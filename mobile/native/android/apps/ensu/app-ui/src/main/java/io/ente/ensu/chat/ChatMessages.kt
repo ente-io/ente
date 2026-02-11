@@ -1,8 +1,11 @@
 package io.ente.ensu.chat
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
@@ -278,15 +281,29 @@ internal fun MessageList(
                     }
                 }
 
-                if (isGenerating && streamingParentId == message.id) {
-                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                    StreamingMessageBubble(text = streamingResponse)
+                AnimatedVisibility(
+                    visible = isGenerating && streamingParentId == message.id,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
+                        scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
+                        scaleOut(targetScale = 0.86f, animationSpec = tween(durationMillis = 180))
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                        StreamingMessageBubble(text = streamingResponse)
+                    }
                 }
             }
         }
 
-        if (isGenerating && streamingParentId == null) {
-            item(key = "streaming") {
+        item(key = "streaming") {
+            AnimatedVisibility(
+                visible = isGenerating && streamingParentId == null,
+                enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
+                    scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
+                    scaleOut(targetScale = 0.86f, animationSpec = tween(durationMillis = 180))
+            ) {
                 StreamingMessageBubble(text = streamingResponse)
             }
         }
@@ -674,18 +691,12 @@ private fun StreamingMessageBubble(text: String) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = 0.9f,
-                    stiffness = Spring.StiffnessMediumLow
-                )
-            ),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         GeneratingAnimation(
             modifier = Modifier
+                .wrapContentSize(align = Alignment.TopStart)
                 .width(92.dp)
                 .height(42.dp)
         )
@@ -707,7 +718,7 @@ private fun GeneratingAnimation(modifier: Modifier = Modifier) {
                 resId = R.raw.ensu,
                 autoplay = true,
                 fit = Fit.CONTAIN,
-                alignment = RiveAlignment.CENTER,
+                alignment = RiveAlignment.CENTER_LEFT,
                 loop = Loop.LOOP
             )
         }
