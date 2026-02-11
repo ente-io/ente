@@ -60,6 +60,7 @@ import app.rive.runtime.kotlin.RiveAnimationView
 import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
 import app.rive.runtime.kotlin.core.Fit
 import app.rive.runtime.kotlin.core.Loop
+import app.rive.runtime.kotlin.core.Rive
 import io.ente.ensu.R
 import io.ente.ensu.components.BranchSwitcher
 import io.ente.ensu.designsystem.EnsuColor
@@ -704,6 +705,7 @@ private fun GeneratingAnimation(modifier: Modifier = Modifier) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
+            Rive.init(context)
             RiveAnimationView(context).apply {
                 setRiveResource(
                     resId = R.raw.ensu,
