@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN=python
+fi
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE_DIR="$(
-  python3 - <<PY
+  "$PYTHON_BIN" - <<PY
 import json
 import os
 import subprocess
@@ -34,6 +39,11 @@ fi
 if [[ -z "$CRATE_DIR" ]]; then
   echo "llama-cpp-sys-2 not found in cargo metadata or registry. Run 'cargo fetch' in $ROOT and try again." >&2
   exit 1
+fi
+
+PY_CRATE_DIR="$CRATE_DIR"
+if command -v cygpath >/dev/null 2>&1; then
+  PY_CRATE_DIR="$(cygpath -w "$CRATE_DIR")"
 fi
 
 TOOLS_DIR="$CRATE_DIR/llama.cpp/tools"
@@ -70,11 +80,13 @@ fi
 
 CLIP_CPP="$MTMD_DIR/clip.cpp"
 if [[ -f "$CLIP_CPP" ]]; then
-  python3 - <<PY
+  PY_CRATE_DIR="$PY_CRATE_DIR" "$PYTHON_BIN" - <<PY
+import os
 from pathlib import Path
 import sys
 
-path = Path("$CLIP_CPP")
+crate_dir = os.environ["PY_CRATE_DIR"]
+path = Path(crate_dir) / "llama.cpp" / "tools" / "mtmd" / "clip.cpp"
 text = path.read_text(encoding="utf-8", errors="ignore")
 
 replacements = {
@@ -105,11 +117,11 @@ if missing:
     sys.stderr.write(f"File: {path}\n")
     sys.exit(1)
 
-marker = Path("$CRATE_DIR") / "llama.cpp" / "CMakeMtmdPatch.txt"
+marker = Path(crate_dir) / "llama.cpp" / "CMakeMtmdPatch.txt"
 needs_rebuild = applied or not marker.exists()
 if needs_rebuild:
     marker.write_text("# mtmd patch applied\n")
-    cmake_root = Path("$CRATE_DIR") / "llama.cpp" / "CMakeLists.txt"
+    cmake_root = Path(crate_dir) / "llama.cpp" / "CMakeLists.txt"
     if cmake_root.exists():
         cmake_root.touch()
 

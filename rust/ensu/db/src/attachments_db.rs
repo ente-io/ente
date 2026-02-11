@@ -240,6 +240,18 @@ impl<B: Backend> AttachmentsDb<B> {
         rows.iter().map(Self::row_from_row).collect()
     }
 
+    pub fn get_uploads_for_message(&self, message_uuid: Uuid) -> Result<Vec<AttachmentUploadRow>> {
+        let rows = self.backend.query(
+            "SELECT attachment_id, session_uuid, message_uuid, size, remote_id, upload_state, uploaded_at, updated_at \
+             FROM attachments \
+             WHERE message_uuid = ? \
+             ORDER BY updated_at ASC",
+            &[Value::Text(message_uuid.to_string())],
+        )?;
+
+        rows.iter().map(Self::row_from_row).collect()
+    }
+
     pub fn get_pending_uploads_for_message(
         &self,
         message_uuid: Uuid,

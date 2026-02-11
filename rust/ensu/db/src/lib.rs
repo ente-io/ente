@@ -20,7 +20,10 @@ pub use crate::backend::{Backend, BackendTx, Row, Value};
 pub use crate::db::ChatDb;
 pub use crate::ensu::EnsuDb;
 pub use crate::error::{Error, Result};
-pub use crate::models::{AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session};
+pub use crate::models::{
+    Attachment, AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session,
+    SessionWithPreview,
+};
 pub use crate::sync_state_db::{SyncEntityState, SyncStateDb};
 pub use crate::traits::{
     AttachmentStore, Clock, FileMetaStore, FsAttachmentStore, MetaStore, RandomUuidGen,

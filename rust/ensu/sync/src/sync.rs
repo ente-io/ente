@@ -6,9 +6,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use zeroize::Zeroizing;
 
 use ensu_db::{
-    AttachmentKind, AttachmentMeta, AttachmentStore, Clock, EnsuDb, EntityType, FsAttachmentStore,
-    Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb, SystemClock,
-    UploadState,
+    Attachment, AttachmentKind, AttachmentMeta, AttachmentStore, Clock, EnsuDb, EntityType,
+    FsAttachmentStore, Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb,
+    SystemClock, UploadState,
 };
 use ente_core::crypto::keys;
 use uuid::Uuid;
@@ -366,13 +366,19 @@ impl SyncEngine {
             )?;
             let messages = offline_db.get_messages(session.uuid)?;
             for message in messages {
+                let attachments: Vec<Attachment> = message
+                    .attachments
+                    .clone()
+                    .into_iter()
+                    .map(Attachment::from)
+                    .collect();
                 let _ = self.db.insert_message_with_uuid_and_state(
                     message.uuid,
                     session.uuid,
                     message.sender.as_str(),
                     &message.text,
                     message.parent_message_uuid,
-                    message.attachments.clone(),
+                    attachments,
                     message.created_at,
                     message.deleted_at,
                     true,

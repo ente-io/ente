@@ -6,7 +6,9 @@ use zeroize::Zeroizing;
 use crate::backend::{Backend, BackendTx, RowExt, Value};
 use crate::crypto;
 use crate::migrations;
-use crate::models::{AttachmentMeta, EntityType, Message, Sender, Session, StoredAttachment};
+use crate::models::{
+    AttachmentMeta, EntityType, Message, Sender, Session, SessionWithPreview, StoredAttachment,
+};
 use crate::traits::{Clock, RandomUuidGen, SystemClock, UuidGen};
 use crate::{Error, Result};
 
@@ -98,6 +100,29 @@ impl<B: Backend> ChatDb<B> {
             &[],
         )?;
         rows.iter().map(|row| self.session_from_row(row)).collect()
+    }
+
+    pub fn list_sessions_with_preview(&self) -> Result<Vec<SessionWithPreview>> {
+        let sessions = self.list_sessions()?;
+        let mut with_preview = Vec::with_capacity(sessions.len());
+
+        for session in sessions {
+            let messages = self.get_messages(session.uuid)?;
+            let last_message_preview = messages.last().map(|message| message.text.clone());
+            with_preview.push(SessionWithPreview {
+                uuid: session.uuid,
+                title: session.title,
+                created_at: session.created_at,
+                updated_at: session.updated_at,
+                server_updated_at: session.server_updated_at,
+                remote_id: session.remote_id,
+                needs_sync: session.needs_sync,
+                deleted_at: session.deleted_at,
+                last_message_preview,
+            });
+        }
+
+        Ok(with_preview)
     }
 
     pub fn update_session_title(&self, uuid: Uuid, title: &str) -> Result<()> {
@@ -306,19 +331,63 @@ impl<B: Backend> ChatDb<B> {
             ],
         )?;
 
-        Ok(Message {
-            uuid: message_uuid,
+        let _ = self.touch_session_remote(session_uuid, created_at);
+
+        self.get_message(message_uuid)?.ok_or(Error::NotFound {
+            entity: EntityType::Message,
+            id: message_uuid,
+        })
+    }
+
+    pub fn insert_message_with_uuid(
+        &self,
+        message_uuid: Uuid,
+        session_uuid: Uuid,
+        sender: &str,
+        text: &str,
+        parent: Option<Uuid>,
+        attachments: Vec<AttachmentMeta>,
+        created_at: i64,
+        deleted_at: Option<i64>,
+    ) -> Result<Message> {
+        self.insert_message_with_uuid_and_state(
+            message_uuid,
             session_uuid,
-            parent_message_uuid: parent,
             sender,
-            text: text.to_string(),
+            text,
+            parent,
             attachments,
             created_at,
-            remote_id: None,
-            server_updated_at: None,
-            needs_sync,
             deleted_at,
-        })
+            false,
+        )
+    }
+
+    pub fn get_message(&self, uuid: Uuid) -> Result<Option<Message>> {
+        let row = self.backend.query_row(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, remote_id, server_updated_at, needs_sync, deleted_at \
+             FROM messages WHERE message_uuid = ?",
+            &[Value::Text(uuid.to_string())],
+        )?;
+
+        row.map(|row| self.message_from_row(&row)).transpose()
+    }
+
+    pub fn get_messages_for_sync(
+        &self,
+        session_uuid: Uuid,
+        include_deleted: bool,
+    ) -> Result<Vec<Message>> {
+        if !include_deleted {
+            return self.get_messages_needing_sync(session_uuid);
+        }
+
+        let rows = self.backend.query(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, remote_id, server_updated_at, needs_sync, deleted_at \
+             FROM messages WHERE session_uuid = ? ORDER BY created_at ASC, message_uuid ASC",
+            &[Value::Text(session_uuid.to_string())],
+        )?;
+        rows.iter().map(|row| self.message_from_row(row)).collect()
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
