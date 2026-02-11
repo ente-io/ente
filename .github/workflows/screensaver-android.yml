@@ -19,6 +19,9 @@ on:
       - "rust/core/**"
       - ".github/workflows/screensaver-android.yml"
 
+env:
+  NDK_VERSION: "27.0.12077973"
+
 permissions:
   contents: write
 
@@ -44,8 +47,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install NDK
+        run: |
+          echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
       - name: Validate build
-        run: ./gradlew lint assembleRelease -x buildEnteCore
+        run: ./gradlew lint assembleRelease
 
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/screensaver-v') }}
@@ -68,8 +84,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install NDK
+        run: |
+          echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
       - name: Build release APK
-        run: ./gradlew assembleRelease -x buildEnteCore
+        run: ./gradlew assembleRelease
 
       - name: Prepare release artifacts
         run: |
