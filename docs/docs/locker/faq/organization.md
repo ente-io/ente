@@ -40,7 +40,7 @@ The collection itself is permanently deleted.
 ### Can an item be in multiple collections? {#locker-multiple-collections}
 
 Yes. Items can belong to multiple collections at the same time. This lets you
-organize the same item in different ways—for example, a passport scan could be
+organize the same item in different ways - for example, a passport scan could be
 in both "Travel Documents" and "Family Documents" collections.
 
 To add an item to additional collections:

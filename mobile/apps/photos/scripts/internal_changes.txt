@@ -1,14 +1,6 @@
+- Ashil: Fix pinch to zoom opening info sheet on video
+- Neeraj: Refresh Security toggles with latest account state (2FA + email verification)
+- Ashil: Fix file picker galleries (that come up with bottom sheet) getting clipped on wide enough screens
 - Neeraj: (i) Show incoming photos in feed
 - Neeraj: Remove internal-user gating for extended collage layouts
-- Ashil: Fix likes on someone else's photo coming up as your in feed + improvements in feed (ownership aware copies for comments and replies)
 - Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
-- Ashil: Social notification improvements
-- Laurens: Notifications for comments and likes
-- Neeraj: Fix incorrect thumbnail for local files
-- Neeraj: QOL: Parse duration & always show video indicator/duration 
-- Ashil: QOL: Option to remove hidden files from outside of hidden
-- Neeraj: Show on device albums in search result
-- Ashil: Scroll to parent comment on tapping it in reply bubble
-- Ashil: QOL: Support for hiding incoming shared albums
-- Prateek: (i) Always enable video streaming
-- Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)

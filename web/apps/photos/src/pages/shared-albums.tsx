@@ -477,6 +477,8 @@ export default function PublicCollectionGallery() {
 
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
+    const joinEnabled = publicCollection?.publicURLs[0]?.enableJoin ?? false;
+    const addPhotosEnabled = !!onAddPhotos;
 
     const hasSelection = selected.count > 0;
 
@@ -585,7 +587,6 @@ export default function PublicCollectionGallery() {
                     <NavbarBase
                         sx={[
                             {
-                                mb: "16px",
                                 px: "24px",
                                 "@media (width < 720px)": { px: "4px" },
                             },
@@ -606,15 +607,19 @@ export default function PublicCollectionGallery() {
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
                                 <Stack direction="row" spacing={2}>
-                                    {onAddPhotos && (
-                                        <AddPhotosButton
-                                            onClick={onAddPhotos}
-                                        />
-                                    )}
+                                    <SecondaryActionButton
+                                        onAddPhotos={onAddPhotos}
+                                        enableJoin={joinEnabled}
+                                        publicCollection={publicCollection}
+                                        accessToken={
+                                            credentials.current.accessToken
+                                        }
+                                        collectionKey={collectionKey.current}
+                                        credentials={credentials}
+                                    />
                                     <PrimaryActionButton
-                                        enableJoin={
-                                            publicCollection?.publicURLs[0]
-                                                ?.enableJoin
+                                        showJoinAsPrimary={
+                                            addPhotosEnabled && joinEnabled
                                         }
                                         publicCollection={publicCollection}
                                         accessToken={
@@ -703,6 +708,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 const GreenButton = styled(Button)(() => ({
     backgroundColor: "#08C225",
     borderRadius: "16px",
+    paddingInline: "20px",
     "&:hover": { backgroundColor: "#07A820" },
 }));
 
@@ -711,39 +717,29 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const isSmallWidth = useIsSmallWidth();
 
     return (
-        <Box>
-            {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>
+        <FocusVisibleButton
+            color="secondary"
+            startIcon={
+                isSmallWidth ? undefined : (
                     <HugeiconsIcon
                         icon={ImageAdd02Icon}
-                        size={22}
+                        size={20}
                         strokeWidth={1.8}
                     />
-                </IconButton>
-            ) : (
-                <FocusVisibleButton
-                    color="secondary"
-                    startIcon={
-                        <HugeiconsIcon
-                            icon={ImageAdd02Icon}
-                            size={20}
-                            strokeWidth={1.8}
-                        />
-                    }
-                    sx={{ borderRadius: "16px" }}
-                    {...{ onClick, disabled }}
-                >
-                    {t("add_photos")}
-                </FocusVisibleButton>
-            )}
-        </Box>
+                )
+            }
+            sx={{ borderRadius: "16px" }}
+            {...{ onClick, disabled }}
+        >
+            {t("add_photos")}
+        </FocusVisibleButton>
     );
 };
 
 interface PrimaryActionButtonProps {
-    /** If true, shows "Join Album" button instead of "Sign Up" */
-    enableJoin?: boolean;
-    /** Collection to join (required if enableJoin is true) */
+    /** If true, shows "Join Album" as the primary action */
+    showJoinAsPrimary?: boolean;
+    /** Collection to join (required if showJoinAsPrimary is true) */
     publicCollection?: Collection;
     /** Access token for the public link */
     accessToken?: string;
@@ -754,7 +750,7 @@ interface PrimaryActionButtonProps {
 }
 
 const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
-    enableJoin,
+    showJoinAsPrimary,
     publicCollection,
     accessToken,
     collectionKey,
@@ -768,7 +764,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
         credentials,
     });
 
-    if (enableJoin) {
+    if (showJoinAsPrimary) {
         return (
             <GreenButton color="accent" onClick={handleJoinAlbum}>
                 {t("join_album")}
@@ -782,9 +778,52 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
     return (
         <GreenButton color="accent" onClick={handleGetEnte}>
-            {t("get_ente")}
+            {t("try_ente")}
         </GreenButton>
     );
+};
+
+interface SecondaryActionButtonProps {
+    onAddPhotos?: () => void;
+    enableJoin?: boolean;
+    publicCollection?: Collection;
+    accessToken?: string;
+    collectionKey?: string;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+}
+
+const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
+    onAddPhotos,
+    enableJoin,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
+}) => {
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
+
+    if (onAddPhotos) {
+        return <AddPhotosButton onClick={onAddPhotos} />;
+    }
+
+    if (enableJoin) {
+        return (
+            <FocusVisibleButton
+                color="secondary"
+                sx={{ borderRadius: "16px" }}
+                onClick={handleJoinAlbum}
+            >
+                {t("join_album")}
+            </FocusVisibleButton>
+        );
+    }
+
+    return null;
 };
 
 interface SelectedFileOptionsProps {
@@ -834,7 +873,7 @@ interface FileListHeaderProps {
 /**
  * The fixed height (in px) of {@link FileListHeader}.
  */
-const fileListHeaderHeight = 68;
+const fileListHeaderHeight = 84;
 
 /**
  * A header shown before the listing of files.
@@ -860,12 +899,15 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         );
 
     return (
-        <GalleryItemsHeaderAdapter>
+        <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
             <SpacedRow>
-                <GalleryItemsSummary
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
+                <Box sx={{ minWidth: 0 }}>
+                    <GalleryItemsSummary
+                        name={publicCollection.name}
+                        fileCount={publicFiles.length}
+                        nameProps={{ noWrap: true }}
+                    />
+                </Box>
                 <Stack
                     direction="row"
                     spacing={1}

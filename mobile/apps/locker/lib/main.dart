@@ -23,14 +23,13 @@ import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/app_localizations.dart';
 import 'package:locker/services/collections/collections_api_client.dart';
-import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/trash/trash_db.dart";
 import 'package:locker/services/trash/trash_service.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -162,12 +161,10 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await CryptoUtil.init();
 
-    await CollectionDB.instance.init();
-    await TrashDB.instance.init();
+    await LockerDB.instance.init();
 
     await Configuration.instance.init([
-      CollectionDB.instance,
-      TrashDB.instance,
+      LockerDB.instance,
     ]);
 
     await Network.instance.init(Configuration.instance);

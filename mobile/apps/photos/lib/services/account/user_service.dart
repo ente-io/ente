@@ -14,7 +14,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/account_configured_event.dart";
-import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/gateways/users/models/delete_account.dart';
 import 'package:photos/gateways/users/models/key_attributes.dart';
@@ -42,6 +41,7 @@ import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
 import "package:photos/ui/common/progress_dialog.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
@@ -86,9 +86,6 @@ class UserService {
         () => {setTwoFactor(fetchTwoFactorStatus: true).ignore()},
       );
     }
-    Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
-      setTwoFactor(value: event.status);
-    });
   }
 
   Future<void> sendOtt(
@@ -130,36 +127,39 @@ class UserService {
       final String? enteErrCode = e.response?.data["code"];
       if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.l10n.oops,
-            context.l10n.emailAlreadyRegistered,
+            title: context.l10n.oops,
+            message: context.l10n.emailAlreadyRegistered,
+            assetPath: 'assets/warning-green.png',
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.l10n.oops,
-            context.l10n.emailNotRegistered,
+            title: context.l10n.oops,
+            message: context.l10n.emailNotRegistered,
+            assetPath: 'assets/warning-green.png',
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            AppLocalizations.of(context).oops,
-            AppLocalizations.of(context).thisEmailIsAlreadyInUse,
+            title: AppLocalizations.of(context).oops,
+            message: AppLocalizations.of(context).thisEmailIsAlreadyInUse,
+            assetPath: 'assets/warning-green.png',
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context: context, error: e));
+        unawaited(showGenericErrorBottomSheet(context: context, error: e));
       }
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
       unawaited(
-        showGenericErrorDialog(context: context, error: e),
+        showGenericErrorBottomSheet(context: context, error: e),
       );
     }
   }
@@ -198,14 +198,31 @@ class UserService {
     bool shouldCache = true,
   }) async {
     _logger.info("Fetching user details");
+    final bool previousEmailMFAStatus = hasEmailMFAEnabled();
+    final bool previousTwoFactorStatus = hasEnabledTwoFactor();
     final userDetails = await _gateway.getUserDetails(memoryCount: memoryCount);
     if (shouldCache) {
       await _preferences.setString(keyUserDetails, userDetails.toJson());
+      bool hasSecurityStatusChanged = false;
       if (userDetails.profileData != null) {
+        final bool currentEmailMFAStatus =
+            userDetails.profileData!.isEmailMFAEnabled;
         await _preferences.setBool(
           kIsEmailMFAEnabled,
-          userDetails.profileData!.isEmailMFAEnabled,
+          currentEmailMFAStatus,
         );
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
+            previousEmailMFAStatus != currentEmailMFAStatus;
+        final bool currentTwoFactorStatus =
+            userDetails.profileData!.isTwoFactorEnabled;
+        await setTwoFactor(value: currentTwoFactorStatus);
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
+            previousTwoFactorStatus != currentTwoFactorStatus;
+      }
+      if (hasSecurityStatusChanged) {
+        Bus.instance.fire(UserDetailsChangedEvent());
       }
       // handle email change from different client
       if (userDetails.email != _config.getEmail()) {
@@ -268,7 +285,7 @@ class UserService {
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
-        () => showGenericErrorDialog(context: context, error: null),
+        () => showGenericErrorBottomSheet(context: context, error: null),
       );
     }
   }
@@ -280,7 +297,7 @@ class UserService {
       return await _gateway.getDeleteChallenge();
     } catch (e) {
       _logger.warning(e);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return null;
     }
   }
@@ -344,7 +361,7 @@ class UserService {
     } catch (e) {
       _logger.warning(e);
       await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
@@ -406,28 +423,32 @@ class UserService {
       _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 410) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).oops,
-          AppLocalizations.of(context).yourVerificationCodeHasExpired,
+          title: AppLocalizations.of(context).oops,
+          message: AppLocalizations.of(context).yourVerificationCodeHasExpired,
+          assetPath: 'assets/warning-green.png',
         );
         Navigator.of(context).pop();
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).incorrectCode,
-          AppLocalizations.of(context).sorryTheCodeYouveEnteredIsIncorrect,
+          title: AppLocalizations.of(context).incorrectCode,
+          message:
+              AppLocalizations.of(context).sorryTheCodeYouveEnteredIsIncorrect,
+          assetPath: 'assets/warning-green.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.warning(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).verificationFailedPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).verificationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }
@@ -467,27 +488,31 @@ class UserService {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).oops,
-          AppLocalizations.of(context).thisEmailIsAlreadyInUse,
+          title: AppLocalizations.of(context).oops,
+          message: AppLocalizations.of(context).thisEmailIsAlreadyInUse,
+          assetPath: 'assets/warning-green.png',
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).incorrectCode,
-          AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          title: AppLocalizations.of(context).incorrectCode,
+          message:
+              AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-green.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.warning(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).verificationFailedPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).verificationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }
@@ -759,20 +784,24 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).incorrectCode,
-          AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          title: AppLocalizations.of(context).incorrectCode,
+          message:
+              AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-green.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message:
+            AppLocalizations.of(context).authenticationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }
@@ -823,10 +852,12 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).oops,
-          AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          title: AppLocalizations.of(context).oops,
+          message:
+              AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-green.png',
         );
       }
     } catch (e) {
@@ -834,10 +865,11 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     } finally {
       await dialog.hide();
@@ -874,10 +906,12 @@ class UserService {
       );
     } catch (e) {
       await dialog.hide();
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).incorrectRecoveryKey,
-        AppLocalizations.of(context).theRecoveryKeyYouEnteredIsIncorrect,
+        title: AppLocalizations.of(context).incorrectRecoveryKey,
+        message:
+            AppLocalizations.of(context).theRecoveryKeyYouEnteredIsIncorrect,
+        assetPath: 'assets/warning-green.png',
       );
       return;
     }
@@ -918,10 +952,12 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).oops,
-          AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          title: AppLocalizations.of(context).oops,
+          message:
+              AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-green.png',
         );
       }
     } catch (e) {
@@ -929,10 +965,11 @@ class UserService {
       _logger.severe('unexpcted error during recovery', e);
 
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     } finally {
       await dialog.hide();
@@ -973,7 +1010,7 @@ class UserService {
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
       return false;
     }
     final dialog =
@@ -989,9 +1026,10 @@ class UserService {
         twoFactorSecretDecryptionNonce:
             CryptoUtil.bin2base64(encryptionResult.nonce!),
       );
+      await setTwoFactor(value: true);
       await dialog.hide();
       Navigator.pop(context);
-      Bus.instance.fire(TwoFactorStatusChangeEvent(true));
+      Bus.instance.fire(UserDetailsChangedEvent());
       return true;
     } catch (e, s) {
       await dialog.hide();
@@ -999,19 +1037,23 @@ class UserService {
       if (e is DioException) {
         if (e.response != null && e.response!.statusCode == 401) {
           // ignore: unawaited_futures
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            AppLocalizations.of(context).incorrectCode,
-            AppLocalizations.of(context).pleaseVerifyTheCodeYouHaveEntered,
+            title: AppLocalizations.of(context).incorrectCode,
+            message:
+                AppLocalizations.of(context).pleaseVerifyTheCodeYouHaveEntered,
+            assetPath: 'assets/warning-green.png',
           );
           return false;
         }
       }
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).somethingWentWrong,
-        AppLocalizations.of(context).pleaseContactSupportIfTheProblemPersists,
+        title: AppLocalizations.of(context).somethingWentWrong,
+        message: AppLocalizations.of(context)
+            .pleaseContactSupportIfTheProblemPersists,
+        assetPath: 'assets/warning-green.png',
       );
     }
     return false;
@@ -1025,8 +1067,9 @@ class UserService {
     await dialog.show();
     try {
       await _gateway.disableTwoFactor();
+      await setTwoFactor(value: false);
       await dialog.hide();
-      Bus.instance.fire(TwoFactorStatusChangeEvent(false));
+      Bus.instance.fire(UserDetailsChangedEvent());
       showShortToast(
         context,
         AppLocalizations.of(context).twofactorAuthenticationHasBeenDisabled,
@@ -1034,18 +1077,24 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe("Failed to disabled 2FA", e);
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).somethingWentWrong,
-        AppLocalizations.of(context).pleaseContactSupportIfTheProblemPersists,
+        title: AppLocalizations.of(context).somethingWentWrong,
+        message: AppLocalizations.of(context)
+            .pleaseContactSupportIfTheProblemPersists,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }
 
   Future<bool> fetchTwoFactorStatus() async {
     try {
+      final previousStatus = hasEnabledTwoFactor();
       final status = await _gateway.getTwoFactorStatus();
       await setTwoFactor(value: status);
+      if (previousStatus != status) {
+        Bus.instance.fire(UserDetailsChangedEvent());
+      }
       return status;
     } catch (e) {
       _logger.severe("Failed to fetch 2FA status", e);
@@ -1149,6 +1198,7 @@ class UserService {
         profile.profileData!.isEmailMFAEnabled = isEnabled;
         await _preferences.setString(keyUserDetails, profile.toJson());
       }
+      Bus.instance.fire(UserDetailsChangedEvent());
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;

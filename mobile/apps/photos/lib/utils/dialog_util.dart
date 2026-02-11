@@ -10,7 +10,9 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/utils/email_util.dart";
@@ -193,6 +195,38 @@ Future<ButtonResult?> showGenericErrorDialog({
     ],
   );
   return result;
+}
+
+Future<void> showGenericErrorBottomSheet({
+  required BuildContext context,
+  required Object? error,
+}) async {
+  final errorBody = parseErrorForUI(
+    context,
+    AppLocalizations.of(context)
+        .itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    error: error,
+  );
+  await showAlertBottomSheet(
+    context,
+    title: AppLocalizations.of(context).error,
+    message: errorBody,
+    assetPath: 'assets/warning-green.png',
+    buttons: [
+      ButtonWidgetV2(
+        buttonType: ButtonTypeV2.secondary,
+        labelText: AppLocalizations.of(context).contactSupport,
+        onTap: () async {
+          await sendLogs(
+            context,
+            AppLocalizations.of(context).contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        },
+      ),
+    ],
+  );
 }
 
 DialogWidget choiceDialog({

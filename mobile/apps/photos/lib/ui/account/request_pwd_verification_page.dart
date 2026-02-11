@@ -7,7 +7,8 @@ import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/utils/dialog_util.dart";
 
 typedef OnPasswordVerifiedFn = Future<void> Function(Uint8List bytes);
@@ -56,18 +57,10 @@ class _RequestPasswordVerificationPageState
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _passwordController.text.isNotEmpty;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -79,51 +72,61 @@ class _RequestPasswordVerificationPageState
         ),
       ),
       body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("verifyPasswordButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: context.l10n.verifyPassword,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, context.l10n.pleaseWait);
-          await dialog.show();
-          try {
-            final attributes = Configuration.instance.getKeyAttributes()!;
-            final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
-              utf8.encode(_passwordController.text),
-              CryptoUtil.base642bin(attributes.kekSalt),
-              attributes.memLimit!,
-              attributes.opsLimit!,
-            );
-            CryptoUtil.decryptSync(
-              CryptoUtil.base642bin(attributes.encryptedKey),
-              keyEncryptionKey,
-              CryptoUtil.base642bin(attributes.keyDecryptionNonce),
-            );
-            await dialog.show();
-            // pop
-            await widget.onPasswordVerified(keyEncryptionKey);
-            await dialog.hide();
-            Navigator.of(context).pop(true);
-          } catch (e, s) {
-            _logger.severe("Error while verifying password", e, s);
-            await dialog.hide();
-            if (widget.onPasswordError != null) {
-              widget.onPasswordError!();
-            } else {
-              // ignore: unawaited_futures
-              showErrorDialog(
-                context,
-                context.l10n.incorrectPasswordTitle,
-                context.l10n.pleaseTryAgain,
-              );
-            }
-          }
-        },
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("verifyPasswordButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: context.l10n.verifyPassword,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  FocusScope.of(context).unfocus();
+                  final dialog = createProgressDialog(
+                    context,
+                    context.l10n.pleaseWait,
+                  );
+                  await dialog.show();
+                  try {
+                    final attributes =
+                        Configuration.instance.getKeyAttributes()!;
+                    final Uint8List keyEncryptionKey =
+                        await CryptoUtil.deriveKey(
+                      utf8.encode(_passwordController.text),
+                      CryptoUtil.base642bin(attributes.kekSalt),
+                      attributes.memLimit!,
+                      attributes.opsLimit!,
+                    );
+                    CryptoUtil.decryptSync(
+                      CryptoUtil.base642bin(attributes.encryptedKey),
+                      keyEncryptionKey,
+                      CryptoUtil.base642bin(attributes.keyDecryptionNonce),
+                    );
+                    await dialog.show();
+                    // pop
+                    await widget.onPasswordVerified(keyEncryptionKey);
+                    await dialog.hide();
+                    Navigator.of(context).pop(true);
+                  } catch (e, s) {
+                    _logger.severe("Error while verifying password", e, s);
+                    await dialog.hide();
+                    if (widget.onPasswordError != null) {
+                      widget.onPasswordError!();
+                    } else {
+                      // ignore: unawaited_futures
+                      showAlertBottomSheet(
+                        context,
+                        title: context.l10n.incorrectPasswordTitle,
+                        message: context.l10n.pleaseTryAgain,
+                        assetPath: 'assets/warning-green.png',
+                      );
+                    }
+                  }
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

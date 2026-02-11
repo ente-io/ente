@@ -15,12 +15,12 @@ import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
-import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
 import "package:locker/services/collections/models/files_split.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
 import "package:locker/services/trash/trash_service.dart";
@@ -48,19 +48,19 @@ class CollectionService {
   final _logger = Logger("CollectionService");
 
   late CollectionApiClient _apiClient;
-  late CollectionDB _db;
+  late LockerDB _db;
 
   final _collectionIDToCollections = <int, Collection>{};
 
   CollectionService._privateConstructor();
 
   Future<void> init() async {
-    _db = CollectionDB.instance;
+    _db = LockerDB.instance;
     _apiClient = CollectionApiClient.instance;
 
-    Bus.instance.on<SignedInEvent>().listen((event) {
+    Bus.instance.on<SignedInEvent>().listen((event) async {
       _logger.info("User signed in, starting initial sync.");
-      _init();
+      await _init();
     });
 
     if (Configuration.instance.hasConfiguredAccount()) {
@@ -260,11 +260,7 @@ class CollectionService {
     }
   }
 
-  /// Removes orphaned files that exist in files table but have no collection mappings.
-  /// This is a one-time cleanup for files deleted from trash before the fix was applied.
-  ///
-  /// This migration fix can be removed after a year or so (around Nov 2026)
-  /// once all users have had the corrected trash deletion logic applied.
+  /// Removes orphaned files that exist in files but have no collection mappings.
   Future<void> cleanupOrphanedFiles() async {
     try {
       await _db.cleanupOrphanedFiles();

@@ -5,13 +5,12 @@ import "package:computer/computer.dart";
 import 'package:exif_reader/exif_reader.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-// ignore: implementation_imports
-import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/utils/file_util.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
@@ -54,16 +53,7 @@ Future<Map<String, IfdTag>?> tryExifFromFile(File originFile) async {
 }
 
 Future<Map<String, dynamic>> getXmp(File file) async {
-  return Computer.shared().compute(
-    _getXMPComputer,
-    param: {"file": file},
-    taskName: "getXMPAsync",
-  );
-}
-
-Map<String, dynamic> _getXMPComputer(Map<String, dynamic> args) {
-  final File originalFile = args["file"] as File;
-  return XMPExtractor().extract(originalFile.readAsBytesSync());
+  return extractXmp(filePath: file.path);
 }
 
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {

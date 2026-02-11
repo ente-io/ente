@@ -5,10 +5,9 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
-import "package:photos/ui/common/dynamic_fab.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
-import 'package:photos/utils/dialog_util.dart';
 
 class TwoFactorRecoveryPage extends StatefulWidget {
   final String sessionID;
@@ -42,18 +41,10 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _recoveryKey.isNotEmpty;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -73,25 +64,29 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("recover2FAButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _recoveryKey.isNotEmpty,
-        buttonText: AppLocalizations.of(context).recover,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          await UserService.instance.removeTwoFactor(
-            context,
-            widget.type,
-            widget.sessionID,
-            _recoveryKeyController.text,
-            widget.encryptedSecret,
-            widget.secretDecryptionNonce,
-          );
-        },
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("recover2FAButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).recover,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  FocusScope.of(context).unfocus();
+                  await UserService.instance.removeTwoFactor(
+                    context,
+                    widget.type,
+                    widget.sessionID,
+                    _recoveryKeyController.text,
+                    widget.encryptedSecret,
+                    widget.secretDecryptionNonce,
+                  );
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -129,12 +124,13 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                 buttonSize: ButtonSizeV2.small,
                 onTap: () async {
                   // ignore: unawaited_futures
-                  showErrorDialog(
+                  showAlertBottomSheet(
                     context,
-                    AppLocalizations.of(context).contactSupport,
-                    AppLocalizations.of(context).dropSupportEmail(
+                    title: AppLocalizations.of(context).contactSupport,
+                    message: AppLocalizations.of(context).dropSupportEmail(
                       supportEmail: "support@ente.io",
                     ),
+                    assetPath: 'assets/warning-green.png',
                   );
                 },
               ),

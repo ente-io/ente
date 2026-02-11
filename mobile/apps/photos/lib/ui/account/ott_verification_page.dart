@@ -4,7 +4,6 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
-import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:pinput/pinput.dart";
 
@@ -55,20 +54,12 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _code.length == 6;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -88,15 +79,17 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("verifyOttButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _code.length == 6,
-        buttonText: AppLocalizations.of(context).verify,
-        onPressedFunction: _onVerifyPressed,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("verifyOttButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).verify,
+          isDisabled: !isFormValid,
+          onTap: isFormValid ? _onVerifyPressed : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

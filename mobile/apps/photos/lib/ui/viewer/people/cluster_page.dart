@@ -59,6 +59,10 @@ class ClusterPage extends StatefulWidget {
   State<ClusterPage> createState() => _ClusterPageState();
 }
 
+enum ClusterPageResult {
+  ignoredPerson,
+}
+
 class _ClusterPageState extends State<ClusterPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
