@@ -1098,7 +1098,9 @@ const Page: React.FC = () => {
                 contextLength?: string;
                 maxTokens?: string;
             };
-            setUseCustomModel(!!parsed.useCustomModel);
+            setUseCustomModel(
+                MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
+            );
             setModelUrl(parsed.modelUrl ?? "");
             setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
             setContextLength(parsed.contextLength ?? "");
@@ -1814,11 +1816,17 @@ const Page: React.FC = () => {
     }, []);
 
     const getModelSettings = useCallback((): ModelSettings => {
+        const customModelEnabled = MODEL_SETTINGS_ENABLED && useCustomModel;
         return {
-            useCustomModel,
-            modelUrl: modelUrl.trim() ? modelUrl.trim() : undefined,
+            useCustomModel: customModelEnabled,
+            modelUrl:
+                customModelEnabled && modelUrl.trim()
+                    ? modelUrl.trim()
+                    : undefined,
             mmprojUrl:
-                allowMmproj && mmprojUrl.trim() ? mmprojUrl.trim() : undefined,
+                customModelEnabled && allowMmproj && mmprojUrl.trim()
+                    ? mmprojUrl.trim()
+                    : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
             maxTokens: maxTokens ? Number(maxTokens) : undefined,
         };
