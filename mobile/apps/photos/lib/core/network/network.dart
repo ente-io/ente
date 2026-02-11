@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -12,6 +13,7 @@ import "package:ua_client_hints/ua_client_hints.dart";
 class NetworkClient {
   late Dio _dio;
   late Dio _enteDio;
+  StreamSubscription<EndpointUpdatedEvent>? _endpointUpdatedSubscription;
   static const kConnectTimeout = 15;
 
   Future<void> init(PackageInfo packageInfo) async {
@@ -48,7 +50,11 @@ class NetworkClient {
 
     _setupInterceptors(endpoint);
 
-    Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
+    if (_endpointUpdatedSubscription != null) {
+      await _endpointUpdatedSubscription!.cancel();
+    }
+    _endpointUpdatedSubscription =
+        Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
       final endpoint = Configuration.instance.getHttpEndpoint();
       _enteDio.options.baseUrl = endpoint;
       _setupInterceptors(endpoint);

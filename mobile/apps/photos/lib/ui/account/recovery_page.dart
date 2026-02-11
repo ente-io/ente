@@ -20,6 +20,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
   final _recoveryKeyController = TextEditingController();
 
   @override
+  void dispose() {
+    _recoveryKeyController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);

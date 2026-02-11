@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CryptoKit
 import Foundation
 import EnteCrypto
 
@@ -75,8 +74,8 @@ class RealCastPairingService {
     }
     
     // Generate real X25519 keypair using EnteCrypto
-    private func generateKeyPair() -> (publicKey: Data, privateKey: Data) {
-        let keys = EnteCrypto.generateCastKeyPair()
+    private func generateKeyPair() throws -> (publicKey: Data, privateKey: Data) {
+        let keys = try EnteCrypto.generateCastKeyPair()
         return (
             publicKey: Data(base64Encoded: keys.publicKey)!,
             privateKey: Data(base64Encoded: keys.privateKey)!
@@ -85,7 +84,7 @@ class RealCastPairingService {
     
     func registerDevice() async throws -> CastDevice {
         print("🔑 Generating real X25519 keypair...")
-        let keys = generateKeyPair()
+        let keys = try generateKeyPair()
         let publicKeyBase64 = keys.publicKey.base64EncodedString()
         
         print("📡 Registering device with Ente production server...")
@@ -182,7 +181,11 @@ class RealCastPairingService {
             print("🔓 Received encrypted payload! Decrypting...")
             
             // Decrypt the payload using our private key
-            let payload = try await decryptPayload(encryptedData: encryptedData, privateKey: device.privateKey)
+            let payload = try await decryptPayload(
+                encryptedData: encryptedData,
+                publicKey: device.publicKey,
+                privateKey: device.privateKey
+            )
             
             print("✅ Successfully decrypted cast payload!")
             hasDeliveredPayload = true
@@ -200,16 +203,7 @@ class RealCastPairingService {
         }
     }
     
-    private func decryptPayload(encryptedData: String, privateKey: Data) async throws -> CastPayload {
-        // Generate public key from private key for sealed box decryption
-        let publicKey: Data
-        do {
-            let curve25519PrivateKey = try CryptoKit.Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKey)
-            publicKey = curve25519PrivateKey.publicKey.rawRepresentation
-        } catch {
-            throw CastError.decryptionError("Failed to derive public key from private key: \(error)")
-        }
-        
+    private func decryptPayload(encryptedData: String, publicKey: Data, privateKey: Data) async throws -> CastPayload {
         // Use EnteCrypto for cast payload decryption
         do {
             let decryptedData = try EnteCrypto.decryptCastPayload(
@@ -230,7 +224,9 @@ class RealCastPairingService {
             let payload = try JSONDecoder().decode(CastPayload.self, from: finalData)
             return payload
         } catch {
-            throw CastError.decryptionError("EnteCrypto cast payload decryption failed: \(error)")
+            throw CastError.decryptionError(
+                "EnteCrypto cast payload decryption failed: \(error.localizedDescription)"
+            )
         }
     }
     

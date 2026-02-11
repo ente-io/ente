@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
@@ -20,21 +22,31 @@ class PushService {
   static final _logger = Logger("PushService");
 
   late SharedPreferences _prefs;
+  StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
+  StreamSubscription<SignedInEvent>? _signedInSubscription;
 
   PushService._privateConstructor();
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await Firebase.initializeApp();
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (_foregroundMessageSubscription != null) {
+      await _foregroundMessageSubscription!.cancel();
+    }
+    _foregroundMessageSubscription =
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _logger.info("Got a message whilst in the foreground!");
       _handleForegroundPushMessage(message);
     });
     try {
+      if (_signedInSubscription != null) {
+        await _signedInSubscription!.cancel();
+      }
       if (Configuration.instance.hasConfiguredAccount()) {
         await _configurePushToken();
       } else {
-        Bus.instance.on<SignedInEvent>().listen((_) async {
+        _signedInSubscription =
+            Bus.instance.on<SignedInEvent>().listen((_) async {
           // ignore: unawaited_futures
           _configurePushToken();
         });

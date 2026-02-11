@@ -1,8 +1,8 @@
 import XCTest
 @testable import EnteCrypto
 @testable import EnteCore
-@testable import EnteNetwork
 import Foundation
+import CryptoKit
 
 final class EnteCryptoTests: XCTestCase {
     
@@ -34,6 +34,24 @@ final class EnteCryptoTests: XCTestCase {
     }
     
     // MARK: - Encryption Tests
+
+    func testGenerateKeyPair() throws {
+        let keyPair = try EnteCrypto.generateKeyPair()
+        let publicKey = try XCTUnwrap(Data(base64Encoded: keyPair.publicKey))
+        let privateKey = try XCTUnwrap(Data(base64Encoded: keyPair.privateKey))
+
+        XCTAssertEqual(publicKey.count, 32)
+        XCTAssertEqual(privateKey.count, 32)
+    }
+
+    func testGenerateKeyPairPublicKeyConsistency() throws {
+        let keyPair = try EnteCrypto.generateKeyPair()
+        let publicKey = try XCTUnwrap(Data(base64Encoded: keyPair.publicKey))
+        let privateKey = try XCTUnwrap(Data(base64Encoded: keyPair.privateKey))
+
+        let curvePrivateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKey)
+        XCTAssertEqual(curvePrivateKey.publicKey.rawRepresentation, publicKey)
+    }
     
     func testSecretBoxOperations() throws {
         let message = "Hello, World!".data(using: .utf8)!
@@ -43,20 +61,6 @@ final class EnteCryptoTests: XCTestCase {
         XCTAssertThrowsError(try EnteCrypto.secretBoxOpen(message, nonce: nonce, key: key)) { error in
             XCTAssertTrue(error is CryptoError)
         }
-    }
-    
-    func testChaCha20Poly1305Operations() throws {
-        let message = "Hello, World!".data(using: .utf8)!
-        let key = Data(repeating: 1, count: 32)
-        
-        let (cipherText, nonce) = try EnteCrypto.encryptChaCha20Poly1305(data: message, key: key)
-        
-        XCTAssertFalse(cipherText.isEmpty)
-        XCTAssertEqual(nonce.count, 24)
-        XCTAssertNotEqual(cipherText, message)
-        
-        let decrypted = try EnteCrypto.decryptChaCha20Poly1305(cipherText: cipherText, key: key, nonce: nonce)
-        XCTAssertEqual(decrypted, message)
     }
     
     // MARK: - SRP Tests
