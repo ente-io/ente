@@ -118,6 +118,13 @@
       "title": "availity"
     },
     {
+      "title": "Avenue",
+      "altNames": [
+        "avenue.us",
+        "Avenue Securities"
+      ]
+    },
+    {
       "title": "AvistaZ.to",
       "slug": "avistaz"
     },
@@ -1338,6 +1345,10 @@
     },
     {
       "title": "Peerberry"
+    },
+    {
+      "title": "Perkbox",
+      "slug": "perkbox"
     },
     {
       "title": "Pingvin Share"

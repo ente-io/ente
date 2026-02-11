@@ -43,37 +43,10 @@
                location = "group:Fonts"
                name = "Fonts">
                <FileRef
-                  location = "group:Gilroy-UltraLightItalic.ttf">
-               </FileRef>
-               <FileRef
                   location = "group:Inter-Medium.ttf">
                </FileRef>
                <FileRef
-                  location = "group:Gilroy-Medium.ttf">
-               </FileRef>
-               <FileRef
                   location = "group:Inter-Light.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-LightItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-ThinItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-HeavyItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-BoldItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-SemiboldItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-RegularItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-BlackItalic.ttf">
                </FileRef>
                <FileRef
                   location = "group:Inter-Bold.ttf">
@@ -82,40 +55,7 @@
                   location = "group:Montserrat-Bold.ttf">
                </FileRef>
                <FileRef
-                  location = "group:Gilroy-Regular.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-UltraLight.ttf">
-               </FileRef>
-               <FileRef
                   location = "group:Inter-Regular.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Black.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Extrabold.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-MediumItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Light.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Thin.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-ExtraboldItalic.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Semibold.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Bold.ttf">
-               </FileRef>
-               <FileRef
-                  location = "group:Gilroy-Heavy.ttf">
                </FileRef>
                <FileRef
                   location = "group:Inter-SemiBold.ttf">

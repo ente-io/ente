@@ -28,12 +28,12 @@ struct FontUtils {
     
     // MARK: - Font Presets
     
-    static func gilroyBlack(size: CGFloat) -> Font {
-        return safeFont(name: "Gilroy-Black", size: size, fallback: .system(size: size, weight: .black))
+    static func montserratBold(size: CGFloat) -> Font {
+        return safeFont(name: "Montserrat-Bold", size: size, fallback: .system(size: size, weight: .bold))
     }
     
-    static func gilroyExtraBold(size: CGFloat) -> Font {
-        return safeFont(name: "Gilroy-Extrabold", size: size, fallback: .system(size: size, weight: .heavy))
+    static func montserratExtraBold(size: CGFloat) -> Font {
+        return safeFont(name: "Montserrat-Bold", size: size, fallback: .system(size: size, weight: .heavy))
     }
     
     static func interRegular(size: CGFloat) -> Font {

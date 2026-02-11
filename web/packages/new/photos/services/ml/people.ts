@@ -487,6 +487,7 @@ export interface PersonSuggestionsAndChoices {
  */
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
+    currentUserID: number,
 ): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
@@ -565,7 +566,8 @@ export const _suggestionsAndChoicesForPerson = async (
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
-    const normalCollectionFiles = await computeNormalCollectionFilesFromSaved();
+    const normalCollectionFiles =
+        await computeNormalCollectionFilesFromSaved(currentUserID);
     const fileByID = new Map(normalCollectionFiles.map((f) => [f.id, f]));
 
     const toPreviewable = (cluster: FaceCluster) => {
@@ -573,7 +575,9 @@ export const _suggestionsAndChoicesForPerson = async (
         for (const faceID of cluster.faces) {
             const fileID = fileIDFromFaceID(faceID);
             if (!fileID) {
-                assertionFailed();
+                assertionFailed(
+                    `Invalid faceID while preparing preview faces: personID=${person.id}, clusterID=${cluster.id}, faceID=${faceID}, fileID=${String(fileID)}`,
+                );
                 continue;
             }
 

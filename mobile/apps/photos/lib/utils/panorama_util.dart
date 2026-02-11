@@ -1,12 +1,14 @@
-// ignore: implementation_imports
-import "package:motion_photos/src/xmp_extractor.dart";
+import "package:logging/logging.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
+
+final _logger = Logger("PanoramaUtil");
 
 /// Check if the file is a panorama image.
 Future<bool> checkIfPanorama(EnteFile enteFile) async {
@@ -18,7 +20,7 @@ Future<bool> checkIfPanorama(EnteFile enteFile) async {
     return false;
   }
   try {
-    final result = XMPExtractor().extract(file.readAsBytesSync());
+    final result = await extractXmp(filePath: file.path);
     if (checkPanoramaFromXMP(result)) {
       return true;
     }
@@ -40,9 +42,12 @@ bool checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
 
 // guardedCheckPanorama() method is used to check if the file is a panorama image.
 Future<void> guardedCheckPanorama(EnteFile file) async {
-  if (file.isPanorama() != null) {
+  if (!file.canEditMetaInfo || file.isPanorama() != null) {
     return;
   }
+  _logger.info(
+    "Checking panorama for ${file.uploadedFileID ?? file.localID ?? file.generatedID}",
+  );
   final result = await checkIfPanorama(file);
 
   // Update the metadata if it is not updated

@@ -13,20 +13,28 @@ import "package:shared_preferences/shared_preferences.dart";
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
-  static const _databaseName = "ente.ml.vectordb.clip.usearch";
-  static const _kMigrationKey = "clip_vectordb_migration";
+  final String _databaseName;
+  final String _migrationKey;
 
   static final BigInt _embeddingDimension = BigInt.from(512);
 
   static Logger get logger => _logger;
 
   // Singleton pattern
-  ClipVectorDB._privateConstructor();
-  static final instance = ClipVectorDB._privateConstructor();
+  ClipVectorDB._privateConstructor(this._databaseName, this._migrationKey);
+  static final instance = ClipVectorDB._privateConstructor(
+    "ente.ml.vectordb.clip.usearch",
+    "clip_vectordb_migration",
+  );
+  static final offlineInstance = ClipVectorDB._privateConstructor(
+    "ente.ml.offline.vectordb.clip.usearch",
+    "clip_vectordb_migration_offline",
+  );
   factory ClipVectorDB() => instance;
 
   // only have a single app-wide reference to the database
-  static Future<VectorDb>? _vectorDbFuture;
+  Future<VectorDb>? _vectorDbFuture;
+  Future<void>? _warmupFuture;
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -39,6 +47,13 @@ class ClipVectorDB {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String dbPath = join(documentsDirectory.path, _databaseName);
     _logger.info("Opening vectorDB access: DB path " + dbPath);
+    final indexFile = File(dbPath);
+    if (!await indexFile.exists() && await checkIfMigrationDone()) {
+      _logger.severe(
+        "VectorDB file is missing while migration is marked done. Invalidating migration state.",
+      );
+      await invalidateMigrationState();
+    }
     late VectorDb vectorDB;
     try {
       vectorDB = VectorDb(
@@ -48,7 +63,7 @@ class ClipVectorDB {
     } catch (e, s) {
       _logger.severe("Could not open VectorDB at path $dbPath", e, s);
       _logger.severe("Deleting the index file and trying again");
-      await deleteIndexFile();
+      await deleteIndexFile(undoMigration: true);
       try {
         vectorDB = VectorDb(
           filePath: dbPath,
@@ -69,7 +84,7 @@ class ClipVectorDB {
     if (_migrationDone != null) return _migrationDone!;
     _logger.info("Checking if ClipVectorDB migration has run");
     final prefs = await SharedPreferences.getInstance();
-    final migrationDone = prefs.getBool(_kMigrationKey) ?? false;
+    final migrationDone = prefs.getBool(_migrationKey) ?? false;
     if (migrationDone) {
       _logger.info("ClipVectorDB migration already done");
       _migrationDone = true;
@@ -84,8 +99,15 @@ class ClipVectorDB {
   Future<void> setMigrationDone() async {
     _logger.info("Setting ClipVectorDB migration done");
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMigrationKey, true);
+    await prefs.setBool(_migrationKey, true);
     _migrationDone = true;
+  }
+
+  Future<void> invalidateMigrationState() async {
+    _logger.info("Invalidating ClipVectorDB migration state");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_migrationKey, false);
+    _migrationDone = false;
   }
 
   Future<void> insertEmbedding({
@@ -148,6 +170,7 @@ class ClipVectorDB {
   }
 
   Future<void> deleteAllEmbeddings() async {
+    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.resetIndex();
@@ -210,6 +233,70 @@ class ClipVectorDB {
     }
   }
 
+  Future<void> warmupApproxSearch() async {
+    _warmupFuture ??= _warmupApproxSearchInternal();
+    await _warmupFuture;
+  }
+
+  Future<void> _warmupApproxSearchInternal() async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      final db = await _vectorDB;
+      final stats = await getIndexStats(db);
+      if (stats.size == 0) {
+        _logger.info("Skipping VectorDB warmup: index is empty");
+        return;
+      }
+
+      final warmupQuery = List<double>.filled(
+        stats.dimensions,
+        0.0,
+        growable: false,
+      );
+      await db.searchVectors(
+        query: warmupQuery,
+        count: BigInt.one,
+        exact: false,
+      );
+      _logger.info(
+        "VectorDB warmup finished in ${stopwatch.elapsedMilliseconds} ms",
+      );
+    } catch (e, s) {
+      _logger.warning("VectorDB warmup failed", e, s);
+      _warmupFuture = null;
+    } finally {
+      stopwatch.stop();
+    }
+  }
+
+  Future<List<QueryResult>> searchApproxSimilaritiesWithinThreshold(
+    List<double> query,
+    double minimumSimilarity,
+  ) async {
+    final db = await _vectorDB;
+    if (!await checkIfMigrationDone()) {
+      throw StateError(
+        "ClipVectorDB migration is not done, cannot run approximate search",
+      );
+    }
+    try {
+      final result = await db.approxSearchVectorsWithinSimilarity(
+        query: query,
+        minimumSimilarity: minimumSimilarity,
+      );
+      final keys = result.$1;
+      final distances = result.$2;
+      final queryResults = <QueryResult>[];
+      for (var i = 0; i < keys.length; i++) {
+        queryResults.add(QueryResult(keys[i].toInt(), 1.0 - distances[i]));
+      }
+      return queryResults;
+    } catch (e, s) {
+      _logger.severe("Error searching approximate similarities", e, s);
+      rethrow;
+    }
+  }
+
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
     List<Float32List> queries,
     BigInt count, {
@@ -250,9 +337,21 @@ class ClipVectorDB {
 
   Future<Map<String, List<QueryResult>>> computeBulkSimilarities(
     Map<String, List<double>> textQueryToEmbeddingMap,
-    Map<String, double> minimumSimilarityMap,
-  ) async {
+    Map<String, double> minimumSimilarityMap, {
+    int? maxResults,
+  }) async {
     try {
+      int? resolvedMaxResults = maxResults;
+      if (resolvedMaxResults == null || resolvedMaxResults <= 0) {
+        final stats = await getIndexStats();
+        resolvedMaxResults = stats.size;
+      }
+      if (resolvedMaxResults == 0) {
+        return {
+          for (final query in textQueryToEmbeddingMap.keys)
+            query: <QueryResult>[],
+        };
+      }
       final queryToResults = <String, List<QueryResult>>{};
       for (final MapEntry<String, List<double>> entry
           in textQueryToEmbeddingMap.entries) {
@@ -260,13 +359,14 @@ class ClipVectorDB {
         final minimumSimilarity = minimumSimilarityMap[query]!;
         final textEmbedding = entry.value;
         final (potentialFileIDs, distances) =
-            await searchClosestVectors(textEmbedding, 1000);
+            await searchClosestVectors(textEmbedding, resolvedMaxResults);
         final queryResults = <QueryResult>[];
         for (var i = 0; i < potentialFileIDs.length; i++) {
           final similarity = 1 - distances[i];
           if (similarity >= minimumSimilarity) {
-            queryResults
-                .add(QueryResult(potentialFileIDs[i].toInt(), similarity));
+            queryResults.add(
+              QueryResult(potentialFileIDs[i].toInt(), similarity),
+            );
           } else {
             break;
           }
@@ -285,10 +385,12 @@ class ClipVectorDB {
   }
 
   Future<void> deleteIndex() async {
+    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.deleteIndex();
       _vectorDbFuture = null;
+      _warmupFuture = null;
     } catch (e, s) {
       _logger.severe("Error deleting index", e, s);
       rethrow;
@@ -306,12 +408,13 @@ class ClipVectorDB {
       }
       _logger.info("Deleted index file on disk");
       _vectorDbFuture = null;
-      if (undoMigration) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_kMigrationKey, false);
-        _migrationDone = false;
-        _logger.info("Undid migration flag");
+      _warmupFuture = null;
+      if (!undoMigration) {
+        _logger.info(
+          "Index file was deleted without explicit undo flag; invalidating migration state regardless.",
+        );
       }
+      await invalidateMigrationState();
     } catch (e, s) {
       _logger.severe("Error deleting index file on disk", e, s);
       rethrow;

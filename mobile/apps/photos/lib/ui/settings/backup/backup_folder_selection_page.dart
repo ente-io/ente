@@ -46,6 +46,7 @@ class BackupFolderSelectionPage extends StatefulWidget {
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Logger _logger = Logger((_BackupFolderSelectionPageState).toString());
+  final ScrollController _scrollController = ScrollController();
   final Set<String> _allDevicePathIDs = <String>{};
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
@@ -213,6 +214,12 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     );
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> updateFolderSettings() async {
     final dialog = createProgressDialog(
       context,
@@ -284,16 +291,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       return const EnteLoadingWidget();
     }
     _sortFiles();
-    final scrollController = ScrollController();
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, bottom: 8),
       child: Scrollbar(
-        controller: scrollController,
+        controller: _scrollController,
         thumbVisibility: true,
         child: Padding(
           padding: const EdgeInsets.only(right: 4),
           child: ImplicitlyAnimatedReorderableList<DeviceCollection>(
-            controller: scrollController,
+            controller: _scrollController,
             items: _deviceCollections!,
             areItemsTheSame: (oldItem, newItem) => oldItem.id == newItem.id,
             onReorderFinished: (item, from, to, newItems) {

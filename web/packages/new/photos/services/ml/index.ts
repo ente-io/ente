@@ -3,6 +3,7 @@
  */
 
 import { proxy, transfer } from "comlink";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
@@ -352,25 +353,49 @@ export const mlSync = async () => {
     if (!_state.isMLEnabled) return;
     if (_state.isSyncing) return;
     _state.isSyncing = true;
+    const runID = `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const syncStartTime = Date.now();
+    log.info(`[ml-sync ${runID}] start`);
 
-    if (_state.needsResetFailures) {
-        // CAS. See documentation for retryIndexingFailures why swapping the
-        // flag before performing the operation is fine.
-        _state.needsResetFailures = false;
-        await resetFailedFileStatuses();
+    try {
+        if (_state.needsResetFailures) {
+            // CAS. See documentation for retryIndexingFailures why swapping the
+            // flag before performing the operation is fine.
+            _state.needsResetFailures = false;
+            const resetStartTime = Date.now();
+            log.info(`[ml-sync ${runID}] resetting failed file statuses`);
+            await resetFailedFileStatuses();
+            log.info(
+                `[ml-sync ${runID}] reset failed file statuses in ${Date.now() - resetStartTime} ms`,
+            );
+        }
+
+        // Dependency order for the sync
+        //
+        //     files -> faces -> cgroups -> clusters -> people
+        //
+
+        // Fetch indexes, or index locally if needed.
+        const indexStartTime = Date.now();
+        log.info(`[ml-sync ${runID}] indexing start`);
+        await worker().then((w) => w.index());
+        log.info(
+            `[ml-sync ${runID}] indexing done in ${Date.now() - indexStartTime} ms`,
+        );
+
+        const clusterAndPeopleStartTime = Date.now();
+        log.info(`[ml-sync ${runID}] cluster+people update start`);
+        await updateClustersAndPeople();
+        log.info(
+            `[ml-sync ${runID}] cluster+people update done in ${Date.now() - clusterAndPeopleStartTime} ms`,
+        );
+    } catch (e) {
+        log.error(`[ml-sync ${runID}] failed`, e);
+        throw e;
+    } finally {
+        _state.isSyncing = false;
+        log.info(`[ml-sync ${runID}] end (${Date.now() - syncStartTime} ms)`);
     }
-
-    // Dependency order for the sync
-    //
-    //     files -> faces -> cgroups -> clusters -> people
-    //
-
-    // Fetch indexes, or index locally if needed.
-    await worker().then((w) => w.index());
-
-    await updateClustersAndPeople();
-
-    _state.isSyncing = false;
 };
 
 const updateClustersAndPeople = async () => {
@@ -953,9 +978,15 @@ export const addManualFileAssignmentsToPerson = async (
  * Return suggestions for the given {@link person}.
  *
  * The suggestion computation happens in a web worker.
- */
+ *
+ * Since the computation is happening in a web worker, and it doesn't
+ * have access to any localStorage, we need to pass the currentUserID explicitly.
+ * for the isHiddenCollection checks in the process.
+ *  */
 export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
-    worker().then((w) => w.suggestionsAndChoicesForPerson(person));
+    worker().then((w) =>
+        w.suggestionsAndChoicesForPerson(person, ensureLocalUser().id),
+    );
 
 /**
  * Implementation for the "save" action on the SuggestionsDialog.

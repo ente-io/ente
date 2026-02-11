@@ -403,7 +403,7 @@ class SettingsSearchRegistry {
       );
     }
 
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn || isOffline) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.memories,
@@ -432,7 +432,9 @@ class SettingsSearchRegistry {
             keywords: ["curated", "smart", "memories"],
           ),
       ]);
+    }
 
+    if (hasLoggedIn && !isOffline) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.notifications,
@@ -451,48 +453,21 @@ class SettingsSearchRegistry {
           keywords: ["shared", "notifications", "shares"],
         ),
         SettingsSearchItem(
-          title: l10n.commentNotifications,
+          title: l10n.socialNotifications,
           subtitle: l10n.notifications,
           sectionPath: l10n.notifications,
           icon: HugeIcons.strokeRoundedNotification01,
           routeBuilder: (_) => const NotificationSettingsScreen(),
           isSubPage: true,
           keywords: [
+            "social",
             "comment",
             "comments",
-            "social",
-            "notifications",
-            "notification",
-          ],
-        ),
-        SettingsSearchItem(
-          title: l10n.likeNotifications,
-          subtitle: l10n.notifications,
-          sectionPath: l10n.notifications,
-          icon: HugeIcons.strokeRoundedNotification01,
-          routeBuilder: (_) => const NotificationSettingsScreen(),
-          isSubPage: true,
-          keywords: [
             "like",
             "likes",
-            "social",
-            "notifications",
-            "notification",
-          ],
-        ),
-        SettingsSearchItem(
-          title: l10n.replyNotifications,
-          subtitle: l10n.notifications,
-          sectionPath: l10n.notifications,
-          icon: HugeIcons.strokeRoundedNotification01,
-          routeBuilder: (_) => const NotificationSettingsScreen(),
-          isSubPage: true,
-          keywords: [
             "reply",
             "replies",
-            "social",
             "notifications",
-            "notification",
           ],
         ),
         SettingsSearchItem(

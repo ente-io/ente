@@ -15,6 +15,7 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -74,13 +75,16 @@ class SearchService {
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
   late final mlDataDB = MLDataDB.instance;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
   SearchService._privateConstructor();
 
   static final SearchService instance = SearchService._privateConstructor();
 
   void init() {
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localPhotosUpdatedSubscription?.cancel();
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
       _cachedFilesForSearch = null;
@@ -319,7 +323,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (flagService.hasGrantedMLConsent) {
+    if (hasGrantedMLConsent) {
       return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
@@ -892,6 +896,94 @@ class SearchService {
     bool showIgnoredOnly = false,
   }) async {
     try {
+      if (isOfflineMode) {
+        final effectiveMinClusterSize = minClusterSize > 5 ? 5 : minClusterSize;
+        if (showIgnoredOnly) {
+          return [];
+        }
+        debugPrint("getting faces (offline)");
+        final offlineMlDb = MLDataDB.offlineInstance;
+        final Map<int, Set<String>> fileIdToClusterID =
+            await offlineMlDb.getFileIdToClusterIds();
+        if (fileIdToClusterID.isEmpty) {
+          return [];
+        }
+        final localIntIds = fileIdToClusterID.keys.toSet();
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+        final allFiles = await getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+        final Map<String, List<EnteFile>> clusterIdToFiles = {};
+        for (final entry in fileIdToClusterID.entries) {
+          final localId = localIdMap[entry.key];
+          if (localId == null) continue;
+          final file = localIdToFile[localId];
+          if (file == null) continue;
+          for (final cluster in entry.value) {
+            clusterIdToFiles.putIfAbsent(cluster, () => []).add(file);
+          }
+        }
+        final List<GenericSearchResult> facesResult = [];
+        final sortedClusterIds = clusterIdToFiles.keys.toList()
+          ..sort(
+            (a, b) => clusterIdToFiles[b]!
+                .length
+                .compareTo(clusterIdToFiles[a]!.length),
+          );
+        for (final clusterId in sortedClusterIds) {
+          final files = clusterIdToFiles[clusterId]!;
+          if (files.length < effectiveMinClusterSize) continue;
+          facesResult.add(
+            GenericSearchResult(
+              ResultType.faces,
+              "",
+              files,
+              params: {
+                kClusterParamId: clusterId,
+              },
+              onResultTap: (ctx) {
+                routeToPage(
+                  ctx,
+                  ClusterPage(
+                    files,
+                    tagPrefix: "${ResultType.faces.toString()}_$clusterId",
+                    clusterID: clusterId,
+                    showNamingBanner: false,
+                  ),
+                );
+              },
+              hierarchicalSearchFilter: FaceFilter(
+                personId: null,
+                clusterId: clusterId,
+                faceName: null,
+                faceFile: files.first,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(files),
+              ),
+            ),
+          );
+        }
+        if (facesResult.isEmpty) return [];
+        sortPeopleFaces(
+          facesResult,
+          PeopleSortConfig(
+            sortKey: localSettings.peopleSortKey(),
+            nameSortAscending: localSettings.peopleNameSortAscending,
+            updatedSortAscending: localSettings.peopleUpdatedSortAscending,
+            photosSortAscending: localSettings.peoplePhotosSortAscending,
+          ),
+        );
+        if (limit != null) {
+          return facesResult.sublist(0, min(limit, facesResult.length));
+        }
+        return facesResult;
+      }
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
           await mlDataDB.getFileIdToClusterIds();

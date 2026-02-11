@@ -1,40 +1,39 @@
 ---
 title: Search
-description: Find documents quickly in Ente Locker
+description: Find items quickly in Ente Locker
 ---
 
 # Search
 
-Search helps you find any document in your Locker quickly. Search works locally
-on your device to maintain the privacy of your encrypted data.
+Search helps you find any item in your Locker quickly. Search works locally on
+your device to maintain the privacy of your encrypted data.
 
 ## Using search
 
 1. Tap the search icon on the home screen
 2. Type your search query
 3. Results appear as you type
-4. Tap a result to open the document
+4. Tap a result to view the item
 
 ## What is searched
 
 Search looks through:
 
-- **Document titles**: The name you gave each document
+- **Item titles**: The name you gave each item
 - **Collection names**: Names of your collections
 
-> **Note**: Search currently matches document titles and names, not the full
-> content within documents. Use descriptive titles to make documents easier
-> to find.
+> **Note**: Search currently matches item titles and names, not the full content
+> within items. Use descriptive titles to make items easier to find.
 
 ## Search tips
 
 ### Use specific terms
 
-Search for specific words or phrases that you know appear in your document:
+Search for specific words or phrases that you know appear in your item:
 
 - "Gmail" to find your Gmail credentials
 - "passport" to find passport-related records
-- "Dr. Smith" to find your doctor's contact
+- "insurance" to find insurance documents
 
 ### Partial matches
 
@@ -51,17 +50,16 @@ results.
 ## Privacy
 
 All search operations happen locally on your device. Your search queries are
-never sent to Ente's servers, and your decrypted document content never leaves
-your device.
+never sent to Ente's servers, and your decrypted item content never leaves your
+device.
 
 ## Limitations
 
-- Search requires documents to be synced to your device
-- Very recently created documents may take a moment to become searchable
+- Very recently created items may take a moment to become searchable
 - Search does not include items in Trash
 
 ## Related FAQs
 
 - [Does search work offline?](/locker/faq/organization#locker-search-offline)
 - [Can I search within a specific collection?](/locker/faq/organization#locker-search-collection)
-- [Why isn't my document appearing in search?](/locker/faq/troubleshooting#locker-search-missing)
+- [Why isn't my item appearing in search?](/locker/faq/troubleshooting#locker-search-missing)

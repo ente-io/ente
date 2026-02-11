@@ -134,12 +134,12 @@ struct CastDataResponse: Codable {
 }
 
 // MARK: - Errors
-enum CastError: Error {
+enum CastError: Error, LocalizedError {
     case networkError(String)
     case serverError(Int, String?)
     case decryptionError(String)
     
-    var localizedDescription: String {
+    var errorDescription: String? {
         switch self {
         case .networkError(let message):
             return "Network error: \(message)"

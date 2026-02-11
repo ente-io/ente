@@ -22,13 +22,11 @@ class CollageWithThreeItems extends StatefulWidget {
     this.third, {
     super.key,
     this.onControllerReady,
-    this.enableExtendedLayouts = false,
     this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
-  final bool enableExtendedLayouts;
   final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
@@ -126,28 +124,26 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems>
             });
           },
         ),
-        if (widget.enableExtendedLayouts)
-          CollageLayoutIconButton(
-            child: FourthVariantIcon(
-              isActive: _variant == Variant.fourth,
-            ),
-            onTap: () {
-              setState(() {
-                _variant = Variant.fourth;
-              });
-            },
+        CollageLayoutIconButton(
+          child: FourthVariantIcon(
+            isActive: _variant == Variant.fourth,
           ),
-        if (widget.enableExtendedLayouts)
-          CollageLayoutIconButton(
-            child: FifthVariantIcon(
-              isActive: _variant == Variant.fifth,
-            ),
-            onTap: () {
-              setState(() {
-                _variant = Variant.fifth;
-              });
-            },
+          onTap: () {
+            setState(() {
+              _variant = Variant.fourth;
+            });
+          },
+        ),
+        CollageLayoutIconButton(
+          child: FifthVariantIcon(
+            isActive: _variant == Variant.fifth,
           ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.fifth;
+            });
+          },
+        ),
       ],
     );
   }

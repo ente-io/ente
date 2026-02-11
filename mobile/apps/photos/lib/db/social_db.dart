@@ -409,6 +409,25 @@ class SocialDB {
     await batch.commit(noResult: true);
   }
 
+  /// Resolves `parent_comment_user_id` for reply comments by looking up the
+  /// parent comment's `user_id`. Only processes rows where the field is still
+  /// NULL, making it idempotent.
+  Future<void> resolveParentCommentUserIDs(int collectionID) async {
+    final db = await database;
+    await db.rawUpdate(
+      '''
+      UPDATE $_commentsTable SET parent_comment_user_id = (
+        SELECT c2.user_id FROM $_commentsTable c2
+        WHERE c2.id = $_commentsTable.parent_comment_id
+      )
+      WHERE collection_id = ?
+        AND parent_comment_id IS NOT NULL
+        AND parent_comment_user_id IS NULL
+      ''',
+      [collectionID],
+    );
+  }
+
   Future<void> upsertReactions(List<Reaction> reactions) async {
     if (reactions.isEmpty) return;
     final db = await database;
@@ -509,8 +528,8 @@ class SocialDB {
 
   /// Gets all replies to comments, excluding the current user's own replies.
   /// Returns replies sorted by created_at DESC.
-  Future<List<Comment>> getRepliesToUserComments({
-    required int targetUserID,
+  Future<List<Comment>> getReplies({
+    required int excludeUserID,
     int limit = 100,
     int offset = 0,
   }) async {
@@ -520,7 +539,7 @@ class SocialDB {
       _commentsTable,
       where:
           'parent_comment_id IS NOT NULL AND is_deleted = 0 AND user_id != ?',
-      whereArgs: [targetUserID],
+      whereArgs: [excludeUserID],
       orderBy: 'created_at DESC',
       limit: limit,
       offset: offset,
@@ -611,8 +630,8 @@ class SocialDB {
 
   /// Gets all replies after [sinceTime], excluding the current user.
   /// Returns replies sorted by created_at DESC.
-  Future<List<Comment>> getRepliesToUserCommentsSince({
-    required int targetUserID,
+  Future<List<Comment>> getRepliesSince({
+    required int excludeUserID,
     required int sinceTime,
   }) async {
     final db = await database;
@@ -620,7 +639,7 @@ class SocialDB {
       _commentsTable,
       where: 'parent_comment_id IS NOT NULL AND is_deleted = 0 '
           'AND user_id != ? AND created_at > ?',
-      whereArgs: [targetUserID, sinceTime],
+      whereArgs: [excludeUserID, sinceTime],
       orderBy: 'created_at DESC',
     );
     return rows.map(_rowToComment).toList();

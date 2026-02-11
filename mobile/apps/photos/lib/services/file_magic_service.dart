@@ -7,26 +7,27 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import "package:photos/models/api/metadata.dart";
+import "package:photos/gateways/collections/models/metadata.dart";
+import "package:photos/gateways/files/file_magic_gateway.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/file_key.dart";
 
 class FileMagicService {
   final _logger = Logger("FileMagicService");
-  late Dio _enteDio;
   late FilesDB _filesDB;
+
+  FileMagicGateway get _gateway => fileMagicGateway;
 
   FileMagicService._privateConstructor() {
     _filesDB = FilesDB.instance;
-    _enteDio = NetworkClient.instance.enteDio;
   }
 
   static final FileMagicService instance =
@@ -61,8 +62,7 @@ class FileMagicService {
     Map<String, dynamic>? newMetadataUpdate, {
     Map<int, Map<String, dynamic>>? metadataUpdateMap,
   }) async {
-    final params = <String, dynamic>{};
-    params['metadataList'] = [];
+    final metadataList = <UpdateMagicMetadataRequest>[];
     final int ownerID = Configuration.instance.getUserID()!;
     try {
       for (final file in files) {
@@ -98,7 +98,7 @@ class FileMagicService {
           utf8.encode(jsonEncode(jsonToUpdate)),
           fileKey,
         );
-        params['metadataList'].add(
+        metadataList.add(
           UpdateMagicMetadataRequest(
             id: file.uploadedFileID!,
             magicMetadata: MetadataRequest(
@@ -112,7 +112,7 @@ class FileMagicService {
         file.pubMmdVersion = file.pubMmdVersion + 1;
       }
 
-      await _enteDio.put("/files/public-magic-metadata", data: params);
+      await _gateway.updatePublicMagicMetadata(metadataList);
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);
@@ -132,12 +132,11 @@ class FileMagicService {
     List<EnteFile> files,
     Map<String, dynamic> newMetadataUpdate,
   ) async {
-    final params = <String, dynamic>{};
     final int ownerID = Configuration.instance.getUserID()!;
     final batchedFiles = files.chunks(batchSize);
     try {
       for (final batch in batchedFiles) {
-        params['metadataList'] = [];
+        final metadataList = <UpdateMagicMetadataRequest>[];
         for (final file in batch) {
           if (file.uploadedFileID == null) {
             throw AssertionError(
@@ -164,7 +163,7 @@ class FileMagicService {
             utf8.encode(jsonEncode(jsonToUpdate)),
             fileKey,
           );
-          params['metadataList'].add(
+          metadataList.add(
             UpdateMagicMetadataRequest(
               id: file.uploadedFileID!,
               magicMetadata: MetadataRequest(
@@ -178,7 +177,7 @@ class FileMagicService {
           file.mMdVersion = file.mMdVersion + 1;
         }
 
-        await _enteDio.put("/files/magic-metadata", data: params);
+        await _gateway.updateMagicMetadata(metadataList);
         await _filesDB.insertMultiple(files);
       }
 

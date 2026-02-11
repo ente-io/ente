@@ -288,7 +288,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       RecoveryKeyPage(
         recoveryKey,
         AppLocalizations.of(context).ok,
-        showAppBar: true,
+        isOnboarding: false,
         onDone: () {},
         title: AppLocalizations.of(context).setupComplete,
         text:

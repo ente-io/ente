@@ -126,7 +126,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                                       )
                         }
                     >
-                        {enableJoin ? t("join_album") : t("get_ente")}
+                        {enableJoin ? t("join_album") : t("try_ente")}
                     </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>

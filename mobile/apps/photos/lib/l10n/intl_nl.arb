@@ -1820,7 +1820,7 @@
   "font": "Lettertype",
   "background": "Achtergrond",
   "align": "Uitlijnen",
-  "addedToAlbums": "{count, plural, one {}=1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
+  "addedToAlbums": "{count, plural, =1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -1953,28 +1953,5 @@
   "streetFood": "Street food bites",
   "riverCruises": "Uitzichten vanaf de cruise",
   "playfulKids": "Spelende kinderen",
-  "coastalCliffs": "Kliffen bij de zee",
-  "cLTitle1": "Herontwerp",
-  "cLDesc1Item1": "Instellingenscherm herontworpen",
-  "cLDesc1Item2": "Zoekbalk naar boven verplaatst",
-  "cLDesc1Item3": "Zoekresultatenpagina herontworpen",
-  "cLTitle2": "Verbeteringen",
-  "cLDesc2Item1": "Zoeken binnen instellingen",
-  "cLDesc2Item2": "Sneller laden van zoektabblad",
-  "cLDesc2Item3": "Zoeken in ontdekking, locatie en bestandstype",
-  "cLDesc2Item4": "Beheerders en albumeigenaren kunnen reacties verwijderen",
-  "cLDesc2Item5": "Knijpen om te zoomen op video",
-  "cLDesc2Item6": "Alle genegeerde personen bekijken",
-  "cLDesc2Item7": "Verbeterde samenvoegstroom",
-  "cLDesc2Item8": "Zoeken en aangepaste sortering op personenpagina",
-  "cLDesc2Item9": "Consistente sortering van contacten",
-  "cLDesc2Item10": "Voorbeeldafbeeldingen voor niet-ondersteunde afbeeldingsformaten",
-  "cLDesc2Item11": "Foto's wisselen en tikken om te vervangen in collagecreator",
-  "cLDesc2Item12": "Prestatieverbetering op bestandsinfokaart",
-  "cLTitle3": "Bugfixes",
-  "cLDesc3Item1": "Fix voor muziek die pauzeert bij openen van de app",
-  "cLDesc3Item2": "Fix voor veeg-om-te-selecteren probleem op Samsung S-apparaten",
-  "cLDesc3Item3": "Fix voor opstartschermprobleem na back-upherstel",
-  "cLDesc3Item4": "Fix voor galerijproblemen op tablets en liggende modus",
-  "cLDesc3Item5": "Fix voor ongecategoriseerde pagina die niet bijwerkt na verplaatsing"
+  "coastalCliffs": "Kliffen bij de zee"
 }

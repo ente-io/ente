@@ -11,10 +11,14 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/account/recovery_page.dart';
-import 'package:photos/ui/common/dynamic_fab.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart'
+    show ButtonAction;
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import 'package:photos/ui/tabs/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -29,10 +33,7 @@ class PasswordReentryPage extends StatefulWidget {
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _logger = Logger((_PasswordReentryPageState).toString());
   final _passwordController = TextEditingController();
-  final FocusNode _passwordFocusNode = FocusNode();
   String? email;
-  bool _passwordInFocus = false;
-  bool _passwordVisible = false;
   String? _volatilePassword;
 
   @override
@@ -47,57 +48,57 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         () => verifyPassword(_volatilePassword!),
       );
     }
-    _passwordFocusNode.addListener(() {
-      setState(() {
-        _passwordInFocus = _passwordFocusNode.hasFocus;
-      });
-    });
   }
 
   @override
   void dispose() {
     _passwordController.dispose();
-    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isFormValid = _passwordController.text.isNotEmpty;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.content,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
+        title: Text(
+          AppLocalizations.of(context).enterPassword,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("verifyPasswordButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: AppLocalizations.of(context).verifyPassword,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          await verifyPassword(_passwordController.text);
-        },
+      body: _getBody(colorScheme, textTheme),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("verifyPasswordButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).logInLabel,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  FocusScope.of(context).unfocus();
+                  await verifyPassword(_passwordController.text);
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -188,142 +189,81 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
   }
 
-  Widget _getBody() {
-    return Column(
-      children: [
-        Expanded(
-          child: AutofillGroup(
-            child: ListView(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    AppLocalizations.of(context).welcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    return SafeArea(
+      child: AutofillGroup(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              Visibility(
+                // hidden textForm for suggesting auto-fill service for saving
+                // password
+                visible: false,
+                child: TextFormField(
+                  autofillHints: const [
+                    AutofillHints.email,
+                  ],
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  initialValue: email,
+                  textInputAction: TextInputAction.next,
                 ),
-                Visibility(
-                  // hidden textForm for suggesting auto-fill service for saving
-                  // password
-                  visible: false,
-                  child: TextFormField(
-                    autofillHints: const [
-                      AutofillHints.email,
-                    ],
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    initialValue: email,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    key: const ValueKey("passwordInputField"),
-                    autofillHints: const [AutofillHints.password],
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).enterYourPassword,
-                      filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
-                      contentPadding: const EdgeInsets.all(20),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _passwordInFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _passwordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _passwordVisible = !_passwordVisible;
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
-                    controller: _passwordController,
-                    autofocus: true,
-                    autocorrect: false,
-                    obscureText: !_passwordVisible,
-                    keyboardType: TextInputType.visiblePassword,
-                    focusNode: _passwordFocusNode,
-                    onChanged: (_) {
-                      setState(() {});
+              ),
+              TextInputWidgetV2(
+                key: const ValueKey("passwordInputField"),
+                label: AppLocalizations.of(context).password,
+                isRequired: true,
+                hintText: AppLocalizations.of(context).enterYourPassword,
+                textEditingController: _passwordController,
+                isPasswordInput: true,
+                autoCorrect: false,
+                onChange: (value) {
+                  setState(() {});
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ButtonWidgetV2(
+                    buttonType: ButtonTypeV2.link,
+                    labelText: AppLocalizations.of(context).changeEmail,
+                    buttonSize: ButtonSizeV2.small,
+                    onTap: () async {
+                      final dialog = createProgressDialog(
+                        context,
+                        AppLocalizations.of(context).pleaseWait,
+                      );
+                      await dialog.show();
+                      await Configuration.instance.logout();
+                      await dialog.hide();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return const RecoveryPage();
-                              },
-                            ),
-                          );
-                        },
-                        child: Text(
-                          AppLocalizations.of(context).forgotPassword,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                  ButtonWidgetV2(
+                    buttonType: ButtonTypeV2.link,
+                    labelText: AppLocalizations.of(context).forgotPassword,
+                    buttonSize: ButtonSizeV2.small,
+                    onTap: () async {
+                      // ignore: unawaited_futures
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return const RecoveryPage();
+                          },
                         ),
-                      ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final dialog = createProgressDialog(
-                            context,
-                            AppLocalizations.of(context).pleaseWait,
-                          );
-                          await dialog.show();
-                          await Configuration.instance.logout();
-                          await dialog.hide();
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
-                        },
-                        child: Text(
-                          AppLocalizations.of(context).changeEmail,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

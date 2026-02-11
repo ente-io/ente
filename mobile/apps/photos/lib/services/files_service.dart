@@ -1,18 +1,21 @@
-import 'package:dio/dio.dart';
+import 'dart:io';
+
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/material.dart";
 import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+import 'package:photo_manager/photo_manager.dart' hide LatLng;
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network/network.dart';
 import "package:photos/db/device_files_db.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/gateways/files/files_gateway.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/freeable_space_info.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -20,13 +23,13 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 
 class FilesService {
-  late Dio _enteDio;
   late Logger _logger;
   late FilesDB _filesDB;
   late Configuration _config;
 
+  FilesGateway get _gateway => filesGateway;
+
   FilesService._privateConstructor() {
-    _enteDio = NetworkClient.instance.enteDio;
     _logger = Logger("FilesService");
     _filesDB = FilesDB.instance;
     _config = Configuration.instance;
@@ -36,13 +39,7 @@ class FilesService {
 
   Future<int> getFileSize(int uploadedFileID) async {
     try {
-      final response = await _enteDio.post(
-        "/files/size",
-        data: {
-          "fileIDs": [uploadedFileID],
-        },
-      );
-      return response.data["size"];
+      return await _gateway.getFilesSize([uploadedFileID]);
     } catch (e) {
       _logger.severe(e);
       rethrow;
@@ -72,15 +69,19 @@ class FilesService {
     }
   }
 
-  Future<BackupStatus> getBackupStatus({String? pathID}) async {
-    BackedUpFileIDs ids;
+  Future<FreeableSpaceInfo> getFreeableSpaceInfo({String? pathID}) async {
+    final excludeLocalIDs = await _getICloudSharedAlbumAssetIDs();
+    FreeableFileIDs ids;
     final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
     if (pathID == null) {
-      ids = await FilesDB.instance.getBackedUpIDs();
+      ids = await FilesDB.instance.getFreeableFileIDs(
+        excludeLocalIDs: excludeLocalIDs,
+      );
     } else {
-      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
+      ids = await FilesDB.instance.getFreeableFileIDsForDeviceCollection(
         pathID,
         Configuration.instance.getUserID()!,
+        excludeLocalIDs: excludeLocalIDs,
       );
     }
     late int size;
@@ -89,16 +90,54 @@ class FilesService {
     } else {
       size = await _getFileSize(ids.uploadedIDs);
     }
-    return BackupStatus(ids.localIDs, size);
+    return FreeableSpaceInfo(ids.localIDs, size);
+  }
+
+  /// Returns iCloud shared album paths on iOS.
+  /// Returns empty list on non-iOS platforms.
+  Future<List<AssetPathEntity>> _getICloudSharedAlbumPaths() async {
+    if (!Platform.isIOS) return [];
+    return PhotoManager.getAssetPathList(
+      hasAll: false,
+      type: RequestType.common,
+      pathFilterOption: const PMPathFilter(
+        darwin: PMDarwinPathFilter(
+          type: [PMDarwinAssetCollectionType.album],
+          subType: [PMDarwinAssetCollectionSubtype.albumCloudShared],
+        ),
+      ),
+    );
+  }
+
+  /// Returns local asset IDs that belong to iCloud shared albums on iOS.
+  /// These assets cannot be deleted via PhotoManager and must be excluded
+  /// from the free-up-space operation.
+  Future<Set<String>> _getICloudSharedAlbumAssetIDs() async {
+    final paths = await _getICloudSharedAlbumPaths();
+    final Set<String> sharedIDs = {};
+    for (final path in paths) {
+      final count = await path.assetCountAsync;
+      final assets = await path.getAssetListRange(start: 0, end: count);
+      for (final asset in assets) {
+        sharedIDs.add(asset.id);
+      }
+    }
+    _logger.info(
+      "Found ${sharedIDs.length} assets in iCloud shared albums",
+    );
+    return sharedIDs;
+  }
+
+  /// Returns path IDs of iCloud shared albums on iOS.
+  /// Returns empty set on non-iOS platforms.
+  Future<Set<String>> getICloudSharedAlbumPathIDs() async {
+    final paths = await _getICloudSharedAlbumPaths();
+    return paths.map((p) => p.id).toSet();
   }
 
   Future<int> _getFileSize(List<int> fileIDs) async {
     try {
-      final response = await _enteDio.post(
-        "/files/size",
-        data: {"fileIDs": fileIDs},
-      );
-      return response.data["size"];
+      return await _gateway.getFilesSize(fileIDs);
     } catch (e) {
       _logger.severe(e);
       rethrow;
@@ -107,18 +146,7 @@ class FilesService {
 
   Future<Map<int, int>> getFilesSizeFromInfo(List<int> uploadedFileID) async {
     try {
-      final response = await _enteDio.post(
-        "/files/info",
-        data: {"fileIDs": uploadedFileID},
-      );
-      final Map<int, int> idToSize = {};
-      final List result = response.data["filesInfo"] as List;
-      for (var fileInfo in result) {
-        final int uploadedFileID = fileInfo["id"];
-        final int size = fileInfo["fileInfo"]["fileSize"];
-        idToSize[uploadedFileID] = size;
-      }
-      return idToSize;
+      return await _gateway.getFilesInfo(uploadedFileID);
     } catch (e, s) {
       _logger.severe("failed to fetch size from fileInfo", e, s);
       rethrow;

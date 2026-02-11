@@ -4,12 +4,12 @@ struct EnteBranding: View {
     var body: some View {
         VStack(alignment: .leading, spacing: -4) {
             Text("ente")
-                .font(FontUtils.gilroyExtraBold(size: 40))
+                .font(FontUtils.montserratExtraBold(size: 40))
                 
                 .foregroundColor(.black)
             
             Text("photos")
-                .font(FontUtils.gilroyBlack(size: 20))
+                .font(FontUtils.montserratBold(size: 20))
                 .foregroundColor(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)

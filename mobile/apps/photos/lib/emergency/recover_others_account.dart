@@ -7,10 +7,10 @@ import 'package:logging/logging.dart';
 import 'package:password_strength/password_strength.dart';
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
+import "package:photos/gateways/users/models/key_attributes.dart";
+import "package:photos/gateways/users/models/set_keys_request.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/user/key_attributes.dart";
-import "package:photos/models/api/user/set_keys_request.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -67,21 +67,22 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   }
 
   @override
+  void dispose() {
+    _passwordController1.dispose();
+    _passwordController2.dispose();
+    _password1FocusNode.dispose();
+    _password2FocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
-
     String title = AppLocalizations.of(context).setPasswordTitle;
     title = AppLocalizations.of(context).resetPasswordTitle;
+    final isFormValid = _passwordsMatch && _isPasswordValid;
+
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -93,17 +94,21 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
         elevation: 0,
       ),
       body: _getBody(title),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordsMatch && _isPasswordValid,
-        buttonText: title,
-        onPressedFunction: () {
-          _updatePassword();
-          FocusScope.of(context).unfocus();
-        },
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: title,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  await _updatePassword();
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -303,7 +308,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
     );
   }
 
-  void _updatePassword() async {
+  Future<void> _updatePassword() async {
     final dialog = createProgressDialog(
       context,
       AppLocalizations.of(context).generatingEncryptionKeys,

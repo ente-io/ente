@@ -1,6 +1,6 @@
 ---
 title: Ente Locker FAQ
-description: Complete index of frequently asked questions about Ente Locker
+description: Answers to common questions about secure document storage, sharing, encryption, and digital inheritance
 ---
 
 # Ente Locker FAQ
@@ -14,9 +14,10 @@ quickly.
 Jump to a category:
 
 - [Getting Started](#getting-started)
-- [Information Types](#information-types)
+- [Item Types](#item-types)
 - [Organization](#organization)
 - [Sharing](#sharing)
+- [Legacy](#legacy)
 - [Security](#security)
 - [Troubleshooting](#troubleshooting)
 
@@ -37,22 +38,49 @@ Jump to a category:
 - [Can I use my existing Ente Photos account?](/locker/faq/getting-started#locker-existing-account)
 - [How do I log in on multiple devices?](/locker/faq/getting-started#locker-multi-device)
 
-## Information Types
+### Pricing and Plans
 
-[View complete Information Types FAQ →](/locker/faq/information-types)
+- [Is Ente Locker free?](/locker/faq/getting-started#locker-pricing-free)
+- [How much does Ente Locker cost?](/locker/faq/getting-started#locker-pricing)
+- [Is Locker storage separate from Photos storage?](/locker/faq/getting-started#locker-storage-separate)
+- [Do I need Ente Photos to use Locker?](/locker/faq/getting-started#locker-need-photos)
+
+### Account Limits
+
+- [What are the storage limits?](/locker/faq/getting-started#locker-account-limits)
+- [What counts as an item?](/locker/faq/getting-started#locker-what-counts-item)
+- [How do I increase my limits?](/locker/faq/getting-started#locker-increase-limits)
+
+### Export and Data
+
+- [Can I export my Locker data?](/locker/faq/getting-started#locker-export)
+- [What happens to my data if I cancel my subscription?](/locker/faq/getting-started#locker-cancel-subscription)
+- [What happens if Ente shuts down?](/locker/faq/getting-started#locker-ente-shutdown)
+
+### Locker, Photos, and Auth
+
+- [Should I store document scans in Locker or Photos?](/locker/faq/getting-started#locker-vs-photos)
+- [Should I store passwords in Locker or use a password manager?](/locker/faq/getting-started#locker-vs-password-manager)
+- [Should I store 2FA codes in Locker or Auth?](/locker/faq/getting-started#locker-vs-auth)
+- [What is Locker NOT designed for?](/locker/faq/getting-started#locker-limitations)
+- [Quick reference: Where to store what](/locker/faq/getting-started#locker-where-to-store)
+
+## Item Types
+
+[View complete Item Types FAQ →](/locker/faq/information-types)
 
 ### General
 
 - [What types of information can I store?](/locker/faq/information-types#locker-what-types)
-- [Can I create custom information types?](/locker/faq/information-types#locker-custom-types)
-- [Can I edit a document after creating it?](/locker/faq/information-types#locker-edit-document)
+- [Can I create custom item types?](/locker/faq/information-types#locker-custom-types)
+- [Can I edit an item after creating it?](/locker/faq/information-types#locker-edit-document)
 
 ### Specific Types
 
-- [Can I format text in Personal Notes?](/locker/faq/information-types#locker-notes-formatting)
+- [What file formats are supported for documents?](/locker/faq/information-types#locker-document-formats)
+- [Can I format text in Notes?](/locker/faq/information-types#locker-notes-formatting)
 - [Does Locker have browser integration for passwords?](/locker/faq/information-types#locker-browser-integration)
 - [Can I attach photos of physical documents?](/locker/faq/information-types#locker-attach-photos)
-- [Can I quickly call a contact from Locker?](/locker/faq/information-types#locker-call-contact)
 
 ## Organization
 
@@ -60,15 +88,15 @@ Jump to a category:
 
 ### Collections
 
-- [How do I organize my documents?](/locker/faq/organization#locker-organize-documents)
+- [How do I organize my items?](/locker/faq/organization#locker-organize-documents)
 - [Can I create nested collections?](/locker/faq/organization#locker-nested-collections)
 - [What happens if I delete a collection?](/locker/faq/organization#locker-delete-collection)
-- [Can a document be in multiple collections?](/locker/faq/organization#locker-multiple-collections)
+- [Can an item be in multiple collections?](/locker/faq/organization#locker-multiple-collections)
 
 ### Trash
 
 - [How long do deleted items stay in Trash?](/locker/faq/organization#locker-trash-retention)
-- [Can I recover documents after 30 days?](/locker/faq/organization#locker-recover-after-30-days)
+- [Can I recover items after 30 days?](/locker/faq/organization#locker-recover-after-30-days)
 - [Does Trash count against my storage?](/locker/faq/organization#locker-trash-storage)
 
 ### Search
@@ -82,16 +110,36 @@ Jump to a category:
 
 ### Sharing with Users
 
-- [How do I share my emergency contacts with family?](/locker/faq/sharing#locker-share-family)
+- [How do I share items with family?](/locker/faq/sharing#locker-share-family)
 - [Can I share with non-Ente users?](/locker/faq/sharing#locker-share-non-users)
-- [What happens when I update a shared document?](/locker/faq/sharing#locker-update-shared)
+- [What happens when I update a shared item?](/locker/faq/sharing#locker-update-shared)
 - [What happens if I revoke access to shared content?](/locker/faq/sharing#locker-revoke-access)
+- [What happens if I delete a shared collection?](/locker/faq/sharing#locker-delete-shared-collection)
+- [What happens to shared items if the owner deletes their account?](/locker/faq/sharing#locker-owner-deletes-account)
 
 ### Public Links
 
 - [Are public links end-to-end encrypted?](/locker/faq/sharing#locker-public-link-encryption)
 - [Can I see who viewed my public link?](/locker/faq/sharing#locker-link-analytics)
 - [How does sharing work with encryption?](/locker/faq/sharing#locker-sharing-encryption)
+
+## Legacy
+
+[View complete Legacy FAQ →](/locker/faq/legacy)
+
+### General
+
+- [What is Legacy?](/locker/faq/legacy#locker-legacy-what-is)
+- [What happens after the waiting period?](/locker/faq/legacy#locker-legacy-waiting-period)
+- [Can I customize the waiting period?](/locker/faq/legacy#locker-legacy-custom-waiting-period)
+- [Can I have multiple trusted contacts?](/locker/faq/legacy#locker-legacy-multiple-contacts)
+- [What data can trusted contacts access?](/locker/faq/legacy#locker-legacy-data-access)
+
+### Setup and Recovery
+
+- [How do I add a trusted contact?](/locker/faq/legacy#locker-legacy-add-contact)
+- [How does a trusted contact initiate recovery?](/locker/faq/legacy#locker-legacy-initiate-recovery)
+- [Can I block a recovery attempt?](/locker/faq/legacy#locker-legacy-block-recovery)
 
 ## Security
 
@@ -115,19 +163,20 @@ Jump to a category:
 - [Can I change my PIN?](/locker/faq/security#locker-change-pin)
 - [Is lock screen available on all devices?](/locker/faq/security#locker-lock-screen-availability)
 
+### Account Management
+
+- [How do I delete my Ente account?](/locker/faq/security#locker-delete-account)
+- [Can I request my data under GDPR?](/locker/faq/security#locker-gdpr-request)
+
 ## Troubleshooting
 
 [View complete Troubleshooting FAQ →](/locker/faq/troubleshooting)
 
-### Sync Issues
-
-- [Why aren't my changes syncing?](/locker/faq/troubleshooting#locker-sync-issues)
-- [Why is sync slow?](/locker/faq/troubleshooting#locker-sync-slow)
-
 ### App Issues
 
 - [The app is crashing. What should I do?](/locker/faq/troubleshooting#locker-app-crash)
-- [Why isn't my document appearing in search?](/locker/faq/troubleshooting#locker-search-missing)
+- [Why isn't my item appearing in search?](/locker/faq/troubleshooting#locker-search-missing)
+- [Can I use Locker offline?](/locker/faq/troubleshooting#locker-offline)
 
 ### Getting Help
 
@@ -140,5 +189,6 @@ Jump to a category:
 
 - Try using the search function at the top of the page
 - Check the [Getting Started guide](/locker/getting-started/)
+- Check the [Family Setup guide](/locker/getting-started/family-setup)
 - Visit the [main Locker documentation](/locker/)
 - Contact [support@ente.io](mailto:support@ente.io)
