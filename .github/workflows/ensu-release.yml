@@ -121,6 +121,7 @@ jobs:
         env:
             HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
             HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+            HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
         defaults:
             run:
@@ -167,6 +168,7 @@ jobs:
               run: |
                   echo "HAS_ANDROID_SIGNING=${HAS_ANDROID_SIGNING}"
                   echo "HAS_PLAYSTORE_SERVICE_ACCOUNT=${HAS_PLAYSTORE_SERVICE_ACCOUNT}"
+                  echo "HAS_DISCORD_WEBHOOK=${HAS_DISCORD_WEBHOOK}"
 
             - name: Setup signing keys
               if: env.HAS_ANDROID_SIGNING == 'true'
@@ -226,7 +228,7 @@ jobs:
                   status: draft
 
             - name: Notify Discord
-              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != ''
+              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
               uses: sarisia/actions-status-discord@v1
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
