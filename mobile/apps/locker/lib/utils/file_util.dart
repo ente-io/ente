@@ -37,6 +37,12 @@ class FileUtil {
       }
     }
 
+    final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
+    if (await cachedDecryptedFile.exists()) {
+      await _launchFile(context, cachedDecryptedFile, file.displayName);
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
       context.l10n.downloading,

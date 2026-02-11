@@ -14,6 +14,24 @@ import 'package:path/path.dart' as p;
 
 final _logger = Logger("FileDownloader");
 
+String getCachedEncryptedFilePath(EnteFile file) {
+  final String cacheDir = Configuration.instance.getCacheDirectory();
+  return "$cacheDir${file.uploadedFileID}.encrypted";
+}
+
+String getCachedDecryptedFilePath(EnteFile file) {
+  final String cacheDir = Configuration.instance.getCacheDirectory();
+  final String extension = _safeExtension(file.displayName);
+  return "$cacheDir${file.uploadedFileID}.decrypted$extension";
+}
+
+String _safeExtension(String fileName) {
+  final ext = p.extension(p.basename(fileName));
+  if (ext.isEmpty) return '';
+  final sanitized = ext.replaceAll(RegExp(r'[\\/:*?"<>|]'), '');
+  return sanitized == '.' ? '' : sanitized;
+}
+
 Future<File?> downloadAndDecrypt(
   EnteFile file,
   Uint8List fileKey, {
@@ -25,10 +43,9 @@ Future<File?> downloadAndDecrypt(
   _logger.info('$logPrefix starting download');
 
   final String tempDir = Configuration.instance.getTempDirectory();
-  final String cacheDir = Configuration.instance.getCacheDirectory();
 
-  final String cachedEncryptedFilePath =
-      "$cacheDir${file.uploadedFileID}.encrypted";
+  final String cachedEncryptedFilePath = getCachedEncryptedFilePath(file);
+  final String cachedDecryptedFilePath = getCachedDecryptedFilePath(file);
   final String tempEncryptedFilePath =
       "$tempDir${file.uploadedFileID}.encrypted";
   String encryptedFilePath = tempEncryptedFilePath;
@@ -37,13 +54,25 @@ Future<File?> downloadAndDecrypt(
   bool downloadedFreshEncryptedFile = false;
 
   final String safeDisplayName = p.basename(file.displayName);
-  final String decryptedFilePath =
-      "$tempDir${file.uploadedFileID}_$safeDisplayName";
+  final String decryptedFilePath = shouldUseCache
+      ? cachedDecryptedFilePath
+      : "$tempDir${file.uploadedFileID}_$safeDisplayName";
   final File decryptedFile = File(decryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
 
   try {
+    if (shouldUseCache && await decryptedFile.exists()) {
+      final decryptedSize = await decryptedFile.length();
+      if (decryptedSize > 0) {
+        _logger.info('$logPrefix using cached decrypted file');
+        progressCallback?.call(decryptedSize, decryptedSize);
+        return decryptedFile;
+      } else {
+        await decryptedFile.delete();
+      }
+    }
+
     bool shouldDownload = true;
     if (shouldUseCache) {
       final cachedEncryptedFile = File(cachedEncryptedFilePath);
