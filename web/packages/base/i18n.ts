@@ -22,6 +22,7 @@ export const supportedLocales = [
     "en-US" /* English */,
     "fr-FR" /* French */,
     "de-DE" /* German */,
+    "ca-ES" /* Catalan */,
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
@@ -173,6 +174,8 @@ const closestSupportedLocale = (
             return "fr-FR";
         } else if (ls.startsWith("de")) {
             return "de-DE";
+        } else if (ls.startsWith("ca")) {
+            return "ca-ES";
         } else if (ls.startsWith("zh")) {
             return "zh-CN";
         } else if (ls.startsWith("nl")) {
