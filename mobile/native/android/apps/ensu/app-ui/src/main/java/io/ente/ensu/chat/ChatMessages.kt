@@ -155,7 +155,7 @@ internal fun MessageList(
             keepStreamingVisible = true
             lastStreamingParentForOutro = streamingParentId
         } else if (keepStreamingVisible) {
-            delay(900)
+            delay(1200)
             keepStreamingVisible = false
             lastStreamingParentForOutro = null
         }
@@ -701,7 +701,7 @@ private fun StreamingMessageBubble(
 
     val riveBoxWidth = 115.dp
     val riveBoxHeight = 52.5.dp
-    val riveOutroOverflowScale = 1.08f
+    val riveOutroOverflowScaleX = 1.08f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -718,9 +718,9 @@ private fun StreamingMessageBubble(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        val overflowScale = if (isGenerating) 1f else riveOutroOverflowScale
-                        scaleX = overflowScale
-                        scaleY = overflowScale
+                        val overflowScaleX = if (isGenerating) 1f else riveOutroOverflowScaleX
+                        scaleX = overflowScaleX
+                        scaleY = 1f
                         transformOrigin = TransformOrigin(0f, 0.5f)
                         clip = false
                     },
