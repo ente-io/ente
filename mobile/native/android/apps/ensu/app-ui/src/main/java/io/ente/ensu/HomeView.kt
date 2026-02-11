@@ -103,16 +103,16 @@ fun HomeView(
     var lastDeveloperTapAt by remember { mutableStateOf<Long?>(null) }
     var showDeveloperDialog by remember { mutableStateOf(false) }
 
-    val handleSignInRequest: () -> Unit = {
-        if (EnsuFeatureFlags.enableSignIn) {
-            isShowingAuth = true
-        } else {
+    val handleSignInRequest: () -> Unit = handle@{
+        if (!EnsuFeatureFlags.enableSignIn) {
             showSignInComingSoon = true
+            return@handle
         }
+        isShowingAuth = true
     }
 
     val handleDeveloperTap: () -> Unit = handle@{
-        if (!EnsuFeatureFlags.enableSignIn) return@handle
+        if (!EnsuFeatureFlags.enableDeveloperTools) return@handle
         // Don't allow switching endpoints for logged-in users.
         if (appState.auth.isLoggedIn) return@handle
 
@@ -332,8 +332,8 @@ fun HomeView(
 
     if (showSignInComingSoon) {
         ComingSoonDialog(
-            title = "Sign in",
-            message = "Coming soon",
+            title = "Coming soon",
+            message = "Sign in and cloud backup will be available in a future update.",
             onDismiss = { showSignInComingSoon = false }
         )
     }

@@ -75,12 +75,12 @@ fun AuthFlowScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    EnsuLogo(height = 20.dp)
+                    EnsuLogo(height = 23.dp)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         if (canGoBack) {
-                            backStack.removeLast()
+                            backStack.removeAt(backStack.lastIndex)
                         } else {
                             onDismiss()
                         }

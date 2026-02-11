@@ -73,7 +73,7 @@ struct SettingsView: View {
                     Button("Close") { dismiss() }
                 }
             }
-            .alert("Sign out of Ente SU?", isPresented: $showSignOutConfirm) {
+            .alert("Sign out of Ensu?", isPresented: $showSignOutConfirm) {
                 Button("Sign Out", role: .destructive) {
                     onSignOut()
                 }

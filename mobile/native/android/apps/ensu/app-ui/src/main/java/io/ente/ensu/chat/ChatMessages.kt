@@ -329,6 +329,8 @@ private fun DownloadOnboarding(
     onDownload: () -> Unit
 ) {
     val haptic = rememberEnsuHaptics()
+    val downloadAccent = EnsuColor.accentDark
+    val downloadButtonTextColor = Color.Black
     val sizeText = modelDownloadSizeBytes?.let { "Approx. ${formatBytes(it)}" } ?: "Approx. size varies by model"
     Box(
         modifier = modifier.fillMaxSize(),
@@ -363,7 +365,7 @@ private fun DownloadOnboarding(
                 if (clamped != null) {
                     LinearProgressIndicator(
                         progress = { clamped / 100f },
-                        color = EnsuColor.accent(),
+                        color = downloadAccent,
                         trackColor = EnsuColor.border(),
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
@@ -371,7 +373,7 @@ private fun DownloadOnboarding(
                     )
                 } else {
                     LinearProgressIndicator(
-                        color = EnsuColor.accent(),
+                        color = downloadAccent,
                         trackColor = EnsuColor.border(),
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
@@ -385,9 +387,9 @@ private fun DownloadOnboarding(
                         onDownload()
                     },
                     shape = RoundedCornerShape(EnsuCornerRadius.button.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = EnsuColor.accent())
+                    colors = ButtonDefaults.buttonColors(containerColor = downloadAccent)
                 ) {
-                    Text(text = "Download", style = EnsuTypography.body, color = EnsuColor.backgroundBase())
+                    Text(text = "Download", style = EnsuTypography.body, color = downloadButtonTextColor)
                 }
                 Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
                 Text(

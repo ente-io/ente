@@ -44,7 +44,7 @@ struct DownloadOnboardingView: View {
                     onDownload()
                 }
                 .font(EnsuTypography.body)
-                .foregroundStyle(EnsuColor.backgroundBase)
+                .foregroundStyle(Color.black)
                 .frame(maxWidth: 200)
                 .padding(.vertical, EnsuSpacing.md)
                 .background(EnsuColor.accent)
@@ -65,52 +65,61 @@ struct DownloadOnboardingView: View {
             let clamped = min(max(percent, 0), 100)
             ProgressView(value: Double(clamped), total: 100)
                 .progressViewStyle(.linear)
-                .tint(EnsuColor.accent)
+                .tint(EnsuColor.action)
                 .frame(maxWidth: 240)
         } else {
             ProgressView()
                 .progressViewStyle(.linear)
-                .tint(EnsuColor.accent)
+                .tint(EnsuColor.action)
                 .frame(maxWidth: 240)
         }
     }
 
 }
 
-struct ComingSoonSheet: View {
+struct SignInComingSoonDialog: View {
     let title: String
     let message: String
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: EnsuSpacing.lg) {
-            RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous)
-                .fill(EnsuColor.fillFaint)
-                .frame(height: 180)
-                .overlay(
-                    Text("Illustration")
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.textMuted)
-                )
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture { onDismiss() }
 
-            Text(title)
-                .font(EnsuTypography.large)
-                .foregroundStyle(EnsuColor.textPrimary)
+            VStack(spacing: EnsuSpacing.lg) {
+                Text(title)
+                    .font(EnsuTypography.large)
+                    .foregroundStyle(EnsuColor.textPrimary)
+                    .multilineTextAlignment(.center)
 
-            Text(message)
-                .font(EnsuTypography.body)
-                .foregroundStyle(EnsuColor.textMuted)
-                .multilineTextAlignment(.center)
+                Text(message)
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textMuted)
+                    .multilineTextAlignment(.center)
 
-            Button("Got it") {
-                onDismiss()
+                Button(action: {
+                    hapticTap()
+                    onDismiss()
+                }) {
+                    Text("Got it")
+                        .font(EnsuTypography.body)
+                        .foregroundStyle(Color.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, EnsuSpacing.md)
+                        .background(EnsuColor.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.button, style: .continuous))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(EnsuColor.accent)
+            .padding(EnsuSpacing.lg)
+            .frame(maxWidth: 360)
+            .background(EnsuColor.backgroundBase)
+            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
+            .padding(.horizontal, EnsuSpacing.pageHorizontal)
+            .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 4)
         }
-        .padding(EnsuSpacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(EnsuColor.backgroundBase)
     }
 }
 
@@ -128,7 +137,7 @@ struct AttachmentDownloadsSheet: View {
                 Spacer()
                 Button("Close", action: onDismiss)
                     .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.accent)
+                    .foregroundStyle(EnsuColor.action)
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.vertical, EnsuSpacing.sm)
@@ -262,7 +271,7 @@ struct ChatAppBar: View {
                         }) {
                             Text("Sign In")
                                 .font(EnsuTypography.small)
-                                .foregroundStyle(EnsuColor.accent)
+                                .foregroundStyle(EnsuColor.action)
                         }
                         .buttonStyle(.plain)
                     } else {
@@ -296,7 +305,7 @@ struct ChatAppBar: View {
             }
 
             if showBrand {
-                EnsuLogo(height: 20)
+                EnsuLogo(height: 21)
                     .padding(.horizontal, centerInset)
             } else {
                 Text(sessionTitle)
@@ -321,12 +330,12 @@ struct ModelProgressIndicator: View {
         if state.phase == .downloading {
             ProgressView(value: Double(clamped), total: 100)
                 .progressViewStyle(.circular)
-                .tint(EnsuColor.accent)
+                .tint(EnsuColor.action)
                 .frame(width: 16, height: 16)
         } else {
             ProgressView()
                 .progressViewStyle(.circular)
-                .tint(EnsuColor.accent)
+                .tint(EnsuColor.action)
                 .frame(width: 16, height: 16)
         }
     }

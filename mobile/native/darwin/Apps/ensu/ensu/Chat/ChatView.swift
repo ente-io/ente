@@ -175,11 +175,6 @@ struct ChatView: View {
                 onDismiss: { viewState.showAttachmentDownloads = false }
             )
         }
-        .sheet(isPresented: $viewState.showSignInComingSoon) {
-            ComingSoonSheet(title: "Sign in", message: "Coming soon") {
-                viewState.showSignInComingSoon = false
-            }
-        }
         .sheet(isPresented: $viewState.showModelSettings) {
             ModelSettingsView(embeddedInNavigation: true)
         }
@@ -225,6 +220,16 @@ struct ChatView: View {
                 Text("Input uses \(alert.inputTokens) tokens (budget \(alert.inputBudget)).")
             } else {
                 Text("")
+            }
+        }
+        .overlay {
+            if viewState.showSignInComingSoon {
+                SignInComingSoonDialog(
+                    title: "Coming Soon",
+                    message: "Sign in and cloud backup will be available in a future update."
+                ) {
+                    viewState.showSignInComingSoon = false
+                }
             }
         }
         .overlay(alignment: .bottom) {
@@ -482,7 +487,7 @@ struct ChatView: View {
     }
 
     private func handleDeveloperTap() {
-        guard EnsuFeatureFlags.enableSignIn else { return }
+        guard EnsuFeatureFlags.enableDeveloperTools else { return }
         // Don't allow switching endpoints for logged-in users.
         guard !appState.isLoggedIn else { return }
 

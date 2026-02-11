@@ -285,7 +285,7 @@ struct ModelSettingsView: View {
                 mmprojUrl = model.mmproj ?? ""
             }
             .font(EnsuTypography.small)
-            .foregroundStyle(EnsuColor.accent)
+            .foregroundStyle(EnsuColor.action)
         }
         .padding(EnsuSpacing.md)
         .background(EnsuColor.fillFaint)

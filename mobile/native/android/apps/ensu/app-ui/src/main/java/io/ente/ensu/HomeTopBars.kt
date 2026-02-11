@@ -49,7 +49,7 @@ internal fun EnsuTopBar(
     CenterAlignedTopAppBar(
         title = {
             if (showBrand) {
-                EnsuLogo(height = 20.dp)
+                EnsuLogo(height = 23.dp)
             } else {
                 Text(
                     text = titleText,
@@ -80,7 +80,7 @@ internal fun EnsuTopBar(
                     Spacer(modifier = Modifier.width(EnsuSpacing.md.dp))
                 }
                 TextButton(onClick = onSignIn) {
-                    Text(text = "Sign In", style = EnsuTypography.small, color = EnsuColor.accent())
+                    Text(text = "Sign In", style = EnsuTypography.small, color = EnsuColor.action())
                 }
             } else {
                 val hasPending = attachmentDownloads.any {
@@ -141,14 +141,14 @@ private fun ModelProgressIndicator(
         CircularProgressIndicator(
             progress = { clamped / 100f },
             modifier = indicatorModifier,
-            color = EnsuColor.accent(),
+            color = EnsuColor.action(),
             trackColor = EnsuColor.border(),
             strokeWidth = 2.dp
         )
     } else {
         CircularProgressIndicator(
             modifier = indicatorModifier,
-            color = EnsuColor.accent(),
+            color = EnsuColor.action(),
             trackColor = EnsuColor.border(),
             strokeWidth = 2.dp
         )

@@ -31,8 +31,11 @@ object EnsuColor {
     val fillFaintLight = Color(0xFFF0EBE4)
     val fillFaintDark = Color(0xFF1E1E1E)
 
-    val accentLight = Color(0xFF9A7E0A)
-    val accentDark = Color(0xFFFFD700)
+    val accentLight = Color(0xFFF4D93B)
+    val accentDark = Color(0xFFF4D93B)
+
+    val actionLight = textPrimaryLight
+    val actionDark = accentDark
 
     val userMessageTextLight = Color(0xFF555555)
     val userMessageTextDark = Color(0xFF999999)
@@ -64,6 +67,9 @@ object EnsuColor {
 
     @Composable
     fun accent(): Color = if (isSystemInDarkTheme()) accentDark else accentLight
+
+    @Composable
+    fun action(): Color = if (isSystemInDarkTheme()) actionDark else actionLight
 
     @Composable
     fun userMessageText(): Color = if (isSystemInDarkTheme()) userMessageTextDark else userMessageTextLight
@@ -162,7 +168,7 @@ fun EnsuTheme(content: @Composable () -> Unit) {
 
 private fun lightEnsuColorScheme(): ColorScheme = lightColorScheme(
     primary = EnsuColor.accentLight,
-    onPrimary = EnsuColor.backgroundBaseLight,
+    onPrimary = Color.Black,
 
     secondary = EnsuColor.fillFaintLight,
     onSecondary = EnsuColor.textPrimaryLight,
@@ -186,7 +192,7 @@ private fun lightEnsuColorScheme(): ColorScheme = lightColorScheme(
 
 private fun darkEnsuColorScheme(): ColorScheme = darkColorScheme(
     primary = EnsuColor.accentDark,
-    onPrimary = EnsuColor.backgroundBaseDark,
+    onPrimary = Color.Black,
 
     secondary = EnsuColor.fillFaintDark,
     onSecondary = EnsuColor.textPrimaryDark,

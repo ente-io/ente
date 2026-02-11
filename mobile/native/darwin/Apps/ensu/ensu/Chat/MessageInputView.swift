@@ -248,7 +248,7 @@ struct MessageInputView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 14, height: 14)
-                .foregroundStyle(EnsuColor.accent)
+                .foregroundStyle(EnsuColor.action)
 
             Text("Editing:")
                 .font(EnsuTypography.small)

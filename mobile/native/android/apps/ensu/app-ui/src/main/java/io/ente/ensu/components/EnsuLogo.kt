@@ -37,7 +37,7 @@ fun EnsuLogo(
             contentDescription = "Ensu",
             modifier = Modifier
                 .height(imageHeight)
-                .aspectRatio(135f / 40f),
+                .aspectRatio(906f / 255f),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(tint)
         )

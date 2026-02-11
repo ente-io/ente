@@ -127,7 +127,7 @@ struct DownloadToastView: View {
                         onRetry()
                     }
                     .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.accent)
+                    .foregroundStyle(EnsuColor.action)
                 }
             }
         }

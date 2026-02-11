@@ -277,7 +277,7 @@ private fun EditBanner(message: ChatMessage, onCancelEdit: () -> Unit) {
             Icon(
                 painter = painterResource(HugeIcons.Edit01Icon),
                 contentDescription = null,
-                tint = EnsuColor.accent(),
+                tint = EnsuColor.action(),
                 modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))

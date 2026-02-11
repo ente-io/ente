@@ -250,7 +250,7 @@ fun TextLink(text: String, onClick: () -> Unit) {
         Text(
             text = text,
             style = EnsuTypography.small,
-            color = EnsuColor.accent()
+            color = EnsuColor.action()
         )
     }
 }

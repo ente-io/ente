@@ -9,6 +9,6 @@ struct RootView: View {
             HomeView()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .tint(EnsuColor.accent)
+        .tint(EnsuColor.action)
     }
 }
