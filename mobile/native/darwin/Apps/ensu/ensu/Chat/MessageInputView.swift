@@ -162,7 +162,7 @@ struct MessageInputView: View {
                         if sendIcon == "StopIcon" {
                             ZStack {
                                 Circle()
-                                    .fill(EnsuColor.textPrimary)
+                                    .fill(Color.white)
                                     .frame(width: attachmentIconSize + 6, height: attachmentIconSize + 6)
                                 Image(sendIcon)
                                     .resizable()

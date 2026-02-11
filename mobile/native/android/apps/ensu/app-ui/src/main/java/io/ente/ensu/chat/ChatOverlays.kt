@@ -21,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -104,7 +105,7 @@ internal fun DownloadToastOverlay(
                     Box(
                         modifier = Modifier
                             .size(22.dp)
-                            .background(EnsuColor.textPrimary(), CircleShape),
+                            .background(Color.White, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
