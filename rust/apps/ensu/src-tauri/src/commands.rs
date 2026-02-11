@@ -86,15 +86,27 @@ fn default_llm_threads() -> i32 {
 
 #[cfg(target_os = "macos")]
 fn macos_total_memory_bytes() -> Option<u64> {
-    let output = Command::new("sysctl")
-        .args(["-n", "hw.memsize"])
-        .output()
-        .ok()?;
-    if !output.status.success() {
-        return None;
+    for candidate in ["/usr/sbin/sysctl", "/sbin/sysctl", "sysctl"] {
+        let output = match Command::new(candidate)
+            .args(["-n", "hw.memsize"])
+            .output()
+        {
+            Ok(output) => output,
+            Err(_) => continue,
+        };
+
+        if !output.status.success() {
+            continue;
+        }
+
+        if let Ok(text) = String::from_utf8(output.stdout) {
+            if let Ok(bytes) = text.trim().parse::<u64>() {
+                return Some(bytes);
+            }
+        }
     }
-    let text = String::from_utf8(output.stdout).ok()?;
-    text.trim().parse::<u64>().ok()
+
+    None
 }
 
 #[cfg(not(target_os = "macos"))]

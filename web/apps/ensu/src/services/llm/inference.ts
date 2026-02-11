@@ -72,7 +72,10 @@ export interface InferenceBackend {
 
 const isTauriRuntime = () =>
     typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_IPC__" in window);
+    ("__TAURI__" in window ||
+        "__TAURI_IPC__" in window ||
+        "__TAURI_INTERNALS__" in window ||
+        "__TAURI_METADATA__" in window);
 
 export const createInferenceBackend = (
     options: InferenceOptions = {},

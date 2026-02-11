@@ -347,10 +347,12 @@ export class LlmProvider {
             const platform = info.platform?.toLowerCase();
             const totalMemoryBytes = info.totalMemoryBytes ?? 0;
 
-            if (
-                platform === "macos" &&
-                totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES
-            ) {
+            const isMacPlatform =
+                platform === "macos" ||
+                platform === "darwin" ||
+                platform === "mac";
+
+            if (isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES) {
                 this.defaultModel = HIGH_RAM_MAC_MODEL;
             }
 
