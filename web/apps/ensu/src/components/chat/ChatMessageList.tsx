@@ -9,6 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { MarkdownRenderer } from "components/MarkdownRenderer";
+import GeneratingRiveIndicator from "components/chat/GeneratingRiveIndicator";
 import React, { memo, useCallback, useMemo } from "react";
 import {
     STREAMING_SELECTION_KEY,
@@ -270,34 +271,28 @@ const MessageRow = memo(
                             }}
                         >
                             {isStreaming ? (
-                                showLoadingPlaceholder ? (
-                                    <Typography
-                                        variant="message"
-                                        sx={{
-                                            ...assistantTextSx,
-                                            color: "text.muted",
-                                        }}
-                                    >
-                                        {loadingPhrase ??
-                                            "Generating your reply"}
+                                <Stack
+                                    sx={{
+                                        gap: showLoadingPlaceholder ? 0 : 0.75,
+                                        alignItems: "flex-start",
+                                        width: "100%",
+                                    }}
+                                >
+                                    <GeneratingRiveIndicator
+                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
+                                    />
+                                    {showLoadingPlaceholder ? null : (
                                         <Box
-                                            component="span"
-                                            sx={{ color: "text.muted" }}
+                                            sx={assistantMarkdownSx}
+                                            className="ensu-markdown-streaming"
                                         >
-                                            {dots}
+                                            <MarkdownRenderer
+                                                content={displayText}
+                                                className="markdown-content"
+                                            />
                                         </Box>
-                                    </Typography>
-                                ) : (
-                                    <Box
-                                        sx={assistantMarkdownSx}
-                                        className="ensu-markdown-streaming"
-                                    >
-                                        <MarkdownRenderer
-                                            content={displayText}
-                                            className="markdown-content"
-                                        />
-                                    </Box>
-                                )
+                                    )}
+                                </Stack>
                             ) : (
                                 <Box sx={assistantMarkdownSx}>
                                     <MarkdownRenderer
