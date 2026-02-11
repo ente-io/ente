@@ -52,21 +52,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import app.rive.runtime.kotlin.RiveAnimationView
-import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
-import app.rive.runtime.kotlin.core.Fit
-import app.rive.runtime.kotlin.core.Loop
-import app.rive.runtime.kotlin.core.Rive
-import io.ente.ensu.R
 import io.ente.ensu.components.BranchSwitcher
+import io.ente.ensu.components.EnsuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -682,7 +675,7 @@ private fun StreamingMessageBubble(text: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        GeneratingAnimation(
+        EnsuRiveAnimation(
             modifier = Modifier
                 .wrapContentSize(align = Alignment.TopStart)
                 .width(92.dp)
@@ -694,29 +687,6 @@ private fun StreamingMessageBubble(text: String) {
             MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
     }
-}
-
-@Composable
-private fun GeneratingAnimation(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val riveView = remember {
-        Rive.init(context.applicationContext)
-        RiveAnimationView(context).apply {
-            setRiveResource(
-                resId = R.raw.ensu,
-                autoplay = true,
-                fit = Fit.CONTAIN,
-                alignment = RiveAlignment.CENTER_LEFT,
-                loop = Loop.LOOP
-            )
-        }
-    }
-
-    AndroidView(
-        modifier = modifier,
-        factory = { riveView },
-        update = { }
-    )
 }
 
 @Composable

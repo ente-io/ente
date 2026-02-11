@@ -38,19 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import app.rive.runtime.kotlin.RiveAnimationView
-import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
-import app.rive.runtime.kotlin.core.Fit
-import app.rive.runtime.kotlin.core.Loop
-import app.rive.runtime.kotlin.core.Rive
-import io.ente.ensu.R
+import io.ente.ensu.components.EnsuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
@@ -149,10 +142,10 @@ private fun DrawerHeader(
                 modifier = Modifier
                     .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
             ) {
-                DrawerEnsuAnimation(
+                EnsuRiveAnimation(
                     modifier = Modifier
-                        .width(104.dp)
-                        .height(27.dp)
+                        .width(124.dp)
+                        .height(32.dp)
                 )
             }
 
@@ -176,29 +169,6 @@ private fun DrawerHeader(
             modifier = Modifier.fillMaxWidth()
         )
     }
-}
-
-@Composable
-private fun DrawerEnsuAnimation(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val riveView = remember {
-        Rive.init(context.applicationContext)
-        RiveAnimationView(context).apply {
-            setRiveResource(
-                resId = R.raw.ensu,
-                autoplay = true,
-                fit = Fit.CONTAIN,
-                alignment = RiveAlignment.CENTER_LEFT,
-                loop = Loop.LOOP
-            )
-        }
-    }
-
-    AndroidView(
-        modifier = modifier,
-        factory = { riveView },
-        update = { }
-    )
 }
 
 @Composable
