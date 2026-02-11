@@ -164,7 +164,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
           },
         ),
         title: Text(
-          AppLocalizations.of(context).passkey,
+          AppLocalizations.of(context).passkeyAuthTitle,
           style: textTheme.largeBold,
         ),
         centerTitle: true,
@@ -185,6 +185,20 @@ class _PasskeyPageState extends State<PasskeyPage> {
               style: textTheme.body.copyWith(color: colorScheme.textMuted),
               textAlign: TextAlign.center,
             ),
+            if (widget.totp2FASessionID.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.link,
+                labelText: context.l10n.use2FAInstead,
+                buttonSize: ButtonSizeV2.small,
+                onTap: () async {
+                  await routeToPage(
+                    context,
+                    TwoFactorAuthenticationPage(widget.totp2FASessionID),
+                  );
+                },
+              ),
+            ],
             const Spacer(),
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
@@ -206,23 +220,6 @@ class _PasskeyPageState extends State<PasskeyPage> {
                 }
               },
             ),
-            if (widget.totp2FASessionID.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.link,
-                labelText: context.l10n.loginWithTOTP,
-                buttonSize: ButtonSizeV2.small,
-                onTap: () async {
-                  // ignore: unawaited_futures
-                  routeToPage(
-                    context,
-                    TwoFactorAuthenticationPage(
-                      widget.totp2FASessionID,
-                    ),
-                  );
-                },
-              ),
-            ],
             const SizedBox(height: 12),
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.link,

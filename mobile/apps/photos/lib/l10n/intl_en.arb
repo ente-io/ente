@@ -1401,6 +1401,7 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
+  "use2FAInstead": "Use 2FA instead",
   "loginWithTOTP": "Login with TOTP",
   "passKeyPendingVerification": "Verification is still pending",
   "loginSessionExpired": "Session expired",
