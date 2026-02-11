@@ -673,47 +673,37 @@ private fun StreamingMessageBubble(text: String) {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = 0.9f,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ),
         horizontalAlignment = Alignment.Start
     ) {
-        val isOnlyLoader = text.isBlank()
-        Column(
-            modifier = Modifier
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = 0.9f,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                )
-                .padding(
-                    start = if (isOnlyLoader) 0.dp else EnsuSpacing.sm.dp,
-                    end = if (isOnlyLoader) 0.dp else EnsuSpacing.sm.dp,
-                    top = if (isOnlyLoader) 0.dp else EnsuSpacing.md.dp,
-                    bottom = if (isOnlyLoader) 0.dp else EnsuSpacing.md.dp
-                )
-        ) {
-            if (isOnlyLoader) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp),
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    GeneratingAnimation(
-                        modifier = Modifier
-                            .width(92.dp)
-                            .height(42.dp)
-                    )
-                }
-            } else {
-                GeneratingAnimation(
-                    modifier = Modifier
-                        .width(92.dp)
-                        .height(42.dp)
-                )
-                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+        if (text.isNotBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
+            ) {
                 MarkdownView(markdown = text, enableSelection = false, trailingCursor = showCursor)
             }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            GeneratingAnimation(
+                modifier = Modifier
+                    .width(92.dp)
+                    .height(42.dp)
+            )
         }
     }
 }
