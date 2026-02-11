@@ -48,7 +48,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.release
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -71,6 +71,13 @@ android {
         fdroid {
             dimension "default"
             applicationIdSuffix ".fdroid"
+        }
+    }
+    android.applicationVariants.all { variant ->
+        if (variant.flavorName == "fdroid") {
+            variant.outputs.all { output ->
+                output.outputFileName = "app-fdroid-release.apk"
+            }
         }
     }
 }
