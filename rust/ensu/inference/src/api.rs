@@ -200,8 +200,8 @@ fn drain_utf8(pending: &mut Vec<u8>) -> String {
             Err(err) => {
                 let valid_up_to = err.valid_up_to();
                 if valid_up_to > 0 {
-                    let valid =
-                        std::str::from_utf8(&pending[..valid_up_to]).expect("valid UTF-8 prefix");
+                    let valid = std::str::from_utf8(&pending[..valid_up_to])
+                        .expect("valid UTF-8 prefix");
                     output.push_str(valid);
                     pending.drain(..valid_up_to);
                 }
@@ -255,10 +255,7 @@ impl StreamDecoder {
 
     fn flush(&mut self) -> DecodeStep {
         if self.pending_bytes.is_empty() {
-            return DecodeStep {
-                text: None,
-                stop: false,
-            };
+            return DecodeStep { text: None, stop: false };
         }
         let piece = String::from_utf8_lossy(&self.pending_bytes).to_string();
         self.pending_bytes.clear();
@@ -267,10 +264,7 @@ impl StreamDecoder {
 
     fn push_text(&mut self, piece: String) -> DecodeStep {
         if piece.is_empty() {
-            return DecodeStep {
-                text: None,
-                stop: false,
-            };
+            return DecodeStep { text: None, stop: false };
         }
 
         let prev_len = self.generated_text.len();
@@ -284,11 +278,7 @@ impl StreamDecoder {
                 let new_piece = self.generated_text[prev_len..stop_index].to_string();
                 self.generated_text.truncate(stop_index);
                 return DecodeStep {
-                    text: if new_piece.is_empty() {
-                        None
-                    } else {
-                        Some(new_piece)
-                    },
+                    text: if new_piece.is_empty() { None } else { Some(new_piece) },
                     stop: true,
                 };
             }
