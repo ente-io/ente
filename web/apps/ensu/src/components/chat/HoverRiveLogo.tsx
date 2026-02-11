@@ -88,7 +88,6 @@ const HoverRiveLogo = memo(
         const startAnimation = () => {
             setIsHovering(true);
             try {
-                riveRef.current?.reset?.();
                 riveRef.current?.play?.();
             } catch {
                 // noop
@@ -99,13 +98,13 @@ const HoverRiveLogo = memo(
             setIsHovering(false);
             try {
                 riveRef.current?.pause?.();
-                riveRef.current?.stop?.();
             } catch {
                 // noop
             }
         };
 
-        const showRive = isHovering && isReady && !failedToLoad;
+        const canShowRive = isReady && !failedToLoad;
+        const showRive = isHovering && canShowRive;
 
         return (
             <Box
@@ -130,7 +129,7 @@ const HoverRiveLogo = memo(
                         height: "100%",
                         display: "block",
                         opacity: showRive ? 0 : 1,
-                        transition: "opacity 120ms ease-out",
+                        transition: "opacity 160ms ease-out",
                     }}
                 />
                 <Box
@@ -144,7 +143,12 @@ const HoverRiveLogo = memo(
                         inset: 0,
                         width: "100%",
                         height: "100%",
-                        display: showRive ? "block" : "none",
+                        display: "block",
+                        opacity: showRive ? 1 : 0,
+                        transition: "opacity 160ms ease-out",
+                        transform: "scale(1.08)",
+                        transformOrigin: "50% 50%",
+                        pointerEvents: "none",
                     }}
                 />
             </Box>
