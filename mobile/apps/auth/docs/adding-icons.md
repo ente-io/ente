@@ -23,6 +23,6 @@ This JSON file contains the following attributes:
 | `title` | Name of the service. | Yes |
 | `slug` | If the icon's SVG file has a name different from the `title` | No |
 | `hex` | Color code for the icon  | No |
-| `altNames` | If the same service goes by different names or has different instances (eg. Mastodon) | No |
+| `altNames` | If the same service goes by different names or has different instances (e.g. Mastodon) | No |
 
 Here is an [example PR](https://github.com/ente-io/ente/pull/9121).
