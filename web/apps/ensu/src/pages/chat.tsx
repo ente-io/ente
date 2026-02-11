@@ -9,7 +9,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { save } from "@tauri-apps/api/dialog";
+import { open as openFileDialog, save } from "@tauri-apps/api/dialog";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -141,8 +141,20 @@ const MEDIA_MARKER = "<__media__>";
 const IMAGE_TOKEN_ESTIMATE = 768;
 const MAX_INFERENCE_IMAGE_PIXELS = 3500;
 const INFERENCE_IMAGE_QUALITY = 0.85;
-const IMAGE_SELECTOR_ACCEPT =
-    ".png,.jpg,.jpeg,.webp,.gif,.bmp,.heic,.heif,.avif";
+const IMAGE_SELECTOR_EXTENSIONS = [
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif",
+    "bmp",
+    "heic",
+    "heif",
+    "avif",
+] as const;
+const IMAGE_SELECTOR_ACCEPT = IMAGE_SELECTOR_EXTENSIONS.map(
+    (ext) => `.${ext}`,
+).join(",");
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -3376,19 +3388,84 @@ const Page: React.FC = () => {
         onCancel: handleImageCancel,
     });
 
+    const openTauriImageSelector = useCallback(async () => {
+        closeAttachmentMenu();
+        try {
+            const selection = await openFileDialog({
+                directory: false,
+                multiple: true,
+                filters: [
+                    {
+                        name: "Images",
+                        extensions: [...IMAGE_SELECTOR_EXTENSIONS],
+                    },
+                ],
+            });
+            if (!selection) {
+                handleImageCancel();
+                return;
+            }
+            const selectedPaths = Array.isArray(selection)
+                ? selection
+                : [selection];
+            if (selectedPaths.length === 0) {
+                handleImageCancel();
+                return;
+            }
+
+            const { readBinaryFile } = await import("@tauri-apps/api/fs");
+            const files = await Promise.all(
+                selectedPaths.map(async (selectedPath) => {
+                    const normalized = selectedPath.replace(/\\/g, "/");
+                    const name =
+                        normalized.split("/").pop()?.replace(/\0/g, "") ||
+                        "image";
+                    const bytes = await readBinaryFile(selectedPath);
+                    return new File([bytes], name, {
+                        type: inferImageMime(name),
+                    });
+                }),
+            );
+
+            if (files.length > 0) {
+                handleImageSelect(files);
+            } else {
+                handleImageCancel();
+            }
+        } catch (error) {
+            log.error("Failed to open image picker", error);
+            showMiniDialog({
+                title: "Image picker unavailable",
+                message: "Could not open the image picker. Please try again.",
+            });
+        }
+    }, [
+        closeAttachmentMenu,
+        handleImageCancel,
+        handleImageSelect,
+        inferImageMime,
+        showMiniDialog,
+    ]);
+
     const openAttachmentMenu = useCallback(
         (_event: React.MouseEvent<HTMLElement>) => {
             closeAttachmentMenu();
             if (showImageAttachment) {
-                openImageSelector();
+                if (isTauriRuntime) {
+                    void openTauriImageSelector();
+                } else {
+                    openImageSelector();
+                }
                 return;
             }
             openDocumentSelector();
         },
         [
             closeAttachmentMenu,
+            isTauriRuntime,
             openDocumentSelector,
             openImageSelector,
+            openTauriImageSelector,
             showImageAttachment,
         ],
     );
