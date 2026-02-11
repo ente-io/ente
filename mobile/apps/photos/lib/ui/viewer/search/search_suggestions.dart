@@ -39,6 +39,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   final Map<_SearchResultsSection, List<SearchResult>> _sectionedResults = {};
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
+  late final VoidCallback _searchResultsStreamNotifierListener;
 
   ///This is the interval at which the queue is checked for new events and
   ///the search result widgets are generated from the queue.
@@ -47,7 +48,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   @override
   void initState() {
     super.initState();
-    SearchWidgetState.searchResultsStreamNotifier.addListener(() {
+    _searchResultsStreamNotifierListener = () {
       IndexOfStackNotifier().searchState = SearchState.searching;
       final resultsStream = SearchWidgetState.searchResultsStreamNotifier.value;
 
@@ -80,7 +81,10 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       );
 
       generateResultWidgetsInIntervalsFromQueue();
-    });
+    };
+    SearchWidgetState.searchResultsStreamNotifier.addListener(
+      _searchResultsStreamNotifierListener,
+    );
   }
 
   void releaseResources() {
@@ -109,6 +113,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   @override
   void dispose() {
     releaseResources();
+    SearchWidgetState.searchResultsStreamNotifier.removeListener(
+      _searchResultsStreamNotifierListener,
+    );
     super.dispose();
   }
 

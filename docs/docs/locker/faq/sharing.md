@@ -31,7 +31,7 @@ opened in any web browser:
 3. Tap **Share link**
 4. Copy and share the link
 
-Note: Collections cannot be shared via public links—only with other Ente users.
+Note: Collections cannot be shared via public links - only with other Ente users.
 
 Learn more about [Public links](/locker/features/sharing/public-links).
 
@@ -83,7 +83,7 @@ When you delete a collection you've shared with others:
   collection. Other users and the owner retain access.
 
 Items in a deleted shared collection follow the same rules as regular
-collections—you can choose to keep or delete the items when deleting the
+collections - you can choose to keep or delete the items when deleting the
 collection.
 
 ### What happens to shared items if the owner deletes their account? {#locker-owner-deletes-account}

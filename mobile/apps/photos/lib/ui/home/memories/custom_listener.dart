@@ -144,6 +144,14 @@ class MemoriesPointerGestureListenerState
     );
   }
 
+  @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    _activePointers.removeListener(_activatePointerListener);
+    _activePointers.dispose();
+    super.dispose();
+  }
+
   void _reset() {
     hasPointerMoved = false;
   }

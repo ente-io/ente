@@ -1,12 +1,12 @@
 import "dart:async";
 
 import "package:computer/computer.dart";
-import "package:dio/dio.dart";
 import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
+import "package:photos/gateways/files/file_data_gateway.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/enc_file_data.dart";
@@ -19,11 +19,11 @@ import "package:shared_preferences/shared_preferences.dart";
 class FileDataService {
   static final Computer _computer = Computer.shared();
   final _logger = Logger("FileDataService");
-  final Dio _dio;
   final SharedPreferences _prefs;
+  final FileDataGateway _gateway;
   late Map<int, PreviewInfo> previewIds;
 
-  FileDataService(this._prefs, this._dio) {
+  FileDataService(this._prefs, this._gateway) {
     _logger.info("FileDataService constructor called");
     previewIds = <int, PreviewInfo>{};
   }
@@ -47,14 +47,11 @@ class FileDataService {
     );
 
     try {
-      final _ = await _dio.put(
-        "/files/data",
-        data: {
-          "fileID": file.uploadedFileID!,
-          "type": data.type.toJson(),
-          "encryptedData": encryptionResult.encData,
-          "decryptionHeader": encryptionResult.header,
-        },
+      await _gateway.putFileData(
+        fileID: file.uploadedFileID!,
+        type: data.type.toJson(),
+        encryptedData: encryptionResult.encData,
+        decryptionHeader: encryptionResult.header,
       );
     } catch (e, s) {
       _logger.severe("putDerivedMetaData failed", e, s);
@@ -67,16 +64,13 @@ class FileDataService {
     DataType type = DataType.mlData,
   }) async {
     try {
-      final res = await _dio.post(
-        "/files/data/fetch",
-        data: {
-          "fileIDs": fileIds.toList(),
-          "type": type.toJson(),
-        },
+      final res = await _gateway.fetchFileData(
+        fileIDs: fileIds.toList(),
+        type: type.toJson(),
       );
-      final remoteEntries = res.data['data'] as List;
-      final pendingIndexFiles = res.data['pendingIndexFileIDs'] as List;
-      final errFileIds = res.data['errFileIDs'] as List;
+      final remoteEntries = res['data'] as List;
+      final pendingIndexFiles = res['pendingIndexFileIDs'] as List;
+      final errFileIds = res['errFileIDs'] as List;
 
       final List<EncryptedFileData> encFileData = <EncryptedFileData>[];
       for (var entry in remoteEntries) {
@@ -131,14 +125,8 @@ class FileDataService {
       bool hasMoreData = false;
       do {
         final lastTime = _prefs.getInt("fd.lastSyncTime") ?? 0;
-        final res = await _dio.post(
-          "/files/data/status-diff",
-          data: {
-            "lastUpdatedAt": lastTime,
-          },
-        );
-        final r = res.data;
-        final data = (r["diff"] ?? []) as List;
+        final res = await _gateway.getStatusDiff(lastUpdatedAt: lastTime);
+        final data = (res["diff"] ?? []) as List;
         final List<FDStatus> result = [];
         int maxUpdatedAt = lastTime;
         for (var entry in data) {

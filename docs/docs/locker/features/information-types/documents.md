@@ -27,9 +27,8 @@ to keep safe and accessible.
 3. Select **Document**
 4. Choose a file from your device
 5. Add a title for the document
-6. Add notes if needed (optional)
-7. Select one or more collections
-8. Tap **Save**
+6. Select one or more collections
+7. Tap **Save**
 
 ## Supported file formats
 
@@ -53,7 +52,6 @@ on your device for viewing and remain encrypted in storage.
 Each document can include:
 
 - **Title**: A descriptive name for easy identification
-- **Notes**: Additional context or information about the document
 - **Collection**: Organize with related items
 
 ### Search
@@ -95,8 +93,6 @@ Uploaded documents count toward your storage quota. Consider:
 ## Best practices
 
 - **Use descriptive titles**: Make documents easy to find with clear names
-- **Add context in notes**: Include expiration dates, account numbers, or other
-  relevant details
 - **Organize with collections**: Group related documents together
 - **Keep originals safe**: Locker is for secure backup, not a replacement for
   physical document storage

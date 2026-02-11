@@ -477,6 +477,7 @@ class ClusterFeedbackService<T> {
   Future<bool> checkAndDoAutomaticMerges(
     PersonEntity p, {
     required String personClusterID,
+    bool firePeopleChangedEvent = true,
   }) async {
     final faceIDs = await mlDataDB.getFaceIDsForCluster(personClusterID);
 
@@ -516,7 +517,9 @@ class ClusterFeedbackService<T> {
       );
     }
 
-    Bus.instance.fire(PeopleChangedEvent());
+    if (firePeopleChangedEvent) {
+      Bus.instance.fire(PeopleChangedEvent());
+    }
 
     return true;
   }
@@ -550,14 +553,20 @@ class ClusterFeedbackService<T> {
     );
   }
 
-  Future<void> ignoreCluster(String clusterID) async {
+  Future<void> ignoreCluster(
+    String clusterID, {
+    bool firePeopleChangedEvent = true,
+  }) async {
     final ignoredPerson = await PersonService.instance
         .addPerson(name: '', clusterID: clusterID, isHidden: true);
-    final mergedAndFired = await checkAndDoAutomaticMerges(
+    final merged = await checkAndDoAutomaticMerges(
       ignoredPerson,
       personClusterID: clusterID,
+      firePeopleChangedEvent: firePeopleChangedEvent,
     );
-    if (!mergedAndFired) Bus.instance.fire(PeopleChangedEvent());
+    if (!merged && firePeopleChangedEvent) {
+      Bus.instance.fire(PeopleChangedEvent());
+    }
   }
 
   Future<List<(String, int)>> checkForMixedClusters() async {

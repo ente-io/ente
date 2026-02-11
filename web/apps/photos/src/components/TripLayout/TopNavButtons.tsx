@@ -92,7 +92,7 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                                   )
                     }
                 >
-                    {enableJoin ? t("join_album") : t("get_ente")}
+                    {enableJoin ? t("join_album") : t("try_ente")}
                 </SignUpButton>
             </ButtonContainer>
 

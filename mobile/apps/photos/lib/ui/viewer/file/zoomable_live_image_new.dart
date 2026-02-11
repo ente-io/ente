@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
-import 'package:motion_photos/motion_photos.dart';
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
@@ -14,6 +13,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
@@ -196,20 +196,23 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       return null;
     });
     if (imageFile != null) {
-      final motionPhoto = MotionPhotos(imageFile.path);
-      final index = await motionPhoto.getMotionVideoIndex();
+      final index = await getMotionVideoIndex(filePath: imageFile.path);
       if (index != null) {
         // Update the metadata if it is not updated
         if (!_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
           FileMagicService.instance.updatePublicMagicMetadata(
             [_enteFile],
-            {motionVideoIndexKey: index.start},
+            {motionVideoIndexKey: index.start.toInt()},
           ).ignore();
         }
-        return motionPhoto.getMotionVideoFile(
-          await getTemporaryDirectory(),
+        final outputPath = await extractMotionVideoFile(
+          filePath: imageFile.path,
+          destinationDirectory: (await getTemporaryDirectory()).path,
           index: index,
         );
+        if (outputPath != null) {
+          return File(outputPath);
+        }
       } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
         _logger.info('Incorrectly tagged as MP, reset tag ${_enteFile.tag}');
         FileMagicService.instance.updatePublicMagicMetadata(

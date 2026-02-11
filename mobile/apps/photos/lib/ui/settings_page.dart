@@ -14,6 +14,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
@@ -89,11 +90,17 @@ class _SettingsBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleBar(context, colorScheme),
-                const SizedBox(height: 16),
-                _buildEmailHeader(context, colorScheme, textTheme),
-                const SizedBox(height: 16),
+                _buildEmailHeaderSection(context, colorScheme, textTheme),
                 if (showLoginEntry) ...[
-                  _buildLoginCard(context, colorScheme),
+                  OfflineSettingsBanner(
+                    onGetStarted: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LandingPageWidget(),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isOfflineMode) ...[
@@ -232,6 +239,30 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
+  Widget _buildEmailHeaderSection(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return AnimatedBuilder(
+      animation: emailNotifier,
+      builder: (BuildContext context, Widget? child) {
+        final email = emailNotifier.value ?? "";
+        if (email.isEmpty) {
+          return const SizedBox(height: 8);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            _buildEmailHeader(context, colorScheme, textTheme),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildIconWidget(
     List<List<dynamic>> icon,
     EnteColorScheme colorScheme, {
@@ -257,23 +288,6 @@ class _SettingsBody extends StatelessWidget {
       trailingIconIsMuted: true,
       onTap: () async {
         await routeToPage(context, const AccountSettingsPage());
-      },
-    );
-  }
-
-  Widget _buildLoginCard(BuildContext context, EnteColorScheme colorScheme) {
-    final title =
-        "${AppLocalizations.of(context).existingUser} / ${AppLocalizations.of(context).newToEnte}";
-    return MenuItemWidgetNew(
-      title: title,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedUser,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const LandingPageWidget());
       },
     );
   }

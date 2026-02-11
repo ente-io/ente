@@ -1,5 +1,3 @@
-import "dart:math";
-
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
@@ -72,52 +70,48 @@ class AddPhotosPhotoWidget extends StatelessWidget {
     hiddenCollectionIDs.add(collection.id);
 
     return Padding(
-      padding: const EdgeInsets.all(0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: min(428, MediaQuery.of(context).size.width),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _AppBarWithBoundary(
-                          child: BottomOfTitleBarWidget(
-                            title: TitleBarTitleWidget(
-                              title: AppLocalizations.of(context).addMore,
-                            ),
-                            caption:
-                                AppLocalizations.of(context).selectItemsToAdd,
-                            showCloseButton: true,
-                          ),
-                        ),
-                        Expanded(
-                          child: DelayedGallery(
-                            hiddenCollectionIDs: hiddenCollectionIDs,
-                            selectedFiles: selectedFiles,
-                          ),
-                        ),
-                      ],
+                  _AppBarWithBoundary(
+                    child: BottomOfTitleBarWidget(
+                      title: TitleBarTitleWidget(
+                        title: AppLocalizations.of(context).addMore,
+                      ),
+                      caption: AppLocalizations.of(context).selectItemsToAdd,
+                      showCloseButton: true,
                     ),
                   ),
-                  SafeArea(
-                    child: Container(
+                  Expanded(
+                    child: DelayedGallery(
+                      hiddenCollectionIDs: hiddenCollectionIDs,
+                      selectedFiles: selectedFiles,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: getEnteColorScheme(context).strokeFaint,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 428),
+                    child: Padding(
                       //inner stroke of 1pt + 15 pts of top padding = 16 pts
                       padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
-                          ),
-                        ),
-                      ),
                       child: Column(
                         children: [
                           ValueListenableBuilder(
@@ -164,11 +158,11 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
