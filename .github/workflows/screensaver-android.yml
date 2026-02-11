@@ -1,0 +1,85 @@
+name: "Screensaver Android"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "mobile/native/android/apps/screensaver/**"
+      - "rust/uniffi/core/**"
+      - "rust/core/**"
+      - ".github/workflows/screensaver-android.yml"
+  push:
+    branches:
+      - main
+    tags:
+      - "screensaver-v*"
+    paths:
+      - "mobile/native/android/apps/screensaver/**"
+      - "rust/uniffi/core/**"
+      - "rust/core/**"
+      - ".github/workflows/screensaver-android.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: ${{ !startsWith(github.ref, 'refs/tags/screensaver-v') }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/native/android/apps/screensaver
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Validate build
+        run: ./gradlew lint assembleRelease -x buildEnteCore
+
+  release:
+    if: ${{ startsWith(github.ref, 'refs/tags/screensaver-v') }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/native/android/apps/screensaver
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease -x buildEnteCore
+
+      - name: Prepare release artifacts
+        run: |
+          APK_DIR="app/build/outputs/apk/release"
+          APK_NAME="ente-screensaver-${{ github.ref_name }}.apk"
+          cp "$APK_DIR/app-release.apk" "$APK_DIR/$APK_NAME"
+          sha256sum "$APK_DIR/$APK_NAME" > "$APK_DIR/sha256sum"
+
+      - name: Create draft GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "mobile/native/android/apps/screensaver/app/build/outputs/apk/release/ente-screensaver-${{ github.ref_name }}.apk,mobile/native/android/apps/screensaver/app/build/outputs/apk/release/sha256sum"
+          draft: true
