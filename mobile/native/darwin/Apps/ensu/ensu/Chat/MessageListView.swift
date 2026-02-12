@@ -27,7 +27,6 @@ struct MessageListView: View {
     @State private var didInitialScroll = false
     @State private var suppressAutoScrollAfterGeneration = false
     @State private var keepStreamingVisible = false
-    @State private var lastStreamingParentForOutro: UUID?
     @State private var outroHideWorkItem: DispatchWorkItem?
 
     var body: some View {
@@ -89,14 +88,12 @@ struct MessageListView: View {
                         outroHideWorkItem?.cancel()
                         outroHideWorkItem = nil
                         keepStreamingVisible = true
-                        lastStreamingParentForOutro = streamingParentId
                         suppressAutoScrollAfterGeneration = false
                     } else {
                         suppressAutoScrollAfterGeneration = true
                         let workItem = DispatchWorkItem {
                             withAnimation(.easeOut(duration: 0.22)) {
                                 keepStreamingVisible = false
-                                lastStreamingParentForOutro = nil
                             }
                             suppressAutoScrollAfterGeneration = false
                             outroHideWorkItem = nil
@@ -106,16 +103,10 @@ struct MessageListView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
                     }
                 }
-                .onChange(of: streamingParentId) { parentId in
-                    if isGenerating {
-                        lastStreamingParentForOutro = parentId
-                    }
-                }
                 .onChange(of: sessionId) { _ in
                     outroHideWorkItem?.cancel()
                     outroHideWorkItem = nil
                     keepStreamingVisible = isGenerating
-                    lastStreamingParentForOutro = streamingParentId
                 }
             }
         }
@@ -235,22 +226,9 @@ struct MessageListView: View {
                         .transition(messageTransition)
                     }
 
-                    let showStreamingForMessage =
-                        (isGenerating && streamingParentId == message.id) ||
-                        (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id)
-
-                    if showStreamingForMessage {
-                        StreamingBubbleView(text: streamingResponse, isGenerating: isGenerating)
-                            .id("streaming-\(message.id.uuidString)")
-                            .transition(streamingTransition)
-                    }
                 }
 
-                let showRootStreaming =
-                    (isGenerating && streamingParentId == nil) ||
-                    (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == nil)
-
-                if showRootStreaming {
+                if isGenerating || keepStreamingVisible {
                     StreamingBubbleView(text: streamingResponse, isGenerating: isGenerating)
                         .id("streaming")
                         .transition(streamingTransition)
