@@ -38,7 +38,7 @@ class PreferencesRepository(private val context: Context) {
             else -> PhotoSourceType.ENTE_PUBLIC_ALBUM
         }
 
-        val intervalMs = (prefs[Keys.intervalKey] ?: "300000").toLongOrNull() ?: 300_000L
+        val intervalMs = (prefs[Keys.intervalKey] ?: "60000").toLongOrNull() ?: 60_000L
 
         val shuffle = prefs[Keys.shuffleKey] ?: true
 
@@ -48,7 +48,7 @@ class PreferencesRepository(private val context: Context) {
             else -> FitMode.CROP
         }
 
-        val enteCacheLimit = (prefs[Keys.enteCacheLimitKey] ?: "15").toIntOrNull() ?: 15
+        val enteCacheLimit = (prefs[Keys.enteCacheLimitKey] ?: "50").toIntOrNull() ?: 50
         val enteRefreshIntervalMs =
             (prefs[Keys.enteRefreshIntervalKey] ?: "3600000").toLongOrNull() ?: 3_600_000L
 
@@ -75,10 +75,10 @@ class PreferencesRepository(private val context: Context) {
     suspend fun resetToDefaults() {
         context.ssaverDataStore.edit { prefs ->
             prefs[Keys.sourceKey] = defaultSourceRaw
-            prefs[Keys.intervalKey] = "300000"
+            prefs[Keys.intervalKey] = "60000"
             prefs[Keys.shuffleKey] = true
             prefs[Keys.fitModeKey] = "crop"
-            prefs[Keys.enteCacheLimitKey] = "15"
+            prefs[Keys.enteCacheLimitKey] = "50"
             prefs[Keys.enteRefreshIntervalKey] = "3600000"
             prefs[Keys.overlayKey] = "normal"
         }

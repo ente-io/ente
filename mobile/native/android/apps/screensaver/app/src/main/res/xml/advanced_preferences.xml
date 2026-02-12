@@ -23,14 +23,14 @@
         android:title="@string/pref_title_photo_source" />
 
     <ListPreference
-        android:defaultValue="300000"
+        android:defaultValue="60000"
         android:entries="@array/pref_interval_entries"
         android:entryValues="@array/pref_interval_values"
         android:key="pref_interval_ms"
         android:title="@string/pref_title_slideshow_interval" />
 
     <ListPreference
-        android:defaultValue="15"
+        android:defaultValue="50"
         android:entries="@array/pref_ente_cache_entries"
         android:entryValues="@array/pref_ente_cache_values"
         android:key="pref_ente_cache_limit"
