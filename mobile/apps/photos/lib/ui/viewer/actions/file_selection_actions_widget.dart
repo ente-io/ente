@@ -45,6 +45,7 @@ import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -150,8 +151,7 @@ class _FileSelectionActionsWidgetState
         !widget.selectedFiles.files.any(
           (element) => element.fileType == FileType.video,
         );
-    final showDownloadOption =
-        widget.selectedFiles.files.any((element) => element.localID == null);
+    final showDownloadOption = hasUploadedFileIDs;
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
@@ -1099,21 +1099,29 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _download(List<EnteFile> files) async {
-    final totalFiles = files.length;
-    int downloadedFiles = 0;
+    if (files.isEmpty) {
+      return;
+    }
 
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).downloading +
-          " ($downloadedFiles/$totalFiles)",
-      isDismissible: true,
-    );
-    await dialog.show();
-    try {
-      final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
-      final futures = <Future>[];
-      for (final file in files) {
-        if (file.localID == null) {
+    final remoteFiles = files.where((file) => file.isRemoteFile).toList();
+    final skippedFiles = files.where((file) => !file.isRemoteFile).toList();
+    final skippedFilesCount = skippedFiles.length;
+
+    if (remoteFiles.isNotEmpty) {
+      final totalFiles = remoteFiles.length;
+      int downloadedFiles = 0;
+
+      final dialog = createProgressDialog(
+        context,
+        AppLocalizations.of(context).downloading +
+            " ($downloadedFiles/$totalFiles)",
+        isDismissible: true,
+      );
+      await dialog.show();
+      try {
+        final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
+        final futures = <Future>[];
+        for (final file in remoteFiles) {
           futures.add(
             taskQueue.add(() async {
               await downloadToGallery(file);
@@ -1125,15 +1133,48 @@ class _FileSelectionActionsWidgetState
             }),
           );
         }
+        await Future.wait(futures);
+        await dialog.hide();
+      } catch (e) {
+        _logger.warning("Failed to save files", e);
+        await dialog.hide();
+        await showGenericErrorDialog(context: context, error: e);
+        return;
       }
-      await Future.wait(futures);
-      await dialog.hide();
+    }
+
+    String finalMessage;
+    if (skippedFilesCount > 0) {
+      if (skippedFilesCount == 1) {
+        final skippedFile = skippedFiles.first;
+        final folderName = await getLocalFolderNameForDownloadSkipToast(
+          skippedFile,
+          fallbackFolderName: AppLocalizations.of(context).gallery,
+        );
+        finalMessage =
+            buildSingleFileDownloadSkippedInMultiSelectionToastMessage(
+          skippedFile,
+          folderName: folderName,
+          fallbackFileName: AppLocalizations.of(context).file,
+        );
+      } else {
+        finalMessage =
+            buildMultipleFilesDownloadSkippedToastMessage(skippedFilesCount);
+      }
+    } else {
+      finalMessage = AppLocalizations.of(context).filesSavedToGallery;
+    }
+
+    showToast(
+      context,
+      finalMessage,
+      iosLongToastLengthInSec: 4,
+    );
+
+    if (skippedFilesCount == 0) {
       widget.selectedFiles.clearAll();
-      showToast(context, AppLocalizations.of(context).filesSavedToGallery);
-    } catch (e) {
-      _logger.warning("Failed to save files", e);
-      await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+    } else if (remoteFiles.isNotEmpty) {
+      widget.selectedFiles.unSelectAll(remoteFiles.toSet());
     }
   }
 }

@@ -37,6 +37,7 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
@@ -312,7 +313,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (isFileUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -618,6 +619,25 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    if (!file.isRemoteFile) {
+      final folderName = await getLocalFolderNameForDownloadSkipToast(
+        file,
+        fallbackFolderName: AppLocalizations.of(context).gallery,
+      );
+      if (mounted) {
+        showToast(
+          context,
+          buildSingleFileDownloadSkippedToastMessage(
+            file,
+            folderName: folderName,
+            fallbackFileName: AppLocalizations.of(context).file,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
+      }
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
       context.l10n.downloading,
