@@ -621,18 +621,21 @@ class FileAppBarState extends State<FileAppBar> {
   Future<void> _download(EnteFile file) async {
     final l10n = context.l10n;
     final String? localFileLocationName =
-        await _getExistingLocalFileLocation(file, l10n);
+        await _getExistingLocalFileLocation(file);
     if (localFileLocationName != null && mounted) {
+      final hasKnownLocation = localFileLocationName.trim().isNotEmpty;
       final actionResult = await showChoiceActionSheet(
         context,
         title: l10n.alreadyAvailableOnDeviceTitle,
-        body: Platform.isAndroid
-            ? l10n.alreadyAvailableOnDeviceBodyAndroid(
-                folderName: localFileLocationName,
-              )
-            : l10n.alreadyAvailableOnDeviceBodyIOS(
-                albumName: localFileLocationName,
-              ),
+        body: hasKnownLocation
+            ? (Platform.isAndroid
+                ? l10n.alreadyAvailableOnDeviceBodyAndroid(
+                    folderName: localFileLocationName,
+                  )
+                : l10n.alreadyAvailableOnDeviceBodyIOS(
+                    albumName: localFileLocationName,
+                  ))
+            : l10n.alreadyAvailableOnDeviceBodyUnknown,
         firstButtonLabel: l10n.downloadAnyway,
         secondButtonLabel: l10n.cancel,
       );
@@ -663,7 +666,6 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<String?> _getExistingLocalFileLocation(
     EnteFile file,
-    AppLocalizations l10n,
   ) async {
     if (file.localID == null || file.localID!.isEmpty) {
       return null;
@@ -679,23 +681,22 @@ class FileAppBarState extends State<FileAppBar> {
     final String deviceFolder = (file.deviceFolder ?? "").trim();
 
     if (Platform.isAndroid) {
-      final String folderName;
       if (relativePath.isNotEmpty) {
-        folderName = _getLastPathSegment(relativePath);
-      } else if (deviceFolder.isNotEmpty) {
-        folderName = _getLastPathSegment(deviceFolder);
-      } else {
-        folderName = l10n.recent;
+        return _getLastPathSegment(relativePath);
       }
-      return folderName;
+      if (deviceFolder.isNotEmpty) {
+        return _getLastPathSegment(deviceFolder);
+      }
+      return "";
     }
 
-    final String albumSource = deviceFolder.isNotEmpty
-        ? _getLastPathSegment(deviceFolder)
-        : relativePath.isNotEmpty
-            ? _getLastPathSegment(relativePath)
-            : l10n.recent;
-    return albumSource;
+    if (deviceFolder.isNotEmpty) {
+      return _getLastPathSegment(deviceFolder);
+    }
+    if (relativePath.isNotEmpty) {
+      return _getLastPathSegment(relativePath);
+    }
+    return "";
   }
 
   String _getLastPathSegment(String path) {
