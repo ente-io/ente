@@ -634,6 +634,7 @@ const getTypography = (appName: AppName): TypographyVariantsOptions => {
             ...baseTypography,
             fontFamily:
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            // Ensu-specific variants (type-augmented in web/apps/ensu/src/types).
             message: { fontSize: "15px", lineHeight: "1.7", fontWeight: 400 },
             code: {
                 fontSize: "13px",
@@ -642,7 +643,7 @@ const getTypography = (appName: AppName): TypographyVariantsOptions => {
                 fontFamily:
                     'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             },
-        };
+        } as TypographyVariantsOptions;
     }
     return baseTypography;
 };
@@ -970,7 +971,7 @@ const getComponents = (appName: AppName): Components => {
                     ...components.MuiTypography?.defaultProps?.variantMapping,
                     message: "p",
                     code: "code",
-                },
+                } as Record<string, string>,
             },
         },
         MuiButton: {
