@@ -3641,7 +3641,7 @@ const Page: React.FC = () => {
                                 objectFit: "contain",
                             }}
                         />
-                        <Box component="span">
+                        <Box component="span" sx={{ px: 1.5 }}>
                             Sign in and cloud backup will be available in a
                             future update.
                         </Box>
