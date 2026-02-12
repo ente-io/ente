@@ -11,9 +11,11 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/common/base.dart";
 import "package:photos/db/ml/base.dart";
 import "package:photos/db/ml/clip_vector_db.dart";
+import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
+import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
@@ -48,20 +50,25 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   final String _databaseName;
   final ClipVectorDB _clipVectorDB;
+  final ClusterCentroidVectorDB _clusterCentroidVectorDB;
   final List<String> _migrationScripts;
 
   MLDataDB._privateConstructor({
     String databaseName = "ente.ml.db",
     ClipVectorDB? clipVectorDB,
+    ClusterCentroidVectorDB? clusterCentroidVectorDB,
     List<String>? migrationScripts,
   })  : _databaseName = databaseName,
         _clipVectorDB = clipVectorDB ?? ClipVectorDB.instance,
+        _clusterCentroidVectorDB =
+            clusterCentroidVectorDB ?? ClusterCentroidVectorDB.instance,
         _migrationScripts = migrationScripts ?? _defaultMigrationScripts;
 
   static final MLDataDB instance = MLDataDB._privateConstructor();
   static final MLDataDB offlineInstance = MLDataDB._privateConstructor(
     databaseName: "ente.ml.offline.db",
     clipVectorDB: ClipVectorDB.offlineInstance,
+    clusterCentroidVectorDB: ClusterCentroidVectorDB.offlineInstance,
     migrationScripts: _offlineMigrationScripts,
   );
 
@@ -76,6 +83,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createFileDataTable,
     createFaceCacheTable,
     createTextEmbeddingsCacheTable,
+    createClusterCentroidVectorIdMappingTable,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -274,12 +282,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteFaceClustersTable);
     await db.execute(deleteClusterPersonTable);
     await db.execute(deleteClusterSummaryTable);
+    await db.execute(deleteClusterCentroidVectorIdMappingTable);
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
-    if (await _clipVectorDB.checkIfMigrationDone()) {
-      await _clipVectorDB.deleteIndexFile(undoMigration: true);
-    }
+    await _clipVectorDB.deleteIndexFile();
+    await _clusterCentroidVectorDB.deleteIndexFile();
   }
 
   @override
@@ -1058,10 +1066,73 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     });
   }
 
+  Future<Map<String, int>> getClusterCentroidVectorIdMap(
+    Iterable<String> clusterIDs, {
+    bool createIfMissing = false,
+  }) async {
+    final uniqueClusterIDs = clusterIDs.toSet().toList(growable: false);
+    if (uniqueClusterIDs.isEmpty) {
+      return {};
+    }
+
+    final db = await asyncDB;
+    if (createIfMissing) {
+      const insertSql = '''
+        INSERT OR IGNORE INTO $clusterCentroidVectorIdMappingTable ($clusterIDColumn)
+        VALUES (?)
+      ''';
+      final insertParams = <List<Object?>>[];
+      for (final clusterID in uniqueClusterIDs) {
+        insertParams.add([clusterID]);
+      }
+      await db.executeBatch(insertSql, insertParams);
+    }
+
+    final result = <String, int>{};
+    const chunkSize = 800;
+    for (int i = 0; i < uniqueClusterIDs.length; i += chunkSize) {
+      final chunk = uniqueClusterIDs.sublist(
+        i,
+        min(i + chunkSize, uniqueClusterIDs.length),
+      );
+      final rows = await db.getAll(
+        '''
+          SELECT $clusterIDColumn, $clusterCentroidVectorIdColumn
+          FROM $clusterCentroidVectorIdMappingTable
+          WHERE $clusterIDColumn IN (${List.filled(chunk.length, '?').join(',')})
+        ''',
+        chunk,
+      );
+      for (final row in rows) {
+        result[row[clusterIDColumn] as String] =
+            row[clusterCentroidVectorIdColumn] as int;
+      }
+    }
+    return result;
+  }
+
+  Future<void> deleteClusterCentroidVectorIdMapping(String clusterID) async {
+    final db = await asyncDB;
+    const deleteSql = '''
+      DELETE FROM $clusterCentroidVectorIdMappingTable
+      WHERE $clusterIDColumn = ?
+    ''';
+    await db.execute(deleteSql, [clusterID]);
+  }
+
+  Future<void> clearClusterCentroidVectorIdMappings() async {
+    final db = await asyncDB;
+    await db.execute(deleteClusterCentroidVectorIdMappingTable);
+  }
+
   @override
   Future<void> clusterSummaryUpdate(
     Map<String, (Uint8List, int)> summary,
   ) async {
+    if (summary.isEmpty) {
+      return;
+    }
+
     final db = await asyncDB;
 
     const String sql = '''
@@ -1082,6 +1153,62 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       batchCounter++;
     }
     await db.executeBatch(sql, parameterSets);
+
+    if (!flagService.enableVectorDb ||
+        !await _clusterCentroidVectorDB.checkIfMigrationDone()) {
+      return;
+    }
+
+    try {
+      final clusterIDToVectorID = await getClusterCentroidVectorIdMap(
+        summary.keys,
+        createIfMissing: true,
+      );
+      final vectorIDs = <int>[];
+      final centroids = <Float32List>[];
+
+      for (final entry in summary.entries) {
+        final vectorID = clusterIDToVectorID[entry.key];
+        if (vectorID == null) {
+          continue;
+        }
+        final centroidBytes = entry.value.$1;
+        Float32List centroid;
+        try {
+          final centroidValues = EVector.fromBuffer(centroidBytes).values;
+          centroid = Float32List.fromList(centroidValues);
+        } catch (e, s) {
+          _logger.warning(
+            "Failed to decode centroid embedding for cluster ${entry.key}, skipping vector update",
+            e,
+            s,
+          );
+          continue;
+        }
+        if (centroid.length != ClusterCentroidVectorDB.embeddingDimensions) {
+          _logger.warning(
+            "Unexpected centroid embedding size ${centroid.length} for cluster ${entry.key}, skipping vector update",
+          );
+          continue;
+        }
+        vectorIDs.add(vectorID);
+        centroids.add(centroid);
+      }
+
+      if (vectorIDs.isNotEmpty) {
+        await _clusterCentroidVectorDB.bulkInsertCentroids(
+          clusterVectorIDs: vectorIDs,
+          centroids: centroids,
+        );
+      }
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to sync cluster summaries to cluster centroid vector DB. Invalidating migration state for a safe fallback.",
+        e,
+        s,
+      );
+      await _clusterCentroidVectorDB.invalidateMigrationState();
+    }
   }
 
   @override
@@ -1090,6 +1217,31 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     const String sqlDelete =
         'DELETE FROM $clusterSummaryTable WHERE $clusterIDColumn = ?';
     await db.execute(sqlDelete, [clusterID]);
+
+    if (!flagService.enableVectorDb ||
+        !await _clusterCentroidVectorDB.checkIfMigrationDone()) {
+      await deleteClusterCentroidVectorIdMapping(clusterID);
+      return;
+    }
+
+    try {
+      final clusterIDToVectorID = await getClusterCentroidVectorIdMap(
+        [clusterID],
+        createIfMissing: false,
+      );
+      final vectorID = clusterIDToVectorID[clusterID];
+      if (vectorID != null) {
+        await _clusterCentroidVectorDB.deleteCentroids([vectorID]);
+      }
+      await deleteClusterCentroidVectorIdMapping(clusterID);
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to remove cluster summary from cluster centroid vector DB. Invalidating migration state for a safe fallback.",
+        e,
+        s,
+      );
+      await _clusterCentroidVectorDB.invalidateMigrationState();
+    }
   }
 
   /// Returns a map of clusterID to (avg embedding, count)
@@ -1161,13 +1313,19 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await db.execute(deleteClusterPersonTable);
       await db.execute(deleteNotPersonFeedbackTable);
       await db.execute(deleteClusterSummaryTable);
+      await db.execute(deleteClusterCentroidVectorIdMappingTable);
       await db.execute(deleteFaceClustersTable);
 
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
       await db.execute(createClusterSummaryTable);
+      await db.execute(createClusterCentroidVectorIdMappingTable);
       await db.execute(createFaceClustersTable);
       await db.execute(fcClusterIDIndex);
+
+      if (await _clusterCentroidVectorDB.checkIfMigrationDone()) {
+        await _clusterCentroidVectorDB.deleteAllCentroids();
+      }
     } catch (e, s) {
       _logger.severe('Error dropping clusters and person table', e, s);
     }
@@ -1273,6 +1431,167 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       embeddings.add(embedding);
     }
     return embeddings;
+  }
+
+  Future<void> checkMigrateFillClusterCentroidVectorDB({
+    bool force = false,
+  }) async {
+    final migrationDone = await _clusterCentroidVectorDB.checkIfMigrationDone();
+    if (migrationDone && !force) {
+      _logger.info(
+        "ClusterCentroidVectorDB migration not needed, already done",
+      );
+      return;
+    }
+    _logger.info("Starting ClusterCentroidVectorDB migration");
+
+    final db = await asyncDB;
+    final countResult = await db.getAll(
+      'SELECT COUNT($clusterIDColumn) as total FROM $clusterSummaryTable',
+    );
+    final totalCount = countResult.first['total'] as int;
+    if (totalCount == 0) {
+      _logger.info("No cluster summaries to migrate");
+      await clearClusterCentroidVectorIdMappings();
+      await _clusterCentroidVectorDB.deleteAllCentroids();
+      await _clusterCentroidVectorDB.setMigrationDone();
+      return;
+    }
+    _logger.info("Total count of cluster summaries: $totalCount");
+
+    final clusterCentroidVectorDB = _clusterCentroidVectorDB;
+    await clusterCentroidVectorDB.deleteAllCentroids();
+    await clearClusterCentroidVectorIdMappings();
+    _logger.info("ClusterCentroidVectorDB cleared before migration");
+
+    const batchSize = 2000;
+    int offset = 0;
+    int processedCount = 0;
+    int weirdCount = 0;
+    int whileCount = 0;
+    const String migrationKey =
+        "cluster_centroid_vector_db_migration_in_progress";
+    final stopwatch = Stopwatch()..start();
+    try {
+      computeController.blockCompute(blocker: migrationKey);
+      while (true) {
+        whileCount++;
+        _logger.info("$whileCount st round of centroid migration while loop");
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        final List<Map<String, dynamic>> results = await db.getAll(
+          '''
+            SELECT $clusterIDColumn, $avgColumn
+            FROM $clusterSummaryTable
+            ORDER BY $clusterIDColumn DESC
+            LIMIT $batchSize OFFSET $offset
+          ''',
+        );
+        if (results.isEmpty) {
+          _logger.info("No more centroid rows, breaking out of while loop");
+          break;
+        }
+
+        final clusterIDs = <String>[];
+        final clusterIDToCentroid = <String, Float32List>{};
+        for (final result in results) {
+          final clusterID = result[clusterIDColumn] as String;
+          final centroidBytes = result[avgColumn] as Uint8List;
+          Float32List centroid;
+          try {
+            final centroidValues = EVector.fromBuffer(centroidBytes).values;
+            centroid = Float32List.fromList(centroidValues);
+          } catch (e, s) {
+            weirdCount++;
+            _logger.warning(
+              "Failed to decode centroid embedding for clusterID $clusterID, skipping",
+              e,
+              s,
+            );
+            continue;
+          }
+          if (centroid.length == ClusterCentroidVectorDB.embeddingDimensions) {
+            clusterIDs.add(clusterID);
+            clusterIDToCentroid[clusterID] = centroid;
+          } else {
+            weirdCount++;
+            _logger.warning(
+              "Weird centroid embedding length ${centroid.length} for clusterID $clusterID, skipping",
+            );
+          }
+        }
+
+        final clusterIDToVectorID = await getClusterCentroidVectorIdMap(
+          clusterIDs,
+          createIfMissing: true,
+        );
+        final vectorIDs = <int>[];
+        final centroids = <Float32List>[];
+        for (final clusterID in clusterIDs) {
+          final vectorID = clusterIDToVectorID[clusterID];
+          final centroid = clusterIDToCentroid[clusterID];
+          if (vectorID == null || centroid == null) {
+            continue;
+          }
+          vectorIDs.add(vectorID);
+          centroids.add(centroid);
+        }
+
+        if (vectorIDs.isNotEmpty) {
+          await clusterCentroidVectorDB.bulkInsertCentroids(
+            clusterVectorIDs: vectorIDs,
+            centroids: centroids,
+          );
+        }
+
+        processedCount += vectorIDs.length;
+        offset += batchSize;
+        _logger.info(
+          "migrated $processedCount/$totalCount cluster centroids to ClusterCentroidVectorDB",
+        );
+        if (processedCount >= totalCount) {
+          _logger.info(
+            "All cluster centroids migrated, breaking out of while loop",
+          );
+          break;
+        }
+      }
+      _logger.info(
+        "migrated $processedCount cluster centroids to ClusterCentroidVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount malformed rows skipped",
+      );
+      await _clusterCentroidVectorDB.setMigrationDone();
+      _logger.info("ClusterCentroidVectorDB migration done");
+      try {
+        final vectorStats = await _clusterCentroidVectorDB.getIndexStats();
+        if (vectorStats.size != processedCount) {
+          _logger.warning(
+            "ClusterCentroidVectorDB size mismatch: vectorDb=${vectorStats.size}, migratedRows=$processedCount",
+          );
+        } else {
+          _logger.info(
+            "ClusterCentroidVectorDB size match: vectorDb=${vectorStats.size}, migratedRows=$processedCount",
+          );
+        }
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to log ClusterCentroidVectorDB size after migration",
+          e,
+          s,
+        );
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "Error migrating ClusterCentroidVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
+        e,
+        s,
+      );
+      await clusterCentroidVectorDB.deleteAllCentroids();
+      await clearClusterCentroidVectorIdMappings();
+      rethrow;
+    } finally {
+      stopwatch.stop();
+      computeController.unblockCompute(blocker: migrationKey);
+    }
   }
 
   Future<void> checkMigrateFillClipVectorDB({bool force = false}) async {

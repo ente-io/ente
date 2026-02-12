@@ -63,7 +63,7 @@ class ClipVectorDB {
     } catch (e, s) {
       _logger.severe("Could not open VectorDB at path $dbPath", e, s);
       _logger.severe("Deleting the index file and trying again");
-      await deleteIndexFile(undoMigration: true);
+      await deleteIndexFile();
       try {
         vectorDB = VectorDb(
           filePath: dbPath,
@@ -397,7 +397,7 @@ class ClipVectorDB {
     }
   }
 
-  Future<void> deleteIndexFile({bool undoMigration = false}) async {
+  Future<void> deleteIndexFile() async {
     try {
       final documentsDirectory = await getApplicationDocumentsDirectory();
       final String dbPath = join(documentsDirectory.path, _databaseName);
@@ -409,11 +409,6 @@ class ClipVectorDB {
       _logger.info("Deleted index file on disk");
       _vectorDbFuture = null;
       _warmupFuture = null;
-      if (!undoMigration) {
-        _logger.info(
-          "Index file was deleted without explicit undo flag; invalidating migration state regardless.",
-        );
-      }
       await invalidateMigrationState();
     } catch (e, s) {
       _logger.severe("Error deleting index file on disk", e, s);

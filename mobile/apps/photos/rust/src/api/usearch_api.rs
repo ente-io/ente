@@ -1,6 +1,7 @@
 use flutter_rust_bridge::frb;
 use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
 
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 const FAST_SEARCH_STEP_COUNTS: [usize; 5] = [200, 500, 2000, 5000, 10000];
@@ -146,6 +147,35 @@ impl VectorDB {
         }
 
         self.fast_search_vectors_within_distance(query, max_distance)
+    }
+
+    pub fn approx_filtered_search_vectors_within_distance(
+        &self,
+        query: &[f32],
+        allowed_keys: &Vec<u64>,
+        count: usize,
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let index_size = self.index.size();
+        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
+            return (Vec::new(), Vec::new());
+        }
+        if !max_distance.is_finite() || max_distance < 0.0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
+        let search_count = count.min(allowed.len()).min(index_size);
+        if search_count == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let matches = self
+            .index
+            .filtered_search(query, search_count, |key| allowed.contains(&key))
+            .expect("Failed to run filtered vector search");
+
+        Self::truncate_sorted_matches_within_distance(matches.keys, matches.distances, max_distance)
     }
 
     fn fast_search_vectors_within_distance(
