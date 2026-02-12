@@ -24,7 +24,6 @@ class SetupActivity : AppCompatActivity() {
     private val portCandidates = listOf(5843, 8080, 8899)
     private val secureRandom = SecureRandom()
     private val pairingCode: String = generatePairingCode()
-    private val setupEncryptionKeyId: String = generateToken(12)
     private val setupEncryptionKeyBytes: ByteArray = ByteArray(32).also { secureRandom.nextBytes(it) }
     private val setupEncryptionKeyB64Url: String = Base64.encodeToString(
         setupEncryptionKeyBytes,
@@ -82,7 +81,6 @@ class SetupActivity : AppCompatActivity() {
                     appContext = applicationContext,
                     port = candidate,
                     pairingCode = pairingCode,
-                    encryptionKeyId = setupEncryptionKeyId,
                     encryptionKey = setupEncryptionKeyBytes,
                     onConfigUpdated = { scope.launch { handleRemoteConfigUpdated() } },
                 ).also { it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false) }
@@ -179,17 +177,8 @@ class SetupActivity : AppCompatActivity() {
         return String.format("%06d", code)
     }
 
-    private fun generateToken(length: Int): String {
-        val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return buildString(length) {
-            repeat(length) {
-                append(alphabet[secureRandom.nextInt(alphabet.length)])
-            }
-        }
-    }
-
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "http://$address:$port/?code=$pairingCode&kid=$setupEncryptionKeyId#ek=$setupEncryptionKeyB64Url"
+        return "http://$address:$port/?code=$pairingCode#ek=$setupEncryptionKeyB64Url"
     }
 
     private fun buildSetupUrlList(addresses: List<NetworkUtils.LocalAddress>, port: Int): String {

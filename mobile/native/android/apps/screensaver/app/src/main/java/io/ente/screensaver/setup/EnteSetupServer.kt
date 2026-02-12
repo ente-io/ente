@@ -19,7 +19,6 @@ class EnteSetupServer(
     private val appContext: Context,
     port: Int,
     private val pairingCode: String,
-    private val encryptionKeyId: String,
     private val encryptionKey: ByteArray,
     private val onConfigUpdated: () -> Unit,
 ) : NanoHTTPD("0.0.0.0", port) {
@@ -107,8 +106,6 @@ class EnteSetupServer(
     private fun serveIndex(session: IHTTPSession): Response {
         val providedCode = session.parameters["code"]?.firstOrNull()?.trim().orEmpty()
         val codeMatches = providedCode.isNotBlank() && providedCode == pairingCode
-        val providedKid = session.parameters["kid"]?.firstOrNull()?.trim().orEmpty()
-        val kidMatches = providedKid.isNotBlank() && providedKid == encryptionKeyId
 
         val codeInput = if (codeMatches) {
             "<input type=\"hidden\" name=\"code\" value=\"${escapeHtml(providedCode)}\" />"
@@ -117,11 +114,6 @@ class EnteSetupServer(
                 <label for="code">${esc(R.string.setup_server_pairing_code_label)}</label>
                 <input name="code" id="code" placeholder="${esc(R.string.setup_server_pairing_code_placeholder)}" inputmode="numeric" />
             """.trimIndent()
-        }
-        val kidInput = if (kidMatches) {
-            "<input type=\"hidden\" name=\"kid\" id=\"kid\" value=\"${escapeHtml(providedKid)}\" />"
-        } else {
-            ""
         }
 
         val codeHint = if (codeMatches) {
@@ -135,7 +127,6 @@ class EnteSetupServer(
               <h1>${esc(R.string.app_name)}</h1>
               <form method="post" action="/set" id="setup-form">
                 $codeInput
-                $kidInput
                 <input type="hidden" name="payload" id="payload" />
                 <input type="hidden" name="header" id="header" />
                 <label for="url">${esc(R.string.setup_server_public_album_label)}</label>
@@ -147,7 +138,7 @@ class EnteSetupServer(
             </div>
             $codeHint
             <p class="note">${esc(R.string.setup_server_open_screen_note)}</p>
-            ${secureSubmitScript(enabled = kidMatches)}
+            ${secureSubmitScript()}
         """.trimIndent()
 
         val html = renderPage(s(R.string.setup_server_page_title), body)
@@ -173,22 +164,15 @@ class EnteSetupServer(
             resetPairingMismatchState()
 
             val encryptedPayload = session.parameters["payload"]?.firstOrNull().orEmpty().trim()
-            val (url, password) = if (encryptedPayload.isNotBlank()) {
-                val kid = session.parameters["kid"]?.firstOrNull().orEmpty().trim()
-                if (kid != encryptionKeyId) {
-                    AppLog.error("Setup", "Encryption key mismatch")
-                    return@runCatching securePayloadInvalidResponse()
-                }
+            val header = session.parameters["header"]?.firstOrNull().orEmpty().trim()
+            if (encryptedPayload.isBlank() || header.isBlank()) {
+                AppLog.error("Setup", "Missing encrypted setup payload")
+                return@runCatching securePayloadInvalidResponse()
+            }
 
-                val header = session.parameters["header"]?.firstOrNull().orEmpty().trim()
-                decryptSetupPayload(encryptedPayload, header) ?: run {
-                    AppLog.error("Setup", "Encrypted setup payload invalid")
-                    return@runCatching securePayloadInvalidResponse()
-                }
-            } else {
-                val rawUrl = session.parameters["url"]?.firstOrNull().orEmpty().trim()
-                val rawPassword = session.parameters["password"]?.firstOrNull().orEmpty()
-                rawUrl to rawPassword
+            val (url, password) = decryptSetupPayload(encryptedPayload, header) ?: run {
+                AppLog.error("Setup", "Encrypted setup payload invalid")
+                return@runCatching securePayloadInvalidResponse()
             }
 
             if (url.isBlank()) {
@@ -397,19 +381,16 @@ class EnteSetupServer(
         }.getOrNull()
     }
 
-    private fun secureSubmitScript(enabled: Boolean): String {
-        if (!enabled) return ""
-
+    private fun secureSubmitScript(): String {
         return """
             <script>
               (() => {
                 const form = document.getElementById('setup-form');
-                const kidInput = document.getElementById('kid');
                 const payloadInput = document.getElementById('payload');
                 const headerInput = document.getElementById('header');
                 const urlInput = document.getElementById('url');
                 const passwordInput = document.getElementById('password');
-                if (!form || !kidInput || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
+                if (!form || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
 
                 const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
                 const hashParams = new URLSearchParams(hash);
