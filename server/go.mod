@@ -6,7 +6,6 @@ toolchain go1.23.3
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/GoKillers/libsodium-go v0.0.0-20171022220152-dd733721c3cb
 	github.com/TwiN/go-away v1.6.13
 	github.com/avct/uasurfer v0.0.0-20191028135549-26b5daa857f1
 	github.com/awa/go-iap v1.3.16
