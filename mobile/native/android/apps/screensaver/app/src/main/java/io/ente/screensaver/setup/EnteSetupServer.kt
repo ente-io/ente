@@ -74,7 +74,6 @@ class EnteSetupServer(
 
     private fun serveSetupCryptoAsset(fileName: String): Response {
         val allowed = mapOf(
-            "ente_wasm.js" to "application/javascript",
             "ente_wasm_bg.js" to "application/javascript",
             "ente_wasm_bg.wasm" to "application/wasm",
         )
@@ -431,6 +430,48 @@ class EnteSetupServer(
                   return out;
                 };
 
+                let wasmModulePromise;
+                const loadEnteWasm = async () => {
+                  if (wasmModulePromise) return wasmModulePromise;
+
+                  wasmModulePromise = (async () => {
+                    const wasmModule = await import('/setup-crypto/ente_wasm_bg.js');
+                    const wasmImports = { './ente_wasm_bg.js': wasmModule };
+
+                    let instance;
+                    if (WebAssembly.instantiateStreaming) {
+                      try {
+                        const streamingResult = await WebAssembly.instantiateStreaming(
+                          fetch('/setup-crypto/ente_wasm_bg.wasm'),
+                          wasmImports,
+                        );
+                        instance = streamingResult.instance;
+                      } catch {
+                        // Fallback below.
+                      }
+                    }
+
+                    if (!instance) {
+                      const wasmResponse = await fetch('/setup-crypto/ente_wasm_bg.wasm');
+                      if (!wasmResponse.ok) {
+                        throw new Error('WASM fetch failed: ' + wasmResponse.status);
+                      }
+                      const bytes = await wasmResponse.arrayBuffer();
+                      const fallbackResult = await WebAssembly.instantiate(bytes, wasmImports);
+                      instance = fallbackResult.instance;
+                    }
+
+                    wasmModule.__wbg_set_wasm(instance.exports);
+                    if (typeof instance.exports.__wbindgen_start === 'function') {
+                      instance.exports.__wbindgen_start();
+                    }
+
+                    return wasmModule;
+                  })();
+
+                  return wasmModulePromise;
+                };
+
                 form.addEventListener('submit', async (event) => {
                   if (!ek) {
                     event.preventDefault();
@@ -441,7 +482,8 @@ class EnteSetupServer(
                   event.preventDefault();
 
                   try {
-                    const wasm = await import('/setup-crypto/ente_wasm.js');
+                    const wasm = await loadEnteWasm();
+
                     if (typeof wasm.crypto_init === 'function') {
                       wasm.crypto_init();
                     }
