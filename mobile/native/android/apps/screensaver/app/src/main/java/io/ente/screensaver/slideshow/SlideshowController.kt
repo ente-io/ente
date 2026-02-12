@@ -93,28 +93,13 @@ class SlideshowController(
         val kind = segments[0]
         val fileId = segments[1].toLongOrNull() ?: return false
         val cache = EnteImageCache(context.applicationContext)
-        return when (kind) {
-            "image" -> {
-                val full = cache.imageFile(accessToken, fileId)
-                val preview = cache.previewFile(accessToken, fileId)
-                (full.exists() && full.length() > 0L) || (preview.exists() && preview.length() > 0L)
-            }
-            "thumb" -> {
-                val preview = cache.previewFile(accessToken, fileId)
-                preview.exists() && preview.length() > 0L
-            }
-            else -> false
+        val file = when (kind) {
+            "image" -> cache.imageFile(accessToken, fileId)
+            "thumb" -> cache.previewFile(accessToken, fileId)
+            else -> return false
         }
-    }
 
-    private fun entePreviewFallbackUri(uri: Uri): Uri? {
-        if (uri.scheme != "ente") return null
-        val accessToken = uri.host.orEmpty()
-        val segments = uri.pathSegments
-        if (accessToken.isBlank() || segments.size < 2) return null
-        if (segments[0] != "image") return null
-        val fileId = segments[1].toLongOrNull() ?: return null
-        return Uri.parse("ente://$accessToken/thumb/$fileId")
+        return file.exists() && file.length() > 0L
     }
 
     private suspend fun run() {
@@ -386,25 +371,10 @@ class SlideshowController(
             lastShown = uri
 
             val transitionMs = if (hasShownImage) 1000L else 0L
-            var ok = showNextWithTimeout(
+            val ok = showNextWithTimeout(
                 uri = uri,
                 transitionMs = transitionMs,
             )
-
-            if (!ok) {
-                val fallbackUri = entePreviewFallbackUri(uri)
-                if (fallbackUri != null) {
-                    AppLog.info(
-                        "Slideshow",
-                        "Falling back to Ente preview for ${uri.redactedForLog()}",
-                    )
-                    ok = showNextWithTimeout(
-                        uri = fallbackUri,
-                        transitionMs = transitionMs,
-                    )
-                }
-            }
-
             if (ok) {
                 consecutiveFailures = 0
                 failedUris.remove(uri)
