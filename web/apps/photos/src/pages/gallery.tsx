@@ -16,6 +16,7 @@ import { DownloadStatusNotifications } from "components/DownloadStatusNotificati
 import type { FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
+import { QuickLinkCreatedNotification } from "components/QuickLinkCreatedNotification";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
@@ -93,12 +94,16 @@ import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/ut
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import {
     usePeopleStateSnapshot,
+    useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
+    addToCollection,
     addToFavoritesCollection,
     createAlbum,
+    createPublicURL,
+    createQuickLinkCollection,
     removeFromCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
@@ -155,6 +160,7 @@ import {
     performFileOp,
     type SelectedState,
 } from "utils/file";
+import { quickLinkNameForFiles, resolveQuickLinkURL } from "utils/quick-link";
 
 /**
  * The default view for logged in users.
@@ -240,6 +246,7 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { customDomain } = useSettingsSnapshot();
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
@@ -305,6 +312,10 @@ const Page: React.FC = () => {
         albumId?: number;
         albumName?: string;
     }>({ open: false, phase: "processing" });
+    const [publicLinkToast, setPublicLinkToast] = useState<{
+        open: boolean;
+        url?: string;
+    }>({ open: false });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
     const onAuthenticateCancelCallback = useRef<(() => void) | undefined>(
@@ -942,6 +953,42 @@ const Page: React.FC = () => {
         void (async () => {
             showLoadingBar();
             try {
+                if (op == "sendLink") {
+                    const selectedFiles = getSelectedFiles(
+                        selected,
+                        filteredFiles,
+                    );
+                    const ownedSelectedFiles = selectedFiles.filter(
+                        // There'll be a user if files are being selected.
+                        (file) => file.ownerID == user!.id,
+                    );
+                    if (!ownedSelectedFiles.length) return;
+                    if (ownedSelectedFiles.length != selectedFiles.length) {
+                        showMiniDialog(notifyOthersFilesDialogAttributes());
+                    }
+
+                    const quickLinkCollection = await createQuickLinkCollection(
+                        quickLinkNameForFiles(ownedSelectedFiles),
+                    );
+                    await addToCollection(
+                        quickLinkCollection,
+                        ownedSelectedFiles,
+                    );
+                    const publicURL = await createPublicURL(
+                        quickLinkCollection.id,
+                    );
+                    const resolvedURL = await resolveQuickLinkURL(
+                        publicURL.url,
+                        quickLinkCollection.key,
+                        customDomain,
+                    );
+                    setPublicLinkToast({ open: true, url: resolvedURL });
+
+                    clearSelection();
+                    await remotePull({ silent: true });
+                    return;
+                }
+
                 // When hiding use all non-hidden files instead of the filtered
                 // files since we want to move all files copies to the hidden
                 // collection.
@@ -1826,6 +1873,17 @@ const Page: React.FC = () => {
                     albumNameInputVisibilityProps.onClose();
                 }}
                 onSubmit={handleAlbumNameSubmit}
+            />
+            <QuickLinkCreatedNotification
+                open={publicLinkToast.open}
+                onCopy={() => {
+                    if (publicLinkToast.url) {
+                        void navigator.clipboard.writeText(publicLinkToast.url);
+                    }
+                }}
+                onClose={() =>
+                    setPublicLinkToast((prev) => ({ ...prev, open: false }))
+                }
             />
             <AlbumAddedNotification
                 open={addToAlbumProgress.open}
