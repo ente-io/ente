@@ -2,6 +2,7 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
 import {
     CollectionShare,
+    type CollectionShareIntent,
     type CollectionShareProps,
 } from "components/Collections/CollectionShare";
 import type { FileListHeaderOrFooter } from "components/FileList";
@@ -125,6 +126,23 @@ export const GalleryBarAndListHeader: React.FC<
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
         useModalVisibility();
+    const [collectionShareIntent, setCollectionShareIntent] =
+        useState<CollectionShareIntent>();
+
+    const openCollectionShare = useCallback(() => {
+        setCollectionShareIntent(undefined);
+        showCollectionShare();
+    }, [showCollectionShare]);
+
+    const openCollectionManageLink = useCallback(() => {
+        setCollectionShareIntent("manage-link");
+        showCollectionShare();
+    }, [showCollectionShare]);
+
+    const closeCollectionShare = useCallback(() => {
+        setCollectionShareIntent(undefined);
+        collectionShareVisibilityProps.onClose();
+    }, [collectionShareVisibilityProps]);
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -186,7 +204,8 @@ export const GalleryBarAndListHeader: React.FC<
                         onSelectPerson,
                     }}
                     collectionSummary={collectionSummary}
-                    onCollectionShare={showCollectionShare}
+                    onCollectionShare={openCollectionShare}
+                    onCollectionManageLink={openCollectionManageLink}
                     onCollectionCast={showCollectionCast}
                 />
             ) : mode != "people" && collectionSummary ? (
@@ -216,6 +235,8 @@ export const GalleryBarAndListHeader: React.FC<
         isActiveCollectionDownloadInProgress,
         activePerson,
         showCollectionShare,
+        openCollectionShare,
+        openCollectionManageLink,
         showCollectionCast,
         onRemotePull,
         onAddSaveGroup,
@@ -271,10 +292,12 @@ export const GalleryBarAndListHeader: React.FC<
                 <>
                     <CollectionShare
                         {...collectionShareVisibilityProps}
+                        onClose={closeCollectionShare}
                         collectionSummary={
                             toShowCollectionSummaries.get(activeCollectionID!)!
                         }
                         collection={activeCollection}
+                        intent={collectionShareIntent}
                         {...{
                             user,
                             emailByUserID,

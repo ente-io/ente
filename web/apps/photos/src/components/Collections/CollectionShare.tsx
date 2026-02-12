@@ -109,7 +109,13 @@ export type CollectionShareProps = ModalVisibilityProps & {
      * Called when an operation in the share menu requires a full remote pull.
      */
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    /**
+     * When set, opens a specific nested share view directly.
+     */
+    intent?: CollectionShareIntent;
 };
+
+export type CollectionShareIntent = "manage-link";
 
 export const CollectionShare: React.FC<CollectionShareProps> = ({
     open,
@@ -121,6 +127,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     shareSuggestionEmails,
     setBlockingLoad,
     onRemotePull,
+    intent,
 }) => {
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
@@ -271,6 +278,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                             onRootClose={onClose}
                             {...{ collection, setBlockingLoad, onRemotePull }}
                             canManage={isOwner}
+                            openManageLink={intent == "manage-link"}
                         />
                     ) : null}
                     {isSharedIncoming ? (
@@ -1433,7 +1441,11 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     );
 };
 
-type PublicShareProps = { onRootClose: () => void; canManage: boolean } & Pick<
+type PublicShareProps = {
+    onRootClose: () => void;
+    canManage: boolean;
+    openManageLink: boolean;
+} & Pick<
     CollectionShareProps,
     "collection" | "setBlockingLoad" | "onRemotePull"
 >;
@@ -1444,6 +1456,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
     setBlockingLoad,
     onRemotePull,
     canManage,
+    openManageLink,
 }) => {
     const { customDomain } = useSettingsSnapshot();
 
@@ -1490,6 +1503,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
             {publicURL && resolvedURL ? (
                 canManage ? (
                     <ManagePublicShare
+                        openOnMount={openManageLink}
                         {...{
                             onRootClose,
                             collection,
@@ -1614,7 +1628,7 @@ type ManagePublicShareProps = { onRootClose: () => void } & Pick<
     Pick<
         CollectionShareProps,
         "collection" | "setBlockingLoad" | "onRemotePull"
-    >;
+    > & { openOnMount: boolean };
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
@@ -1624,6 +1638,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     resolvedURL,
     setBlockingLoad,
     onRemotePull,
+    openOnMount,
 }) => {
     const {
         show: showManagePublicShare,
@@ -1631,6 +1646,15 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     } = useModalVisibility();
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
+
+    useEffect(() => {
+        if (openOnMount) showManagePublicShare();
+    }, [openOnMount, showManagePublicShare]);
+
+    const handleManagePublicShareClose = useCallback(() => {
+        managePublicShareVisibilityProps.onClose();
+        if (openOnMount) onRootClose();
+    }, [managePublicShareVisibilityProps, openOnMount, onRootClose]);
 
     return (
         <>
@@ -1672,6 +1696,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
             </Stack>
             <ManagePublicShareOptions
                 {...managePublicShareVisibilityProps}
+                onClose={handleManagePublicShareClose}
                 {...{
                     onRootClose,
                     collection,

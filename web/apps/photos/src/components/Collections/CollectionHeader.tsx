@@ -99,6 +99,7 @@ export interface CollectionHeaderProps
      */
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
+    onCollectionManageLink: () => void;
     onCollectionCast: () => void;
     /**
      * A function that can be used to create a UI notification to track the
@@ -155,6 +156,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     setActiveCollectionID,
     onRemotePull,
     onCollectionShare,
+    onCollectionManageLink,
     onCollectionCast,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
@@ -754,10 +756,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummary={collectionSummary}
+                isQuickLinkAlbum={!!isQuickLinkAlbum}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
-                onShareClick={onCollectionShare}
+                onShareClick={
+                    isQuickLinkAlbum
+                        ? onCollectionManageLink
+                        : onCollectionShare
+                }
                 onCleanUncategorizedClick={confirmCleanUncategorized}
             />
             {validMenuOptions.length > 0 && (
@@ -812,6 +819,7 @@ interface OptionProps {
 
 interface QuickOptionsProps {
     collectionSummary: CollectionSummary;
+    isQuickLinkAlbum: boolean;
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
@@ -825,6 +833,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onShareClick,
     onCleanUncategorizedClick,
     collectionSummary,
+    isQuickLinkAlbum,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
@@ -849,6 +858,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
                 collectionSummary={collectionSummary}
+                isQuickLinkAlbum={isQuickLinkAlbum}
                 onClick={onShareClick}
             />
         )}
@@ -981,6 +991,7 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
 
 interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;
+    isQuickLinkAlbum: boolean;
     onClick: () => void;
 }
 
@@ -1018,17 +1029,20 @@ const SmallShareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
     collectionSummary: { attributes },
+    isQuickLinkAlbum,
     onClick,
 }) => (
     <Tooltip
         title={
-            attributes.has("userFavorites")
-                ? t("share_favorites")
-                : attributes.has("sharedIncoming")
-                  ? t("sharing_details")
-                  : attributes.has("shared")
-                    ? t("modify_sharing")
-                    : t("share_album")
+            isQuickLinkAlbum
+                ? t("manage_link")
+                : attributes.has("userFavorites")
+                  ? t("share_favorites")
+                  : attributes.has("sharedIncoming")
+                    ? t("sharing_details")
+                    : attributes.has("shared")
+                      ? t("modify_sharing")
+                      : t("share_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -1041,7 +1055,7 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                     justifyContent: "center",
                 }}
             >
-                <ShareIcon />
+                {isQuickLinkAlbum ? <LinkIcon /> : <ShareIcon />}
             </Box>
         </IconButton>
     </Tooltip>
