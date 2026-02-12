@@ -136,20 +136,6 @@ export const Export: React.FC<ExportProps> = ({
         void syncExportRecord(exportFolder);
     }, [open, exportFolder, syncExportRecord]);
 
-    useEffect(() => {
-        if (!exportService.isExportInProgress()) return;
-
-        // If the dialog mounts mid-export, the stage can lag behind progress.
-        const processed = exportProgress.success + exportProgress.failed;
-        if (
-            exportStage < ExportStage.exportingFiles &&
-            exportProgress.total > 0 &&
-            processed > 0
-        ) {
-            setExportStage(ExportStage.exportingFiles);
-        }
-    }, [exportProgress, exportStage, exportService]);
-
     const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
             showMiniDialog({

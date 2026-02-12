@@ -597,8 +597,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const baseTypography: TypographyVariantsOptions = {
-    fontFamily:
-        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,
@@ -638,7 +637,13 @@ const baseTypography: TypographyVariantsOptions = {
 };
 
 const getTypography = (appName: AppName): TypographyVariantsOptions => {
-    void appName;
+    if (appName === "ensu") {
+        return {
+            ...baseTypography,
+            fontFamily:
+                '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        };
+    }
     return baseTypography;
 };
 

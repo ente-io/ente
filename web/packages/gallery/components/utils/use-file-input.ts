@@ -69,18 +69,16 @@ export const useFileInput = ({
         // via props, so do it using its ref.
         //
         // https://github.com/facebook/react/issues/27858
-        const input = inputRef.current;
-        if (!input) return;
-        input.addEventListener("cancel", onCancel);
+        inputRef.current!.addEventListener("cancel", onCancel);
         return () => {
-            input.removeEventListener("cancel", onCancel);
+            // Use optional chaining to avoid spurious errors during HMR.
+            inputRef.current?.removeEventListener("cancel", onCancel);
         };
     }, [onCancel]);
 
     const openSelector = useCallback(() => {
-        if (!inputRef.current) return;
-        inputRef.current.value = "";
-        inputRef.current.click();
+        inputRef.current!.value = "";
+        inputRef.current!.click();
     }, []);
 
     const handleChange: React.ChangeEventHandler<HTMLInputElement> = (

@@ -1,3 +1,4 @@
+import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
