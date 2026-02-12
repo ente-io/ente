@@ -43,11 +43,15 @@ const getQuickLinkNameForDateRange = (
 export const quickLinkNameForFiles = (files: EnteFile[]) => {
     if (!files.length) return "Quick link";
 
-    const creationTimes = files.map((file) => fileCreationTime(file));
-    return getQuickLinkNameForDateRange(
-        Math.min(...creationTimes),
-        Math.max(...creationTimes),
-    );
+    let minCreationTime = Number.POSITIVE_INFINITY;
+    let maxCreationTime = Number.NEGATIVE_INFINITY;
+    for (const file of files) {
+        const creationTime = fileCreationTime(file);
+        if (creationTime < minCreationTime) minCreationTime = creationTime;
+        if (creationTime > maxCreationTime) maxCreationTime = creationTime;
+    }
+
+    return getQuickLinkNameForDateRange(minCreationTime, maxCreationTime);
 };
 
 const substituteCustomDomainIfNeeded = (

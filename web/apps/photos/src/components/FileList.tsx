@@ -267,7 +267,10 @@ export interface FileListProps {
      *
      * @param action The action that was triggered.
      */
-    onContextMenuAction?: (action: FileContextAction) => void;
+    onContextMenuAction?: (
+        action: FileContextAction,
+        targetFile?: EnteFile,
+    ) => void;
     /**
      * Whether to show the "Add Person" action in the context menu.
      */
@@ -773,9 +776,9 @@ export const FileList: React.FC<FileListProps> = ({
     const handleContextMenuActionWithTracking = useCallback(
         (action: FileContextAction) => {
             contextMenuActionTakenRef.current = true;
-            onContextMenuAction?.(action);
+            onContextMenuAction?.(action, contextMenu?.file);
         },
-        [onContextMenuAction],
+        [onContextMenuAction, contextMenu],
     );
 
     const renderListItem = useCallback(

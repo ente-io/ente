@@ -1292,6 +1292,40 @@ const Page: React.FC = () => {
         [],
     );
 
+    const handleFileViewerSendLink = useCallback(
+        async (file: EnteFile) => {
+            if (file.ownerID != user?.id) return;
+
+            showLoadingBar();
+            try {
+                const quickLinkCollection = await createQuickLinkCollection(
+                    quickLinkNameForFiles([file]),
+                );
+                await addToCollection(quickLinkCollection, [file]);
+                const publicURL = await createPublicURL(quickLinkCollection.id);
+                const resolvedURL = await resolveQuickLinkURL(
+                    publicURL.url,
+                    quickLinkCollection.key,
+                    customDomain,
+                );
+                setPublicLinkToast({ open: true, url: resolvedURL });
+                await remotePull({ silent: true });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
+            }
+        },
+        [
+            user?.id,
+            showLoadingBar,
+            hideLoadingBar,
+            customDomain,
+            remotePull,
+            onGenericError,
+        ],
+    );
+
     const handleMarkTempDeleted = useCallback(
         (files: EnteFile[]) => dispatch({ type: "markTempDeleted", files }),
         [],
@@ -1341,12 +1375,16 @@ const Page: React.FC = () => {
      * and selects an action from the context menu.
      */
     const handleContextMenuAction = useCallback(
-        (action: FileContextAction) => {
+        (action: FileContextAction, targetFile?: EnteFile) => {
             // The selection should already be set by FileList's handleContextMenu
             // We just need to invoke the appropriate action handler
             switch (action) {
                 case "sendLink":
-                    createFileOpHandler("sendLink")();
+                    if (targetFile) {
+                        void handleFileViewerSendLink(targetFile);
+                    } else {
+                        createFileOpHandler("sendLink")();
+                    }
                     break;
                 case "download":
                     createFileOpHandler("download")();
@@ -1500,6 +1538,7 @@ const Page: React.FC = () => {
             createFileOpHandler,
             createOnCreateForCollectionOp,
             createOnSelectForCollectionOp,
+            handleFileViewerSendLink,
             handleOpenCollectionSelector,
             handleRemoveFilesFromCollection,
             showMiniDialog,
@@ -1841,6 +1880,7 @@ const Page: React.FC = () => {
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate
                     }
+                    onSendLink={handleFileViewerSendLink}
                     onMarkTempDeleted={handleMarkTempDeleted}
                     onSetOpenFileViewer={setIsFileViewerOpen}
                     onRemotePull={remotePull}
