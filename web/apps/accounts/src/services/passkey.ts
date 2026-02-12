@@ -361,7 +361,8 @@ export const isWhitelistedRedirect = (redirectURL: URL) => {
         redirectURL.protocol === "entelocker:" ||
         redirectURL.protocol === "ensu:" ||
         redirectURL.protocol === "ente-cli:" ||
-        redirectURL.protocol === "tauri:" ||
+        (redirectURL.protocol === "tauri:" &&
+            redirectURL.hostname === "localhost") ||
         _isWhitelistedRedirect(redirectURL)
     );
 };
