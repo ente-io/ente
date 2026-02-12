@@ -5,6 +5,10 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+import 'package:path/path.dart' as path;
+import 'package:version/version.dart';
+
 import 'target.dart';
 import 'util.dart';
 
@@ -50,20 +54,20 @@ class AndroidEnvironment {
   final Target target;
 
   bool ndkIsInstalled() {
-    final ndkPath = _join([sdkPath, 'ndk', ndkVersion]);
-    final ndkPackageXml = File(_join([ndkPath, 'package.xml']));
+    final ndkPath = path.join(sdkPath, 'ndk', ndkVersion);
+    final ndkPackageXml = File(path.join(ndkPath, 'package.xml'));
     return ndkPackageXml.existsSync();
   }
 
   void installNdk({required String javaHome}) {
     final sdkManagerExtension = Platform.isWindows ? '.bat' : '';
-    final sdkManager = _join([
+    final sdkManager = path.join(
       sdkPath,
       'cmdline-tools',
       'latest',
       'bin',
       'sdkmanager$sdkManagerExtension',
-    ]);
+    );
 
     log.info('Installing NDK $ndkVersion');
     runCommand(
@@ -75,18 +79,18 @@ class AndroidEnvironment {
 
   Future<Map<String, String>> buildEnvironment() async {
     final hostArch = Platform.isMacOS
-        ? 'darwin-x86_64'
-        : (Platform.isLinux ? 'linux-x86_64' : 'windows-x86_64');
+        ? "darwin-x86_64"
+        : (Platform.isLinux ? "linux-x86_64" : "windows-x86_64");
 
-    final ndkPath = _join([sdkPath, 'ndk', ndkVersion]);
-    final toolchainPath = _join([
+    final ndkPath = path.join(sdkPath, 'ndk', ndkVersion);
+    final toolchainPath = path.join(
       ndkPath,
       'toolchains',
       'llvm',
       'prebuilt',
       hostArch,
       'bin',
-    ]);
+    );
 
     final minSdkVersion = math.max(
       target.androidMinSdkVersion!,
@@ -96,13 +100,9 @@ class AndroidEnvironment {
     final exe = Platform.isWindows ? '.exe' : '';
 
     final arKey = 'AR_${target.rust}';
-    final arValue = _firstExistingPath(
-      [
-        '${target.rust}-ar',
-        'llvm-ar',
-        'llvm-ar.exe',
-      ].map((e) => _join([toolchainPath, e])),
-    );
+    final arValue = ['${target.rust}-ar', 'llvm-ar', 'llvm-ar.exe']
+        .map((e) => path.join(toolchainPath, e))
+        .firstWhereOrNull((element) => File(element).existsSync());
     if (arValue == null) {
       throw Exception('Failed to find ar for $target in $toolchainPath');
     }
@@ -110,12 +110,12 @@ class AndroidEnvironment {
     final targetArg = '--target=${target.rust}$minSdkVersion';
 
     final ccKey = 'CC_${target.rust}';
-    final ccValue = _join([toolchainPath, 'clang$exe']);
+    final ccValue = path.join(toolchainPath, 'clang$exe');
     final cfFlagsKey = 'CFLAGS_${target.rust}';
     final cFlagsValue = targetArg;
 
     final cxxKey = 'CXX_${target.rust}';
-    final cxxValue = _join([toolchainPath, 'clang++$exe']);
+    final cxxValue = path.join(toolchainPath, 'clang++$exe');
     final cxxFlagsKey = 'CXXFLAGS_${target.rust}';
     final cxxFlagsValue = targetArg;
 
@@ -123,11 +123,11 @@ class AndroidEnvironment {
         .toUpperCase();
 
     final ranlibKey = 'RANLIB_${target.rust}';
-    final ranlibValue = _join([toolchainPath, 'llvm-ranlib$exe']);
+    final ranlibValue = path.join(toolchainPath, 'llvm-ranlib$exe');
 
-    final ndkMajor = _parseMajorVersion(ndkVersion);
+    final ndkVersionParsed = Version.parse(ndkVersion);
     final rustFlagsKey = 'CARGO_ENCODED_RUSTFLAGS';
-    final rustFlagsValue = _libGccWorkaround(targetTempDir, ndkMajor);
+    final rustFlagsValue = _libGccWorkaround(targetTempDir, ndkVersionParsed);
 
     final runRustTool = Platform.isWindows
         ? 'run_build_tool.cmd'
@@ -137,7 +137,7 @@ class AndroidEnvironment {
       Uri.parse('package:build_tool/buildtool.dart'),
     ))!.toFilePath();
     final selfPath = _canonicalize(
-      _join([packagePath, '..', '..', '..', runRustTool]),
+      path.join(packagePath, '..', '..', '..', runRustTool),
     );
 
     // Make sure that run_build_tool is working properly even initially launched directly
@@ -161,24 +161,29 @@ class AndroidEnvironment {
     };
   }
 
+  String _canonicalize(String filePath) {
+    final normalized = Uri.file(filePath).normalizePath();
+    return normalized.toFilePath(windows: Platform.isWindows);
+  }
+
   // Workaround for libgcc missing in NDK23, inspired by cargo-ndk
-  String _libGccWorkaround(String buildDir, int ndkMajor) {
-    final workaroundDir = _join([
+  String _libGccWorkaround(String buildDir, Version ndkVersion) {
+    final workaroundDir = path.join(
       buildDir,
       'cargokit',
       'libgcc_workaround',
-      '$ndkMajor',
-    ]);
+      '${ndkVersion.major}',
+    );
     Directory(workaroundDir).createSync(recursive: true);
-    if (ndkMajor >= 23) {
+    if (ndkVersion.major >= 23) {
       File(
-        _join([workaroundDir, 'libgcc.a']),
+        path.join(workaroundDir, 'libgcc.a'),
       ).writeAsStringSync('INPUT(-lunwind)');
     } else {
       // Other way around, untested, forward libgcc.a from libunwind once Rust
       // gets updated for NDK23+.
       File(
-        _join([workaroundDir, 'libunwind.a']),
+        path.join(workaroundDir, 'libunwind.a'),
       ).writeAsStringSync('INPUT(-lgcc)');
     }
 
@@ -189,74 +194,5 @@ class AndroidEnvironment {
     rustFlags = '$rustFlags-L\x1f$workaroundDir';
     rustFlags = '$rustFlags\x1f-C\x1flink-arg=-Wl,-z,max-page-size=16384';
     return rustFlags;
-  }
-
-  int _parseMajorVersion(String version) {
-    final major = int.tryParse(version.split('.').first.trim());
-    if (major == null) {
-      throw Exception('Invalid NDK version: $version');
-    }
-    return major;
-  }
-
-  String? _firstExistingPath(Iterable<String> candidates) {
-    for (final candidate in candidates) {
-      if (File(candidate).existsSync()) {
-        return candidate;
-      }
-    }
-    return null;
-  }
-
-  String _canonicalize(String filePath) {
-    final normalized = Uri.file(filePath).normalizePath();
-    return normalized.toFilePath(windows: Platform.isWindows);
-  }
-
-  String _join(List<String> parts) {
-    final normalized = parts
-        .where((part) => part.isNotEmpty)
-        .map(_normalizeSeparators)
-        .toList();
-    if (normalized.isEmpty) {
-      return '';
-    }
-
-    var result = _trimTrailingSeparators(normalized.first);
-    for (final rawPart in normalized.skip(1)) {
-      final part = _trimLeadingAndTrailingSeparators(rawPart);
-      if (part.isEmpty) {
-        continue;
-      }
-      if (result.isEmpty || result.endsWith(Platform.pathSeparator)) {
-        result = '$result$part';
-      } else {
-        result = '$result${Platform.pathSeparator}$part';
-      }
-    }
-    return result;
-  }
-
-  String _normalizeSeparators(String value) {
-    return value.replaceAll(RegExp(r'[\\/]'), Platform.pathSeparator);
-  }
-
-  String _trimTrailingSeparators(String value) {
-    var result = value;
-    while (result.endsWith('/') || result.endsWith('\\')) {
-      result = result.substring(0, result.length - 1);
-    }
-    return result;
-  }
-
-  String _trimLeadingAndTrailingSeparators(String value) {
-    var result = value;
-    while (result.startsWith('/') || result.startsWith('\\')) {
-      result = result.substring(1);
-    }
-    while (result.endsWith('/') || result.endsWith('\\')) {
-      result = result.substring(0, result.length - 1);
-    }
-    return result;
   }
 }
