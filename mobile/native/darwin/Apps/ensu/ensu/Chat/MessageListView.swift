@@ -25,6 +25,7 @@ struct MessageListView: View {
     @State private var lastContentHeight: CGFloat = 0
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
+    @State private var suppressAutoScrollAfterGeneration = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -63,7 +64,12 @@ struct MessageListView: View {
                     let delta = newHeight - lastContentHeight
                     lastContentHeight = newHeight
                     let lastMessageIsUser = messages.last?.role == .user
-                    if delta > 1, autoScrollEnabled, !isUserDragging, !isGenerating, lastMessageIsUser {
+                    if delta > 1,
+                       autoScrollEnabled,
+                       !isUserDragging,
+                       !isGenerating,
+                       !suppressAutoScrollAfterGeneration,
+                       lastMessageIsUser {
                         scrollToBottom(scrollProxy, force: true, animated: true)
                     }
                 }
@@ -74,6 +80,14 @@ struct MessageListView: View {
                     lastScrollChange = currentScrollChange
                     didInitialScroll = false
                     scheduleInitialScroll(scrollProxy)
+                }
+                .onChange(of: isGenerating) { generating in
+                    if !generating {
+                        suppressAutoScrollAfterGeneration = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                            suppressAutoScrollAfterGeneration = false
+                        }
+                    }
                 }
             }
         }
@@ -128,7 +142,11 @@ struct MessageListView: View {
         }
 
         if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging && !isGenerating && !didGenerationJustFinish {
+            if autoScrollEnabled &&
+                !isUserDragging &&
+                !isGenerating &&
+                !didGenerationJustFinish &&
+                !suppressAutoScrollAfterGeneration {
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
