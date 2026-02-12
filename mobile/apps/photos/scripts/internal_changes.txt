@@ -1,4 +1,3 @@
-- Ashil: Enable single file download for locally existing uploaded files.
 - Laurens: (i) Use usearch vectorDB for magic search and discover section
 - Laurens: Make it possible to ignore already named persons
 - Neeraj: Fix iOS native video crash by avoiding FFprobe on problematic files, harden seekbar null handling, and stop audio on swipe dismiss
