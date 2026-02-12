@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -136,6 +137,9 @@ internal fun MessageList(
         }
     }
 
+    val streamingOutroDurationMs = 520L
+    val streamingCollapseDurationMs = 300
+
     val lastMessage = messages.lastOrNull()
     LaunchedEffect(isGenerating, lastMessage?.id) {
         if (lastMessage == null) {
@@ -153,7 +157,7 @@ internal fun MessageList(
             keepStreamingVisible = true
             lastStreamingParentForOutro = streamingParentId
         } else if (keepStreamingVisible) {
-            delay(1200)
+            delay(streamingOutroDurationMs)
             keepStreamingVisible = false
             lastStreamingParentForOutro = null
         }
@@ -269,8 +273,8 @@ internal fun MessageList(
                             (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id),
                     enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                         scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                        shrinkVertically(animationSpec = tween(durationMillis = 220))
+                    exit = fadeOut(animationSpec = tween(durationMillis = streamingCollapseDurationMs)) +
+                        shrinkVertically(animationSpec = tween(durationMillis = streamingCollapseDurationMs))
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -290,8 +294,8 @@ internal fun MessageList(
                         (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == null),
                 enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                     scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                    shrinkVertically(animationSpec = tween(durationMillis = 220))
+                exit = fadeOut(animationSpec = tween(durationMillis = streamingCollapseDurationMs)) +
+                    shrinkVertically(animationSpec = tween(durationMillis = streamingCollapseDurationMs))
             ) {
                 StreamingMessageBubble(
                     text = streamingResponse,
@@ -704,13 +708,19 @@ private fun StreamingMessageBubble(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        ensuRiveAnimation(
+        Box(
             modifier = Modifier
                 .width(riveWidth)
-                .height(riveHeight),
-            outroTrigger = !isGenerating,
-            outroInputName = "outro"
-        )
+                .height(riveHeight)
+                .clipToBounds(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            ensuRiveAnimation(
+                modifier = Modifier.fillMaxSize(),
+                outroTrigger = !isGenerating,
+                outroInputName = "outro"
+            )
+        }
 
         if (renderedText.isNotBlank()) {
             Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
