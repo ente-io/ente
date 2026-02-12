@@ -115,7 +115,6 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (!isOfflineMode) return const SizedBox.shrink();
     if (_dismissed) return const SizedBox.shrink();
     if (!hasGrantedMLConsent) return const SizedBox.shrink();
     if (localSettings.isMLProgressBannerDismissed) {
