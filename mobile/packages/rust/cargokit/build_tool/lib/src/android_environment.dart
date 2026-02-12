@@ -136,9 +136,9 @@ class AndroidEnvironment {
     final packagePath = (await Isolate.resolvePackageUri(
       Uri.parse('package:build_tool/buildtool.dart'),
     ))!.toFilePath();
-    final selfPath = _canonicalize(
+    final selfPath = Uri.file(
       path.join(packagePath, '..', '..', '..', runRustTool),
-    );
+    ).normalizePath().toFilePath(windows: Platform.isWindows);
 
     // Make sure that run_build_tool is working properly even initially launched directly
     // through dart run.
@@ -159,11 +159,6 @@ class AndroidEnvironment {
       '_CARGOKIT_NDK_LINK_CLANG': ccValue,
       'CARGOKIT_TOOL_TEMP_DIR': toolTempDir,
     };
-  }
-
-  String _canonicalize(String filePath) {
-    final normalized = Uri.file(filePath).normalizePath();
-    return normalized.toFilePath(windows: Platform.isWindows);
   }
 
   // Workaround for libgcc missing in NDK23, inspired by cargo-ndk
