@@ -657,6 +657,17 @@ export const ChatMessageList = memo(
                     overflowX: "hidden",
                     bgcolor: "background.paper",
                     overscrollBehaviorY: "contain",
+                    scrollbarWidth: "thin",
+                    "&::-webkit-scrollbar": {
+                        width: "8px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "divider",
+                        borderRadius: "999px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                        backgroundColor: "transparent",
+                    },
                     minWidth: 0,
                     width: "100%",
                     maxWidth: "100vw",

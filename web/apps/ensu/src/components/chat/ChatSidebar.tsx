@@ -209,6 +209,17 @@ export const ChatSidebar = memo(
                     overflowY: "auto",
                     px: 1,
                     overscrollBehaviorY: "contain",
+                    scrollbarWidth: "thin",
+                    "&::-webkit-scrollbar": {
+                        width: "8px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "divider",
+                        borderRadius: "999px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                        backgroundColor: "transparent",
+                    },
                 }}
             >
                 <Stack
