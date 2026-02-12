@@ -7,7 +7,7 @@ on:
     workflow_dispatch: # Allow manual trigger
 
 env:
-    FLUTTER_VERSION: "3.38.0"
+    FLUTTER_VERSION: "3.38.9"
 
 permissions:
     contents: read

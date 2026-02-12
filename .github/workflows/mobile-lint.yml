@@ -9,7 +9,7 @@ on:
             - ".github/workflows/mobile-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.38.0"
+    FLUTTER_VERSION: "3.38.9"
     RUSTFLAGS: -D warnings
 
 permissions:
