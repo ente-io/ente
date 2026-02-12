@@ -81,16 +81,15 @@ class SmartMemoriesService {
     bool debugSurfaceAll = false,
   }) async {
     try {
-      if (isOfflineMode) {
-        final memories = await calcSimpleMemories();
-        return MemoriesResult(memories, <BaseLocation>[]);
-      }
       final TimeLogger t = TimeLogger(context: "calcMemories");
       _logger.info(
         'calcMemories called with time: $now at ${DateTime.now()} $t',
       );
 
-      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
+      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories(
+        useLocalIntIds: isOfflineMode,
+        requireLocalId: isOfflineMode,
+      );
       _logger.info("All files length: ${allFiles.length} $t");
 
       final collectionIDsToExclude = await getCollectionIDsToExclude();
@@ -101,7 +100,11 @@ class SmartMemoriesService {
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.info('seenTimes has ${seenTimes.length} entries $t');
 
-      final allPersons = await PersonService.instance.getPersons();
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final allPersons = isOfflineMode
+          ? const <PersonEntity>[]
+          : await PersonService.instance.getPersons();
       final persons =
           allPersons.where((person) => !person.data.hideFromMemories).toList();
       _logger.info(
@@ -111,30 +114,29 @@ class SmartMemoriesService {
           allPersons.map((person) => person.remoteID).toList(growable: false);
       final assignedClusterIDs = allPersonIDs.isEmpty
           ? <String>{}
-          : await MLDataDB.instance.getPersonsClusterIDs(allPersonIDs);
+          : await mlDataDB.getPersonsClusterIDs(allPersonIDs);
       _logger.info('assignedClusterIDs has ${assignedClusterIDs.length} $t');
 
-      final currentUserEmail = Configuration.instance.getEmail();
+      final currentUserEmail =
+          isOfflineMode ? null : Configuration.instance.getEmail();
       _logger.info('currentUserEmail: $currentUserEmail $t');
 
       final cities = await locationService.getCities();
       _logger.info('cities has ${cities.length} entries $t');
 
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
-          await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
+          await mlDataDB.getFileIDsToFacesWithoutEmbedding();
       _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
-      final clusterIdToFaceCount =
-          await MLDataDB.instance.clusterIdToFaceCount();
+      final clusterIdToFaceCount = await mlDataDB.clusterIdToFaceCount();
       _logger.info(
         'clusterIdToFaceCount has ${clusterIdToFaceCount.length} entries $t',
       );
-      final clusterIdToFaceIDs =
-          await MLDataDB.instance.getAllClusterIdToFaceIDs();
+      final clusterIdToFaceIDs = await mlDataDB.getAllClusterIdToFaceIDs();
       _logger.info(
         'clusterIdToFaceIDs has ${clusterIdToFaceIDs.length} entries $t',
       );
 
-      final allImageEmbeddings = await MLDataDB.instance.getAllClipVectors();
+      final allImageEmbeddings = await mlDataDB.getAllClipVectors();
       _logger.info(
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
@@ -582,7 +584,7 @@ class SmartMemoriesService {
         }
       }
     }
-    final Set<EnteFile> allFiles = {};
+    final Set<EnteFile> candidateFiles = {};
     for (final file in allFilesFromSearchService) {
       final localId = file.localID;
       final hasLocalId = localId != null && localId.isNotEmpty;
@@ -608,26 +610,35 @@ class SmartMemoriesService {
             archivedOrHiddenCollectionIDs.contains(collectionID)) {
           continue;
         }
-        allFiles.add(file);
+        candidateFiles.add(file);
       }
     }
     final Map<String, int> localIdToIntId = useLocalIntIds
         ? await OfflineFilesDB.instance.ensureLocalIntIds(
-            allFiles
+            candidateFiles
                 .map((file) => file.localID)
                 .whereType<String>()
                 .where((id) => id.isNotEmpty),
           )
         : <String, int>{};
+    final Set<EnteFile> allFiles = {};
     final allFileIdsToFile = <int, EnteFile>{};
-    for (final file in allFiles) {
+    for (final file in candidateFiles) {
+      final localIntId = useLocalIntIds ? localIdToIntId[file.localID] : null;
+      final mappedFile = localIntId != null
+          ? file.copyWith(
+              generatedID: localIntId,
+              uploadedFileID: localIntId,
+            )
+          : file;
       final key = useLocalIntIds
-          ? localIdToIntId[file.localID]
+          ? localIntId
           : useGeneratedIds
-              ? file.generatedID
-              : file.uploadedFileID;
+              ? mappedFile.generatedID
+              : mappedFile.uploadedFileID;
       if (key != null) {
-        allFileIdsToFile[key] = file;
+        allFiles.add(mappedFile);
+        allFileIdsToFile[key] = mappedFile;
       }
     }
     return (allFiles, allFileIdsToFile);
@@ -892,7 +903,7 @@ class SmartMemoriesService {
       }
     }
     final List<String> orderedImportantPersonsID = persons
-        .where((person) => !person.data.isIgnored)
+        .where((person) => !isOfflineMode && !person.data.isIgnored)
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());
