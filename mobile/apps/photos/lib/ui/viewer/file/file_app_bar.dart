@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -32,7 +31,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -61,12 +59,6 @@ class FileAppBar extends StatefulWidget {
 
   @override
   FileAppBarState createState() => FileAppBarState();
-}
-
-class _LocalFileLocation {
-  final String locationName;
-
-  const _LocalFileLocation(this.locationName);
 }
 
 class FileAppBarState extends State<FileAppBar> {
@@ -320,7 +312,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (isFileUploaded) {
+      if (widget.file.isRemoteFile) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -626,26 +618,6 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
-    final _LocalFileLocation? localFileLocation =
-        await _getExistingLocalFileLocation(file);
-    if (localFileLocation != null && mounted) {
-      final actionResult = await showChoiceActionSheet(
-        context,
-        title: "Already available on device",
-        body: Platform.isAndroid
-            ? "You can find this file in the \"${localFileLocation.locationName}\" folder. Download it again?"
-            : "You can find this file in the \"${localFileLocation.locationName}\" album. Download it again?",
-        firstButtonLabel: "Download anyway",
-        secondButtonLabel: "Cancel",
-      );
-      if (actionResult?.action != ButtonAction.first) {
-        return;
-      }
-    }
-    if (!mounted) {
-      return;
-    }
-
     final dialog = createProgressDialog(
       context,
       context.l10n.downloading,
@@ -661,61 +633,6 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
-  }
-
-  Future<_LocalFileLocation?> _getExistingLocalFileLocation(
-    EnteFile file,
-  ) async {
-    if (file.localID == null || file.localID!.isEmpty) {
-      return null;
-    }
-
-    final asset = await file.getAsset;
-    if (asset == null || !(await asset.exists)) {
-      _logger.info(
-        "Removing stale localID reference before download for ${file.tag}",
-      );
-      file.localID = null;
-      if (file.generatedID != null) {
-        unawaited(FilesDB.instance.update(file));
-      }
-      return null;
-    }
-
-    final String relativePath =
-        (asset.relativePath ?? "").trim().replaceFirst(RegExp(r'[/\\]+$'), '');
-    final String deviceFolder = (file.deviceFolder ?? "").trim();
-
-    if (Platform.isAndroid) {
-      final String folderName;
-      if (relativePath.isNotEmpty) {
-        folderName = _getLastPathSegment(relativePath);
-      } else if (deviceFolder.isNotEmpty) {
-        folderName = _getLastPathSegment(deviceFolder);
-      } else {
-        folderName = "Recent";
-      }
-      return _LocalFileLocation(folderName);
-    }
-
-    final String albumSource = deviceFolder.isNotEmpty
-        ? _getLastPathSegment(deviceFolder)
-        : relativePath.isNotEmpty
-            ? _getLastPathSegment(relativePath)
-            : "Recents";
-    return _LocalFileLocation(albumSource);
-  }
-
-  String _getLastPathSegment(String path) {
-    final normalized = path.trim().replaceFirst(RegExp(r'[/\\]+$'), '');
-    if (normalized.isEmpty) {
-      return normalized;
-    }
-    final segments = normalized
-        .split(RegExp(r'[/\\]+'))
-        .where((segment) => segment.trim().isNotEmpty)
-        .toList();
-    return segments.isEmpty ? normalized : segments.last;
   }
 
   Future<void> _setAs(EnteFile file) async {
