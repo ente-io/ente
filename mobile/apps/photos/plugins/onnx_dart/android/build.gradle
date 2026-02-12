@@ -54,7 +54,7 @@ android {
         testImplementation("org.mockito:mockito-core:5.0.0")
 
         implementation("com.microsoft.onnxruntime:onnxruntime-android") {
-            version { strictly("1.22.0") }
+            version { strictly("1.23.1") }
         }
     }
 
