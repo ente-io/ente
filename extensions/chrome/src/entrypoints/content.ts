@@ -38,7 +38,7 @@ export default defineContentScript({
     const ICON_SIZE = 24;
     const ICON_PADDING = 4;
     const AUTO_SUBMIT_STORAGE_KEY = "autoSubmitEnabled";
-    let autoSubmitEnabled = true;
+    let autoSubmitEnabled = false;
 
     chrome.storage.local.get(AUTO_SUBMIT_STORAGE_KEY, (result) => {
       const value = result[AUTO_SUBMIT_STORAGE_KEY] as boolean | undefined;
@@ -50,7 +50,7 @@ export default defineContentScript({
 
       if (changes[AUTO_SUBMIT_STORAGE_KEY]) {
         const v = changes[AUTO_SUBMIT_STORAGE_KEY]!.newValue;
-        autoSubmitEnabled = typeof v === "boolean" ? v : true;
+        autoSubmitEnabled = typeof v === "boolean" ? v : false;
       }
     });
 

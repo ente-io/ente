@@ -77,7 +77,6 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
   }
 
   const baseDomain = getBaseDomain(hostname);
-  const baseKey = baseDomain.replace(/[^a-z0-9]/g, "");
   const matches: SiteMatch[] = [];
 
   const isAliasMatch = (issuerKey: string): boolean => {
@@ -116,26 +115,8 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
       continue;
     }
 
-    // Fallback fuzzy match: helps "bitwarden" match "bitwarden.com", etc.
-    // This is intentionally lower-confidence and should NOT trigger "silent" autofill.
-    if (issuerKey.length >= 4) {
-      const STOPWORDS = new Set([
-        "auth",
-        "authenticator",
-        "otp",
-        "totp",
-        "mfa",
-        "2fa",
-        "verify",
-        "verification",
-        "code",
-        "security",
-      ]);
-      if (!STOPWORDS.has(issuerKey) && baseKey.includes(issuerKey)) {
-        matches.push({ code, score: 50, matchType: "fuzzy" });
-        continue;
-      }
-    }
+    // Intentionally no fuzzy/substring matching.
+    // Restricting matches to strict domain/alias/equality reduces phishing risk.
   }
 
   return matches.sort((a, b) => {

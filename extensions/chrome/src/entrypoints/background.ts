@@ -18,6 +18,12 @@ export default defineBackground(() => {
   const AUTO_LOCK_ALARM = "autoLock";
   const TOKEN_CHECK_ALARM = "tokenCheck";
   const TOKEN_CHECK_INTERVAL_MINUTES = 10;
+  const CONTENT_SCRIPT_ALLOWED_MESSAGES = new Set<BackgroundMessage["type"]>([
+    "GET_CODES_FOR_SITE",
+    "GENERATE_OTP",
+    "GENERATE_OTPS",
+    "USER_ACTIVITY",
+  ]);
   // Master key is kept in-memory only to avoid persistence risks
   let inMemoryMasterKey: string | null = null;
 
@@ -65,12 +71,27 @@ export default defineBackground(() => {
 
   const migrateLegacyTokenStorage = async () => {
     try {
-      const { localStorage } = await import("@/lib/storage");
+      const { clearAllData, localStorage } = await import("@/lib/storage");
       const user = await localStorage.getUser();
       const encryptedToken = await localStorage.getEncryptedToken();
       const keyAttributes = await localStorage.getKeyAttributes();
 
-      if (!user || !user.token || encryptedToken || !keyAttributes?.publicKey) {
+      if (!user || !user.token || encryptedToken) {
+        return;
+      }
+      if (!keyAttributes?.publicKey) {
+        console.warn(
+          "Missing key attributes for legacy token migration; clearing local data",
+        );
+        await clearAllData();
+        await setPendingLogin(null);
+        inMemoryMasterKey = null;
+        await chrome.alarms.clear(AUTO_LOCK_ALARM);
+        await chrome.alarms.clear(TOKEN_CHECK_ALARM);
+        if (lockTimer) {
+          clearTimeout(lockTimer);
+          lockTimer = null;
+        }
         return;
       }
 
@@ -83,7 +104,17 @@ export default defineBackground(() => {
       await localStorage.setEncryptedToken(sealed);
       await localStorage.setUser({ id: user.id, email: user.email });
     } catch (e) {
-      console.warn("Legacy token migration skipped:", e);
+      const { clearAllData } = await import("@/lib/storage");
+      console.error("Legacy token migration failed; clearing local data", e);
+      await clearAllData();
+      await setPendingLogin(null);
+      inMemoryMasterKey = null;
+      await chrome.alarms.clear(AUTO_LOCK_ALARM);
+      await chrome.alarms.clear(TOKEN_CHECK_ALARM);
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        lockTimer = null;
+      }
     }
   };
 
@@ -740,9 +771,28 @@ export default defineBackground(() => {
    * Handle messages from popup and content scripts.
    */
   chrome.runtime.onMessage.addListener((message: BackgroundMessage, sender, sendResponse) => {
-    if (sender?.id && sender.id !== chrome.runtime.id) {
-      console.warn("Blocked message from non-extension sender", sender.id);
-      return;
+    if (sender?.id !== chrome.runtime.id) {
+      console.warn("Blocked message from non-extension sender", sender?.id);
+      sendResponse({ success: false, error: "Unauthorized sender" });
+      return false;
+    }
+
+    const senderUrl = typeof sender?.url === "string" ? sender.url : "";
+    const isExtensionPage = senderUrl.startsWith(chrome.runtime.getURL(""));
+    const isContentScript = !!sender?.tab;
+    if (!isExtensionPage && !isContentScript) {
+      console.warn("Blocked message from unknown sender context", sender);
+      sendResponse({ success: false, error: "Unauthorized sender context" });
+      return false;
+    }
+    if (isContentScript && !CONTENT_SCRIPT_ALLOWED_MESSAGES.has(message.type)) {
+      console.warn(
+        "Blocked unauthorized content-script action",
+        message.type,
+        senderUrl,
+      );
+      sendResponse({ success: false, error: "Unauthorized action" });
+      return false;
     }
 
     // Reset auto-lock timer:
@@ -751,8 +801,6 @@ export default defineBackground(() => {
     if (message.type === "USER_ACTIVITY") {
       void resetLockTimer();
     } else {
-      const isExtensionPage =
-        typeof sender?.url === "string" && sender.url.startsWith(chrome.runtime.getURL(""));
       if (isExtensionPage && message.type !== "GET_STATE") {
         void resetLockTimer();
       }
@@ -767,6 +815,13 @@ export default defineBackground(() => {
           return getCodes();
 
         case "GET_CODES_FOR_SITE":
+          if (isContentScript) {
+            if (!senderUrl) {
+              return { matches: [] };
+            }
+            // Bind site matching to the sender tab URL instead of trusting caller input.
+            return getCodesForSite(senderUrl);
+          }
           return getCodesForSite(message.url);
 
         case "GENERATE_OTP":

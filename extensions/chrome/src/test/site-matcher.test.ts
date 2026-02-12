@@ -23,9 +23,9 @@ describe("site-matcher", () => {
     expect(matches[0]?.matchType).toBe("domain");
   });
 
-  it("adds a low-confidence fuzzy match for common issuer-to-domain cases", () => {
+  it("does not match by fuzzy substring to reduce phishing risk", () => {
     const code = mkCode({ issuer: "Bitwarden" });
     const matches = matchCodesToSite([code], "https://bitwarden.com/login");
-    expect(matches[0]?.matchType).toBe("fuzzy");
+    expect(matches.length).toBe(0);
   });
 });

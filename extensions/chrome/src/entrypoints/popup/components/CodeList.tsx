@@ -24,7 +24,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [recentById, setRecentById] = useState<Record<string, number>>({});
   const [otpById, setOtpById] = useState<Record<string, { otp: string; nextOtp: string; validFor: number }>>({});
-  const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(true);
+  const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(false);
   const [clipboardAutoClearEnabled, setClipboardAutoClearEnabled] = useState(false);
   const [clipboardAutoClearSeconds, setClipboardAutoClearSeconds] = useState(30);
   const [appLockEnabled, setAppLockEnabled] = useState(false);
@@ -70,7 +70,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
       (result) => {
         setPopupTheme(result.popupTheme === "light" ? "light" : "dark");
         setAppLockEnabled(typeof result.appLockEnabled === "boolean" ? result.appLockEnabled : false);
-        setAutoSubmitEnabled(typeof result.autoSubmitEnabled === "boolean" ? result.autoSubmitEnabled : true);
+        setAutoSubmitEnabled(typeof result.autoSubmitEnabled === "boolean" ? result.autoSubmitEnabled : false);
         setClipboardAutoClearEnabled(typeof result.clipboardAutoClearEnabled === "boolean" ? result.clipboardAutoClearEnabled : false);
         setClipboardAutoClearSeconds(typeof result.clipboardAutoClearSeconds === "number" ? result.clipboardAutoClearSeconds : 30);
       },
@@ -94,7 +94,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
       }
       if (changes.autoSubmitEnabled) {
         const v = changes.autoSubmitEnabled.newValue;
-        setAutoSubmitEnabled(typeof v === "boolean" ? v : true);
+        setAutoSubmitEnabled(typeof v === "boolean" ? v : false);
       }
       if (changes.clipboardAutoClearEnabled) {
         const v = changes.clipboardAutoClearEnabled.newValue;

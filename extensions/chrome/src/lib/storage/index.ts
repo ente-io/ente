@@ -286,7 +286,7 @@ export const localStorage = {
   },
 
   async getAutoSubmitEnabled(): Promise<boolean> {
-    return (await this.get<boolean>(LOCAL_KEYS.AUTO_SUBMIT)) ?? true;
+    return (await this.get<boolean>(LOCAL_KEYS.AUTO_SUBMIT)) ?? false;
   },
 
   async setAutoSubmitEnabled(enabled: boolean): Promise<void> {

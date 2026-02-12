@@ -47,7 +47,7 @@ export interface ExtensionState {
 export interface SiteMatch {
   code: Code;
   score: number;
-  matchType: "exact" | "domain" | "fuzzy" | "alias";
+  matchType: "exact" | "domain" | "alias";
 }
 
 /**
