@@ -182,7 +182,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 l10n.mlProgressBannerDescription,
                 style: textTheme.miniMuted.copyWith(
@@ -190,7 +190,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 24),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2.5),
                 child: LinearProgressIndicator(
@@ -202,7 +202,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
