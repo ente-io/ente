@@ -13,7 +13,7 @@ String buildSingleFileDownloadSkippedToastMessage(
           ? displayName
           : fallbackFileName;
 
-  return "$fileName is already available in the $folderName folder on your device";
+  return "$fileName is already available in the $folderName album on your device";
 }
 
 String buildSingleFileDownloadSkippedInMultiSelectionToastMessage(
@@ -29,13 +29,10 @@ String buildSingleFileDownloadSkippedInMultiSelectionToastMessage(
           ? displayName
           : fallbackFileName;
 
-  return "Download of $fileName skipped as it is already available in the $folderName folder on your device";
+  return "Download of $fileName skipped as it is already available in the $folderName album on your device";
 }
 
 String buildMultipleFilesDownloadSkippedToastMessage(int fileCount) {
-  if (fileCount == 1) {
-    return "Download of 1 file skipped as it is already on your device";
-  }
   return "Download of $fileCount files skipped as they are already on your device";
 }
 
