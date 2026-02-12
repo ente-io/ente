@@ -63,6 +63,13 @@ class SmartMemoriesService {
   static const yearsBefore = 30;
 
   static const minimumMemoryLength = 5;
+  static const _maximumUnnamedPeopleClusters = 10;
+  static const _maximumUnnamedPeopleGroupSize = 6;
+  static const _minimumUnnamedPeopleWithMePhotos = minimumMemoryLength;
+  static const _minimumUnnamedPeopleNonGroupPhotos = minimumMemoryLength;
+  static const _minimumUnnamedPeopleNonConsecutiveDays = 4;
+  static const _unnamedClusterPersonIDPrefix = "cluster:";
+  static const _debugForceUnnamedClustersOnly = false;
 
   SmartMemoriesService();
 
@@ -99,6 +106,12 @@ class SmartMemoriesService {
       _logger.info(
         'gotten all ${persons.length} persons after filtering $t',
       );
+      final allPersonIDs =
+          allPersons.map((person) => person.remoteID).toList(growable: false);
+      final assignedClusterIDs = allPersonIDs.isEmpty
+          ? <String>{}
+          : await MLDataDB.instance.getPersonsClusterIDs(allPersonIDs);
+      _logger.info('assignedClusterIDs has ${assignedClusterIDs.length} $t');
 
       final currentUserEmail = Configuration.instance.getEmail();
       _logger.info('currentUserEmail: $currentUserEmail $t');
@@ -109,6 +122,16 @@ class SmartMemoriesService {
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
           await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
       _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
+      final clusterIdToFaceCount =
+          await MLDataDB.instance.clusterIdToFaceCount();
+      _logger.info(
+        'clusterIdToFaceCount has ${clusterIdToFaceCount.length} entries $t',
+      );
+      final clusterIdToFaceIDs =
+          await MLDataDB.instance.getAllClusterIdToFaceIDs();
+      _logger.info(
+        'clusterIdToFaceIDs has ${clusterIdToFaceIDs.length} entries $t',
+      );
 
       final allImageEmbeddings = await MLDataDB.instance.getAllClipVectors();
       _logger.info(
@@ -160,6 +183,9 @@ class SmartMemoriesService {
           "currentUserEmail": currentUserEmail,
           "cities": cities,
           "fileIdToFaces": fileIdToFaces,
+          "clusterIdToFaceCount": clusterIdToFaceCount,
+          "clusterIdToFaceIDs": clusterIdToFaceIDs,
+          "assignedClusterIDs": assignedClusterIDs,
           "allImageEmbeddings": allImageEmbeddings,
           "clipPositiveTextVector": clipPositiveTextVector,
           "clipPeopleActivityVectors": clipPeopleActivityVectors,
@@ -336,6 +362,177 @@ class SmartMemoriesService {
     return filtered;
   }
 
+  static List<PeopleMemoryCandidate> _buildUnnamedClusterCandidates({
+    required Map<String, int> clusterIdToFaceCount,
+    required Map<String, Iterable<String>> clusterIdToFaceIDs,
+    required Set<String> assignedClusterIDs,
+    required Map<int, EnteFile> allFileIdsToFile,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Set<int>? meFileIDs,
+    required bool isMeAssigned,
+    required Map<int, int> seenTimes,
+    required int nowInMicroseconds,
+    required int windowEnd,
+    required PeopleSelectionBuilder selectionBuilder,
+  }) {
+    if (clusterIdToFaceCount.isEmpty || clusterIdToFaceIDs.isEmpty) {
+      return <PeopleMemoryCandidate>[];
+    }
+    if (isMeAssigned && (meFileIDs == null || meFileIDs.isEmpty)) {
+      return <PeopleMemoryCandidate>[];
+    }
+    final sortedUnassignedClusters = clusterIdToFaceCount.entries
+        .where((entry) => !assignedClusterIDs.contains(entry.key))
+        .toList(growable: false)
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final unnamedCandidates = <PeopleMemoryCandidate>[];
+    for (final entry in sortedUnassignedClusters) {
+      if (unnamedCandidates.length >= _maximumUnnamedPeopleClusters) break;
+      final clusterID = entry.key;
+      final faceIDs = clusterIdToFaceIDs[clusterID];
+      if (faceIDs == null || faceIDs.isEmpty) continue;
+
+      final clusterFileIDs = <int>{};
+      for (final faceID in faceIDs) {
+        clusterFileIDs.add(getFileIdFromFaceId(faceID));
+      }
+      if (clusterFileIDs.isEmpty) continue;
+
+      final nonGroupFiles = <EnteFile>[];
+      final nonGroupCreationTimes = <int>[];
+      int overlapWithMeInNonGroupFiles = 0;
+      for (final fileID in clusterFileIDs) {
+        final facesInPhoto = fileIdToFaces[fileID]?.length ?? 0;
+        if (facesInPhoto == 0 ||
+            facesInPhoto > _maximumUnnamedPeopleGroupSize) {
+          continue;
+        }
+        final file = allFileIdsToFile[fileID];
+        if (file == null || file.creationTime == null) continue;
+        nonGroupFiles.add(file);
+        nonGroupCreationTimes.add(file.creationTime!);
+        if (isMeAssigned && meFileIDs!.contains(fileID)) {
+          overlapWithMeInNonGroupFiles++;
+        }
+      }
+      if (isMeAssigned &&
+          overlapWithMeInNonGroupFiles < _minimumUnnamedPeopleWithMePhotos) {
+        continue;
+      }
+      if (nonGroupFiles.length < _minimumUnnamedPeopleNonGroupPhotos) {
+        continue;
+      }
+      final nonConsecutiveDays =
+          _countNonConsecutiveDays(nonGroupCreationTimes);
+      if (nonConsecutiveDays < _minimumUnnamedPeopleNonConsecutiveDays) {
+        continue;
+      }
+
+      unnamedCandidates.add(
+        PeopleMemoryCandidate(
+          personID: "$_unnamedClusterPersonIDPrefix$clusterID",
+          personName: null,
+          type: PeopleMemoryType.spotlight,
+          rawMemories: nonGroupFiles
+              .map((file) => Memory.fromFile(file, seenTimes))
+              .toList(growable: false),
+          firstDateToShow: nowInMicroseconds,
+          lastDateToShow: windowEnd,
+          selectionBuilder: selectionBuilder,
+          isUnnamedCluster: true,
+        ),
+      );
+    }
+    return unnamedCandidates;
+  }
+
+  static int _countNonConsecutiveDays(Iterable<int> creationTimes) {
+    if (creationTimes.isEmpty) return 0;
+    final uniqueDays = creationTimes
+        .map((timestamp) => timestamp - (timestamp % microSecondsInDay))
+        .toSet()
+        .toList(growable: false)
+      ..sort();
+    if (uniqueDays.isEmpty) return 0;
+    int count = 1;
+    int previousDay = uniqueDays.first;
+    for (final day in uniqueDays.skip(1)) {
+      if (day - previousDay > microSecondsInDay) {
+        count++;
+      }
+      previousDay = day;
+    }
+    return count;
+  }
+
+  static Map<String, int> _latestShownTimeByPersonID(
+    Iterable<PeopleShownLog> shownPeople,
+  ) {
+    final latestShownTimeByPersonID = <String, int>{};
+    for (final shownLog in shownPeople) {
+      final oldValue = latestShownTimeByPersonID[shownLog.personID];
+      if (oldValue == null || shownLog.lastTimeShown > oldValue) {
+        latestShownTimeByPersonID[shownLog.personID] = shownLog.lastTimeShown;
+      }
+    }
+    return latestShownTimeByPersonID;
+  }
+
+  static List<PeopleMemoryCandidate> _orderUnnamedCandidatesByRecencyAndRandom({
+    required Iterable<PeopleMemoryCandidate> candidates,
+    required Iterable<PeopleShownLog> shownPeople,
+    required DateTime currentTime,
+    required Duration shownPersonTimeout,
+  }) {
+    final remaining = candidates.toList(growable: true);
+    if (remaining.length <= 1) return remaining;
+    final random = Random();
+    final latestShownTimeByPersonID = _latestShownTimeByPersonID(shownPeople);
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final unseenWeight = max(1, shownPersonTimeout.inDays * 2);
+    final orderedCandidates = <PeopleMemoryCandidate>[];
+    while (remaining.isNotEmpty) {
+      final weights = <int>[];
+      int totalWeight = 0;
+      for (final candidate in remaining) {
+        final latestShownTime = latestShownTimeByPersonID[candidate.personID];
+        final weight = latestShownTime == null
+            ? unseenWeight
+            : max(
+                1,
+                (nowInMicroseconds - latestShownTime) ~/ microSecondsInDay,
+              );
+        weights.add(weight);
+        totalWeight += weight;
+      }
+      var chosenWeight = random.nextInt(totalWeight);
+      int chosenIndex = 0;
+      for (; chosenIndex < weights.length; chosenIndex++) {
+        chosenWeight -= weights[chosenIndex];
+        if (chosenWeight < 0) break;
+      }
+      orderedCandidates.add(remaining.removeAt(chosenIndex));
+    }
+    return orderedCandidates;
+  }
+
+  static bool _wasPersonShownRecently({
+    required String personID,
+    required Iterable<PeopleShownLog> shownPeople,
+    required DateTime currentTime,
+    required Duration shownPersonTimeout,
+  }) {
+    for (final shownLog in shownPeople) {
+      if (shownLog.personID != personID) continue;
+      final shownDate =
+          DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+      if (currentTime.difference(shownDate) < shownPersonTimeout) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<(Set<EnteFile>, Map<int, EnteFile>)> _getFilesAndMapForMemories({
     bool useGeneratedIds = false,
     bool requireLocalId = false,
@@ -430,6 +627,15 @@ class SmartMemoriesService {
       final List<City> cities = args["cities"];
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
           args["fileIdToFaces"];
+      final Map<String, int> clusterIdToFaceCount = Map<String, int>.from(
+        args["clusterIdToFaceCount"] as Map,
+      );
+      final Map<String, Iterable<String>> clusterIdToFaceIDs =
+          Map<String, Iterable<String>>.from(
+        args["clusterIdToFaceIDs"] as Map,
+      );
+      final Set<String> assignedClusterIDs =
+          (args["assignedClusterIDs"] as Set).cast<String>();
       final List<EmbeddingVector> allImageEmbeddings =
           args["allImageEmbeddings"];
       final Vector clipPositiveTextVector = args["clipPositiveTextVector"];
@@ -479,6 +685,9 @@ class SmartMemoriesService {
         persons: persons,
         currentUserEmail: currentUserEmail,
         fileIdToFaces: fileIdToFaces,
+        clusterIdToFaceCount: clusterIdToFaceCount,
+        clusterIdToFaceIDs: clusterIdToFaceIDs,
+        assignedClusterIDs: assignedClusterIDs,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
         clipPeopleActivityVectors: clipPeopleActivityVectors,
@@ -621,6 +830,9 @@ class SmartMemoriesService {
     required List<PersonEntity> persons,
     String? currentUserEmail,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, int> clusterIdToFaceCount,
+    required Map<String, Iterable<String>> clusterIdToFaceIDs,
+    required Set<String> assignedClusterIDs,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
     required Map<PeopleActivity, Vector> clipPeopleActivityVectors,
@@ -634,7 +846,6 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered (random) list of important people
-    if (persons.isEmpty) return [];
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
@@ -657,6 +868,12 @@ class SmartMemoriesService {
         .toList();
     orderedImportantPersonsID.shuffle(Random());
     final amountOfPersons = orderedImportantPersonsID.length;
+    final shownPersonTimeout = Duration(
+      days: min(
+        kPersonShowTimeout.inDays,
+        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
+      ),
+    );
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
@@ -678,6 +895,38 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
+    }
+
+    final unnamedClusterCandidates = _buildUnnamedClusterCandidates(
+      clusterIdToFaceCount: clusterIdToFaceCount,
+      clusterIdToFaceIDs: clusterIdToFaceIDs,
+      assignedClusterIDs: assignedClusterIDs,
+      allFileIdsToFile: allFileIdsToFile,
+      fileIdToFaces: fileIdToFaces,
+      meFileIDs: meFileIDs,
+      isMeAssigned: isMeAssigned,
+      seenTimes: seenTimes,
+      nowInMicroseconds: nowInMicroseconds,
+      windowEnd: windowEnd,
+      selectionBuilder: selectPeopleMemories,
+    );
+    final randomizedUnnamedClusterCandidates =
+        _orderUnnamedCandidatesByRecencyAndRandom(
+      candidates: unnamedClusterCandidates,
+      shownPeople: shownPeople,
+      currentTime: currentTime,
+      shownPersonTimeout: shownPersonTimeout,
+    );
+    w?.log('unnamed cluster candidates setup');
+
+    if (kDebugMode && _debugForceUnnamedClustersOnly) {
+      for (final candidate in randomizedUnnamedClusterCandidates) {
+        final memory = await candidate.realize();
+        if (memory == null) continue;
+        memoryResults.add(memory);
+        if (!surfaceAll) break;
+      }
+      return memoryResults;
     }
 
     final Map<String, Map<PeopleMemoryType, List<PeopleMemoryCandidate>>>
@@ -892,6 +1141,12 @@ class SmartMemoriesService {
           }
         }
       }
+      for (final candidate in unnamedClusterCandidates) {
+        final memory = await candidate.realize();
+        if (memory != null) {
+          memoryResults.add(memory);
+        }
+      }
       return memoryResults;
     }
 
@@ -986,14 +1241,9 @@ class SmartMemoriesService {
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
-    final shownPersonTimeout = Duration(
-      days: min(
-        kPersonShowTimeout.inDays,
-        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
-      ),
-    );
     final shownPersonAndTypeTimeout =
         Duration(days: shownPersonTimeout.inDays * 2);
+    bool addedFromRotation = false;
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -1045,10 +1295,51 @@ class SmartMemoriesService {
         final potentialMemory = await potentialCandidate.realize();
         if (potentialMemory == null) continue;
         memoryResults.add(potentialMemory);
+        addedFromRotation = true;
         added++;
         if (added >= 2) break peopleRotationLoop;
       }
       if (added > 0) break peopleRotationLoop;
+    }
+    if (!addedFromRotation) {
+      final eligibleUnnamedCandidates = <PeopleMemoryCandidate>[];
+      for (final candidate in randomizedUnnamedClusterCandidates) {
+        final candidatePersonID = candidate.personID;
+        bool alreadyInResults = false;
+        for (final memory in memoryResults) {
+          if (memory.personID == candidatePersonID) {
+            alreadyInResults = true;
+            break;
+          }
+        }
+        if (alreadyInResults) {
+          continue;
+        }
+        if (_wasPersonShownRecently(
+          personID: candidatePersonID,
+          shownPeople: shownPeople,
+          currentTime: currentTime,
+          shownPersonTimeout: shownPersonTimeout,
+        )) {
+          continue;
+        }
+        eligibleUnnamedCandidates.add(candidate);
+      }
+      final orderedEligibleUnnamedCandidates =
+          _orderUnnamedCandidatesByRecencyAndRandom(
+        candidates: eligibleUnnamedCandidates,
+        shownPeople: shownPeople,
+        currentTime: currentTime,
+        shownPersonTimeout: shownPersonTimeout,
+      );
+      for (final candidate in orderedEligibleUnnamedCandidates) {
+        final potentialMemory = await candidate.realize();
+        if (potentialMemory == null) {
+          continue;
+        }
+        memoryResults.add(potentialMemory);
+        break;
+      }
     }
     w?.log('rotation setup');
 
