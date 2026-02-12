@@ -132,7 +132,6 @@ brew install go
 
 ```sh
 brew install postgresql@15
-brew install libsodium
 brew install pkg-config
 ```
 

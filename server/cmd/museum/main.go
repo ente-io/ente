@@ -35,7 +35,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/offer"
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
-	"github.com/GoKillers/libsodium-go/sodium"
 	"github.com/dlmiddlecote/sqlstats"
 	"github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/api"
@@ -130,8 +129,6 @@ func main() {
 
 	db := setupDatabase()
 	defer db.Close()
-
-	sodium.Init()
 
 	hostName, err := os.Hostname()
 	if err != nil {
