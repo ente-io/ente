@@ -88,7 +88,10 @@ import "package:receive_sharing_intent/receive_sharing_intent.dart";
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     super.key,
+    this.startWithoutAccount = false,
   });
+
+  final bool startWithoutAccount;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -715,6 +718,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          final isStartWithoutAccountFlow = widget.startWithoutAccount &&
+              !Configuration.instance.hasConfiguredAccount() &&
+              !localSettings.isAppModeSet;
+          if (isStartWithoutAccountFlow) {
+            Navigator.pop(context);
+            return;
+          }
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
               _selectedFiles.clearAll();
@@ -833,9 +843,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      if (offlineMode) {
+      final isOfflineEntryFlowEnabled =
+          widget.startWithoutAccount && localSettings.showOfflineModeOption;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      if (isOfflineEntryFlowEnabled || hasPersistedOfflineMode) {
         if (_shouldShowPermissionWidget()) {
-          return const GrantPermissionsWidget();
+          return const GrantPermissionsWidget(startWithoutAccount: true);
         }
       } else {
         return const LandingPageWidget();
