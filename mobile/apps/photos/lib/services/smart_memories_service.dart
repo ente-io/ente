@@ -68,6 +68,7 @@ class SmartMemoriesService {
   static const _minimumUnnamedPeopleWithMePhotos = minimumMemoryLength;
   static const _minimumUnnamedPeopleNonGroupPhotos = minimumMemoryLength;
   static const _minimumUnnamedPeopleNonConsecutiveDays = 4;
+  static const _minimumNamedPeopleBeforeDisablingUnnamedFallback = 5;
   static const _unnamedClusterPersonIDPrefix = "cluster:";
   static const _debugForceUnnamedClustersOnly = false;
 
@@ -868,7 +869,8 @@ class SmartMemoriesService {
         .toList();
     orderedImportantPersonsID.shuffle(Random());
     final amountOfPersons = orderedImportantPersonsID.length;
-    final canUseUnnamedFallback = isOfflineMode || amountOfPersons < 5;
+    final canUseUnnamedFallback = isOfflineMode ||
+        amountOfPersons < _minimumNamedPeopleBeforeDisablingUnnamedFallback;
     final shownPersonTimeout = Duration(
       days: min(
         kPersonShowTimeout.inDays,
