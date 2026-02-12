@@ -619,17 +619,22 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    final l10n = context.l10n;
     final String? localFileLocationName =
-        await _getExistingLocalFileLocation(file);
+        await _getExistingLocalFileLocation(file, l10n);
     if (localFileLocationName != null && mounted) {
       final actionResult = await showChoiceActionSheet(
         context,
-        title: "Already available on device",
+        title: l10n.alreadyAvailableOnDeviceTitle,
         body: Platform.isAndroid
-            ? "You can find this file in the \"$localFileLocationName\" folder. Download it again?"
-            : "You can find this file in the \"$localFileLocationName\" album. Download it again?",
-        firstButtonLabel: "Download anyway",
-        secondButtonLabel: "Cancel",
+            ? l10n.alreadyAvailableOnDeviceBodyAndroid(
+                folderName: localFileLocationName,
+              )
+            : l10n.alreadyAvailableOnDeviceBodyIOS(
+                albumName: localFileLocationName,
+              ),
+        firstButtonLabel: l10n.downloadAnyway,
+        secondButtonLabel: l10n.cancel,
       );
       if (actionResult?.action != ButtonAction.first) {
         return;
@@ -658,6 +663,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<String?> _getExistingLocalFileLocation(
     EnteFile file,
+    AppLocalizations l10n,
   ) async {
     if (file.localID == null || file.localID!.isEmpty) {
       return null;
@@ -679,7 +685,7 @@ class FileAppBarState extends State<FileAppBar> {
       } else if (deviceFolder.isNotEmpty) {
         folderName = _getLastPathSegment(deviceFolder);
       } else {
-        folderName = "Recent";
+        folderName = l10n.recent;
       }
       return folderName;
     }
@@ -688,7 +694,7 @@ class FileAppBarState extends State<FileAppBar> {
         ? _getLastPathSegment(deviceFolder)
         : relativePath.isNotEmpty
             ? _getLastPathSegment(relativePath)
-            : "Recents";
+            : l10n.recent;
     return albumSource;
   }
 
