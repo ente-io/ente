@@ -666,6 +666,7 @@ export const FileList: React.FC<FileListProps> = ({
             collectionSummary,
             showAddPerson: !!showAddPersonAction,
             showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
+            showSendLink: selected.ownCount > 0,
         });
         if (!actions.includes("favorite")) return actions;
         if (

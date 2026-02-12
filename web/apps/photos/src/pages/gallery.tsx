@@ -1345,6 +1345,9 @@ const Page: React.FC = () => {
             // The selection should already be set by FileList's handleContextMenu
             // We just need to invoke the appropriate action handler
             switch (action) {
+                case "sendLink":
+                    createFileOpHandler("sendLink")();
+                    break;
                 case "download":
                     createFileOpHandler("download")();
                     break;
