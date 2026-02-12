@@ -1124,7 +1124,9 @@ class _FileSelectionActionsWidgetState
         for (final file in remoteFiles) {
           futures.add(
             taskQueue.add(() async {
-              await downloadToGallery(file);
+              // Avoid mutating selected file instances since `localID` is part
+              // of EnteFile hashCode and selection is maintained in a Set.
+              await downloadToGallery(file.copyWith());
               downloadedFiles++;
               dialog.update(
                 message: AppLocalizations.of(context).downloading +
@@ -1173,8 +1175,8 @@ class _FileSelectionActionsWidgetState
 
     if (skippedFilesCount == 0) {
       widget.selectedFiles.clearAll();
-    } else if (remoteFiles.isNotEmpty) {
-      widget.selectedFiles.unSelectAll(remoteFiles.toSet());
+    } else {
+      widget.selectedFiles.replaceSelection(skippedFiles.toSet());
     }
   }
 }
