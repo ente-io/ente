@@ -112,14 +112,43 @@ struct EnsuBrandIllustration: View {
         discoverPlaybackTargets()
 
         let inputName = resolvedOutroInputName ?? outroInputName
-        
-        // Try trigger input first (most common for state machine triggers)
+
+        if let boolInput = riveViewModel.boolInput(named: inputName) {
+            boolInput.setValue(true)
+            riveViewModel.play()
+            return
+        }
+
+        if let numberInput = riveViewModel.numberInput(named: inputName) {
+            numberInput.setValue(1)
+            riveViewModel.play()
+            return
+        }
+
+        if let outroStateMachineName {
+            try? riveViewModel.configureModel(stateMachineName: outroStateMachineName)
+            riveViewModel.play()
+            return
+        }
+
+        if let outroAnimationName {
+            try? riveViewModel.configureModel(animationName: outroAnimationName)
+            riveViewModel.play(loop: .oneShot)
+            return
+        }
+
         riveViewModel.triggerInput(inputName)
-        riveViewModel.play()
     }
 
     private func resetOutroInputValue() {
-        // Trigger inputs are one-time events and don't need to be reset
+        let inputName = resolvedOutroInputName ?? outroInputName
+        if let boolInput = riveViewModel.boolInput(named: inputName) {
+            boolInput.setValue(false)
+            return
+        }
+        if let numberInput = riveViewModel.numberInput(named: inputName) {
+            numberInput.setValue(0)
+        }
     }
 }
 
