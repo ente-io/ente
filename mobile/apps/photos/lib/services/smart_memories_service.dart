@@ -386,6 +386,30 @@ class SmartMemoriesService {
         .where((entry) => !assignedClusterIDs.contains(entry.key))
         .toList(growable: false)
       ..sort((a, b) => b.value.compareTo(a.value));
+    // Wrap the selection builder to move the photo with the fewest faces to
+    // the front, so the cover thumbnail clearly shows who the memory is about.
+    Future<List<Memory>> coverOptimizedBuilder(List<Memory> memories) async {
+      final selected = await selectionBuilder(memories);
+      if (selected.length <= 1) return selected;
+      int bestIdx = 0;
+      int bestFaceCount =
+          fileIdToFaces[selected[0].file.uploadedFileID]?.length ?? 999;
+      for (int i = 1; i < selected.length; i++) {
+        final faceCount =
+            fileIdToFaces[selected[i].file.uploadedFileID]?.length ?? 999;
+        if (faceCount < bestFaceCount) {
+          bestFaceCount = faceCount;
+          bestIdx = i;
+        }
+      }
+      if (bestIdx == 0) return selected;
+      return [
+        selected[bestIdx],
+        ...selected.sublist(0, bestIdx),
+        ...selected.sublist(bestIdx + 1),
+      ];
+    }
+
     final unnamedCandidates = <PeopleMemoryCandidate>[];
     for (final entry in sortedUnassignedClusters) {
       if (unnamedCandidates.length >= _maximumUnnamedPeopleClusters) break;
@@ -439,7 +463,7 @@ class SmartMemoriesService {
               .toList(growable: false),
           firstDateToShow: nowInMicroseconds,
           lastDateToShow: windowEnd,
-          selectionBuilder: selectionBuilder,
+          selectionBuilder: coverOptimizedBuilder,
           isUnnamedCluster: true,
         ),
       );
