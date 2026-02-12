@@ -117,7 +117,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final clipVectorDB = isOfflineMode
                   ? ClipVectorDB.offlineInstance
                   : ClipVectorDB.instance;
-              await clipVectorDB.deleteIndexFile(undoMigration: true);
+              await clipVectorDB.deleteIndexFile();
               await SimilarImagesService.instance.clearCache();
               showShortToast(context, 'Deleted vectorDB index');
             } catch (e, s) {

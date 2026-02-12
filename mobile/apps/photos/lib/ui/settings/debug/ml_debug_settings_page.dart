@@ -774,7 +774,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           final vectorDB = isOfflineMode
               ? ClipVectorDB.offlineInstance
               : ClipVectorDB.instance;
-          await vectorDB.deleteIndexFile(undoMigration: true);
+          await vectorDB.deleteIndexFile();
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('reset usearch index failed ', e, s);
