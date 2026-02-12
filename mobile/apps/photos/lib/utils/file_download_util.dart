@@ -267,7 +267,7 @@ Future<void> downloadToGallery(EnteFile file) async {
           );
         } else {
           _logger.info(
-            'Skipping localID update after download; existing localID is already a gallery asset',
+            'Skipping localID update after download',
           );
         }
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
