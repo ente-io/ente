@@ -54,8 +54,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
-  bool get _enableIOSLivePhotoFlickerFix =>
-      Platform.isIOS && flagService.internalUser;
+  bool get _enableLivePhotoFlickerFix => flagService.internalUser;
 
   @override
   void initState() {
@@ -252,7 +251,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     final controller = VideoController(_player);
     setState(() {
       _videoController = controller;
-      _isVideoFrameReady = !_enableIOSLivePhotoFlickerFix;
+      _isVideoFrameReady = !_enableLivePhotoFlickerFix;
     });
 
     try {
@@ -267,7 +266,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       if (!mounted || _videoController != controller) return;
       setState(() {
         _videoController = null;
-        _isVideoFrameReady = !_enableIOSLivePhotoFlickerFix;
+        _isVideoFrameReady = !_enableLivePhotoFlickerFix;
       });
       return;
     }
@@ -277,7 +276,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       await _player.pause();
     }
 
-    if (_enableIOSLivePhotoFlickerFix) {
+    if (_enableLivePhotoFlickerFix) {
       try {
         await controller.waitUntilFirstFrameRendered
             .timeout(const Duration(seconds: 2));
@@ -291,7 +290,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       await _player.play();
     }
 
-    if (!_enableIOSLivePhotoFlickerFix) {
+    if (!_enableLivePhotoFlickerFix) {
       return;
     }
 
