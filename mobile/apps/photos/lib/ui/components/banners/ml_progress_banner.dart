@@ -51,7 +51,8 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       _indexingComplete = false;
       _ensurePolling();
     });
-    _notificationSubscription = Bus.instance.on<NotificationEvent>().listen((_) {
+    _notificationSubscription =
+        Bus.instance.on<NotificationEvent>().listen((_) {
       _indexingComplete = false;
       _ensurePolling();
     });
