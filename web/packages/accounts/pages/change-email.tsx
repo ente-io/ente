@@ -8,7 +8,6 @@ import {
 import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import { changeEmail, sendOTT } from "ente-accounts/services/user";
-import { appName } from "ente-base/app";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
@@ -116,13 +115,7 @@ const ChangeEmailForm: React.FC = () => {
                             a: (
                                 <Box
                                     component={"span"}
-                                    sx={{
-                                        color: "text.muted",
-                                        fontFamily:
-                                            appName === "ensu"
-                                                ? '"Inter Variable", sans-serif'
-                                                : undefined,
-                                    }}
+                                    sx={{ color: "text.muted" }}
                                 />
                             ),
                         }}

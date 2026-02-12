@@ -38,7 +38,6 @@ import {
     sendOTT,
     verifyEmail,
 } from "ente-accounts/services/user";
-import { appName } from "ente-base/app";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import {
@@ -211,10 +210,6 @@ const Page: React.FC = () => {
                                 sx={{
                                     color: "text.muted",
                                     wordBreak: "break-word",
-                                    fontFamily:
-                                        appName === "ensu"
-                                            ? '"Inter Variable", sans-serif'
-                                            : undefined,
                                 }}
                             />
                         ),
