@@ -1,39 +1,16 @@
 import "package:photos/models/file/file.dart";
 
-String buildSingleFileDownloadSkippedToastMessage(
+String getDownloadSkipToastFileName(
   EnteFile file, {
-  required String folderName,
   required String fallbackFileName,
 }) {
   final title = (file.title ?? "").trim();
   final displayName = file.displayName.trim();
-  final fileName = title.isNotEmpty
+  return title.isNotEmpty
       ? title
       : displayName.isNotEmpty
           ? displayName
           : fallbackFileName;
-
-  return "$fileName is already available in the $folderName album on your device";
-}
-
-String buildSingleFileDownloadSkippedInMultiSelectionToastMessage(
-  EnteFile file, {
-  required String folderName,
-  required String fallbackFileName,
-}) {
-  final title = (file.title ?? "").trim();
-  final displayName = file.displayName.trim();
-  final fileName = title.isNotEmpty
-      ? title
-      : displayName.isNotEmpty
-          ? displayName
-          : fallbackFileName;
-
-  return "Download of $fileName skipped as it is already available in the $folderName album on your device";
-}
-
-String buildMultipleFilesDownloadSkippedToastMessage(int fileCount) {
-  return "Download of $fileCount files skipped as they are already on your device";
 }
 
 Future<String> getLocalFolderNameForDownloadSkipToast(

@@ -1147,21 +1147,24 @@ class _FileSelectionActionsWidgetState
 
     String finalMessage;
     if (skippedFilesCount > 0) {
+      final l10n = AppLocalizations.of(context);
       if (skippedFilesCount == 1) {
         final skippedFile = skippedFiles.first;
         final folderName = await getLocalFolderNameForDownloadSkipToast(
           skippedFile,
-          fallbackFolderName: AppLocalizations.of(context).gallery,
+          fallbackFolderName: l10n.gallery,
         );
-        finalMessage =
-            buildSingleFileDownloadSkippedInMultiSelectionToastMessage(
-          skippedFile,
-          folderName: folderName,
-          fallbackFileName: AppLocalizations.of(context).file,
+        finalMessage = l10n.downloadSkippedInSelectionSingleFile(
+          fileName: getDownloadSkipToastFileName(
+            skippedFile,
+            fallbackFileName: l10n.file,
+          ),
+          albumName: folderName,
         );
       } else {
-        finalMessage =
-            buildMultipleFilesDownloadSkippedToastMessage(skippedFilesCount);
+        finalMessage = l10n.downloadSkippedInSelectionMultipleFiles(
+          fileCount: skippedFilesCount,
+        );
       }
     } else {
       finalMessage = AppLocalizations.of(context).filesSavedToGallery;

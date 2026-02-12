@@ -625,12 +625,15 @@ class FileAppBarState extends State<FileAppBar> {
         fallbackFolderName: AppLocalizations.of(context).gallery,
       );
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         showToast(
           context,
-          buildSingleFileDownloadSkippedToastMessage(
-            file,
-            folderName: folderName,
-            fallbackFileName: AppLocalizations.of(context).file,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(
+              file,
+              fallbackFileName: l10n.file,
+            ),
+            albumName: folderName,
           ),
           iosLongToastLengthInSec: 4,
         );
