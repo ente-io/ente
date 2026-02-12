@@ -176,6 +176,7 @@ class SmartMemoriesService {
           "allFiles": allFiles,
           "allFileIdsToFile": allFileIdsToFile,
           "collectionIDsToExclude": collectionIDsToExclude,
+          "isOfflineMode": isOfflineMode,
           "now": now,
           "oldCache": oldCache,
           "debugSurfaceAll": debugSurfaceAll,
@@ -641,6 +642,7 @@ class SmartMemoriesService {
       final Set<EnteFile> allFiles = args["allFiles"];
       final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
       final Set<int> collectionIDsToExclude = args["collectionIDsToExclude"];
+      final bool isOfflineMode = args["isOfflineMode"] ?? false;
       final DateTime now = args["now"];
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
@@ -708,6 +710,7 @@ class SmartMemoriesService {
         surfaceAll: debugSurfaceAll,
         seenTimes: seenTimes,
         persons: persons,
+        isOfflineMode: isOfflineMode,
         currentUserEmail: currentUserEmail,
         fileIdToFaces: fileIdToFaces,
         clusterIdToFaceCount: clusterIdToFaceCount,
@@ -853,6 +856,7 @@ class SmartMemoriesService {
     bool surfaceAll = false,
     required Map<int, int> seenTimes,
     required List<PersonEntity> persons,
+    required bool isOfflineMode,
     String? currentUserEmail,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, int> clusterIdToFaceCount,
