@@ -24,6 +24,7 @@ import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
+import "package:photos/events/opened_settings_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/events/subscription_purchased_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
@@ -88,7 +89,10 @@ import "package:receive_sharing_intent/receive_sharing_intent.dart";
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     super.key,
+    this.startWithoutAccount = false,
   });
+
+  final bool startWithoutAccount;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -97,9 +101,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
-  static final _settingsPage = SettingsPage(
-    emailNotifier: UserService.instance.emailValueNotifier,
-  );
 
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
@@ -715,6 +716,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          final isStartWithoutAccountFlow = widget.startWithoutAccount &&
+              !Configuration.instance.hasConfiguredAccount() &&
+              !localSettings.isAppModeSet;
+          if (isStartWithoutAccountFlow) {
+            Navigator.pop(context);
+            return;
+          }
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
               _selectedFiles.clearAll();
@@ -748,11 +756,18 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Drawer(
                     width: double.infinity,
                     shape: const RoundedRectangleBorder(),
-                    child: _settingsPage,
+                    child: SettingsPage(
+                      emailNotifier: UserService.instance.emailValueNotifier,
+                    ),
                   ),
                 )
               : null,
-          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
+          onDrawerChanged: (isOpened) {
+            isSettingsOpen = isOpened;
+            if (isOpened) {
+              Bus.instance.fire(OpenedSettingsEvent());
+            }
+          },
           body: Stack(
             children: [
               Builder(
@@ -833,9 +848,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      if (offlineMode) {
+      final isOfflineEntryFlowEnabled =
+          widget.startWithoutAccount && localSettings.showOfflineModeOption;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      if (isOfflineEntryFlowEnabled || hasPersistedOfflineMode) {
         if (_shouldShowPermissionWidget()) {
-          return const GrantPermissionsWidget();
+          return const GrantPermissionsWidget(startWithoutAccount: true);
         }
       } else {
         return const LandingPageWidget();

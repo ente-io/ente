@@ -159,8 +159,10 @@ class _VideoWidgetState extends State<VideoWidget> {
       );
     }
 
-    if (useNativeVideoPlayer && !playPreview ||
-        playPreview && Platform.isAndroid) {
+    final shouldUseNativeVideoPlayer =
+        useNativeVideoPlayer && (!playPreview || Platform.isAndroid);
+
+    if (shouldUseNativeVideoPlayer) {
       return VideoWidgetNative(
         widget.file,
         key: nativePlayerKey,

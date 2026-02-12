@@ -985,6 +985,27 @@
   "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
+  "alreadyAvailableOnDeviceTitle": "Already available on device",
+  "alreadyAvailableOnDeviceBodyAndroid": "You can find this file in the \"{folderName}\" folder. Download it again?",
+  "@alreadyAvailableOnDeviceBodyAndroid": {
+    "description": "Dialog body shown before re-downloading when the file is already present on device on Android",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyAvailableOnDeviceBodyIOS": "You can find this file in the \"{albumName}\" album. Download it again?",
+  "@alreadyAvailableOnDeviceBodyIOS": {
+    "description": "Dialog body shown before re-downloading when the file is already present on device on iOS",
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyAvailableOnDeviceBodyUnknown": "This file is already on your device. Download it again?",
+  "downloadAnyway": "Download anyway",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
   "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",

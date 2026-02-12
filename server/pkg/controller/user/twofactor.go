@@ -228,7 +228,7 @@ func (c *UserController) GetKeyAttributeAndToken(context *gin.Context, userID in
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
-	err = c.AddTokenAndNotify(userID, auth.GetApp(context),
+	err = c.AddTokenAndNotify(context, userID, auth.GetApp(context),
 		token, network.GetClientIP(context), context.Request.UserAgent())
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")

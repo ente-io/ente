@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/app_mode.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -23,7 +24,12 @@ import "package:photos/utils/dialog_util.dart";
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
-  const GrantPermissionsWidget({super.key});
+  const GrantPermissionsWidget({
+    super.key,
+    this.startWithoutAccount = false,
+  });
+
+  final bool startWithoutAccount;
 
   @override
   State<GrantPermissionsWidget> createState() => _GrantPermissionsWidgetState();
@@ -45,7 +51,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (isOfflineMode) {
+    if (widget.startWithoutAccount) {
       return _buildOfflinePermissionScreen(context);
     }
 
@@ -224,6 +230,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       _logger.info("Offline permission state: $state");
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
+        await localSettings.setAppMode(AppMode.offline);
         await permissionService.onUpdatePermission(state);
         Bus.instance.fire(PermissionGrantedEvent());
         try {

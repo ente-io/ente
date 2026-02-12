@@ -85,7 +85,7 @@ Jump to a category:
 ### Hide vs Archive
 
 - [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
-- [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
+- [Can I hide albums or photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
 - [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
 - [How do I hide photos in Ente?](/photos/faq/albums-and-organization#how-to-hide)
 - [How do I archive photos in Ente?](/photos/faq/albums-and-organization#how-to-archive)

@@ -216,8 +216,12 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
   bool _isLoading = true;
+  bool _hasLoadedFromDb = false;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
+  bool get _isLoadingFromDb => !_hasLoadedFromDb && _isLoading;
+  bool get _isSyncingWithServer =>
+      _hasLoadedFromDb && !_hasCompletedInitialLoad;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -522,6 +526,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
+          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
@@ -530,6 +535,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
+          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad =
               CollectionService.instance.hasCompletedFirstSync();
         });
@@ -642,7 +648,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: !_hasCompletedInitialLoad || _isLoading,
+                  isSyncing: _isSyncingWithServer,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -695,6 +701,16 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
+    if (_isLoadingFromDb) {
+      final colorScheme = getEnteColorScheme(context);
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: colorScheme.primary700,
+        ),
+      );
+    }
+
     if (_error != null) {
       return Center(
         child: Padding(
