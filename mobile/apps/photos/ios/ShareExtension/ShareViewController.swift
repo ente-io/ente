@@ -1,3 +1,4 @@
+#if canImport(receive_sharing_intent)
 import receive_sharing_intent
 
 class ShareViewController: RSIShareViewController {
@@ -8,3 +9,12 @@ class ShareViewController: RSIShareViewController {
         return true
     }
 }
+#elseif canImport(UIKit)
+import UIKit
+
+class ShareViewController: UIViewController {}
+#else
+import Foundation
+
+class ShareViewController: NSObject {}
+#endif
