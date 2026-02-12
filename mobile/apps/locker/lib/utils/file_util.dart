@@ -9,7 +9,6 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/configuration.dart";
 import "package:locker/services/files/download/file_downloader.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
@@ -38,11 +37,9 @@ class FileUtil {
       }
     }
 
-    final String cachedFilePath =
-        "${Configuration.instance.getCacheDirectory()}${file.displayName}";
-    final File cachedFile = File(cachedFilePath);
-    if (await cachedFile.exists()) {
-      await _launchFile(context, cachedFile, file.displayName);
+    final cachedDecryptedFile = File(getCachedDecryptedFilePath(file));
+    if (await cachedDecryptedFile.exists()) {
+      await _launchFile(context, cachedDecryptedFile, file.displayName);
       return;
     }
 
