@@ -28,6 +28,13 @@ struct EnsuBrandIllustration: View {
                 } else {
                     riveViewModel.pause()
                 }
+
+                if outroTrigger {
+                    riveViewModel.triggerInput(outroInputName)
+                    lastOutroTrigger = true
+                } else {
+                    lastOutroTrigger = false
+                }
             }
             .onChange(of: animated) { value in
                 if value {
