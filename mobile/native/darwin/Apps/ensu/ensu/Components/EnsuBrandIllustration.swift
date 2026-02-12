@@ -59,8 +59,6 @@ struct EnsuBrandIllustration: View {
 
     var body: some View {
         let activePhase = animated ? isAnimating : true
-        _ = outroTrigger
-        _ = outroInputName
 
         Image("EnsuLogoForeground")
             .resizable()
