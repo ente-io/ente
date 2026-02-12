@@ -6,6 +6,11 @@
         android:title="@string/diagnostics" />
 
     <Preference
+        android:key="pref_adb_instructions"
+        android:title="@string/button_adb_instructions"
+        android:summary="@string/pref_adb_instructions_summary" />
+
+    <Preference
         android:key="pref_clear_cache"
         android:title="@string/ente_cache_clear"
         android:summary="@string/ente_cache_clear_summary" />

@@ -64,45 +64,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/step_set_screensaver"
-                android:textColor="@color/ssaver_text_secondary"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/text_screensaver_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/ssaver_text_hint"
-                android:textSize="12sp" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_set_screensaver"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/button_set_screensaver" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_open_dream_settings"
-                style="@style/Widget.SSaver.Button.Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/open_system_screensaver_settings" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_adb_instructions"
-                style="@style/Widget.SSaver.Button.Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/button_adb_instructions" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="@string/section_settings_logs"
                 android:textColor="@color/ssaver_text_secondary"
                 android:textSize="12sp" />
@@ -124,15 +85,6 @@
                 android:text="@string/diagnostics" />
 
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:text="@string/main_adb_hint"
-            android:textColor="@color/ssaver_text_hint"
-            android:textSize="13sp" />
 
     </LinearLayout>
 

@@ -7,6 +7,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.AdbInstructionsActivity
 import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
@@ -28,6 +29,11 @@ class AdvancedSettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("pref_diagnostics")?.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), DiagnosticsActivity::class.java))
+            true
+        }
+
+        findPreference<Preference>("pref_adb_instructions")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), AdbInstructionsActivity::class.java))
             true
         }
 

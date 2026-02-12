@@ -1,9 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
     <string name="app_name">Ente Screensaver</string>
     <string name="settings">Settings</string>
-    <string name="preview">Preview</string>
-
-    <string name="setup_preview_summary">Preview the slideshow now</string>
     <string name="ente_cache_clear">Clear Ente cache</string>
     <string name="ente_cache_clear_summary">Remove cached Ente photos and refresh metadata.</string>
     <string name="ente_cache_cleared">Ente cache cleared.</string>
@@ -29,12 +26,8 @@
     <string name="diagnostics_no_recent_logs">No recent logs.</string>
 
     <string name="main_subtitle">Configure a public album to start the screensaver.</string>
-    <string name="main_adb_hint">Need ADB? Open ADB instructions below.</string>
     <string name="step_connect_album">Step 1: Connect album</string>
-    <string name="step_set_screensaver">Step 2: Set as screensaver</string>
     <string name="section_settings_logs">Settings &amp; logs</string>
-    <string name="screensaver_status_configured">Status: Screensaver set</string>
-    <string name="screensaver_status_needs_setup">Status: Not set. ADB may be required.</string>
     <string name="button_set_screensaver">Set as screensaver</string>
     <string name="button_adb_instructions">ADB instructions</string>
 
@@ -164,8 +157,10 @@
     <!-- Settings refactor -->
     <string name="pref_change_album">Change album</string>
     <string name="pref_change_album_summary">Reconfigure your Ente album</string>
+    <string name="pref_set_screensaver_summary">Try setting this app as the active screensaver</string>
     <string name="pref_advanced">Advanced settings</string>
     <string name="pref_advanced_summary">Cache, intervals, fit mode, and more</string>
+    <string name="pref_adb_instructions_summary">Show ADB command to grant required permission</string>
     <string name="pref_clock_summary">Display clock on screensaver</string>
     <string name="advanced_settings_title">Advanced Settings</string>
 

@@ -7,15 +7,14 @@ import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.ScreensaverConfigurator
 import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
 import io.ente.photos.screensaver.setup.SetupActivity
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    private val scope = MainScope()
     private var dataStore: SsaverPreferenceDataStore? = null
+    private var setScreensaverPreference: Preference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val store = SsaverPreferenceDataStore(requireContext().applicationContext)
@@ -29,8 +28,21 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<Preference>("pref_open_preview")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), io.ente.photos.screensaver.preview.PreviewActivity::class.java))
+        setScreensaverPreference = findPreference("pref_set_screensaver")
+        setScreensaverPreference?.setOnPreferenceClickListener {
+            val result = ScreensaverConfigurator.trySetAsScreensaver(requireContext())
+            when (result) {
+                is ScreensaverConfigurator.Result.Success -> {
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
+                }
+                is ScreensaverConfigurator.Result.NeedsWriteSecureSettings -> {
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
+                }
+                is ScreensaverConfigurator.Result.Error -> {
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
+                }
+            }
+            updateSetScreensaverVisibility()
             true
         }
 
@@ -43,6 +55,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             startActivity(Intent(requireContext(), AdvancedSettingsActivity::class.java))
             true
         }
+
+        updateSetScreensaverVisibility()
     }
 
     private fun openDreamSettings() {
@@ -71,10 +85,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateSetScreensaverVisibility()
+    }
+
+    private fun updateSetScreensaverVisibility() {
+        val context = context ?: return
+        setScreensaverPreference?.isVisible = !ScreensaverConfigurator.isScreensaverConfigured(context)
+    }
+
     override fun onDestroy() {
         dataStore?.close()
         dataStore = null
-        scope.cancel()
         super.onDestroy()
     }
 }

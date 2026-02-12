@@ -7,9 +7,9 @@
         android:summary="@string/pref_change_album_summary" />
 
     <Preference
-        android:key="pref_open_preview"
-        android:title="@string/preview"
-        android:summary="@string/setup_preview_summary" />
+        android:key="pref_set_screensaver"
+        android:title="@string/button_set_screensaver"
+        android:summary="@string/pref_set_screensaver_summary" />
 
     <Preference
         android:key="pref_open_dream_settings"

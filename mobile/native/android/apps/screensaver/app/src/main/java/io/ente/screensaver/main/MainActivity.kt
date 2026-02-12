@@ -4,18 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivityMainBinding
 import io.ente.photos.screensaver.databinding.ActivityMainPreviewBinding
-import io.ente.photos.screensaver.diagnostics.AdbInstructionsActivity
 import io.ente.photos.screensaver.diagnostics.AppLog
 import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
-import io.ente.photos.screensaver.diagnostics.ScreensaverConfigurator
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.imageloading.AppImageLoader
 import io.ente.photos.screensaver.permissions.MediaPermissions
@@ -97,51 +93,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        setupBinding!!.buttonSetScreensaver.setOnClickListener {
-            val result = ScreensaverConfigurator.trySetAsScreensaver(this)
-            when (result) {
-                is ScreensaverConfigurator.Result.Success -> {
-                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
-                }
-                is ScreensaverConfigurator.Result.NeedsWriteSecureSettings -> {
-                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
-                }
-                is ScreensaverConfigurator.Result.Error -> {
-                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
-                }
-            }
-            updateScreensaverStatus()
-        }
-
-        setupBinding!!.buttonOpenDreamSettings.setOnClickListener {
-            val attempts = listOf(
-                Intent(Settings.ACTION_DREAM_SETTINGS),
-                Intent().setClassName(
-                    "com.android.tv.settings",
-                    "com.android.tv.settings.device.display.daydream.DaydreamActivity",
-                ),
-                Intent().setClassName(
-                    "com.android.tv.settings",
-                    "com.android.tv.settings.display.daydream.DaydreamActivity",
-                ),
-                Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.LEANBACK_SETTINGS"),
-                Intent(Settings.ACTION_SETTINGS),
-            )
-
-            val launched = attempts.any { intent ->
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                runCatching { startActivity(intent) }.isSuccess
-            }
-
-            if (!launched) {
-                Toast.makeText(this, getString(R.string.unavailable_system_screensaver_settings), Toast.LENGTH_LONG).show()
-            }
-        }
-
-        setupBinding!!.buttonAdbInstructions.setOnClickListener {
-            startActivity(Intent(this, AdbInstructionsActivity::class.java))
-        }
-
         setupBinding!!.buttonDiagnostics.setOnClickListener {
             startActivity(Intent(this, DiagnosticsActivity::class.java))
         }
@@ -165,9 +116,6 @@ class MainActivity : AppCompatActivity() {
                     slideshowController?.start()
                 }
             }
-        } else {
-            // Setup mode: update screensaver status
-            updateScreensaverStatus()
         }
     }
 
@@ -207,12 +155,4 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-    private fun updateScreensaverStatus() {
-        val configured = ScreensaverConfigurator.isScreensaverConfigured(this)
-        setupBinding?.textScreensaverStatus?.text = if (configured) {
-            getString(R.string.screensaver_status_configured)
-        } else {
-            getString(R.string.screensaver_status_needs_setup)
-        }
-    }
 }
