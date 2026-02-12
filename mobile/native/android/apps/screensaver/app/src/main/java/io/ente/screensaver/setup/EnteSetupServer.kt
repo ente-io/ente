@@ -8,11 +8,10 @@ import androidx.annotation.StringRes
 import fi.iki.elonen.NanoHTTPD
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.ente.EnteCrypto
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.ente.toDisplayMessage
-import javax.crypto.Cipher
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
+import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
@@ -51,6 +50,8 @@ class EnteSetupServer(
 
         return when {
             session.method == Method.GET && path == "/" -> serveIndex(session)
+            session.method == Method.GET && path.startsWith("/setup-crypto/") ->
+                serveSetupCryptoAsset(path.removePrefix("/setup-crypto/"))
             session.method == Method.POST && path == "/set" -> serveSet(session)
             session.method == Method.POST && path == "/clear" -> serveClear(session)
             path == "/set" || path == "/clear" -> {
@@ -68,6 +69,39 @@ class EnteSetupServer(
                     s(R.string.setup_server_not_found),
                 )
             }
+        }
+    }
+
+    private fun serveSetupCryptoAsset(fileName: String): Response {
+        val allowed = mapOf(
+            "ente_wasm.js" to "application/javascript",
+            "ente_wasm_bg.js" to "application/javascript",
+            "ente_wasm_bg.wasm" to "application/wasm",
+        )
+
+        val mime = allowed[fileName] ?: return newFixedLengthResponse(
+            Response.Status.NOT_FOUND,
+            MIME_PLAINTEXT,
+            s(R.string.setup_server_not_found),
+        )
+
+        val bytes = try {
+            appContext.assets.open("setup_crypto/$fileName").use { it.readBytes() }
+        } catch (_: IOException) {
+            return newFixedLengthResponse(
+                Response.Status.NOT_FOUND,
+                MIME_PLAINTEXT,
+                s(R.string.setup_server_not_found),
+            )
+        }
+
+        return newFixedLengthResponse(
+            Response.Status.OK,
+            mime,
+            bytes.inputStream(),
+            bytes.size.toLong(),
+        ).apply {
+            addHeader("Cache-Control", "no-store")
         }
     }
 
@@ -104,7 +138,7 @@ class EnteSetupServer(
                 $codeInput
                 $kidInput
                 <input type="hidden" name="payload" id="payload" />
-                <input type="hidden" name="iv" id="iv" />
+                <input type="hidden" name="header" id="header" />
                 <label for="url">${esc(R.string.setup_server_public_album_label)}</label>
                 <input name="url" id="url" placeholder="${esc(R.string.setup_server_public_album_placeholder)}" autocomplete="off" />
                 <label for="password">${esc(R.string.setup_server_password_label)}</label>
@@ -147,8 +181,8 @@ class EnteSetupServer(
                     return@runCatching securePayloadInvalidResponse()
                 }
 
-                val iv = session.parameters["iv"]?.firstOrNull().orEmpty().trim()
-                decryptSetupPayload(encryptedPayload, iv) ?: run {
+                val header = session.parameters["header"]?.firstOrNull().orEmpty().trim()
+                decryptSetupPayload(encryptedPayload, header) ?: run {
                     AppLog.error("Setup", "Encrypted setup payload invalid")
                     return@runCatching securePayloadInvalidResponse()
                 }
@@ -344,25 +378,23 @@ class EnteSetupServer(
         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/html", html)
     }
 
-    private fun decryptSetupPayload(payloadB64: String, ivB64: String): Pair<String, String>? {
-        val cipherBytes = decodeBase64Url(payloadB64) ?: return null
-        val ivBytes = decodeBase64Url(ivB64) ?: return null
-        if (ivBytes.size != 12) return null
+    private fun decryptSetupPayload(payloadB64: String, headerB64: String): Pair<String, String>? {
+        val encryptedBytes = decodeBase64(payloadB64) ?: return null
 
         return runCatching {
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            val key = SecretKeySpec(encryptionKey, "AES")
-            val spec = GCMParameterSpec(128, ivBytes)
-            cipher.init(Cipher.DECRYPT_MODE, key, spec)
-            val plaintextBytes = cipher.doFinal(cipherBytes)
+            val plaintextBytes = EnteCrypto.decryptBlobBytes(
+                encryptedData = encryptedBytes,
+                decryptionHeaderB64 = headerB64,
+                key = encryptionKey,
+            )
             val payload = JSONObject(String(plaintextBytes, Charsets.UTF_8))
             payload.optString("url").trim() to payload.optString("password")
         }.getOrNull()
     }
 
-    private fun decodeBase64Url(value: String): ByteArray? {
+    private fun decodeBase64(value: String): ByteArray? {
         return runCatching {
-            Base64.decode(value, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+            Base64.decode(value, Base64.DEFAULT)
         }.getOrNull()
     }
 
@@ -375,19 +407,19 @@ class EnteSetupServer(
                 const form = document.getElementById('setup-form');
                 const kidInput = document.getElementById('kid');
                 const payloadInput = document.getElementById('payload');
-                const ivInput = document.getElementById('iv');
+                const headerInput = document.getElementById('header');
                 const urlInput = document.getElementById('url');
                 const passwordInput = document.getElementById('password');
-                if (!form || !kidInput || !payloadInput || !ivInput || !urlInput || !passwordInput) return;
+                if (!form || !kidInput || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
 
                 const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
                 const hashParams = new URLSearchParams(hash);
                 const ek = hashParams.get('ek');
 
-                const bytesToBase64Url = (bytes) => {
+                const bytesToBase64 = (bytes) => {
                   let binary = '';
                   bytes.forEach((b) => { binary += String.fromCharCode(b); });
-                  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+                  return btoa(binary);
                 };
 
                 const base64UrlToBytes = (value) => {
@@ -409,18 +441,31 @@ class EnteSetupServer(
                   event.preventDefault();
 
                   try {
+                    const wasm = await import('/setup-crypto/ente_wasm.js');
+                    if (typeof wasm.crypto_init === 'function') {
+                      wasm.crypto_init();
+                    }
+
                     const keyBytes = base64UrlToBytes(ek);
-                    const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt']);
-                    const iv = crypto.getRandomValues(new Uint8Array(12));
+                    const keyB64 = bytesToBase64(keyBytes);
+
                     const plaintext = JSON.stringify({
                       url: urlInput.value || '',
                       password: passwordInput.value || ''
                     });
                     const plaintextBytes = new TextEncoder().encode(plaintext);
-                    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintextBytes);
+                    const plaintextB64 = bytesToBase64(plaintextBytes);
 
-                    payloadInput.value = bytesToBase64Url(new Uint8Array(encrypted));
-                    ivInput.value = bytesToBase64Url(iv);
+                    const encrypted = wasm.crypto_encrypt_blob(plaintextB64, keyB64);
+                    const encryptedData = encrypted?.encrypted_data ?? encrypted?.encryptedData;
+                    const decryptionHeader = encrypted?.decryption_header ?? encrypted?.decryptionHeader;
+
+                    if (!encryptedData || !decryptionHeader) {
+                      throw new Error('Missing encrypted payload');
+                    }
+
+                    payloadInput.value = encryptedData;
+                    headerInput.value = decryptionHeader;
 
                     urlInput.value = '';
                     passwordInput.value = '';
