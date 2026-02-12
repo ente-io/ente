@@ -148,22 +148,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _isFreePlanUser() || !_hasLoadedData
-                    ? const SizedBox.shrink()
-                    : Text(
-                        convertBytesToReadableFormat(
-                          _userDetails.getTotalStorage(),
-                        ),
-                        style: textTheme.smallMuted,
-                      ),
-              ],
-            ),
-          ),
           Expanded(child: _getBody()),
         ],
       ),
@@ -542,11 +526,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       );
     }
     return planWidgets;
-  }
-
-  bool _isFreePlanUser() {
-    return _currentSubscription != null &&
-        freeProductID == _currentSubscription!.productID;
   }
 
   bool _isPopularPlan(BillingPlan plan) {

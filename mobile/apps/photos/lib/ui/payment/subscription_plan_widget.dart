@@ -28,8 +28,13 @@ class SubscriptionPlanWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final numAndUnit = convertBytesToNumberAndUnit(storage);
-    final String storageValue = numAndUnit.$1.toString();
-    final String storageUnit = numAndUnit.$2.toUpperCase();
+    int storageValueInUnit = numAndUnit.$1;
+    String storageUnit = numAndUnit.$2.toUpperCase();
+    if (storageUnit == "TB") {
+      storageValueInUnit = storageValueInUnit * 1000;
+      storageUnit = "GB";
+    }
+    final String storageValue = storageValueInUnit.toString();
     final bool isSelected = isActive;
 
     return Padding(

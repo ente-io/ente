@@ -189,22 +189,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _isFreePlanUser() || !_hasLoadedData
-                    ? const SizedBox.shrink()
-                    : Text(
-                        convertBytesToReadableFormat(
-                          _userDetails.getTotalStorage(),
-                        ),
-                        style: textTheme.smallMuted,
-                      ),
-              ],
-            ),
-          ),
           Expanded(child: _getBody()),
         ],
       ),
