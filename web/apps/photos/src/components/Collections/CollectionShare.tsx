@@ -56,13 +56,14 @@ import type {
     CollectionNewParticipantRole,
     PublicURL,
 } from "ente-media/collection";
-import { type CollectionUser } from "ente-media/collection";
+import { CollectionSubType, type CollectionUser } from "ente-media/collection";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     createPublicURL,
+    deleteCollection,
     deleteShareURL,
     getCollectionByID,
     shareCollection,
@@ -1784,6 +1785,17 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         setBlockingLoad(true);
         setErrorMessage("");
         try {
+            const isQuickLinkAlbum =
+                collection.magicMetadata?.data.subType ==
+                CollectionSubType.quicklink;
+            if (isQuickLinkAlbum && collection.sharees.length === 0) {
+                await deleteCollection(collection.id, { keepFiles: true });
+                setPublicURL(undefined);
+                void onRemotePull({ silent: true });
+                handleRootClose();
+                return;
+            }
+
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
             void onRemotePull({ silent: true });
