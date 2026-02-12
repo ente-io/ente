@@ -3,7 +3,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 
 class SaveFacesBanner extends StatefulWidget {
   const SaveFacesBanner({super.key});
@@ -92,7 +92,7 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LandingPageWidget(),
+                    builder: (_) => const EmailEntryPage(),
                   ),
                 );
               },

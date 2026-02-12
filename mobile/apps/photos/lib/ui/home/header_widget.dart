@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/service_locator.dart';
 import "package:photos/services/wrapped/wrapped_service.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/components/banners/get_started_banner.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/memories/memories_widget.dart";
 import 'package:photos/ui/home/status_bar_widget.dart';
 import "package:photos/ui/wrapped/rewind_banner.dart";
@@ -70,7 +70,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             onGetStarted: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const LandingPageWidget(),
+                  builder: (_) => const EmailEntryPage(),
                 ),
               );
             },
