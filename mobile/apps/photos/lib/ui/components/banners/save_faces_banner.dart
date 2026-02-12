@@ -59,13 +59,16 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
-                        color: colorScheme.contentLight,
-                        size: 18,
-                        strokeWidth: 2,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
+                          color: colorScheme.contentLight,
+                          size: 18,
+                          strokeWidth: 2,
+                        ),
                       ),
                     ),
                   ),

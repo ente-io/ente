@@ -96,13 +96,16 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                       GestureDetector(
                         onTap: _onDismiss,
                         behavior: HitTestBehavior.opaque,
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCancel01,
-                            color: Colors.white,
-                            size: 20,
-                            strokeWidth: 2,
+                        child: const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: Colors.white,
+                              size: 20,
+                              strokeWidth: 2,
+                            ),
                           ),
                         ),
                       ),
