@@ -12,10 +12,16 @@ export const getEnteURL = (isTouchscreen: boolean): string => {
             userAgent.includes("iPhone") ||
             userAgent.includes("iPod");
         const isAndroid = userAgent.includes("Android");
+        const isAltAndroidOS =
+            /LineageOS|Graphene|Calyx|\/e\/|eOS|HarmonyOS|Huawei|Fire OS|Silk\//i.test(
+                userAgent,
+            );
 
         if (isIOS) {
             return "https://apps.apple.com/app/id1542026904";
         } else if (isAndroid) {
+            // Play Store links can bounce or fail on non-Play Android variants.
+            if (isAltAndroidOS) return "https://web.ente.io";
             return "https://play.google.com/store/apps/details?id=io.ente.photos";
         }
         // For other touchscreen devices, fall back to web
