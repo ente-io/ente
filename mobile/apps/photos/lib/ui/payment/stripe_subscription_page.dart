@@ -17,6 +17,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -57,6 +58,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
   final Logger logger = Logger("StripeSubscriptionPage");
+  String? _selectedPlanProductID;
 
   Future<void> _fetchSub() async {
     return _userService
@@ -77,6 +79,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       }
 
       return _filterStripeForUI().then((value) {
+        _syncOnboardingSelection();
         _hasLoadedData = true;
         setState(() {});
       });
@@ -93,6 +96,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       final isYearlyPlan = plan.period == 'year';
       return isYearlyPlan == _showYearlyPlan;
     }).toList();
+    _syncOnboardingSelection();
     if (mounted) {
       setState(() {});
     }
@@ -151,6 +155,27 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           Expanded(child: _getBody()),
         ],
       ),
+      bottomNavigationBar: widget.isOnboarding &&
+              _hasLoadedData &&
+              !(_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin())
+          ? Container(
+              color: colorScheme.backgroundColour,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  child: ButtonWidgetV2(
+                    buttonType: ButtonTypeV2.primary,
+                    labelText: AppLocalizations.of(context).continueLabel,
+                    isDisabled: _selectedPlanProductID == null,
+                    onTap: _selectedPlanProductID == null
+                        ? null
+                        : _onOnboardingContinueTap,
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -175,13 +200,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   Widget _buildPlans() {
     final widgets = <Widget>[];
-
-    widgets.add(
-      SubscriptionHeaderWidget(
-        isOnboarding: widget.isOnboarding,
-        currentUsage: _userDetails.getFamilyOrPersonalUsage(),
-      ),
-    );
 
     widgets.add(
       SubscriptionToggle(
@@ -432,93 +450,81 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       planWidgets.add(
         GestureDetector(
           onTap: () async {
-            if (widget.isOnboarding && plan.id == freeProductID) {
-              Bus.instance.fire(SubscriptionPurchasedEvent());
-              // ignore: unawaited_futures
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const HomeWidget();
-                  },
-                ),
-                (route) => false,
-              );
-              unawaited(
-                _billingService.verifySubscription(
-                  freeProductID,
-                  "",
-                  paymentProvider: "ente",
-                ),
-              );
-            } else {
-              if (isActive) {
-                return;
-              }
-              // prompt user to cancel their active subscription form other
-              // payment providers
-              if (!_isStripeSubscriber &&
-                  _hasActiveSubscription &&
-                  _currentSubscription!.productID != freeProductID) {
-                await showErrorDialog(
-                  context,
-                  AppLocalizations.of(context).sorry,
-                  AppLocalizations.of(context).cancelOtherSubscription(
-                    paymentProvider: _currentSubscription!.paymentProvider,
-                  ),
-                );
-                return;
-              }
-              final int addOnBonus =
-                  _userDetails.bonusData?.totalAddOnBonus() ?? 0;
-              if (_userDetails.getFamilyOrPersonalUsage() >
-                  (plan.storage + addOnBonus)) {
-                logger.warning(
-                  " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
-                  " plan storage ${convertBytesToReadableFormat(plan.storage)} "
-                  "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
-                  "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
-                );
-                await showErrorDialog(
-                  context,
-                  AppLocalizations.of(context).sorry,
-                  AppLocalizations.of(context).youCannotDowngradeToThisPlan,
-                );
-                return;
-              }
-              String stripPurChaseAction = 'buy';
-              if (_isStripeSubscriber && _hasActiveSubscription) {
-                // confirm if user wants to change plan or not
-                final result = await showChoiceDialog(
-                  context,
-                  title: AppLocalizations.of(context).confirmPlanChange,
-                  body: AppLocalizations.of(context)
-                      .areYouSureYouWantToChangeYourPlan,
-                  firstButtonLabel: AppLocalizations.of(context).yes,
-                );
-                if (result!.action == ButtonAction.first) {
-                  stripPurChaseAction = 'update';
-                } else {
-                  return;
-                }
-              }
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return PaymentWebPage(
-                      planId: plan.stripeID,
-                      actionType: stripPurChaseAction,
-                    );
-                  },
-                ),
-              ).then((value) => onWebPaymentGoBack(value));
+            if (widget.isOnboarding) {
+              setState(() {
+                _selectedPlanProductID = productID;
+              });
+              return;
             }
+            if (isActive) {
+              return;
+            }
+            // prompt user to cancel their active subscription form other
+            // payment providers
+            if (!_isStripeSubscriber &&
+                _hasActiveSubscription &&
+                _currentSubscription!.productID != freeProductID) {
+              await showErrorDialog(
+                context,
+                AppLocalizations.of(context).sorry,
+                AppLocalizations.of(context).cancelOtherSubscription(
+                  paymentProvider: _currentSubscription!.paymentProvider,
+                ),
+              );
+              return;
+            }
+            final int addOnBonus =
+                _userDetails.bonusData?.totalAddOnBonus() ?? 0;
+            if (_userDetails.getFamilyOrPersonalUsage() >
+                (plan.storage + addOnBonus)) {
+              logger.warning(
+                " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
+                " plan storage ${convertBytesToReadableFormat(plan.storage)} "
+                "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
+                "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
+              );
+              await showErrorDialog(
+                context,
+                AppLocalizations.of(context).sorry,
+                AppLocalizations.of(context).youCannotDowngradeToThisPlan,
+              );
+              return;
+            }
+            String stripPurChaseAction = 'buy';
+            if (_isStripeSubscriber && _hasActiveSubscription) {
+              // confirm if user wants to change plan or not
+              final result = await showChoiceDialog(
+                context,
+                title: AppLocalizations.of(context).confirmPlanChange,
+                body: AppLocalizations.of(context)
+                    .areYouSureYouWantToChangeYourPlan,
+                firstButtonLabel: AppLocalizations.of(context).yes,
+              );
+              if (result!.action == ButtonAction.first) {
+                stripPurChaseAction = 'update';
+              } else {
+                return;
+              }
+            }
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return PaymentWebPage(
+                    planId: plan.stripeID,
+                    actionType: stripPurChaseAction,
+                  );
+                },
+              ),
+            ).then((value) => onWebPaymentGoBack(value));
           },
           child: SubscriptionPlanWidget(
             storage: plan.storage,
             price: plan.price,
             period: plan.period,
-            isActive: isActive && !_hideCurrentPlanSelection,
+            isActive: widget.isOnboarding
+                ? _selectedPlanProductID == productID
+                : isActive && !_hideCurrentPlanSelection,
             isPopular: _isPopularPlan(plan),
             isOnboarding: widget.isOnboarding,
           ),
@@ -530,5 +536,124 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   bool _isPopularPlan(BillingPlan plan) {
     return popularProductIDs.contains(plan.id);
+  }
+
+  void _syncOnboardingSelection() {
+    if (!widget.isOnboarding) {
+      return;
+    }
+    final visibleProductIDs = _plans
+        .map((plan) => plan.stripeID)
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    if (_selectedPlanProductID != null &&
+        visibleProductIDs.contains(_selectedPlanProductID)) {
+      return;
+    }
+    final currentProductID = _currentSubscription?.productID;
+    if (currentProductID != null &&
+        visibleProductIDs.contains(currentProductID)) {
+      _selectedPlanProductID = currentProductID;
+      return;
+    }
+    _selectedPlanProductID =
+        visibleProductIDs.isNotEmpty ? visibleProductIDs.first : null;
+  }
+
+  Future<void> _onOnboardingContinueTap() async {
+    final selectedPlanProductID = _selectedPlanProductID;
+    if (selectedPlanProductID == null) {
+      return;
+    }
+
+    if (selectedPlanProductID == freeProductID) {
+      Bus.instance.fire(SubscriptionPurchasedEvent());
+      // ignore: unawaited_futures
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const HomeWidget();
+          },
+        ),
+        (route) => false,
+      );
+      unawaited(
+        _billingService.verifySubscription(
+          freeProductID,
+          "",
+          paymentProvider: "ente",
+        ),
+      );
+      return;
+    }
+
+    final BillingPlan? selectedPlan = _plans
+        .where((plan) => plan.stripeID == selectedPlanProductID)
+        .firstOrNull;
+    if (selectedPlan == null) {
+      return;
+    }
+
+    final isActive = _hasActiveSubscription &&
+        _currentSubscription!.productID == selectedPlanProductID;
+    if (isActive) {
+      return;
+    }
+
+    if (!_isStripeSubscriber &&
+        _hasActiveSubscription &&
+        _currentSubscription!.productID != freeProductID) {
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).sorry,
+        AppLocalizations.of(context).cancelOtherSubscription(
+          paymentProvider: _currentSubscription!.paymentProvider,
+        ),
+      );
+      return;
+    }
+
+    final int addOnBonus = _userDetails.bonusData?.totalAddOnBonus() ?? 0;
+    if (_userDetails.getFamilyOrPersonalUsage() >
+        (selectedPlan.storage + addOnBonus)) {
+      logger.warning(
+        " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
+        " plan storage ${convertBytesToReadableFormat(selectedPlan.storage)} "
+        "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
+        "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (selectedPlan.storage + addOnBonus))}",
+      );
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).sorry,
+        AppLocalizations.of(context).youCannotDowngradeToThisPlan,
+      );
+      return;
+    }
+
+    String stripPurChaseAction = 'buy';
+    if (_isStripeSubscriber && _hasActiveSubscription) {
+      final result = await showChoiceDialog(
+        context,
+        title: AppLocalizations.of(context).confirmPlanChange,
+        body: AppLocalizations.of(context).areYouSureYouWantToChangeYourPlan,
+        firstButtonLabel: AppLocalizations.of(context).yes,
+      );
+      if (result!.action == ButtonAction.first) {
+        stripPurChaseAction = 'update';
+      } else {
+        return;
+      }
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return PaymentWebPage(
+            planId: selectedPlan.stripeID,
+            actionType: stripPurChaseAction,
+          );
+        },
+      ),
+    ).then((value) => onWebPaymentGoBack(value));
   }
 }

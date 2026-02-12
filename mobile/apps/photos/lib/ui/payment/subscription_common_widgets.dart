@@ -9,38 +9,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
 
-class SubscriptionHeaderWidget extends StatefulWidget {
-  final bool? isOnboarding;
-  final int? currentUsage;
-
-  const SubscriptionHeaderWidget({
-    super.key,
-    this.isOnboarding,
-    this.currentUsage,
-  });
-
-  @override
-  State<StatefulWidget> createState() {
-    return _SubscriptionHeaderWidgetState();
-  }
-}
-
-class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
-  @override
-  Widget build(BuildContext context) {
-    if (widget.isOnboarding!) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text(
-          AppLocalizations.of(context).enteSubscriptionPitch,
-          style: getEnteTextTheme(context).smallFaint,
-        ),
-      );
-    }
-    return const SizedBox.shrink();
-  }
-}
-
 class ValidityWidget extends StatelessWidget {
   final Subscription? currentSubscription;
   final BonusData? bonusData;
