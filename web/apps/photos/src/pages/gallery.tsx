@@ -182,6 +182,7 @@ const Page: React.FC = () => {
     const [state, dispatch] = useGalleryReducer();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -194,7 +195,6 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
-    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // Pending navigation from feed item click
     const [pendingFileNavigation, setPendingFileNavigation] = useState<{
@@ -1544,7 +1544,7 @@ const Page: React.FC = () => {
     const showSelectionBar =
         selected.count > 0 &&
         selected.collectionID === activeCollectionID &&
-        !isContextMenuOpen;
+        !(isContextMenuOpen && selected.count === 1);
 
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.

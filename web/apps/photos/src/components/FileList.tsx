@@ -334,7 +334,6 @@ export const FileList: React.FC<FileListProps> = ({
         file: EnteFile;
         fileIndex: number;
     } | null>(null);
-    const isContextMenuOpen = contextMenu !== null;
 
     // Track selection state before right-click modified it.
     // If there are already 3 files explicitly selected via checkmarks,
@@ -781,7 +780,8 @@ export const FileList: React.FC<FileListProps> = ({
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
-            const showGroupCheckbox = haveSelection && !isContextMenuOpen;
+            const showGroupCheckbox =
+                haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
@@ -886,13 +886,13 @@ export const FileList: React.FC<FileListProps> = ({
             activeCollectionID,
             activePersonID,
             checkedTimelineDateStrings,
+            contextMenu,
             emailByUserID,
             favoriteFileIDs,
             handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
-            isContextMenuOpen,
             isShiftKeyPressed,
             mode,
             onChangeSelectAllCheckBox,
