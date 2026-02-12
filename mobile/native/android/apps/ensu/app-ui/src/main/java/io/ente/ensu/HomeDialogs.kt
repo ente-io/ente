@@ -39,20 +39,16 @@ internal fun ComingSoonDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        icon = {
+            Image(
+                painter = painterResource(id = R.drawable.ensu_ducky),
+                contentDescription = null,
+                modifier = Modifier.height(108.dp),
+                contentScale = ContentScale.Fit
+            )
+        },
         title = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ensu_ducky),
-                    contentDescription = null,
-                    modifier = Modifier.height(108.dp),
-                    contentScale = ContentScale.Fit
-                )
-                Text(text = title, style = EnsuTypography.h3Bold)
-            }
+            Text(text = title, style = EnsuTypography.h3Bold)
         },
         text = {
             Text(text = message, style = EnsuTypography.body, color = EnsuColor.textMuted())
