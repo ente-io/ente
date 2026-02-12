@@ -26,8 +26,9 @@ struct MessageListView: View {
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
     @State private var suppressAutoScrollAfterGeneration = false
-    @State private var keepStreamingVisible = false
-    @State private var outroHideWorkItem: DispatchWorkItem?
+    @State private var showStreamingBubble = false
+    @State private var streamingWasGenerating = false
+    @State private var streamingHideWorkItem: DispatchWorkItem?
 
     var body: some View {
         GeometryReader { proxy in
@@ -81,32 +82,38 @@ struct MessageListView: View {
                 .onAppear {
                     lastScrollChange = currentScrollChange
                     didInitialScroll = false
+                    showStreamingBubble = isGenerating
+                    streamingWasGenerating = isGenerating
                     scheduleInitialScroll(scrollProxy)
                 }
                 .onChange(of: isGenerating) { generating in
                     if generating {
-                        outroHideWorkItem?.cancel()
-                        outroHideWorkItem = nil
-                        keepStreamingVisible = true
+                        streamingHideWorkItem?.cancel()
+                        streamingHideWorkItem = nil
+                        showStreamingBubble = true
                         suppressAutoScrollAfterGeneration = false
                     } else {
                         suppressAutoScrollAfterGeneration = true
-                        let workItem = DispatchWorkItem {
-                            withAnimation(.easeOut(duration: 0.22)) {
-                                keepStreamingVisible = false
+                        if streamingWasGenerating {
+                            let workItem = DispatchWorkItem {
+                                withAnimation(.easeInOut(duration: 0.30)) {
+                                    showStreamingBubble = false
+                                }
+                                suppressAutoScrollAfterGeneration = false
+                                streamingHideWorkItem = nil
                             }
-                            suppressAutoScrollAfterGeneration = false
-                            outroHideWorkItem = nil
+                            streamingHideWorkItem?.cancel()
+                            streamingHideWorkItem = workItem
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.52, execute: workItem)
                         }
-                        outroHideWorkItem?.cancel()
-                        outroHideWorkItem = workItem
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
                     }
+                    streamingWasGenerating = generating
                 }
                 .onChange(of: sessionId) { _ in
-                    outroHideWorkItem?.cancel()
-                    outroHideWorkItem = nil
-                    keepStreamingVisible = isGenerating
+                    streamingHideWorkItem?.cancel()
+                    streamingHideWorkItem = nil
+                    showStreamingBubble = isGenerating
+                    streamingWasGenerating = isGenerating
                 }
             }
         }
@@ -228,17 +235,21 @@ struct MessageListView: View {
 
                 }
 
-                if isGenerating || keepStreamingVisible {
-                    StreamingBubbleView(text: streamingResponse, isGenerating: isGenerating)
-                        .id("streaming")
-                        .transition(streamingTransition)
+                if isGenerating || showStreamingBubble {
+                    StreamingBubbleView(
+                        text: streamingResponse,
+                        isGenerating: isGenerating,
+                        isOutroPhase: !isGenerating && showStreamingBubble
+                    )
+                    .id("streaming")
+                    .transition(streamingTransition)
                 }
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
             .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
-            .animation(.easeOut(duration: 0.22), value: keepStreamingVisible)
+            .animation(.easeInOut(duration: 0.30), value: showStreamingBubble)
 
             Color.clear
                 .frame(height: contentBottomPadding)
