@@ -1,4 +1,8 @@
-import { CleanIcon, Delete02Icon } from "@hugeicons/core-free-icons";
+import {
+    CleanIcon,
+    Delete02Icon,
+    RemoveCircleIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
@@ -45,6 +49,7 @@ import {
     cleanUncategorized,
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
+    deleteShareURL,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     leaveSharedCollection,
@@ -431,6 +436,18 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
+    const removeQuickLink = wrap(async () => {
+        if (!activeCollection) return;
+
+        if (isQuickLinkAlbum && activeCollection.sharees.length === 0) {
+            await deleteCollection(activeCollection.id, { keepFiles: true });
+            setActiveCollectionID(PseudoCollectionID.all);
+            return;
+        }
+
+        await deleteShareURL(activeCollection.id);
+    });
+
     const changeSortOrderAsc = wrap(async () => {
         if (!activeCollection) return;
         await updateCollectionSortOrder(activeCollection, true);
@@ -610,6 +627,19 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         onClick={onCollectionCast}
                     >
                         {t("cast_album_to_tv")}
+                    </OverflowMenuOption>,
+                    <OverflowMenuOption
+                        key="remove-link"
+                        onClick={removeQuickLink}
+                        startIcon={
+                            <HugeiconsIcon
+                                icon={RemoveCircleIcon}
+                                size={20}
+                                strokeWidth={1.5}
+                            />
+                        }
+                    >
+                        {t("remove_link")}
                     </OverflowMenuOption>,
                 ];
                 break;
