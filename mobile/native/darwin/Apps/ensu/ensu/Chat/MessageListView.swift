@@ -84,7 +84,7 @@ struct MessageListView: View {
                 .onChange(of: isGenerating) { generating in
                     if !generating {
                         suppressAutoScrollAfterGeneration = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                             suppressAutoScrollAfterGeneration = false
                         }
                     }
@@ -132,7 +132,7 @@ struct MessageListView: View {
             if newValue.keyboardHeight > 0 {
                 wasAtBottomBeforeKeyboard = isAtBottom
             }
-            if wasAtBottomBeforeKeyboard {
+            if wasAtBottomBeforeKeyboard && !didGenerationJustFinish && !suppressAutoScrollAfterGeneration {
                 autoScrollEnabled = true
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
@@ -260,15 +260,8 @@ struct MessageListView: View {
         }
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false, animated: Bool = true) {
-        guard force || (autoScrollEnabled && isAtBottom) else { return }
-        if animated {
-            withAnimation(.easeOut(duration: 0.2)) {
-                proxy.scrollTo("bottom", anchor: .bottom)
-            }
-        } else {
-            proxy.scrollTo("bottom", anchor: .bottom)
-        }
+    private func scrollToBottom(_ : ScrollViewProxy, force _: Bool = false, animated _: Bool = true) {
+        // Intentionally no-op: auto-scroll is disabled for Swift chat.
     }
 
     private func openAttachment(_ attachment: ChatAttachment) {
