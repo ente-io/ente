@@ -177,7 +177,7 @@ Values you used for `database name` and `username` correspond to the values you 
     ```shell
     # Change into web directory, this is where all the applications
     # will be managed and built
-    cd web
+    cd ../web
 
     # Install dependencies
     yarn install
@@ -242,43 +242,43 @@ Values you used for `database name` and `username` correspond to the values you 
     ```groovy
     # Replace the ports with domain names if you have subdomains configured and need HTTPS
     :3000 {
-        root * /var/www/ente/apps/out/photos
+        root * /var/www/ente/apps/photos
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3001 {
-        root * /var/www/ente/apps/out/accounts
+        root * /var/www/ente/apps/accounts
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3002 {
-        root * /var/www/ente/apps/out/photos
+        root * /var/www/ente/apps/photos
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3003 {
-        root * /var/www/ente/apps/out/auth
+        root * /var/www/ente/apps/auth
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3004 {
-        root * /var/www/ente/apps/out/cast
+        root * /var/www/ente/apps/cast
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3005 {
-        root * /var/www/ente/apps/out/share
+        root * /var/www/ente/apps/share
         file_server
         try_files {path} {path}.html /index.html
     }
 
     :3006 {
-        root * /var/www/ente/apps/out/embed
+        root * /var/www/ente/apps/embed
         file_server
         try_files {path} {path}.html /index.html
     }

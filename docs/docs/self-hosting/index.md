@@ -63,8 +63,8 @@ Enter the verification code by checking the cluster logs using
 Upload a picture via the web user interface.
 
 Alternatively, if using Ente Auth, get started by adding an account (assuming
-you are running Ente Auth at `http://<machine-ip>:3002` or
-`http://localhost:3002`).
+you are running Ente Auth at `http://<machine-ip>:3003` or
+`http://localhost:3003`).
 
 ## Try the mobile app
 
