@@ -152,7 +152,7 @@ impl VectorDB {
     pub fn approx_filtered_search_vectors_within_distance(
         &self,
         query: &[f32],
-        allowed_keys: &Vec<u64>,
+        allowed_keys: &[u64],
         count: usize,
         max_distance: f32,
     ) -> (Vec<u64>, Vec<f32>) {
