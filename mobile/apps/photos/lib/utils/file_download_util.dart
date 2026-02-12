@@ -224,10 +224,7 @@ Future<void> downloadToGallery(EnteFile file) async {
     final bool shouldUpdateLocalIDReference =
         file.isRemoteFile || file.isSharedMediaToAppSandbox;
     AssetEntity? savedAsset;
-    final File? downloadedFile = await getFileFromServer(file);
-    if (downloadedFile == null) {
-      throw Exception("Failed to download file");
-    }
+    final File? fileToSave = await getFile(file);
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -237,12 +234,10 @@ Future<void> downloadToGallery(EnteFile file) async {
       await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
-            .saveImageWithPath(downloadedFile.path, title: file.title!);
+            .saveImageWithPath(fileToSave!.path, title: file.title!);
       } else if (type == FileType.video) {
-        savedAsset = await PhotoManager.editor.saveVideo(
-          downloadedFile,
-          title: file.title!,
-        );
+        savedAsset = await PhotoManager.editor
+            .saveVideo(fileToSave!, title: file.title!);
       } else if (type == FileType.livePhoto) {
         final File? liveVideoFile =
             await getFileFromServer(file, liveVideo: true);
@@ -250,10 +245,10 @@ Future<void> downloadToGallery(EnteFile file) async {
           throw AssertionError("Live video can not be null");
         }
         if (downloadLivePhotoOnDroid) {
-          await _saveLivePhotoOnDroid(downloadedFile, liveVideoFile, file);
+          await _saveLivePhotoOnDroid(fileToSave!, liveVideoFile, file);
         } else {
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
-            imageFile: downloadedFile,
+            imageFile: fileToSave!,
             videoFile: liveVideoFile,
             title: file.title!,
           );
