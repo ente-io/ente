@@ -55,7 +55,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
-    final bool isAppStoreReview = widget.email == 'appstore@ente.io';
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -115,8 +114,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             ),
           DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            isFormValid:
-                _pinController.text.length == (isAppStoreReview ? 8 : 6),
+            isFormValid: _pinController.text.length == 6,
             buttonText: context.strings.verify,
             onPressedFunction: onPressed,
           ),
@@ -130,7 +128,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget _getBody() {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final bool isAppStoreReview = widget.email == 'appstore@ente.io';
 
     final defaultPinTheme = PinTheme(
       height: 48,
@@ -197,7 +194,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               ),
               const SizedBox(height: 32),
               Pinput(
-                length: isAppStoreReview ? 8 : 6,
+                length: 6,
                 controller: _pinController,
                 autofocus: true,
                 defaultPinTheme: defaultPinTheme,
@@ -206,7 +203,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 showCursor: false,
                 keyboardType: TextInputType.number,
                 onCompleted: (value) {
-                  if (value.length == (isAppStoreReview ? 8 : 6)) {
+                  if (value.length == 6) {
                     onPressed();
                   }
                 },
