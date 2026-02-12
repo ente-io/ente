@@ -127,7 +127,7 @@ private fun DrawerHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(EnsuColor.backgroundBase())
-            .padding(EnsuSpacing.lg.dp)
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp)
     ) {
         if (isLoggedIn) {
             Row(
@@ -144,7 +144,7 @@ private fun DrawerHeader(
                 )
             }
 
-            Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+            Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
         }
 
         DrawerSearchControls(
