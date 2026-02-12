@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -61,12 +60,6 @@ class FileAppBar extends StatefulWidget {
 
   @override
   FileAppBarState createState() => FileAppBarState();
-}
-
-class _LocalFileLocation {
-  final String locationName;
-
-  const _LocalFileLocation(this.locationName);
 }
 
 class FileAppBarState extends State<FileAppBar> {
@@ -626,15 +619,15 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
-    final _LocalFileLocation? localFileLocation =
+    final String? localFileLocationName =
         await _getExistingLocalFileLocation(file);
-    if (localFileLocation != null && mounted) {
+    if (localFileLocationName != null && mounted) {
       final actionResult = await showChoiceActionSheet(
         context,
         title: "Already available on device",
         body: Platform.isAndroid
-            ? "You can find this file in the \"${localFileLocation.locationName}\" folder. Download it again?"
-            : "You can find this file in the \"${localFileLocation.locationName}\" album. Download it again?",
+            ? "You can find this file in the \"$localFileLocationName\" folder. Download it again?"
+            : "You can find this file in the \"$localFileLocationName\" album. Download it again?",
         firstButtonLabel: "Download anyway",
         secondButtonLabel: "Cancel",
       );
@@ -663,7 +656,7 @@ class FileAppBarState extends State<FileAppBar> {
     }
   }
 
-  Future<_LocalFileLocation?> _getExistingLocalFileLocation(
+  Future<String?> _getExistingLocalFileLocation(
     EnteFile file,
   ) async {
     if (file.localID == null || file.localID!.isEmpty) {
@@ -672,13 +665,6 @@ class FileAppBarState extends State<FileAppBar> {
 
     final asset = await file.getAsset;
     if (asset == null || !(await asset.exists)) {
-      _logger.info(
-        "Removing stale localID reference before download for ${file.tag}",
-      );
-      file.localID = null;
-      if (file.generatedID != null) {
-        unawaited(FilesDB.instance.update(file));
-      }
       return null;
     }
 
@@ -695,7 +681,7 @@ class FileAppBarState extends State<FileAppBar> {
       } else {
         folderName = "Recent";
       }
-      return _LocalFileLocation(folderName);
+      return folderName;
     }
 
     final String albumSource = deviceFolder.isNotEmpty
@@ -703,7 +689,7 @@ class FileAppBarState extends State<FileAppBar> {
         : relativePath.isNotEmpty
             ? _getLastPathSegment(relativePath)
             : "Recents";
-    return _LocalFileLocation(albumSource);
+    return albumSource;
   }
 
   String _getLastPathSegment(String path) {
