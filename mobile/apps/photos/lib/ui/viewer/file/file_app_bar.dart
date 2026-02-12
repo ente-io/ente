@@ -670,6 +670,9 @@ class FileAppBarState extends State<FileAppBar> {
     if (file.localID == null || file.localID!.isEmpty) {
       return null;
     }
+    if (file.isSharedMediaToAppSandbox) {
+      return null;
+    }
 
     final asset = await file.getAsset;
     if (asset == null || !(await asset.exists)) {
