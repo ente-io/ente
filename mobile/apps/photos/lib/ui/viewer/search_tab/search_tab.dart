@@ -55,7 +55,6 @@ class _SearchTabState extends State<SearchTab> {
   @override
   void dispose() {
     indexOfStackNotifier.removeListener(indexNotifierListener);
-    indexOfStackNotifier.dispose();
     super.dispose();
   }
 

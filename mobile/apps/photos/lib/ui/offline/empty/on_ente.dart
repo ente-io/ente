@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 
 class EmptyOnEnteSection extends StatelessWidget {
   final List<Collection> collections;
@@ -60,10 +60,10 @@ class EmptyOnEnteSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
+              onTap: () async {
+                await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LandingPageWidget(),
+                    builder: (_) => const EmailEntryPage(),
                   ),
                 );
               },
