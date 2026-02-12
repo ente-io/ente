@@ -868,6 +868,7 @@ class SmartMemoriesService {
         .toList();
     orderedImportantPersonsID.shuffle(Random());
     final amountOfPersons = orderedImportantPersonsID.length;
+    final canUseUnnamedFallback = isOfflineMode || amountOfPersons < 5;
     final shownPersonTimeout = Duration(
       days: min(
         kPersonShowTimeout.inDays,
@@ -1301,7 +1302,7 @@ class SmartMemoriesService {
       }
       if (added > 0) break peopleRotationLoop;
     }
-    if (!addedFromRotation) {
+    if (!addedFromRotation && canUseUnnamedFallback) {
       final eligibleUnnamedCandidates = <PeopleMemoryCandidate>[];
       for (final candidate in randomizedUnnamedClusterCandidates) {
         final candidatePersonID = candidate.personID;
