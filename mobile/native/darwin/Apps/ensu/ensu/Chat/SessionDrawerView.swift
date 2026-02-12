@@ -59,12 +59,13 @@ struct SessionDrawerView: View {
                         expands: false
                     )
                 }
-                .padding(.bottom, EnsuSpacing.md)
+                .padding(.bottom, EnsuSpacing.sm)
             }
 
             headerControls
         }
-        .padding(EnsuSpacing.lg)
+        .padding(.horizontal, EnsuSpacing.lg)
+        .padding(.vertical, EnsuSpacing.md)
         .background(EnsuColor.backgroundBase)
     }
 
