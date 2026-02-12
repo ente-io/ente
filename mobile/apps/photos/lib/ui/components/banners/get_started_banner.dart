@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/typedefs.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class GetStartedBanner extends StatelessWidget {
   final FutureVoidCallback onGetStarted;
@@ -16,9 +17,10 @@ class GetStartedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const titleStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 18,
+      height: 28 / 18,
       letterSpacing: -1,
       color: Colors.white,
     );
@@ -27,33 +29,24 @@ class GetStartedBanner extends StatelessWidget {
       fontFamily: "Montserrat",
       fontWeight: FontWeight.w600,
       fontSize: 12,
-      height: 1.3,
-      color: Color.fromRGBO(255, 255, 255, 0.79),
+      height: 18 / 12,
+      color: Color.fromRGBO(255, 255, 255, 0.8),
     );
 
     const buttonTextStyle = TextStyle(
       fontFamily: "Montserrat",
       fontWeight: FontWeight.w600,
       fontSize: 10,
+      height: 12 / 10,
       color: Colors.black,
     );
 
     return Container(
-      height: 156,
+      height: 165,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          transform: GradientRotation(0.19),
-          colors: [
-            Color.fromRGBO(4, 122, 23, 1),
-            Color.fromRGBO(8, 194, 37, 1),
-            Color.fromRGBO(72, 240, 98, 1),
-          ],
-          stops: [0.0264, 0.5255, 1.0],
-        ),
+        color: getEnteColorScheme(context).greenBase,
       ),
       child: Stack(
         clipBehavior: Clip.none,
@@ -120,7 +113,7 @@ class GetStartedBanner extends StatelessWidget {
           ),
           Positioned(
             right: 12,
-            bottom: 0,
+            bottom: 12,
             child: IgnorePointer(
               child: Image.asset(
                 "assets/ducky_get_started.png",
