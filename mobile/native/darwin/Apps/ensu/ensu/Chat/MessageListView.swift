@@ -114,7 +114,7 @@ struct MessageListView: View {
                             }
                             streamingHideWorkItem?.cancel()
                             streamingHideWorkItem = workItem
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.52, execute: workItem)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.52, execute: workItem)
                         }
                     }
                     streamingWasGenerating = generating
