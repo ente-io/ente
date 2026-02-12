@@ -18,32 +18,23 @@ struct EnsuBrandIllustration: View {
     )
     @State private var lastOutroTrigger = false
     @State private var resolvedOutroInputName: String?
+    @State private var primaryStateMachineName: String?
+    @State private var primaryAnimationName: String?
+    @State private var outroStateMachineName: String?
+    @State private var outroAnimationName: String?
 
     var body: some View {
         riveViewModel
             .view()
             .frame(width: width, height: height, alignment: .leading)
             .onAppear {
-                if riveViewModel.riveModel?.stateMachine == nil,
-                   let fallbackStateMachineName = riveViewModel.riveModel?.artboard?.stateMachineNames().first {
-                    try? riveViewModel.configureModel(stateMachineName: fallbackStateMachineName)
-                }
-
-                if let discoveredOutro = riveViewModel.riveModel?.stateMachine?.inputNames().first(where: {
-                    $0.lowercased().contains("outro")
-                }) {
-                    resolvedOutroInputName = discoveredOutro
-                } else if resolvedOutroInputName == nil {
-                    resolvedOutroInputName = outroInputName
-                }
+                discoverPlaybackTargets()
 
                 if animated {
-                    riveViewModel.play()
+                    restorePrimaryPlayback()
                 } else {
                     riveViewModel.pause()
                 }
-
-                resetOutroInputValue()
 
                 if outroTrigger {
                     fireOutro()
@@ -54,8 +45,10 @@ struct EnsuBrandIllustration: View {
             }
             .onChange(of: animated) { value in
                 if value {
-                    riveViewModel.play()
-                    resetOutroInputValue()
+                    restorePrimaryPlayback()
+                    if outroTrigger {
+                        fireOutro()
+                    }
                 } else {
                     riveViewModel.pause()
                 }
@@ -64,14 +57,60 @@ struct EnsuBrandIllustration: View {
                 if value && !lastOutroTrigger {
                     fireOutro()
                 } else if !value {
-                    resetOutroInputValue()
+                    restorePrimaryPlayback()
                 }
                 lastOutroTrigger = value
             }
             .accessibilityLabel("Ensu")
     }
 
+    private func discoverPlaybackTargets() {
+        let stateMachines = riveViewModel.riveModel?.artboard?.stateMachineNames() ?? []
+        let animations = riveViewModel.riveModel?.artboard?.animationNames() ?? []
+
+        if riveViewModel.riveModel?.stateMachine == nil,
+           let fallbackStateMachineName = stateMachines.first {
+            try? riveViewModel.configureModel(stateMachineName: fallbackStateMachineName)
+        }
+
+        if primaryStateMachineName == nil {
+            primaryStateMachineName = riveViewModel.riveModel?.stateMachine?.name() ?? stateMachines.first
+        }
+        if primaryAnimationName == nil {
+            primaryAnimationName = riveViewModel.riveModel?.animation?.name() ?? animations.first
+        }
+
+        if outroStateMachineName == nil {
+            outroStateMachineName = stateMachines.first(where: { $0.lowercased().contains("outro") })
+        }
+        if outroAnimationName == nil {
+            outroAnimationName = animations.first(where: { $0.lowercased().contains("outro") })
+        }
+
+        if let discoveredOutro = riveViewModel.riveModel?.stateMachine?.inputNames().first(where: {
+            $0.lowercased().contains("outro")
+        }) {
+            resolvedOutroInputName = discoveredOutro
+        } else if resolvedOutroInputName == nil {
+            resolvedOutroInputName = outroInputName
+        }
+    }
+
+    private func restorePrimaryPlayback() {
+        if let stateMachine = primaryStateMachineName {
+            try? riveViewModel.configureModel(stateMachineName: stateMachine)
+        } else if let animation = primaryAnimationName {
+            try? riveViewModel.configureModel(animationName: animation)
+        }
+        resetOutroInputValue()
+        if animated {
+            riveViewModel.play()
+        }
+    }
+
     private func fireOutro() {
+        discoverPlaybackTargets()
+
         let inputName = resolvedOutroInputName ?? outroInputName
         if let boolInput = riveViewModel.boolInput(named: inputName) {
             boolInput.setValue(true)
@@ -83,6 +122,19 @@ struct EnsuBrandIllustration: View {
             riveViewModel.play()
             return
         }
+
+        if let outroStateMachineName {
+            try? riveViewModel.configureModel(stateMachineName: outroStateMachineName)
+            riveViewModel.play()
+            return
+        }
+
+        if let outroAnimationName {
+            try? riveViewModel.configureModel(animationName: outroAnimationName)
+            riveViewModel.play(loop: .oneShot)
+            return
+        }
+
         riveViewModel.triggerInput(inputName)
     }
 
