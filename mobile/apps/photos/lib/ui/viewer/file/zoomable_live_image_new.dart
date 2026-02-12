@@ -12,6 +12,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/ui/notification/toast.dart';
@@ -46,12 +47,14 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   late EnteFile _enteFile;
   bool _showVideo = false;
   bool _isLoadingVideoPlayer = false;
+  bool _isVideoFrameReady = true;
 
   late final _player = Player();
   VideoController? _videoController;
 
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  bool get _enableLivePhotoFlickerFix => flagService.internalUser;
 
   @override
   void initState() {
@@ -70,9 +73,16 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   }
 
   void _onLongPressEvent(bool isPressed) {
-    if (_videoController != null && isPressed == false) {
+    if (isPressed) {
+      if (_videoController == null) {
+        unawaited(_loadLiveVideo());
+      } else {
+        _videoController!.player.seek(Duration.zero).ignore();
+        _videoController!.player.play().ignore();
+      }
+    } else if (_videoController != null) {
       // stop playing video
-      _videoController!.player.pause();
+      _videoController!.player.pause().ignore();
     }
     if (mounted) {
       setState(() {
@@ -83,24 +93,35 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-    // check is long press is selected but videoPlayer is not configured yet
-    if (_showVideo && _videoController == null) {
-      _loadLiveVideo();
-    }
+    final image = ZoomableImage(
+      _enteFile,
+      tagPrefix: widget.tagPrefix,
+      shouldDisableScroll: widget.shouldDisableScroll,
+      backgroundDecoration: widget.backgroundDecoration,
+      isGuestView: isGuestView,
+      onFinalFileLoad: widget.onFinalFileLoad,
+    );
 
-    if (_showVideo && _videoController != null) {
-      content = _getVideoPlayer();
-    } else {
-      content = ZoomableImage(
-        _enteFile,
-        tagPrefix: widget.tagPrefix,
-        shouldDisableScroll: widget.shouldDisableScroll,
-        backgroundDecoration: widget.backgroundDecoration,
-        isGuestView: isGuestView,
-        onFinalFileLoad: widget.onFinalFileLoad,
-      );
-    }
+    final shouldShowVideo =
+        _showVideo && _videoController != null && _isVideoFrameReady;
+
+    final Widget content = Stack(
+      fit: StackFit.expand,
+      children: [
+        image,
+        if (_videoController != null)
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            opacity: shouldShowVideo ? 1 : 0,
+            child: IgnorePointer(
+              ignoring: !shouldShowVideo,
+              child: _getVideoPlayer(),
+            ),
+          ),
+      ],
+    );
+
     if (!widget.isFromMemories) {
       return GestureDetector(
         onLongPressStart: (_) => _onLongPressEvent(true),
@@ -122,9 +143,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   }
 
   Widget _getVideoPlayer() {
-    _videoController!.player.seek(Duration.zero);
-    _videoController!.player.setPlaylistMode(PlaylistMode.single);
-    _videoController!.player.play();
     return Container(
       color: Colors.black,
       child: Video(
@@ -140,19 +158,22 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       return;
     }
     _isLoadingVideoPlayer = true;
-    // For non-live photo, with fileType as Image, we still call _getMotionPhoto
-    // to check if it is a motion photo. This is needed to handle earlier
-    // uploads and upload from desktop
-    final File? videoFile = _enteFile.isLivePhoto
-        ? await _getLivePhotoVideo()
-        : await _getMotionPhotoVideo();
+    try {
+      // For non-live photo, with fileType as Image, we still call _getMotionPhoto
+      // to check if it is a motion photo. This is needed to handle earlier
+      // uploads and upload from desktop
+      final File? videoFile = _enteFile.isLivePhoto
+          ? await _getLivePhotoVideo()
+          : await _getMotionPhotoVideo();
 
-    if (videoFile != null && videoFile.existsSync()) {
-      _setVideoController(videoFile.path);
-    } else if (_enteFile.isLivePhoto) {
-      showShortToast(context, AppLocalizations.of(context).downloadFailed);
+      if (videoFile != null && videoFile.existsSync()) {
+        await _setVideoController(videoFile.path);
+      } else if (_enteFile.isLivePhoto) {
+        showShortToast(context, AppLocalizations.of(context).downloadFailed);
+      }
+    } finally {
+      _isLoadingVideoPlayer = false;
     }
-    _isLoadingVideoPlayer = false;
   }
 
   Future<File?> _getLivePhotoVideo() async {
@@ -224,13 +245,58 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     return null;
   }
 
-  void _setVideoController(String url) {
-    if (mounted) {
+  Future<void> _setVideoController(String url) async {
+    if (!mounted) return;
+
+    final controller = VideoController(_player);
+    setState(() {
+      _videoController = controller;
+      _isVideoFrameReady = !_enableLivePhotoFlickerFix;
+    });
+
+    try {
+      await _player.setPlaylistMode(PlaylistMode.single);
+      await _player.open(Media(url), play: true);
+    } catch (e, s) {
+      _logger.info(
+        "Failed to initialize live photo video ${_enteFile.tag}",
+        e,
+        s,
+      );
+      if (!mounted || _videoController != controller) return;
       setState(() {
-        _videoController = VideoController(_player);
-        _player.open(Media(url));
-        _showVideo = true;
+        _videoController = null;
+        _isVideoFrameReady = !_enableLivePhotoFlickerFix;
       });
+      return;
     }
+
+    // If long-press has already ended by this point, don't keep playback running.
+    if (!_showVideo) {
+      await _player.pause();
+    }
+
+    if (_enableLivePhotoFlickerFix) {
+      try {
+        await controller.waitUntilFirstFrameRendered
+            .timeout(const Duration(seconds: 2));
+      } catch (e, s) {
+        _logger.info("First frame wait failed for ${_enteFile.tag}", e, s);
+      }
+    }
+
+    if (_showVideo) {
+      await _player.seek(Duration.zero);
+      await _player.play();
+    }
+
+    if (!_enableLivePhotoFlickerFix) {
+      return;
+    }
+
+    if (!mounted || _videoController != controller) return;
+    setState(() {
+      _isVideoFrameReady = true;
+    });
   }
 }
