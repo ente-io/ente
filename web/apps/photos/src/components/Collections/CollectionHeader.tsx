@@ -28,7 +28,11 @@ import { useBaseContext } from "ente-base/context";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
-import { CollectionOrder, type Collection } from "ente-media/collection";
+import {
+    CollectionOrder,
+    CollectionSubType,
+    type Collection,
+} from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
@@ -172,6 +176,9 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         useModalVisibility();
 
     const { type: collectionSummaryType, fileCount } = collectionSummary;
+    const isQuickLinkAlbum =
+        activeCollection?.magicMetadata?.data.subType ==
+        CollectionSubType.quicklink;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -579,6 +586,34 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
 
         default:
+            if (isQuickLinkAlbum) {
+                menuOptions = [
+                    shouldShowMapOption(collectionSummary) && (
+                        <OverflowMenuOption
+                            key="map"
+                            onClick={handleShowMap}
+                            startIcon={<MapOutlinedIcon />}
+                        >
+                            {t("map")}
+                        </OverflowMenuOption>
+                    ),
+                    <OverflowMenuOption
+                        key="sort"
+                        onClick={showSortOrderMenu}
+                        startIcon={<SortIcon />}
+                    >
+                        {t("sort_by")}
+                    </OverflowMenuOption>,
+                    <OverflowMenuOption
+                        key="cast"
+                        startIcon={<TvIcon />}
+                        onClick={onCollectionCast}
+                    >
+                        {t("cast_album_to_tv")}
+                    </OverflowMenuOption>,
+                ];
+                break;
+            }
             menuOptions = [
                 <OverflowMenuOption
                     key="rename"
