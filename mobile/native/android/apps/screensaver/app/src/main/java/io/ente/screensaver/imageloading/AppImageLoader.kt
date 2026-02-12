@@ -1,4 +1,4 @@
-package io.ente.screensaver.imageloading
+package io.ente.photos.screensaver.imageloading
 
 import android.content.Context
 import android.os.Build
@@ -6,7 +6,7 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import io.ente.screensaver.ente.EnteUriFetcher
+import io.ente.photos.screensaver.ente.EnteUriFetcher
 
 object AppImageLoader {
 

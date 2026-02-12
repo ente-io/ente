@@ -1,7 +1,7 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
-import io.ente.screensaver.BuildConfig
+import io.ente.photos.screensaver.BuildConfig
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

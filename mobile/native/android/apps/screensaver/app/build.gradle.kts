@@ -14,11 +14,11 @@ val keystoreProperties = Properties().apply {
 val hasReleaseSigning = keystorePropertiesFile.exists()
 
 android {
-    namespace = "io.ente.screensaver"
+    namespace = "io.ente.photos.screensaver"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "io.ente.screensaver"
+        applicationId = "io.ente.photos.screensaver"
         minSdk = 21
         targetSdk = 34
         versionCode = 1

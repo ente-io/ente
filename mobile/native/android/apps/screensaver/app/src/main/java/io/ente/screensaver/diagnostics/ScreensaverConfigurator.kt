@@ -1,12 +1,12 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package io.ente.screensaver.diagnostics
+package io.ente.photos.screensaver.diagnostics
 
 import android.content.ComponentName
 import android.content.Context
 import android.provider.Settings
-import io.ente.screensaver.R
-import io.ente.screensaver.dream.PhotoDreamService
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.dream.PhotoDreamService
 
 object ScreensaverConfigurator {
 

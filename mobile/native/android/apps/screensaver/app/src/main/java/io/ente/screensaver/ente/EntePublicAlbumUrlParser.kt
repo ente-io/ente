@@ -1,6 +1,6 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.net.Uri
 import android.util.Base64

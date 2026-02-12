@@ -1,4 +1,4 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
 import android.net.Uri
@@ -14,9 +14,9 @@ import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.request.Options
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.imageloading.ImageFormatClassifier
-import io.ente.screensaver.prefs.PreferencesRepository
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.imageloading.ImageFormatClassifier
+import io.ente.photos.screensaver.prefs.PreferencesRepository
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File

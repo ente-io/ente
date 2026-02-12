@@ -1,6 +1,6 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package io.ente.screensaver.diagnostics
+package io.ente.photos.screensaver.diagnostics
 
 import android.content.ComponentName
 import android.content.Intent
@@ -10,9 +10,9 @@ import android.provider.Settings
 import android.text.method.ScrollingMovementMethod
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import io.ente.screensaver.R
-import io.ente.screensaver.databinding.ActivityDiagnosticsBinding
-import io.ente.screensaver.dream.PhotoDreamService
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.databinding.ActivityDiagnosticsBinding
+import io.ente.photos.screensaver.dream.PhotoDreamService
 
 class DiagnosticsActivity : AppCompatActivity() {
 

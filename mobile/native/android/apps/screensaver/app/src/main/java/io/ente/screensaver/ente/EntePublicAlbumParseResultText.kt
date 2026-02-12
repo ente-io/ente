@@ -1,9 +1,9 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
-import io.ente.screensaver.R
+import io.ente.photos.screensaver.R
 
 fun EntePublicAlbumUrlParser.ParseResult.Error.toDisplayMessage(context: Context): String {
     val detailText = this.detail

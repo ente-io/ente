@@ -1,16 +1,16 @@
-package io.ente.screensaver.preview
+package io.ente.photos.screensaver.preview
 
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import io.ente.screensaver.R
-import io.ente.screensaver.imageloading.AppImageLoader
-import io.ente.screensaver.databinding.ActivityPreviewBinding
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.permissions.MediaPermissions
-import io.ente.screensaver.prefs.PhotoSourceType
-import io.ente.screensaver.prefs.PreferencesRepository
-import io.ente.screensaver.slideshow.SlideshowController
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.imageloading.AppImageLoader
+import io.ente.photos.screensaver.databinding.ActivityPreviewBinding
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.permissions.MediaPermissions
+import io.ente.photos.screensaver.prefs.PhotoSourceType
+import io.ente.photos.screensaver.prefs.PreferencesRepository
+import io.ente.photos.screensaver.slideshow.SlideshowController
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

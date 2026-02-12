@@ -1,4 +1,4 @@
-package io.ente.screensaver.permissions
+package io.ente.photos.screensaver.permissions
 
 import android.Manifest
 import android.content.Context

@@ -1,15 +1,15 @@
-package io.ente.screensaver.dream
+package io.ente.photos.screensaver.dream
 
 import android.service.dreams.DreamService
 import android.view.LayoutInflater
-import io.ente.screensaver.R
-import io.ente.screensaver.imageloading.AppImageLoader
-import io.ente.screensaver.databinding.DreamLayoutBinding
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.permissions.MediaPermissions
-import io.ente.screensaver.prefs.PhotoSourceType
-import io.ente.screensaver.prefs.PreferencesRepository
-import io.ente.screensaver.slideshow.SlideshowController
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.imageloading.AppImageLoader
+import io.ente.photos.screensaver.databinding.DreamLayoutBinding
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.permissions.MediaPermissions
+import io.ente.photos.screensaver.prefs.PhotoSourceType
+import io.ente.photos.screensaver.prefs.PreferencesRepository
+import io.ente.photos.screensaver.slideshow.SlideshowController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel

@@ -3,7 +3,7 @@
 
 @file:Suppress("NAME_SHADOWING")
 
-package io.ente.screensaver.ente.uniffi
+package io.ente.photos.screensaver.ente.uniffi
 
 // Common helper code.
 //

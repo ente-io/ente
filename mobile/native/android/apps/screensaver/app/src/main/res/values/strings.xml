@@ -60,7 +60,7 @@
     <string name="setup_configured_from_phone">Album configured from phone. Returning…</string>
     <string name="setup_cleared">Cleared</string>
     <string name="setup_configure_summary">Configure Ente public album (QR or paste)</string>
-    <string name="setup_help">How to set this as the TV screensaver:\n\n1) Install the app on your TV.\n2) If your TV doesn’t show a screensaver picker UI, you may need ADB.\n3) From a computer on the same network, run:\n   adb shell pm grant io.ente.screensaver android.permission.WRITE_SECURE_SETTINGS\n   adb shell settings put secure screensaver_default_component io.ente.screensaver/io.ente.screensaver.dream.PhotoDreamService\n   adb shell settings put secure screensaver_components io.ente.screensaver/io.ente.screensaver.dream.PhotoDreamService\n\nThen wait for idle or run: adb shell cmd dream start</string>
+    <string name="setup_help">How to set this as the TV screensaver:\n\n1) Install the app on your TV.\n2) If your TV doesn’t show a screensaver picker UI, you may need ADB.\n3) From a computer on the same network, run:\n   adb shell pm grant io.ente.photos.screensaver android.permission.WRITE_SECURE_SETTINGS\n   adb shell settings put secure screensaver_default_component io.ente.photos.screensaver/io.ente.photos.screensaver.dream.PhotoDreamService\n   adb shell settings put secure screensaver_components io.ente.photos.screensaver/io.ente.photos.screensaver.dream.PhotoDreamService\n\nThen wait for idle or run: adb shell cmd dream start</string>
 
     <string name="setup_network_label_wifi">Wi‑Fi</string>
     <string name="setup_network_label_ethernet">Ethernet</string>

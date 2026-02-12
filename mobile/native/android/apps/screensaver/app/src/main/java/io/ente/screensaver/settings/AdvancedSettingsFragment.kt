@@ -1,4 +1,4 @@
-package io.ente.screensaver.settings
+package io.ente.photos.screensaver.settings
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,10 +6,10 @@ import android.widget.Toast
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import io.ente.screensaver.R
-import io.ente.screensaver.diagnostics.DiagnosticsActivity
-import io.ente.screensaver.ente.EntePublicAlbumRepository
-import io.ente.screensaver.prefs.SsaverPreferenceDataStore
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
+import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
+import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

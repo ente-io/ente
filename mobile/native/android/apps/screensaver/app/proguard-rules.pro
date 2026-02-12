@@ -5,4 +5,4 @@
 -dontwarn com.sun.jna.**
 
 # UniFFI bindings rely on JNA mapping method names to native symbols.
--keep class io.ente.screensaver.ente.uniffi.** { *; }
+-keep class io.ente.photos.screensaver.ente.uniffi.** { *; }

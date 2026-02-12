@@ -1,4 +1,4 @@
-package io.ente.screensaver.diagnostics
+package io.ente.photos.screensaver.diagnostics
 
 import android.content.Context
 import android.util.Log

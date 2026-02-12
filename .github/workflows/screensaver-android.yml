@@ -26,7 +26,7 @@ jobs:
       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_SCREENSAVER || secrets.SIGNING_STORE_PASSWORD }}
       SIGNING_KEY_FILE: "screensaver-release.jks"
       PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_SCREENSAVER || secrets.SERVICE_ACCOUNT_JSON }}
-      PLAYSTORE_PACKAGE_NAME: "io.ente.screensaver"
+      PLAYSTORE_PACKAGE_NAME: "io.ente.photos.screensaver"
       PLAYSTORE_TRACK: "internal"
 
     steps:

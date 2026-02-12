@@ -1,9 +1,9 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import io.ente.screensaver.prefs.ssaverDataStore
+import io.ente.photos.screensaver.prefs.ssaverDataStore
 import kotlinx.coroutines.flow.first
 
 class EntePublicAlbumConfigRepository(

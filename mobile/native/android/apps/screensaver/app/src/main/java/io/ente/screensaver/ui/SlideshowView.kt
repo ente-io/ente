@@ -1,4 +1,4 @@
-package io.ente.screensaver.ui
+package io.ente.photos.screensaver.ui
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -29,12 +29,12 @@ import com.awxkee.jxlcoder.PreferredColorConfig
 import com.awxkee.jxlcoder.ScaleMode
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import io.ente.screensaver.databinding.ViewSlideshowBinding
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.diagnostics.redactedForLog
-import io.ente.screensaver.ente.EnteImageCache
-import io.ente.screensaver.imageloading.ImageFormatClassifier
-import io.ente.screensaver.prefs.FitMode
+import io.ente.photos.screensaver.databinding.ViewSlideshowBinding
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.diagnostics.redactedForLog
+import io.ente.photos.screensaver.ente.EnteImageCache
+import io.ente.photos.screensaver.imageloading.ImageFormatClassifier
+import io.ente.photos.screensaver.prefs.FitMode
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
@@ -82,7 +82,7 @@ class SlideshowView @JvmOverloads constructor(
         binding.imageNext.scaleType = scaleType
     }
 
-    fun setOverlayMode(mode: io.ente.screensaver.prefs.OverlayMode) {
+    fun setOverlayMode(mode: io.ente.photos.screensaver.prefs.OverlayMode) {
         // Calculate 40% of screen width dynamically for max width
         val displayMetrics = resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels
@@ -94,7 +94,7 @@ class SlideshowView @JvmOverloads constructor(
         binding.textMessage.maxWidth = maxWidth
         
         when (mode) {
-            io.ente.screensaver.prefs.OverlayMode.NORMAL -> {
+            io.ente.photos.screensaver.prefs.OverlayMode.NORMAL -> {
                 // Clock on right, description on left (default layout order)
                 binding.bottomOverlay.visibility = VISIBLE
                 clockEnabled = true
@@ -119,7 +119,7 @@ class SlideshowView @JvmOverloads constructor(
                 
                 binding.bottomOverlay.addView(binding.textClock)
             }
-            io.ente.screensaver.prefs.OverlayMode.ALTERNATE -> {
+            io.ente.photos.screensaver.prefs.OverlayMode.ALTERNATE -> {
                 // Clock on left, description on right (swapped order)
                 binding.bottomOverlay.visibility = VISIBLE
                 clockEnabled = true
@@ -144,7 +144,7 @@ class SlideshowView @JvmOverloads constructor(
                 
                 binding.bottomOverlay.addView(binding.descriptionContainer)
             }
-            io.ente.screensaver.prefs.OverlayMode.DISABLE -> {
+            io.ente.photos.screensaver.prefs.OverlayMode.DISABLE -> {
                 // Hide the entire overlay
                 binding.bottomOverlay.visibility = GONE
                 clockEnabled = false

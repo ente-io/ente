@@ -1,19 +1,19 @@
-package io.ente.screensaver.slideshow
+package io.ente.photos.screensaver.slideshow
 
 import android.content.Context
 import android.net.Uri
 import coil.ImageLoader
-import io.ente.screensaver.R
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.diagnostics.redactedForLog
-import io.ente.screensaver.permissions.MediaPermissions
-import io.ente.screensaver.ente.EnteImageCache
-import io.ente.screensaver.photos.EntePublicAlbumPhotoSource
-import io.ente.screensaver.photos.MediaStorePhotoSource
-import io.ente.screensaver.photos.PhotoSource
-import io.ente.screensaver.prefs.PhotoSourceType
-import io.ente.screensaver.prefs.PreferencesRepository
-import io.ente.screensaver.ui.SlideshowView
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.diagnostics.redactedForLog
+import io.ente.photos.screensaver.permissions.MediaPermissions
+import io.ente.photos.screensaver.ente.EnteImageCache
+import io.ente.photos.screensaver.photos.EntePublicAlbumPhotoSource
+import io.ente.photos.screensaver.photos.MediaStorePhotoSource
+import io.ente.photos.screensaver.photos.PhotoSource
+import io.ente.photos.screensaver.prefs.PhotoSourceType
+import io.ente.photos.screensaver.prefs.PreferencesRepository
+import io.ente.photos.screensaver.ui.SlideshowView
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -119,7 +119,7 @@ class SlideshowController(
         val holdLoadingMessage = settings.sourceType == PhotoSourceType.ENTE_PUBLIC_ALBUM
         val prioritizeEnteCache = settings.sourceType == PhotoSourceType.ENTE_PUBLIC_ALBUM
         val enteRepo = if (holdLoadingMessage) {
-            io.ente.screensaver.ente.EntePublicAlbumRepository.get(context)
+            io.ente.photos.screensaver.ente.EntePublicAlbumRepository.get(context)
         } else {
             null
         }

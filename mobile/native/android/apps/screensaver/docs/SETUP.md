@@ -12,7 +12,7 @@
 2. If it fails, open **ADB instructions** and run:
 
    ```
-   adb shell pm grant io.ente.screensaver android.permission.WRITE_SECURE_SETTINGS
+   adb shell pm grant io.ente.photos.screensaver android.permission.WRITE_SECURE_SETTINGS
    ```
 
 3. Tap **Set as screensaver** again.

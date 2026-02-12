@@ -1,8 +1,8 @@
-package io.ente.screensaver.settings
+package io.ente.photos.screensaver.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import io.ente.screensaver.R
+import io.ente.photos.screensaver.R
 
 class SettingsActivity : AppCompatActivity() {
 

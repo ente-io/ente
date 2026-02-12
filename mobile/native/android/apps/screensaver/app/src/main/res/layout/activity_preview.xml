@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <io.ente.screensaver.ui.SlideshowView
+    <io.ente.photos.screensaver.ui.SlideshowView
         android:id="@+id/slideshow"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

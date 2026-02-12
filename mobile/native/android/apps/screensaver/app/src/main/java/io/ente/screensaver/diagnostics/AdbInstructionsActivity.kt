@@ -1,8 +1,8 @@
-package io.ente.screensaver.diagnostics
+package io.ente.photos.screensaver.diagnostics
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import io.ente.screensaver.databinding.ActivityAdbInstructionsBinding
+import io.ente.photos.screensaver.databinding.ActivityAdbInstructionsBinding
 
 class AdbInstructionsActivity : AppCompatActivity() {
 

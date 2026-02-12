@@ -1,4 +1,4 @@
-package io.ente.screensaver.setup
+package io.ente.photos.screensaver.setup
 
 import java.net.Inet4Address
 import java.net.NetworkInterface

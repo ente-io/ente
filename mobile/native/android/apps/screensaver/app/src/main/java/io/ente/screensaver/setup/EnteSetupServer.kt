@@ -1,14 +1,14 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package io.ente.screensaver.setup
+package io.ente.photos.screensaver.setup
 
 import android.content.Context
 import androidx.annotation.StringRes
 import fi.iki.elonen.NanoHTTPD
-import io.ente.screensaver.R
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.ente.EntePublicAlbumRepository
-import io.ente.screensaver.ente.toDisplayMessage
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
+import io.ente.photos.screensaver.ente.toDisplayMessage
 import kotlinx.coroutines.runBlocking
 
 class EnteSetupServer(
@@ -128,13 +128,13 @@ class EnteSetupServer(
             val password = session.parameters["password"]?.firstOrNull().orEmpty()
 
             val result = runBlocking { repo.setConfigFromUrl(url, password) }
-            if (result is io.ente.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success) {
+            if (result is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success) {
                 runBlocking { repo.refreshIfNeeded(force = true) }
                 onConfigUpdated()
             }
 
             val html = when (result) {
-                is io.ente.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success -> {
+                is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success -> {
                     AppLog.info("Setup", "Album configured from setup page")
                     renderPage(
                         s(R.string.setup_server_saved_title),
@@ -148,7 +148,7 @@ class EnteSetupServer(
                     )
                 }
 
-                is io.ente.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Error -> {
+                is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Error -> {
                     val message = escapeHtml(result.toDisplayMessage(appContext))
                     AppLog.error("Setup", "Setup failed: ${result.debugMessage()}")
                     renderPage(

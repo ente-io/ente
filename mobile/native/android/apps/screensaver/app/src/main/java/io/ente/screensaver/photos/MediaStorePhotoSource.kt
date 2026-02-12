@@ -1,10 +1,10 @@
-package io.ente.screensaver.photos
+package io.ente.photos.screensaver.photos
 
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import io.ente.screensaver.imageloading.ImageFormatClassifier
+import io.ente.photos.screensaver.imageloading.ImageFormatClassifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

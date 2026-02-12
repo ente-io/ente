@@ -1,4 +1,4 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 data class EnteFileRecord(
     val id: Long,

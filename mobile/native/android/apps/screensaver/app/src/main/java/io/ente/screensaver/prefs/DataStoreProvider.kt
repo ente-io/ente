@@ -1,4 +1,4 @@
-package io.ente.screensaver.prefs
+package io.ente.photos.screensaver.prefs
 
 import android.content.Context
 import androidx.datastore.core.DataStore

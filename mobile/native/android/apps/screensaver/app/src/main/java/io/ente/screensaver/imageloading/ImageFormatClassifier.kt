@@ -1,4 +1,4 @@
-package io.ente.screensaver.imageloading
+package io.ente.photos.screensaver.imageloading
 
 import android.net.Uri
 import java.io.File

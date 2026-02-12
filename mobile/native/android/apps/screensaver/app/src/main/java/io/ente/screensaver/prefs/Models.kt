@@ -1,4 +1,4 @@
-package io.ente.screensaver.prefs
+package io.ente.photos.screensaver.prefs
 
 enum class PhotoSourceType {
     MEDIASTORE,

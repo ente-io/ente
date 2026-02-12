@@ -1,10 +1,10 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
-import io.ente.screensaver.ente.uniffi.decryptBlobBytes as rustDecryptBlobBytes
-import io.ente.screensaver.ente.uniffi.decryptBoxKey as rustDecryptBoxKey
-import io.ente.screensaver.ente.uniffi.decryptMetadataFileType as rustDecryptMetadataFileType
-import io.ente.screensaver.ente.uniffi.deriveKey as rustDeriveKey
-import io.ente.screensaver.ente.uniffi.secretboxKeyBytes as rustSecretboxKeyBytes
+import io.ente.photos.screensaver.ente.uniffi.decryptBlobBytes as rustDecryptBlobBytes
+import io.ente.photos.screensaver.ente.uniffi.decryptBoxKey as rustDecryptBoxKey
+import io.ente.photos.screensaver.ente.uniffi.decryptMetadataFileType as rustDecryptMetadataFileType
+import io.ente.photos.screensaver.ente.uniffi.deriveKey as rustDeriveKey
+import io.ente.photos.screensaver.ente.uniffi.secretboxKeyBytes as rustSecretboxKeyBytes
 
 object EnteCrypto {
 

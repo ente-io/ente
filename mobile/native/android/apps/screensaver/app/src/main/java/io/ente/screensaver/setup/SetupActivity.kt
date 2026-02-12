@@ -1,15 +1,15 @@
-package io.ente.screensaver.setup
+package io.ente.photos.screensaver.setup
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import fi.iki.elonen.NanoHTTPD
-import io.ente.screensaver.R
-import io.ente.screensaver.databinding.ActivitySetupBinding
-import io.ente.screensaver.diagnostics.AppLog
-import io.ente.screensaver.ente.EntePublicAlbumRepository
-import io.ente.screensaver.ente.toDisplayMessage
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.databinding.ActivitySetupBinding
+import io.ente.photos.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
+import io.ente.photos.screensaver.ente.toDisplayMessage
 import java.security.SecureRandom
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -47,12 +47,12 @@ class SetupActivity : AppCompatActivity() {
             scope.launch {
                 val result = repo.setConfigFromUrl(url, password)
                 when (result) {
-                    is io.ente.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success -> {
+                    is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success -> {
                         repo.refreshIfNeeded(force = true)
                         binding.editPublicAlbumPassword.text?.clear()
                         Toast.makeText(this@SetupActivity, getString(R.string.setup_saved), Toast.LENGTH_LONG).show()
                     }
-                    is io.ente.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Error -> {
+                    is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Error -> {
                         Toast.makeText(this@SetupActivity, result.toDisplayMessage(this@SetupActivity), Toast.LENGTH_LONG).show()
                     }
                 }

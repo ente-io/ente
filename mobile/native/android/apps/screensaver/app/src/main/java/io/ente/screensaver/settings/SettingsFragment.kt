@@ -1,4 +1,4 @@
-package io.ente.screensaver.settings
+package io.ente.photos.screensaver.settings
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,9 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import io.ente.screensaver.R
-import io.ente.screensaver.prefs.SsaverPreferenceDataStore
-import io.ente.screensaver.setup.SetupActivity
+import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
+import io.ente.photos.screensaver.setup.SetupActivity
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
@@ -30,7 +30,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<Preference>("pref_open_preview")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), io.ente.screensaver.preview.PreviewActivity::class.java))
+            startActivity(Intent(requireContext(), io.ente.photos.screensaver.preview.PreviewActivity::class.java))
             true
         }
 

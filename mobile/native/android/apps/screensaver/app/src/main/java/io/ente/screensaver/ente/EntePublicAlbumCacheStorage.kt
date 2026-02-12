@@ -1,4 +1,4 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
 import java.io.File

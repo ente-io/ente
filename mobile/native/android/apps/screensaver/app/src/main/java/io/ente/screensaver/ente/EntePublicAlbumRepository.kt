@@ -1,8 +1,8 @@
-package io.ente.screensaver.ente
+package io.ente.photos.screensaver.ente
 
 import android.content.Context
 import android.net.Uri
-import io.ente.screensaver.diagnostics.AppLog
+import io.ente.photos.screensaver.diagnostics.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

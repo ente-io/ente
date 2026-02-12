@@ -1,4 +1,4 @@
-package io.ente.screensaver.setup
+package io.ente.photos.screensaver.setup
 
 import android.graphics.Bitmap
 import android.graphics.Color
