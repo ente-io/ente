@@ -812,38 +812,16 @@ class ClusterFeedbackService<T> {
         w?.log(
           'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
-        List<(String, double, String)> suggestionsMeanBigClusters;
-        if (canUseVectorDb) {
-          try {
-            suggestionsMeanBigClusters = await _calcSuggestionsMeanWithVectorDb(
-              clusterAvgBigClusters,
-              personClusters,
-              ignoredClusters,
-              goodMeanDistance,
-              perClusterResultCount: 8,
-            );
-          } catch (e, s) {
-            _logger.warning(
-              "Cluster centroid vector DB mean suggestions failed, falling back to in-memory comparisons",
-              e,
-              s,
-            );
-            canUseVectorDb = false;
-            suggestionsMeanBigClusters = await calcSuggestionsMeanInComputer(
-              clusterAvgBigClusters,
-              personClusters,
-              ignoredClusters,
-              goodMeanDistance,
-            );
-          }
-        } else {
-          suggestionsMeanBigClusters = await calcSuggestionsMeanInComputer(
-            clusterAvgBigClusters,
-            personClusters,
-            ignoredClusters,
-            goodMeanDistance,
-          );
-        }
+        final suggestionsMeanBigClusters =
+            await _calcSuggestionsMeanWithFallback(
+          clusterAvgBigClusters,
+          personClusters,
+          ignoredClusters,
+          goodMeanDistance,
+          canUseVectorDb: canUseVectorDb,
+          perClusterResultCount: 8,
+          onVectorDbFailed: () => canUseVectorDb = false,
+        );
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
@@ -874,38 +852,15 @@ class ClusterFeedbackService<T> {
 
     // Find the other cluster candidates based on the median
     final clusterAvg = clusterAvgBigClusters;
-    List<(String, double, String)> moreSuggestionsMean;
-    if (canUseVectorDb) {
-      try {
-        moreSuggestionsMean = await _calcSuggestionsMeanWithVectorDb(
-          clusterAvg,
-          personClusters,
-          ignoredClusters,
-          maxMeanDistance,
-          perClusterResultCount: 12,
-        );
-      } catch (e, s) {
-        _logger.warning(
-          "Cluster centroid vector DB loose mean suggestions failed, falling back to in-memory comparisons",
-          e,
-          s,
-        );
-        canUseVectorDb = false;
-        moreSuggestionsMean = await calcSuggestionsMeanInComputer(
-          clusterAvg,
-          personClusters,
-          ignoredClusters,
-          maxMeanDistance,
-        );
-      }
-    } else {
-      moreSuggestionsMean = await calcSuggestionsMeanInComputer(
-        clusterAvg,
-        personClusters,
-        ignoredClusters,
-        maxMeanDistance,
-      );
-    }
+    final moreSuggestionsMean = await _calcSuggestionsMeanWithFallback(
+      clusterAvg,
+      personClusters,
+      ignoredClusters,
+      maxMeanDistance,
+      canUseVectorDb: canUseVectorDb,
+      perClusterResultCount: 12,
+      onVectorDbFailed: () => canUseVectorDb = false,
+    );
     if (moreSuggestionsMean.isEmpty) {
       _logger
           .info("No suggestions found using mean, even with higher threshold");
@@ -1202,6 +1157,41 @@ class ClusterFeedbackService<T> {
     );
 
     return clusterAvg;
+  }
+
+  Future<List<(String, double, String)>> _calcSuggestionsMeanWithFallback(
+    Map<String, Vector> clusterAvg,
+    Set<String> personClusters,
+    Set<String> ignoredClusters,
+    double maxClusterDistance, {
+    required bool canUseVectorDb,
+    int perClusterResultCount = 8,
+    required VoidCallback onVectorDbFailed,
+  }) async {
+    if (canUseVectorDb) {
+      try {
+        return await _calcSuggestionsMeanWithVectorDb(
+          clusterAvg,
+          personClusters,
+          ignoredClusters,
+          maxClusterDistance,
+          perClusterResultCount: perClusterResultCount,
+        );
+      } catch (e, s) {
+        _logger.warning(
+          "Cluster centroid vector DB mean suggestions failed, falling back to in-memory comparisons",
+          e,
+          s,
+        );
+        onVectorDbFailed();
+      }
+    }
+    return calcSuggestionsMeanInComputer(
+      clusterAvg,
+      personClusters,
+      ignoredClusters,
+      maxClusterDistance,
+    );
   }
 
   Future<List<(String, double, String)>> _calcSuggestionsMeanWithVectorDb(
