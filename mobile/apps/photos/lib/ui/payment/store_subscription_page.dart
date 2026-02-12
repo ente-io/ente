@@ -19,10 +19,8 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -170,7 +168,26 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       isDismissible: true,
     );
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text(
+          widget.isOnboarding
+              ? AppLocalizations.of(context).selectYourPlan
+              : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -179,11 +196,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TitleBarTitleWidget(
-                  title: widget.isOnboarding
-                      ? AppLocalizations.of(context).selectYourPlan
-                      : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
-                ),
                 _isFreePlanUser() || !_hasLoadedData
                     ? const SizedBox.shrink()
                     : Text(
@@ -300,9 +312,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       );
       widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
       widgets.add(const SizedBox(height: 20));
-    } else {
-      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
-      const SizedBox(height: 56);
     }
 
     if (_hasActiveSubscription &&
@@ -323,17 +332,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         widgets.add(
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
-            child: MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Manage payment method",
-              ),
+            child: MenuItemWidgetNew(
+              title: "Manage payment method",
               menuItemColor: colorScheme.fillFaint,
               trailingWidget: Icon(
                 Icons.chevron_right_outlined,
                 color: colorScheme.strokeBase,
               ),
-              singleBorderRadius: 4,
-              alignCaptionedTextToLeft: true,
               onTap: () async {
                 _onPlatformRestrictedPaymentDetailsClick();
               },
@@ -351,19 +356,15 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       widgets.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-          child: MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: _isFreePlanUser()
-                  ? AppLocalizations.of(context).familyPlans
-                  : AppLocalizations.of(context).manageFamily,
-            ),
+          child: MenuItemWidgetNew(
+            title: _isFreePlanUser()
+                ? AppLocalizations.of(context).familyPlans
+                : AppLocalizations.of(context).manageFamily,
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            singleBorderRadius: 4,
-            alignCaptionedTextToLeft: true,
             onTap: () async {
               unawaited(
                 _billingService.launchFamilyPortal(context, _userDetails),

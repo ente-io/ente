@@ -6,8 +6,7 @@ import 'package:photos/gateways/billing/models/subscription.dart';
 import "package:photos/gateways/storage_bonus/models/bonus.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
@@ -41,7 +40,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
       );
     } else {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: RichText(
           text: TextSpan(
             children: [
@@ -159,17 +158,13 @@ class SubFaqWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-      child: MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).faqs,
-        ),
+      child: MenuItemWidgetNew(
+        title: AppLocalizations.of(context).faqs,
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: Icon(
           Icons.chevron_right_outlined,
           color: colorScheme.strokeBase,
         ),
-        singleBorderRadius: 4,
-        alignCaptionedTextToLeft: true,
         onTap: () async {
           // ignore: unawaited_futures
           showModalBottomSheet<void>(
@@ -227,25 +222,6 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        setIsYearly(false);
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                        ),
-                        width: widthOfButton,
-                        child: Center(
-                          child: Text(
-                            AppLocalizations.of(context).monthly,
-                            style: textTheme.bodyFaint,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: spaceBetweenButtons),
-                    GestureDetector(
-                      onTap: () {
                         setIsYearly(true);
                       },
                       behavior: HitTestBehavior.opaque,
@@ -262,12 +238,31 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: spaceBetweenButtons),
+                    GestureDetector(
+                      onTap: () {
+                        setIsYearly(false);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            AppLocalizations.of(context).monthly,
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutQuart,
-                  left: _isYearly ? widthOfButton + spaceBetweenButtons : 0,
+                  left: _isYearly ? 0 : widthOfButton + spaceBetweenButtons,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: 8,
