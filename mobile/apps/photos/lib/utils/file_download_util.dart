@@ -221,8 +221,6 @@ Future<void> downloadToGallery(EnteFile file) async {
     final FileType type = file.fileType;
     final bool downloadLivePhotoOnDroid =
         type == FileType.livePhoto && Platform.isAndroid;
-    final bool shouldUpdateLocalIDReference =
-        file.isRemoteFile || file.isSharedMediaToAppSandbox;
     AssetEntity? savedAsset;
     final File? fileToSave = await getFile(file);
     // We use a lock to prevent synchronisation to occur while it is downloading
@@ -256,20 +254,14 @@ Future<void> downloadToGallery(EnteFile file) async {
       }
 
       if (savedAsset != null) {
-        if (shouldUpdateLocalIDReference) {
-          file.localID = savedAsset!.id;
-          await FilesDB.instance.insert(file);
-          Bus.instance.fire(
-            LocalPhotosUpdatedEvent(
-              [file],
-              source: "download",
-            ),
-          );
-        } else {
-          _logger.info(
-            'Skipping localID update after download; existing localID is already a gallery asset',
-          );
-        }
+        file.localID = savedAsset!.id;
+        await FilesDB.instance.insert(file);
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            [file],
+            source: "download",
+          ),
+        );
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }
