@@ -9,12 +9,14 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/linalg.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -44,6 +46,12 @@ class ClusterFeedbackService<T> {
   final _computer = Computer.shared();
   ClusterFeedbackService._privateConstructor();
   late final mlDataDB = MLDataDB.instance;
+  // Person entities and person suggestions are online-only; keep all
+  // suggestion centroid mapping/vector access pinned to the online DB.
+  MLDataDB get _mlDataDBForCentroidVectorDb => MLDataDB.instance;
+  ClusterCentroidVectorDB get _clusterCentroidVectorDB =>
+      ClusterCentroidVectorDB.instance;
+  Future<void>? _prepareClusterCentroidVectorDbFuture;
 
   static final ClusterFeedbackService instance =
       ClusterFeedbackService._privateConstructor();
@@ -62,6 +70,16 @@ class ClusterFeedbackService<T> {
     PersonEntity person, {
     bool extremeFilesFirst = true,
   }) async {
+    assert(
+      !isOfflineMode,
+      "Person suggestions are online-only and should not run in offline mode.",
+    );
+    if (isOfflineMode) {
+      _logger.info(
+        "Skipping getSuggestionForPerson in offline mode because person suggestions are online-only",
+      );
+      return [];
+    }
     _logger.info(
       'getSuggestionForPerson ${kDebugMode ? person.data.name : person.remoteID}',
     );
@@ -714,6 +732,42 @@ class ClusterFeedbackService<T> {
     return clusterResult;
   }
 
+  Future<void> _prepareClusterCentroidVectorDbForSuggestions() {
+    _prepareClusterCentroidVectorDbFuture ??=
+        _prepareClusterCentroidVectorDbForSuggestionsInternal();
+    return _prepareClusterCentroidVectorDbFuture!;
+  }
+
+  Future<void> _prepareClusterCentroidVectorDbForSuggestionsInternal() async {
+    try {
+      if (!flagService.usearchForSearch) return;
+      if (!flagService.hasGrantedMLConsent) return;
+      if (!await _clusterCentroidVectorDB.checkIfMigrationDone()) {
+        await _mlDataDBForCentroidVectorDb
+            .checkMigrateFillClusterCentroidVectorDB();
+      }
+      if (await _clusterCentroidVectorDB.checkIfMigrationDone()) {
+        await _clusterCentroidVectorDB.warmupApproxSearch();
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "Failed to prepare cluster centroid vector DB for suggestions",
+        e,
+        s,
+      );
+    } finally {
+      _prepareClusterCentroidVectorDbFuture = null;
+    }
+  }
+
+  Future<bool> _canUseClusterCentroidVectorDbForSuggestions() async {
+    if (!flagService.usearchForSearch) return false;
+    if (!flagService.hasGrantedMLConsent) return false;
+    if (await _clusterCentroidVectorDB.checkIfMigrationDone()) return true;
+    unawaited(_prepareClusterCentroidVectorDbForSuggestions());
+    return false;
+  }
+
   /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
   /// 1. clusterID: the ID of the cluster
   /// 2. distance: the distance between the person's cluster and the suggestion
@@ -746,6 +800,7 @@ class ClusterFeedbackService<T> {
     final checkSizes = [20, kMinimumClusterSizeSearchResult, 10, 5, 1];
     Map<String, Vector> clusterAvgBigClusters = <String, Vector>{};
     final List<(String, double)> suggestionsMean = [];
+    bool canUseVectorDb = await _canUseClusterCentroidVectorDbForSuggestions();
     for (final minimumSize in checkSizes.toSet()) {
       if (smallestPersonClusterSize >=
           min(minimumSize, kMinimumClusterSizeSearchResult)) {
@@ -757,13 +812,38 @@ class ClusterFeedbackService<T> {
         w?.log(
           'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
-        final List<(String, double, String)> suggestionsMeanBigClusters =
-            await calcSuggestionsMeanInComputer(
-          clusterAvgBigClusters,
-          personClusters,
-          ignoredClusters,
-          goodMeanDistance,
-        );
+        List<(String, double, String)> suggestionsMeanBigClusters;
+        if (canUseVectorDb) {
+          try {
+            suggestionsMeanBigClusters = await _calcSuggestionsMeanWithVectorDb(
+              clusterAvgBigClusters,
+              personClusters,
+              ignoredClusters,
+              goodMeanDistance,
+              perClusterResultCount: 8,
+            );
+          } catch (e, s) {
+            _logger.warning(
+              "Cluster centroid vector DB mean suggestions failed, falling back to in-memory comparisons",
+              e,
+              s,
+            );
+            canUseVectorDb = false;
+            suggestionsMeanBigClusters = await calcSuggestionsMeanInComputer(
+              clusterAvgBigClusters,
+              personClusters,
+              ignoredClusters,
+              goodMeanDistance,
+            );
+          }
+        } else {
+          suggestionsMeanBigClusters = await calcSuggestionsMeanInComputer(
+            clusterAvgBigClusters,
+            personClusters,
+            ignoredClusters,
+            goodMeanDistance,
+          );
+        }
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
@@ -794,13 +874,38 @@ class ClusterFeedbackService<T> {
 
     // Find the other cluster candidates based on the median
     final clusterAvg = clusterAvgBigClusters;
-    final List<(String, double, String)> moreSuggestionsMean =
-        await calcSuggestionsMeanInComputer(
-      clusterAvg,
-      personClusters,
-      ignoredClusters,
-      maxMeanDistance,
-    );
+    List<(String, double, String)> moreSuggestionsMean;
+    if (canUseVectorDb) {
+      try {
+        moreSuggestionsMean = await _calcSuggestionsMeanWithVectorDb(
+          clusterAvg,
+          personClusters,
+          ignoredClusters,
+          maxMeanDistance,
+          perClusterResultCount: 12,
+        );
+      } catch (e, s) {
+        _logger.warning(
+          "Cluster centroid vector DB loose mean suggestions failed, falling back to in-memory comparisons",
+          e,
+          s,
+        );
+        canUseVectorDb = false;
+        moreSuggestionsMean = await calcSuggestionsMeanInComputer(
+          clusterAvg,
+          personClusters,
+          ignoredClusters,
+          maxMeanDistance,
+        );
+      }
+    } else {
+      moreSuggestionsMean = await calcSuggestionsMeanInComputer(
+        clusterAvg,
+        personClusters,
+        ignoredClusters,
+        maxMeanDistance,
+      );
+    }
     if (moreSuggestionsMean.isEmpty) {
       _logger
           .info("No suggestions found using mean, even with higher threshold");
@@ -921,6 +1026,16 @@ class ClusterFeedbackService<T> {
     double threshold, {
     Set<String>? extraIgnoredClusters,
   }) async {
+    assert(
+      !isOfflineMode,
+      "Fast person suggestions are online-only and should not run in offline mode.",
+    );
+    if (isOfflineMode) {
+      _logger.info(
+        "Skipping _getFastSuggestions in offline mode because person suggestions are online-only",
+      );
+      return [];
+    }
     final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
     final personignoredClusters =
         await mlDataDB.getPersonIgnoredClusters(person.remoteID);
@@ -958,9 +1073,16 @@ class ClusterFeedbackService<T> {
   }) async {
     final w = (kDebugMode ? EnteWatch('_getUpdateClusterAvg') : null)?..start();
     final startTime = DateTime.now();
+    final shouldPersistClusterSummaryUpdates =
+        _prepareClusterCentroidVectorDbFuture == null;
     _logger.info(
       'start getUpdateClusterAvg for ${allClusterIdsToCountMap.length} clusters, minClusterSize $minClusterSize, maxClusterInCurrentRun $maxClusterInCurrentRun',
     );
+    if (!shouldPersistClusterSummaryUpdates) {
+      _logger.info(
+        "Skipping cluster summary cache writes while centroid vector DB migration is in progress",
+      );
+    }
 
     final Map<String, (Uint8List, int)> clusterToSummary =
         await mlDataDB.getAllClusterSummary(minClusterSize);
@@ -1050,12 +1172,16 @@ class ClusterFeedbackService<T> {
       );
       final avg = vectors.reduce((a, b) => a + b) / vectors.length;
       final avgNormalized = avg / avg.norm();
-      final avgEmbeddingBuffer = EVector(values: avgNormalized).writeToBuffer();
-      updatesForClusterSummary[clusterID] =
-          (avgEmbeddingBuffer, embeddings.length);
+      if (shouldPersistClusterSummaryUpdates) {
+        final avgEmbeddingBuffer =
+            EVector(values: avgNormalized).writeToBuffer();
+        updatesForClusterSummary[clusterID] =
+            (avgEmbeddingBuffer, embeddings.length);
+      }
       // store the intermediate updates
       indexedInCurrentRun++;
-      if (updatesForClusterSummary.length > 100) {
+      if (shouldPersistClusterSummaryUpdates &&
+          updatesForClusterSummary.length > 100) {
         await mlDataDB.clusterSummaryUpdate(updatesForClusterSummary);
         updatesForClusterSummary.clear();
         if (kDebugMode) {
@@ -1066,7 +1192,8 @@ class ClusterFeedbackService<T> {
       }
       clusterAvg[clusterID] = avgNormalized;
     }
-    if (updatesForClusterSummary.isNotEmpty) {
+    if (shouldPersistClusterSummaryUpdates &&
+        updatesForClusterSummary.isNotEmpty) {
       await mlDataDB.clusterSummaryUpdate(updatesForClusterSummary);
     }
     w?.logAndReset('done computing avg ');
@@ -1075,6 +1202,98 @@ class ClusterFeedbackService<T> {
     );
 
     return clusterAvg;
+  }
+
+  Future<List<(String, double, String)>> _calcSuggestionsMeanWithVectorDb(
+    Map<String, Vector> clusterAvg,
+    Set<String> personClusters,
+    Set<String> ignoredClusters,
+    double maxClusterDistance, {
+    int perClusterResultCount = 8,
+  }) async {
+    if (clusterAvg.isEmpty) {
+      return [];
+    }
+    if (perClusterResultCount <= 0) {
+      return [];
+    }
+
+    final validPersonClusters = personClusters
+        .where((clusterID) => clusterAvg.containsKey(clusterID))
+        .toSet();
+    if (validPersonClusters.isEmpty) {
+      return [];
+    }
+
+    final otherClusters = clusterAvg.keys
+        .toSet()
+        .difference(validPersonClusters)
+        .difference(ignoredClusters);
+    if (otherClusters.isEmpty) {
+      return [];
+    }
+
+    final relevantClusterIDs = <String>{}
+      ..addAll(validPersonClusters)
+      ..addAll(otherClusters);
+    final clusterIDToVectorID =
+        await _mlDataDBForCentroidVectorDb.getClusterCentroidVectorIdMap(
+      relevantClusterIDs,
+      createIfMissing: false,
+    );
+    if (clusterIDToVectorID.isEmpty) {
+      return [];
+    }
+
+    final baseAllowedVectorIDs = otherClusters
+        .map((clusterID) => clusterIDToVectorID[clusterID])
+        .whereType<int>()
+        .toSet();
+    if (baseAllowedVectorIDs.isEmpty) {
+      return [];
+    }
+
+    final vectorIDToClusterID = {
+      for (final entry in clusterIDToVectorID.entries) entry.value: entry.key,
+    };
+
+    final bestSuggestionPerCluster = <String, (double, String)>{};
+    for (final personClusterID in validPersonClusters) {
+      final queryVector = clusterAvg[personClusterID];
+      if (queryVector == null) {
+        continue;
+      }
+      final matches = await _clusterCentroidVectorDB
+          .searchApproxClosestCentroidsWithinDistance(
+        queryVector.toList(),
+        baseAllowedVectorIDs,
+        maxDistance: maxClusterDistance,
+        count: perClusterResultCount,
+      );
+
+      for (final match in matches) {
+        final suggestedClusterID = vectorIDToClusterID[match.$1];
+        if (suggestedClusterID == null) {
+          continue;
+        }
+        if (ignoredClusters.contains(suggestedClusterID) ||
+            validPersonClusters.contains(suggestedClusterID)) {
+          continue;
+        }
+        final previous = bestSuggestionPerCluster[suggestedClusterID];
+        if (previous == null || match.$2 < previous.$1) {
+          bestSuggestionPerCluster[suggestedClusterID] =
+              (match.$2, personClusterID);
+        }
+      }
+    }
+
+    final suggestions = <(String, double, String)>[];
+    for (final entry in bestSuggestionPerCluster.entries) {
+      suggestions.add((entry.key, entry.value.$1, entry.value.$2));
+    }
+    suggestions.sort((a, b) => a.$2.compareTo(b.$2));
+    return suggestions.sublist(0, min(suggestions.length, 20));
   }
 
   Future<List<(String, double, String)>> calcSuggestionsMeanInComputer(
