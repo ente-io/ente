@@ -1,6 +1,7 @@
 package io.ente.photos.screensaver.setup
 
 import android.os.Bundle
+import android.util.Base64
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +22,15 @@ class SetupActivity : AppCompatActivity() {
     private val scope = MainScope()
 
     private val portCandidates = listOf(5843, 8080, 8899)
+    private val secureRandom = SecureRandom()
     private val pairingCode: String = generatePairingCode()
+    private val setupEncryptionKeyId: String = generateToken(12)
+    private val setupEncryptionKeyBytes: ByteArray = ByteArray(32).also { secureRandom.nextBytes(it) }
+    private val setupEncryptionKeyB64Url: String = Base64.encodeToString(
+        setupEncryptionKeyBytes,
+        Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+    )
+
     private var server: EnteSetupServer? = null
     private var activePort: Int? = null
     private var serverStatus: String? = null
@@ -49,6 +58,7 @@ class SetupActivity : AppCompatActivity() {
                 when (result) {
                     is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success -> {
                         repo.refreshIfNeeded(force = true)
+                        binding.editPublicAlbumUrl.text?.clear()
                         binding.editPublicAlbumPassword.text?.clear()
                         Toast.makeText(this@SetupActivity, getString(R.string.setup_saved), Toast.LENGTH_LONG).show()
                     }
@@ -72,6 +82,8 @@ class SetupActivity : AppCompatActivity() {
                     appContext = applicationContext,
                     port = candidate,
                     pairingCode = pairingCode,
+                    encryptionKeyId = setupEncryptionKeyId,
+                    encryptionKey = setupEncryptionKeyBytes,
                     onConfigUpdated = { scope.launch { handleRemoteConfigUpdated() } },
                 ).also { it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false) }
             }.getOrNull()
@@ -105,6 +117,8 @@ class SetupActivity : AppCompatActivity() {
 
         binding.cardManualEntry.visibility = View.VISIBLE
         binding.buttonToggleManual.text = getString(R.string.setup_button_hide_manual)
+        binding.editPublicAlbumUrl.text?.clear()
+        binding.editPublicAlbumPassword.text?.clear()
 
         binding.cardManualEntry.post {
             binding.editPublicAlbumUrl.requestFocus()
@@ -118,10 +132,6 @@ class SetupActivity : AppCompatActivity() {
             binding.textStatus.text = getString(R.string.setup_status_not_configured)
         } else {
             binding.textStatus.text = getString(R.string.setup_status_configured)
-            if (binding.editPublicAlbumUrl.text?.toString().isNullOrBlank()) {
-                binding.editPublicAlbumUrl.setText(config.publicUrl)
-                binding.editPublicAlbumUrl.setSelection(config.publicUrl.length)
-            }
         }
     }
 
@@ -165,12 +175,21 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun generatePairingCode(): String {
-        val code = SecureRandom().nextInt(1_000_000)
+        val code = secureRandom.nextInt(1_000_000)
         return String.format("%06d", code)
     }
 
+    private fun generateToken(length: Int): String {
+        val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return buildString(length) {
+            repeat(length) {
+                append(alphabet[secureRandom.nextInt(alphabet.length)])
+            }
+        }
+    }
+
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "http://$address:$port/?code=$pairingCode"
+        return "http://$address:$port/?code=$pairingCode&kid=$setupEncryptionKeyId#ek=$setupEncryptionKeyB64Url"
     }
 
     private fun buildSetupUrlList(addresses: List<NetworkUtils.LocalAddress>, port: Int): String {

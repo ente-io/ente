@@ -3,18 +3,25 @@
 package io.ente.photos.screensaver.setup
 
 import android.content.Context
+import android.util.Base64
 import androidx.annotation.StringRes
 import fi.iki.elonen.NanoHTTPD
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.diagnostics.AppLog
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.ente.toDisplayMessage
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
 
 class EnteSetupServer(
     private val appContext: Context,
     port: Int,
     private val pairingCode: String,
+    private val encryptionKeyId: String,
+    private val encryptionKey: ByteArray,
     private val onConfigUpdated: () -> Unit,
 ) : NanoHTTPD("0.0.0.0", port) {
 
@@ -67,6 +74,9 @@ class EnteSetupServer(
     private fun serveIndex(session: IHTTPSession): Response {
         val providedCode = session.parameters["code"]?.firstOrNull()?.trim().orEmpty()
         val codeMatches = providedCode.isNotBlank() && providedCode == pairingCode
+        val providedKid = session.parameters["kid"]?.firstOrNull()?.trim().orEmpty()
+        val kidMatches = providedKid.isNotBlank() && providedKid == encryptionKeyId
+
         val codeInput = if (codeMatches) {
             "<input type=\"hidden\" name=\"code\" value=\"${escapeHtml(providedCode)}\" />"
         } else {
@@ -75,6 +85,12 @@ class EnteSetupServer(
                 <input name="code" id="code" placeholder="${esc(R.string.setup_server_pairing_code_placeholder)}" inputmode="numeric" />
             """.trimIndent()
         }
+        val kidInput = if (kidMatches) {
+            "<input type=\"hidden\" name=\"kid\" id=\"kid\" value=\"${escapeHtml(providedKid)}\" />"
+        } else {
+            ""
+        }
+
         val codeHint = if (codeMatches) {
             ""
         } else {
@@ -84,17 +100,21 @@ class EnteSetupServer(
         val body = """
             <div class="card">
               <h1>${esc(R.string.app_name)}</h1>
-              <form method="post" action="/set">
+              <form method="post" action="/set" id="setup-form">
                 $codeInput
+                $kidInput
+                <input type="hidden" name="payload" id="payload" />
+                <input type="hidden" name="iv" id="iv" />
                 <label for="url">${esc(R.string.setup_server_public_album_label)}</label>
-                <input name="url" id="url" placeholder="${esc(R.string.setup_server_public_album_placeholder)}" />
+                <input name="url" id="url" placeholder="${esc(R.string.setup_server_public_album_placeholder)}" autocomplete="off" />
                 <label for="password">${esc(R.string.setup_server_password_label)}</label>
-                <input name="password" id="password" type="password" autocomplete="current-password" />
+                <input name="password" id="password" type="password" autocomplete="new-password" />
                 <button type="submit">${esc(R.string.setup_server_save_button)}</button>
               </form>
             </div>
             $codeHint
             <p class="note">${esc(R.string.setup_server_open_screen_note)}</p>
+            ${secureSubmitScript(enabled = kidMatches)}
         """.trimIndent()
 
         val html = renderPage(s(R.string.setup_server_page_title), body)
@@ -119,13 +139,29 @@ class EnteSetupServer(
             }
             resetPairingMismatchState()
 
-            val url = session.parameters["url"]?.firstOrNull().orEmpty().trim()
+            val encryptedPayload = session.parameters["payload"]?.firstOrNull().orEmpty().trim()
+            val (url, password) = if (encryptedPayload.isNotBlank()) {
+                val kid = session.parameters["kid"]?.firstOrNull().orEmpty().trim()
+                if (kid != encryptionKeyId) {
+                    AppLog.error("Setup", "Encryption key mismatch")
+                    return@runCatching securePayloadInvalidResponse()
+                }
+
+                val iv = session.parameters["iv"]?.firstOrNull().orEmpty().trim()
+                decryptSetupPayload(encryptedPayload, iv) ?: run {
+                    AppLog.error("Setup", "Encrypted setup payload invalid")
+                    return@runCatching securePayloadInvalidResponse()
+                }
+            } else {
+                val rawUrl = session.parameters["url"]?.firstOrNull().orEmpty().trim()
+                val rawPassword = session.parameters["password"]?.firstOrNull().orEmpty()
+                rawUrl to rawPassword
+            }
+
             if (url.isBlank()) {
                 AppLog.error("Setup", "Missing album URL in setup request")
                 return@runCatching missingUrlResponse()
             }
-
-            val password = session.parameters["password"]?.firstOrNull().orEmpty()
 
             val result = runBlocking { repo.setConfigFromUrl(url, password) }
             if (result is io.ente.photos.screensaver.ente.EntePublicAlbumUrlParser.ParseResult.Success) {
@@ -292,6 +328,113 @@ class EnteSetupServer(
             """.trimIndent(),
         )
         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/html", html)
+    }
+
+    private fun securePayloadInvalidResponse(): Response {
+        val html = renderPage(
+            s(R.string.setup_server_secure_payload_invalid_title),
+            """
+                <div class="card">
+                  <h1>${esc(R.string.setup_server_secure_payload_invalid_heading)}</h1>
+                  <p>${esc(R.string.setup_server_secure_payload_invalid_body)}</p>
+                  <p class="note"><a class="link" href="/">${esc(R.string.setup_server_back_to_setup)}</a></p>
+                </div>
+            """.trimIndent(),
+        )
+        return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/html", html)
+    }
+
+    private fun decryptSetupPayload(payloadB64: String, ivB64: String): Pair<String, String>? {
+        val cipherBytes = decodeBase64Url(payloadB64) ?: return null
+        val ivBytes = decodeBase64Url(ivB64) ?: return null
+        if (ivBytes.size != 12) return null
+
+        return runCatching {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val key = SecretKeySpec(encryptionKey, "AES")
+            val spec = GCMParameterSpec(128, ivBytes)
+            cipher.init(Cipher.DECRYPT_MODE, key, spec)
+            val plaintextBytes = cipher.doFinal(cipherBytes)
+            val payload = JSONObject(String(plaintextBytes, Charsets.UTF_8))
+            payload.optString("url").trim() to payload.optString("password")
+        }.getOrNull()
+    }
+
+    private fun decodeBase64Url(value: String): ByteArray? {
+        return runCatching {
+            Base64.decode(value, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        }.getOrNull()
+    }
+
+    private fun secureSubmitScript(enabled: Boolean): String {
+        if (!enabled) return ""
+
+        return """
+            <script>
+              (() => {
+                const form = document.getElementById('setup-form');
+                const kidInput = document.getElementById('kid');
+                const payloadInput = document.getElementById('payload');
+                const ivInput = document.getElementById('iv');
+                const urlInput = document.getElementById('url');
+                const passwordInput = document.getElementById('password');
+                if (!form || !kidInput || !payloadInput || !ivInput || !urlInput || !passwordInput) return;
+
+                const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
+                const hashParams = new URLSearchParams(hash);
+                const ek = hashParams.get('ek');
+
+                const bytesToBase64Url = (bytes) => {
+                  let binary = '';
+                  bytes.forEach((b) => { binary += String.fromCharCode(b); });
+                  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+                };
+
+                const base64UrlToBytes = (value) => {
+                  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+                  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+                  const binary = atob(padded);
+                  const out = new Uint8Array(binary.length);
+                  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
+                  return out;
+                };
+
+                form.addEventListener('submit', async (event) => {
+                  if (!ek) {
+                    event.preventDefault();
+                    alert('Secure key missing. Please scan the QR code again from the TV.');
+                    return;
+                  }
+
+                  event.preventDefault();
+
+                  try {
+                    const keyBytes = base64UrlToBytes(ek);
+                    const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt']);
+                    const iv = crypto.getRandomValues(new Uint8Array(12));
+                    const plaintext = JSON.stringify({
+                      url: urlInput.value || '',
+                      password: passwordInput.value || ''
+                    });
+                    const plaintextBytes = new TextEncoder().encode(plaintext);
+                    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintextBytes);
+
+                    payloadInput.value = bytesToBase64Url(new Uint8Array(encrypted));
+                    ivInput.value = bytesToBase64Url(iv);
+
+                    urlInput.value = '';
+                    passwordInput.value = '';
+                    urlInput.removeAttribute('name');
+                    passwordInput.removeAttribute('name');
+
+                    form.submit();
+                  } catch (err) {
+                    alert('Secure setup failed. Please scan the QR code again and retry.');
+                  }
+                });
+              })();
+            </script>
+        """.trimIndent()
     }
 
     private fun renderPage(title: String, content: String): String {

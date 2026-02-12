@@ -151,6 +151,9 @@
     <string name="setup_server_missing_link_title">Missing link</string>
     <string name="setup_server_missing_link_heading">Missing link</string>
     <string name="setup_server_missing_link_body">Please paste the full public album link.</string>
+    <string name="setup_server_secure_payload_invalid_title">Secure setup failed</string>
+    <string name="setup_server_secure_payload_invalid_heading">Secure setup failed</string>
+    <string name="setup_server_secure_payload_invalid_body">Couldn’t decrypt setup data. Please scan the QR code again from the TV.</string>
 
     <!-- Setup screen refactor -->
     <string name="setup_button_manual">Type manually</string>
