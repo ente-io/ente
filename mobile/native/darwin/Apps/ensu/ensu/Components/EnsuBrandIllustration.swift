@@ -7,6 +7,8 @@ struct EnsuBrandIllustration: View {
     var width: CGFloat = 92
     var height: CGFloat = 42
     var animated: Bool = true
+    var outroTrigger: Bool = false
+    var outroInputName: String = "outro"
 
     @StateObject private var riveViewModel = RiveViewModel(
         fileName: "ensu",
@@ -14,12 +16,12 @@ struct EnsuBrandIllustration: View {
         alignment: .centerLeft,
         autoPlay: true
     )
+    @State private var lastOutroTrigger = false
 
     var body: some View {
         riveViewModel
             .view()
             .frame(width: width, height: height, alignment: .leading)
-            .clipped()
             .onAppear {
                 if animated {
                     riveViewModel.play()
@@ -34,6 +36,12 @@ struct EnsuBrandIllustration: View {
                     riveViewModel.pause()
                 }
             }
+            .onChange(of: outroTrigger) { value in
+                if value && !lastOutroTrigger {
+                    riveViewModel.triggerInput(outroInputName)
+                }
+                lastOutroTrigger = value
+            }
             .accessibilityLabel("Ensu")
     }
 }
@@ -44,11 +52,15 @@ struct EnsuBrandIllustration: View {
     var width: CGFloat = 92
     var height: CGFloat = 42
     var animated: Bool = true
+    var outroTrigger: Bool = false
+    var outroInputName: String = "outro"
 
     @State private var isAnimating = false
 
     var body: some View {
         let activePhase = animated ? isAnimating : true
+        _ = outroTrigger
+        _ = outroInputName
 
         Image("EnsuLogoForeground")
             .resizable()

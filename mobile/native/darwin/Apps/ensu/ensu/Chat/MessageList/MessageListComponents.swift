@@ -219,6 +219,7 @@ private enum StreamingCursor {
 
 struct StreamingBubbleView: View {
     let text: String
+    let isGenerating: Bool
 
     @State private var storageId = UUID().uuidString
 
@@ -227,7 +228,12 @@ struct StreamingBubbleView: View {
 
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                EnsuBrandIllustration(width: 115, height: 52.5)
+                EnsuBrandIllustration(
+                    width: 115,
+                    height: 52.5,
+                    outroTrigger: !isGenerating,
+                    outroInputName: "outro"
+                )
 
                 if hasText {
                     TimelineView(.periodic(from: .now, by: 0.55)) { context in

@@ -26,6 +26,9 @@ struct MessageListView: View {
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
     @State private var suppressAutoScrollAfterGeneration = false
+    @State private var keepStreamingVisible = false
+    @State private var lastStreamingParentForOutro: UUID?
+    @State private var outroHideWorkItem: DispatchWorkItem?
 
     var body: some View {
         GeometryReader { proxy in
@@ -82,12 +85,37 @@ struct MessageListView: View {
                     scheduleInitialScroll(scrollProxy)
                 }
                 .onChange(of: isGenerating) { generating in
-                    if !generating {
+                    if generating {
+                        outroHideWorkItem?.cancel()
+                        outroHideWorkItem = nil
+                        keepStreamingVisible = true
+                        lastStreamingParentForOutro = streamingParentId
+                        suppressAutoScrollAfterGeneration = false
+                    } else {
                         suppressAutoScrollAfterGeneration = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                        let workItem = DispatchWorkItem {
+                            withAnimation(.easeOut(duration: 0.22)) {
+                                keepStreamingVisible = false
+                                lastStreamingParentForOutro = nil
+                            }
                             suppressAutoScrollAfterGeneration = false
+                            outroHideWorkItem = nil
                         }
+                        outroHideWorkItem?.cancel()
+                        outroHideWorkItem = workItem
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
                     }
+                }
+                .onChange(of: streamingParentId) { parentId in
+                    if isGenerating {
+                        lastStreamingParentForOutro = parentId
+                    }
+                }
+                .onChange(of: sessionId) { _ in
+                    outroHideWorkItem?.cancel()
+                    outroHideWorkItem = nil
+                    keepStreamingVisible = isGenerating
+                    lastStreamingParentForOutro = streamingParentId
                 }
             }
         }
@@ -207,21 +235,32 @@ struct MessageListView: View {
                         .transition(messageTransition)
                     }
 
-                    if isGenerating, streamingParentId == message.id {
-                        StreamingBubbleView(text: streamingResponse)
+                    let showStreamingForMessage =
+                        (isGenerating && streamingParentId == message.id) ||
+                        (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id)
+
+                    if showStreamingForMessage {
+                        StreamingBubbleView(text: streamingResponse, isGenerating: isGenerating)
                             .id("streaming-\(message.id.uuidString)")
+                            .transition(streamingTransition)
                     }
                 }
 
-                if isGenerating, streamingParentId == nil {
-                    StreamingBubbleView(text: streamingResponse)
+                let showRootStreaming =
+                    (isGenerating && streamingParentId == nil) ||
+                    (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == nil)
+
+                if showRootStreaming {
+                    StreamingBubbleView(text: streamingResponse, isGenerating: isGenerating)
                         .id("streaming")
+                        .transition(streamingTransition)
                 }
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
             .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
+            .animation(.easeOut(duration: 0.22), value: keepStreamingVisible)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -243,6 +282,13 @@ struct MessageListView: View {
 
     private var messageTransition: AnyTransition {
         .move(edge: .bottom).combined(with: .opacity)
+    }
+
+    private var streamingTransition: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .topLeading)),
+            removal: .opacity.combined(with: .scale(scale: 0.92, anchor: .topLeading))
+        )
     }
 
     private var contentBottomPadding: CGFloat {
