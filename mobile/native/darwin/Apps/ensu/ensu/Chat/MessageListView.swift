@@ -29,6 +29,7 @@ struct MessageListView: View {
     @State private var showStreamingBubble = false
     @State private var streamingWasGenerating = false
     @State private var streamingAnchorParentId: UUID?
+    @State private var streamingAnchorIndex: Int?
     @State private var streamingHideWorkItem: DispatchWorkItem?
 
     var body: some View {
@@ -86,6 +87,9 @@ struct MessageListView: View {
                     showStreamingBubble = isGenerating
                     streamingWasGenerating = isGenerating
                     streamingAnchorParentId = streamingParentId
+                    streamingAnchorIndex = streamingParentId.flatMap { parentId in
+                        messages.firstIndex(where: { $0.id == parentId })
+                    }
                     scheduleInitialScroll(scrollProxy)
                 }
                 .onChange(of: isGenerating) { generating in
@@ -94,6 +98,9 @@ struct MessageListView: View {
                         streamingHideWorkItem = nil
                         showStreamingBubble = true
                         streamingAnchorParentId = streamingParentId
+                        streamingAnchorIndex = streamingParentId.flatMap { parentId in
+                            messages.firstIndex(where: { $0.id == parentId })
+                        }
                         suppressAutoScrollAfterGeneration = false
                     } else {
                         suppressAutoScrollAfterGeneration = true
@@ -115,6 +122,14 @@ struct MessageListView: View {
                 .onChange(of: streamingParentId) { parentId in
                     if isGenerating {
                         streamingAnchorParentId = parentId
+                        streamingAnchorIndex = parentId.flatMap { anchorId in
+                            messages.firstIndex(where: { $0.id == anchorId })
+                        }
+                    }
+                }
+                .onChange(of: messages.count) { _ in
+                    if isGenerating, let anchorId = streamingAnchorParentId {
+                        streamingAnchorIndex = messages.firstIndex(where: { $0.id == anchorId })
                     }
                 }
                 .onChange(of: sessionId) { _ in
@@ -123,6 +138,9 @@ struct MessageListView: View {
                     showStreamingBubble = isGenerating
                     streamingWasGenerating = isGenerating
                     streamingAnchorParentId = streamingParentId
+                    streamingAnchorIndex = streamingParentId.flatMap { parentId in
+                        messages.firstIndex(where: { $0.id == parentId })
+                    }
                 }
             }
         }
@@ -221,8 +239,11 @@ struct MessageListView: View {
 
                 let shouldShowStreaming = isGenerating || showStreamingBubble
                 let activeStreamingParentId = isGenerating ? streamingParentId : streamingAnchorParentId
+                let activeStreamingIndex = isGenerating
+                    ? streamingParentId.flatMap { parentId in messages.firstIndex(where: { $0.id == parentId }) }
+                    : streamingAnchorIndex
 
-                ForEach(messages) { message in
+                ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
                     if message.role == .user {
                         UserMessageBubbleView(
                             message: message,
@@ -245,7 +266,9 @@ struct MessageListView: View {
                         .transition(messageTransition)
                     }
 
-                    if shouldShowStreaming && activeStreamingParentId == message.id {
+                    let isAnchoredById = activeStreamingParentId == message.id
+                    let isAnchoredByIndex = activeStreamingIndex == index
+                    if shouldShowStreaming && (isAnchoredById || isAnchoredByIndex) {
                         StreamingBubbleView(
                             text: streamingResponse,
                             isGenerating: isGenerating,
@@ -256,7 +279,7 @@ struct MessageListView: View {
                     }
                 }
 
-                if shouldShowStreaming && activeStreamingParentId == nil {
+                if shouldShowStreaming && activeStreamingParentId == nil && activeStreamingIndex == nil {
                     StreamingBubbleView(
                         text: streamingResponse,
                         isGenerating: isGenerating,
