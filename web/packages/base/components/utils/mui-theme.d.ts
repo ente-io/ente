@@ -1,5 +1,5 @@
 import type { PaletteColor } from "@mui/material";
-import type { CSSProperties } from "react";
+import React from "react";
 
 // Import the module augmentation that provides types for `theme.vars.*`.
 import type {} from "@mui/material/themeCssVarsAugmentation";
@@ -232,21 +232,17 @@ declare module "@mui/material/CircularProgress" {
 
 declare module "@mui/material/styles" {
     interface TypographyVariants {
-        body: CSSProperties;
-        message: CSSProperties;
-        code: CSSProperties;
-        small: CSSProperties;
-        mini: CSSProperties;
-        tiny: CSSProperties;
+        body: React.CSSProperties;
+        small: React.CSSProperties;
+        mini: React.CSSProperties;
+        tiny: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
-        body?: CSSProperties;
-        message?: CSSProperties;
-        code?: CSSProperties;
-        small?: CSSProperties;
-        mini?: CSSProperties;
-        tiny?: CSSProperties;
+        body?: React.CSSProperties;
+        small?: React.CSSProperties;
+        mini?: React.CSSProperties;
+        tiny?: React.CSSProperties;
     }
 }
 
@@ -263,8 +259,6 @@ declare module "@mui/material/Typography" {
         overline: false;
         // Add our custom variants.
         body: true;
-        message: true;
-        code: true;
         small: true;
         mini: true;
         tiny: true;

@@ -623,14 +623,6 @@ const baseTypography: TypographyVariantsOptions = {
         fontWeight: 600 /* Medium */,
     },
     body: { fontSize: "16px", lineHeight: "20px" },
-    message: { fontSize: "15px", lineHeight: "1.7", fontWeight: 400 },
-    code: {
-        fontSize: "13px",
-        lineHeight: "1.45",
-        fontWeight: 400,
-        fontFamily:
-            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-    },
     small: { fontSize: "14px", lineHeight: "17px" },
     mini: { fontSize: "12px", lineHeight: "15px" },
     tiny: { fontSize: "10px", lineHeight: "12px" },
@@ -642,6 +634,14 @@ const getTypography = (appName: AppName): TypographyVariantsOptions => {
             ...baseTypography,
             fontFamily:
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            message: { fontSize: "15px", lineHeight: "1.7", fontWeight: 400 },
+            code: {
+                fontSize: "13px",
+                lineHeight: "1.45",
+                fontWeight: 400,
+                fontFamily:
+                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            },
         };
     }
     return baseTypography;
@@ -681,14 +681,7 @@ const components: Components = {
             // body1, which is "body".
             variant: "body",
             // Map all our custom variants to <p>.
-            variantMapping: {
-                body: "p",
-                message: "p",
-                small: "p",
-                mini: "p",
-                tiny: "p",
-                code: "code",
-            },
+            variantMapping: { body: "p", small: "p", mini: "p", tiny: "p" },
         },
     },
 
@@ -969,6 +962,17 @@ const getComponents = (appName: AppName): Components => {
 
     return {
         ...components,
+        MuiTypography: {
+            ...components.MuiTypography,
+            defaultProps: {
+                ...components.MuiTypography?.defaultProps,
+                variantMapping: {
+                    ...components.MuiTypography?.defaultProps?.variantMapping,
+                    message: "p",
+                    code: "code",
+                },
+            },
+        },
         MuiButton: {
             ...components.MuiButton,
             styleOverrides: {
