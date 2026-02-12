@@ -19,7 +19,6 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -171,7 +170,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
-        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundColour,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -300,7 +298,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             ? _getStripePlanWidgets()
             : _getMobilePlanWidgets(),
       ),
-      const Padding(padding: EdgeInsets.all(4)),
     ]);
 
     if (_currentSubscription != null) {
@@ -310,8 +307,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           bonusData: _userDetails.bonusData,
         ),
       );
-      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
-      widgets.add(const SizedBox(height: 20));
     }
 
     if (_hasActiveSubscription &&
@@ -436,7 +431,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
 
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
-    bool foundActivePlan = false;
     for (final plan in _plans) {
       final productID = plan.stripeID;
       if (productID.isEmpty) {
@@ -444,9 +438,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       }
       final isActive = _hasActiveSubscription &&
           _currentSubscription!.productID == productID;
-      if (isActive) {
-        foundActivePlan = true;
-      }
       planWidgets.add(
         GestureDetector(
           onTap: () async {
@@ -491,18 +482,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         ),
       );
     }
-    if (!foundActivePlan && _hasActiveSubscription) {
-      _addCurrentPlanWidget(planWidgets);
-    }
     return planWidgets;
   }
 
   List<Widget> _getMobilePlanWidgets() {
-    bool foundActivePlan = false;
     final List<Widget> planWidgets = [];
     if (_hasActiveSubscription &&
         _currentSubscription!.productID == freeProductID) {
-      foundActivePlan = true;
       planWidgets.add(
         GestureDetector(
           onTap: () {
@@ -540,9 +526,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
       final isActive = _hasActiveSubscription &&
           _currentSubscription!.productID == productID;
-      if (isActive) {
-        foundActivePlan = true;
-      }
       planWidgets.add(
         GestureDetector(
           onTap: () async {
@@ -614,52 +597,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         ),
       );
     }
-    if (!foundActivePlan && _hasActiveSubscription) {
-      _addCurrentPlanWidget(planWidgets);
-    }
     return planWidgets;
-  }
-
-  void _addCurrentPlanWidget(List<Widget> planWidgets) {
-    int activePlanIndex = 0;
-    for (; activePlanIndex < _plans.length; activePlanIndex++) {
-      if (_plans[activePlanIndex].storage > _currentSubscription!.storage) {
-        break;
-      }
-    }
-    planWidgets.insert(
-      activePlanIndex,
-      GestureDetector(
-        onTap: () {
-          if (_currentSubscription!.isFreePlan() & widget.isOnboarding) {
-            Bus.instance.fire(SubscriptionPurchasedEvent());
-            // ignore: unawaited_futures
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const HomeWidget();
-                },
-              ),
-              (route) => false,
-            );
-            unawaited(
-              _billingService.verifySubscription(
-                freeProductID,
-                "",
-                paymentProvider: "ente",
-              ),
-            );
-          }
-        },
-        child: SubscriptionPlanWidget(
-          storage: _currentSubscription!.storage,
-          price: _currentSubscription!.price,
-          period: _currentSubscription!.period,
-          isActive: true,
-          isOnboarding: widget.isOnboarding,
-        ),
-      ),
-    );
   }
 
   bool _isPopularPlan(BillingPlan plan) {

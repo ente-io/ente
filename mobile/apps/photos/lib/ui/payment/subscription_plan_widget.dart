@@ -36,7 +36,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
       padding: const EdgeInsets.only(
         left: 16,
         right: 16,
-        bottom: 12,
+        bottom: 24,
       ),
       child: Stack(
         clipBehavior: Clip.none,

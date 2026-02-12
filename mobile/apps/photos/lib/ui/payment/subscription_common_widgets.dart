@@ -28,8 +28,6 @@ class SubscriptionHeaderWidget extends StatefulWidget {
 class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
     if (widget.isOnboarding!) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -38,28 +36,8 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
           style: getEnteTextTheme(context).smallFaint,
         ),
       );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: AppLocalizations.of(context).currentUsageIs,
-                style: textTheme.bodyFaint,
-              ),
-              TextSpan(
-                text: formatBytes(widget.currentUsage!),
-                style: textTheme.body.copyWith(
-                  color: colorScheme.primary700,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
     }
+    return const SizedBox.shrink();
   }
 }
 
@@ -198,6 +176,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
     const borderPadding = 2.5;
     const spaceBetweenButtons = 4.0;
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: LayoutBuilder(
@@ -208,7 +187,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
               2;
           return Container(
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillBaseGrey,
+              color: colorScheme.fillBaseGrey,
               borderRadius: BorderRadius.circular(50),
             ),
             padding: const EdgeInsets.symmetric(
@@ -269,7 +248,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                     ),
                     width: widthOfButton,
                     decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                      color: colorScheme.backgroundColour,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: AnimatedSwitcher(
