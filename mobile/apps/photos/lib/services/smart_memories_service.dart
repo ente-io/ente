@@ -74,6 +74,49 @@ class SmartMemoriesService {
 
   SmartMemoriesService();
 
+  Future<
+      ({
+        Set<String> assignedClusterIDs,
+        Map<String, int> clusterIdToFaceCount,
+        Map<String, Iterable<String>> clusterIdToFaceIDs,
+      })> _loadUnnamedClusterData({
+    required MLDataDB mlDataDB,
+    required List<PersonEntity> allPersons,
+    required bool shouldLoadUnnamedClusterData,
+    required TimeLogger t,
+  }) async {
+    if (!shouldLoadUnnamedClusterData) {
+      _logger.info(
+        'Skipping unnamed cluster data load (fallback disabled) $t',
+      );
+      return (
+        assignedClusterIDs: <String>{},
+        clusterIdToFaceCount: <String, int>{},
+        clusterIdToFaceIDs: <String, Iterable<String>>{},
+      );
+    }
+
+    final allPersonIDs =
+        allPersons.map((person) => person.remoteID).toList(growable: false);
+    final assignedClusterIDs = allPersonIDs.isEmpty
+        ? <String>{}
+        : await mlDataDB.getPersonsClusterIDs(allPersonIDs);
+    _logger.info('assignedClusterIDs has ${assignedClusterIDs.length} $t');
+    final clusterIdToFaceCount = await mlDataDB.clusterIdToFaceCount();
+    _logger.info(
+      'clusterIdToFaceCount has ${clusterIdToFaceCount.length} entries $t',
+    );
+    final clusterIdToFaceIDs = await mlDataDB.getAllClusterIdToFaceIDs();
+    _logger.info(
+      'clusterIdToFaceIDs has ${clusterIdToFaceIDs.length} entries $t',
+    );
+    return (
+      assignedClusterIDs: assignedClusterIDs,
+      clusterIdToFaceCount: clusterIdToFaceCount,
+      clusterIdToFaceIDs: clusterIdToFaceIDs,
+    );
+  }
+
   // One general method to get all memories, which calls on internal methods for each separate memory type
   Future<MemoriesResult> calcSmartMemories(
     DateTime now,
@@ -110,12 +153,23 @@ class SmartMemoriesService {
       _logger.info(
         'gotten all ${persons.length} persons after filtering $t',
       );
-      final allPersonIDs =
-          allPersons.map((person) => person.remoteID).toList(growable: false);
-      final assignedClusterIDs = allPersonIDs.isEmpty
-          ? <String>{}
-          : await mlDataDB.getPersonsClusterIDs(allPersonIDs);
-      _logger.info('assignedClusterIDs has ${assignedClusterIDs.length} $t');
+      final amountOfNonIgnoredPersons =
+          persons.where((person) => !person.data.isIgnored).length;
+      final canUseUnnamedFallback = isOfflineMode ||
+          amountOfNonIgnoredPersons <
+              _minimumNamedPeopleBeforeDisablingUnnamedFallback;
+      final shouldLoadUnnamedClusterData = canUseUnnamedFallback ||
+          debugSurfaceAll ||
+          _debugForceUnnamedClustersOnly;
+      final unnamedClusterData = await _loadUnnamedClusterData(
+        mlDataDB: mlDataDB,
+        allPersons: allPersons,
+        shouldLoadUnnamedClusterData: shouldLoadUnnamedClusterData,
+        t: t,
+      );
+      final assignedClusterIDs = unnamedClusterData.assignedClusterIDs;
+      final clusterIdToFaceCount = unnamedClusterData.clusterIdToFaceCount;
+      final clusterIdToFaceIDs = unnamedClusterData.clusterIdToFaceIDs;
 
       final currentUserEmail =
           isOfflineMode ? null : Configuration.instance.getEmail();
@@ -127,14 +181,6 @@ class SmartMemoriesService {
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
           await mlDataDB.getFileIDsToFacesWithoutEmbedding();
       _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
-      final clusterIdToFaceCount = await mlDataDB.clusterIdToFaceCount();
-      _logger.info(
-        'clusterIdToFaceCount has ${clusterIdToFaceCount.length} entries $t',
-      );
-      final clusterIdToFaceIDs = await mlDataDB.getAllClusterIdToFaceIDs();
-      _logger.info(
-        'clusterIdToFaceIDs has ${clusterIdToFaceIDs.length} entries $t',
-      );
 
       final allImageEmbeddings = await mlDataDB.getAllClipVectors();
       _logger.info(
@@ -182,6 +228,7 @@ class SmartMemoriesService {
           "now": now,
           "oldCache": oldCache,
           "debugSurfaceAll": debugSurfaceAll,
+          "canUseUnnamedFallback": canUseUnnamedFallback,
           "seenTimes": seenTimes,
           "persons": persons,
           "currentUserEmail": currentUserEmail,
@@ -680,6 +727,7 @@ class SmartMemoriesService {
       final DateTime now = args["now"];
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
+      final bool canUseUnnamedFallback = args["canUseUnnamedFallback"] ?? false;
       final Map<int, int> seenTimes = args["seenTimes"];
       final List<PersonEntity> persons = (args["persons"] as List<PersonEntity>)
           .where((person) => !person.data.hideFromMemories)
@@ -745,6 +793,7 @@ class SmartMemoriesService {
         seenTimes: seenTimes,
         persons: persons,
         isOfflineMode: isOfflineMode,
+        canUseUnnamedFallback: canUseUnnamedFallback,
         currentUserEmail: currentUserEmail,
         fileIdToFaces: fileIdToFaces,
         clusterIdToFaceCount: clusterIdToFaceCount,
@@ -891,6 +940,7 @@ class SmartMemoriesService {
     required Map<int, int> seenTimes,
     required List<PersonEntity> persons,
     required bool isOfflineMode,
+    required bool canUseUnnamedFallback,
     String? currentUserEmail,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, int> clusterIdToFaceCount,
@@ -931,8 +981,6 @@ class SmartMemoriesService {
         .toList();
     orderedImportantPersonsID.shuffle(Random());
     final amountOfPersons = orderedImportantPersonsID.length;
-    final canUseUnnamedFallback = isOfflineMode ||
-        amountOfPersons < _minimumNamedPeopleBeforeDisablingUnnamedFallback;
     final shownPersonTimeout = Duration(
       days: min(
         kPersonShowTimeout.inDays,
