@@ -51,7 +51,6 @@ class CollectionService {
   late LockerDB _db;
 
   final _collectionIDToCollections = <int, Collection>{};
-  bool _hasAttemptedFirstSync = false;
 
   CollectionService._privateConstructor();
 
@@ -75,10 +74,13 @@ class CollectionService {
         await CollectionApiClient.instance.getCollections(syncTime);
     if (updatedCollections.isEmpty) {
       _logger.info("No collections to sync.");
-      // On the first sync for empty accounts, signal that sync has completed
-      // so the UI can transition from the loading spinner to the empty state.
-      if (!_hasAttemptedFirstSync) {
-        _hasAttemptedFirstSync = true;
+      // On the first sync for empty accounts, persist a minimal sync time so
+      // hasCompletedFirstSync() returns true and the UI can transition from
+      // the loading spinner to the empty state. A value of 1 means "synced,
+      // found nothing" — subsequent getCollections(1) still returns all real
+      // collections since their updationTime will always be > 1.
+      if (syncTime == 0) {
+        await _db.setSyncTime(1);
         Bus.instance.fire(CollectionsUpdatedEvent('first_sync_empty'));
       }
       return;
@@ -89,7 +91,6 @@ class CollectionService {
       _collectionIDToCollections[collection.id] = collection;
     }
     await _db.setSyncTime(updatedCollections.last.updationTime);
-    _hasAttemptedFirstSync = true;
 
     final List<Future> fileFutures = [];
     for (final collection in updatedCollections) {
@@ -130,7 +131,7 @@ class CollectionService {
 
   bool hasCompletedFirstSync() {
     return Configuration.instance.hasConfiguredAccount() &&
-        (_db.getSyncTime() > 0 || _hasAttemptedFirstSync);
+        _db.getSyncTime() > 0;
   }
 
   Future<Collection> createCollection(
