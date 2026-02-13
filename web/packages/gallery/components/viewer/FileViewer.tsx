@@ -2633,12 +2633,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile.annotation.isOwnFile && onSendLink && (
-                    <MoreMenuItem onClick={handleSendLinkMenuAction}>
-                        <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
-                        <HugeiconsIcon icon={Navigation03Icon} size={20} />
-                    </MoreMenuItem>
-                )}
+                {activeAnnotatedFile.annotation.isOwnFile &&
+                    !isInTrashSection &&
+                    onSendLink && (
+                        <MoreMenuItem onClick={handleSendLinkMenuAction}>
+                            <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
+                            <HugeiconsIcon icon={Navigation03Icon} size={20} />
+                        </MoreMenuItem>
+                    )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>

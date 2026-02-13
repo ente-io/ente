@@ -16,6 +16,7 @@ import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
+import TvOutlinedIcon from "@mui/icons-material/TvOutlined";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -484,33 +485,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
 
         case "userFavorites":
-            menuOptions = [
-                fileCount && (
-                    <DownloadOption
-                        key="download"
-                        isDownloadInProgress={
-                            isActiveCollectionDownloadInProgress
-                        }
-                        onClick={downloadCollection}
-                    >
-                        {t("download_favorites")}
-                    </DownloadOption>
-                ),
-                <OverflowMenuOption
-                    key="share"
-                    onClick={onCollectionShare}
-                    startIcon={<ShareIcon />}
-                >
-                    {t("share_favorites")}
-                </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="cast"
-                    startIcon={<TvIcon />}
-                    onClick={onCollectionCast}
-                >
-                    {t("cast_to_tv")}
-                </OverflowMenuOption>,
-            ];
+            menuOptions = [];
             break;
 
         case "uncategorized":
@@ -765,6 +740,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         ? onCollectionManageLink
                         : onCollectionShare
                 }
+                onCastClick={onCollectionCast}
                 onCleanUncategorizedClick={confirmCleanUncategorized}
             />
             {validMenuOptions.length > 0 && (
@@ -824,6 +800,7 @@ interface QuickOptionsProps {
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
+    onCastClick: () => void;
     onCleanUncategorizedClick: () => void;
 }
 
@@ -831,6 +808,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
+    onCastClick,
     onCleanUncategorizedClick,
     collectionSummary,
     isQuickLinkAlbum,
@@ -861,6 +839,9 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 isQuickLinkAlbum={isQuickLinkAlbum}
                 onClick={onShareClick}
             />
+        )}
+        {showCastQuickOption(collectionSummary) && (
+            <CastQuickOption onClick={onCastClick} />
         )}
     </Stack>
 );
@@ -989,6 +970,9 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     attributes.has("favorites") ||
     attributes.has("shared");
 
+const showCastQuickOption = ({ type }: CollectionSummary) =>
+    type == "userFavorites";
+
 interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;
     isQuickLinkAlbum: boolean;
@@ -1056,6 +1040,24 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                 }}
             >
                 {isQuickLinkAlbum ? <LinkIcon /> : <ShareIcon />}
+            </Box>
+        </IconButton>
+    </Tooltip>
+);
+
+const CastQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("cast_to_tv")}>
+        <IconButton onClick={onClick}>
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <TvOutlinedIcon />
             </Box>
         </IconButton>
     </Tooltip>
