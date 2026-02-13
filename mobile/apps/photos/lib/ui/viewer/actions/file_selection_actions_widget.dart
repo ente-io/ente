@@ -1103,12 +1103,35 @@ class _FileSelectionActionsWidgetState
       return;
     }
 
-    final remoteFiles = files.where((file) => file.isRemoteFile).toList();
-    final skippedFiles = files.where((file) => !file.isRemoteFile).toList();
+    final l10n = AppLocalizations.of(context);
+    final existingLocalFolderNames = await Future.wait(
+      files.map(
+        (file) => getExistingLocalFolderNameForDownloadSkipToast(
+          file,
+          fallbackFolderName: l10n.gallery,
+        ),
+      ),
+    );
+
+    final filesToDownload = <EnteFile>[];
+    final skippedFiles = <EnteFile>[];
+    String? skippedSingleFolderName;
+    for (int i = 0; i < files.length; i++) {
+      final file = files[i];
+      final existingLocalFolderName = existingLocalFolderNames[i];
+      if (existingLocalFolderName != null) {
+        skippedFiles.add(file);
+        skippedSingleFolderName = existingLocalFolderName;
+        continue;
+      }
+      filesToDownload.add(
+        file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null),
+      );
+    }
     final skippedFilesCount = skippedFiles.length;
 
-    if (remoteFiles.isNotEmpty) {
-      final totalFiles = remoteFiles.length;
+    if (filesToDownload.isNotEmpty) {
+      final totalFiles = filesToDownload.length;
       int downloadedFiles = 0;
 
       final dialog = createProgressDialog(
@@ -1121,12 +1144,10 @@ class _FileSelectionActionsWidgetState
       try {
         final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
         final futures = <Future>[];
-        for (final file in remoteFiles) {
+        for (final file in filesToDownload) {
           futures.add(
             taskQueue.add(() async {
-              // Avoid mutating selected file instances since `localID` is part
-              // of EnteFile hashCode and selection is maintained in a Set.
-              await downloadToGallery(file.copyWith());
+              await downloadToGallery(file);
               downloadedFiles++;
               dialog.update(
                 message: AppLocalizations.of(context).downloading +
@@ -1147,19 +1168,14 @@ class _FileSelectionActionsWidgetState
 
     String finalMessage;
     if (skippedFilesCount > 0) {
-      final l10n = AppLocalizations.of(context);
       if (skippedFilesCount == 1) {
         final skippedFile = skippedFiles.first;
-        final folderName = await getLocalFolderNameForDownloadSkipToast(
-          skippedFile,
-          fallbackFolderName: l10n.gallery,
-        );
         finalMessage = l10n.downloadSkippedInSelectionSingleFile(
           fileName: getDownloadSkipToastFileName(
             skippedFile,
             fallbackFileName: l10n.file,
           ),
-          albumName: folderName,
+          albumName: skippedSingleFolderName ?? l10n.gallery,
         );
       } else {
         finalMessage = l10n.downloadSkippedInSelectionMultipleFiles(

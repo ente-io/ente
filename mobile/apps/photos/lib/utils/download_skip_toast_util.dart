@@ -13,24 +13,22 @@ String getDownloadSkipToastFileName(
           : fallbackFileName;
 }
 
-Future<String> getLocalFolderNameForDownloadSkipToast(
+Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
   EnteFile file, {
   required String fallbackFolderName,
 }) async {
-  final String deviceFolder = (file.deviceFolder ?? "").trim();
-  if (deviceFolder.isNotEmpty) {
-    return _getLastPathSegment(deviceFolder);
+  if (file.localID == null) {
+    return null;
   }
-
   final asset = await file.getAsset;
-  if (asset != null && await asset.exists) {
-    final String relativePath =
-        (asset.relativePath ?? "").trim().replaceFirst(RegExp(r'[/\\]+$'), '');
-    if (relativePath.isNotEmpty) {
-      return _getLastPathSegment(relativePath);
-    }
+  if (asset == null || !(await asset.exists)) {
+    return null;
   }
-
+  final String relativePath =
+      (asset.relativePath ?? "").trim().replaceFirst(RegExp(r'[/\\]+$'), '');
+  if (relativePath.isNotEmpty) {
+    return _getLastPathSegment(relativePath);
+  }
   return fallbackFolderName;
 }
 
