@@ -57,7 +57,11 @@ class MLService {
 
   static const _kForceClusteringFaceCount = 8000;
   static const _kForceClusteringFaceCountOffline = 100;
-  int get _forceClusteringFaceCount => isOfflineMode ? _kForceClusteringFaceCountOffline : _kForceClusteringFaceCount;
+  int _forceClusteringFaceCountForMode(MLMode mode) {
+    return mode == MLMode.offline
+        ? _kForceClusteringFaceCountOffline
+        : _kForceClusteringFaceCount;
+  }
 
   MLDataDB get _mlDataDB =>
       isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
@@ -182,7 +186,7 @@ class MLService {
 
       final int unclusteredFacesCount =
           await mlDataDB.getUnclusteredFaceCount();
-      if (unclusteredFacesCount > _forceClusteringFaceCount) {
+      if (unclusteredFacesCount > _forceClusteringFaceCountForMode(mode)) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
         );
