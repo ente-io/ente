@@ -312,6 +312,20 @@ class SmartMemoriesService {
     return false;
   }
 
+  static int? _memoryFileId(
+    EnteFile file, {
+    required bool isOfflineMode,
+  }) {
+    return isOfflineMode ? file.generatedID : file.uploadedFileID;
+  }
+
+  static int? _memoryFileIdFromMemory(
+    Memory memory, {
+    required bool isOfflineMode,
+  }) {
+    return _memoryFileId(memory.file, isOfflineMode: isOfflineMode);
+  }
+
   static bool _isTooCloseInTime(
     int? creationTime,
     Iterable<int> selectedCreationTimes, {
@@ -331,6 +345,7 @@ class SmartMemoriesService {
     List<Memory> memories,
     Map<int, EmbeddingVector> fileIDToImageEmbedding, {
     int? minKeep,
+    required bool isOfflineMode,
     double similarityThreshold = _clipSimilarImageThreshold,
   }) {
     if (memories.length < 2) return memories;
@@ -339,7 +354,10 @@ class SmartMemoriesService {
     int skipped = 0;
     final total = memories.length;
     for (final mem in memories) {
-      final fileID = mem.file.uploadedFileID;
+      final fileID = _memoryFileIdFromMemory(
+        mem,
+        isOfflineMode: isOfflineMode,
+      );
       final bool shouldSkip = fileID != null &&
           _isNearDuplicate(
             fileID,
@@ -364,17 +382,26 @@ class SmartMemoriesService {
     List<Memory> candidates,
     List<Memory> selected,
     Map<int, EmbeddingVector> fileIDToImageEmbedding, {
+    required bool isOfflineMode,
     double similarityThreshold = _clipSimilarImageThreshold,
   }) {
     if (selected.isEmpty || candidates.isEmpty) return candidates;
     final selectedFileIDs = selected
-        .map((mem) => mem.file.uploadedFileID)
+        .map(
+          (mem) => _memoryFileIdFromMemory(
+            mem,
+            isOfflineMode: isOfflineMode,
+          ),
+        )
         .whereType<int>()
         .toList(growable: false);
     if (selectedFileIDs.isEmpty) return candidates;
     final filtered = <Memory>[];
     for (final candidate in candidates) {
-      final fileID = candidate.file.uploadedFileID;
+      final fileID = _memoryFileIdFromMemory(
+        candidate,
+        isOfflineMode: isOfflineMode,
+      );
       if (fileID == null ||
           !_isNearDuplicate(
             fileID,
@@ -447,6 +474,7 @@ class SmartMemoriesService {
     required Map<int, int> seenTimes,
     required int nowInMicroseconds,
     required int windowEnd,
+    required bool isOfflineMode,
     required PeopleSelectionBuilder selectionBuilder,
   }) {
     if (clusterIdToFaceCount.isEmpty || clusterIdToFaceIDs.isEmpty) {
@@ -465,11 +493,19 @@ class SmartMemoriesService {
       final selected = await selectionBuilder(memories);
       if (selected.length <= 1) return selected;
       int bestIdx = 0;
-      int bestFaceCount =
-          fileIdToFaces[selected[0].file.uploadedFileID]?.length ?? 999;
+      int bestFaceCount = fileIdToFaces[_memoryFileIdFromMemory(
+            selected[0],
+            isOfflineMode: isOfflineMode,
+          )]
+              ?.length ??
+          999;
       for (int i = 1; i < selected.length; i++) {
-        final faceCount =
-            fileIdToFaces[selected[i].file.uploadedFileID]?.length ?? 999;
+        final faceCount = fileIdToFaces[_memoryFileIdFromMemory(
+              selected[i],
+              isOfflineMode: isOfflineMode,
+            )]
+                ?.length ??
+            999;
         if (faceCount < bestFaceCount) {
           bestFaceCount = faceCount;
           bestIdx = i;
@@ -698,7 +734,6 @@ class SmartMemoriesService {
       final mappedFile = localIntId != null
           ? file.copyWith(
               generatedID: localIntId,
-              uploadedFileID: localIntId,
             )
           : file;
       final key = useLocalIntIds
@@ -814,6 +849,7 @@ class SmartMemoriesService {
         now,
         oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
+        isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -831,6 +867,7 @@ class SmartMemoriesService {
         now,
         oldCache.clipShownLogs,
         surfaceAll: debugSurfaceAll,
+        isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipMemoryTypeVectors: clipMemoryTypeVectors,
@@ -843,6 +880,7 @@ class SmartMemoriesService {
       final timeMemories = await _onThisDayOrWeekResults(
         allFiles,
         now,
+        isOfflineMode: isOfflineMode,
         seenTimes: seenTimes,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
@@ -1005,6 +1043,7 @@ class SmartMemoriesService {
     Future<List<Memory>> selectPeopleMemories(List<Memory> memories) {
       return _bestSelectionPeople(
         memories,
+        isOfflineMode: isOfflineMode,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
@@ -1021,6 +1060,7 @@ class SmartMemoriesService {
       seenTimes: seenTimes,
       nowInMicroseconds: nowInMicroseconds,
       windowEnd: windowEnd,
+      isOfflineMode: isOfflineMode,
       selectionBuilder: selectPeopleMemories,
     );
     final randomizedUnnamedClusterCandidates =
@@ -1217,6 +1257,7 @@ class SmartMemoriesService {
           lastTimeMemories,
           fileIDToImageEmbedding,
           minKeep: 2,
+          isOfflineMode: isOfflineMode,
         );
         final spacedLastTimeMemories = _filterByTimeSpacing(
           filteredLastTimeMemories,
@@ -1464,6 +1505,7 @@ class SmartMemoriesService {
     DateTime currentTime,
     List<ClipShownLog> shownClip, {
     bool surfaceAll = false,
+    required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Map<ClipMemoryType, Vector> clipMemoryTypeVectors,
@@ -1491,9 +1533,9 @@ class SmartMemoriesService {
       );
       final List<EnteFile> clipFiles = [];
       for (final file in allFiles) {
-        final uploadedFileID = file.uploadedFileID;
-        if (uploadedFileID == null) continue;
-        final similarity = similarities[uploadedFileID];
+        final memoryFileID = _memoryFileId(file, isOfflineMode: isOfflineMode);
+        if (memoryFileID == null) continue;
+        final similarity = similarities[memoryFileID];
         if (similarity == null) continue;
         if (similarity > _clipMemoryTypeQueryThreshold) {
           clipFiles.add(file);
@@ -1502,8 +1544,8 @@ class SmartMemoriesService {
       if (clipFiles.length < 10) return null;
       // sort based on highest similarity first
       clipFiles.sort((a, b) {
-        final int bFileID = b.uploadedFileID!;
-        final int aFileID = a.uploadedFileID!;
+        final int bFileID = _memoryFileId(b, isOfflineMode: isOfflineMode)!;
+        final int aFileID = _memoryFileId(a, isOfflineMode: isOfflineMode)!;
         return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
       final int limit = min(clipFiles.length, 50);
@@ -1515,7 +1557,8 @@ class SmartMemoriesService {
       int skipped = 0;
       for (final file in topCandidates) {
         if (selected.length >= 10) break;
-        final fileID = file.uploadedFileID!;
+        final fileID = _memoryFileId(file, isOfflineMode: isOfflineMode);
+        if (fileID == null) continue;
         final creationTime = file.creationTime;
         if (_isTooCloseInTime(
           creationTime,
@@ -1540,8 +1583,8 @@ class SmartMemoriesService {
         }
       }
       selected.sort((a, b) {
-        final int bFileID = b.uploadedFileID!;
-        final int aFileID = a.uploadedFileID!;
+        final int bFileID = _memoryFileId(b, isOfflineMode: isOfflineMode)!;
+        final int aFileID = _memoryFileId(a, isOfflineMode: isOfflineMode)!;
         return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
       return ClipMemory(
@@ -1594,6 +1637,7 @@ class SmartMemoriesService {
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
+    required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -1698,7 +1742,15 @@ class SmartMemoriesService {
       );
       baseLocations.add(
         BaseLocation(
-          files.map((file) => file.uploadedFileID!).toList(),
+          files
+              .map(
+                (file) => _memoryFileId(
+                  file,
+                  isOfflineMode: isOfflineMode,
+                ),
+              )
+              .whereType<int>()
+              .toList(),
           location,
           isCurrent,
         ),
@@ -1884,6 +1936,7 @@ class SmartMemoriesService {
             _tryFindLocationName(trip.memories, cities);
         final photoSelection = await _bestSelection(
           trip.memories,
+          isOfflineMode: isOfflineMode,
           fileIdToFaces: fileIdToFaces,
           faceIDsToPersonID: faceIDsToPersonID,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -1938,6 +1991,7 @@ class SmartMemoriesService {
             _tryFindLocationName(trip.memories, cities);
         final photoSelection = await _bestSelection(
           trip.memories,
+          isOfflineMode: isOfflineMode,
           fileIdToFaces: fileIdToFaces,
           faceIDsToPersonID: faceIDsToPersonID,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2009,6 +2063,7 @@ class SmartMemoriesService {
                   _tryFindLocationName(trip.memories, cities);
               final photoSelection = await _bestSelection(
                 trip.memories,
+                isOfflineMode: isOfflineMode,
                 fileIdToFaces: fileIdToFaces,
                 faceIDsToPersonID: faceIDsToPersonID,
                 fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2035,6 +2090,7 @@ class SmartMemoriesService {
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
     Set<EnteFile> allFiles,
     DateTime currentTime, {
+    required bool isOfflineMode,
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
@@ -2089,6 +2145,7 @@ class SmartMemoriesService {
         final allPhotos = yearGroups.values.expand((x) => x).toList();
         final photoSelection = await _bestSelection(
           allPhotos,
+          isOfflineMode: isOfflineMode,
           fileIdToFaces: fileIdToFaces,
           faceIDsToPersonID: faceIDsToPersonID,
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2112,6 +2169,7 @@ class SmartMemoriesService {
           final files = yearGroups[year]!;
           final photoSelection = await _bestSelection(
             files,
+            isOfflineMode: isOfflineMode,
             fileIdToFaces: fileIdToFaces,
             faceIDsToPersonID: faceIDsToPersonID,
             fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2160,6 +2218,7 @@ class SmartMemoriesService {
               currentWeekYearGroups.values.expand((x) => x).toList();
           final photoSelection = await _bestSelection(
             allPhotos,
+            isOfflineMode: isOfflineMode,
             fileIdToFaces: fileIdToFaces,
             faceIDsToPersonID: faceIDsToPersonID,
             fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2182,6 +2241,7 @@ class SmartMemoriesService {
             final files = currentWeekYearGroups[year]!;
             final photoSelection = await _bestSelection(
               files,
+              isOfflineMode: isOfflineMode,
               fileIdToFaces: fileIdToFaces,
               faceIDsToPersonID: faceIDsToPersonID,
               fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2236,6 +2296,7 @@ class SmartMemoriesService {
       final photoSelection = await _bestSelection(
         monthYearFiles,
         prefferedSize: monthSelectionSize,
+        isOfflineMode: isOfflineMode,
         fileIdToFaces: fileIdToFaces,
         faceIDsToPersonID: faceIDsToPersonID,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2263,6 +2324,7 @@ class SmartMemoriesService {
     final photoSelection = await _bestSelection(
       allPhotos,
       prefferedSize: monthSelectionSize,
+      isOfflineMode: isOfflineMode,
       fileIdToFaces: fileIdToFaces,
       faceIDsToPersonID: faceIDsToPersonID,
       fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -2599,6 +2661,7 @@ class SmartMemoriesService {
   static Future<List<Memory>> _bestSelectionPeople(
     List<Memory> memories, {
     int? prefferedSize,
+    required bool isOfflineMode,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
   }) async {
@@ -2637,8 +2700,15 @@ class SmartMemoriesService {
       final finalSelection = <Memory>[];
       for (final bucket in timeBuckets) {
         // Get X% most nostalgic photos
-        final bucketFileIDs =
-            bucket.map((memory) => memory.file.uploadedFileID!).toSet().toSet();
+        final bucketFileIDs = bucket
+            .map(
+              (memory) => _memoryFileIdFromMemory(
+                memory,
+                isOfflineMode: isOfflineMode,
+              ),
+            )
+            .whereType<int>()
+            .toSet();
         final bucketVectors = _getEmbeddingsForFileIDs(
           fileIDToImageEmbedding,
           bucketFileIDs,
@@ -2652,8 +2722,18 @@ class SmartMemoriesService {
         }
         final sortedNostalgia = bucket
           ..sort(
-            (a, b) => (nostalgiaScores[b.file.uploadedFileID!] ?? 0.0)
-                .compareTo((nostalgiaScores[a.file.uploadedFileID!] ?? 0.0)),
+            (a, b) => (nostalgiaScores[_memoryFileIdFromMemory(
+                      b,
+                      isOfflineMode: isOfflineMode,
+                    )] ??
+                    0.0)
+                .compareTo(
+              nostalgiaScores[_memoryFileIdFromMemory(
+                    a,
+                    isOfflineMode: isOfflineMode,
+                  )] ??
+                  0.0,
+            ),
           );
         late List<Memory> mostNostalgic;
         if (littleEmbeddings) {
@@ -2674,6 +2754,7 @@ class SmartMemoriesService {
             mostNostalgic,
             finalSelection,
             fileIDToImageEmbedding,
+            isOfflineMode: isOfflineMode,
           );
           if (filteredCandidates.isNotEmpty) {
             candidates = filteredCandidates;
@@ -2737,6 +2818,7 @@ class SmartMemoriesService {
   static Future<List<Memory>> _bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
+    required bool isOfflineMode,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
     required Map<String, String> faceIDsToPersonID,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
@@ -2745,7 +2827,15 @@ class SmartMemoriesService {
     final fileCount = memories.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return memories;
-    final fileIDs = memories.map((e) => e.file.uploadedFileID!).toSet();
+    final fileIDs = memories
+        .map(
+          (e) => _memoryFileIdFromMemory(
+            e,
+            isOfflineMode: isOfflineMode,
+          ),
+        )
+        .whereType<int>()
+        .toSet();
 
     final allYears = memories.map((e) {
       final creationTime =
@@ -2767,7 +2857,11 @@ class SmartMemoriesService {
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
     for (final mem in memories) {
-      final fileID = mem.file.uploadedFileID!;
+      final fileID = _memoryFileIdFromMemory(
+        mem,
+        isOfflineMode: isOfflineMode,
+      );
+      if (fileID == null) continue;
       fileToFaceCount[fileID] = 0;
       final faces = fileIdToFaces[fileID];
       if (faces == null || faces.isEmpty) {
@@ -2787,13 +2881,25 @@ class SmartMemoriesService {
       // TODO: lau: eventually this sorting might have to be replaced with some scoring system
       // sort first on clip embeddings score (descending)
       memories.sort(
-        (a, b) => (fileToScore[b.file.uploadedFileID!] ?? 0.0)
-            .compareTo((fileToScore[a.file.uploadedFileID!] ?? 0.0)),
+        (a, b) => (fileToScore[
+                    _memoryFileIdFromMemory(b, isOfflineMode: isOfflineMode)] ??
+                0.0)
+            .compareTo(
+          fileToScore[
+                  _memoryFileIdFromMemory(a, isOfflineMode: isOfflineMode)] ??
+              0.0,
+        ),
       );
       // then sort on faces (descending), heavily prioritizing named faces
       memories.sort(
-        (a, b) => fileToFaceCount[b.file.uploadedFileID!]!
-            .compareTo(fileToFaceCount[a.file.uploadedFileID!]!),
+        (a, b) => (fileToFaceCount[
+                    _memoryFileIdFromMemory(b, isOfflineMode: isOfflineMode)] ??
+                0)
+            .compareTo(
+          fileToFaceCount[
+                  _memoryFileIdFromMemory(a, isOfflineMode: isOfflineMode)] ??
+              0,
+        ),
       );
 
       // then filter out similar images as much as possible
@@ -2815,11 +2921,21 @@ class SmartMemoriesService {
           skipped++;
           continue filesLoop;
         }
-        final clip = fileIDToImageEmbedding[mem.file.uploadedFileID!];
+        final memFileID = _memoryFileIdFromMemory(
+          mem,
+          isOfflineMode: isOfflineMode,
+        );
+        final clip =
+            memFileID == null ? null : fileIDToImageEmbedding[memFileID];
         if (clip != null && (fileCount - skipped) > targetSize) {
           for (final filteredMem in filteredMemories) {
-            final fClip =
-                fileIDToImageEmbedding[filteredMem.file.uploadedFileID!];
+            final filteredFileID = _memoryFileIdFromMemory(
+              filteredMem,
+              isOfflineMode: isOfflineMode,
+            );
+            final fClip = filteredFileID == null
+                ? null
+                : fileIDToImageEmbedding[filteredFileID];
             if (fClip == null) continue;
             final similarity = clip.vector.dot(fClip.vector);
             if (similarity > _clipSimilarImageThreshold) {
@@ -2853,13 +2969,33 @@ class SmartMemoriesService {
         final yearFiles = yearToFiles[year]!;
         // sort first on clip embeddings score (descending)
         yearFiles.sort(
-          (a, b) => (fileToScore[b.file.uploadedFileID!] ?? 0.0)
-              .compareTo((fileToScore[a.file.uploadedFileID!] ?? 0.0)),
+          (a, b) => (fileToScore[_memoryFileIdFromMemory(
+                    b,
+                    isOfflineMode: isOfflineMode,
+                  )] ??
+                  0.0)
+              .compareTo(
+            fileToScore[_memoryFileIdFromMemory(
+                  a,
+                  isOfflineMode: isOfflineMode,
+                )] ??
+                0.0,
+          ),
         );
         // then sort on faces (descending), heavily prioritizing named faces
         yearFiles.sort(
-          (a, b) => fileToFaceCount[b.file.uploadedFileID!]!
-              .compareTo(fileToFaceCount[a.file.uploadedFileID!]!),
+          (a, b) => (fileToFaceCount[_memoryFileIdFromMemory(
+                    b,
+                    isOfflineMode: isOfflineMode,
+                  )] ??
+                  0)
+              .compareTo(
+            fileToFaceCount[_memoryFileIdFromMemory(
+                  a,
+                  isOfflineMode: isOfflineMode,
+                )] ??
+                0,
+          ),
         );
       }
 
@@ -2886,11 +3022,21 @@ class SmartMemoriesService {
           }
           if (round != 0 && (fileCount - skipped) > targetSize) {
             // check for filtering
-            final clip = fileIDToImageEmbedding[newMem.file.uploadedFileID!];
+            final newMemID = _memoryFileIdFromMemory(
+              newMem,
+              isOfflineMode: isOfflineMode,
+            );
+            final clip =
+                newMemID == null ? null : fileIDToImageEmbedding[newMemID];
             if (clip != null) {
               for (final filteredMem in filteredMemories) {
-                final fClip =
-                    fileIDToImageEmbedding[filteredMem.file.uploadedFileID!];
+                final filteredFileID = _memoryFileIdFromMemory(
+                  filteredMem,
+                  isOfflineMode: isOfflineMode,
+                );
+                final fClip = filteredFileID == null
+                    ? null
+                    : fileIDToImageEmbedding[filteredFileID];
                 if (fClip == null) continue;
                 final similarity = clip.vector.dot(fClip.vector);
                 if (similarity > _clipSimilarImageThreshold) {
