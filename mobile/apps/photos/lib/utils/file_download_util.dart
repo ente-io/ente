@@ -32,8 +32,6 @@ final _logger = Logger("file_download_util");
 ///
 /// Rationale:
 /// 1. We prefer the original title for stable, filename-like copy in the toast.
-/// 2. We keep a single place for the toast naming rule (title -> displayName)
-///    so all skip-toasts stay consistent.
 String getDownloadSkipToastFileName(EnteFile file) {
   final title = (file.title ?? "").trim();
   final displayName = file.displayName.trim();
