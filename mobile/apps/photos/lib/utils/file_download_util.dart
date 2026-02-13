@@ -11,6 +11,7 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/device_files_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
@@ -26,6 +27,39 @@ import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 
 final _logger = Logger("file_download_util");
+
+/// Use this instead of `file.displayName` directly for skip toasts.
+///
+/// Rationale:
+/// 1. We prefer the original title for stable, filename-like copy in the toast.
+/// 2. We keep a single place for the toast naming rule (title -> displayName)
+///    so all skip-toasts stay consistent.
+String getDownloadSkipToastFileName(EnteFile file) {
+  final title = (file.title ?? "").trim();
+  final displayName = file.displayName.trim();
+  return title.isNotEmpty ? title : displayName;
+}
+
+Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
+  EnteFile file,
+) async {
+  if (file.localID == null) {
+    return null;
+  }
+  final asset = await file.getAsset;
+  if (asset == null || !(await asset.exists)) {
+    return null;
+  }
+  final folderNames =
+      await FilesDB.instance.getDeviceCollectionNamesForLocalID(file.localID!);
+  if (folderNames.isNotEmpty) {
+    return folderNames.last;
+  }
+  throw StateError(
+    "Expected non-empty device collection name for localID=${file.localID}, "
+    "but found none.",
+  );
+}
 
 Future<File?> downloadAndDecryptPublicFile(
   EnteFile file, {

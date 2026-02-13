@@ -37,7 +37,6 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
@@ -627,10 +626,7 @@ class FileAppBarState extends State<FileAppBar> {
         showToast(
           context,
           l10n.downloadSkippedAlreadyAvailableOnDevice(
-            fileName: getDownloadSkipToastFileName(
-              file,
-              fallbackFileName: l10n.file,
-            ),
+            fileName: getDownloadSkipToastFileName(file),
             albumName: existingFolderName,
           ),
           iosLongToastLengthInSec: 4,

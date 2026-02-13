@@ -45,7 +45,6 @@ import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -1168,10 +1167,7 @@ class _FileSelectionActionsWidgetState
       if (skippedFilesCount == 1) {
         final skippedFile = skippedFiles.first;
         finalMessage = l10n.downloadSkippedInSelectionSingleFile(
-          fileName: getDownloadSkipToastFileName(
-            skippedFile,
-            fallbackFileName: l10n.file,
-          ),
+          fileName: getDownloadSkipToastFileName(skippedFile),
           albumName: skippedSingleFolderName ?? l10n.gallery,
         );
       } else {
