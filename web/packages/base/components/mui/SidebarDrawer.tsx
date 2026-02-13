@@ -2,13 +2,12 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
+    Drawer,
     IconButton,
     Stack,
     styled,
-    SwipeableDrawer,
     Typography,
     type DrawerProps,
-    type SwipeableDrawerProps,
 } from "@mui/material";
 import { isDesktop } from "ente-base/app";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -27,44 +26,27 @@ import React from "react";
 export const SidebarDrawer: React.FC<DrawerProps> = ({
     slotProps,
     children,
-    onClose,
-    open,
     ...rest
-}) => {
-    const commonSlotProps = {
-        ...(slotProps ?? {}),
-        paper: {
-            sx: {
-                maxWidth: "375px",
-                width: "100%",
-                scrollbarWidth: "thin",
-                // Need to increase specificity to override inherited padding.
-                "&&": { padding: 0 },
+}) => (
+    <Drawer
+        {...rest}
+        slotProps={{
+            ...(slotProps ?? {}),
+            paper: {
+                sx: {
+                    maxWidth: "375px",
+                    width: "100%",
+                    scrollbarWidth: "thin",
+                    // Need to increase specificity to override inherited padding.
+                    "&&": { padding: 0 },
+                },
             },
-        },
-    };
-
-    const handleSwipeableClose: SwipeableDrawerProps["onClose"] = (event) => {
-        onClose?.(event as React.SyntheticEvent, "backdropClick");
-    };
-    const handleSwipeableOpen: SwipeableDrawerProps["onOpen"] = () => {
-        // Intentionally a no-op; required by SwipeableDrawer.
-    };
-
-    return (
-        <SwipeableDrawer
-            {...rest}
-            open={open}
-            disableSwipeToOpen
-            onClose={handleSwipeableClose}
-            onOpen={handleSwipeableOpen}
-            slotProps={commonSlotProps}
-        >
-            {isDesktop && <AppTitlebarBackdrop />}
-            <Box sx={{ p: 1 }}>{children}</Box>
-        </SwipeableDrawer>
-    );
-};
+        }}
+    >
+        {isDesktop && <AppTitlebarBackdrop />}
+        <Box sx={{ p: 1 }}>{children}</Box>
+    </Drawer>
+);
 
 /**
  * When running on desktop, we adds a sticky opaque bar at the top of the
@@ -110,14 +92,8 @@ export const NestedSidebarDrawer: React.FC<
     NestedSidebarDrawerVisibilityProps & DrawerProps
 > = ({ onClose, onRootClose, ...rest }) => {
     // Intercept backdrop taps and repurpose them to close the entire stack.
-    const handleClose: DrawerProps["onClose"] = (event, reason) => {
-        const target = (event as { target?: EventTarget | null }).target;
-        const isBackdropEvent =
-            reason === "backdropClick" &&
-            target instanceof HTMLElement &&
-            target.classList.contains("MuiBackdrop-root");
-
-        if (isBackdropEvent) {
+    const handleClose: DrawerProps["onClose"] = (_, reason) => {
+        if (reason == "backdropClick") {
             onClose();
             onRootClose();
         } else {

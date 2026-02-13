@@ -129,10 +129,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       if (_passwordStrength > kStrongPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).strongPassword;
         passwordMessageType = TextInputMessageType.success;
-      } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-        passwordMessage = AppLocalizations.of(context).moderateStrength;
-        passwordMessageType = TextInputMessageType.alert;
-      } else {
+      } else if (_passwordStrength <= kMildPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).weakStrength;
         passwordMessageType = TextInputMessageType.alert;
       }

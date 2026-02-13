@@ -521,6 +521,7 @@
     "done": "Tamamlandı",
     "share_link_section_title": "Ya da bir bağlantı paylaş",
     "remove_link": "Bağlantıyı kaldır",
+    "link_created": "",
     "create_public_link": "Herkese açık bir bağlantı oluştur",
     "public_link_created": "Herkese açık bağlantı oluşturuldu",
     "public_link_enabled": "Herkese açık bağlantı aktive edildi",

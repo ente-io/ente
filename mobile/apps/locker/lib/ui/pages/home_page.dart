@@ -216,12 +216,9 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
   bool _isLoading = true;
-  bool _hasLoadedFromDb = false;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
-  bool get _isLoadingFromDb => !_hasLoadedFromDb && _isLoading;
-  bool get _isSyncingWithServer =>
-      _hasLoadedFromDb && !_hasCompletedInitialLoad;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -526,7 +523,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
-          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
@@ -535,7 +531,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
-          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad =
               CollectionService.instance.hasCompletedFirstSync();
         });
@@ -648,7 +643,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: _isSyncingWithServer,
+                  isSyncing: _isSyncing,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -701,16 +696,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
-    if (_isLoadingFromDb) {
-      final colorScheme = getEnteColorScheme(context);
-      return Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          color: colorScheme.primary700,
-        ),
-      );
-    }
-
     if (_error != null) {
       return Center(
         child: Padding(
@@ -748,10 +733,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(),
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isLoading: _isSyncing),
         ),
       );
     }
@@ -761,10 +746,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isLoading: _isSyncing),
                 ),
               )
             : SingleChildScrollView(

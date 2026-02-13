@@ -84,6 +84,7 @@ class LocalSettings {
   static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
 
   static const _kOfflineFlags = "ls.offline_flags";
+  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
 
   final SharedPreferences _prefs;
 
@@ -240,10 +241,12 @@ class LocalSettings {
   Future<void> setOfflineMLConsent(bool value) =>
       _setFlag(OfflineFlag.mlConsent, value);
 
-  bool get offlineMapEnabled => _getFlag(OfflineFlag.mapEnabled);
+  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? true;
 
-  Future<void> setOfflineMapEnabled(bool value) =>
-      _setFlag(OfflineFlag.mapEnabled, value);
+  Future<void> setOfflineMapEnabled(bool value) async {
+    await _prefs.setBool(_kOfflineMapEnabled, value);
+    await _setFlag(OfflineFlag.mapEnabled, value);
+  }
 
   bool get isMLLocalIndexingEnabled {
     final key = appMode == AppMode.offline

@@ -1,3 +1,5 @@
+import { Navigation03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -307,6 +309,12 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onDownload?: (file: EnteFile) => void;
     /**
+     * Called when the given {@link file} should be shared via quick link.
+     *
+     * If this is not provided then the send link action will not be shown.
+     */
+    onSendLink?: (file: EnteFile) => void;
+    /**
      * Called when the given {@link file} should be deleted.
      *
      * If this is not provided then the delete action will not be shown.
@@ -401,6 +409,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onToggleFavorite,
     onFileVisibilityUpdate,
     onDownload,
+    onSendLink,
     onDelete,
     onSelectCollection,
     onSelectPerson,
@@ -1341,6 +1350,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleDownloadMenuAction = () => {
         handleMoreMenuCloseIfNeeded();
         onDownload!(activeAnnotatedFile!.file);
+    };
+
+    // Callback invoked when the send link action is triggered by activating the
+    // send link menu item in the more menu.
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleSendLinkMenuAction = () => {
+        handleMoreMenuCloseIfNeeded();
+        onSendLink!(activeAnnotatedFile!.file);
     };
 
     const handleMore = useCallback(
@@ -2606,6 +2624,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
+                disableAutoFocusItem
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
@@ -2614,6 +2633,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
+                {activeAnnotatedFile.annotation.isOwnFile &&
+                    !isInTrashSection &&
+                    onSendLink && (
+                        <MoreMenuItem onClick={handleSendLinkMenuAction}>
+                            <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
+                            <HugeiconsIcon icon={Navigation03Icon} size={20} />
+                        </MoreMenuItem>
+                    )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>

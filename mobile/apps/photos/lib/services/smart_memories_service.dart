@@ -63,8 +63,59 @@ class SmartMemoriesService {
   static const yearsBefore = 30;
 
   static const minimumMemoryLength = 5;
+  static const _maximumUnnamedPeopleClusters = 10;
+  static const _maximumUnnamedPeopleGroupSize = 6;
+  static const _minimumUnnamedPeopleWithMePhotos = minimumMemoryLength;
+  static const _minimumUnnamedPeopleNonGroupPhotos = minimumMemoryLength;
+  static const _minimumUnnamedPeopleNonConsecutiveDays = 4;
+  static const _minimumNamedPeopleBeforeDisablingUnnamedFallback = 5;
+  static const _unnamedClusterPersonIDPrefix = "cluster:";
+  static const _debugForceUnnamedClustersOnly = false;
 
   SmartMemoriesService();
+
+  Future<
+      ({
+        Set<String> assignedClusterIDs,
+        Map<String, int> clusterIdToFaceCount,
+        Map<String, Iterable<String>> clusterIdToFaceIDs,
+      })> _loadUnnamedClusterData({
+    required MLDataDB mlDataDB,
+    required List<PersonEntity> allPersons,
+    required bool shouldLoadUnnamedClusterData,
+    required TimeLogger t,
+  }) async {
+    if (!shouldLoadUnnamedClusterData) {
+      _logger.info(
+        'Skipping unnamed cluster data load (fallback disabled) $t',
+      );
+      return (
+        assignedClusterIDs: <String>{},
+        clusterIdToFaceCount: <String, int>{},
+        clusterIdToFaceIDs: <String, Iterable<String>>{},
+      );
+    }
+
+    final allPersonIDs =
+        allPersons.map((person) => person.remoteID).toList(growable: false);
+    final assignedClusterIDs = allPersonIDs.isEmpty
+        ? <String>{}
+        : await mlDataDB.getPersonsClusterIDs(allPersonIDs);
+    _logger.info('assignedClusterIDs has ${assignedClusterIDs.length} $t');
+    final clusterIdToFaceCount = await mlDataDB.clusterIdToFaceCount();
+    _logger.info(
+      'clusterIdToFaceCount has ${clusterIdToFaceCount.length} entries $t',
+    );
+    final clusterIdToFaceIDs = await mlDataDB.getAllClusterIdToFaceIDs();
+    _logger.info(
+      'clusterIdToFaceIDs has ${clusterIdToFaceIDs.length} entries $t',
+    );
+    return (
+      assignedClusterIDs: assignedClusterIDs,
+      clusterIdToFaceCount: clusterIdToFaceCount,
+      clusterIdToFaceIDs: clusterIdToFaceIDs,
+    );
+  }
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
   Future<MemoriesResult> calcSmartMemories(
@@ -73,16 +124,15 @@ class SmartMemoriesService {
     bool debugSurfaceAll = false,
   }) async {
     try {
-      if (isOfflineMode) {
-        final memories = await calcSimpleMemories();
-        return MemoriesResult(memories, <BaseLocation>[]);
-      }
       final TimeLogger t = TimeLogger(context: "calcMemories");
       _logger.info(
         'calcMemories called with time: $now at ${DateTime.now()} $t',
       );
 
-      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
+      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories(
+        useLocalIntIds: isOfflineMode,
+        requireLocalId: isOfflineMode,
+      );
       _logger.info("All files length: ${allFiles.length} $t");
 
       final collectionIDsToExclude = await getCollectionIDsToExclude();
@@ -93,24 +143,46 @@ class SmartMemoriesService {
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.info('seenTimes has ${seenTimes.length} entries $t');
 
-      final allPersons = await PersonService.instance.getPersons();
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final allPersons = isOfflineMode
+          ? const <PersonEntity>[]
+          : await PersonService.instance.getPersons();
       final persons =
           allPersons.where((person) => !person.data.hideFromMemories).toList();
       _logger.info(
         'gotten all ${persons.length} persons after filtering $t',
       );
+      final amountOfNonIgnoredPersons =
+          persons.where((person) => !person.data.isIgnored).length;
+      final canUseUnnamedFallback = isOfflineMode ||
+          amountOfNonIgnoredPersons <
+              _minimumNamedPeopleBeforeDisablingUnnamedFallback;
+      final shouldLoadUnnamedClusterData = canUseUnnamedFallback ||
+          debugSurfaceAll ||
+          _debugForceUnnamedClustersOnly;
+      final unnamedClusterData = await _loadUnnamedClusterData(
+        mlDataDB: mlDataDB,
+        allPersons: allPersons,
+        shouldLoadUnnamedClusterData: shouldLoadUnnamedClusterData,
+        t: t,
+      );
+      final assignedClusterIDs = unnamedClusterData.assignedClusterIDs;
+      final clusterIdToFaceCount = unnamedClusterData.clusterIdToFaceCount;
+      final clusterIdToFaceIDs = unnamedClusterData.clusterIdToFaceIDs;
 
-      final currentUserEmail = Configuration.instance.getEmail();
+      final currentUserEmail =
+          isOfflineMode ? null : Configuration.instance.getEmail();
       _logger.info('currentUserEmail: $currentUserEmail $t');
 
       final cities = await locationService.getCities();
       _logger.info('cities has ${cities.length} entries $t');
 
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
-          await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
+          await mlDataDB.getFileIDsToFacesWithoutEmbedding();
       _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
 
-      final allImageEmbeddings = await MLDataDB.instance.getAllClipVectors();
+      final allImageEmbeddings = await mlDataDB.getAllClipVectors();
       _logger.info(
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
@@ -152,14 +224,19 @@ class SmartMemoriesService {
           "allFiles": allFiles,
           "allFileIdsToFile": allFileIdsToFile,
           "collectionIDsToExclude": collectionIDsToExclude,
+          "isOfflineMode": isOfflineMode,
           "now": now,
           "oldCache": oldCache,
           "debugSurfaceAll": debugSurfaceAll,
+          "canUseUnnamedFallback": canUseUnnamedFallback,
           "seenTimes": seenTimes,
           "persons": persons,
           "currentUserEmail": currentUserEmail,
           "cities": cities,
           "fileIdToFaces": fileIdToFaces,
+          "clusterIdToFaceCount": clusterIdToFaceCount,
+          "clusterIdToFaceIDs": clusterIdToFaceIDs,
+          "assignedClusterIDs": assignedClusterIDs,
           "allImageEmbeddings": allImageEmbeddings,
           "clipPositiveTextVector": clipPositiveTextVector,
           "clipPeopleActivityVectors": clipPeopleActivityVectors,
@@ -170,6 +247,14 @@ class SmartMemoriesService {
         '${memoriesResult.memories.length} memories computed in computer $t',
       );
 
+      if (isOfflineMode && memoriesResult.isEmpty) {
+        _logger.severe(
+          "Smart memories returned empty in offline mode, falling back to simple memories",
+        );
+        final fallbackMemories = await calcSimpleMemories();
+        return MemoriesResult(fallbackMemories, <BaseLocation>[]);
+      }
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
@@ -177,6 +262,21 @@ class SmartMemoriesService {
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
+      if (isOfflineMode) {
+        try {
+          _logger.warning(
+            "Falling back to simple memories after smart memories failure in offline mode",
+          );
+          final fallbackMemories = await calcSimpleMemories();
+          return MemoriesResult(fallbackMemories, <BaseLocation>[]);
+        } catch (fallbackError, fallbackStackTrace) {
+          _logger.severe(
+            "Offline fallback to simple memories failed",
+            fallbackError,
+            fallbackStackTrace,
+          );
+        }
+      }
       return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
     }
   }
@@ -336,6 +436,201 @@ class SmartMemoriesService {
     return filtered;
   }
 
+  static List<PeopleMemoryCandidate> _buildUnnamedClusterCandidates({
+    required Map<String, int> clusterIdToFaceCount,
+    required Map<String, Iterable<String>> clusterIdToFaceIDs,
+    required Set<String> assignedClusterIDs,
+    required Map<int, EnteFile> allFileIdsToFile,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Set<int>? meFileIDs,
+    required bool isMeAssigned,
+    required Map<int, int> seenTimes,
+    required int nowInMicroseconds,
+    required int windowEnd,
+    required PeopleSelectionBuilder selectionBuilder,
+  }) {
+    if (clusterIdToFaceCount.isEmpty || clusterIdToFaceIDs.isEmpty) {
+      return <PeopleMemoryCandidate>[];
+    }
+    if (isMeAssigned && (meFileIDs == null || meFileIDs.isEmpty)) {
+      return <PeopleMemoryCandidate>[];
+    }
+    final sortedUnassignedClusters = clusterIdToFaceCount.entries
+        .where((entry) => !assignedClusterIDs.contains(entry.key))
+        .toList(growable: false)
+      ..sort((a, b) => b.value.compareTo(a.value));
+    // Wrap the selection builder to move the photo with the fewest faces to
+    // the front, so the cover thumbnail clearly shows who the memory is about.
+    Future<List<Memory>> coverOptimizedBuilder(List<Memory> memories) async {
+      final selected = await selectionBuilder(memories);
+      if (selected.length <= 1) return selected;
+      int bestIdx = 0;
+      int bestFaceCount =
+          fileIdToFaces[selected[0].file.uploadedFileID]?.length ?? 999;
+      for (int i = 1; i < selected.length; i++) {
+        final faceCount =
+            fileIdToFaces[selected[i].file.uploadedFileID]?.length ?? 999;
+        if (faceCount < bestFaceCount) {
+          bestFaceCount = faceCount;
+          bestIdx = i;
+        }
+      }
+      if (bestIdx == 0) return selected;
+      return [
+        selected[bestIdx],
+        ...selected.sublist(0, bestIdx),
+        ...selected.sublist(bestIdx + 1),
+      ];
+    }
+
+    final unnamedCandidates = <PeopleMemoryCandidate>[];
+    for (final entry in sortedUnassignedClusters) {
+      if (unnamedCandidates.length >= _maximumUnnamedPeopleClusters) break;
+      final clusterID = entry.key;
+      final faceIDs = clusterIdToFaceIDs[clusterID];
+      if (faceIDs == null || faceIDs.isEmpty) continue;
+
+      final clusterFileIDs = <int>{};
+      for (final faceID in faceIDs) {
+        clusterFileIDs.add(getFileIdFromFaceId(faceID));
+      }
+      if (clusterFileIDs.isEmpty) continue;
+
+      final nonGroupFiles = <EnteFile>[];
+      final nonGroupCreationTimes = <int>[];
+      int overlapWithMeInNonGroupFiles = 0;
+      for (final fileID in clusterFileIDs) {
+        final facesInPhoto = fileIdToFaces[fileID]?.length ?? 0;
+        if (facesInPhoto == 0 ||
+            facesInPhoto > _maximumUnnamedPeopleGroupSize) {
+          continue;
+        }
+        final file = allFileIdsToFile[fileID];
+        if (file == null || file.creationTime == null) continue;
+        nonGroupFiles.add(file);
+        nonGroupCreationTimes.add(file.creationTime!);
+        if (isMeAssigned && meFileIDs!.contains(fileID)) {
+          overlapWithMeInNonGroupFiles++;
+        }
+      }
+      if (isMeAssigned &&
+          overlapWithMeInNonGroupFiles < _minimumUnnamedPeopleWithMePhotos) {
+        continue;
+      }
+      if (nonGroupFiles.length < _minimumUnnamedPeopleNonGroupPhotos) {
+        continue;
+      }
+      final nonConsecutiveDays =
+          _countNonConsecutiveDays(nonGroupCreationTimes);
+      if (nonConsecutiveDays < _minimumUnnamedPeopleNonConsecutiveDays) {
+        continue;
+      }
+
+      unnamedCandidates.add(
+        PeopleMemoryCandidate(
+          personID: "$_unnamedClusterPersonIDPrefix$clusterID",
+          personName: null,
+          type: PeopleMemoryType.spotlight,
+          rawMemories: nonGroupFiles
+              .map((file) => Memory.fromFile(file, seenTimes))
+              .toList(growable: false),
+          firstDateToShow: nowInMicroseconds,
+          lastDateToShow: windowEnd,
+          selectionBuilder: coverOptimizedBuilder,
+          isUnnamedCluster: true,
+        ),
+      );
+    }
+    return unnamedCandidates;
+  }
+
+  static int _countNonConsecutiveDays(Iterable<int> creationTimes) {
+    if (creationTimes.isEmpty) return 0;
+    final uniqueDays = creationTimes
+        .map((timestamp) => timestamp - (timestamp % microSecondsInDay))
+        .toSet()
+        .toList(growable: false)
+      ..sort();
+    if (uniqueDays.isEmpty) return 0;
+    int count = 1;
+    int previousDay = uniqueDays.first;
+    for (final day in uniqueDays.skip(1)) {
+      if (day - previousDay > microSecondsInDay) {
+        count++;
+      }
+      previousDay = day;
+    }
+    return count;
+  }
+
+  static Map<String, int> _latestShownTimeByPersonID(
+    Iterable<PeopleShownLog> shownPeople,
+  ) {
+    final latestShownTimeByPersonID = <String, int>{};
+    for (final shownLog in shownPeople) {
+      final oldValue = latestShownTimeByPersonID[shownLog.personID];
+      if (oldValue == null || shownLog.lastTimeShown > oldValue) {
+        latestShownTimeByPersonID[shownLog.personID] = shownLog.lastTimeShown;
+      }
+    }
+    return latestShownTimeByPersonID;
+  }
+
+  static List<PeopleMemoryCandidate> _orderUnnamedCandidatesByRecencyAndRandom({
+    required Iterable<PeopleMemoryCandidate> candidates,
+    required Iterable<PeopleShownLog> shownPeople,
+    required DateTime currentTime,
+    required Duration shownPersonTimeout,
+  }) {
+    final remaining = candidates.toList(growable: true);
+    if (remaining.length <= 1) return remaining;
+    final random = Random();
+    final latestShownTimeByPersonID = _latestShownTimeByPersonID(shownPeople);
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final unseenWeight = max(1, shownPersonTimeout.inDays * 2);
+    final orderedCandidates = <PeopleMemoryCandidate>[];
+    while (remaining.isNotEmpty) {
+      final weights = <int>[];
+      int totalWeight = 0;
+      for (final candidate in remaining) {
+        final latestShownTime = latestShownTimeByPersonID[candidate.personID];
+        final weight = latestShownTime == null
+            ? unseenWeight
+            : max(
+                1,
+                (nowInMicroseconds - latestShownTime) ~/ microSecondsInDay,
+              );
+        weights.add(weight);
+        totalWeight += weight;
+      }
+      var chosenWeight = random.nextInt(totalWeight);
+      int chosenIndex = 0;
+      for (; chosenIndex < weights.length; chosenIndex++) {
+        chosenWeight -= weights[chosenIndex];
+        if (chosenWeight < 0) break;
+      }
+      orderedCandidates.add(remaining.removeAt(chosenIndex));
+    }
+    return orderedCandidates;
+  }
+
+  static bool _wasPersonShownRecently({
+    required String personID,
+    required Iterable<PeopleShownLog> shownPeople,
+    required DateTime currentTime,
+    required Duration shownPersonTimeout,
+  }) {
+    for (final shownLog in shownPeople) {
+      if (shownLog.personID != personID) continue;
+      final shownDate =
+          DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+      if (currentTime.difference(shownDate) < shownPersonTimeout) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<(Set<EnteFile>, Map<int, EnteFile>)> _getFilesAndMapForMemories({
     bool useGeneratedIds = false,
     bool requireLocalId = false,
@@ -359,7 +654,7 @@ class SmartMemoriesService {
         }
       }
     }
-    final Set<EnteFile> allFiles = {};
+    final Set<EnteFile> candidateFiles = {};
     for (final file in allFilesFromSearchService) {
       final localId = file.localID;
       final hasLocalId = localId != null && localId.isNotEmpty;
@@ -385,26 +680,35 @@ class SmartMemoriesService {
             archivedOrHiddenCollectionIDs.contains(collectionID)) {
           continue;
         }
-        allFiles.add(file);
+        candidateFiles.add(file);
       }
     }
     final Map<String, int> localIdToIntId = useLocalIntIds
         ? await OfflineFilesDB.instance.ensureLocalIntIds(
-            allFiles
+            candidateFiles
                 .map((file) => file.localID)
                 .whereType<String>()
                 .where((id) => id.isNotEmpty),
           )
         : <String, int>{};
+    final Set<EnteFile> allFiles = {};
     final allFileIdsToFile = <int, EnteFile>{};
-    for (final file in allFiles) {
+    for (final file in candidateFiles) {
+      final localIntId = useLocalIntIds ? localIdToIntId[file.localID] : null;
+      final mappedFile = localIntId != null
+          ? file.copyWith(
+              generatedID: localIntId,
+              uploadedFileID: localIntId,
+            )
+          : file;
       final key = useLocalIntIds
-          ? localIdToIntId[file.localID]
+          ? localIntId
           : useGeneratedIds
-              ? file.generatedID
-              : file.uploadedFileID;
+              ? mappedFile.generatedID
+              : mappedFile.uploadedFileID;
       if (key != null) {
-        allFileIdsToFile[key] = file;
+        allFiles.add(mappedFile);
+        allFileIdsToFile[key] = mappedFile;
       }
     }
     return (allFiles, allFileIdsToFile);
@@ -419,9 +723,11 @@ class SmartMemoriesService {
       final Set<EnteFile> allFiles = args["allFiles"];
       final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
       final Set<int> collectionIDsToExclude = args["collectionIDsToExclude"];
+      final bool isOfflineMode = args["isOfflineMode"] ?? false;
       final DateTime now = args["now"];
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
+      final bool canUseUnnamedFallback = args["canUseUnnamedFallback"] ?? false;
       final Map<int, int> seenTimes = args["seenTimes"];
       final List<PersonEntity> persons = (args["persons"] as List<PersonEntity>)
           .where((person) => !person.data.hideFromMemories)
@@ -430,6 +736,15 @@ class SmartMemoriesService {
       final List<City> cities = args["cities"];
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
           args["fileIdToFaces"];
+      final Map<String, int> clusterIdToFaceCount = Map<String, int>.from(
+        args["clusterIdToFaceCount"] as Map,
+      );
+      final Map<String, Iterable<String>> clusterIdToFaceIDs =
+          Map<String, Iterable<String>>.from(
+        args["clusterIdToFaceIDs"] as Map,
+      );
+      final Set<String> assignedClusterIDs =
+          (args["assignedClusterIDs"] as Set).cast<String>();
       final List<EmbeddingVector> allImageEmbeddings =
           args["allImageEmbeddings"];
       final Vector clipPositiveTextVector = args["clipPositiveTextVector"];
@@ -477,8 +792,13 @@ class SmartMemoriesService {
         surfaceAll: debugSurfaceAll,
         seenTimes: seenTimes,
         persons: persons,
+        isOfflineMode: isOfflineMode,
+        canUseUnnamedFallback: canUseUnnamedFallback,
         currentUserEmail: currentUserEmail,
         fileIdToFaces: fileIdToFaces,
+        clusterIdToFaceCount: clusterIdToFaceCount,
+        clusterIdToFaceIDs: clusterIdToFaceIDs,
+        assignedClusterIDs: assignedClusterIDs,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
         clipPeopleActivityVectors: clipPeopleActivityVectors,
@@ -619,8 +939,13 @@ class SmartMemoriesService {
     bool surfaceAll = false,
     required Map<int, int> seenTimes,
     required List<PersonEntity> persons,
+    required bool isOfflineMode,
+    required bool canUseUnnamedFallback,
     String? currentUserEmail,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, int> clusterIdToFaceCount,
+    required Map<String, Iterable<String>> clusterIdToFaceIDs,
+    required Set<String> assignedClusterIDs,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Vector clipPositiveTextVector,
     required Map<PeopleActivity, Vector> clipPeopleActivityVectors,
@@ -634,7 +959,6 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered (random) list of important people
-    if (persons.isEmpty) return [];
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
@@ -652,11 +976,17 @@ class SmartMemoriesService {
       }
     }
     final List<String> orderedImportantPersonsID = persons
-        .where((person) => !person.data.isIgnored)
+        .where((person) => !isOfflineMode && !person.data.isIgnored)
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());
     final amountOfPersons = orderedImportantPersonsID.length;
+    final shownPersonTimeout = Duration(
+      days: min(
+        kPersonShowTimeout.inDays,
+        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
+      ),
+    );
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
@@ -678,6 +1008,38 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
+    }
+
+    final unnamedClusterCandidates = _buildUnnamedClusterCandidates(
+      clusterIdToFaceCount: clusterIdToFaceCount,
+      clusterIdToFaceIDs: clusterIdToFaceIDs,
+      assignedClusterIDs: assignedClusterIDs,
+      allFileIdsToFile: allFileIdsToFile,
+      fileIdToFaces: fileIdToFaces,
+      meFileIDs: meFileIDs,
+      isMeAssigned: isMeAssigned,
+      seenTimes: seenTimes,
+      nowInMicroseconds: nowInMicroseconds,
+      windowEnd: windowEnd,
+      selectionBuilder: selectPeopleMemories,
+    );
+    final randomizedUnnamedClusterCandidates =
+        _orderUnnamedCandidatesByRecencyAndRandom(
+      candidates: unnamedClusterCandidates,
+      shownPeople: shownPeople,
+      currentTime: currentTime,
+      shownPersonTimeout: shownPersonTimeout,
+    );
+    w?.log('unnamed cluster candidates setup');
+
+    if (kDebugMode && _debugForceUnnamedClustersOnly) {
+      for (final candidate in randomizedUnnamedClusterCandidates) {
+        final memory = await candidate.realize();
+        if (memory == null) continue;
+        memoryResults.add(memory);
+        if (!surfaceAll) break;
+      }
+      return memoryResults;
     }
 
     final Map<String, Map<PeopleMemoryType, List<PeopleMemoryCandidate>>>
@@ -892,6 +1254,12 @@ class SmartMemoriesService {
           }
         }
       }
+      for (final candidate in unnamedClusterCandidates) {
+        final memory = await candidate.realize();
+        if (memory != null) {
+          memoryResults.add(memory);
+        }
+      }
       return memoryResults;
     }
 
@@ -986,14 +1354,9 @@ class SmartMemoriesService {
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
-    final shownPersonTimeout = Duration(
-      days: min(
-        kPersonShowTimeout.inDays,
-        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
-      ),
-    );
     final shownPersonAndTypeTimeout =
         Duration(days: shownPersonTimeout.inDays * 2);
+    bool addedFromRotation = false;
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -1045,10 +1408,51 @@ class SmartMemoriesService {
         final potentialMemory = await potentialCandidate.realize();
         if (potentialMemory == null) continue;
         memoryResults.add(potentialMemory);
+        addedFromRotation = true;
         added++;
         if (added >= 2) break peopleRotationLoop;
       }
       if (added > 0) break peopleRotationLoop;
+    }
+    if (!addedFromRotation && canUseUnnamedFallback) {
+      final eligibleUnnamedCandidates = <PeopleMemoryCandidate>[];
+      for (final candidate in randomizedUnnamedClusterCandidates) {
+        final candidatePersonID = candidate.personID;
+        bool alreadyInResults = false;
+        for (final memory in memoryResults) {
+          if (memory.personID == candidatePersonID) {
+            alreadyInResults = true;
+            break;
+          }
+        }
+        if (alreadyInResults) {
+          continue;
+        }
+        if (_wasPersonShownRecently(
+          personID: candidatePersonID,
+          shownPeople: shownPeople,
+          currentTime: currentTime,
+          shownPersonTimeout: shownPersonTimeout,
+        )) {
+          continue;
+        }
+        eligibleUnnamedCandidates.add(candidate);
+      }
+      final orderedEligibleUnnamedCandidates =
+          _orderUnnamedCandidatesByRecencyAndRandom(
+        candidates: eligibleUnnamedCandidates,
+        shownPeople: shownPeople,
+        currentTime: currentTime,
+        shownPersonTimeout: shownPersonTimeout,
+      );
+      for (final candidate in orderedEligibleUnnamedCandidates) {
+        final potentialMemory = await candidate.realize();
+        if (potentialMemory == null) {
+          continue;
+        }
+        memoryResults.add(potentialMemory);
+        break;
+      }
     }
     w?.log('rotation setup');
 

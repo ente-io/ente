@@ -985,27 +985,39 @@
   "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
-  "alreadyAvailableOnDeviceTitle": "Already available on device",
-  "alreadyAvailableOnDeviceBodyAndroid": "You can find this file in the \"{folderName}\" folder. Download it again?",
-  "@alreadyAvailableOnDeviceBodyAndroid": {
-    "description": "Dialog body shown before re-downloading when the file is already present on device on Android",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} is already available in the {albumName} album on your device",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
     "placeholders": {
-      "folderName": {
+      "fileName": {
         "type": "String"
-      }
-    }
-  },
-  "alreadyAvailableOnDeviceBodyIOS": "You can find this file in the \"{albumName}\" album. Download it again?",
-  "@alreadyAvailableOnDeviceBodyIOS": {
-    "description": "Dialog body shown before re-downloading when the file is already present on device on iOS",
-    "placeholders": {
+      },
       "albumName": {
         "type": "String"
       }
     }
   },
-  "alreadyAvailableOnDeviceBodyUnknown": "This file is already on your device. Download it again?",
-  "downloadAnyway": "Download anyway",
+  "downloadSkippedInSelectionSingleFile": "Download of {fileName} skipped as it is already available in the {albumName} album on your device",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Download of {fileCount} files skipped as they are already on your device",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Press and hold to play video",
   "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",
@@ -1983,6 +1995,10 @@
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} turning {age} soon",
   "lastTimeWithThem": "Last time with {name}",
+  "unnamedPeopleSpotlight": "A familiar face",
+  "unnamedPeopleYouAndThem": "You two",
+  "unnamedPeopleDoingSomethingTogether": "Doing it together",
+  "unnamedPeopleLastTimeYouSawThem": "Last time together",
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",

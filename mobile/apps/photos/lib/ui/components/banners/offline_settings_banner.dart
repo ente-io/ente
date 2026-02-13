@@ -28,10 +28,10 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
     }
 
     const titleStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
-      height: 28 / 16,
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 18,
+      height: 28 / 18,
       letterSpacing: -1,
       color: Colors.white,
     );
@@ -39,8 +39,8 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
     const descriptionStyle = TextStyle(
       fontFamily: "Montserrat",
       fontWeight: FontWeight.w600,
-      fontSize: 10,
-      height: 16 / 10,
+      fontSize: 12,
+      height: 18 / 12,
       color: Color.fromRGBO(165, 165, 165, 0.79),
     );
 
@@ -48,6 +48,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
       fontFamily: "Montserrat",
       fontWeight: FontWeight.w600,
       fontSize: 10,
+      height: 12 / 10,
       color: Colors.black,
     );
 
@@ -56,7 +57,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
       child: Container(
-        height: 156,
+        height: 165,
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -95,13 +96,16 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                       GestureDetector(
                         onTap: _onDismiss,
                         behavior: HitTestBehavior.opaque,
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCancel01,
-                            color: Colors.white,
-                            size: 20,
-                            strokeWidth: 2,
+                        child: const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: Colors.white,
+                              size: 20,
+                              strokeWidth: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -109,13 +113,13 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                   ),
                   const SizedBox(height: 4),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200),
+                    constraints: const BoxConstraints(maxWidth: 235),
                     child: Text(
                       l10n.offlineSettingsBannerDesc,
                       style: descriptionStyle,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const Spacer(),
                   GestureDetector(
                     onTap: widget.onGetStarted,
                     child: Container(
