@@ -278,7 +278,8 @@ class CollectionsService {
     return false;
   }
 
-  /// Returns the count of shared collections containing this file.
+  /// Returns the count of shared collections containing this file where
+  /// comments/reactions are enabled.
   /// Uses early exit optimization - stops counting at 2.
   ///
   /// Returns:
@@ -306,10 +307,11 @@ class CollectionsService {
         continue;
       }
 
-      // Same logic as isFileInSharedCollection
-      if (collection.hasSharees ||
-          collection.hasLink ||
-          !collection.isOwner(currentUserID)) {
+      // Only count shared collections where social interactions are enabled.
+      if ((collection.hasSharees ||
+              collection.hasLink ||
+              !collection.isOwner(currentUserID)) &&
+          collection.enableCommentAndReactions) {
         sharedCount++;
         // Early exit: we only need to distinguish between 0, 1, and >1
         if (sharedCount > 1) {
@@ -1382,6 +1384,57 @@ class CollectionsService {
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> updateCommentAndReactionsSetting(
+    Collection collection,
+    bool enableCommentAndReactions,
+  ) async {
+    try {
+      await collectionsGateway.updateCommentAndReactionsSetting(
+        collectionID: collection.id,
+        enableCommentAndReactions: enableCommentAndReactions,
+      );
+      _collectionIDToCollections[collection.id] = collection.copyWith(
+        enableCommentAndReactions: enableCommentAndReactions,
+        publicURLs: enableCommentAndReactions
+            ? collection.publicURLs
+            : collection.publicURLs
+                .map(
+                  (url) => PublicURL(
+                    url: url.url,
+                    deviceLimit: url.deviceLimit,
+                    validTill: url.validTill,
+                    enableDownload: url.enableDownload,
+                    passwordEnabled: url.passwordEnabled,
+                    enableCollect: url.enableCollect,
+                    enableJoin: url.enableJoin,
+                    enableComment: false,
+                    nonce: url.nonce,
+                    opsLimit: url.opsLimit,
+                    memLimit: url.memLimit,
+                  ),
+                )
+                .toList(),
+      );
+      await _db.insert([
+        _collectionIDToCollections[collection.id]!,
+      ]);
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <EnteFile>[],
+          "updateCommentAndReactionsSetting",
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe(
+        "failed to update collection comments/reactions setting",
+        e,
+        s,
+      );
       rethrow;
     }
   }

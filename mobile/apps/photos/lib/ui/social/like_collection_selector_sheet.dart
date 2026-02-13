@@ -103,7 +103,8 @@ class _LikeCollectionSelectorSheetState
           .whereType<Collection>()
           .where(
             (c) =>
-                c.hasSharees || c.hasLink || !c.isOwner(widget.currentUserID),
+                c.enableCommentAndReactions &&
+                (c.hasSharees || c.hasLink || !c.isOwner(widget.currentUserID)),
           )
           .toList();
 

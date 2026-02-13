@@ -4,6 +4,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/repo"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ type ReactionsController struct {
 	Repo         *socialrepo.ReactionsRepository
 	CommentsRepo *socialrepo.CommentsRepository
 	AccessCtrl   access.Controller
+	CollectionRepo *repo.CollectionRepository
 }
 
 // UpsertReactionRequest holds the payload for creating or updating a reaction.
@@ -74,6 +76,9 @@ func (c *ReactionsController) Upsert(ctx *gin.Context, req UpsertReactionRequest
 		}); err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
+	}
+	if err := c.ensureCommentAndReactionsEnabled(req.CollectionID); err != nil {
+		return "", err
 	}
 
 	var targetComment *socialentity.Comment
@@ -186,6 +191,25 @@ func validateCommentReactionContext(comment *socialentity.Comment, requestedFile
 	}
 	if requestedFileID != nil {
 		return stacktrace.Propagate(ente.ErrBadRequest, "fileID must be omitted when reacting to a collection-level comment")
+	}
+	return nil
+}
+
+func (c *ReactionsController) ensureCommentAndReactionsEnabled(collectionID int64) error {
+	if c.CollectionRepo == nil {
+		return nil
+	}
+	collection, err := c.CollectionRepo.Get(collectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if !collection.EnableCommentAndReactions {
+		return stacktrace.Propagate(
+			ente.NewBadRequestWithMessage(
+				"comments and reactions are disabled for this album",
+			),
+			"",
+		)
 	}
 	return nil
 }

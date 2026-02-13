@@ -194,12 +194,13 @@ func (pcr *CollectionLinkRepo) AccessedInPast(ctx context.Context, shareID int64
 
 func (pcr *CollectionLinkRepo) GetCollectionSummaryByToken(ctx context.Context, accessToken string) (ente.PublicCollectionSummary, error) {
 	row := pcr.DB.QueryRowContext(ctx,
-		`SELECT sct.id, sct.collection_id, sct.is_disabled, sct.valid_till, sct.device_limit, sct.pw_hash, sct.enable_comment,
+		`SELECT sct.id, sct.collection_id, sct.is_disabled, sct.valid_till, sct.device_limit, sct.pw_hash, (sct.enable_comment AND COALESCE(c.enable_comment_and_reactions, TRUE)),
        sct.created_at, sct.updated_at, count(ah.share_id)
 		from public_collection_tokens sct
+		LEFT JOIN collections c ON c.collection_id = sct.collection_id
 		LEFT JOIN public_collection_access_history ah ON sct.id = ah.share_id
 		where access_token = $1
-		group by sct.id`, accessToken)
+		group by sct.id, c.enable_comment_and_reactions`, accessToken)
 	var result = ente.PublicCollectionSummary{}
 	err := row.Scan(&result.ID, &result.CollectionID, &result.IsDisabled, &result.ValidTill, &result.DeviceLimit,
 		&result.PassHash, &result.EnableComment, &result.CreatedAt, &result.UpdatedAt, &result.DeviceAccessCount)

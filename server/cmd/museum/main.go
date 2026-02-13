@@ -271,13 +271,15 @@ func main() {
 	reactionsRepo := &socialrepo.ReactionsRepository{DB: db}
 	anonUsersRepo := &socialrepo.AnonUsersRepository{DB: db}
 	commentsController := &socialcontroller.CommentsController{
-		Repo:       commentsRepo,
-		AccessCtrl: accessCtrl,
+		Repo:           commentsRepo,
+		AccessCtrl:     accessCtrl,
+		CollectionRepo: collectionRepo,
 	}
 	reactionsController := &socialcontroller.ReactionsController{
-		Repo:         reactionsRepo,
-		CommentsRepo: commentsRepo,
-		AccessCtrl:   accessCtrl,
+		Repo:           reactionsRepo,
+		CommentsRepo:   commentsRepo,
+		AccessCtrl:     accessCtrl,
+		CollectionRepo: collectionRepo,
 	}
 	socialController := &socialcontroller.Controller{
 		CommentsRepo:   commentsRepo,
@@ -666,6 +668,7 @@ func main() {
 	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
 	privateAPI.PUT("/collections/share-url", collectionHandler.UpdateShareURL)
+	privateAPI.PUT("/collections/comment-and-reactions", collectionHandler.UpdateCommentAndReactionsSetting)
 	privateAPI.DELETE("/collections/share-url/:collectionID", collectionHandler.UnShareURL)
 	privateAPI.POST("/collections/unshare", collectionHandler.UnShare)
 	privateAPI.POST("/collections/leave/:collectionID", collectionHandler.Leave)

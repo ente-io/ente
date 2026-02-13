@@ -80,6 +80,23 @@ class CollectionsGateway {
     );
   }
 
+  /// Updates the shared-album level comments/reactions setting.
+  ///
+  /// [collectionID] - The collection to update.
+  /// [enableCommentAndReactions] - Whether comments/reactions are allowed.
+  Future<void> updateCommentAndReactionsSetting({
+    required int collectionID,
+    required bool enableCommentAndReactions,
+  }) async {
+    await _enteDio.put(
+      "/collections/comment-and-reactions",
+      data: {
+        "collectionID": collectionID,
+        "enableCommentAndReactions": enableCommentAndReactions,
+      },
+    );
+  }
+
   /// Gets the diff of files in a collection since a given time.
   ///
   /// [collectionID] - The ID of the collection.

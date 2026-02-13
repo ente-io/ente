@@ -24,7 +24,9 @@ type CollectionHandler struct {
 // Create creates a collection
 func (h *CollectionHandler) Create(c *gin.Context) {
 	log.Info("Collection create")
-	var collection ente.Collection
+	collection := ente.Collection{
+		EnableCommentAndReactions: true,
+	}
 	if err := c.ShouldBindJSON(&collection); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
@@ -179,6 +181,19 @@ func (h *CollectionHandler) UpdateShareURL(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"result": response,
 	})
+}
+
+func (h *CollectionHandler) UpdateCommentAndReactionsSetting(c *gin.Context) {
+	var req ente.UpdateCollectionCommentAndReactionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if err := h.Controller.UpdateCommentAndReactionsSetting(c, req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 // UnShareURL disable all shared urls for the given collectionID

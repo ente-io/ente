@@ -29,6 +29,7 @@ class CollectionsDB {
   static const columnVersion = 'version';
   static const columnSharees = 'sharees';
   static const columnPublicURLs = 'public_urls';
+  static const columnEnableCommentAndReactions = 'enable_comment_and_reactions';
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
   static const columnMMdVersion = 'mmd_ver';
@@ -52,6 +53,7 @@ class CollectionsDB {
     ...addPrivateMetadata(),
     ...addPublicMetadata(),
     ...addShareeMetadata(),
+    ...addEnableCommentAndReactions(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -191,6 +193,14 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addEnableCommentAndReactions() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnEnableCommentAndReactions INTEGER DEFAULT $_sqlBoolTrue;
+      ''',
+    ];
+  }
+
   Future<void> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -266,6 +276,8 @@ class CollectionsDB {
         json.encode(collection.sharees.map((x) => x.toMap()).toList());
     row[columnPublicURLs] =
         json.encode(collection.publicURLs.map((x) => x.toMap()).toList());
+    row[columnEnableCommentAndReactions] =
+        collection.enableCommentAndReactions ? _sqlBoolTrue : _sqlBoolFalse;
     row[columnUpdationTime] = collection.updationTime;
     if (collection.isDeleted) {
       row[columnIsDeleted] = _sqlBoolTrue;
@@ -306,6 +318,7 @@ class CollectionsDB {
               (json.decode(row[columnPublicURLs]) as List)
                   .map((x) => PublicURL.fromMap(x)),
             ),
+      (row[columnEnableCommentAndReactions] ?? _sqlBoolTrue) == _sqlBoolTrue,
       int.parse(row[columnUpdationTime]),
       // default to False is columnIsDeleted is not set
       isDeleted: (row[columnIsDeleted] ?? _sqlBoolFalse) == _sqlBoolTrue,

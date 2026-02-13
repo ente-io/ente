@@ -14,6 +14,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/sharing/add_participant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/album_share_info_widget.dart';
@@ -21,6 +22,7 @@ import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -38,19 +40,40 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   final GlobalKey sendLinkButtonKey = GlobalKey();
   bool _redirectedToParticipants = false;
 
+  Future<void> _updateCommentAndReactionsSetting(bool enabled) async {
+    final collection =
+        CollectionsService.instance.getCollectionByID(widget.collection.id) ??
+            widget.collection;
+    try {
+      await CollectionsService.instance.updateCommentAndReactionsSetting(
+        collection,
+        enabled,
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      await showGenericErrorDialog(context: context, error: e);
+      rethrow;
+    }
+  }
+
   Future<void> _navigateToManageUser() async {
+    final collection =
+        CollectionsService.instance.getCollectionByID(widget.collection.id) ??
+            widget.collection;
     if (_sharees.length == 1) {
       await routeToPage(
         context,
         ManageIndividualParticipant(
-          collection: widget.collection,
+          collection: collection,
           user: _sharees.first!,
         ),
       );
     } else {
       await routeToPage(
         context,
-        AlbumParticipantsPage(widget.collection),
+        AlbumParticipantsPage(collection),
       );
     }
     if (mounted) {
@@ -61,9 +84,12 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   @override
   Widget build(BuildContext context) {
     final int userID = Configuration.instance.getUserID() ?? -1;
+    final collection =
+        CollectionsService.instance.getCollectionByID(widget.collection.id) ??
+            widget.collection;
 
     if (!_redirectedToParticipants) {
-      final bool isOwner = widget.collection.owner.id == userID;
+      final bool isOwner = collection.owner.id == userID;
       if (!isOwner) {
         _redirectedToParticipants = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,7 +98,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           }
           replacePage(
             context,
-            AlbumParticipantsPage(widget.collection),
+            AlbumParticipantsPage(collection),
           );
         });
       } else {
@@ -80,9 +106,11 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       }
     }
 
-    _sharees = widget.collection.sharees;
-    final bool hasUrl = widget.collection.hasLink;
-    final bool isOwner = widget.collection.owner.id == userID;
+    _sharees = collection.sharees;
+    final bool hasUrl = collection.hasLink;
+    final bool isOwner = collection.owner.id == userID;
+    final bool isCommentAndReactionsEnabled =
+        collection.enableCommentAndReactions;
     final bool canManageParticipants = isOwner;
     final children = <Widget>[];
     children.add(
@@ -95,7 +123,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
     children.add(
       EmailItemWidget(
-        widget.collection,
+        collection,
         onTap: _navigateToManageUser,
       ),
     );
@@ -115,7 +143,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             await routeToPage(
               context,
               AddParticipantPage(
-                [widget.collection],
+                [collection],
                 const [ActionTypesToShow.addAdmin],
               ),
             );
@@ -146,7 +174,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             routeToPage(
               context,
               AddParticipantPage(
-                [widget.collection],
+                [collection],
                 const [ActionTypesToShow.addCollaborator],
               ),
             ).then(
@@ -177,7 +205,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             await routeToPage(
               context,
               AddParticipantPage(
-                [widget.collection],
+                [collection],
                 const [ActionTypesToShow.addViewer],
               ),
             );
@@ -202,6 +230,31 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           height: 24,
         ),
         MenuSectionTitle(
+          title: AppLocalizations.of(context).social,
+          iconData: Icons.favorite_outline,
+        ),
+        MenuItemWidget(
+          key: ValueKey(
+            "Enable comment and reactions $isCommentAndReactionsEnabled",
+          ),
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).enableComment,
+          ),
+          alignCaptionedTextToLeft: true,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => isCommentAndReactionsEnabled,
+            onChanged: () async {
+              await _updateCommentAndReactionsSetting(
+                !isCommentAndReactionsEnabled,
+              );
+            },
+          ),
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        MenuSectionTitle(
           title: hasUrl
               ? AppLocalizations.of(context).publicLinkEnabled
               : AppLocalizations.of(context).shareALink,
@@ -211,7 +264,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       if (hasUrl) {
         children.add(
           PublicLinkEnabledActionsWidget(
-            collection: widget.collection,
+            collection: collection,
             sendLinkButtonKey: sendLinkButtonKey,
           ),
         );
@@ -235,7 +288,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 // ignore: unawaited_futures
                 routeToPage(
                   context,
-                  ManageSharedLinkWidget(collection: widget.collection),
+                  ManageSharedLinkWidget(collection: collection),
                 ).then(
                   (value) => {
                     if (mounted) {setState(() => {})},
@@ -258,7 +311,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             showOnlyLoadingState: true,
             onTap: () async {
               final bool result =
-                  await collectionActions.enableUrl(context, widget.collection);
+                  await collectionActions.enableUrl(context, collection);
               if (result && mounted) {
                 setState(() => {});
               }
@@ -291,7 +344,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             onTap: () async {
               final bool result = await collectionActions.enableUrl(
                 context,
-                widget.collection,
+                collection,
                 enableCollect: true,
               );
               if (result && mounted) {
@@ -312,7 +365,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.collection.displayName,
+          collection.displayName,
           style:
               Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16),
         ),

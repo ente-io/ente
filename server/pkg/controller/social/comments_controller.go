@@ -4,6 +4,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/repo"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ import (
 type CommentsController struct {
 	Repo       *socialrepo.CommentsRepository
 	AccessCtrl access.Controller
+	CollectionRepo *repo.CollectionRepository
 }
 
 // CreateCommentRequest encapsulates parameters for adding a comment.
@@ -81,6 +83,9 @@ func (c *CommentsController) Create(ctx *gin.Context, req CreateCommentRequest) 
 		}); err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
+	}
+	if err := c.ensureCommentAndReactionsEnabled(req.CollectionID); err != nil {
+		return "", err
 	}
 
 	var parentComment *socialentity.Comment
@@ -151,6 +156,9 @@ func (c *CommentsController) UpdatePayload(ctx *gin.Context, req UpdateCommentRe
 	comment, err := c.Repo.GetByID(ctx, req.CommentID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if err := c.ensureCommentAndReactionsEnabled(comment.CollectionID); err != nil {
+		return err
 	}
 	if req.Actor.IsAnonymous() {
 		if err := req.Actor.ValidateAnon(); err != nil {
@@ -223,6 +231,25 @@ func validateReplyFileContext(parent *socialentity.Comment, requestedFileID *int
 	}
 	if requestedFileID != nil {
 		return stacktrace.Propagate(ente.ErrBadRequest, "fileID must be omitted when replying to a collection-level comment")
+	}
+	return nil
+}
+
+func (c *CommentsController) ensureCommentAndReactionsEnabled(collectionID int64) error {
+	if c.CollectionRepo == nil {
+		return nil
+	}
+	collection, err := c.CollectionRepo.Get(collectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if !collection.EnableCommentAndReactions {
+		return stacktrace.Propagate(
+			ente.NewBadRequestWithMessage(
+				"comments and reactions are disabled for this album",
+			),
+			"",
+		)
 	}
 	return nil
 }

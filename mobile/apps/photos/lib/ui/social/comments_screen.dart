@@ -188,7 +188,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         .map((id) => CollectionsService.instance.getCollectionByID(id))
         .whereType<Collection>()
         .where(
-          (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
+          (c) =>
+              c.enableCommentAndReactions &&
+              (c.hasSharees || c.hasLink || !c.isOwner(_currentUserID)),
         )
         .toList();
 

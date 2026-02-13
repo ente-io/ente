@@ -47,9 +47,9 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 		return ente.Collection{}, ente.ErrInvalidApp
 	}
 
-	err := repo.DB.QueryRow(`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, magic_metadata, pub_magic_metadata, app) 
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING collection_id`,
-		c.Owner.ID, c.EncryptedKey, c.KeyDecryptionNonce, c.Name, c.EncryptedName, c.NameDecryptionNonce, c.Type, c.Attributes, c.UpdationTime, c.MagicMetadata, c.PublicMagicMetadata, c.App).Scan(&c.ID)
+	err := repo.DB.QueryRow(`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, magic_metadata, pub_magic_metadata, app, enable_comment_and_reactions) 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING collection_id`,
+		c.Owner.ID, c.EncryptedKey, c.KeyDecryptionNonce, c.Name, c.EncryptedName, c.NameDecryptionNonce, c.Type, c.Attributes, c.UpdationTime, c.MagicMetadata, c.PublicMagicMetadata, c.App, c.EnableCommentAndReactions).Scan(&c.ID)
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index\"" ||
 			err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index_v2\"" {
@@ -63,12 +63,12 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 
 // Get returns a collection identified by the collectionID
 func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata, enable_comment_and_reactions
 		FROM collections
 		WHERE collection_id = $1`, collectionID)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata, &c.EnableCommentAndReactions); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -135,12 +135,12 @@ func (repo *CollectionRepository) GetWithSharingDetailsForUser(collectionID int6
 	return c, nil
 }
 func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string, app string) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, enable_comment_and_reactions
         FROM collections
         WHERE owner_id = $1 and type = $2 and app = $3`, userID, collectionType, app)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.EnableCommentAndReactions); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -156,6 +156,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 	query := `
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
+c.enable_comment_and_reactions,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
 pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_comment, pct.enable_join, pct.min_role 
     FROM collections c
@@ -189,7 +190,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata, &c.EnableCommentAndReactions,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
 			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableComment, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
@@ -258,7 +259,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collections.enable_comment_and_reactions, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -283,7 +284,7 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
 		var roleType sql.NullString
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.EnableCommentAndReactions, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
 			return collections, stacktrace.Propagate(err, "")
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
@@ -1074,6 +1075,51 @@ func (repo *CollectionRepository) Rename(collectionID int64, encryptedName strin
 				WHERE collection_id = $4`,
 		encryptedName, nameDecryptionNonce, updationTime, collectionID)
 	return stacktrace.Propagate(err, "")
+}
+
+func (repo *CollectionRepository) UpdateCommentAndReactionsSetting(
+	ctx context.Context,
+	collectionID int64,
+	enableCommentAndReactions bool,
+) error {
+	updationTime := time.Microseconds()
+	tx, err := repo.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE collections
+		 SET enable_comment_and_reactions = $1,
+		     updation_time = $2
+		 WHERE collection_id = $3`,
+		enableCommentAndReactions,
+		updationTime,
+		collectionID,
+	); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	// Album-level disable takes precedence over link-level setting.
+	if !enableCommentAndReactions {
+		if _, err := tx.ExecContext(
+			ctx,
+			`UPDATE public_collection_tokens
+			 SET enable_comment = FALSE
+			 WHERE collection_id = $1
+			   AND is_disabled = FALSE`,
+			collectionID,
+		); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
 }
 
 // UpdateMagicMetadata updates the magic metadata for the given collection

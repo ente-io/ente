@@ -229,6 +229,9 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 	if req.EnableJoin == nil {
 		req.EnableJoin = &valTrue
 	}
+	if !collection.EnableCommentAndReactions {
+		req.EnableComment = false
+	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
 		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
@@ -255,6 +258,20 @@ func (c *CollectionController) UpdateShareURL(
 	}
 	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
 		return nil, stacktrace.Propagate(err, "")
+	}
+	collection, err := c.CollectionRepo.Get(req.CollectionID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if !collection.EnableCommentAndReactions &&
+		req.EnableComment != nil &&
+		*req.EnableComment {
+		return nil, stacktrace.Propagate(
+			ente.NewBadRequestWithMessage(
+				"public link comments can not be enabled when album comments and reactions are disabled",
+			),
+			"",
+		)
 	}
 	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {

@@ -191,6 +191,24 @@ func (c *CollectionController) Rename(userID int64, cID int64, encryptedName str
 	return nil
 }
 
+func (c *CollectionController) UpdateCommentAndReactionsSetting(
+	ctx *gin.Context,
+	req ente.UpdateCollectionCommentAndReactionsRequest,
+) error {
+	userID := auth.GetUserID(ctx.Request.Header)
+	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if err := c.CollectionRepo.UpdateCommentAndReactionsSetting(
+		ctx,
+		req.CollectionID,
+		req.EnableCommentAndReactions,
+	); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 // UpdateMagicMetadata updates the magic metadata for given collection
 func (c *CollectionController) UpdateMagicMetadata(ctx *gin.Context, request ente.UpdateCollectionMagicMetadata, isPublicMetadata bool) error {
 	userID := auth.GetUserID(ctx.Request.Header)

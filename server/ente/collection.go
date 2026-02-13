@@ -22,6 +22,7 @@ type Collection struct {
 	Attributes          CollectionAttributes `json:"attributes,omitempty" binding:"required"`
 	Sharees             []CollectionUser     `json:"sharees"`
 	PublicURLs          []PublicURL          `json:"publicURLs"`
+	EnableCommentAndReactions bool           `json:"enableCommentAndReactions"`
 	UpdationTime        int64                `json:"updationTime"`
 	IsDeleted           bool                 `json:"isDeleted,omitempty"`
 	MagicMetadata       *MagicMetadata       `json:"magicMetadata,omitempty"`
@@ -147,6 +148,11 @@ type RenameRequest struct {
 	CollectionID        int64  `json:"collectionID" binding:"required"`
 	EncryptedName       string `json:"encryptedName" binding:"required"`
 	NameDecryptionNonce string `json:"nameDecryptionNonce" binding:"required"`
+}
+
+type UpdateCollectionCommentAndReactionsRequest struct {
+	CollectionID               int64 `json:"collectionID" binding:"required"`
+	EnableCommentAndReactions bool  `json:"enableCommentAndReactions"`
 }
 
 // UpdateCollectionMagicMetadata payload for updating magic metadata for single file

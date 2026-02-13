@@ -59,6 +59,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   int? lastFileGenID;
   bool _hasLiked = false;
   int _commentCount = 0;
+  bool _hasEnabledSharedCollection = false;
 
   @override
   void initState() {
@@ -84,6 +85,7 @@ class FileBottomBarState extends State<FileBottomBar> {
     if (widget.file.uploadedFileID == null) {
       _hasLiked = false;
       _commentCount = 0;
+      _hasEnabledSharedCollection = false;
       return;
     }
 
@@ -108,8 +110,37 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     // Get comment count
     _commentCount = await provider.getCommentCountForFile(fileID);
+    final enabledSharedCollections =
+        await _getEnabledSharedCollectionsForFile(fileID);
+    _hasEnabledSharedCollection = enabledSharedCollections.isNotEmpty;
 
     safeRefresh();
+  }
+
+  Future<List<Collection>> _getEnabledSharedCollectionsForFile(
+    int uploadedFileID,
+  ) async {
+    final currentUserID = widget.userID;
+    if (currentUserID == null) {
+      return [];
+    }
+
+    final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
+      uploadedFileID,
+    );
+
+    return collectionIDs
+        .map((id) => CollectionsService.instance.getCollectionByID(id))
+        .whereType<Collection>()
+        .where(
+          (collection) =>
+              !collection.isDeleted &&
+              collection.enableCommentAndReactions &&
+              (collection.hasSharees ||
+                  collection.hasLink ||
+                  !collection.isOwner(currentUserID)),
+        )
+        .toList();
   }
 
   @override
@@ -259,7 +290,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
       // Add social icons (heart, comment) if file is in a shared collection
       // and social features are enabled
-      if (isInSharedCollection && flagService.isSocialEnabled) {
+      if (_hasEnabledSharedCollection && flagService.isSocialEnabled) {
         children.add(_buildHeartIcon());
         children.add(_buildCommentIcon());
       }
@@ -402,9 +433,12 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   Future<void> _toggleReaction() async {
     final file = widget.file;
-    if (file.uploadedFileID == null ||
-        file.collectionID == null ||
-        widget.userID == null) {
+    if (file.uploadedFileID == null || widget.userID == null) {
+      return;
+    }
+    final enabledSharedCollections =
+        await _getEnabledSharedCollectionsForFile(file.uploadedFileID!);
+    if (enabledSharedCollections.isEmpty) {
       return;
     }
 
@@ -414,12 +448,9 @@ class FileBottomBarState extends State<FileBottomBar> {
       return;
     }
 
-    // Check how many shared collections contain this file
-    final sharedCount = await CollectionsService.instance
-        .getSharedCollectionCountForFile(file.uploadedFileID!);
-
-    if (sharedCount <= 1) {
-      // Single shared collection: like directly
+    if (enabledSharedCollections.length == 1) {
+      // Single shared collection: like directly in that collection.
+      final targetCollectionID = enabledSharedCollections.first.id;
       final previousState = _hasLiked;
       _hasLiked = true;
       safeRefresh();
@@ -427,7 +458,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       try {
         await SocialDataProvider.instance.toggleReaction(
           userID: widget.userID!,
-          collectionID: file.collectionID!,
+          collectionID: targetCollectionID,
           fileID: file.uploadedFileID,
         );
       } catch (e) {
@@ -465,19 +496,8 @@ class FileBottomBarState extends State<FileBottomBar> {
     safeRefresh();
 
     try {
-      // Get all collections containing this file
-      final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
-        fileID,
-      );
-
-      // Filter to shared collections
-      final sharedCollections = collectionIDs
-          .map((id) => CollectionsService.instance.getCollectionByID(id))
-          .whereType<Collection>()
-          .where(
-            (c) => c.hasSharees || c.hasLink || !c.isOwner(currentUserID),
-          )
-          .toList();
+      final sharedCollections =
+          await _getEnabledSharedCollectionsForFile(fileID);
 
       // Track failures
       int failedCount = 0;
@@ -540,7 +560,11 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   void _showLikesBottomSheet() {
     final file = widget.file;
-    if (file.uploadedFileID == null || file.collectionID == null) return;
+    if (file.uploadedFileID == null ||
+        file.collectionID == null ||
+        !_hasEnabledSharedCollection) {
+      return;
+    }
 
     showLikesBottomSheet(
       context,
@@ -601,7 +625,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   void _openCommentsScreen() {
     final file = widget.file;
-    if (file.collectionID == null) return;
+    if (file.collectionID == null || !_hasEnabledSharedCollection) return;
 
     showFileCommentsBottomSheet(
       context,

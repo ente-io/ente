@@ -75,6 +75,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
     final enableComment =
         widget.collection!.publicURLs.firstOrNull?.enableComment ?? false;
+    final isCommentAndReactionsEnabled =
+        widget.collection!.enableCommentAndReactions;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue = CollectionsService.instance.getPublicUrl(
@@ -138,20 +140,32 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     bgColor: enteColorScheme.fillFaint,
                   ),
                   MenuItemWidget(
-                    key: ValueKey("Enable comment $enableComment"),
+                    key: ValueKey(
+                      "Enable comment ${enableComment && isCommentAndReactionsEnabled}",
+                    ),
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).enableComment,
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: enteColorScheme.fillFaint,
-                    trailingWidget: ToggleSwitchWidget(
-                      value: () => enableComment,
-                      onChanged: () async {
-                        await _updateUrlSettings(context, {
-                          'enableComment': !enableComment,
-                        });
-                      },
+                    trailingWidget: IgnorePointer(
+                      ignoring: !isCommentAndReactionsEnabled,
+                      child: Opacity(
+                        opacity: isCommentAndReactionsEnabled ? 1.0 : 0.5,
+                        child: ToggleSwitchWidget(
+                          value: () =>
+                              enableComment && isCommentAndReactionsEnabled,
+                          onChanged: () async {
+                            if (!isCommentAndReactionsEnabled) {
+                              return;
+                            }
+                            await _updateUrlSettings(context, {
+                              'enableComment': !enableComment,
+                            });
+                          },
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

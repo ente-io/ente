@@ -25,6 +25,7 @@ class Collection {
   final CollectionAttributes attributes;
   final List<User> sharees;
   final List<PublicURL> publicURLs;
+  final bool enableCommentAndReactions;
   final int updationTime;
   final bool isDeleted;
 
@@ -92,6 +93,7 @@ class Collection {
     this.attributes,
     this.sharees,
     this.publicURLs,
+    this.enableCommentAndReactions,
     this.updationTime, {
     this.isDeleted = false,
   });
@@ -241,6 +243,7 @@ class Collection {
     CollectionAttributes? attributes,
     List<User>? sharees,
     List<PublicURL>? publicURLs,
+    bool? enableCommentAndReactions,
     int? updationTime,
     bool? isDeleted,
     String? mMdEncodedJson,
@@ -261,6 +264,7 @@ class Collection {
       attributes ?? this.attributes,
       sharees ?? this.sharees,
       publicURLs ?? this.publicURLs,
+      enableCommentAndReactions ?? this.enableCommentAndReactions,
       updationTime ?? this.updationTime,
       isDeleted: isDeleted ?? this.isDeleted,
     );
@@ -298,6 +302,7 @@ class Collection {
       CollectionAttributes.fromMap(map['attributes']),
       sharees,
       publicURLs,
+      map['enableCommentAndReactions'] ?? true,
       map['updationTime'],
       isDeleted: map['isDeleted'] ?? false,
     );
