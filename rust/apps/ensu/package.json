@@ -1,0 +1,15 @@
+{
+  "name": "ensu-tauri",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/tauri-dev.mjs",
+    "build": "tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.5.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0"
+  }
+}
