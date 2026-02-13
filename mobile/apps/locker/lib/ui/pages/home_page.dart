@@ -183,7 +183,9 @@ class CustomLockerAppBar extends StatelessWidget
                       minHeight: 44,
                     ),
                   ),
-                  style: TextStyle(color: colorScheme.iconColor),
+                  style: TextStyle(
+                    color: colorScheme.iconColor,
+                  ),
                 ),
               ),
             ),
@@ -213,27 +215,17 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _searchFocusNode = FocusNode();
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
-  bool _isLoadingLocalCache = true;
-  bool _hasLoadedLocalCache = false;
-  bool _hasCompletedInitialSync = false;
+  bool _isLoading = true;
+  bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
-  bool get _isLoadingFromLocalCache =>
-      !_hasLoadedLocalCache && _isLoadingLocalCache;
-  bool get _isInitialSyncInProgress =>
-      _hasLoadedLocalCache && !_hasCompletedInitialSync;
-  bool get _hasAnyLocalContent =>
-      _collections.isNotEmpty || _recentFiles.isNotEmpty;
-  bool get _shouldShowCenterSyncLoader => _isLoadingFromLocalCache;
-  bool get _shouldShowAppBarSyncIndicator =>
-      _isInitialSyncInProgress && _hasAnyLocalContent;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier = ValueNotifier(
-    [],
-  );
+  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier =
+      ValueNotifier([]);
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -321,9 +313,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       await _loadCollections();
     });
 
-    _triggerLogoutSubscription = Bus.instance.on<TriggerLogoutEvent>().listen((
-      event,
-    ) async {
+    _triggerLogoutSubscription =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await _autoLogoutAlert();
     });
   }
@@ -359,7 +350,10 @@ class _HomePageState extends UploaderPageState<HomePage>
             text: context.l10n.ok,
             onTap: () async {
               navigator.pop();
-              final dialog = createProgressDialog(context, l10n.pleaseWait);
+              final dialog = createProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();
@@ -378,9 +372,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       _mediaStreamSubscription =
           ReceiveSharingIntent.instance.getMediaStream().listen(
         (List<SharedMediaFile> value) {
-          _logger.info(
-            'Received shared media files via stream: ${value.length}',
-          );
+          _logger
+              .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
             _logger.info('Shared file received, type: ${file.type}');
           }
@@ -410,9 +403,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       _logger.info('Initial media check result: ${initialMedia.length} files');
 
       if (initialMedia.isNotEmpty) {
-        _logger.info(
-          'Found initial shared media files: ${initialMedia.length}',
-        );
+        _logger
+            .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
           _logger.info('Initial shared file, type: ${file.type}');
         }
@@ -492,14 +484,14 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Future<void> _loadCollections() async {
-    final shouldTriggerTransientLoadingState =
-        _collections.isEmpty && _recentFiles.isEmpty && !_isLoadingLocalCache;
+    final shouldShowLoading =
+        _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
 
     try {
-      if (mounted && (shouldTriggerTransientLoadingState || _error != null)) {
+      if (mounted && (shouldShowLoading || _error != null)) {
         setState(() {
-          if (shouldTriggerTransientLoadingState) {
-            _isLoadingLocalCache = true;
+          if (shouldShowLoading) {
+            _isLoading = true;
           }
           _error = null;
         });
@@ -522,30 +514,25 @@ class _HomePageState extends UploaderPageState<HomePage>
         await _loadRecentFiles(collections);
       }
 
-      final sortedCollections = CollectionSortUtil.getSortedCollections(
-        collections,
-      );
+      final sortedCollections =
+          CollectionSortUtil.getSortedCollections(collections);
 
       if (mounted) {
         setState(() {
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
-          _isLoadingLocalCache = false;
-          _hasLoadedLocalCache = true;
-          _hasCompletedInitialSync = hasCompletedFirstSync;
+          _isLoading = false;
+          _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
     } catch (error) {
-      _logger.severe('Error fetching collections', error);
       if (mounted) {
-        final hasCompletedFirstSync =
-            CollectionService.instance.hasCompletedFirstSync();
         setState(() {
           _error = 'Error fetching collections: $error';
-          _isLoadingLocalCache = false;
-          _hasLoadedLocalCache = true;
-          _hasCompletedInitialSync = hasCompletedFirstSync;
+          _isLoading = false;
+          _hasCompletedInitialLoad =
+              CollectionService.instance.hasCompletedFirstSync();
         });
       }
     }
@@ -656,7 +643,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: _shouldShowAppBarSyncIndicator,
+                  isSyncing: _isSyncing,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -723,19 +710,12 @@ class _HomePageState extends UploaderPageState<HomePage>
                 showBorder: false,
               ),
               const SizedBox(height: 20),
-              GradientButton(onTap: _loadCollections, text: context.l10n.retry),
+              GradientButton(
+                onTap: _loadCollections,
+                text: context.l10n.retry,
+              ),
             ],
           ),
-        ),
-      );
-    }
-
-    if (_shouldShowCenterSyncLoader) {
-      final colorScheme = getEnteColorScheme(context);
-      return Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          color: colorScheme.primary700,
         ),
       );
     }
@@ -753,10 +733,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(),
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isLoading: _isSyncing),
         ),
       );
     }
@@ -766,10 +746,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isLoading: _isSyncing),
                 ),
               )
             : SingleChildScrollView(
@@ -798,6 +778,9 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _openSavePage() {
-    showSaveBottomSheet(context, onUploadDocument: addFile);
+    showSaveBottomSheet(
+      context,
+      onUploadDocument: addFile,
+    );
   }
 }
