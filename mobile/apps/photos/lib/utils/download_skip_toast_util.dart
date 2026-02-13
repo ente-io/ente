@@ -16,9 +16,8 @@ String getDownloadSkipToastFileName(
 }
 
 Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
-  EnteFile file, {
-  required String fallbackFolderName,
-}) async {
+  EnteFile file,
+) async {
   if (file.localID == null) {
     return null;
   }
@@ -31,5 +30,8 @@ Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
   if (folderNames.isNotEmpty) {
     return folderNames.last;
   }
-  return fallbackFolderName;
+  throw StateError(
+    "Expected non-empty device collection name for localID=${file.localID}, "
+    "but found none.",
+  );
 }

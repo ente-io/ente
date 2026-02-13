@@ -1106,10 +1106,7 @@ class _FileSelectionActionsWidgetState
     final l10n = AppLocalizations.of(context);
     final existingLocalFolderNames = await Future.wait(
       files.map(
-        (file) => getExistingLocalFolderNameForDownloadSkipToast(
-          file,
-          fallbackFolderName: l10n.gallery,
-        ),
+        (file) => getExistingLocalFolderNameForDownloadSkipToast(file),
       ),
     );
 

@@ -620,10 +620,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _download(EnteFile file) async {
     final existingFolderName =
-        await getExistingLocalFolderNameForDownloadSkipToast(
-      file,
-      fallbackFolderName: AppLocalizations.of(context).gallery,
-    );
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
     if (existingFolderName != null) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
