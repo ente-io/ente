@@ -31,6 +31,8 @@ func (h *CollectionHandler) Create(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "Could not bind request params"))
 		return
 	}
+	// Collection creation does not accept this setting; default effective behavior is enabled.
+	collection.EnableCommentAndReactions = true
 
 	collection.App = string(auth.GetApp(c))
 	collection.UpdationTime = time.Microseconds()
