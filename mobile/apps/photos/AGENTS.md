@@ -28,7 +28,7 @@ Commits should stay concise and imperative, summarising all substantial code cha
 Regenerate Dart bindings when Rust APIs change and keep generated code in `lib/src/rust/`. Exercise Rust crates with `cargo test` during such updates. For copy edits, update `lib/l10n/intl_en.arb` then run `flutter gen-l10n` (configured by `l10n.yaml`) to refresh `lib/generated/`, and coordinate Crowdin syncs through `crowdin.yml`.
 
 ## Development Setup Requirements
-1. Install Flutter `3.38.0` with a Dart SDK between `>=3.10.0 <4.0.0`.
+1. Install Flutter `3.32.8` with a Dart SDK between `>=3.3.0 <4.0.0`.
 2. Install Rust along with `flutter_rust_bridge_codegen` via `cargo install flutter_rust_bridge_codegen`.
 3. Regenerate Rust bindings whenever native APIs shift using `flutter_rust_bridge_codegen generate`.
 4. Initialize and refresh git submodules with `git submodule update --init --recursive`.

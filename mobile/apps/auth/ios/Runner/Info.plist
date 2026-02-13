@@ -48,7 +48,7 @@
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>MinimumOSVersion</key>
-		<string>12.0</string>
+		<string>13.0</string>
 		<key>NSCameraUsageDescription</key>
 		<string>This app needs camera access to scan QR codes</string>
 		<key>NSFaceIDUsageDescription</key>
@@ -61,27 +61,6 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
-		<key>UIApplicationSceneManifest</key>
-		<dict>
-			<key>UIApplicationSupportsMultipleScenes</key>
-			<false/>
-			<key>UISceneConfigurations</key>
-			<dict>
-				<key>UIWindowSceneSessionRoleApplication</key>
-				<array>
-					<dict>
-						<key>UISceneClassName</key>
-						<string>UIWindowScene</string>
-						<key>UISceneDelegateClassName</key>
-						<string>FlutterSceneDelegate</string>
-						<key>UISceneConfigurationName</key>
-						<string>flutter</string>
-						<key>UISceneStoryboardFile</key>
-						<string>Main</string>
-					</dict>
-				</array>
-			</dict>
-		</dict>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>FlutterDeepLinkingEnabled</key>

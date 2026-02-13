@@ -190,8 +190,7 @@ class SuperLogging {
     }
 
     final enable = appConfig.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled =
-        enable &&
+    sentryIsEnabled = enable &&
         appConfig.sentryDsn != null &&
         !isFDroidClient &&
         shouldReportCrashes();
@@ -254,18 +253,9 @@ class SuperLogging {
           options.dsn = appConfig!.sentryDsn;
           options.httpClient = http.Client();
           if (appConfig.tunnel != null) {
-            options.transport = TunneledTransport(
-              Uri.parse(appConfig.tunnel!),
-              options,
-            );
+            options.transport =
+                TunneledTransport(Uri.parse(appConfig.tunnel!), options);
           }
-          // Disable UI interaction integrations to avoid noisy Compose reflection
-          // ClassNotFound logs on non-Compose Flutter UIs.
-          options.enableUserInteractionBreadcrumbs = false;
-          options.enableUserInteractionTracing = false;
-          options.attachViewHierarchy = false;
-          options.enableAutoNativeBreadcrumbs = false;
-
           // Filter out errors that should not be sent to Sentry
           options.beforeSend = (SentryEvent event, Hint hint) async {
             // Check if the error should be skipped
@@ -302,30 +292,27 @@ class SuperLogging {
         details.stack,
       );
     };
-    WidgetsBinding.instance.platformDispatcher.onError =
-        (
-          Object error,
-          StackTrace stack,
-        ) {
-          $.severe("Unhandled platform error", error, stack);
-          return false;
-        };
+    WidgetsBinding.instance.platformDispatcher.onError = (
+      Object error,
+      StackTrace stack,
+    ) {
+      $.severe("Unhandled platform error", error, stack);
+      return false;
+    };
 
-    try {
-      await body();
-    } catch (error, stack) {
-      $.severe("Unhandled zone error", error, stack);
-      rethrow;
-    }
+    await runZonedGuarded(
+      () async => body(),
+      (Object error, StackTrace stack) {
+        $.severe("Unhandled zone error", error, stack);
+      },
+    );
   }
 
   static Future<void> setUserID(String userID) async {
     if (config.sentryDsn != null) {
       $.finest("setting sentry user ID to: $userID");
       Sentry.configureScope(
-        (scope) => scope
-            .setUser(SentryUser(id: userID))
-            .onError(
+        (scope) => scope.setUser(SentryUser(id: userID)).onError(
               (e, s) => $.warning("failed to configure scope user", e, s),
             ),
       );
@@ -336,8 +323,7 @@ class SuperLogging {
     if (error is DioException) {
       return true;
     }
-    final bool result =
-        error is StorageLimitExceededError ||
+    final bool result = error is StorageLimitExceededError ||
         error is WiFiUnavailableError ||
         error is InvalidFileError ||
         error is NoActiveSubscriptionError ||

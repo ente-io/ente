@@ -69,29 +69,22 @@ bool isProcessBg = true;
 bool _stopHearBeat = false;
 
 void main() async {
-  await runZonedGuarded(
-    () async {
-      debugRepaintRainbowEnabled = false;
-      await EntePhotosRust.init();
-      WidgetsFlutterBinding.ensureInitialized();
-      FFmpegKitConfig.init().ignore();
-      await rive.RiveNative.init();
-      MediaKit.ensureInitialized();
+  debugRepaintRainbowEnabled = false;
+  await EntePhotosRust.init();
+  WidgetsFlutterBinding.ensureInitialized();
+  FFmpegKitConfig.init().ignore();
+  await rive.RiveNative.init();
+  MediaKit.ensureInitialized();
 
-      final savedThemeMode = await AdaptiveTheme.getThemeMode();
-      await _runInForeground(savedThemeMode);
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await _runInForeground(savedThemeMode);
 
-      if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
-      );
-
-      unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
-    },
-    (Object error, StackTrace stack) {
-      _logger.severe("Unhandled root zone error", error, stack);
-    },
+  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
+
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -104,8 +97,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       AppLock(
         builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled:
-            await Configuration.instance.shouldShowLockScreen() ||
+        enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -174,9 +166,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance.onAppInBackground(
-      'init via: WorkManager $tlog',
-    );
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
     // Crypto rel.
     await Computer.shared().turnOn(workersCount: 4);
@@ -367,9 +358,8 @@ void logLocalSettings() {
         VideoPreviewService.instance.isVideoStreamingEnabled,
   };
 
-  final formattedSettings = settings.entries
-      .map((e) => '${e.key}: ${e.value}')
-      .join(', ');
+  final formattedSettings =
+      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 
