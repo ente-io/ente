@@ -418,6 +418,12 @@ When photos are added via a collect link (by people without Ente accounts), you 
 
 In collaborative albums (with other Ente users), you can see who uploaded each photo by viewing the photo's info.
 
+### I had an existing album that I shared on the free plan. If I upgrade to a paid plan, will the device limit be removed automatically for this album? {#device-limit-upgrade}
+
+For existing album links shared while on the free plan, the device limit will not be removed automatically.
+
+Once you upgrade to a paid plan, all future public links will have no device limit unless you set one yourself.
+
 ## Public Link Features
 
 ### Can I convert a quick link to a regular album? {#quick-link-convert}
