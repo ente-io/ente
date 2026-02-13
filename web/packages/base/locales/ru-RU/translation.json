@@ -521,6 +521,7 @@
     "done": "Сделано",
     "share_link_section_title": "Или поделитесь ссылкой",
     "remove_link": "Удалить ссылку",
+    "link_created": "",
     "create_public_link": "Создать общедоступную ссылку",
     "public_link_created": "Создана общедоступная ссылка",
     "public_link_enabled": "Включена общедоступная ссылка",
