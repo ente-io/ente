@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 interface UseFileInputParams {
     /**
@@ -50,7 +50,7 @@ interface UseFileInputResult {
  * Wrap a open file selector into an easy to use package.
  *
  * Returns a {@link UseFileInputResult} which contains a function to get the
- * props for an input element, a function to open the file selector, and the
+ * properties for an input element, a function to open the file selector, and the
  * list of selected files.
  *
  * See the documentation of {@link UseFileInputParams} and
@@ -64,21 +64,27 @@ export const useFileInput = ({
 }: UseFileInputParams): UseFileInputResult => {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    useEffect(() => {
-        // React (as of 19) doesn't support attaching the onCancel event handler
-        // via props, so do it using its ref.
-        //
-        // https://github.com/facebook/react/issues/27858
-        inputRef.current!.addEventListener("cancel", onCancel);
-        return () => {
-            // Use optional chaining to avoid spurious errors during HMR.
-            inputRef.current?.removeEventListener("cancel", onCancel);
-        };
-    }, [onCancel]);
+    const handleInputRef = useCallback(
+        (node: HTMLInputElement | null) => {
+            if (inputRef.current) {
+                inputRef.current.removeEventListener("cancel", onCancel);
+            }
+
+            inputRef.current = node;
+
+            if (inputRef.current) {
+                inputRef.current.addEventListener("cancel", onCancel);
+            }
+        },
+        [onCancel],
+    );
 
     const openSelector = useCallback(() => {
-        inputRef.current!.value = "";
-        inputRef.current!.click();
+        const input = inputRef.current;
+        if (!input) return;
+
+        input.value = "";
+        input.click();
     }, []);
 
     const handleChange: React.ChangeEventHandler<HTMLInputElement> = (
@@ -113,11 +119,11 @@ export const useFileInput = ({
             multiple: true,
             style: { display: "none" },
             ...directoryOpts,
-            ref: inputRef,
+            ref: handleInputRef,
             onChange: handleChange,
             ...(accept && { accept }),
         }),
-        [directoryOpts, accept, handleChange],
+        [directoryOpts, accept, handleChange, handleInputRef],
     );
 
     return { getInputProps, openSelector };

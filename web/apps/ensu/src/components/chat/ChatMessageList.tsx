@@ -278,15 +278,6 @@ const MessageRow = memo(
                                         width: "100%",
                                     }}
                                 >
-                                    <GeneratingRiveIndicator
-                                        isGenerating={
-                                            isGenerating && isStreaming
-                                        }
-                                        isOutroPhase={
-                                            isStreaming && isStreamingOutro
-                                        }
-                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
-                                    />
                                     {showLoadingPlaceholder ? null : (
                                         <Box
                                             sx={assistantMarkdownSx}
@@ -298,6 +289,15 @@ const MessageRow = memo(
                                             />
                                         </Box>
                                     )}
+                                    <GeneratingRiveIndicator
+                                        isGenerating={
+                                            isGenerating && isStreaming
+                                        }
+                                        isOutroPhase={
+                                            isStreaming && isStreamingOutro
+                                        }
+                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
+                                    />
                                 </Stack>
                             ) : (
                                 <Box sx={assistantMarkdownSx}>
@@ -658,9 +658,7 @@ export const ChatMessageList = memo(
                     bgcolor: "background.paper",
                     overscrollBehaviorY: "contain",
                     scrollbarWidth: "thin",
-                    "&::-webkit-scrollbar": {
-                        width: "8px",
-                    },
+                    "&::-webkit-scrollbar": { width: "8px" },
                     "&::-webkit-scrollbar-thumb": {
                         backgroundColor: "divider",
                         borderRadius: "999px",

@@ -175,7 +175,6 @@ const SESSION_TITLE_PROMPT =
 
 const REPEAT_PENALTY = 1.18;
 const STREAMING_OUTRO_DURATION_MS = 520;
-const STREAMING_COLLAPSE_DURATION_MS = 300;
 
 type DocumentAttachment = {
     id: string;
@@ -2970,11 +2969,7 @@ const Page: React.FC = () => {
                 setIsStreamingOutro(true);
 
                 await new Promise<void>((resolve) => {
-                    window.setTimeout(
-                        resolve,
-                        STREAMING_OUTRO_DURATION_MS +
-                            STREAMING_COLLAPSE_DURATION_MS,
-                    );
+                    window.setTimeout(resolve, STREAMING_OUTRO_DURATION_MS);
                 });
 
                 if (!isActiveGeneration()) {
@@ -3635,11 +3630,7 @@ const Page: React.FC = () => {
                             component="img"
                             src={comingSoonDuckySrc}
                             alt="Ensu ducky"
-                            sx={{
-                                width: 92,
-                                height: 92,
-                                objectFit: "contain",
-                            }}
+                            sx={{ width: 92, height: 92, objectFit: "contain" }}
                         />
                         <Box component="span" sx={{ px: 3 }}>
                             Sign in and cloud backup will be available in a

@@ -7,8 +7,6 @@ type GeneratingRiveIndicatorProps = {
     fallbackText?: string;
     isGenerating?: boolean;
     isOutroPhase?: boolean;
-    outroDurationMs?: number;
-    collapseDurationMs?: number;
 };
 
 type RivePlaybackTarget = string | string[];
@@ -34,8 +32,6 @@ const GeneratingRiveIndicator = memo(
         fallbackText,
         isGenerating = true,
         isOutroPhase = false,
-        outroDurationMs = 520,
-        collapseDurationMs = 300,
     }: GeneratingRiveIndicatorProps) => {
         const canvasRef = useRef<HTMLCanvasElement | null>(null);
         const instanceRef = useRef<RiveInstance | null>(null);
@@ -48,18 +44,9 @@ const GeneratingRiveIndicator = memo(
         const wasOutroPhaseRef = useRef(isOutroPhase);
         const generatingLiveRef = useRef(isGenerating);
         const outroPhaseLiveRef = useRef(isOutroPhase);
-        const collapseTimerRef = useRef<number | null>(null);
         const [failedToLoad, setFailedToLoad] = useState(false);
-        const [isCollapsed, setIsCollapsed] = useState(false);
         const { basePath } = useRouter();
         const riveSrc = `${basePath ?? ""}${RIVE_SRC}`;
-
-        const clearCollapseTimer = () => {
-            if (collapseTimerRef.current) {
-                window.clearTimeout(collapseTimerRef.current);
-                collapseTimerRef.current = null;
-            }
-        };
 
         const playMain = () => {
             const instance = instanceRef.current;
@@ -210,7 +197,6 @@ const GeneratingRiveIndicator = memo(
 
             return () => {
                 canceled = true;
-                clearCollapseTimer();
                 try {
                     instanceRef.current?.cleanup?.();
                 } catch {
@@ -230,28 +216,17 @@ const GeneratingRiveIndicator = memo(
             generatingLiveRef.current = isGenerating;
             outroPhaseLiveRef.current = isOutroPhase;
 
-            if (wasOutroPhase && !isOutroPhase) {
-                clearCollapseTimer();
-                setIsCollapsed(false);
-            }
-
             if (!wasOutroPhase && isOutroPhase) {
                 triggerOutro();
-                clearCollapseTimer();
-                collapseTimerRef.current = window.setTimeout(() => {
-                    setIsCollapsed(true);
-                    collapseTimerRef.current = null;
-                }, outroDurationMs);
             }
 
             if (!isOutroPhase && isGenerating && !wasGenerating) {
-                setIsCollapsed(false);
                 playMain();
             }
 
             wasGeneratingRef.current = isGenerating;
             wasOutroPhaseRef.current = isOutroPhase;
-        }, [isGenerating, isOutroPhase, outroDurationMs]);
+        }, [isGenerating, isOutroPhase]);
 
         if (failedToLoad) {
             return (
@@ -270,9 +245,8 @@ const GeneratingRiveIndicator = memo(
                     display: "flex",
                     alignItems: "center",
                     overflow: "hidden",
-                    maxHeight: isCollapsed ? 0 : size,
-                    opacity: isCollapsed ? 0 : 1,
-                    transition: `max-height ${collapseDurationMs}ms ease-in-out, opacity ${collapseDurationMs}ms ease-in-out`,
+                    maxHeight: size,
+                    opacity: 1,
                 }}
             >
                 <Box
