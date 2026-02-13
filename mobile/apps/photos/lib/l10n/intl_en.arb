@@ -134,6 +134,8 @@
   "changeEmail": "Change email",
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
+  "readyToBackupTitle": "Ready to backup",
+  "readyToBackupSubtitle": "Your photos will sync in the background. The first backup may take some time.",
   "contactSupport": "Contact support",
   "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
   "@locationPickerTip": {
