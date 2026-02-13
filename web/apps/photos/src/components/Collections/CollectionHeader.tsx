@@ -1057,7 +1057,11 @@ const CastQuickOption: React.FC<OptionProps> = ({ onClick }) => (
                     justifyContent: "center",
                 }}
             >
-                <HugeiconsIcon icon={ModernTvIcon} size={22} strokeWidth={1.8} />
+                <HugeiconsIcon
+                    icon={ModernTvIcon}
+                    size={22}
+                    strokeWidth={1.8}
+                />
             </Box>
         </IconButton>
     </Tooltip>
