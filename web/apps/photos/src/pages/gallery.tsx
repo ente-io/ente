@@ -1375,16 +1375,12 @@ const Page: React.FC = () => {
      * and selects an action from the context menu.
      */
     const handleContextMenuAction = useCallback(
-        (action: FileContextAction, targetFile?: EnteFile) => {
+        (action: FileContextAction) => {
             // The selection should already be set by FileList's handleContextMenu
             // We just need to invoke the appropriate action handler
             switch (action) {
                 case "sendLink":
-                    if (targetFile) {
-                        void handleFileViewerSendLink(targetFile);
-                    } else {
-                        createFileOpHandler("sendLink")();
-                    }
+                    createFileOpHandler("sendLink")();
                     break;
                 case "download":
                     createFileOpHandler("download")();
@@ -1538,7 +1534,6 @@ const Page: React.FC = () => {
             createFileOpHandler,
             createOnCreateForCollectionOp,
             createOnSelectForCollectionOp,
-            handleFileViewerSendLink,
             handleOpenCollectionSelector,
             handleRemoveFilesFromCollection,
             showMiniDialog,
