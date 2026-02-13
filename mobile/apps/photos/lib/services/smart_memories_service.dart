@@ -200,6 +200,14 @@ class SmartMemoriesService {
         '${memoriesResult.memories.length} memories computed in computer $t',
       );
 
+      if (isOfflineMode && memoriesResult.isEmpty) {
+        _logger.severe(
+          "Smart memories returned empty in offline mode, falling back to simple memories",
+        );
+        final fallbackMemories = await calcSimpleMemories();
+        return MemoriesResult(fallbackMemories, <BaseLocation>[]);
+      }
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
@@ -207,6 +215,21 @@ class SmartMemoriesService {
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
+      if (isOfflineMode) {
+        try {
+          _logger.warning(
+            "Falling back to simple memories after smart memories failure in offline mode",
+          );
+          final fallbackMemories = await calcSimpleMemories();
+          return MemoriesResult(fallbackMemories, <BaseLocation>[]);
+        } catch (fallbackError, fallbackStackTrace) {
+          _logger.severe(
+            "Offline fallback to simple memories failed",
+            fallbackError,
+            fallbackStackTrace,
+          );
+        }
+      }
       return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
     }
   }
