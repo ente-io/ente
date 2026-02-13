@@ -37,7 +37,6 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
@@ -620,20 +619,14 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _download(EnteFile file) async {
     final existingFolderName =
-        await getExistingLocalFolderNameForDownloadSkipToast(
-      file,
-      fallbackFolderName: AppLocalizations.of(context).gallery,
-    );
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
     if (existingFolderName != null) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         showToast(
           context,
           l10n.downloadSkippedAlreadyAvailableOnDevice(
-            fileName: getDownloadSkipToastFileName(
-              file,
-              fallbackFileName: l10n.file,
-            ),
+            fileName: getDownloadSkipToastFileName(file),
             albumName: existingFolderName,
           ),
           iosLongToastLengthInSec: 4,
