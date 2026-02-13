@@ -7,7 +7,6 @@ import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/app_mode.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/l10n/l10n.dart";
@@ -16,12 +15,10 @@ import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
   const GrantPermissionsWidget({
@@ -55,124 +52,95 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       return _buildOfflinePermissionScreen(context);
     }
 
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
-    final headerText = _getHeaderText(context);
-
-    if (_showOnlyNewFeature) {
-      return Scaffold(
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.only(top: 44),
-                sliver: SliverToBoxAdapter(
-                  child: _buildHeaderContent(context, isLightMode, headerText),
-                ),
-              ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 36, bottom: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _buildNewFeatureActionArea(context),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 120),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              _buildHeaderContent(context, isLightMode, headerText),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: getEnteColorScheme(context).backgroundBase,
-              spreadRadius: 190,
-              blurRadius: 30,
-              offset: const Offset(0, 170),
-            ),
-          ],
-        ),
-        width: double.infinity,
-        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-        child: OutlinedButton(
-          key: const ValueKey("grantPermissionButton"),
-          onPressed: _onTapSelectFolders,
-          child: Text(AppLocalizations.of(context).continueLabel),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+    return _buildOnlinePermissionScreen(context);
   }
 
-  Widget _buildHeaderContent(
-    BuildContext context,
-    bool isLightMode,
-    String headerText,
-  ) {
-    return Column(
-      children: [
-        Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              isLightMode
-                  ? Image.asset(
-                      'assets/loading_photos_background.png',
-                      color: Colors.white.withValues(alpha: 0.4),
-                      colorBlendMode: BlendMode.modulate,
-                    )
-                  : Image.asset(
-                      'assets/loading_photos_background_dark.png',
-                    ),
-              Center(
+  Widget _buildOnlinePermissionScreen(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        backgroundColor: colorScheme.backgroundColour,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text(
+          "ente",
+          style: textTheme.h3Bold.copyWith(
+            fontFamily: "Montserrat",
+            color: colorScheme.content,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: [
+            const SliverPadding(padding: EdgeInsets.only(top: 24)),
+            SliverToBoxAdapter(
+              child: _buildHeaderContent(context),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 36, bottom: 20),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const SizedBox(height: 42),
-                    Image.asset(
-                      "assets/gallery_locked.png",
-                      height: 160,
-                    ),
+                    _showOnlyNewFeature
+                        ? _buildNewFeatureActionArea(context)
+                        : _buildDefaultActionArea(context),
                   ],
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderContent(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Column(
+      children: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: Image.asset(
+              "assets/photo_backup.png",
+              height: 252,
+            ),
           ),
         ),
-        const SizedBox(height: 36),
+        const SizedBox(height: 22),
         Padding(
-          padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: StyledText(
-            text: headerText,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(fontWeight: FontWeight.w700),
-            tags: {
-              'i': StyledTextTag(
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(fontWeight: FontWeight.w400),
-              ),
-            },
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            context.l10n.readyToBackupTitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: "Nunito",
+              fontWeight: FontWeight.w900,
+              fontSize: 32,
+              letterSpacing: -1.4,
+            ).copyWith(color: colorScheme.content),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            context.l10n.readyToBackupSubtitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.contentLight,
+                ),
           ),
         ),
       ],
@@ -300,56 +268,52 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     Bus.instance.fire(PermissionGrantedEvent());
   }
 
-  String _getHeaderText(BuildContext context) {
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      return context.l10n.chooseBackupModeHeader;
-    } else {
-      return AppLocalizations.of(context).entePhotosPerm;
-    }
-  }
-
   Widget _buildNewFeatureActionArea(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GradientButton(
+          ButtonWidgetV2(
             key: const ValueKey("selectFoldersButton"),
+            buttonType: ButtonTypeV2.primary,
+            labelText: context.l10n.selectFoldersForBackup,
             onTap: _onTapSelectFolders,
-            text: context.l10n.selectFolders,
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              key: const ValueKey("onlyNewPhotosButton"),
-              style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-              onPressed: () => _onlyNewActionDebouncer.run(() async {
+          ButtonWidgetV2(
+            key: const ValueKey("onlyNewPhotosButton"),
+            buttonType: ButtonTypeV2.secondary,
+            labelText: context.l10n.startWithLatestPhotos,
+            onTap: () async {
+              _onlyNewActionDebouncer.run(() async {
                 await _onTapOnlyNewPhotos();
-              }),
-              child: Text(
-                context.l10n.startWithLatestPhotos,
-                style: const TextStyle(
-                  color: Colors.black, // same for both themes
-                ),
-              ),
-            ),
+              });
+            },
+            shouldSurfaceExecutionStates: false,
           ),
-          const SizedBox(height: 16),
-          GestureDetector(
+          const SizedBox(height: 12),
+          ButtonWidgetV2(
             key: const ValueKey("skipForNowButton"),
-            behavior: HitTestBehavior.opaque,
+            buttonType: ButtonTypeV2.link,
+            labelText: context.l10n.doThisLater,
             onTap: _onTapSkip,
-            child: Text(
-              context.l10n.skip,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(decoration: TextDecoration.underline),
-            ),
+            shouldSurfaceExecutionStates: false,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultActionArea(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ButtonWidgetV2(
+        key: const ValueKey("grantPermissionButton"),
+        buttonType: ButtonTypeV2.primary,
+        labelText: AppLocalizations.of(context).continueLabel,
+        onTap: _onTapSelectFolders,
+        shouldSurfaceExecutionStates: false,
       ),
     );
   }

@@ -826,12 +826,18 @@ class _HomeWidgetState extends State<HomeWidget> {
                     final isOnLandingPage =
                         !Configuration.instance.hasConfiguredAccount() &&
                             !isOfflineMode;
+                    final isOnOnlineGrantPermissionScreen =
+                        Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            _shouldShowPermissionWidget();
                     return AppBar(
                       backgroundColor: isOnLandingPage
                           ? colorScheme.greenBase
                           : isSearchResults
                               ? resultsBackground
-                              : colorScheme.backgroundBase,
+                              : isOnOnlineGrantPermissionScreen
+                                  ? colorScheme.backgroundColour
+                                  : colorScheme.backgroundBase,
                     );
                   },
                 );
