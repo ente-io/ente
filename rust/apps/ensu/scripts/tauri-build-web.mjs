@@ -17,6 +17,7 @@ const child = spawn(yarnBin, ["build:ensu"], {
     env: {
         ...process.env,
         ENTE_TAURI: "1",
+        _ENTE_IS_DESKTOP: "1",
     },
 });
 
