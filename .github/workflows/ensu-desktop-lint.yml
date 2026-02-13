@@ -52,6 +52,9 @@ jobs:
               working-directory: .
               run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
+            - name: Ensure Tauri distDir exists for macro checks
+              run: mkdir -p ../../../../web/apps/ensu/out
+
             - run: cargo fmt --check
 
             - run: cargo clippy --all-targets --all-features
