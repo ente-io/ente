@@ -2624,6 +2624,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
+                disableAutoFocusItem
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
