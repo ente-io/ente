@@ -28,7 +28,7 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 Share via links that anyone can access without an account:
 
 - **Regular public links**: View-only access to an album
-- **Quick links**: Select photos → create link (Ente creates hidden album automatically)
+- **Quick links**: Select photos → create link (Ente creates special album automatically)
 - **Collect links**: Enable "Allow adding photos" so anyone can contribute
 - Password protection, expiry, and device limits available
 - Custom domains supported
@@ -60,7 +60,7 @@ Quick links ARE public links - just with a different creation method:
 **Quick links:**
 
 - Select specific photos anywhere in Ente
-- Ente creates a hidden album automatically
+- Ente creates a special album automatically
 - Share via link (works exactly like a public link)
 - Can convert to regular album later
 
@@ -432,9 +432,20 @@ This gives you more control over the album, including the ability to rename it a
 
 ### How do I create a quick link? {#create-quick-link}
 
-1. Select one or more photos (without creating an album)
-2. Tap/click the Share button
-3. Select "Create quick link"
+**On mobile:**
+
+1. Long press to select one or more photos
+2. Tap "Send link"
+3. The quick link is created
+4. Copy and share the link
+
+**On web/desktop:**
+
+You can create a quick link in any of these ways:
+
+1. Right-click a file and select "Send link" from the context menu
+2. Select multiple files and use the "Send link" action in the top navbar
+3. Open a file in the viewer and use "Send link" from the viewer menu
 4. Copy and share the link
 
 Ente creates a special album behind the scenes with the selected photos. Quick links work like public links and support the same features (password protection, expiry, etc.).
