@@ -1,6 +1,7 @@
 import {
     CleanIcon,
     Delete02Icon,
+    ModernTvIcon,
     RemoveCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -16,7 +17,6 @@ import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
-import TvOutlinedIcon from "@mui/icons-material/TvOutlined";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -1057,7 +1057,7 @@ const CastQuickOption: React.FC<OptionProps> = ({ onClick }) => (
                     justifyContent: "center",
                 }}
             >
-                <TvOutlinedIcon />
+                <HugeiconsIcon icon={ModernTvIcon} size={22} strokeWidth={1.8} />
             </Box>
         </IconButton>
     </Tooltip>
