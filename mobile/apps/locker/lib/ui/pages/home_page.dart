@@ -223,13 +223,9 @@ class _HomePageState extends UploaderPageState<HomePage>
       _hasLoadedLocalCache && !_hasCompletedInitialSync;
   bool get _hasAnyLocalContent =>
       _collections.isNotEmpty || _recentFiles.isNotEmpty;
-  bool get _shouldShowCenterSyncLoader =>
-      _isLoadingFromLocalCache ||
-      (_isInitialSyncInProgress && !_hasAnyLocalContent);
+  bool get _shouldShowCenterSyncLoader => _isLoadingFromLocalCache;
   bool get _shouldShowAppBarSyncIndicator =>
       _isInitialSyncInProgress && _hasAnyLocalContent;
-  bool get _canShowFinalEmptyState =>
-      _hasLoadedLocalCache && _hasCompletedInitialSync;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -757,9 +753,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      if (!_canShowFinalEmptyState) {
-        return const SizedBox.shrink();
-      }
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -773,14 +766,12 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? !_canShowFinalEmptyState
-                ? const SizedBox.shrink()
-                : const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: HomeEmptyStateWidget(),
-                    ),
-                  )
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(),
+                ),
+              )
             : SingleChildScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
