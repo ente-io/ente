@@ -1,0 +1,61 @@
+{
+  "build": {
+    "beforeDevCommand": "cd ../../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
+    "beforeBuildCommand": "node scripts/tauri-build-web.mjs",
+    "devPath": "http://localhost:3010",
+    "distDir": "../../../../web/apps/ensu/out"
+  },
+  "package": {
+    "productName": "Ensu",
+    "version": "0.0.1"
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "Ensu",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "visible": false,
+        "hiddenTitle": false
+      }
+    ],
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "io.ente.ensu",
+      "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"]
+    },
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": "^((mailto:)|(tel:)|(https?://)|(file://)).+"
+      },
+      "dialog": {
+        "all": false,
+        "open": true,
+        "save": true
+      },
+      "fs": {
+        "all": true,
+        "scope": [
+          "$APPDATA",
+          "$APPDATA/*",
+          "$APPDATA/**",
+          "$DOCUMENT",
+          "$DOCUMENT/*",
+          "$DOCUMENT/**"
+        ]
+      },
+      "path": {
+        "all": true
+      }
+    },
+    "security": {
+      "csp": null
+    }
+  }
+}
