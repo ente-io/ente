@@ -45,6 +45,7 @@ import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/download_skip_toast_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -150,8 +151,7 @@ class _FileSelectionActionsWidgetState
         !widget.selectedFiles.files.any(
           (element) => element.fileType == FileType.video,
         );
-    final showDownloadOption =
-        widget.selectedFiles.files.any((element) => element.localID == null);
+    final showDownloadOption = hasUploadedFileIDs;
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
@@ -1099,21 +1099,52 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _download(List<EnteFile> files) async {
-    final totalFiles = files.length;
-    int downloadedFiles = 0;
+    if (files.isEmpty) {
+      return;
+    }
 
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).downloading +
-          " ($downloadedFiles/$totalFiles)",
-      isDismissible: true,
+    final l10n = AppLocalizations.of(context);
+    final existingLocalFolderNames = await Future.wait(
+      files.map(
+        (file) => getExistingLocalFolderNameForDownloadSkipToast(
+          file,
+          fallbackFolderName: l10n.gallery,
+        ),
+      ),
     );
-    await dialog.show();
-    try {
-      final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
-      final futures = <Future>[];
-      for (final file in files) {
-        if (file.localID == null) {
+
+    final filesToDownload = <EnteFile>[];
+    final skippedFiles = <EnteFile>[];
+    String? skippedSingleFolderName;
+    for (int i = 0; i < files.length; i++) {
+      final file = files[i];
+      final existingLocalFolderName = existingLocalFolderNames[i];
+      if (existingLocalFolderName != null) {
+        skippedFiles.add(file);
+        skippedSingleFolderName = existingLocalFolderName;
+        continue;
+      }
+      filesToDownload.add(
+        file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null),
+      );
+    }
+    final skippedFilesCount = skippedFiles.length;
+
+    if (filesToDownload.isNotEmpty) {
+      final totalFiles = filesToDownload.length;
+      int downloadedFiles = 0;
+
+      final dialog = createProgressDialog(
+        context,
+        AppLocalizations.of(context).downloading +
+            " ($downloadedFiles/$totalFiles)",
+        isDismissible: true,
+      );
+      await dialog.show();
+      try {
+        final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
+        final futures = <Future>[];
+        for (final file in filesToDownload) {
           futures.add(
             taskQueue.add(() async {
               await downloadToGallery(file);
@@ -1125,15 +1156,46 @@ class _FileSelectionActionsWidgetState
             }),
           );
         }
+        await Future.wait(futures);
+        await dialog.hide();
+      } catch (e) {
+        _logger.warning("Failed to save files", e);
+        await dialog.hide();
+        await showGenericErrorDialog(context: context, error: e);
+        return;
       }
-      await Future.wait(futures);
-      await dialog.hide();
+    }
+
+    String finalMessage;
+    if (skippedFilesCount > 0) {
+      if (skippedFilesCount == 1) {
+        final skippedFile = skippedFiles.first;
+        finalMessage = l10n.downloadSkippedInSelectionSingleFile(
+          fileName: getDownloadSkipToastFileName(
+            skippedFile,
+            fallbackFileName: l10n.file,
+          ),
+          albumName: skippedSingleFolderName ?? l10n.gallery,
+        );
+      } else {
+        finalMessage = l10n.downloadSkippedInSelectionMultipleFiles(
+          fileCount: skippedFilesCount,
+        );
+      }
+    } else {
+      finalMessage = AppLocalizations.of(context).filesSavedToGallery;
+    }
+
+    showToast(
+      context,
+      finalMessage,
+      iosLongToastLengthInSec: 4,
+    );
+
+    if (skippedFilesCount == 0) {
       widget.selectedFiles.clearAll();
-      showToast(context, AppLocalizations.of(context).filesSavedToGallery);
-    } catch (e) {
-      _logger.warning("Failed to save files", e);
-      await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+    } else {
+      widget.selectedFiles.replaceSelection(skippedFiles.toSet());
     }
   }
 }
