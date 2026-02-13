@@ -14,6 +14,7 @@ import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
 import { ChatSidebar } from "components/chat/ChatSidebar";
+import { useFileInput } from "components/utils/use-file-input";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
@@ -22,7 +23,6 @@ import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
 import { saveStringAsFile } from "ente-base/utils/web";
-import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import { type NotificationAttributes } from "ente-new/photos/components/Notification";
 import { useRouter } from "next/router";
 import React, {
