@@ -3,7 +3,7 @@ description: A Flutter package for logging functionality across ente apps
 version: 1.0.0
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:

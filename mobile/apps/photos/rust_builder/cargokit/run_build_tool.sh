@@ -26,7 +26,7 @@ version: 1.0.0
 publish_to: none
 
 environment:
-  sdk: '>=3.10.0 <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
   build_tool:

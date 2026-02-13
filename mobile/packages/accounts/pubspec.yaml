@@ -3,7 +3,7 @@ description: A Flutter package containing account-related models, pages, and ser
 version: 1.0.0
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
