@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "io.ente.auth"
     compileSdk 36
-    ndkVersion flutter.ndkVersion
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         // Flag to enable support for the new language APIs
@@ -65,6 +65,9 @@ android {
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+        }
     }
 
     signingConfigs {
@@ -102,6 +105,12 @@ android {
               arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
             }
           }
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging false
         }
     }
 
