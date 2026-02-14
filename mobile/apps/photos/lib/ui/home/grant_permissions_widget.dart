@@ -200,6 +200,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           state == PermissionState.limited) {
         await localSettings.setAppMode(AppMode.offline);
         await permissionService.onUpdatePermission(state);
+        SyncService.instance.onPermissionGranted().ignore();
         Bus.instance.fire(PermissionGrantedEvent());
         try {
           await setMLConsent(true);

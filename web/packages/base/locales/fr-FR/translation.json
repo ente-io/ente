@@ -521,6 +521,7 @@
     "done": "Terminé",
     "share_link_section_title": "Ou partager un lien",
     "remove_link": "Supprimer le lien",
+    "link_created": "",
     "create_public_link": "Créer un lien public",
     "public_link_created": "Lien public créé",
     "public_link_enabled": "Lien public activé",

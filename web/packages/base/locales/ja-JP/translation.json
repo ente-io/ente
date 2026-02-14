@@ -521,6 +521,7 @@
     "done": "完了",
     "share_link_section_title": "またはリンクを共有",
     "remove_link": "リンクを削除",
+    "link_created": "",
     "create_public_link": "公開リンクを作成",
     "public_link_created": "公開リンクを作成しました",
     "public_link_enabled": "公開リンクが有効です",

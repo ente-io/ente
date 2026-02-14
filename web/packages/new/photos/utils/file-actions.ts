@@ -10,6 +10,7 @@ import {
  * These correspond to the same operations available in SelectedFileOptions.
  */
 export type FileContextAction =
+    | "sendLink"
     | "download"
     | "fixTime"
     | "editLocation"
@@ -53,6 +54,12 @@ export interface FileActionContext {
      * This depends on the selection containing owned files.
      */
     showEditLocation: boolean;
+    /**
+     * Whether to show the "Send link" action.
+     *
+     * This depends on the selection containing owned files.
+     */
+    showSendLink: boolean;
 }
 
 /**
@@ -70,6 +77,7 @@ export function getAvailableFileActions(
         collectionSummary,
         showAddPerson,
         showEditLocation,
+        showSendLink,
     } = context;
 
     const actions = getBaseActions(
@@ -78,6 +86,10 @@ export function getAvailableFileActions(
         collectionSummary,
         showEditLocation,
     );
+
+    if (showSendLink && collectionSummary?.id !== PseudoCollectionID.trash) {
+        insertSendLinkBeforeDownload(actions);
+    }
 
     // Insert "addPerson" before modification actions if enabled
     // (not applicable for trash since you can't add people to trashed files)
@@ -171,6 +183,18 @@ function getBaseActions(
     actions.push("hide", "trash");
 
     return actions;
+}
+
+/**
+ * Inserts "sendLink" before "download" if present, else prepends it.
+ */
+function insertSendLinkBeforeDownload(actions: FileContextAction[]): void {
+    const downloadIndex = actions.indexOf("download");
+    if (downloadIndex !== -1) {
+        actions.splice(downloadIndex, 0, "sendLink");
+    } else {
+        actions.unshift("sendLink");
+    }
 }
 
 /**

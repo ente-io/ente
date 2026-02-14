@@ -31,7 +31,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -619,34 +618,25 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
-    final l10n = context.l10n;
-    final String? localFileLocationName =
-        await _getExistingLocalFileLocation(file);
-    if (localFileLocationName != null && mounted) {
-      final hasKnownLocation = localFileLocationName.trim().isNotEmpty;
-      final actionResult = await showChoiceActionSheet(
-        context,
-        title: l10n.alreadyAvailableOnDeviceTitle,
-        body: hasKnownLocation
-            ? (Platform.isAndroid
-                ? l10n.alreadyAvailableOnDeviceBodyAndroid(
-                    folderName: localFileLocationName,
-                  )
-                : l10n.alreadyAvailableOnDeviceBodyIOS(
-                    albumName: localFileLocationName,
-                  ))
-            : l10n.alreadyAvailableOnDeviceBodyUnknown,
-        firstButtonLabel: l10n.downloadAnyway,
-        secondButtonLabel: l10n.cancel,
-      );
-      if (actionResult?.action != ButtonAction.first) {
-        return;
+    final existingFolderName =
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
+    if (existingFolderName != null) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(file),
+            albumName: existingFolderName,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
       }
-    }
-    if (!mounted) {
       return;
     }
 
+    final fileToDownload =
+        !file.isRemoteFile ? file.copyWith(localID: null) : file;
     final dialog = createProgressDialog(
       context,
       context.l10n.downloading,
@@ -654,7 +644,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
     await dialog.show();
     try {
-      await downloadToGallery(file);
+      await downloadToGallery(fileToDownload);
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
@@ -662,53 +652,6 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
-  }
-
-  Future<String?> _getExistingLocalFileLocation(
-    EnteFile file,
-  ) async {
-    if (file.localID == null || file.localID!.isEmpty) {
-      return null;
-    }
-
-    final asset = await file.getAsset;
-    if (asset == null || !(await asset.exists)) {
-      return null;
-    }
-
-    final String relativePath =
-        (asset.relativePath ?? "").trim().replaceFirst(RegExp(r'[/\\]+$'), '');
-    final String deviceFolder = (file.deviceFolder ?? "").trim();
-
-    if (Platform.isAndroid) {
-      if (relativePath.isNotEmpty) {
-        return _getLastPathSegment(relativePath);
-      }
-      if (deviceFolder.isNotEmpty) {
-        return _getLastPathSegment(deviceFolder);
-      }
-      return "";
-    }
-
-    if (deviceFolder.isNotEmpty) {
-      return _getLastPathSegment(deviceFolder);
-    }
-    if (relativePath.isNotEmpty) {
-      return _getLastPathSegment(relativePath);
-    }
-    return "";
-  }
-
-  String _getLastPathSegment(String path) {
-    final normalized = path.trim().replaceFirst(RegExp(r'[/\\]+$'), '');
-    if (normalized.isEmpty) {
-      return normalized;
-    }
-    final segments = normalized
-        .split(RegExp(r'[/\\]+'))
-        .where((segment) => segment.trim().isNotEmpty)
-        .toList();
-    return segments.isEmpty ? normalized : segments.last;
   }
 
   Future<void> _setAs(EnteFile file) async {

@@ -521,6 +521,7 @@
     "done": "تم",
     "share_link_section_title": "أو مشاركة رابط",
     "remove_link": "إزالة الرابط",
+    "link_created": "",
     "create_public_link": "إنشاء رابط عام",
     "public_link_created": "تم إنشاء الرابط العام",
     "public_link_enabled": "تم تمكين الرابط العام",

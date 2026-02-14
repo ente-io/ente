@@ -7,7 +7,8 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-ente-core = { path = "../../../rust/core" }
+ente-core = { path = "../../../rust/core", features = ["srp"] }
+serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
