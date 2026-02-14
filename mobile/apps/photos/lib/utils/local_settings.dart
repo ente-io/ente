@@ -85,6 +85,9 @@ class LocalSettings {
 
   static const _kOfflineFlags = "ls.offline_flags";
   static const _kOfflineMapEnabled = "ls.offline_map_enabled";
+  static const _kKeepOptimizedCopy = "ls.keep_optimized_copy";
+  static const _kEagerLoadFullResolutionOnOpen =
+      "ls.eager_load_full_resolution_on_open";
 
   final SharedPreferences _prefs;
 
@@ -353,6 +356,25 @@ class LocalSettings {
 
   Future<void> setShouldLoopVideo(bool value) async {
     await _prefs.setBool(shouldLoopVideoKey, value);
+  }
+
+  bool get keepOptimizedCopy => _prefs.getBool(_kKeepOptimizedCopy) ?? false;
+
+  Future<void> setKeepOptimizedCopy(bool value) async {
+    await _prefs.setBool(_kKeepOptimizedCopy, value);
+    if (!value) {
+      await _prefs.setBool(_kEagerLoadFullResolutionOnOpen, false);
+    }
+  }
+
+  bool get eagerLoadFullResolutionOnOpen =>
+      _prefs.getBool(_kEagerLoadFullResolutionOnOpen) ?? false;
+
+  Future<void> setEagerLoadFullResolutionOnOpen(bool value) async {
+    await _prefs.setBool(
+      _kEagerLoadFullResolutionOnOpen,
+      keepOptimizedCopy && value,
+    );
   }
 
   bool shouldLoopVideo() {

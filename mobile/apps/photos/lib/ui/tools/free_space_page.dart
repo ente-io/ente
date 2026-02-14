@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/freeable_space_info.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/delete_file_util.dart';
 
@@ -25,6 +27,15 @@ class FreeSpacePage extends StatefulWidget {
 }
 
 class _FreeSpacePageState extends State<FreeSpacePage> {
+  static const _keepOptimizedCopyTitle = "Keep an optimized copy";
+  static const _keepOptimizedCopyDesc =
+      "Only load full-resolution photo when you zoom in. "
+      "For photos, keep an optimized on-device copy. "
+      "Videos are removed from device and loaded from cloud.";
+  static const _eagerLoadTitle = "Eager load full resolution";
+  static const _eagerLoadDesc =
+      "Load full-resolution photo immediately when opening.";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +164,69 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 36),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _keepOptimizedCopyTitle,
+                      style: informationTextStyle,
+                    ),
+                  ),
+                  ToggleSwitchWidget(
+                    value: () => localSettings.keepOptimizedCopy,
+                    onChanged: () async {
+                      await localSettings.setKeepOptimizedCopy(
+                        !localSettings.keepOptimizedCopy,
+                      );
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _keepOptimizedCopyDesc,
+                style: informationTextStyle.copyWith(fontSize: 12),
+              ),
+              if (localSettings.keepOptimizedCopy) ...[
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _eagerLoadTitle,
+                        style: informationTextStyle,
+                      ),
+                    ),
+                    ToggleSwitchWidget(
+                      value: () => localSettings.eagerLoadFullResolutionOnOpen,
+                      onChanged: () async {
+                        await localSettings.setEagerLoadFullResolutionOnOpen(
+                          !localSettings.eagerLoadFullResolutionOnOpen,
+                        );
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _eagerLoadDesc,
+                  style: informationTextStyle.copyWith(fontSize: 12),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const Padding(padding: EdgeInsets.all(24)),
         Container(
           width: double.infinity,
           constraints: const BoxConstraints(
@@ -173,7 +247,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   }
 
   Future<void> _freeStorage(FreeableSpaceInfo status) async {
-    bool isSuccess = await deleteLocalFiles(context, status.localIDs);
+    bool isSuccess = localSettings.keepOptimizedCopy
+        ? await freeUpByKeepingOptimizedCopy(context, status.localIDs)
+        : await deleteLocalFiles(context, status.localIDs);
 
     if (isSuccess == false) {
       isSuccess = await deleteLocalFilesAfterRemovingAlreadyDeletedIDs(

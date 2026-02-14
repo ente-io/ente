@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
@@ -16,11 +18,14 @@ import 'package:photos/gateways/trash/models/trash_item_request.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/freeable_space_info.dart";
+import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -402,6 +407,143 @@ Future<bool> deleteLocalFiles(
     _logger.severe("Could not delete local files", e, s);
     return false;
   }
+}
+
+Future<bool> freeUpByKeepingOptimizedCopy(
+  BuildContext context,
+  List<String> localIDs,
+) async {
+  final files = await FilesDB.instance.getLocalFiles(
+    localIDs,
+    dedupeByLocalID: true,
+  );
+  if (files.isEmpty) {
+    return true;
+  }
+
+  final ignoredMap = await IgnoredFilesService.instance.idToIgnoreReasonMap;
+  final List<String> fallbackDeleteIDs = [];
+  final List<String> replacedOriginalIDs = [];
+  final List<IgnoredFile> ignoredToInsert = [];
+  final List<EnteFile> updatedFiles = [];
+
+  for (final file in files) {
+    final localID = file.localID;
+    if (localID == null) {
+      continue;
+    }
+    if (file.fileType != FileType.image || file.uploadedFileID == null) {
+      fallbackDeleteIDs.add(localID);
+      continue;
+    }
+
+    final reason = IgnoredFilesService.instance.getUploadSkipReason(
+      ignoredMap,
+      file,
+    );
+    if (reason == kIgnoreReasonOptimizedCopy) {
+      continue;
+    }
+
+    final replaced = await _replaceWithOptimizedCopy(file);
+    if (!replaced.success || replaced.newLocalID == null) {
+      fallbackDeleteIDs.add(localID);
+      continue;
+    }
+
+    final newLocalID = replaced.newLocalID!;
+    file.localID = newLocalID;
+    await FilesDB.instance.updateUploadedFileAcrossCollections(file);
+    updatedFiles.add(file);
+    replacedOriginalIDs.add(localID);
+    ignoredToInsert.add(
+      IgnoredFile(
+        newLocalID,
+        file.title,
+        file.deviceFolder,
+        kIgnoreReasonOptimizedCopy,
+      ),
+    );
+  }
+
+  if (ignoredToInsert.isNotEmpty) {
+    await IgnoredFilesService.instance.cacheAndInsert(ignoredToInsert);
+  }
+
+  if (updatedFiles.isNotEmpty) {
+    Bus.instance
+        .fire(LocalPhotosUpdatedEvent(updatedFiles, source: "optimizedCopy"));
+  }
+
+  final idsToDelete = [...fallbackDeleteIDs, ...replacedOriginalIDs];
+  if (idsToDelete.isEmpty) {
+    return updatedFiles.isNotEmpty;
+  }
+  return deleteLocalFiles(context, idsToDelete);
+}
+
+Future<({bool success, String? newLocalID})> _replaceWithOptimizedCopy(
+  EnteFile file,
+) async {
+  try {
+    final src = await getFile(file);
+    if (src == null || !src.existsSync()) {
+      return (success: false, newLocalID: null);
+    }
+
+    final bytes = await _compressedOptimizedBytes(file, src);
+    if (bytes == null || bytes.isEmpty) {
+      return (success: false, newLocalID: null);
+    }
+
+    final fileName =
+        "${DateTime.now().microsecondsSinceEpoch}_${file.displayName.replaceAll(' ', '_')}.jpeg";
+    final asset = await PhotoManager.editor.saveImage(
+      bytes,
+      filename: fileName,
+      relativePath: file.deviceFolder,
+    );
+    return (success: true, newLocalID: asset.id);
+  } catch (e, s) {
+    _logger.warning("Failed to create optimized copy", e, s);
+    return (success: false, newLocalID: null);
+  }
+}
+
+Future<Uint8List?> _compressedOptimizedBytes(EnteFile file, File src) async {
+  const maxTargetBytes = 120 * 1024;
+  const minTargetBytes = 80 * 1024;
+  Uint8List? best;
+  var quality = 88;
+  var scale = 1.0;
+
+  for (int attempt = 0; attempt < 8; attempt++) {
+    final minWidth = max(1280, (file.width * scale).round());
+    final minHeight = max(1280, (file.height * scale).round());
+    final compressed = await FlutterImageCompress.compressWithFile(
+      src.path,
+      minWidth: minWidth,
+      minHeight: minHeight,
+      quality: quality,
+      format: CompressFormat.jpeg,
+      keepExif: true,
+    );
+    if (compressed == null || compressed.isEmpty) {
+      continue;
+    }
+    best = compressed;
+    if (compressed.lengthInBytes <= maxTargetBytes &&
+        compressed.lengthInBytes >= minTargetBytes) {
+      return compressed;
+    }
+    if (compressed.lengthInBytes > maxTargetBytes) {
+      quality = max(50, quality - 10);
+      scale *= 0.9;
+      continue;
+    }
+    break;
+  }
+  return best;
 }
 
 Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(

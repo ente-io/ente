@@ -17,6 +17,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/ignored_file.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -64,6 +67,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _showingThumbnailFallback = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
+  bool? _isOptimizedCopy;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
   late final StreamSubscription<FileCaptionUpdatedEvent>
@@ -85,6 +89,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
+      if (_isZooming) {
+        _loadFinalImageIfNeeded(context);
+      }
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
@@ -107,6 +114,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
         _scaleStateController.scaleState = PhotoViewScaleState.initial;
       }
     });
+
+    unawaited(_loadOptimizedCopyTag());
   }
 
   @override
@@ -307,7 +316,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
       }
     }
-    if (!_loadedFinalImage && !_loadingFinalImage) {
+    if (!_loadedFinalImage && !_loadingFinalImage && !_shouldDeferFullResLoad) {
       _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
         if (file != null) {
@@ -345,7 +354,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       });
     }
 
-    if (!_loadingFinalImage && !_loadedFinalImage) {
+    if (!_loadingFinalImage && !_loadedFinalImage && !_shouldDeferFullResLoad) {
       _loadingFinalImage = true;
       getFile(
         _photo,
@@ -374,6 +383,46 @@ class _ZoomableImageState extends State<ZoomableImage> {
           }
         }
       });
+    }
+  }
+
+  Future<void> _loadOptimizedCopyTag() async {
+    if (_photo.localID == null) {
+      _isOptimizedCopy = false;
+      return;
+    }
+    final map = await IgnoredFilesService.instance.idToIgnoreReasonMap;
+    final reason =
+        IgnoredFilesService.instance.getUploadSkipReason(map, _photo);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isOptimizedCopy = reason == kIgnoreReasonOptimizedCopy;
+    });
+    _loadFinalImageIfNeeded(context);
+  }
+
+  bool get _shouldDeferFullResLoad {
+    if (!localSettings.keepOptimizedCopy) {
+      return false;
+    }
+    if (localSettings.eagerLoadFullResolutionOnOpen) {
+      return false;
+    }
+    if (_photo.localID == null) {
+      return false;
+    }
+    return _isOptimizedCopy ?? true;
+  }
+
+  void _loadFinalImageIfNeeded(BuildContext context) {
+    if (!_shouldDeferFullResLoad || _isZooming) {
+      if (_photo.isRemoteFile) {
+        _loadNetworkImage();
+      } else {
+        _loadLocalImage(context);
+      }
     }
   }
 

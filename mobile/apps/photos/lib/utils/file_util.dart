@@ -18,6 +18,7 @@ import 'package:photos/core/constants.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -25,6 +26,10 @@ final _logger = Logger("FileUtil");
 
 void preloadFile(EnteFile file) {
   if (file.fileType == FileType.video) {
+    return;
+  }
+  if (localSettings.keepOptimizedCopy &&
+      !localSettings.eagerLoadFullResolutionOnOpen) {
     return;
   }
   getFile(file);
