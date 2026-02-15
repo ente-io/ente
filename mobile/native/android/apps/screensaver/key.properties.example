@@ -1,0 +1,4 @@
+storeFile=app/keystore/ente-screensaver-release.jks
+storePassword=CHANGE_ME
+keyAlias=ente_screensaver
+keyPassword=CHANGE_ME

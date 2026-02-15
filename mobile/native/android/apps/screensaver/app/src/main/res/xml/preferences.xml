@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="pref_change_album"
+        android:title="@string/pref_change_album"
+        android:summary="@string/pref_change_album_summary" />
+
+    <Preference
+        android:key="pref_open_preview"
+        android:title="@string/preview"
+        android:summary="@string/setup_preview_summary" />
+
+    <Preference
+        android:key="pref_open_dream_settings"
+        android:title="@string/open_system_screensaver_settings" />
+
+    <ListPreference
+        android:defaultValue="normal"
+        android:entries="@array/pref_overlay_entries"
+        android:entryValues="@array/pref_overlay_values"
+        android:key="pref_overlay"
+        android:summary="@string/pref_overlay_summary"
+        android:title="@string/pref_title_overlay" />
+
+    <Preference
+        android:key="pref_open_advanced"
+        android:title="@string/pref_advanced"
+        android:summary="@string/pref_advanced_summary" />
+
+</PreferenceScreen>

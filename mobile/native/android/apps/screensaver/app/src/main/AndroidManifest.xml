@@ -1,0 +1,94 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <queries>
+        <intent>
+            <action android:name="android.settings.DREAM_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.service.dreams.DreamService" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:banner="@mipmap/icon_green"
+        android:icon="@mipmap/icon_green"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SSaver">
+
+        <activity
+            android:name=".main.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".setup.SetupActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".preview.PreviewActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".settings.AdvancedSettingsActivity"
+            android:label="@string/advanced_settings_title"
+            android:exported="false" />
+
+        <activity
+            android:name=".diagnostics.DiagnosticsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".diagnostics.AdbInstructionsActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".dream.PhotoDreamService"
+            android:exported="true"
+            android:label="@string/dream_label"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/dream_metadata" />
+        </service>
+
+    </application>
+
+</manifest>
