@@ -795,6 +795,26 @@
   "youAreOnAFamilyPlan": "You are on a family plan!",
   "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
+  "youAreOnAFamilyPlanSubtitle": "You are on a family plan.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " manages this plan.\nReach out to them for any changes.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Leave family plan",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Need help? Contact ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",
   "rateTheApp": "Rate the app",

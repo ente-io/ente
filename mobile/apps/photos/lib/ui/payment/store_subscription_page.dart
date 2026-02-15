@@ -159,6 +159,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     colorScheme = getEnteColorScheme(context);
+    final bool isFamilyChildUser = _hasLoadedData &&
+        _userDetails.isPartOfFamily() &&
+        !_userDetails.isFamilyAdmin();
     if (!_isLoading) {
       _isLoading = true;
       _fetchSubData();
@@ -180,13 +183,15 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          widget.isOnboarding
-              ? AppLocalizations.of(context).selectYourPlan
-              : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
-          style: textTheme.largeBold,
-        ),
-        centerTitle: true,
+        title: isFamilyChildUser
+            ? null
+            : Text(
+                widget.isOnboarding
+                    ? AppLocalizations.of(context).selectYourPlan
+                    : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
+                style: textTheme.largeBold,
+              ),
+        centerTitle: !isFamilyChildUser,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

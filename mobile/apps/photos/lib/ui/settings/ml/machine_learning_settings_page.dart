@@ -154,74 +154,63 @@ class _MachineLearningSettingsPageState
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return PopScope(
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) {
-          return;
-        }
-        unawaited(_handleDisabledScreenExit());
-      },
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundColour,
-        appBar: AppBar(
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          backgroundColor: colorScheme.backgroundColour,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
-            onPressed: () async {
-              await _handleDisabledScreenExit();
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context).mlConsent,
-                  style: textTheme.h3Bold,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context).mlConsent,
+                style: textTheme.h3Bold,
+              ),
+              const SizedBox(height: 12),
+              _buildDisabledMLDescription(context),
+              const SizedBox(height: 20),
+              Center(
+                child: Image.asset(
+                  "assets/ducky_ml.png",
+                  height: 150,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 12),
-                _buildDisabledMLDescription(context),
-                const SizedBox(height: 20),
-                Center(
-                  child: Image.asset(
-                    "assets/ducky_ml.png",
-                    height: 150,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _buildDisabledConsentAckRow(context),
-                const SizedBox(height: 20),
-                ButtonWidgetV2(
-                  buttonType: ButtonTypeV2.primary,
-                  labelText: AppLocalizations.of(context).mlConsent,
-                  isDisabled: !_hasAcknowledgedMLConsent,
-                  onTap: () async {
-                    if (!_hasAcknowledgedMLConsent) return;
-                    await toggleMlConsent();
-                  },
-                ),
-                const SizedBox(height: 12),
-                ButtonWidgetV2(
-                  buttonType: ButtonTypeV2.secondary,
-                  labelText: AppLocalizations.of(context).cancel,
-                  onTap: () async {
-                    await _handleDisabledScreenExit();
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 18),
+              _buildDisabledConsentAckRow(context),
+              const SizedBox(height: 20),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: AppLocalizations.of(context).mlConsent,
+                isDisabled: !_hasAcknowledgedMLConsent,
+                onTap: () async {
+                  if (!_hasAcknowledgedMLConsent) return;
+                  await toggleMlConsent();
+                },
+              ),
+              const SizedBox(height: 12),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.secondary,
+                labelText: AppLocalizations.of(context).cancel,
+                onTap: () async {
+                  await _handleDisabledScreenExit();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),
