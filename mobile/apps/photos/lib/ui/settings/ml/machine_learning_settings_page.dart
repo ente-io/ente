@@ -1,8 +1,9 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/notification_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -16,16 +17,11 @@ import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
-import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -43,6 +39,8 @@ class _MachineLearningSettingsPageState
   Timer? _timer;
   int _titleTapCount = 0;
   Timer? _advancedOptionsTimer;
+  bool _hasAcknowledgedMLConsent = false;
+  bool _hasHandledDisabledExit = false;
 
   @override
   void initState() {
@@ -79,163 +77,171 @@ class _MachineLearningSettingsPageState
   @override
   Widget build(BuildContext context) {
     final hasEnabled = hasGrantedMLConsent;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final pageBackgroundColor =
-        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+
+    if (!hasEnabled) {
+      return _buildDisabledMLScreen(context);
+    }
+
+    return _buildEnabledMLScreen(context);
+  }
+
+  Widget _buildEnabledMLScreen(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return Scaffold(
-      backgroundColor: pageBackgroundColor,
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            backgroundColor: pageBackgroundColor,
-            flexibleSpaceTitle: GestureDetector(
-              child: TitleBarTitleWidget(
-                title: AppLocalizations.of(context).machineLearning,
-              ),
-              onTap: () {
-                setState(() {
-                  _titleTapCount++;
-                  if (_titleTapCount >= 7) {
-                    _titleTapCount = 0;
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return MLUserDeveloperOptions(
-                            mlIsEnabled: hasEnabled,
-                          );
-                        },
-                      ),
-                    ).ignore();
-                  }
-                });
-              },
-            ),
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+      backgroundColor: colorScheme.backgroundColour,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  Navigator.pop(context);
-                  if (Navigator.canPop(context)) Navigator.pop(context);
-                  if (Navigator.canPop(context)) Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (delegateBuildContext, index) => Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                child: Column(
-                  children: [
-                    if (!hasEnabled)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context).enableMLIndexingDesc,
-                          textAlign: TextAlign.left,
-                          style: getEnteTextTheme(context).small,
+                  setState(() {
+                    _titleTapCount++;
+                    if (_titleTapCount >= 7) {
+                      _titleTapCount = 0;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return const MLUserDeveloperOptions(
+                              mlIsEnabled: true,
+                            );
+                          },
                         ),
-                      ),
-                    Text(
-                      AppLocalizations.of(context).mlIndexingDescription,
-                      textAlign: TextAlign.left,
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
-                          ),
-                    ),
-                  ],
+                      ).ignore();
+                    }
+                  });
+                },
+                child: Text(
+                  AppLocalizations.of(context).machineLearning,
+                  style: textTheme.h3Bold,
                 ),
               ),
-              childCount: 1,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (delegateBuildContext, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: _getMlSettings(context),
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
-          ),
-          if (!hasEnabled)
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (delegateBuildContext, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        ButtonWidget(
-                          buttonType: ButtonType.primary,
-                          labelText: context.l10n.enable,
-                          onTap: () async {
-                            await toggleMlConsent();
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        ButtonWidget(
-                          buttonType: ButtonType.secondary,
-                          labelText: context.l10n.moreDetails,
-                          onTap: () async {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return WebPage(
-                                    AppLocalizations.of(context).help,
-                                    "https://ente.io/help/photos/features/machine-learning",
-                                  );
-                                },
-                              ),
-                            ).ignore();
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          AppLocalizations.of(context).magicSearchHint,
-                          textAlign: TextAlign.left,
-                          style: getEnteTextTheme(context).mini.copyWith(
-                                color: getEnteColorScheme(context).textMuted,
-                              ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: 1,
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context).mlIndexingDescription,
+                textAlign: TextAlign.left,
+                style: textTheme.small.copyWith(
+                  color: colorScheme.textMuted,
+                ),
               ),
-            ),
-        ],
+              const SizedBox(height: 20),
+              _getMlSettings(context),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
       ),
     );
   }
 
+  Widget _buildDisabledMLScreen(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          return;
+        }
+        unawaited(_handleDisabledScreenExit());
+      },
+      child: Scaffold(
+        backgroundColor: colorScheme.backgroundColour,
+        appBar: AppBar(
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: colorScheme.backgroundColour,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: colorScheme.strokeBase),
+            onPressed: () async {
+              await _handleDisabledScreenExit();
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context).mlConsent,
+                  style: textTheme.h3Bold,
+                ),
+                const SizedBox(height: 12),
+                _buildDisabledMLDescription(context),
+                const SizedBox(height: 20),
+                Center(
+                  child: Image.asset(
+                    "assets/ducky_ml.png",
+                    height: 150,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _buildDisabledConsentAckRow(context),
+                const SizedBox(height: 20),
+                ButtonWidgetV2(
+                  buttonType: ButtonTypeV2.primary,
+                  labelText: AppLocalizations.of(context).mlConsent,
+                  isDisabled: !_hasAcknowledgedMLConsent,
+                  onTap: () async {
+                    if (!_hasAcknowledgedMLConsent) return;
+                    await toggleMlConsent();
+                  },
+                ),
+                const SizedBox(height: 12),
+                ButtonWidgetV2(
+                  buttonType: ButtonTypeV2.secondary,
+                  labelText: AppLocalizations.of(context).cancel,
+                  onTap: () async {
+                    await _handleDisabledScreenExit();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleDisabledScreenExit() async {
+    if (_hasHandledDisabledExit || hasGrantedMLConsent) {
+      return;
+    }
+    _hasHandledDisabledExit = true;
+    await localSettings.setHasSeenMLEnablingBanner();
+    Bus.instance.fire(NotificationEvent());
+  }
+
   Future<void> toggleMlConsent() async {
     final oldMlConsent = hasGrantedMLConsent;
-    // Go to consent page first if not enabled
-    if (!oldMlConsent) {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return const EnableMachineLearningConsent();
-          },
-        ),
-      );
-      if (result == null || result == false) {
-        return;
-      }
-    }
     final mlConsent = !oldMlConsent;
     await setMLConsent(mlConsent);
+    Bus.instance.fire(NotificationEvent());
     if (!mlConsent) {
       MLService.instance.pauseIndexingAndClustering();
       unawaited(
@@ -249,6 +255,95 @@ class _MachineLearningSettingsPageState
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Widget _buildDisabledMLDescription(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context).mlConsentDescription,
+          textAlign: TextAlign.left,
+          style: textTheme.small.copyWith(color: colorScheme.textMuted),
+        ),
+        const SizedBox(height: 6),
+        GestureDetector(
+          onTap: () async => _openMLPrivacyPolicy(context),
+          child: Text(
+            AppLocalizations.of(context).mlConsentPrivacy,
+            textAlign: TextAlign.left,
+            style: textTheme.small.copyWith(
+              color: colorScheme.textMuted,
+              decoration: TextDecoration.underline,
+              decorationColor: colorScheme.textMuted,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDisabledConsentAckRow(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final accentColor = colorScheme.greenBase;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _hasAcknowledgedMLConsent = !_hasAcknowledgedMLConsent;
+        });
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: accentColor),
+              color:
+                  _hasAcknowledgedMLConsent ? accentColor : Colors.transparent,
+            ),
+            alignment: Alignment.center,
+            child: _hasAcknowledgedMLConsent
+                ? Icon(
+                    Icons.check,
+                    size: 14,
+                    color: colorScheme.contentReverse,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).mlConsentConfirmation,
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: colorScheme.textMuted,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openMLPrivacyPolicy(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage(
+            AppLocalizations.of(context).privacyPolicyTitle,
+            "https://ente.io/privacy",
+          );
+        },
+      ),
+    );
   }
 
   Widget _getMlSettings(BuildContext context) {
