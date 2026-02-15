@@ -529,6 +529,8 @@
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
   "selectFolders": "Select folders",
+  "backupToEnte": "Backup to Ente",
+  "selectAlbumsToBackUpToEnte": "Select albums to back up to Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
