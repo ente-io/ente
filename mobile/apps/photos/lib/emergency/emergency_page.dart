@@ -576,7 +576,7 @@ class _WarningBanner extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.warning400.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(20),
