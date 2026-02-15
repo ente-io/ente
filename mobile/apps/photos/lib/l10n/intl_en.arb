@@ -134,6 +134,8 @@
   "changeEmail": "Change email",
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
+  "readyToBackupTitle": "Ready to backup",
+  "readyToBackupSubtitle": "Your photos will sync in the background. The first backup may take some time.",
   "contactSupport": "Contact support",
   "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
   "@locationPickerTip": {
@@ -527,6 +529,8 @@
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
   "selectFolders": "Select folders",
+  "backupToEnte": "Backup to Ente",
+  "selectAlbumsToBackUpToEnte": "Select albums to back up to Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
@@ -791,6 +795,26 @@
   "youAreOnAFamilyPlan": "You are on a family plan!",
   "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
+  "youAreOnAFamilyPlanSubtitle": "You are on a family plan.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " manages this plan.\nReach out to them for any changes.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Leave family plan",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Need help? Contact ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",
   "rateTheApp": "Rate the app",
