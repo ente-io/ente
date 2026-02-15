@@ -1658,6 +1658,12 @@
       "hex": "EDA920"
     },
     {
+      "title": "Stoat",
+      "altNames": [
+        "stoat.chat"
+      ] 
+    },
+    {
       "title": "Stripchat",
       "slug": "stripchat",
       "altNames": [
@@ -1950,6 +1956,10 @@
     },
     {
       "title": "Wealthfront"
+    },
+    {
+      "title": "Wealthify"
+
     },
     {
       "title": "Wealthsimple"
