@@ -266,7 +266,6 @@ class _AddContactSheetState extends State<AddContactSheet> {
           labelText: l10n.proceed,
           onTap: () async => Navigator.of(context).pop(true),
           shouldSurfaceExecutionStates: false,
-          isInAlert: true,
         ),
       ],
     );
