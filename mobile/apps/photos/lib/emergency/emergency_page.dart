@@ -404,7 +404,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                 : context.l10n.removeContact,
             onTap: () async => Navigator.of(context).pop(true),
             shouldSurfaceExecutionStates: false,
-            isInAlert: true,
           ),
         ],
       );
@@ -456,7 +455,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             context,
             title: context.l10n.cannotUpdateRecoveryTime,
             message: context.l10n.cannotUpdateRecoveryTimeMessage,
-            assetPath: "assets/warning-blue.png",
+            assetPath: "assets/warning-green.png",
           );
         }
       }
