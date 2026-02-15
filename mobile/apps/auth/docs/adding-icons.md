@@ -5,10 +5,9 @@ Ente Auth supports the icon pack provided by
 
 If you would like to add your own custom icon, please open a pull-request with
 the relevant SVG placed within `mobile/apps/auth/assets/custom-icons/icons` and add the
-corresponding entry within `mobile/apps/auth/assets/custom-icons/_data/custom-icons.json`.
+corresponding entry within `mobile/apps/auth/assets/custom-icons/_data/custom-icons.json`. Please note icon names may only contain lowercase characters.
 
-Please be careful to upload small and optimized icon files. If your icon file 
-is over 50KB, it is likely not optimized.
+Please be careful to upload small and optimized icon files. Icons exceeding 20KB will not be accepted.
 
 Note that the correspondence between the icon and the issuer is based on the name 
 of the issuer provided by the user, excluding spaces. Only the text before the 
