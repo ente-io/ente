@@ -43,7 +43,7 @@
     <string name="setup_album_password_hint">Album password (if set)</string>
     <string name="setup_pairing_code">Pairing code: %1$s</string>
     <string name="setup_open_on_phone_prefix">Open on your phone (same Wi‑Fi):</string>
-    <string name="setup_wifi_hint">Same Wi‑Fi required. If the QR doesn’t open, ensure your phone is on Wi‑Fi (disable VPN/mobile data) and type one of the URLs above in your browser.</string>
+    <string name="setup_wifi_hint">Scan this QR with your phone. Keep TV and phone on the same Wi‑Fi, and disable VPN/mobile data on your phone.</string>
     <string name="setup_no_network">Connect this TV to your network to enable QR setup.</string>
     <string name="setup_server_running">Setup server running on port %1$d</string>
     <string name="setup_server_failed">Setup server failed to start. Try reopening this screen.</string>

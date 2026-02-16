@@ -8,10 +8,8 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import io.ente.photos.screensaver.R
-import io.ente.photos.screensaver.databinding.ActivityMainBinding
 import io.ente.photos.screensaver.databinding.ActivityMainPreviewBinding
 import io.ente.photos.screensaver.diagnostics.AppLog
-import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.imageloading.AppImageLoader
 import io.ente.photos.screensaver.permissions.MediaPermissions
@@ -27,12 +25,11 @@ import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
 
-    private var setupBinding: ActivityMainBinding? = null
     private var previewBinding: ActivityMainPreviewBinding? = null
-    
+
     private val scope = MainScope()
     private val handler = Handler(Looper.getMainLooper())
-    
+
     // Preview mode dependencies
     private var preferencesRepository: PreferencesRepository? = null
     private var slideshowController: SlideshowController? = null
@@ -49,7 +46,11 @@ class MainActivity : AppCompatActivity() {
         if (isConfigured) {
             showPreviewMode()
         } else {
-            showSetupMode()
+            startActivity(
+                Intent(this, SetupActivity::class.java)
+                    .putExtra(SetupActivity.EXTRA_AUTO_RETURN_TO_PREVIEW, true),
+            )
+            finish()
         }
     }
 
@@ -81,26 +82,9 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(hideHintRunnable!!, 6000)
     }
 
-    private fun showSetupMode() {
-        setupBinding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(setupBinding!!.root)
-
-        setupBinding!!.buttonSetup.setOnClickListener {
-            startActivity(Intent(this, SetupActivity::class.java))
-        }
-
-        setupBinding!!.buttonSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-
-        setupBinding!!.buttonDiagnostics.setOnClickListener {
-            startActivity(Intent(this, DiagnosticsActivity::class.java))
-        }
-    }
-
     override fun onStart() {
         super.onStart()
-        
+
         if (previewBinding != null) {
             // Preview mode: start slideshow
             scope.launch {
@@ -127,14 +111,13 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         hideHintRunnable?.let { handler.removeCallbacks(it) }
         hideHintRunnable = null
-        
+
         slideshowController?.stop()
         slideshowController = null
         preferencesRepository = null
-        
-        setupBinding = null
+
         previewBinding = null
-        
+
         scope.cancel()
         super.onDestroy()
     }
@@ -147,6 +130,7 @@ class MainActivity : AppCompatActivity() {
                 openSettings()
                 true
             }
+
             else -> super.onKeyDown(keyCode, event)
         }
     }
@@ -154,5 +138,4 @@ class MainActivity : AppCompatActivity() {
     private fun openSettings() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
-
 }
