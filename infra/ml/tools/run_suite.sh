@@ -10,6 +10,7 @@ SUITE="smoke"
 PLATFORMS="all"
 UPDATE_GOLDEN=false
 FAIL_ON_MISSING_PLATFORM=false
+ALLOW_EMPTY_COMPARISON=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/out/parity"
 
 usage() {
@@ -21,6 +22,7 @@ Flags:
   --platforms all|desktop|android|ios
   --update-golden
   --fail-on-missing-platform
+  --allow-empty-comparison
   --output-dir <path>
 EOF
 }
@@ -41,6 +43,10 @@ while (($# > 0)); do
       ;;
     --fail-on-missing-platform)
       FAIL_ON_MISSING_PLATFORM=true
+      shift
+      ;;
+    --allow-empty-comparison)
+      ALLOW_EMPTY_COMPARISON=true
       shift
       ;;
     --output-dir)
@@ -66,6 +72,7 @@ fi
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
 PYTHON_OUTPUT_DIR="$OUTPUT_DIR/python"
+rm -rf "$PYTHON_OUTPUT_DIR"
 mkdir -p "$PYTHON_OUTPUT_DIR"
 
 echo "Running ML parity suite"
@@ -96,7 +103,19 @@ while IFS=$'\t' read -r source_rel source_url source_sha; do
   mv "$tmp_path" "$target_path"
 
   if [[ -n "$source_sha" ]]; then
-    actual_sha="$(shasum -a 256 "$target_path" | awk '{print $1}')"
+    actual_sha="$(
+      python3 - "$target_path" <<'PY'
+import hashlib
+import sys
+
+path = sys.argv[1]
+digest = hashlib.sha256()
+with open(path, "rb") as file:
+    for chunk in iter(lambda: file.read(1024 * 1024), b""):
+        digest.update(chunk)
+print(digest.hexdigest())
+PY
+    )"
     if [[ "$actual_sha" != "$source_sha" ]]; then
       echo "SHA-256 mismatch for $source_rel: expected $source_sha got $actual_sha" >&2
       exit 1
@@ -140,6 +159,13 @@ case "$PLATFORMS" in
     ;;
 esac
 
+echo "Clearing stale platform output directories"
+for platform in "${selected_platforms[@]}"; do
+  platform_dir="$OUTPUT_DIR/$platform"
+  rm -rf "$platform_dir"
+  mkdir -p "$platform_dir"
+done
+
 declare -a compare_args=()
 missing_platform_count=0
 
@@ -157,6 +183,15 @@ done
 if $FAIL_ON_MISSING_PLATFORM && ((missing_platform_count > 0)); then
   echo "Missing platform outputs and --fail-on-missing-platform is set" >&2
   exit 1
+fi
+
+if ((${#compare_args[@]} == 0)); then
+  if $ALLOW_EMPTY_COMPARISON; then
+    echo "No platform outputs available; continuing because --allow-empty-comparison is set"
+  else
+    echo "No platform outputs available for comparison. Provide at least one platform result or use --allow-empty-comparison." >&2
+    exit 1
+  fi
 fi
 
 compare_output="$OUTPUT_DIR/comparison_report.json"

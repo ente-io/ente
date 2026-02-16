@@ -268,7 +268,8 @@ Flags:
 2. `--platforms all|desktop|android|ios`
 3. `--update-golden`
 4. `--fail-on-missing-platform`
-5. `--output-dir ...`
+5. `--allow-empty-comparison` (optional override when intentionally running without any platform outputs)
+6. `--output-dir ...`
 
 Target runtime: 10-20 minutes for full local run (with caching).
 
@@ -315,5 +316,6 @@ No automatic run for unrelated PRs.
 ## Assumptions and Defaults
 1. Corpus is maintained in `ente-io/test-fixtures` at `ml/indexing/v1`; `run_suite.sh` downloads fixture files to `infra/ml/test_data/ml-indexing/v1` using each manifest item's `source_url`.
 2. Parity outputs are runtime artifacts and are not committed; `run_suite.sh` regenerates them on each run.
-3. Mobile behavior is the setup reference for ground-truth implementation details in this phase.
-4. Missing local platform support is reported clearly by default, not automatically fatal unless strict mode is enabled.
+3. `run_suite.sh` fails if zero platform outputs are available for comparison, unless `--allow-empty-comparison` is passed.
+4. Mobile behavior is the setup reference for ground-truth implementation details in this phase.
+5. Missing local platform support is reported clearly by default, not automatically fatal unless strict mode is enabled.
