@@ -100,7 +100,6 @@ class FileUtil {
       await showGenericErrorBottomSheet(
         context: context,
         error: e,
-        surfaceError: false,
       );
     }
   }
@@ -395,7 +394,6 @@ class FileUtil {
       await showGenericErrorBottomSheet(
         context: context,
         error: e,
-        surfaceError: false,
       );
     }
   }
@@ -411,7 +409,6 @@ class FileUtil {
       await showGenericErrorBottomSheet(
         context: context,
         error: e,
-        surfaceError: false,
       );
     }
   }

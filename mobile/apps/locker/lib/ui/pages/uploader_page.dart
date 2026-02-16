@@ -204,7 +204,6 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     await showGenericErrorBottomSheet(
       context: context,
       error: error,
-      surfaceError: false,
     );
   }
 
