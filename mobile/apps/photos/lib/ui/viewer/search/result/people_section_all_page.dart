@@ -430,6 +430,18 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             setState(() {
               _suggestionReloadToken++;
             });
+          } else if (event is PeopleChangedEvent &&
+              event.type == PeopleEventType.syncDone) {
+            _peopleReloadDebouncer.run(() async {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _isInitialLoad = false;
+                _isLoaded = false;
+                sectionData = getResults();
+              });
+            });
           } else {
             _peopleReloadDebouncer.run(() async {
               if (!mounted) {
