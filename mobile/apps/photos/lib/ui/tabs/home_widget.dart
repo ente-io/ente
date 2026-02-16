@@ -855,7 +855,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
       final isOfflineEntryFlowEnabled =
-          widget.startWithoutAccount && localSettings.showOfflineModeOption;
+          widget.startWithoutAccount && offlineMode;
       final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
       final canResumePersistedOfflineMode =
           hasPersistedOfflineMode && permissionService.hasGrantedPermissions();

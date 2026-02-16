@@ -81,7 +81,6 @@ class LocalSettings {
   static const _kDefaultClusteringDistanceOverride =
       "ml_debug.default_clustering_distance";
   static const _kAppMode = "ls.app_mode";
-  static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
 
   static const _kOfflineFlags = "ls.offline_flags";
   static const _kOfflineMapEnabled = "ls.offline_map_enabled";
@@ -465,13 +464,6 @@ class LocalSettings {
   Future<void> setAppMode(AppMode mode) async {
     await _prefs.setInt(_kAppMode, mode.index);
     _cachedAppMode = mode;
-  }
-
-  bool get showOfflineModeOption =>
-      _prefs.getBool(_kShowOfflineModeOption) ?? false;
-
-  Future<void> setShowOfflineModeOption(bool value) async {
-    await _prefs.setBool(_kShowOfflineModeOption, value);
   }
 
   bool get isOfflineGetStartedBannerDismissed =>

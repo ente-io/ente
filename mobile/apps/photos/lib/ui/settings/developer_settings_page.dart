@@ -54,15 +54,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               onTap: () async {
                 final url = _urlController.text;
                 _logger.info("Entered endpoint: $url");
-                if (url == "localMode") {
+                if (url == "offline") {
                   await localSettings.setAppMode(AppMode.offline);
-                  await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to offline");
                   Navigator.of(context).pop();
                   return;
                 }
-                if (url == "onlineMode") {
+                if (url == "online") {
                   await localSettings.setAppMode(AppMode.online);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to online");
