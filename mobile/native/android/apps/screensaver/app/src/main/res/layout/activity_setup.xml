@@ -1,35 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="24dp">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingTop="24dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="24dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <ImageView
             android:id="@+id/image_qr"
-            android:layout_width="520dp"
-            android:layout_height="520dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@null" />
-
-        <TextView
-            android:id="@+id/text_setup_hint"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:textColor="@color/ssaver_text_secondary"
-            android:textSize="16sp" />
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:padding="20dp"
+            android:scaleType="fitCenter" />
 
-    </LinearLayout>
+    </FrameLayout>
 
-</ScrollView>
+    <TextView
+        android:id="@+id/text_setup_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:maxLines="3"
+        android:textColor="@color/ssaver_text_secondary"
+        android:textSize="16sp" />
+
+</LinearLayout>
