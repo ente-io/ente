@@ -179,19 +179,28 @@ jobs:
                   keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
                   EOF
 
-            - name: Build signed release APK and AAB
+            - name: Build signed release APK
               if: env.HAS_ANDROID_SIGNING == 'true'
-              run: ./gradlew :app-ui:assembleRelease :app-ui:bundleRelease
+              run: ./gradlew :app-ui:assembleRelease
+
+            - name: Build signed release AAB (PlayStore)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: ./gradlew :app-ui:bundleRelease
 
             - name: Build unsigned debug APK (fallback)
               if: env.HAS_ANDROID_SIGNING != 'true'
               run: ./gradlew :app-ui:assembleDebug
 
-            - name: Collect Android artifacts (signed)
+            - name: Collect Android artifacts (signed APK)
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ github.ref_name }}.apk
+
+            - name: Collect Android artifacts (signed AAB)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: |
+                  mkdir -p artifacts
                   cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
 
             - name: Collect Android artifacts (unsigned fallback)
