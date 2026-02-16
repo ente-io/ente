@@ -63,24 +63,6 @@ export type WorkerState = "init" | "idle" | "tick" | "indexing" | "fetching";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
-const runMLDebugStage = async <T>(
-    stage: string,
-    fileID: number,
-    op: () => Promise<T>,
-): Promise<T> => {
-    const start = Date.now();
-    log.info(`[ml-debug] fileID=${fileID} stage=${stage} start`);
-    try {
-        const result = await op();
-        const ms = Date.now() - start;
-        log.info(`[ml-debug] fileID=${fileID} stage=${stage} done ms=${ms}`);
-        return result;
-    } catch (e) {
-        const ms = Date.now() - start;
-        log.warn(`[ml-debug] fileID=${fileID} stage=${stage} fail ms=${ms}`, e);
-        throw e;
-    }
-};
 
 interface IndexableItem {
     /**
@@ -558,10 +540,10 @@ const index = async (
 
     let renderableBlob: Blob;
     try {
-        renderableBlob = await runMLDebugStage(
-            "fetch-renderable-blob",
-            fileID,
-            () => fetchRenderableBlob(file, processableUploadItem, electron),
+        renderableBlob = await fetchRenderableBlob(
+            file,
+            processableUploadItem,
+            electron,
         );
     } catch (e) {
         // Network errors are transient and shouldn't be marked.
@@ -573,9 +555,7 @@ const index = async (
 
     let image: ImageBitmapAndData;
     try {
-        image = await runMLDebugStage("create-image-bitmap", fileID, () =>
-            createImageBitmapAndData(renderableBlob),
-        );
+        image = await createImageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
         // won't help (if in the future we enhance the underlying code for
@@ -594,19 +574,9 @@ const index = async (
         const startTime = Date.now();
 
         try {
-            const faceIndexTask = existingFaceIndex
-                ? Promise.resolve(existingFaceIndex)
-                : runMLDebugStage("index-faces", fileID, () =>
-                      indexFaces(file, image, electron),
-                  );
-            const clipIndexTask = existingCLIPIndex
-                ? Promise.resolve(existingCLIPIndex)
-                : runMLDebugStage("index-clip", fileID, () =>
-                      indexCLIP(image, electron),
-                  );
             [faceIndex, clipIndex] = await Promise.all([
-                faceIndexTask,
-                clipIndexTask,
+                existingFaceIndex ?? indexFaces(file, image, electron),
+                existingCLIPIndex ?? indexCLIP(image, electron),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -649,9 +619,7 @@ const index = async (
 
         try {
             const lastUpdatedAt = remoteMLData?.updatedAt ?? 0;
-            await runMLDebugStage("upload-ml-data", fileID, () =>
-                putMLData(file, rawMLData, lastUpdatedAt),
-            );
+            await putMLData(file, rawMLData, lastUpdatedAt);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             if (isHTTP4xxError(e)) {
@@ -665,18 +633,14 @@ const index = async (
             throw e;
         }
 
-        await runMLDebugStage("save-indexes", fileID, () =>
-            saveIndexes({ fileID, ...faceIndex }, { fileID, ...clipIndex }),
-        );
+        await saveIndexes({ fileID, ...faceIndex }, { fileID, ...clipIndex });
 
         // This step, saving face crops, is conceptually not part of the
         // indexing pipeline; we just do it here since we have already have the
         // ImageBitmap at hand.
         if (!existingFaceIndex) {
             try {
-                await runMLDebugStage("save-face-crops", fileID, () =>
-                    saveFaceCrops(image.bitmap, faceIndex),
-                );
+                await saveFaceCrops(image.bitmap, faceIndex);
             } catch (e) {
                 // Ignore errors that happen during this since it does not
                 // impact the generated face index.
