@@ -226,7 +226,8 @@ struct MessageListView: View {
 
                 let shouldShowStreaming = isGenerating
                 let streamingDisplayText = streamingResponse
-                let outroAssistantId = (!isGenerating && showStreamingBubble) ? resolvedStreamingAssistantReplyId() : nil
+                let isOutroActive = !isGenerating && (showStreamingBubble || streamingWasGenerating)
+                let outroAssistantId = isOutroActive ? resolvedStreamingAssistantReplyId() : nil
 
                 ForEach(messages) { message in
                     if message.role == .user {
@@ -267,7 +268,7 @@ struct MessageListView: View {
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
-            .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
+            .animation(nil, value: messages.count)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -288,7 +289,7 @@ struct MessageListView: View {
     }
 
     private var messageTransition: AnyTransition {
-        .move(edge: .bottom).combined(with: .opacity)
+        .identity
     }
 
     private var streamingTransition: AnyTransition {
