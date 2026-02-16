@@ -1,9 +1,11 @@
 import "dart:io";
 import "dart:typed_data";
 
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/progress_dialog.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
+import "package:ente_utils/email_util.dart";
 import "package:file_saver/file_saver.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
@@ -13,6 +15,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/files/download/file_downloader.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -77,18 +80,27 @@ class FileUtil {
       if (decryptedFile != null) {
         await _launchFile(context, decryptedFile, file.displayName);
       } else {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.l10n.downloadFailed,
-          context.l10n.failedToDownloadOrDecrypt,
+          title: context.l10n.downloadFailed,
+          message: context.l10n.failedToDownloadOrDecrypt,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(context, "support@ente.io", postShare: () {});
+              },
+            ),
+          ],
         );
       }
     } catch (e) {
       await dialog.hide();
-      await showErrorDialog(
-        context,
-        context.l10n.errorOpeningFile,
-        context.l10n.errorOpeningFileMessage(e.toString()),
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: e,
+        surfaceError: false,
       );
     }
   }
@@ -331,10 +343,19 @@ class FileUtil {
     try {
       final infoItem = InfoFileService.instance.extractInfoFromFile(file);
       if (infoItem == null) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.l10n.errorOpeningFile,
-          'Unable to extract information from this file',
+          title: context.l10n.errorOpeningFile,
+          message: "Unable to extract information from this file",
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(context, "support@ente.io", postShare: () {});
+              },
+            ),
+          ],
         );
         return;
       }
@@ -371,10 +392,10 @@ class FileUtil {
         MaterialPageRoute(builder: (context) => page),
       );
     } catch (e) {
-      await showErrorDialog(
-        context,
-        context.l10n.errorOpeningFile,
-        'Failed to open info file: ${e.toString()}',
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: e,
+        surfaceError: false,
       );
     }
   }
@@ -387,10 +408,10 @@ class FileUtil {
     try {
       await OpenFile.open(file.path);
     } catch (e) {
-      await showErrorDialog(
-        context,
-        context.l10n.errorOpeningFile,
-        context.l10n.couldNotOpenFile(e.toString()),
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: e,
+        surfaceError: false,
       );
     }
   }

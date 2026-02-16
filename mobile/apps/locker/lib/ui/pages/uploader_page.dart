@@ -59,6 +59,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
 
   Future<bool> uploadFiles(List<File> files) async {
     var didUpload = false;
+    var hasUploadError = false;
     final progressDialog = createProgressDialog(
       context,
       context.l10n.uploadedFilesProgress(0, files.length),
@@ -103,14 +104,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         for (final file in files) {
           final fileUploadFuture = FileUploader.instance
               .upload(file, uploadResult.selectedCollections.first);
-          futures.add(fileUploadFuture);
           futures.add(
             fileUploadFuture.then((enteFile) async {
               completedUploads++;
-              progressDialog.update(
-                message: context.l10n
-                    .uploadedFilesProgress(completedUploads, files.length),
-              );
+              if (!hasUploadError && progressDialog.isShowing()) {
+                progressDialog.update(
+                  message: context.l10n
+                      .uploadedFilesProgress(completedUploads, files.length),
+                );
+              }
               // Add to additional collections if multiple were selected
               for (int cIndex = 1;
                   cIndex < uploadResult.selectedCollections.length;
@@ -132,16 +134,19 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
                       .editFileCaption(enteFile, uploadResult.note),
                 );
               }
-            }).catchError((e) {
+            }).catchError((e) async {
               completedUploads++;
               _logger.severe('File upload failed', e);
-              progressDialog.update(
-                message: context.l10n.uploadedFilesProgressWithError(
-                  completedUploads,
-                  files.length,
-                  e.toString(),
-                ),
-              );
+              if (hasUploadError) {
+                return;
+              }
+              hasUploadError = true;
+              if (progressDialog.isShowing()) {
+                await progressDialog.hide();
+              }
+              if (mounted) {
+                await _showUploadFailureError(e);
+              }
             }),
           );
         }
@@ -162,26 +167,8 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       if (progressDialog.isShowing()) {
         await progressDialog.hide();
       }
-      if (e is StorageLimitExceededError) {
-        await _showUploadErrorSheet(
-          context.l10n.uploadStorageLimitErrorTitle,
-          context.l10n.uploadStorageLimitErrorBody,
-        );
-      } else if (e is FileLimitReachedError) {
-        await _showUploadErrorSheet(
-          context.l10n.uploadFileCountLimitErrorTitle,
-          context.l10n.uploadFileCountLimitErrorBody,
-        );
-      } else if (e is FileTooLargeForPlanError) {
-        await _showUploadErrorSheet(
-          context.l10n.uploadFileTooLargeErrorTitle,
-          context.l10n.uploadFileTooLargeErrorBody,
-        );
-      } else {
-        await showGenericErrorDialog(
-          context: context,
-          error: e,
-        );
+      if (mounted) {
+        await _showUploadFailureError(e);
       }
     } finally {
       if (progressDialog.isShowing()) {
@@ -190,6 +177,35 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     }
 
     return didUpload;
+  }
+
+  Future<void> _showUploadFailureError(Object error) async {
+    if (error is StorageLimitExceededError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadStorageLimitErrorTitle,
+        context.l10n.uploadStorageLimitErrorBody,
+      );
+      return;
+    }
+    if (error is FileLimitReachedError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadFileCountLimitErrorTitle,
+        context.l10n.uploadFileCountLimitErrorBody,
+      );
+      return;
+    }
+    if (error is FileTooLargeForPlanError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadFileTooLargeErrorTitle,
+        context.l10n.uploadFileTooLargeErrorBody,
+      );
+      return;
+    }
+    await showGenericErrorBottomSheet(
+      context: context,
+      error: error,
+      surfaceError: false,
+    );
   }
 
   Future<void> _showUploadErrorSheet(String title, String message) async {
