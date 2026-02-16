@@ -5,4 +5,5 @@ data class EntePublicAlbumConfig(
     val accessToken: String,
     val collectionKeyB64: String,
     val accessTokenJWT: String? = null,
+    val albumName: String? = null,
 )

@@ -25,6 +25,7 @@ class EntePublicAlbumApi(
     )
 
     data class CollectionInfo(
+        val albumName: String?,
         val passwordEnabled: Boolean,
         val nonce: String?,
         val opsLimit: Long?,
@@ -65,6 +66,8 @@ class EntePublicAlbumApi(
         )
 
         val collection = json.getJSONObject("collection")
+        val albumName = collection.optString("name")?.trim()?.takeIf { it.isNotBlank() }
+
         val publicUrls = collection.optJSONArray("publicURLs") ?: JSONArray()
         val firstUrl = if (publicUrls.length() > 0) publicUrls.optJSONObject(0) else null
 
@@ -75,6 +78,7 @@ class EntePublicAlbumApi(
         val memLimit = firstUrl?.optLong("memLimit").takeIf { it != null && it > 0 }
 
         return CollectionInfo(
+            albumName = albumName,
             passwordEnabled = passwordEnabled,
             nonce = nonce,
             opsLimit = opsLimit,

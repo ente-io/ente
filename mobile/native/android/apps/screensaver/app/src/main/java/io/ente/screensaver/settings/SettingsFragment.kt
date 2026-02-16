@@ -81,8 +81,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val context = context ?: return
         scope.launch {
             val config = EntePublicAlbumRepository.get(context).getConfig()
-            changeAlbumPreference?.summary = config?.publicUrl?.let(::albumLabelFromUrl)
-                ?: getString(R.string.pref_change_album_summary)
+            val summary = if (config == null) {
+                getString(R.string.pref_change_album_summary)
+            } else {
+                config.albumName?.takeIf { it.isNotBlank() }
+                    ?: albumLabelFromUrl(config.publicUrl)
+            }
+            changeAlbumPreference?.summary = summary
         }
     }
 

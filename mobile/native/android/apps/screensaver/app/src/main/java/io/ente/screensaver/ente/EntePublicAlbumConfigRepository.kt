@@ -15,6 +15,7 @@ class EntePublicAlbumConfigRepository(
         val accessToken = stringPreferencesKey("pref_ente_access_token")
         val collectionKeyB64 = stringPreferencesKey("pref_ente_collection_key_b64")
         val accessTokenJWT = stringPreferencesKey("pref_ente_access_token_jwt")
+        val albumName = stringPreferencesKey("pref_ente_album_name")
     }
 
     suspend fun get(): EntePublicAlbumConfig? {
@@ -23,6 +24,7 @@ class EntePublicAlbumConfigRepository(
         val accessToken = prefs[Keys.accessToken].orEmpty()
         val collectionKeyB64 = prefs[Keys.collectionKeyB64].orEmpty()
         val accessTokenJWT = prefs[Keys.accessTokenJWT]
+        val albumName = prefs[Keys.albumName]
 
         if (publicUrl.isBlank() || accessToken.isBlank() || collectionKeyB64.isBlank()) {
             return null
@@ -33,6 +35,7 @@ class EntePublicAlbumConfigRepository(
             accessToken = accessToken,
             collectionKeyB64 = collectionKeyB64,
             accessTokenJWT = accessTokenJWT,
+            albumName = albumName,
         )
     }
 
@@ -57,6 +60,13 @@ class EntePublicAlbumConfigRepository(
             } else {
                 prefs[Keys.accessTokenJWT] = jwt
             }
+
+            val albumName = config.albumName
+            if (albumName.isNullOrBlank()) {
+                prefs.remove(Keys.albumName)
+            } else {
+                prefs[Keys.albumName] = albumName
+            }
         }
     }
 
@@ -66,6 +76,7 @@ class EntePublicAlbumConfigRepository(
             prefs.remove(Keys.accessToken)
             prefs.remove(Keys.collectionKeyB64)
             prefs.remove(Keys.accessTokenJWT)
+            prefs.remove(Keys.albumName)
         }
     }
 }

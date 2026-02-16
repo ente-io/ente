@@ -31,6 +31,7 @@ class EntePublicAlbumRepository private constructor(
     private val mutex = Mutex()
 
     private val configRepo = EntePublicAlbumConfigRepository(appContext)
+    private val secureStore = EnteSecureStore(appContext)
     private val storage = EntePublicAlbumCacheStorage(appContext)
     private val api = EntePublicAlbumApi(appContext)
 
@@ -72,55 +73,84 @@ class EntePublicAlbumRepository private constructor(
         }
 
         val trimmedPassword = password?.trim().orEmpty()
+        val secureStoredPassword = secureStore.getAlbumPassword(baseConfig.accessToken).orEmpty()
+
+        suspend fun verifyPasswordAndGetJwt(rawPassword: String): String {
+            val nonce = collectionInfo.nonce
+            val opsLimit = collectionInfo.opsLimit
+            val memLimit = collectionInfo.memLimit
+
+            if (nonce.isNullOrBlank() || opsLimit == null || memLimit == null) {
+                AppLog.error("Ente", "Missing password parameters for album")
+                throw IllegalStateException("MISSING_PASSWORD_PARAMETERS")
+            }
+
+            val passHash = try {
+                EnteCrypto.deriveKey(rawPassword, nonce, opsLimit, memLimit)
+            } catch (e: Exception) {
+                AppLog.error("Ente", "Failed to derive password hash", e)
+                throw IllegalStateException("PASSWORD_HASH_DERIVATION_FAILED:${e.message}")
+            }
+
+            AppLog.info("Ente", "Verifying album password")
+            return try {
+                api.verifyPassword(
+                    EntePublicAlbumApi.Credentials(baseConfig.accessToken),
+                    passHash,
+                )
+            } catch (e: Exception) {
+                val message = e.message.orEmpty()
+                val isIncorrectPassword = message.contains("HTTP 401")
+                val code = if (isIncorrectPassword) {
+                    EntePublicAlbumUrlParser.ParseResult.Error.Code.INCORRECT_PASSWORD
+                } else {
+                    EntePublicAlbumUrlParser.ParseResult.Error.Code.PASSWORD_VERIFICATION_FAILED
+                }
+                val detail = if (isIncorrectPassword) null else message
+                AppLog.error("Ente", "Password verification failed: ${code.name}${detail?.let { ": $it" }.orEmpty()}", e)
+                throw IllegalStateException("${code.name}:${detail.orEmpty()}")
+            }
+        }
+
         val accessTokenJWT = if (collectionInfo.passwordEnabled) {
             when {
-                trimmedPassword.isNotBlank() -> {
-                    val nonce = collectionInfo.nonce
-                    val opsLimit = collectionInfo.opsLimit
-                    val memLimit = collectionInfo.memLimit
-
-                    if (nonce.isNullOrBlank() || opsLimit == null || memLimit == null) {
-                        AppLog.error("Ente", "Missing password parameters for album")
-                        return EntePublicAlbumUrlParser.ParseResult.Error(
+                trimmedPassword.isNotBlank() -> runCatching {
+                    verifyPasswordAndGetJwt(trimmedPassword)
+                }.getOrElse { error ->
+                    val token = error.message.orEmpty()
+                    return when {
+                        token.startsWith("MISSING_PASSWORD_PARAMETERS") -> EntePublicAlbumUrlParser.ParseResult.Error(
                             code = EntePublicAlbumUrlParser.ParseResult.Error.Code.MISSING_PASSWORD_PARAMETERS,
                         )
-                    }
 
-                    val passHash = try {
-                        EnteCrypto.deriveKey(trimmedPassword, nonce, opsLimit, memLimit)
-                    } catch (e: Exception) {
-                        AppLog.error("Ente", "Failed to derive password hash", e)
-                        return EntePublicAlbumUrlParser.ParseResult.Error(
+                        token.startsWith("PASSWORD_HASH_DERIVATION_FAILED:") -> EntePublicAlbumUrlParser.ParseResult.Error(
                             code = EntePublicAlbumUrlParser.ParseResult.Error.Code.PASSWORD_HASH_DERIVATION_FAILED,
-                            detail = e.message,
+                            detail = token.removePrefix("PASSWORD_HASH_DERIVATION_FAILED:"),
                         )
-                    }
 
-                    AppLog.info("Ente", "Verifying album password")
-                    val jwt = try {
-                        api.verifyPassword(
-                            EntePublicAlbumApi.Credentials(baseConfig.accessToken),
-                            passHash,
+                        token.startsWith("INCORRECT_PASSWORD") -> EntePublicAlbumUrlParser.ParseResult.Error(
+                            code = EntePublicAlbumUrlParser.ParseResult.Error.Code.INCORRECT_PASSWORD,
                         )
-                    } catch (e: Exception) {
-                        val message = e.message.orEmpty()
-                        val isIncorrectPassword = message.contains("HTTP 401")
-                        val code = if (isIncorrectPassword) {
-                            EntePublicAlbumUrlParser.ParseResult.Error.Code.INCORRECT_PASSWORD
-                        } else {
-                            EntePublicAlbumUrlParser.ParseResult.Error.Code.PASSWORD_VERIFICATION_FAILED
-                        }
-                        val detail = if (isIncorrectPassword) null else message
-                        AppLog.error("Ente", "Password verification failed: ${code.name}${detail?.let { ": $it" }.orEmpty()}", e)
-                        return EntePublicAlbumUrlParser.ParseResult.Error(code = code, detail = detail)
+
+                        else -> EntePublicAlbumUrlParser.ParseResult.Error(
+                            code = EntePublicAlbumUrlParser.ParseResult.Error.Code.PASSWORD_VERIFICATION_FAILED,
+                            detail = token.substringAfter(':', ""),
+                        )
                     }
-                    AppLog.info("Ente", "Password verified")
-                    jwt
                 }
 
                 !existingJwt.isNullOrBlank() -> {
                     AppLog.info("Ente", "Using saved password token")
                     existingJwt
+                }
+
+                secureStoredPassword.isNotBlank() -> runCatching {
+                    verifyPasswordAndGetJwt(secureStoredPassword)
+                }.getOrNull() ?: run {
+                    AppLog.error("Ente", "Stored secure password is no longer valid")
+                    return EntePublicAlbumUrlParser.ParseResult.Error(
+                        code = EntePublicAlbumUrlParser.ParseResult.Error.Code.PASSWORD_REQUIRED,
+                    )
                 }
 
                 else -> {
@@ -134,7 +164,10 @@ class EntePublicAlbumRepository private constructor(
             null
         }
 
-        val updatedConfig = baseConfig.copy(accessTokenJWT = accessTokenJWT)
+        val updatedConfig = baseConfig.copy(
+            accessTokenJWT = accessTokenJWT,
+            albumName = collectionInfo.albumName,
+        )
 
         if (existing != null && (existing.accessToken != updatedConfig.accessToken ||
                 existing.collectionKeyB64 != updatedConfig.collectionKeyB64)
@@ -143,6 +176,16 @@ class EntePublicAlbumRepository private constructor(
                 cachedState = null
                 withContext(Dispatchers.IO) { storage.clear() }
             }
+            secureStore.clearAlbumPassword(existing.accessToken)
+        }
+
+        if (collectionInfo.passwordEnabled) {
+            secureStore.saveAlbumPassword(
+                accessToken = baseConfig.accessToken,
+                password = trimmedPassword.ifBlank { secureStoredPassword },
+            )
+        } else {
+            secureStore.clearAlbumPassword(baseConfig.accessToken)
         }
 
         configRepo.save(updatedConfig)
@@ -151,10 +194,12 @@ class EntePublicAlbumRepository private constructor(
     }
 
     suspend fun clearConfig() {
+        val config = configRepo.get()
         mutex.withLock {
             cachedState = null
             withContext(Dispatchers.IO) { storage.clear() }
         }
+        config?.accessToken?.let { secureStore.clearAlbumPassword(it) }
         configRepo.clear()
         AppLog.info("Ente", "Album configuration cleared")
     }

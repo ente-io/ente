@@ -104,6 +104,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("net.java.dev.jna:jna:5.12.1@aar")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // Setup via phone (QR + local HTTP form).
     implementation("org.nanohttpd:nanohttpd:2.3.1")
