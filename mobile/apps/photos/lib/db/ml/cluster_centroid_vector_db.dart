@@ -242,6 +242,57 @@ class ClusterCentroidVectorDB {
     }
   }
 
+  Future<Map<int, List<(int, double)>>>
+      bulkSearchApproxClosestCentroidsForKeysWithinDistance(
+    Set<int> queryClusterVectorIDs, {
+    required int count,
+    double? maxDistance,
+  }) async {
+    if (!await checkIfMigrationDone()) {
+      throw StateError(
+        "Cluster centroid vector DB migration is not done, cannot run approximate search",
+      );
+    }
+    if (count <= 0 || queryClusterVectorIDs.isEmpty) {
+      return const {};
+    }
+    final db = await _vectorDB;
+    try {
+      final queryKeys = queryClusterVectorIDs.toList(growable: false);
+      final result = await db.bulkSearchKeys(
+        potentialKeys: Uint64List.fromList(queryKeys),
+        count: BigInt.from(count),
+        exact: false,
+      );
+      final containedKeys = result.$1;
+      final matchedKeys = result.$2;
+      final matchedDistances = result.$3;
+
+      final output = <int, List<(int, double)>>{};
+      for (var i = 0; i < containedKeys.length; i++) {
+        final queryKey = containedKeys[i].toInt();
+        final keysForQuery = matchedKeys[i];
+        final distancesForQuery = matchedDistances[i];
+        final alignedLength = keysForQuery.length < distancesForQuery.length
+            ? keysForQuery.length
+            : distancesForQuery.length;
+        final matches = <(int, double)>[];
+        for (var j = 0; j < alignedLength; j++) {
+          final distance = distancesForQuery[j];
+          if (maxDistance != null && distance > maxDistance) {
+            break;
+          }
+          matches.add((keysForQuery[j].toInt(), distance));
+        }
+        output[queryKey] = matches;
+      }
+      return output;
+    } catch (e, s) {
+      _logger.severe("Error bulk searching centroids", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> warmupApproxSearch() async {
     _warmupFuture ??= _warmupApproxSearchInternal();
     await _warmupFuture;

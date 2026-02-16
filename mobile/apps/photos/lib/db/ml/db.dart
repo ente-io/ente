@@ -43,6 +43,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 /// [faceCacheTable] - Stores a all the mappings from personID or clusterID to the faceID that has been used as cover face.
 class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   static final Logger _logger = Logger("MLDataDB");
+  static const int _maxSqlBindParamsPerQuery = 10000;
 
   static Logger get logger => _logger;
 
@@ -114,6 +115,13 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     stopwatch.stop();
 
     return asyncDBConnection;
+  }
+
+  Iterable<List<T>> _chunkList<T>(List<T> values, int chunkSize) sync* {
+    for (int i = 0; i < values.length; i += chunkSize) {
+      final end = min(i + chunkSize, values.length);
+      yield values.sublist(i, end);
+    }
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
@@ -310,29 +318,46 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     Iterable<String> clusterIDs, {
     int? limit,
   }) async {
+    if (clusterIDs.isEmpty) {
+      return {};
+    }
     final db = await asyncDB;
     final Map<String, List<Uint8List>> result = {};
+    final clusterIDList = clusterIDs.toSet().toList(growable: false);
+    final maxClusterIDsPerQuery = limit != null
+        ? _maxSqlBindParamsPerQuery - 1
+        : _maxSqlBindParamsPerQuery;
+    int? remainingLimit = limit;
 
-    final selectQuery = '''
+    for (final clusterChunk
+        in _chunkList(clusterIDList, maxClusterIDsPerQuery)) {
+      if (remainingLimit != null && remainingLimit <= 0) {
+        break;
+      }
+      final selectQuery = '''
   SELECT fc.$clusterIDColumn, fe.$embeddingColumn
   FROM $faceClustersTable fc
   INNER JOIN $facesTable fe ON fc.$faceIDColumn = fe.$faceIDColumn
-  WHERE fc.$clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
-  ${limit != null ? 'LIMIT ?' : ''}
+  WHERE fc.$clusterIDColumn IN (${SqlDbBase.getParams(clusterChunk.length)})
+  ${remainingLimit != null ? 'LIMIT ?' : ''}
 ''';
 
-    final List<dynamic> selectQueryParams = [...clusterIDs];
-    if (limit != null) {
-      selectQueryParams.add(limit);
-    }
+      final List<dynamic> selectQueryParams = [...clusterChunk];
+      if (remainingLimit != null) {
+        selectQueryParams.add(remainingLimit);
+      }
 
-    final List<Map<String, dynamic>> maps =
-        await db.getAll(selectQuery, selectQueryParams);
+      final List<Map<String, dynamic>> maps =
+          await db.getAll(selectQuery, selectQueryParams);
+      if (remainingLimit != null) {
+        remainingLimit -= maps.length;
+      }
 
-    for (final map in maps) {
-      final clusterID = map[clusterIDColumn] as String;
-      final faceEmbedding = map[embeddingColumn] as Uint8List;
-      result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
+      for (final map in maps) {
+        final clusterID = map[clusterIDColumn] as String;
+        final faceEmbedding = map[embeddingColumn] as Uint8List;
+        result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
+      }
     }
 
     return result;
@@ -466,22 +491,29 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
     Set<String> clusterIDs,
   ) async {
+    if (clusterIDs.isEmpty) {
+      return {};
+    }
     final db = await asyncDB;
     final Map<String, List<String>> result = {};
+    final clusterIDList = clusterIDs.toList(growable: false);
 
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      '''
+    for (final clusterChunk
+        in _chunkList(clusterIDList, _maxSqlBindParamsPerQuery)) {
+      final List<Map<String, dynamic>> maps = await db.getAll(
+        '''
   SELECT $clusterIDColumn, $faceIDColumn
   FROM $faceClustersTable
-  WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
+  WHERE $clusterIDColumn IN (${SqlDbBase.getParams(clusterChunk.length)})
   ''',
-      [...clusterIDs],
-    );
+        clusterChunk,
+      );
 
-    for (final map in maps) {
-      final clusterID = map[clusterIDColumn] as String;
-      final faceID = map[faceIDColumn] as String;
-      result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
+      for (final map in maps) {
+        final clusterID = map[clusterIDColumn] as String;
+        final faceID = map[faceIDColumn] as String;
+        result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
+      }
     }
     return result;
   }
