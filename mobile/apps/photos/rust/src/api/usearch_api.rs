@@ -178,6 +178,60 @@ impl VectorDB {
         Self::truncate_sorted_matches_within_distance(matches.keys, matches.distances, max_distance)
     }
 
+    pub fn bulk_approx_filtered_search_vectors_within_distance(
+        &self,
+        queries: &Vec<Vec<f32>>,
+        allowed_keys: &[u64],
+        count: usize,
+        max_distance: f32,
+    ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
+        let query_count = queries.len();
+        if query_count == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let empty_aligned_results = || {
+            (
+                vec![Vec::<u64>::new(); query_count],
+                vec![Vec::<f32>::new(); query_count],
+            )
+        };
+
+        let index_size = self.index.size();
+        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
+            return empty_aligned_results();
+        }
+        if !max_distance.is_finite() || max_distance < 0.0 {
+            return empty_aligned_results();
+        }
+
+        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
+        let search_count = count.min(allowed.len()).min(index_size);
+        if search_count == 0 {
+            return empty_aligned_results();
+        }
+
+        let mut all_keys = Vec::with_capacity(query_count);
+        let mut all_distances = Vec::with_capacity(query_count);
+
+        for query in queries {
+            let matches = self
+                .index
+                .filtered_search(query, search_count, |key| allowed.contains(&key))
+                .expect("Failed to run filtered vector search");
+
+            let (keys, distances) = Self::truncate_sorted_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+            all_keys.push(keys);
+            all_distances.push(distances);
+        }
+
+        (all_keys, all_distances)
+    }
+
     fn fast_search_vectors_within_distance(
         &self,
         query: &[f32],

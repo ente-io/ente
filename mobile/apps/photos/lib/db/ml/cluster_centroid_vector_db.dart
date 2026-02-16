@@ -242,6 +242,65 @@ class ClusterCentroidVectorDB {
     }
   }
 
+  Future<List<List<(int, double)>>>
+      bulkSearchApproxClosestCentroidsWithinDistance(
+    List<List<double>> queries,
+    Set<int> allowedClusterVectorIDs, {
+    required double maxDistance,
+    int count = 10,
+  }) async {
+    if (!await checkIfMigrationDone()) {
+      throw StateError(
+        "Cluster centroid vector DB migration is not done, cannot run approximate search",
+      );
+    }
+    if (count <= 0 || queries.isEmpty || allowedClusterVectorIDs.isEmpty) {
+      return const <List<(int, double)>>[];
+    }
+    final db = await _vectorDB;
+    try {
+      final rustQueries = <Float32List>[];
+      for (final query in queries) {
+        if (query is Float32List) {
+          rustQueries.add(query);
+        } else {
+          rustQueries.add(Float32List.fromList(query));
+        }
+      }
+      final allowedKeys = Uint64List.fromList(
+        allowedClusterVectorIDs.toList(growable: false),
+      );
+      final result = await db.bulkApproxFilteredSearchVectorsWithinDistance(
+        queries: rustQueries,
+        allowedKeys: allowedKeys,
+        count: BigInt.from(count),
+        maxDistance: maxDistance,
+      );
+
+      final keysPerQuery = result.$1;
+      final distancesPerQuery = result.$2;
+      final alignedQueryLength = keysPerQuery.length < distancesPerQuery.length
+          ? keysPerQuery.length
+          : distancesPerQuery.length;
+      final output = <List<(int, double)>>[];
+      for (var i = 0; i < alignedQueryLength; i++) {
+        final keys = keysPerQuery[i];
+        final distances = distancesPerQuery[i];
+        final alignedLength =
+            keys.length < distances.length ? keys.length : distances.length;
+        final matches = <(int, double)>[];
+        for (var j = 0; j < alignedLength; j++) {
+          matches.add((keys[j].toInt(), distances[j]));
+        }
+        output.add(matches);
+      }
+      return output;
+    } catch (e, s) {
+      _logger.severe("Error bulk searching filtered centroids", e, s);
+      rethrow;
+    }
+  }
+
   Future<Map<int, List<(int, double)>>>
       bulkSearchApproxClosestCentroidsForKeysWithinDistance(
     Set<int> queryClusterVectorIDs, {

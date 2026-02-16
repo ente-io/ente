@@ -644,29 +644,45 @@ class ClusterFeedbackService<T> {
             continue;
           }
 
+          final queryClusterIDs = <String>[];
+          final queryVectors = <List<double>>[];
           for (final queryClusterID in entry.value) {
             final queryVector = clusterAvg[queryClusterID];
             if (queryVector == null) {
               continue;
             }
+            queryClusterIDs.add(queryClusterID);
+            queryVectors.add(queryVector.toList(growable: false));
+          }
+          if (queryClusterIDs.isEmpty) {
+            continue;
+          }
 
-            List<(int, double)> filteredMatches;
-            try {
-              filteredMatches = await _clusterCentroidVectorDB
-                  .searchApproxClosestCentroidsWithinDistance(
-                queryVector.toList(),
-                allowedVectorIDs,
-                maxDistance: 0.65,
-                count: _allPeopleSuggestionVectorResultCount,
-              );
-            } catch (e, s) {
-              _logger.warning(
-                "Filtered centroid fallback search failed for query cluster $queryClusterID",
-                e,
-                s,
-              );
-              continue;
-            }
+          List<List<(int, double)>> filteredMatchesByQuery;
+          try {
+            filteredMatchesByQuery = await _clusterCentroidVectorDB
+                .bulkSearchApproxClosestCentroidsWithinDistance(
+              queryVectors,
+              allowedVectorIDs,
+              maxDistance: 0.65,
+              count: _allPeopleSuggestionVectorResultCount,
+            );
+          } catch (e, s) {
+            _logger.warning(
+              "Filtered centroid fallback search failed for person $personID",
+              e,
+              s,
+            );
+            continue;
+          }
+
+          final alignedLength = min(
+            queryClusterIDs.length,
+            filteredMatchesByQuery.length,
+          );
+          for (var i = 0; i < alignedLength; i++) {
+            final queryClusterID = queryClusterIDs[i];
+            final filteredMatches = filteredMatchesByQuery[i];
             if (filteredMatches.isEmpty) {
               continue;
             }
@@ -1949,19 +1965,36 @@ class ClusterFeedbackService<T> {
       for (final entry in clusterIDToVectorID.entries) entry.value: entry.key,
     };
 
-    final bestSuggestionPerCluster = <String, (double, String)>{};
+    final orderedPersonClusterIDs = <String>[];
+    final queryVectors = <List<double>>[];
     for (final personClusterID in validPersonClusters) {
       final queryVector = clusterAvg[personClusterID];
       if (queryVector == null) {
         continue;
       }
-      final matches = await _clusterCentroidVectorDB
-          .searchApproxClosestCentroidsWithinDistance(
-        queryVector.toList(),
-        baseAllowedVectorIDs,
-        maxDistance: maxClusterDistance,
-        count: perClusterResultCount,
-      );
+      orderedPersonClusterIDs.add(personClusterID);
+      queryVectors.add(queryVector.toList(growable: false));
+    }
+    if (orderedPersonClusterIDs.isEmpty) {
+      return [];
+    }
+
+    final matchesPerQuery = await _clusterCentroidVectorDB
+        .bulkSearchApproxClosestCentroidsWithinDistance(
+      queryVectors,
+      baseAllowedVectorIDs,
+      maxDistance: maxClusterDistance,
+      count: perClusterResultCount,
+    );
+
+    final bestSuggestionPerCluster = <String, (double, String)>{};
+    final alignedQueryLength = min(
+      orderedPersonClusterIDs.length,
+      matchesPerQuery.length,
+    );
+    for (var i = 0; i < alignedQueryLength; i++) {
+      final personClusterID = orderedPersonClusterIDs[i];
+      final matches = matchesPerQuery[i];
 
       for (final match in matches) {
         final suggestedClusterID = vectorIDToClusterID[match.$1];
