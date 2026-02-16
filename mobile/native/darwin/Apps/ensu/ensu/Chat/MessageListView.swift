@@ -69,14 +69,8 @@ struct MessageListView: View {
                     .onPreferenceChange(ContentHeightKey.self) { newHeight in
                         let delta = newHeight - lastContentHeight
                         lastContentHeight = newHeight
-                        let lastMessageIsUser = messages.last?.role == .user
-                        if delta > 1,
-                           autoScrollEnabled,
-                           !isUserDragging,
-                           !isGenerating,
-                           !suppressAutoScrollAfterGeneration,
-                           lastMessageIsUser {
-                            scrollToBottom(scrollProxy, force: true, animated: true)
+                        if delta > 1, autoScrollEnabled, !isUserDragging {
+                            scrollToBottom(scrollProxy, force: true, animated: false)
                         }
                     }
                     .onChange(of: currentScrollChange) { newValue in
@@ -155,14 +149,12 @@ struct MessageListView: View {
     private func handleScrollChange(_ newValue: ScrollChange, scrollProxy: ScrollViewProxy) {
         let previous = lastScrollChange
         lastScrollChange = newValue
-        let didGenerationJustFinish = previous.isGenerating && !newValue.isGenerating
 
         if newValue.messagesCount != previous.messagesCount {
             if !didInitialScroll {
                 scheduleInitialScroll(scrollProxy)
-            } else if messages.last?.role == .user {
-                autoScrollEnabled = true
-                scrollToBottom(scrollProxy, force: true, animated: true)
+            } else {
+                scrollToBottom(scrollProxy, animated: newValue.isGenerating)
             }
         }
 
@@ -172,11 +164,15 @@ struct MessageListView: View {
             scheduleInitialScroll(scrollProxy)
         }
 
+        if newValue.streamingLength != previous.streamingLength {
+            scrollToBottom(scrollProxy, animated: false)
+        }
+
         if newValue.keyboardHeight != previous.keyboardHeight {
             if newValue.keyboardHeight > 0 {
                 wasAtBottomBeforeKeyboard = isAtBottom
             }
-            if wasAtBottomBeforeKeyboard && !didGenerationJustFinish && !suppressAutoScrollAfterGeneration {
+            if wasAtBottomBeforeKeyboard {
                 autoScrollEnabled = true
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
@@ -186,11 +182,14 @@ struct MessageListView: View {
         }
 
         if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled &&
-                !isUserDragging &&
-                !isGenerating &&
-                !didGenerationJustFinish &&
-                !suppressAutoScrollAfterGeneration {
+            if autoScrollEnabled && !isUserDragging {
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+        }
+
+        if newValue.isGenerating != previous.isGenerating {
+            if newValue.isGenerating {
+                autoScrollEnabled = true
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
@@ -198,6 +197,7 @@ struct MessageListView: View {
         if newValue.isAtBottom != previous.isAtBottom {
             if newValue.isAtBottom && !isUserDragging {
                 autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
     }
@@ -337,8 +337,15 @@ struct MessageListView: View {
         }
     }
 
-    private func scrollToBottom(_ : ScrollViewProxy, force _: Bool = false, animated _: Bool = true) {
-        // Intentionally no-op: auto-scroll is disabled for Swift chat.
+    private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false, animated: Bool = true) {
+        guard force || (autoScrollEnabled && isAtBottom) else { return }
+        if animated {
+            withAnimation(.easeOut(duration: 0.2)) {
+                proxy.scrollTo("bottom", anchor: .bottom)
+            }
+        } else {
+            proxy.scrollTo("bottom", anchor: .bottom)
+        }
     }
 
     private func openAttachment(_ attachment: ChatAttachment) {

@@ -126,8 +126,10 @@ internal fun MessageList(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = if (messages.isNotEmpty()) messages.size else 0
     )
+    val haptic = rememberEnsuHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
     var isAutoScrolling by remember { mutableStateOf(false) }
+    var lastHapticLength by remember { mutableStateOf(0) }
     var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
@@ -142,6 +144,11 @@ internal fun MessageList(
 
     val lastMessage = messages.lastOrNull()
     LaunchedEffect(isGenerating, lastMessage?.id) {
+        if (isGenerating) {
+            autoScrollEnabled = true
+            lastHapticLength = 0
+        }
+
         if (lastMessage == null) {
             lastUserMessageId = null
         } else if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
@@ -167,15 +174,32 @@ internal fun MessageList(
         }
     }
 
+    LaunchedEffect(isAtBottom, isGenerating) {
+        if (isGenerating && isAtBottom) {
+            autoScrollEnabled = true
+        }
+    }
 
-    LaunchedEffect(messages.size, streamingParentId, isGenerating, autoScrollEnabled) {
-        val shouldScrollForNewUserMessage = messages.lastOrNull()?.author == MessageAuthor.User
-        if (!autoScrollEnabled || isGenerating || !shouldScrollForNewUserMessage) return@LaunchedEffect
+    LaunchedEffect(streamingResponse, isGenerating) {
+        if (!isGenerating) return@LaunchedEffect
+        val length = streamingResponse.length
+        if (length > lastHapticLength) {
+            haptic.perform(HapticFeedbackType.TextHandleMove)
+            lastHapticLength = length
+        }
+    }
+
+    LaunchedEffect(messages.size, streamingResponse, streamingParentId, isGenerating, autoScrollEnabled) {
+        if (!autoScrollEnabled) return@LaunchedEffect
         val targetIndex = messages.size
         if (targetIndex >= 0) {
             isAutoScrolling = true
             try {
-                listState.animateScrollToItem(targetIndex)
+                if (isGenerating) {
+                    listState.animateScrollToItem(targetIndex)
+                } else {
+                    listState.scrollToItem(targetIndex)
+                }
             } finally {
                 isAutoScrolling = false
             }
