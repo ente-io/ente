@@ -29,8 +29,8 @@ struct MessageListView: View {
     @State private var showStreamingBubble = false
     @State private var streamingWasGenerating = false
     @State private var streamingAnchorParentId: UUID?
-    @State private var streamingAnchorIndex: Int?
     @State private var streamingHideWorkItem: DispatchWorkItem?
+    private let streamingOutroDuration: TimeInterval = 0.52
 
     var body: some View {
         GeometryReader { proxy in
@@ -87,9 +87,6 @@ struct MessageListView: View {
                     showStreamingBubble = isGenerating
                     streamingWasGenerating = isGenerating
                     streamingAnchorParentId = streamingParentId
-                    streamingAnchorIndex = streamingParentId.flatMap { parentId in
-                        messages.firstIndex(where: { $0.id == parentId })
-                    }
                     scheduleInitialScroll(scrollProxy)
                 }
                 .onChange(of: isGenerating) { generating in
@@ -97,39 +94,28 @@ struct MessageListView: View {
                         streamingHideWorkItem?.cancel()
                         streamingHideWorkItem = nil
                         showStreamingBubble = true
-                        streamingAnchorParentId = streamingParentId
-                        streamingAnchorIndex = streamingParentId.flatMap { parentId in
-                            messages.firstIndex(where: { $0.id == parentId })
+                        if let parentId = streamingParentId {
+                            streamingAnchorParentId = parentId
                         }
                         suppressAutoScrollAfterGeneration = false
                     } else {
                         suppressAutoScrollAfterGeneration = true
                         if streamingWasGenerating {
                             let workItem = DispatchWorkItem {
-                                withAnimation(.easeInOut(duration: 0.30)) {
-                                    showStreamingBubble = false
-                                }
+                                showStreamingBubble = false
                                 suppressAutoScrollAfterGeneration = false
                                 streamingHideWorkItem = nil
                             }
                             streamingHideWorkItem?.cancel()
                             streamingHideWorkItem = workItem
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.52, execute: workItem)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + streamingOutroDuration, execute: workItem)
                         }
                     }
                     streamingWasGenerating = generating
                 }
                 .onChange(of: streamingParentId) { parentId in
-                    if isGenerating {
+                    if let parentId {
                         streamingAnchorParentId = parentId
-                        streamingAnchorIndex = parentId.flatMap { anchorId in
-                            messages.firstIndex(where: { $0.id == anchorId })
-                        }
-                    }
-                }
-                .onChange(of: messages.count) { _ in
-                    if isGenerating, let anchorId = streamingAnchorParentId {
-                        streamingAnchorIndex = messages.firstIndex(where: { $0.id == anchorId })
                     }
                 }
                 .onChange(of: sessionId) { _ in
@@ -137,9 +123,10 @@ struct MessageListView: View {
                     streamingHideWorkItem = nil
                     showStreamingBubble = isGenerating
                     streamingWasGenerating = isGenerating
-                    streamingAnchorParentId = streamingParentId
-                    streamingAnchorIndex = streamingParentId.flatMap { parentId in
-                        messages.firstIndex(where: { $0.id == parentId })
+                    if isGenerating {
+                        streamingAnchorParentId = streamingParentId
+                    } else {
+                        streamingAnchorParentId = nil
                     }
                 }
             }
@@ -237,13 +224,11 @@ struct MessageListView: View {
                     .frame(minHeight: emptyStateMinHeight)
                 }
 
-                let shouldShowStreaming = isGenerating || showStreamingBubble
-                let activeStreamingParentId = isGenerating ? streamingParentId : streamingAnchorParentId
-                let activeStreamingIndex = isGenerating
-                    ? streamingParentId.flatMap { parentId in messages.firstIndex(where: { $0.id == parentId }) }
-                    : streamingAnchorIndex
+                let shouldShowStreaming = isGenerating
+                let streamingDisplayText = streamingResponse
+                let outroAssistantId = (!isGenerating && showStreamingBubble) ? resolvedStreamingAssistantReplyId() : nil
 
-                ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                ForEach(messages) { message in
                     if message.role == .user {
                         UserMessageBubbleView(
                             message: message,
@@ -260,32 +245,22 @@ struct MessageListView: View {
                             onCopy: { onCopy(message) },
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },
-                            onOpenAttachment: openAttachment
+                            onOpenAttachment: openAttachment,
+                            showsMetadata: outroAssistantId != message.id,
+                            showOutroRive: (!isGenerating && showStreamingBubble) && outroAssistantId == message.id
                         )
                         .id(message.id)
                         .transition(messageTransition)
                     }
-
-                    let isAnchoredById = activeStreamingParentId == message.id
-                    let isAnchoredByIndex = activeStreamingIndex == index
-                    if shouldShowStreaming && (isAnchoredById || isAnchoredByIndex) {
-                        StreamingBubbleView(
-                            text: streamingResponse,
-                            isGenerating: isGenerating,
-                            isOutroPhase: !isGenerating && showStreamingBubble
-                        )
-                        .id("streaming-\(message.id.uuidString)")
-                        .transition(streamingTransition)
-                    }
                 }
 
-                if shouldShowStreaming && activeStreamingParentId == nil && activeStreamingIndex == nil {
+                if shouldShowStreaming {
                     StreamingBubbleView(
-                        text: streamingResponse,
-                        isGenerating: isGenerating,
-                        isOutroPhase: !isGenerating && showStreamingBubble
+                        text: streamingDisplayText,
+                        isGenerating: true,
+                        isOutroPhase: false
                     )
-                    .id("streaming-root")
+                    .id("streaming")
                     .transition(streamingTransition)
                 }
             }
@@ -293,7 +268,6 @@ struct MessageListView: View {
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
             .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
-            .animation(.easeInOut(duration: 0.30), value: showStreamingBubble)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -320,8 +294,36 @@ struct MessageListView: View {
     private var streamingTransition: AnyTransition {
         .asymmetric(
             insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .topLeading)),
-            removal: .opacity.combined(with: .scale(scale: 0.92, anchor: .topLeading))
+            removal: .opacity
         )
+    }
+
+    private func resolvedStreamingAnchorId() -> UUID? {
+        if isGenerating {
+            return streamingParentId ?? streamingAnchorParentId
+        }
+
+        return nil
+    }
+
+    private func resolvedStreamingAssistantReplyId() -> UUID? {
+        guard let parentId = streamingAnchorParentId ?? streamingParentId else { return nil }
+        return resolvedAssistantReplyId(forParentId: parentId)
+    }
+
+    private func resolvedAssistantReplyId(forParentId parentId: UUID) -> UUID? {
+        guard let parentIndex = messages.firstIndex(where: { $0.id == parentId }) else { return nil }
+        guard parentIndex < messages.index(before: messages.endIndex) else { return nil }
+        for index in messages.index(after: parentIndex)..<messages.endIndex {
+            let candidate = messages[index]
+            if candidate.role == .assistant {
+                return candidate.id
+            }
+            if candidate.role == .user {
+                break
+            }
+        }
+        return nil
     }
 
     private var contentBottomPadding: CGFloat {
@@ -380,4 +382,3 @@ struct MessageListView: View {
     }
 }
 #endif
-

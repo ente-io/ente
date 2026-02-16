@@ -165,10 +165,12 @@ struct AssistantMessageBubbleView: View {
     let onRetry: () -> Void
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
+    let showsMetadata: Bool
+    let showOutroRive: Bool
 
     var body: some View {
         HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
+            VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
                     AssistantMessageRenderer(text: message.text, isStreaming: false, storageId: message.id.uuidString)
 
@@ -194,20 +196,37 @@ struct AssistantMessageBubbleView: View {
                 }
                 #endif
 
-                HStack(spacing: EnsuSpacing.sm) {
-                    TimestampView(date: message.timestamp)
-                    if message.branchCount > 1 {
-                        BranchSwitcherView(
-                            currentIndex: message.branchIndex,
-                            totalCount: message.branchCount,
-                            onPrevious: { onBranchChange(-1) },
-                            onNext: { onBranchChange(1) }
-                        )
-                    }
+                if showOutroRive {
+                    EnsuBrandIllustration(
+                        width: 115,
+                        height: 52.5,
+                        outroTrigger: true,
+                        outroInputName: "outro",
+                        clipsContent: false
+                    )
+                    .padding(.horizontal, EnsuSpacing.sm)
+                    .offset(y: -4)
+                    .frame(width: 115, height: 52.5, alignment: .topLeading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, EnsuSpacing.sm)
+
+                if showsMetadata {
+                    HStack(spacing: EnsuSpacing.sm) {
+                        TimestampView(date: message.timestamp)
+                        if message.branchCount > 1 {
+                            BranchSwitcherView(
+                                currentIndex: message.branchIndex,
+                                totalCount: message.branchCount,
+                                onPrevious: { onBranchChange(-1) },
+                                onNext: { onBranchChange(1) }
+                            )
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, EnsuSpacing.sm)
+                    .transition(.opacity)
+                }
             }
+            .animation(.easeInOut(duration: 0.22), value: showsMetadata)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -223,39 +242,70 @@ struct StreamingBubbleView: View {
     let isOutroPhase: Bool
 
     @State private var storageId = UUID().uuidString
+    @State private var renderedText = ""
+    private let riveWidth: CGFloat = 115
+    private let riveHeight: CGFloat = 52.5
 
     var body: some View {
-        let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasText = isGenerating && !renderedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let bubbleVerticalPadding = hasText ? EnsuSpacing.md : 0
+        let contentSpacing = hasText ? EnsuSpacing.sm : 0
 
         HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                EnsuBrandIllustration(
-                    width: 115,
-                    height: 52.5,
-                    outroTrigger: isOutroPhase,
-                    outroInputName: "outro"
-                )
-                .frame(width: 115, height: 52.5, alignment: .leading)
-                .clipped()
-
+            VStack(alignment: .leading, spacing: contentSpacing) {
                 if hasText {
                     TimelineView(.periodic(from: .now, by: 0.55)) { context in
                         let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
                         let showCursor = phase == 0
                         AssistantMessageRenderer(
-                            text: text,
+                            text: renderedText,
                             isStreaming: true,
                             storageId: storageId,
                             showsCursor: showCursor
                         )
                     }
                 }
+
+                EnsuBrandIllustration(
+                    width: riveWidth,
+                    height: riveHeight,
+                    outroTrigger: isOutroPhase,
+                    outroInputName: "outro",
+                    clipsContent: false
+                )
+                .offset(y: -4)
+                .frame(width: riveWidth, height: riveHeight, alignment: .topLeading)
             }
-            .padding(.vertical, EnsuSpacing.md)
+            .padding(.vertical, bubbleVerticalPadding)
             .padding(.horizontal, EnsuSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(EnsuColor.textPrimary)
+        .onAppear {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                renderedText = text
+            } else if isGenerating {
+                renderedText = ""
+            }
+        }
+        .onChange(of: text) { newValue in
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                renderedText = newValue
+                return
+            }
+            if isGenerating {
+                renderedText = ""
+            }
+        }
+        .onChange(of: isGenerating) { generating in
+            if !generating {
+                renderedText = ""
+            } else if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                renderedText = ""
+            }
+        }
     }
 }
 

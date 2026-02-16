@@ -632,6 +632,7 @@ internal class ChatStoreActions(
 
         if (shouldUpdateUi) {
             streamingParentId = null
+            val (displayMessages, branchSelectionIndices) = buildDisplayMessagesAndSelections(sessionId)
             state.update { appState ->
                 appState.copy(
                     chat = appState.chat.copy(
@@ -640,11 +641,12 @@ internal class ChatStoreActions(
                         streamingResponse = "",
                         streamingParentId = null,
                         downloadPercent = null,
-                        downloadStatus = null
+                        downloadStatus = null,
+                        messages = displayMessages,
+                        branchSelections = branchSelectionIndices
                     )
                 )
             }
-            rebuildChatState(sessionId)
             syncActions.syncAfterGeneration()
         }
         scheduleSessionSummary(sessionId)
@@ -851,12 +853,22 @@ internal class ChatStoreActions(
     }
 
     private fun rebuildChatState(sessionId: String?) {
-        if (sessionId == null) {
-            state.update { appState ->
-                appState.copy(chat = appState.chat.copy(messages = emptyList(), branchSelections = emptyMap()))
-            }
-            return
+        val (displayMessages, branchSelectionIndices) = buildDisplayMessagesAndSelections(sessionId)
+        state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    messages = displayMessages,
+                    branchSelections = branchSelectionIndices
+                )
+            )
         }
+    }
+
+    private fun buildDisplayMessagesAndSelections(sessionId: String?): Pair<List<ChatMessage>, Map<String, Int>> {
+        if (sessionId == null) {
+            return emptyList<ChatMessage>() to emptyMap()
+        }
+
         val messages = messageStore[sessionId].orEmpty()
         val path = buildSelectedPath(sessionId)
         val childrenMap = buildChildrenMap(messages)
@@ -875,14 +887,7 @@ internal class ChatStoreActions(
             message.copy(branchCount = max(1, siblings.size))
         }
 
-        state.update { appState ->
-            appState.copy(
-                chat = appState.chat.copy(
-                    messages = displayMessages,
-                    branchSelections = branchSelectionIndices
-                )
-            )
-        }
+        return displayMessages to branchSelectionIndices
     }
 
     private fun buildSelectedPath(sessionId: String): List<ChatMessage> {
