@@ -59,7 +59,7 @@
   "deleteCodeMessage": "您确定要删除此代码吗？此操作不可逆。",
   "trashCode": "要删除代码吗？",
   "trashCodeMessage": "您确定要删除 {account} 的代码吗？",
-  "trash": "删除",
+  "trash": "回收站",
   "viewLogsAction": "查看日志",
   "sendLogsDescription": "这将发送日志以帮助我们调试您的问题。虽然我们采取预防措施确保不记录敏感信息，但我们建议您在共享这些日志之前先查看它们。",
   "preparingLogsTitle": "正在准备日志...",
