@@ -28,10 +28,7 @@ import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
-import {
-    useIsSmallWidth,
-    useIsTouchscreen,
-} from "ente-base/components/utils/hooks";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -756,7 +753,6 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     collectionKey,
     credentials,
 }) => {
-    const isTouchscreen = useIsTouchscreen();
     const { handleJoinAlbum } = useJoinAlbum({
         publicCollection,
         accessToken,
@@ -773,7 +769,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     }
 
     const handleGetEnte = () => {
-        window.open(getEnteURL(isTouchscreen), "_blank", "noopener");
+        window.location.href = getEnteURL();
     };
 
     return (
