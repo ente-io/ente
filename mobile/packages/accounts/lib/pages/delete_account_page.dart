@@ -190,8 +190,8 @@ class DeleteAccountPage extends StatelessWidget {
       if (!context.mounted) {
         return;
       }
-      Navigator.of(context).popUntil((route) => route.isFirst);
       showShortToast(context, context.strings.yourAccountHasBeenDeleted);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
