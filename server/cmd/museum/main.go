@@ -1068,7 +1068,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	castDb castRepo.Repository) {
-	const deletedTokenRetentionDays = 390 // 13 months using a fixed-day approximation
+	const deletedTokenRetentionDays = 397 // 13 months using a fixed-day approximation
 
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
