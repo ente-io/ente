@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 ML_DIR="$ROOT_DIR/infra/ml"
+MANIFEST_PATH="$ROOT_DIR/infra/ml/ground_truth/manifest.json"
+TEST_DATA_DIR="$ML_DIR/test_data/ml-indexing/v1"
 
 SUITE="smoke"
 PLATFORMS="all"
@@ -70,6 +72,54 @@ echo "Running ML parity suite"
 echo "  suite: $SUITE"
 echo "  platforms: $PLATFORMS"
 echo "  output_dir: $OUTPUT_DIR"
+
+echo "Preparing local fixture directory: $TEST_DATA_DIR"
+rm -rf "$TEST_DATA_DIR"
+mkdir -p "$TEST_DATA_DIR"
+
+downloaded_count=0
+while IFS=$'\t' read -r source_rel source_url source_sha; do
+  if [[ -z "$source_rel" ]]; then
+    continue
+  fi
+  if [[ -z "$source_url" ]]; then
+    echo "Manifest item missing source_url for source=$source_rel" >&2
+    exit 1
+  fi
+
+  target_path="$ML_DIR/$source_rel"
+  target_dir="$(dirname "$target_path")"
+  mkdir -p "$target_dir"
+
+  tmp_path="$target_path.tmp"
+  curl -fsSL --retry 3 --retry-delay 1 "$source_url" -o "$tmp_path"
+  mv "$tmp_path" "$target_path"
+
+  if [[ -n "$source_sha" ]]; then
+    actual_sha="$(shasum -a 256 "$target_path" | awk '{print $1}')"
+    if [[ "$actual_sha" != "$source_sha" ]]; then
+      echo "SHA-256 mismatch for $source_rel: expected $source_sha got $actual_sha" >&2
+      exit 1
+    fi
+  fi
+  downloaded_count=$((downloaded_count + 1))
+done < <(
+  python3 - "$MANIFEST_PATH" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+manifest = json.loads(manifest_path.read_text())
+items = manifest.get("items", [])
+for item in items:
+    source = str(item.get("source", "")).strip()
+    source_url = str(item.get("source_url", "")).strip()
+    source_sha = str(item.get("source_sha256", "")).strip()
+    print(f"{source}\t{source_url}\t{source_sha}")
+PY
+)
+echo "Downloaded fixture files: $downloaded_count"
 
 echo "Generating Python goldens"
 uv run --project "$ML_DIR" --no-sync python "$ML_DIR/tools/generate_goldens.py" \

@@ -92,11 +92,43 @@ def _git_revision(default: str = "local") -> str:
     return completed.stdout.strip() or default
 
 
-def _build_result(item: Mapping[str, Any], *, ml_dir: Path, code_revision: str) -> ParityResult:
+def _load_source_bytes(*, source: str, ml_dir: Path) -> bytes:
+    source_path = Path(source)
+    if not source_path.is_absolute():
+        source_path = ml_dir / source_path
+    return source_path.read_bytes()
+
+
+def _validate_source_hash(
+    *,
+    source_bytes: bytes,
+    expected_sha256: str | None,
+    file_id: str,
+) -> None:
+    if not expected_sha256:
+        return
+
+    actual_sha256 = hashlib.sha256(source_bytes).hexdigest()
+    if actual_sha256.lower() != expected_sha256.lower():
+        raise ValueError(
+            f"source hash mismatch for {file_id}: expected {expected_sha256}, got {actual_sha256}"
+        )
+
+
+def _build_result(
+    item: Mapping[str, Any],
+    *,
+    ml_dir: Path,
+    code_revision: str,
+) -> ParityResult:
     file_id = str(item["file_id"])
-    source_relative_path = Path(str(item["source"]))
-    source_path = ml_dir / source_relative_path
-    source_bytes = source_path.read_bytes()
+    source = str(item["source"])
+    source_bytes = _load_source_bytes(source=source, ml_dir=ml_dir)
+    _validate_source_hash(
+        source_bytes=source_bytes,
+        expected_sha256=item.get("source_sha256"),
+        file_id=file_id,
+    )
     source_seed = file_id.encode("utf-8") + source_bytes
 
     clip_embedding = _stable_unit_vector(source_seed + b":clip", 512)
@@ -175,7 +207,14 @@ def main() -> int:
         raise ValueError("Manifest has no items")
 
     code_revision = _git_revision()
-    results = tuple(_build_result(item, ml_dir=ml_dir, code_revision=code_revision) for item in items)
+    results = tuple(
+        _build_result(
+            item,
+            ml_dir=ml_dir,
+            code_revision=code_revision,
+        )
+        for item in items
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     for result in results:
