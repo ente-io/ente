@@ -200,7 +200,6 @@ jobs:
             - name: Collect Android artifacts (signed AAB)
               if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
               run: |
-                  mkdir -p artifacts
                   cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
 
             - name: Collect Android artifacts (unsigned fallback)
