@@ -746,8 +746,17 @@ Future<void> showDeleteSheet(
     return;
   }
   if (isOfflineMode) {
-    await deleteFilesOnDeviceOnly(context, deletableFiles);
-    selectedFiles.clearAll();
+    final offlineDeletableFiles =
+        deletableFiles.where((file) => file.localID != null).toList();
+    if (offlineDeletableFiles.isEmpty) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
+      return;
+    }
+    await deleteFilesOnDeviceOnly(context, offlineDeletableFiles);
+    selectedFiles.unSelectAll(offlineDeletableFiles.toSet());
     return;
   }
   final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);

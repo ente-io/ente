@@ -33,8 +33,15 @@ Future<void> showSingleFileDeleteSheet(
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
   if (isOfflineMode) {
+    if (file.localID == null) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
+      return;
+    }
     await deleteFilesOnDeviceOnly(context, [file]);
-    if (onFileRemoved != null && file.localID != null) {
+    if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
       onFileRemoved(file);
     }
     return;
