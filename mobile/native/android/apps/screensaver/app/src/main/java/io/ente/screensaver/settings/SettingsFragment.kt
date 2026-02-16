@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.ente.photos.screensaver.R
@@ -61,6 +62,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             startActivity(Intent(requireContext(), AdvancedSettingsActivity::class.java))
             true
         }
+
+        findPreference<ListPreference>("pref_interval_ms")?.summaryProvider =
+            ListPreference.SimpleSummaryProvider.getInstance()
 
         updateSetScreensaverVisibility()
         updateAlbumSummary()

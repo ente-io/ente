@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:defaultValue="60000"
-        android:entries="@array/pref_interval_entries"
-        android:entryValues="@array/pref_interval_values"
-        android:key="pref_interval_ms"
-        android:title="@string/pref_title_slideshow_interval" />
-
     <Preference
         android:key="pref_clear_cache"
         android:title="@string/ente_cache_clear"

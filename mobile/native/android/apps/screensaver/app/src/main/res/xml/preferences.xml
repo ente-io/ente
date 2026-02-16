@@ -16,6 +16,13 @@
         android:key="pref_shuffle"
         android:title="@string/pref_title_shuffle" />
 
+    <ListPreference
+        android:defaultValue="60000"
+        android:entries="@array/pref_interval_entries"
+        android:entryValues="@array/pref_interval_values"
+        android:key="pref_interval_ms"
+        android:title="@string/pref_title_slideshow_interval" />
+
     <Preference
         android:key="pref_open_advanced"
         android:title="@string/pref_advanced"

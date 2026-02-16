@@ -9,6 +9,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        title = getString(R.string.settings_title_ente_photos)
 
         if (savedInstanceState == null) {
             supportFragmentManager
