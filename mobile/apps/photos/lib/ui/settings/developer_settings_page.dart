@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:photos/app_mode.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
@@ -55,7 +54,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 final url = _urlController.text.trim();
                 _logger.info("Entered endpoint: $url");
                 if (url == "offline") {
-                  await localSettings.setAppMode(AppMode.offline);
                   await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to offline");
@@ -63,7 +61,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   return;
                 }
                 if (url == "online") {
-                  await localSettings.setAppMode(AppMode.online);
+                  await localSettings.setShowOfflineModeOption(false);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to online");
                   Navigator.of(context).pop();

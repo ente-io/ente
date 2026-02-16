@@ -468,7 +468,7 @@ class LocalSettings {
   }
 
   bool get showOfflineModeOption =>
-      _prefs.getBool(_kShowOfflineModeOption) ?? false;
+      _prefs.getBool(_kShowOfflineModeOption) ?? true;
 
   Future<void> setShowOfflineModeOption(bool value) async {
     await _prefs.setBool(_kShowOfflineModeOption, value);
