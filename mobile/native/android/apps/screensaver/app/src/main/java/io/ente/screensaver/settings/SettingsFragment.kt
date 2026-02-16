@@ -1,3 +1,5 @@
+@file:Suppress("PackageDirectoryMismatch")
+
 package io.ente.photos.screensaver.settings
 
 import android.content.Intent
@@ -38,8 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         setScreensaverPreference = findPreference("pref_set_screensaver")
         setScreensaverPreference?.setOnPreferenceClickListener {
-            val result = ScreensaverConfigurator.trySetAsScreensaver(requireContext())
-            when (result) {
+            when (val result = ScreensaverConfigurator.trySetAsScreensaver(requireContext())) {
                 is ScreensaverConfigurator.Result.Success -> {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
                 }
