@@ -7,7 +7,6 @@ import 'package:photos/models/social/anon_profile.dart';
 import 'package:photos/models/social/api_responses.dart';
 import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/reaction.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/social_service.dart';
 
 /// Service for syncing social data (comments and reactions) with the server.
@@ -159,10 +158,6 @@ class SocialSyncService {
   /// Uses the /comments-reactions/updated-at endpoint to determine which
   /// collections actually need syncing, avoiding unnecessary API calls.
   Future<bool> syncAllSharedCollections() async {
-    if (!flagService.isSocialEnabled) {
-      _logger.info('Social features disabled, skipping sync');
-      return false;
-    }
     if (_isSyncing) {
       _logger.info('Sync already in progress, skipping');
       return false;
