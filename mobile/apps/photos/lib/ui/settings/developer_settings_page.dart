@@ -52,9 +52,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             const SizedBox(height: 40),
             GradientButton(
               onTap: () async {
-                final url = _urlController.text;
+                final url = _urlController.text.trim();
+                final normalizedInput = url.toLowerCase();
                 _logger.info("Entered endpoint: $url");
-                if (url == "localMode") {
+                if (normalizedInput == "localmode" ||
+                    normalizedInput == "offline") {
                   await localSettings.setAppMode(AppMode.offline);
                   await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
@@ -62,7 +64,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   Navigator.of(context).pop();
                   return;
                 }
-                if (url == "onlineMode") {
+                if (normalizedInput == "onlinemode" ||
+                    normalizedInput == "online") {
                   await localSettings.setAppMode(AppMode.online);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to online");
