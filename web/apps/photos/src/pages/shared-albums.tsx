@@ -843,7 +843,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             flex: 1,
             gap: 1,
             alignItems: "center",
-            mx: -2,
+            mx: -1.5,
             "@media (width < 720px)": { mx: -1 },
         }}
     >
@@ -913,8 +913,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     spacing={1}
                     sx={{
                         alignItems: "center",
-                        mr: -1.5,
-                        "@media (width < 720px)": { mr: -1 },
+                        "@media (width > 720px)": { mr: -1.5 },
                     }}
                 >
                     {onShowFeed && !hasSelection && (
