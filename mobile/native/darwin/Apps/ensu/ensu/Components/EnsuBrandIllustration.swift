@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum EnsuBrandIllustrationAlignment {
+    case centerLeft
+    case center
+}
+
 #if canImport(RiveRuntime)
 import RiveRuntime
 
@@ -10,17 +15,51 @@ struct EnsuBrandIllustration: View {
     var outroTrigger: Bool = false
     var outroInputName: String = "outro"
     var clipsContent: Bool = true
+    var riveAlignment: EnsuBrandIllustrationAlignment = .centerLeft
 
-    @StateObject private var riveViewModel = RiveViewModel(
-        fileName: "ensu",
-        fit: .contain,
-        alignment: .centerLeft,
-        autoPlay: true
-    )
+    @StateObject private var riveViewModel: RiveViewModel
     @State private var lastOutroTrigger = false
     @State private var resolvedOutroInputName: String?
     @State private var primaryStateMachineName: String?
     @State private var primaryAnimationName: String?
+
+    init(
+        width: CGFloat = 92,
+        height: CGFloat = 42,
+        animated: Bool = true,
+        outroTrigger: Bool = false,
+        outroInputName: String = "outro",
+        clipsContent: Bool = true,
+        riveAlignment: EnsuBrandIllustrationAlignment = .centerLeft
+    ) {
+        self.width = width
+        self.height = height
+        self.animated = animated
+        self.outroTrigger = outroTrigger
+        self.outroInputName = outroInputName
+        self.clipsContent = clipsContent
+        self.riveAlignment = riveAlignment
+
+        let riveViewModel: RiveViewModel
+        switch riveAlignment {
+        case .centerLeft:
+            riveViewModel = RiveViewModel(
+                fileName: "ensu",
+                fit: .contain,
+                alignment: .centerLeft,
+                autoPlay: true
+            )
+        case .center:
+            riveViewModel = RiveViewModel(
+                fileName: "ensu",
+                fit: .contain,
+                alignment: .center,
+                autoPlay: true
+            )
+        }
+
+        _riveViewModel = StateObject(wrappedValue: riveViewModel)
+    }
 
     @ViewBuilder
     private var riveContent: some View {
@@ -171,6 +210,7 @@ struct EnsuBrandIllustration: View {
     var outroTrigger: Bool = false
     var outroInputName: String = "outro"
     var clipsContent: Bool = true
+    var riveAlignment: EnsuBrandIllustrationAlignment = .centerLeft
 
     @State private var isAnimating = false
 

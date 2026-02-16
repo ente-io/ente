@@ -28,105 +28,109 @@ struct MessageListView: View {
     @State private var suppressAutoScrollAfterGeneration = false
     @State private var showStreamingBubble = false
     @State private var streamingWasGenerating = false
-    @State private var streamingAnchorParentId: UUID?
+    @State private var streamingTextStorageId = UUID().uuidString
     @State private var streamingHideWorkItem: DispatchWorkItem?
     private let streamingOutroDuration: TimeInterval = 0.52
 
     var body: some View {
         GeometryReader { proxy in
             ScrollViewReader { scrollProxy in
-                ScrollView {
-                    messageListContent(containerHeight: proxy.size.height)
-                }
-                .id(sessionId)
-                .coordinateSpace(name: "scroll")
-                .simultaneousGesture(
-                    DragGesture()
-                        .onChanged { _ in
-                            isUserDragging = true
-                            autoScrollEnabled = false
-                            onDismissKeyboard()
+                ZStack(alignment: .bottomLeading) {
+                    ScrollView {
+                        messageListContent(containerHeight: proxy.size.height)
+                    }
+                    .id(sessionId)
+                    .coordinateSpace(name: "scroll")
+                    .simultaneousGesture(
+                        DragGesture()
+                            .onChanged { _ in
+                                isUserDragging = true
+                                autoScrollEnabled = false
+                                onDismissKeyboard()
+                            }
+                            .onEnded { _ in
+                                isUserDragging = false
+                                if isAtBottom {
+                                    autoScrollEnabled = true
+                                }
+                            }
+                    )
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded {
+                                onDismissKeyboard()
+                            }
+                    )
+                    .onPreferenceChange(BottomOffsetKey.self) { value in
+                        let threshold: CGFloat = EnsuSpacing.xxxl
+                        let distanceToBottom = value - proxy.size.height
+                        isAtBottom = distanceToBottom <= threshold
+                    }
+                    .onPreferenceChange(ContentHeightKey.self) { newHeight in
+                        let delta = newHeight - lastContentHeight
+                        lastContentHeight = newHeight
+                        let lastMessageIsUser = messages.last?.role == .user
+                        if delta > 1,
+                           autoScrollEnabled,
+                           !isUserDragging,
+                           !isGenerating,
+                           !suppressAutoScrollAfterGeneration,
+                           lastMessageIsUser {
+                            scrollToBottom(scrollProxy, force: true, animated: true)
                         }
-                        .onEnded { _ in
-                            isUserDragging = false
-                            if isAtBottom {
-                                autoScrollEnabled = true
+                    }
+                    .onChange(of: currentScrollChange) { newValue in
+                        handleScrollChange(newValue, scrollProxy: scrollProxy)
+                    }
+                    .onAppear {
+                        lastScrollChange = currentScrollChange
+                        didInitialScroll = false
+                        showStreamingBubble = isGenerating
+                        streamingWasGenerating = isGenerating
+                        scheduleInitialScroll(scrollProxy)
+                    }
+                    .onChange(of: isGenerating) { generating in
+                        if generating {
+                            streamingHideWorkItem?.cancel()
+                            streamingHideWorkItem = nil
+                            showStreamingBubble = true
+                            suppressAutoScrollAfterGeneration = false
+                        } else {
+                            suppressAutoScrollAfterGeneration = true
+                            if streamingWasGenerating {
+                                let workItem = DispatchWorkItem {
+                                    showStreamingBubble = false
+                                    suppressAutoScrollAfterGeneration = false
+                                    streamingHideWorkItem = nil
+                                }
+                                streamingHideWorkItem?.cancel()
+                                streamingHideWorkItem = workItem
+                                DispatchQueue.main.asyncAfter(deadline: .now() + streamingOutroDuration, execute: workItem)
                             }
                         }
-                )
-                .simultaneousGesture(
-                    TapGesture()
-                        .onEnded {
-                            onDismissKeyboard()
-                        }
-                )
-                .onPreferenceChange(BottomOffsetKey.self) { value in
-                    let threshold: CGFloat = EnsuSpacing.xxxl
-                    let distanceToBottom = value - proxy.size.height
-                    isAtBottom = distanceToBottom <= threshold
-                }
-                .onPreferenceChange(ContentHeightKey.self) { newHeight in
-                    let delta = newHeight - lastContentHeight
-                    lastContentHeight = newHeight
-                    let lastMessageIsUser = messages.last?.role == .user
-                    if delta > 1,
-                       autoScrollEnabled,
-                       !isUserDragging,
-                       !isGenerating,
-                       !suppressAutoScrollAfterGeneration,
-                       lastMessageIsUser {
-                        scrollToBottom(scrollProxy, force: true, animated: true)
+                        streamingWasGenerating = generating
                     }
-                }
-                .onChange(of: currentScrollChange) { newValue in
-                    handleScrollChange(newValue, scrollProxy: scrollProxy)
-                }
-                .onAppear {
-                    lastScrollChange = currentScrollChange
-                    didInitialScroll = false
-                    showStreamingBubble = isGenerating
-                    streamingWasGenerating = isGenerating
-                    streamingAnchorParentId = streamingParentId
-                    scheduleInitialScroll(scrollProxy)
-                }
-                .onChange(of: isGenerating) { generating in
-                    if generating {
+                    .onChange(of: sessionId) { _ in
                         streamingHideWorkItem?.cancel()
                         streamingHideWorkItem = nil
-                        showStreamingBubble = true
-                        if let parentId = streamingParentId {
-                            streamingAnchorParentId = parentId
-                        }
-                        suppressAutoScrollAfterGeneration = false
-                    } else {
-                        suppressAutoScrollAfterGeneration = true
-                        if streamingWasGenerating {
-                            let workItem = DispatchWorkItem {
-                                showStreamingBubble = false
-                                suppressAutoScrollAfterGeneration = false
-                                streamingHideWorkItem = nil
-                            }
-                            streamingHideWorkItem?.cancel()
-                            streamingHideWorkItem = workItem
-                            DispatchQueue.main.asyncAfter(deadline: .now() + streamingOutroDuration, execute: workItem)
-                        }
+                        showStreamingBubble = isGenerating
+                        streamingWasGenerating = isGenerating
                     }
-                    streamingWasGenerating = generating
-                }
-                .onChange(of: streamingParentId) { parentId in
-                    if let parentId {
-                        streamingAnchorParentId = parentId
-                    }
-                }
-                .onChange(of: sessionId) { _ in
-                    streamingHideWorkItem?.cancel()
-                    streamingHideWorkItem = nil
-                    showStreamingBubble = isGenerating
-                    streamingWasGenerating = isGenerating
-                    if isGenerating {
-                        streamingAnchorParentId = streamingParentId
-                    } else {
-                        streamingAnchorParentId = nil
+
+                    if showStreamingBubble {
+                        EnsuBrandIllustration(
+                            width: 115,
+                            height: 52.5,
+                            outroTrigger: !isGenerating,
+                            outroInputName: "outro",
+                            clipsContent: false,
+                            riveAlignment: .center
+                        )
+                        .offset(y: -4)
+                        .frame(width: 115, height: 52.5, alignment: .top)
+                        .padding(.bottom, floatingStreamingBottomPadding)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .allowsHitTesting(false)
                     }
                 }
             }
@@ -224,11 +228,6 @@ struct MessageListView: View {
                     .frame(minHeight: emptyStateMinHeight)
                 }
 
-                let shouldShowStreaming = isGenerating
-                let streamingDisplayText = streamingResponse
-                let isOutroActive = !isGenerating && (showStreamingBubble || streamingWasGenerating)
-                let outroAssistantId = isOutroActive ? resolvedStreamingAssistantReplyId() : nil
-
                 ForEach(messages) { message in
                     if message.role == .user {
                         UserMessageBubbleView(
@@ -247,22 +246,22 @@ struct MessageListView: View {
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },
                             onOpenAttachment: openAttachment,
-                            showsMetadata: outroAssistantId != message.id,
-                            showOutroRive: (!isGenerating && showStreamingBubble) && outroAssistantId == message.id
+                            showsMetadata: true,
+                            showOutroRive: false
                         )
                         .id(message.id)
                         .transition(messageTransition)
                     }
+
+                    if isGenerating, streamingParentId == message.id {
+                        inlineStreamingTextBubble
+                            .id("streaming-\(message.id.uuidString)")
+                    }
                 }
 
-                if shouldShowStreaming {
-                    StreamingBubbleView(
-                        text: streamingDisplayText,
-                        isGenerating: true,
-                        isOutroPhase: false
-                    )
-                    .id("streaming")
-                    .transition(streamingTransition)
+                if isGenerating, streamingParentId == nil {
+                    inlineStreamingTextBubble
+                        .id("streaming")
                 }
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
@@ -288,43 +287,39 @@ struct MessageListView: View {
         )
     }
 
+    private var inlineStreamingTextBubble: some View {
+        let trimmed = streamingResponse.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasText = !trimmed.isEmpty
+
+        return HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 0) {
+                TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                    let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
+                    let showCursor = phase == 0
+                    AssistantMessageRenderer(
+                        text: streamingResponse,
+                        isStreaming: true,
+                        storageId: streamingTextStorageId,
+                        showsCursor: showCursor
+                    )
+                }
+            }
+            .padding(.vertical, hasText ? EnsuSpacing.md : 0)
+            .padding(.horizontal, EnsuSpacing.sm)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .foregroundStyle(EnsuColor.textPrimary)
+    }
+
     private var messageTransition: AnyTransition {
         .identity
     }
 
-    private var streamingTransition: AnyTransition {
-        .asymmetric(
-            insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .topLeading)),
-            removal: .opacity
-        )
-    }
-
-    private func resolvedStreamingAnchorId() -> UUID? {
-        if isGenerating {
-            return streamingParentId ?? streamingAnchorParentId
-        }
-
-        return nil
-    }
-
-    private func resolvedStreamingAssistantReplyId() -> UUID? {
-        guard let parentId = streamingAnchorParentId ?? streamingParentId else { return nil }
-        return resolvedAssistantReplyId(forParentId: parentId)
-    }
-
-    private func resolvedAssistantReplyId(forParentId parentId: UUID) -> UUID? {
-        guard let parentIndex = messages.firstIndex(where: { $0.id == parentId }) else { return nil }
-        guard parentIndex < messages.index(before: messages.endIndex) else { return nil }
-        for index in messages.index(after: parentIndex)..<messages.endIndex {
-            let candidate = messages[index]
-            if candidate.role == .assistant {
-                return candidate.id
-            }
-            if candidate.role == .user {
-                break
-            }
-        }
-        return nil
+    private var floatingStreamingBottomPadding: CGFloat {
+        let floatingGap: CGFloat = 36
+        let minPadding = EnsuSpacing.xxxl + floatingGap
+        let inputPadding = inputBarHeight > 0 ? inputBarHeight + floatingGap : minPadding
+        return max(minPadding, inputPadding)
     }
 
     private var contentBottomPadding: CGFloat {

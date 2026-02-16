@@ -132,17 +132,12 @@ internal fun MessageList(
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
     var lastUserMessageId by remember { mutableStateOf<String?>(null) }
-    var keepStreamingVisible by remember { mutableStateOf(false) }
     val isAtBottom by remember {
         derivedStateOf {
             !listState.canScrollForward
         }
     }
 
-    val streamingOutroDurationMs = 520L
-    val outroAssistantId = if (!isGenerating && keepStreamingVisible) {
-        messages.lastOrNull { it.author == MessageAuthor.Assistant }?.id
-    } else null
     val streamingAnchorId = if (isGenerating) streamingParentId else null
 
     val lastMessage = messages.lastOrNull()
@@ -154,15 +149,6 @@ internal fun MessageList(
             if (!listState.isScrollInProgress || isAtBottom) {
                 autoScrollEnabled = true
             }
-        }
-    }
-
-    LaunchedEffect(isGenerating, streamingParentId) {
-        if (isGenerating) {
-            keepStreamingVisible = true
-        } else if (keepStreamingVisible) {
-            delay(streamingOutroDurationMs)
-            keepStreamingVisible = false
         }
     }
 
@@ -263,8 +249,8 @@ internal fun MessageList(
                             branchSelections = branchSelections,
                             onRetry = { onRetryMessage(message) },
                             onBranchChange = onBranchChange,
-                            showsMetadata = outroAssistantId != message.id,
-                            showOutroRive = outroAssistantId == message.id
+                            showsMetadata = true,
+                            showOutroRive = false
                         )
                     }
                 }
@@ -719,39 +705,15 @@ private fun StreamingMessageBubble(
         renderedText = text
     }
 
-    val riveWidth = 115.dp
-    val riveHeight = 52.5.dp
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = EnsuSpacing.sm.dp)
-            .padding(vertical = EnsuSpacing.md.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        if (isGenerating && renderedText.isNotBlank()) {
-            MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
-            Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-        }
-
-        Box(
+    if (isGenerating && renderedText.isNotBlank()) {
+        Column(
             modifier = Modifier
-                .width(riveWidth)
-                .height(riveHeight)
-                .clipToBounds(),
-            contentAlignment = Alignment.CenterStart
+                .fillMaxWidth()
+                .padding(horizontal = EnsuSpacing.sm.dp)
+                .padding(vertical = EnsuSpacing.md.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clipToBounds()
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier.fillMaxSize(),
-                    outroTrigger = !isGenerating,
-                    outroInputName = "outro"
-                )
-            }
+            MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
     }
 }

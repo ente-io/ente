@@ -13,25 +13,34 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
+import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.state.ChatState
+import kotlinx.coroutines.delay
 
 @Composable
 fun ChatView(
@@ -69,6 +78,8 @@ fun ChatView(
     var didAutoFocusInput by remember { mutableStateOf(false) }
     var focusRequestId by remember { mutableStateOf(0) }
     var wasDrawerOpen by remember { mutableStateOf(false) }
+    var inputBarHeightPx by remember { mutableIntStateOf(0) }
+    var showFloatingStreamingIndicator by remember { mutableStateOf(chatState.isGenerating) }
 
     val shouldAutoFocusInput = chatState.isModelDownloaded &&
         !showDownloadOnboarding &&
@@ -121,6 +132,15 @@ fun ChatView(
         }
     }
 
+    LaunchedEffect(chatState.isGenerating) {
+        if (chatState.isGenerating) {
+            showFloatingStreamingIndicator = true
+        } else if (showFloatingStreamingIndicator) {
+            delay(520)
+            showFloatingStreamingIndicator = false
+        }
+    }
+
     val sessionKey = chatState.currentSessionId ?: "new-session"
 
     val editingMessage by remember(chatState.editingMessageId, chatState.messages) {
@@ -130,6 +150,9 @@ fun ChatView(
             }
         }
     }
+
+    val density = LocalDensity.current
+    val floatingIndicatorBottomPadding = with(density) { inputBarHeightPx.toDp() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -193,7 +216,8 @@ fun ChatView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .background(EnsuColor.backgroundBase()),
+                        .background(EnsuColor.backgroundBase())
+                        .onSizeChanged { inputBarHeightPx = it.height },
                     messageText = chatState.messageText,
                     attachments = chatState.attachments,
                     editingMessage = editingMessage,
@@ -214,6 +238,30 @@ fun ChatView(
                     onCancelEdit = onCancelEdit,
                     focusRequestId = focusRequestId
                 )
+            }
+        }
+
+        if (!showDownloadOnboarding && showFloatingStreamingIndicator) {
+            Box(
+                modifier = Modifier
+                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                    .padding(bottom = floatingIndicatorBottomPadding)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(115.dp)
+                        .height(52.5.dp)
+                ) {
+                    ensuRiveAnimation(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .offset(y = (-4).dp),
+                        alignment = RiveAlignment.CENTER,
+                        outroTrigger = !chatState.isGenerating,
+                        outroInputName = "outro",
+                        clipContent = false
+                    )
+                }
             }
         }
 
