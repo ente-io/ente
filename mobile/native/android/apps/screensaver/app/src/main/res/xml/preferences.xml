@@ -11,17 +11,10 @@
         android:title="@string/button_set_screensaver"
         android:summary="@string/pref_set_screensaver_summary" />
 
-    <Preference
-        android:key="pref_open_dream_settings"
-        android:title="@string/open_system_screensaver_settings" />
-
-    <ListPreference
-        android:defaultValue="normal"
-        android:entries="@array/pref_overlay_entries"
-        android:entryValues="@array/pref_overlay_values"
-        android:key="pref_overlay"
-        android:summary="@string/pref_overlay_summary"
-        android:title="@string/pref_title_overlay" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="pref_shuffle"
+        android:title="@string/pref_title_shuffle" />
 
     <Preference
         android:key="pref_open_advanced"

@@ -7,7 +7,6 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.ente.photos.screensaver.R
-import io.ente.photos.screensaver.diagnostics.AdbInstructionsActivity
 import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
@@ -32,11 +31,6 @@ class AdvancedSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<Preference>("pref_adb_instructions")?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), AdbInstructionsActivity::class.java))
-            true
-        }
-
         findPreference<Preference>("pref_clear_cache")?.setOnPreferenceClickListener {
             scope.launch {
                 val repo = EntePublicAlbumRepository.get(requireContext())
@@ -51,15 +45,7 @@ class AdvancedSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        findPreference<ListPreference>("pref_source")?.summaryProvider =
-            ListPreference.SimpleSummaryProvider.getInstance()
         findPreference<ListPreference>("pref_interval_ms")?.summaryProvider =
-            ListPreference.SimpleSummaryProvider.getInstance()
-        findPreference<ListPreference>("pref_ente_cache_limit")?.summaryProvider =
-            ListPreference.SimpleSummaryProvider.getInstance()
-        findPreference<ListPreference>("pref_ente_refresh_interval_ms")?.summaryProvider =
-            ListPreference.SimpleSummaryProvider.getInstance()
-        findPreference<ListPreference>("pref_fit_mode")?.summaryProvider =
             ListPreference.SimpleSummaryProvider.getInstance()
     }
 

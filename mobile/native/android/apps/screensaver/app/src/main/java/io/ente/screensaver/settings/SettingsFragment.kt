@@ -1,19 +1,26 @@
 package io.ente.photos.screensaver.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.ente.photos.screensaver.R
+import io.ente.photos.screensaver.diagnostics.AdbInstructionsActivity
 import io.ente.photos.screensaver.diagnostics.ScreensaverConfigurator
+import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
 import io.ente.photos.screensaver.setup.SetupActivity
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
+    private val scope = MainScope()
     private var dataStore: SsaverPreferenceDataStore? = null
+    private var changeAlbumPreference: Preference? = null
     private var setScreensaverPreference: Preference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -23,7 +30,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        findPreference<Preference>("pref_change_album")?.setOnPreferenceClickListener {
+        changeAlbumPreference = findPreference("pref_change_album")
+        changeAlbumPreference?.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), SetupActivity::class.java))
             true
         }
@@ -35,19 +43,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 is ScreensaverConfigurator.Result.Success -> {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
                 }
+
                 is ScreensaverConfigurator.Result.NeedsWriteSecureSettings -> {
-                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
+                    startActivity(Intent(requireContext(), AdbInstructionsActivity::class.java))
                 }
+
                 is ScreensaverConfigurator.Result.Error -> {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
                 }
             }
             updateSetScreensaverVisibility()
-            true
-        }
-
-        findPreference<Preference>("pref_open_dream_settings")?.setOnPreferenceClickListener {
-            openDreamSettings()
             true
         }
 
@@ -57,37 +62,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         updateSetScreensaverVisibility()
-    }
-
-    private fun openDreamSettings() {
-        val context = requireContext()
-        val attempts = listOf(
-            Intent(Settings.ACTION_DREAM_SETTINGS),
-            Intent().setClassName(
-                "com.android.tv.settings",
-                "com.android.tv.settings.device.display.daydream.DaydreamActivity",
-            ),
-            Intent().setClassName(
-                "com.android.tv.settings",
-                "com.android.tv.settings.display.daydream.DaydreamActivity",
-            ),
-            Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.LEANBACK_SETTINGS"),
-            Intent(Settings.ACTION_SETTINGS),
-        )
-
-        val launched = attempts.any { intent ->
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            runCatching { startActivity(intent) }.isSuccess
-        }
-
-        if (!launched) {
-            Toast.makeText(context, getString(R.string.unavailable_system_screensaver_settings), Toast.LENGTH_LONG).show()
-        }
+        updateAlbumSummary()
     }
 
     override fun onResume() {
         super.onResume()
         updateSetScreensaverVisibility()
+        updateAlbumSummary()
     }
 
     private fun updateSetScreensaverVisibility() {
@@ -95,9 +76,41 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setScreensaverPreference?.isVisible = !ScreensaverConfigurator.isScreensaverConfigured(context)
     }
 
+    private fun updateAlbumSummary() {
+        val context = context ?: return
+        scope.launch {
+            val config = EntePublicAlbumRepository.get(context).getConfig()
+            changeAlbumPreference?.summary = config?.publicUrl?.let(::albumLabelFromUrl)
+                ?: getString(R.string.pref_change_album_summary)
+        }
+    }
+
+    private fun albumLabelFromUrl(publicUrl: String): String {
+        val uri = runCatching { Uri.parse(publicUrl) }.getOrNull() ?: return publicUrl
+
+        val queryName = listOf("name", "title", "album")
+            .firstNotNullOfOrNull { key -> uri.getQueryParameter(key)?.trim()?.takeIf { it.isNotBlank() } }
+        if (!queryName.isNullOrBlank()) return queryName
+
+        val token = uri.getQueryParameter("t")?.trim().orEmpty()
+        val pathLabel = uri.pathSegments
+            .asReversed()
+            .firstOrNull { segment ->
+                val clean = segment.trim()
+                clean.isNotBlank() && clean != token && clean.lowercase() !in setOf("a", "album", "albums", "share")
+            }
+            ?.replace('-', ' ')
+            ?.replace('_', ' ')
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+
+        return pathLabel ?: (uri.host?.removePrefix("www.") ?: publicUrl)
+    }
+
     override fun onDestroy() {
         dataStore?.close()
         dataStore = null
+        scope.cancel()
         super.onDestroy()
     }
 }

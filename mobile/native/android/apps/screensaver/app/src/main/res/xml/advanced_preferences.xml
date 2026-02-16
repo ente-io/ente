@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
-        android:key="pref_diagnostics"
-        android:title="@string/diagnostics" />
-
-    <Preference
-        android:key="pref_adb_instructions"
-        android:title="@string/button_adb_instructions"
-        android:summary="@string/pref_adb_instructions_summary" />
-
-    <Preference
-        android:key="pref_clear_cache"
-        android:title="@string/ente_cache_clear"
-        android:summary="@string/ente_cache_clear_summary" />
-
-    <ListPreference
-        android:defaultValue="ente_public_album"
-        android:entries="@array/pref_source_entries"
-        android:entryValues="@array/pref_source_values"
-        android:key="pref_source"
-        android:title="@string/pref_title_photo_source" />
-
     <ListPreference
         android:defaultValue="60000"
         android:entries="@array/pref_interval_entries"
@@ -29,30 +8,13 @@
         android:key="pref_interval_ms"
         android:title="@string/pref_title_slideshow_interval" />
 
-    <ListPreference
-        android:defaultValue="50"
-        android:entries="@array/pref_ente_cache_entries"
-        android:entryValues="@array/pref_ente_cache_values"
-        android:key="pref_ente_cache_limit"
-        android:title="@string/pref_title_ente_cache_size" />
+    <Preference
+        android:key="pref_clear_cache"
+        android:title="@string/ente_cache_clear"
+        android:summary="@string/ente_cache_clear_summary" />
 
-    <ListPreference
-        android:defaultValue="3600000"
-        android:entries="@array/pref_ente_refresh_entries"
-        android:entryValues="@array/pref_ente_refresh_values"
-        android:key="pref_ente_refresh_interval_ms"
-        android:title="@string/pref_title_ente_refresh_interval" />
-
-    <SwitchPreferenceCompat
-        android:defaultValue="true"
-        android:key="pref_shuffle"
-        android:title="@string/pref_title_shuffle" />
-
-    <ListPreference
-        android:defaultValue="crop"
-        android:entries="@array/pref_fit_entries"
-        android:entryValues="@array/pref_fit_values"
-        android:key="pref_fit_mode"
-        android:title="@string/pref_title_fit_mode" />
+    <Preference
+        android:key="pref_diagnostics"
+        android:title="@string/diagnostics" />
 
 </PreferenceScreen>
