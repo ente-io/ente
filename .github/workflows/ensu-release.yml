@@ -156,7 +156,7 @@ jobs:
 
             - name: Build Rust libraries
               run: |
-                  cd ../../../packages/rust/tool
+                  cd ../../packages/rust/tool
                   ./build_android.sh
               env:
                   ANDROID_HOME: ${{ env.ANDROID_HOME }}
