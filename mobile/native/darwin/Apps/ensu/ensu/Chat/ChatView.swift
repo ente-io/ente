@@ -259,6 +259,10 @@ struct ChatView: View {
                     guard EnsuFeatureFlags.enableSignIn else { return }
                     handleSignInRequest()
                 },
+                onNewChat: {
+                    viewModel.startNewSession()
+                    viewState.isDrawerOpen = false
+                },
                 onAttachmentDownloads: {
                     viewState.showAttachmentDownloads = true
                 }
@@ -407,10 +411,6 @@ struct ChatView: View {
             currentSessionId: viewModel.currentSessionId,
             isLoggedIn: appState.isLoggedIn,
             email: CredentialStore.shared.email,
-            onNewChat: {
-                viewModel.startNewSession()
-                viewState.isDrawerOpen = false
-            },
             onSelectSession: { session in
                 viewModel.selectSession(session)
                 viewState.isDrawerOpen = false
