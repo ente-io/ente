@@ -9,6 +9,7 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
@@ -102,6 +103,8 @@ export interface CollectionHeaderProps
     onCollectionShare: () => void;
     onCollectionManageLink: () => void;
     onCollectionCast: () => void;
+    canSetAlbumCover: boolean;
+    onSetAlbumCover: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -159,6 +162,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionShare,
     onCollectionManageLink,
     onCollectionCast,
+    canSetAlbumCover,
+    onSetAlbumCover,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
     onMarkTempDeleted,
@@ -629,6 +634,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("rename_album")}
                 </OverflowMenuOption>,
+                canSetAlbumCover && (
+                    <OverflowMenuOption
+                        key="set-cover"
+                        onClick={onSetAlbumCover}
+                        startIcon={<ImageOutlinedIcon />}
+                    >
+                        {t("set_cover")}
+                    </OverflowMenuOption>
+                ),
                 <OverflowMenuOption
                     key="sort"
                     onClick={showSortOrderMenu}
