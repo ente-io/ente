@@ -20,3 +20,6 @@ CLIP/mobileclip_repo/
 
 # Data
 data/flickr8k_captions.txt
+
+# Local parity run outputs
+out/

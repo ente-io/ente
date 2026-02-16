@@ -1,0 +1,32 @@
+{
+  "schema_version": "1",
+  "dataset": "local-bootstrap-corpus",
+  "items": [
+    {
+      "file_id": "man.jpeg",
+      "source": "data/man.jpeg",
+      "tags": ["smoke", "single-face"],
+      "bootstrap_face_count": 1
+    },
+    {
+      "file_id": "people.jpeg",
+      "source": "data/people.jpeg",
+      "tags": ["smoke", "group-photo"],
+      "bootstrap_face_count": 3
+    },
+    {
+      "file_id": "singapore.jpg",
+      "source": "data/singapore.jpg",
+      "tags": ["smoke", "cityscape", "no-face"],
+      "bootstrap_face_count": 0
+    }
+  ],
+  "threshold_defaults": {
+    "clip_cosine_distance": 0.01,
+    "cross_platform_clip_cosine_distance": 0.01,
+    "face_embedding_cosine_distance": 0.015,
+    "box_iou_threshold": 0.98,
+    "landmark_error_threshold": 0.03,
+    "score_delta_threshold": 0.1
+  }
+}

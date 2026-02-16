@@ -84,13 +84,13 @@ Use this section as the primary onboarding map before touching code.
 This section is for implementation agents to keep a running log so handoffs stay low-friction.
 
 ### Workstream Checklist
-- [ ] W1: Define shared output schema (`file_id`, clip vector, detections, face embeddings, metadata)
+- [x] W1: Define shared output schema (`file_id`, clip vector, detections, face embeddings, metadata)
 - [ ] W2: Implement Python ground truth pipeline (`clip.py`, `face_detection.py`, `face_alignment.py`, `face_embedding.py`, `pipeline.py`)
-- [ ] W3: Add/define corpus manifest and storage layout under `infra/ml/ground_truth`
+- [x] W3: Add/define corpus manifest and storage layout under `infra/ml/ground_truth`
 - [ ] W4: Implement desktop parity runner
 - [ ] W5: Implement Android parity runner
 - [ ] W6: Implement iOS parity runner
-- [ ] W7: Implement comparator and report generator
+- [x] W7: Implement comparator and report generator
 - [ ] W8: Implement one-command local orchestration (`run_suite.sh`)
 - [ ] W9: Add selective CI workflow for indexing-related path changes
 - [ ] W10: Document usage and maintenance (`README`, golden update instructions)
@@ -98,24 +98,25 @@ This section is for implementation agents to keep a running log so handoffs stay
 ### Implementation Log
 | Date (YYYY-MM-DD) | Agent | Change Summary | Files Touched | Validation Run | Next Step |
 |---|---|---|---|---|---|
-| _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ |
+| 2026-02-13 | Codex (GPT-5) | Implemented shared parity result schema, comparator/report engine, bootstrap corpus manifest + deterministic golden generator, comparator CLI, suite runner scaffold, and pytest coverage for schema/comparator behavior across python/android/ios/desktop fixtures. | `infra/ml/ground_truth/schema.py`, `infra/ml/ground_truth/manifest.json`, `infra/ml/ground_truth/README.md`, `infra/ml/comparator/compare.py`, `infra/ml/tools/generate_goldens.py`, `infra/ml/tools/compare_parity_outputs.py`, `infra/ml/tools/run_suite.sh`, `infra/ml/tests/conftest.py`, `infra/ml/tests/test_schema.py`, `infra/ml/tests/test_comparator.py`, `infra/ml/.gitignore` | `uv run --project infra/ml --no-sync python infra/ml/tools/generate_goldens.py --manifest infra/ml/ground_truth/manifest.json --output-dir infra/ml/ground_truth/goldens`; `uv run --project infra/ml --no-sync --with pytest pytest infra/ml/tests/test_schema.py infra/ml/tests/test_comparator.py`; `uv run --project infra/ml --no-sync python infra/ml/tools/compare_parity_outputs.py --ground-truth infra/ml/ground_truth/goldens/results.json --platform-result desktop=infra/ml/ground_truth/goldens/results.json --output /tmp/ml_parity_compare_report.json`; `infra/ml/tools/run_suite.sh --suite smoke --platforms all --output-dir infra/ml/out/parity` | Implement real ONNX-backed Python pipeline modules (`clip.py`, `face_detection.py`, `face_alignment.py`, `face_embedding.py`, `pipeline.py`) and connect desktop/android/ios runners to emit schema outputs. |
 
 ### Decisions and Rationale Log
 | Date | Decision | Rationale | Impacted Files |
 |---|---|---|---|
-| _TBD_ | _TBD_ | _TBD_ | _TBD_ |
+| 2026-02-13 | Start with strict schema + comparator + contract tests before platform runner wiring. | Provides immediate, automated parity coverage and a stable JSON contract while platform-specific runner implementations are still pending. | `infra/ml/ground_truth/schema.py`, `infra/ml/comparator/compare.py`, `infra/ml/tests/test_schema.py`, `infra/ml/tests/test_comparator.py` |
+| 2026-02-13 | Use deterministic bootstrap golden generation from manifest-defined corpus metadata for initial suite bring-up. | Allows end-to-end tool validation (`generate_goldens` -> comparator -> report) without waiting for full Python model pipeline completion. | `infra/ml/tools/generate_goldens.py`, `infra/ml/ground_truth/manifest.json`, `infra/ml/tools/run_suite.sh` |
 
 ### Open Questions / Blockers
 | Date | Owner | Blocker | Unblocked By |
 |---|---|---|---|
-| _TBD_ | _TBD_ | _TBD_ | _TBD_ |
+| 2026-02-13 | Codex (GPT-5) | Platform runners are not yet implemented (`desktop/scripts/ml_parity_runner.ts`, mobile integration parity tests), so `run_suite.sh` currently consumes platform outputs only when available. | Implement W4/W5/W6 runner outputs in shared schema and invoke them directly from `run_suite.sh`. |
 
 ### Handoff Checklist
-- [ ] Added brief implementation note to `Implementation Log`
-- [ ] Updated `Workstream Checklist` states
-- [ ] Recorded any non-obvious tradeoff in `Decisions and Rationale Log`
-- [ ] Listed unresolved blockers/questions
-- [ ] Included exact command(s) used for validation in log
+- [x] Added brief implementation note to `Implementation Log`
+- [x] Updated `Workstream Checklist` states
+- [x] Recorded any non-obvious tradeoff in `Decisions and Rationale Log`
+- [x] Listed unresolved blockers/questions
+- [x] Included exact command(s) used for validation in log
 
 ## Goals
 1. Verify CLIP image embeddings parity across Android, iOS, desktop, and Python ground truth.
