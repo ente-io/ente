@@ -141,7 +141,7 @@ PY
 echo "Downloaded fixture files: $downloaded_count"
 
 echo "Generating Python goldens"
-uv run --project "$ML_DIR" --no-sync python "$ML_DIR/tools/generate_goldens.py" \
+uv run --project "$ML_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
   --manifest "infra/ml/ground_truth/manifest.json" \
   --output-dir "$PYTHON_OUTPUT_DIR"
 
@@ -218,5 +218,5 @@ fi
 
 echo "Parity comparison passed"
 if $UPDATE_GOLDEN; then
-  echo "--update-golden currently regenerates Python bootstrap goldens only."
+  echo "--update-golden currently regenerates Python ONNX ground-truth outputs only."
 fi
