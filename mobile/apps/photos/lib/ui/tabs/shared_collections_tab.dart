@@ -170,7 +170,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            const FeedPreviewWidget(),
+            if (flagService.isSocialEnabled) const FeedPreviewWidget(),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
