@@ -9,7 +9,6 @@ on:
     workflow_dispatch:
 
 env:
-    RUST_VERSION: "1.83"
     NDK_VERSION: "27.0.12077973"
 
 permissions:
@@ -150,7 +149,6 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
               with:
-                  toolchain: ${{ env.RUST_VERSION }}
                   targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
             - name: Install cargo-ndk
