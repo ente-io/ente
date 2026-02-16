@@ -824,7 +824,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                     final isSearchResults =
                         isOnSearchTab && IndexOfStackNotifier().index == 1;
                     final isOnLandingPage =
-                        _shouldShowLandingPageForUnconfiguredAccount();
+                        !Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode;
                     final isOnOnlineGrantPermissionScreen =
                         Configuration.instance.hasConfiguredAccount() &&
                             !isOfflineMode &&
@@ -850,13 +851,20 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      if (_shouldShowLandingPageForUnconfiguredAccount()) {
+      final isOfflineEntryFlowEnabled =
+          widget.startWithoutAccount && localSettings.showOfflineModeOption;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      final canResumePersistedOfflineMode =
+          hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
+      if (isOfflineEntryFlowEnabled || canResumePersistedOfflineMode) {
+        if (_shouldShowPermissionWidget()) {
+          return const GrantPermissionsWidget(startWithoutAccount: true);
+        }
+      } else {
         return const LandingPageWidget();
-      }
-      if (_shouldShowPermissionWidget()) {
-        return const GrantPermissionsWidget(startWithoutAccount: true);
       }
     }
     if (flagService.enableOnlyBackupFuturePhotos) {
@@ -1165,18 +1173,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     } else {
       return !permissionService.hasGrantedPermissions();
     }
-  }
-
-  bool _shouldShowLandingPageForUnconfiguredAccount() {
-    if (Configuration.instance.hasConfiguredAccount()) {
-      return false;
-    }
-    final isOfflineEntryFlowEnabled =
-        widget.startWithoutAccount && localSettings.showOfflineModeOption;
-    final hasPersistedOfflineMode = localSettings.isAppModeSet && isOfflineMode;
-    final canResumePersistedOfflineMode =
-        hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
-    return !(isOfflineEntryFlowEnabled || canResumePersistedOfflineMode);
   }
 
   bool _shouldShowLoadingWidget() {
