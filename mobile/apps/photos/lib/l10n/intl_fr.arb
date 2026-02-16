@@ -59,7 +59,7 @@
   "incorrectRecoveryKeyBody": "La clé de secours que vous avez entrée est incorrecte",
   "forgotPassword": "Mot de passe oublié",
   "enterYourRecoveryKey": "Entrez votre clé de récupération",
-  "noRecoveryKey": "Aucune clé de récupération ?",
+  "noRecoveryKey": "Clé de récupération égarée ?",
   "sorry": "Désolé",
   "noRecoveryKeyNoDecryption": "En raison de notre protocole de chiffrement de bout en bout, vos données ne peuvent pas être déchiffré sans votre mot de passe ou clé de récupération",
   "verifyEmail": "Vérifier l'e-mail",
@@ -67,9 +67,21 @@
   "checkInboxAndSpamFolder": "Consultez votre boîte de réception (et les indésirables) pour finaliser la vérification",
   "tapToEnterCode": "Appuyez pour saisir le code",
   "resendEmail": "Renvoyer l'e-mail",
+  "resendCode": "Renvoyer le code",
   "weHaveSendEmailTo": "Nous avons envoyé un e-mail à <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Nous avons envoyé un code à {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
     "placeholders": {
       "email": {
         "description": "The email address of the user",
@@ -88,6 +100,10 @@
   "weakStrength": "Faible",
   "strongStrength": "Forte",
   "moderateStrength": "Moyenne",
+  "strongPassword": "Mot de passe fort",
+  "passwordRequirements": "Utilisez plus de 9 caractères, une lettre majuscule et un caractère spécial",
+  "passwordsMatch": "Les mots de passe correspondent",
+  "passwordsDontMatch": "Les mots de passe ne correspondent pas",
   "passwordStrength": "Sécurité du mot de passe : {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -130,9 +146,10 @@
   "verifyPassword": "Vérifier le mot de passe",
   "recoveryKey": "Clé de secours",
   "recoveryKeyOnForgotPassword": "Si vous oubliez votre mot de passe, la seule façon de récupérer vos données sera grâce à cette clé.",
-  "recoveryKeySaveDescription": "Nous ne la stockons pas, veuillez la conserver en lieu endroit sûr.",
+  "recoveryKeySaveDescription": "Enregistrez cette clé dans un endroit sûr.",
   "doThisLater": "Plus tard",
   "saveKey": "Enregistrer la clé",
+  "shareKey": "Clé de partage",
   "recoveryKeyCopiedToClipboard": "Clé de secours copiée dans le presse-papiers",
   "recoverAccount": "Récupérer un compte",
   "recover": "Récupérer",
@@ -153,6 +170,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Copiez-collez ce code\ndans votre application d'authentification",
   "tapToCopy": "taper pour copier",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Scannez ce code-barres avec\nvotre application d'authentification",
+  "twoFAVerification": "Vérification 2FA",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Entrez le code à 6 chiffres de\nvotre application d'authentification",
   "confirm": "Confirmer",
   "setupComplete": "Configuration terminée",
@@ -321,11 +339,14 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB récupérés !",
   "details": "Détails",
   "claimMore": "Réclamez plus !",
+  "earnMoreSpace": "Gagnez de l'espace !",
   "theyAlsoGetXGb": "Ils obtiennent aussi {storageAmountInGB} Go",
+  "referralStorageForBoth": "{storageAmountInGB} GB pour eux + {storageAmountInGB} GB pour vous lorsqu'ils mettront à niveau leur compte.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} Go chaque fois que quelqu'un s'inscrit à une offre payante et applique votre code",
-  "shareTextReferralCode": "Code de parrainage Ente : {referralCode} \n\nValidez-le dans Paramètres → Général → Références pour obtenir {referralStorageInGB} Go gratuitement après votre inscription à un plan payant\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos est un endroit privé et sécurisé pour vos photos\n* Téléchargez des photos Ente à partir de https://ente. o/app\n* Créez un compte\n* Appliquez le code de parrainage {referralCode} dans Paramètres->Parrainage\n* Obtennez {referralStorageInGB}Go gratuitement lorsque vous passez à une offre payante",
   "claimFreeStorage": "Obtenez du stockage gratuit",
   "inviteYourFriends": "Parrainez vos ami·e·s",
   "earnFreeStorage": "Obtenez du stockage gratuit",
@@ -333,9 +354,9 @@
   "youBothGet": "Vous obtenez les deux",
   "free": "gratuit",
   "failedToFetchReferralDetails": "Impossible de récupérer les détails du parrainage. Veuillez réessayer plus tard.",
-  "referralStep1": "1. Personnalisez et partagez votre code avec vos amis.",
-  "referralStep2": "2. Ils souscrivent à une offre payante",
-  "referralStep3": "3. Vous recevez tous les deux {storageInGB} Go* gratuits",
+  "referralStep1": "1. Personnalisez et partagez votre code.",
+  "referralStep2": "2. Ils se sont inscrits à Ente en utilisant votre code.",
+  "referralStep3": "3. {storageInGB}Go gratuit pour eux + {storageInGB}Go gratuit pour vous lorsqu'ils passent sur un plan payant.",
   "referralsAreCurrentlyPaused": "Les recommandations sont actuellement en pause",
   "youCanAtMaxDoubleYourStorage": "Vous pouvez au maximum doubler votre espace de stockage",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Votre famille a obtenu {storageAmountInGb} Go jusqu'à présent} false {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent} other {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent !}}",
@@ -379,6 +400,8 @@
   "subscribeToChangeLinkSetting": "Vous avez besoin d'un abonnement payant pour modifier le paramètre de ce lien.",
   "subscribe": "S'abonner",
   "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
+  "cannotMoveToSharedAlbums": "Impossible de déplacer vers les albums partagés",
+  "cannotMoveToSharedAlbumsMessage": "Les éléments peuvent être ajoutés qu'aux albums partagés, et non déplacés. Voulez-vous ajouter à la place ?",
   "deleteSharedAlbum": "Supprimer l'album partagé ?",
   "deleteAlbum": "Supprimer l'album",
   "deleteAlbumDialog": "Supprimer aussi les photos (et vidéos) présentes dans cet album de <bold>tous</bold> les autres albums dont elles font partie ?",
@@ -471,6 +494,10 @@
   "mlConsentPrivacy": "Veuillez cliquer ici pour plus de détails sur cette fonctionnalité dans notre politique de confidentialité",
   "mlConsentConfirmation": "Je comprends et je souhaite activer l'apprentissage automatique",
   "magicSearch": "Recherche magique",
+  "magic": "Magique",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Découverte",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -582,6 +609,10 @@
   "backup": "Sauvegarde",
   "freeUpDeviceSpace": "Libérer de l'espace sur l'appareil",
   "freeUpDeviceSpaceDesc": "Économisez de l'espace sur votre appareil en effaçant les fichiers qui ont déjà été sauvegardés.",
+  "freeUpDeviceSpaceDescICloud": "Les fichiers dans les albums partagés iCloud ne peuvent pas être effacés.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Tout est effacé",
   "noDeviceThatCanBeDeleted": "Vous n'avez pas de fichiers sur cet appareil qui peuvent être supprimés",
   "removeDuplicates": "Supprimer les doublons",
@@ -631,6 +662,8 @@
   "notifications": "Notifications",
   "sharedPhotoNotifications": "Nouvelles photos partagées",
   "sharedPhotoNotificationsExplanation": "Recevoir des notifications quand quelqu'un·e ajoute une photo à un album partagé dont vous faites partie",
+  "socialNotifications": "J'aime et commentaires",
+  "socialNotificationsExplanation": "Recevoir des notifications pour les \"J'aime\" sur vos photos et les commentaires sur les albums dont vous faites partie",
   "advanced": "Avancé",
   "general": "Général",
   "security": "Sécurité",
@@ -769,17 +802,12 @@
   "openSettings": "Ouvrir les paramètres",
   "selectMorePhotos": "Sélectionner plus de photos",
   "existingUser": "Utilisateur existant",
-  "privateBackups": "Sauvegardes privées",
-  "forYourMemories": "pour vos souvenirs",
-  "endtoendEncryptedByDefault": "Chiffrement de bout en bout par défaut",
-  "safelyStored": "Stockage sécurisé",
-  "atAFalloutShelter": "dans un abri antiatomique",
-  "designedToOutlive": "Conçu pour survivre",
-  "available": "Disponible",
-  "everywhere": "partout",
-  "androidIosWebDesktop": "Android, iOS, Web, Ordinateur",
-  "mobileWebDesktop": "Mobile, Web, Ordinateur",
   "newToEnte": "Nouveau sur Ente",
+  "createAnEnteAccount": "Créer un compte Ente",
+  "continueWithoutAccount": "Continuer sans compte",
+  "loginToExistingAccount": "Se connecter à un compte existant",
+  "shareTheMoment": "Partagez le moment",
+  "letFriendsAndFamilyReact": "Laissez vos amis et votre famille réagir et commenter vos photos.",
   "pleaseLoginAgain": "Veuillez vous reconnecter",
   "autoLogoutMessage": "En raison d'un problème technique, vous avez été déconnecté. Veuillez nous excuser pour le désagrément.",
   "yourSubscriptionHasExpired": "Votre abonnement a expiré",
@@ -795,7 +823,6 @@
   "couldNotBackUpTryLater": "Nous n'avons pas pu sauvegarder vos données.\nNous allons réessayer plus tard.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente peut chiffrer et conserver des fichiers que si vous leur accordez l'accès",
   "pleaseGrantPermissions": "Veuillez accorder la permission",
-  "grantPermission": "Accorder la permission",
   "privateSharing": "Partage privé",
   "shareOnlyWithThePeopleYouWant": "Partagez uniquement avec les personnes que vous souhaitez",
   "usePublicLinksForPeopleNotOnEnte": "Utilisez des liens publics pour les personnes qui ne sont pas sur Ente",
@@ -817,6 +844,7 @@
   "name": "Nom",
   "newest": "Le plus récent",
   "lastUpdated": "Dernière mise à jour",
+  "updated": "Mis à jour",
   "deleteEmptyAlbums": "Supprimer les albums vides",
   "deleteEmptyAlbumsWithQuestionMark": "Supprimer les albums vides ?",
   "deleteAlbumsDialogBody": "Ceci supprimera tous les albums vides. Ceci est utile lorsque vous voulez réduire l'encombrement dans votre liste d'albums.",
@@ -915,6 +943,8 @@
   "sortAlbumsBy": "Trier par",
   "sortNewestFirst": "Plus récent en premier",
   "sortOldestFirst": "Plus ancien en premier",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Renommer",
   "leaveSharedAlbum": "Quitter l'album partagé?",
   "leaveAlbum": "Quitter l'album",
@@ -954,6 +984,39 @@
   "filesSavedToGallery": "Fichiers enregistrés dans la galerie",
   "fileFailedToSaveToGallery": "Échec de l'enregistrement dans la galerie",
   "download": "Télécharger",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} est déjà disponible dans l'album {albumName} sur votre appareil",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionSingleFile": "Le téléchargement d' {fileName} a été ignoré car il est déjà disponible dans l'album {albumName} sur votre appareil",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Le téléchargement de {fileCount} fichiers a été ignoré car ils sont déjà sur votre appareil",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Appuyez et maintenez enfoncé pour lire la vidéo",
   "pressAndHoldToPlayVideoDetailed": "Maintenez appuyé sur l'image pour lire la vidéo",
   "downloadFailed": "Échec du téléchargement",
@@ -969,7 +1032,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1003,7 +1066,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1110,6 +1173,46 @@
   "loadMessage8": "web.ente.io dispose d'un outil de téléchargement facile à utiliser",
   "loadMessage9": "Nous utilisons Xchacha20Poly1305 pour chiffrer vos données en toute sécurité",
   "photoDescriptions": "Descriptions de la photo",
+  "searchResultFileName": "Nom du fichier",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Description",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Type",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Extension du fichier",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Personne",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Partagé",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Déposé par",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Marque de l'appareil",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Modèle de l'appareil",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Fichiers",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Types et noms de fichiers",
   "location": "Lieu",
   "moments": "Souvenirs",
@@ -1259,6 +1362,7 @@
   "visibility": "Visibilité",
   "hideFromMemories": "Masquer des souvenirs",
   "showInMemories": "Afficher dans les souvenirs",
+  "showIgnored": "Afficher les ignorés",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1277,7 +1381,7 @@
   "moveToHiddenAlbum": "Déplacer vers un album masqué",
   "fileTypes": "Types de fichiers",
   "deleteConfirmDialogBody": "Ce compte est lié à d'autres applications Ente, si vous en utilisez une. Vos données téléchargées, dans toutes les applications ente, seront planifiées pour suppression, et votre compte sera définitivement supprimé.",
-  "hearUsWhereTitle": "Comment avez-vous entendu parler de Ente? (facultatif)",
+  "hearUsWhereTitle": "Comment avez-vous entendu parler de Ente ?",
   "hearUsExplanation": "Nous ne suivons pas les installations d'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !",
   "viewAddOnButton": "Afficher les modules complémentaires",
   "addOns": "Modules complémentaires",
@@ -1347,8 +1451,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1423,6 +1527,7 @@
   "enterPin": "Saisir le code PIN",
   "setNewPin": "Définir un nouveau code PIN",
   "appLock": "Verrouillage de l'application",
+  "lockScreenType": "Mode de verrouillage",
   "noSystemLockFound": "Aucun verrou système trouvé",
   "tapToUnlock": "Appuyer pour déverrouiller",
   "tooManyIncorrectAttempts": "Trop de tentatives incorrectes",
@@ -1477,7 +1582,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, =1 {Ajout d'un fichier à {personName}} other { {count} fichiers ajoutés à {personName}}}",
+  "addedFilesToPerson": "{count, plural, one {}=1 {Ajout d'un fichier à {personName}} other { {count} fichiers ajoutés à {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1491,7 +1596,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Un fichier est déjà lié à {personName}} other {{count} fichiers sont déjà liés à {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {Un fichier est déjà lié à {personName}} other {{count} fichiers sont déjà liés à {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1508,6 +1613,26 @@
   "addNewPerson": "Ajouter une nouvelle personne",
   "addNameOrMerge": "Ajouter un nom ou fusionner",
   "mergeWithExisting": "Fusionner avec existant",
+  "mergeWithPersonTitle": "Fusionner avec {name} ?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Toutes les photos des deux groupes de visage seront fusionnées sous {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nouvelle personne",
   "addName": "Ajouter un nom",
   "add": "Ajouter",
@@ -1532,7 +1657,7 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1562,7 +1687,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, =0 {Ajouter un admin} =1 {Ajouter un admin} other {Ajouter des admins}}",
+  "addAdmins": "{count, plural, one {}=0 {Ajouter un admin} =1 {Ajouter un admin} other {Ajouter des admins}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -1869,6 +1994,10 @@
   "personIsAge": "{name} a {age}!",
   "personTurningAge": "{name} aura bientôt {age}",
   "lastTimeWithThem": "Dernière fois avec {name}",
+  "unnamedPeopleSpotlight": "Un visage familier",
+  "unnamedPeopleYouAndThem": "Vous deux",
+  "unnamedPeopleDoingSomethingTogether": "Faites-le ensemble",
+  "unnamedPeopleLastTimeYouSawThem": "La dernière fois ensemble",
   "tripToLocation": "Voyage vers {location}",
   "tripInYear": "Voyage en {year}",
   "lastYearsTrip": "Voyage de l'an dernier",
@@ -1925,6 +2054,10 @@
   "areYouSureYouWantToMergeThem": "Êtes-vous sûr de vouloir les fusionner?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Tous les groupes sans nom seront fusionnés dans la personne sélectionnée. Cela peut toujours être annulé à partir de l'historique des suggestions de la personne.",
   "yesIgnore": "Oui, ignorer",
+  "areYouSureYouWantToShowThisPersonInPeopleSectionAgain": "Êtes-vous sûr de vouloir réafficher cette personne dans la section Personnes ?",
+  "areYouSureYouWantToShowThesePeopleInPeopleSectionAgain": "Êtes-vous sûr de vouloir réafficher ces personnes dans la section Personnes ?",
+  "yesShowPerson": "Oui, montrer la personne",
+  "yesShowPeople": "Oui, montrer les personnes",
   "same": "Identique",
   "different": "Différent(e)",
   "sameperson": "Même personne ?",
@@ -1966,7 +2099,7 @@
   "font": "Police",
   "background": "Arrière-plan",
   "align": "Aligner",
-  "addedToAlbums": "{count, plural, =1{Ajouté avec succès à 1 album} other{Ajouté avec succès à {count} albums}}",
+  "addedToAlbums": "{count, plural, one {}=1{Ajouté avec succès à 1 album} other{Ajouté avec succès à {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2005,7 +2138,7 @@
   "findSimilarImages": "Rechercher des images similaires",
   "noSimilarImagesFound": "Aucune image similaire trouvée",
   "yourPhotosLookUnique": "Vos photos semblent uniques",
-  "similarGroupsFound": "{count, plural, =1{{count} groupe trouvé} other{{count} groupes trouvés}}",
+  "similarGroupsFound": "{count, plural, one {}=1{{count} groupe trouvé} other{{count} groupes trouvés}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2083,6 +2216,7 @@
     }
   },
   "size": "Taille",
+  "closest": "Le plus proche",
   "similarity": "Similitude",
   "analyzingPhotosLocally": "Analyse de vos photos en local ...",
   "lookingForVisualSimilarities": "Recherche de ressemblances visuelles...",
@@ -2294,11 +2428,46 @@
   "ritualEmojiUseAction": "Utiliser",
   "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie.",
   "feed": "Fil d'actualité",
-  "likedYourPhoto": "Aimé une photo",
-  "commentedOnYourPhoto": "Commenté sur une photo",
-  "repliedToYourComment": "A répondu à un commentaire",
-  "likedYourComment": "A aimé un commentaire",
-  "likedYourReply": "A aimé une réponse",
+  "newCommentNotificationTitle": "Vous avez reçu un commentaire",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Vous avez un \"j'aime\"",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "A aimé votre photo",
+  "likedAPhoto": "A aimé une photo",
+  "likedYourVideo": "A aimé votre vidéo",
+  "commentedOnYourPhoto": "Commenté sur votre photo",
+  "commentedOnAPhoto": "Commenté sur une photo",
+  "commentedOnYourVideo": "Commenté sur votre vidéo",
+  "commentedOnAVideo": "A commenté une vidéo",
+  "repliedToYourComment": "A répondu à votre commentaire",
+  "repliedToAComment": "A répondu à un commentaire",
+  "likedYourComment": "A aimé ton commentaire",
+  "likedAComment": "A aimé un commentaire",
+  "likedYourReply": "A aimé votre réponse",
+  "likedAReply": "A aimé une réponse",
+  "addedAMemoryTo": "Ajouter un souvenir à {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Ajout de {count} souvenirs à {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "et 1 autre",
   "andXOthers": "et {count} autres",
   "@andXOthers": {
@@ -2336,7 +2505,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, =1{1 j'aime} other{{count} j'aime}}",
+  "likesCount": "{count, plural, one {}=1{1 j'aime} other{{count} j'aime}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2357,7 +2526,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, =1{J'aime impossible sur 1 album} other{J'aime impossible sur {count} albums}}",
+  "failedToLikeAlbums": "{count, plural, one {}=1{J'aime impossible sur 1 album} other{J'aime impossible sur {count} albums}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2370,7 +2539,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
+  "albumsCount": "{count, plural, one {}=1{1 album} other{{count} albums}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -2416,7 +2585,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{0 commentaires} =1{1 commentaire} other{{count} commentaires}}",
+  "commentsCount": "{count, plural, one {} =0{0 commentaires} =1{1 commentaire} other{{count} commentaires}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {
@@ -2424,5 +2593,58 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Paramètres de recherche",
+  "suggestions": "Suggestions",
+  "cleanupHiddenFiles": "Nettoyer les fichiers cachés",
+  "cleanupHiddenFilesDescription": "Certains fichiers dans les albums cachés existant toujours dans les albums non cachés les rendent visibles en dehors de la section cachée. Nettoyer-les, cela les supprimera des albums non cachés.",
+  "cleanupComplete": "Nettoyage terminé",
+  "deleteHiddenFilesFromDevice": "Supprimer les fichiers cachés de l'appareil",
+  "deleteHiddenFilesFromDeviceDescription": "Supprimer les copies locales des fichiers cachés de votre appareil",
+  "deleteOnDeviceFiles": "Supprimer sur les fichiers de l'appareil",
+  "noHiddenFilesOnDevice": "Supprimer les fichiers cachés de l'appareil",
+  "welcome": "Bienvenue",
+  "grantGalleryPermissionDesc": "Accorder la permission d'accéder et d'organiser des photos avec la reconnaissance faciale.\n\nTout le traitement se produit sur votre appareil.",
+  "grantPermission": "Accorder la permission",
+  "privateAI": "IA privée",
+  "privateAIDescription": "Ente utilise l'IA sur l'appareil pour analyser sur vos photos, les visages, les objets, les emplacements et le texte. Ces données sont utilisées pour alimenter des fonctionnalités telles que la reconnaissance faciale et la recherche intelligente. Tout est traité et stocké localement sur votre appareil — rien n'est jamais téléchargé sur nos serveurs.",
+  "byAgreeing": "En poursuivant, j'accepte les <u-terms>conditions d'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>.",
+  "moreThanJustAGallery": "Plus qu'une simple galerie.",
+  "encryptedBackupDescription": "Sauvegarde chiffrée, recherche intelligente, liens partagables et synchronisation transparente sur tous vos appareils.",
+  "getStarted": "C'est parti",
+  "unlockSmartFeatures": "Débloquer les fonctionnalités intelligentes",
+  "enableOnDeviceMLDescription": "Activez le ML sur l'appareil pour rechercher par faces, lieux et plus. Vos photos ne quittent jamais votre appareil.",
+  "offlineEnableSharingTitle": "Le partage commence ici",
+  "offlineEnableSharingDesc": "Inscrivez-vous pour partager des photos avec tout le monde - même ceux qui ne sont pas sur Ente",
+  "offlineEnableBackupTitle": "Vos albums sauvegardés apparaitront ici",
+  "offlineEnableBackupDesc": "Inscrivez-vous pour préserver vos souvenirs avec Ente.",
+  "offlineEnableBackupAction": "Commencez avec 10 Go GRATUITS",
+  "offlineSettingsBannerTitle": "Nous ne pouvons pas voir vos photos. Jamais.",
+  "offlineSettingsBannerDesc": "Le cryptage zéro connaissance signifie que vos souvenirs restent les vôtres.",
+  "alreadyHaveAnAccount": "Déjà un compte ?",
+  "loginToEnte": "Se connecter à Ente",
+  "searchAndDiscover": "Recherche et découverte",
+  "searchAndDiscoverDesc": "Rechercher des photos avec du texte ou redécouvrir d'anciens souvenirs avec ML sur l'appareil",
+  "shareYourMemories": "Partagez vos souvenirs",
+  "shareYourMemoriesDesc": "Partagez vos albums, créez des liens, collectez des photos et déposez un commentaire",
+  "privateAndSecureBackups": "Sauvegardes privées et sécurisées",
+  "privateAndSecureBackupsDesc": "Chiffré de bout en bout, triple réplication, open source, et audité indépendamment",
+  "mlProgressBannerTitle": "Accrochez-vous !",
+  "mlProgressBannerDescription": "Vos photos sont traitées sur l'appareil pour détecter les visages, les objets et plus encore.",
+  "mlProgressBannerStatus": "{indexed} photos traitées sur un total de {total}",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "Vous voulez sauvegarder ces visages ?",
+  "offlineFacesBannerSubtitle": "Inscrivez-vous pour taguer des gens et les retrouver facilement plus tard.",
+  "offlineNameFaceBannerTitle": "Donner un nom à ce visage",
+  "offlineNameFaceBannerSubtitle": "Inscrivez-vous pour les taguer et retrouvez facilement leurs photos plus tard.",
+  "signUp": "S'inscrire"
 }
