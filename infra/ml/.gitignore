@@ -23,3 +23,13 @@ data/flickr8k_captions.txt
 
 # Local parity run outputs
 out/
+
+# Local fixture cache
+.cache/
+
+# Runtime-downloaded fixture inputs
+test_data/
+
+# Runtime parity JSON outputs
+ground_truth/goldens/*.json
+!ground_truth/goldens/.gitkeep
