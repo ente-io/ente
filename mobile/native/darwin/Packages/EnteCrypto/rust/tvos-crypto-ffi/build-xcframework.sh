@@ -2,9 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IOS_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+ENCRYPTO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 CRATE_DIR="${SCRIPT_DIR}"
-BINARY_DIR="${IOS_DIR}/Packages/EnteCrypto/Binaries"
+BINARY_DIR="${ENCRYPTO_DIR}/Binaries"
 XCFRAMEWORK_DIR="${BINARY_DIR}/EnteRustCryptoFFI.xcframework"
 HEADER_DIR="${CRATE_DIR}/include"
 TARGET_DIR="${CRATE_DIR}/target"
