@@ -857,7 +857,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       final isOfflineEntryFlowEnabled =
           widget.startWithoutAccount && localSettings.showOfflineModeOption;
       final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
-      if (isOfflineEntryFlowEnabled || hasPersistedOfflineMode) {
+      final canResumePersistedOfflineMode =
+          hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
+      if (isOfflineEntryFlowEnabled || canResumePersistedOfflineMode) {
         if (_shouldShowPermissionWidget()) {
           return const GrantPermissionsWidget(startWithoutAccount: true);
         }

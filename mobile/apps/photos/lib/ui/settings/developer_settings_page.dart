@@ -56,6 +56,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 _logger.info("Entered endpoint: $url");
                 if (url == "localMode") {
                   await localSettings.setAppMode(AppMode.offline);
+                  await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to offline");
                   Navigator.of(context).pop();
