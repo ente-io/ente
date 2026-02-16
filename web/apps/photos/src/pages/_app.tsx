@@ -192,30 +192,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
     }, [appLock.enabled, appLock.isLocked, appLock.autoLockTimeMs]);
 
-    // Blur main content when tab is hidden to prevent content from appearing
-    // in tab previews and Alt+Tab thumbnails (desktop only).
-    useEffect(() => {
-        if (!isDesktop || !appLock.hideContentOnBlur) return;
-
-        const el = document.getElementById("__next");
-        if (!el) return;
-
-        const handleVisibilityChange = () => {
-            el.style.filter = document.hidden ? "blur(30px)" : "";
-        };
-
-        handleVisibilityChange();
-
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        return () => {
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange,
-            );
-            el.style.filter = "";
-        };
-    }, [appLock.hideContentOnBlur]);
-
     // On Electron, clear the auto-lock timer when the main window regains focus.
     useEffect(() => {
         if (!appLock.enabled) return;

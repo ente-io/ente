@@ -27,7 +27,6 @@ import {
     setupPassword,
     disableAppLock,
     setAutoLockTime,
-    setHideContentOnBlur,
 } from "../../services/app-lock";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -80,10 +79,6 @@ export const AppLockSettings: React.FC<
     const handlePasswordSetupComplete = useCallback(() => {
         setPasswordDialogOpen(false);
     }, []);
-
-    const handleToggleHideContent = useCallback(() => {
-        setHideContentOnBlur(!state.hideContentOnBlur);
-    }, [state.hideContentOnBlur]);
 
     return (
         <>
@@ -156,14 +151,6 @@ export const AppLockSettings: React.FC<
                             </Stack>
                         </>
                     )}
-
-                    <RowButtonGroup>
-                        <RowSwitch
-                            label={t("hide_content_on_blur")}
-                            checked={state.hideContentOnBlur}
-                            onClick={handleToggleHideContent}
-                        />
-                    </RowButtonGroup>
                 </Stack>
             </TitledNestedSidebarDrawer>
 

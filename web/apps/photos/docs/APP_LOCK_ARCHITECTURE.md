@@ -141,8 +141,6 @@ export interface AppLockState {
     cooldownExpiresAt: number;
     /** Auto-lock delay in milliseconds */
     autoLockTimeMs: number;
-    /** Whether to blur content when tab/window is hidden */
-    hideContentOnBlur: boolean;
 }
 ```
 
@@ -169,7 +167,6 @@ export function attemptUnlock(input: string): Promise<boolean>;
 export function setAppLockEnabled(enabled: boolean): void;
 export function setLockType(type: "pin" | "password"): void;
 export function setAutoLockTime(ms: number): void;
-export function setHideContentOnBlur(enabled: boolean): void;
 export function setupPin(pin: string): Promise<void>;
 export function setupPassword(password: string): Promise<void>;
 export function logoutAppLock(): void;
@@ -188,7 +185,6 @@ Three categories, each using the appropriate existing storage mechanism:
 | Lock type | `localStorage` | Synchronous read needed on cold start | `"appLock.lockType"` |
 | Enabled flag | `localStorage` | Synchronous read needed on cold start | `"appLock.enabled"` |
 | Auto-lock time (ms) | `localStorage` | Non-sensitive preference | `"appLock.autoLockTimeMs"` |
-| Hide content on blur | `localStorage` | Non-sensitive preference | `"appLock.hideContentOnBlur"` |
 | Invalid attempt count | IndexedDB via `setKV` | Harder to tamper than localStorage | `"appLock.invalidAttempts"` |
 | Cooldown expiry timestamp | IndexedDB via `setKV` | Harder to tamper than localStorage | `"appLock.cooldownExpiresAt"` |
 
@@ -343,11 +339,9 @@ Full-viewport fixed-position overlay. Uses MUI z-index convention: `calc(var(--m
 
 3. **Cooldown timer:** Shows "Too many attempts. Try again in Xm Ys" with a `setInterval` countdown.
 
-4. **Privacy screen:** When `hideContentOnBlur` is enabled and `document.hidden` is true, apply `filter: blur(30px)` on the main content container. Prevents content from appearing in tab previews and Alt+Tab thumbnails.
+4. **No dismiss:** Cannot be closed except through authentication or logout. No Escape key handling. No click-outside dismiss.
 
-5. **No dismiss:** Cannot be closed except through authentication or logout. No Escape key handling. No click-outside dismiss.
-
-6. **Logout link:** Calls the existing `logout()` from `BaseContext`. Shows a confirmation dialog before proceeding (matching the existing `handleLogout` pattern in `Sidebar.tsx:266-278`).
+5. **Logout link:** Calls the existing `logout()` from `BaseContext`. Shows a confirmation dialog before proceeding (matching the existing `handleLogout` pattern in `Sidebar.tsx:266-278`).
 
 ---
 

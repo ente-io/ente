@@ -33,8 +33,6 @@ export interface AppLockState {
     cooldownExpiresAt: number;
     /** Auto-lock delay in milliseconds. */
     autoLockTimeMs: number;
-    /** Whether to blur content when tab/window is hidden. */
-    hideContentOnBlur: boolean;
 }
 
 const createDefaultState = (): AppLockState => ({
@@ -44,7 +42,6 @@ const createDefaultState = (): AppLockState => ({
     invalidAttemptCount: 0,
     cooldownExpiresAt: 0,
     autoLockTimeMs: 0,
-    hideContentOnBlur: false,
 });
 
 /**
@@ -102,7 +99,6 @@ const setSnapshot = (snapshot: AppLockState) => {
 const lsKeyEnabled = "appLock.enabled";
 const lsKeyLockType = "appLock.lockType";
 const lsKeyAutoLockTimeMs = "appLock.autoLockTimeMs";
-const lsKeyHideContentOnBlur = "appLock.hideContentOnBlur";
 
 // -- KV DB keys (IndexedDB, async) --
 
@@ -154,8 +150,9 @@ export const initAppLock = () => {
     const autoLockTimeMs = Number(
         localStorage.getItem(lsKeyAutoLockTimeMs) ?? "0",
     );
-    const hideContentOnBlur =
-        localStorage.getItem(lsKeyHideContentOnBlur) === "true";
+
+    // Remove stale key from removed "hide content when switching apps" setting.
+    localStorage.removeItem("appLock.hideContentOnBlur");
 
     const isLocked = enabled && haveMasterKeyInSession();
 
@@ -165,7 +162,6 @@ export const initAppLock = () => {
         lockType,
         isLocked,
         autoLockTimeMs,
-        hideContentOnBlur,
     });
 
     // Restore brute-force state from KV DB (async) so cooldowns survive
@@ -364,7 +360,6 @@ export const logoutAppLock = async () => {
     localStorage.removeItem(lsKeyEnabled);
     localStorage.removeItem(lsKeyLockType);
     localStorage.removeItem(lsKeyAutoLockTimeMs);
-    localStorage.removeItem(lsKeyHideContentOnBlur);
 
     await removeKV(kvKeyHash);
     await removeKV(kvKeySalt);
@@ -382,18 +377,6 @@ export const logoutAppLock = async () => {
 export const setAutoLockTime = (ms: number) => {
     localStorage.setItem(lsKeyAutoLockTimeMs, String(ms));
     setSnapshot({ ..._state.snapshot, autoLockTimeMs: ms });
-};
-
-/**
- * Update the hide-content-on-blur preference.
- */
-export const setHideContentOnBlur = (enabled: boolean) => {
-    if (enabled) {
-        localStorage.setItem(lsKeyHideContentOnBlur, "true");
-    } else {
-        localStorage.removeItem(lsKeyHideContentOnBlur);
-    }
-    setSnapshot({ ..._state.snapshot, hideContentOnBlur: enabled });
 };
 
 /**

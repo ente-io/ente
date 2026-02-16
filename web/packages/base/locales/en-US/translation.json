@@ -826,7 +826,6 @@
     "lock_type": "Lock type",
     "auto_lock": "Auto-lock",
     "auto_lock_hint": "Automatically lock the app after a period of inactivity",
-    "hide_content_on_blur": "Hide content when switching apps",
     "pin_mismatch": "PINs don't match",
     "password_mismatch": "Passwords don't match",
     "app_lock_password": "App lock password",
