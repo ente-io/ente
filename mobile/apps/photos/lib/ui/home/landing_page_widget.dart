@@ -1,5 +1,4 @@
 import "dart:async";
-import 'dart:io';
 
 import 'package:dots_indicator/dots_indicator.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -155,15 +154,17 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       labelText:
                           AppLocalizations.of(context).createAnEnteAccount,
                       onTap: _navigateToSignUpPage,
+                      shouldSurfaceExecutionStates: false,
                       shouldStickToLightTheme: true,
                     ),
-                    if (isOfflineMode && Platform.isAndroid) ...[
+                    if (localSettings.showOfflineModeOption) ...[
                       const SizedBox(height: 12),
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
                         labelText:
                             AppLocalizations.of(context).continueWithoutAccount,
                         onTap: _navigateWithoutAccount,
+                        shouldSurfaceExecutionStates: false,
                         shouldStickToLightTheme: true,
                       ),
                     ],
@@ -231,19 +232,19 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     final l10n = AppLocalizations.of(context);
     final features = [
       (
-        "assets/onboarding_lock.png",
+        "assets/onboarding_1.png",
         l10n.searchAndDiscover,
         "",
         l10n.searchAndDiscoverDesc,
       ),
       (
-        "assets/onboarding_safe.png",
+        "assets/onboarding_2.png",
         l10n.shareYourMemories,
         "",
         l10n.shareYourMemoriesDesc,
       ),
       (
-        "assets/onboarding_sync.png",
+        "assets/onboarding_3.png",
         l10n.privateAndSecureBackups,
         "",
         l10n.privateAndSecureBackupsDesc,
@@ -301,9 +302,10 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Future<void> _navigateWithoutAccount() async {
     updateService.hideChangeLog().ignore();
-    await Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeWidget()),
-      (route) => false,
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const HomeWidget(startWithoutAccount: true),
+      ),
     );
   }
 

@@ -46,7 +46,7 @@ ButtonTheme _criticalPalette(EnteColorScheme c) => ButtonTheme(
       hoverBg: c.redDark,
       pressedBg: c.redDarker,
       disabledBg: c.fillDark,
-      foreground: c.contentReverse,
+      foreground: Colors.white,
       disabledForeground: c.contentLighter,
     );
 

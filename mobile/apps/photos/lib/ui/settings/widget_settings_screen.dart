@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/widgets/albums_widget_settings.dart";
 import "package:photos/ui/settings/widgets/memories_widget_settings.dart";
 import "package:photos/ui/settings/widgets/people_widget_settings.dart";
@@ -18,7 +18,7 @@ class WidgetSettingsScreen extends StatelessWidget {
     if (isMLEnabled) {
       routeToPage(
         context,
-        const EnableMachineLearningConsent(),
+        const MachineLearningSettingsPage(),
         forceCustomPageRoute: true,
       );
       return;

@@ -10,9 +10,10 @@ The content from **Desktop Installation Troubleshooting** has been reorganized. 
 
 ## Desktop Installation Issues
 
-- [Windows JavaScript error (missing VC++ runtime)](/photos/faq/troubleshooting#windows-vc) - Solution for "JavaScript error in main process"
+- [Windows JavaScript error (missing VC++ runtime)](/photos/faq/troubleshooting#windows-javascript-error) - Solution for "JavaScript error in main process"
+- [Windows ML stuck / models not downloading](/photos/faq/troubleshooting#windows-ml-stuck) - Fix for ONNX runtime DLL initialization failures
 - [Linux AppImage issues](/photos/faq/troubleshooting#appimage-integration) - Desktop integration, FUSE requirements, ARM64 support
-- [Linux SUID sandbox error](/photos/faq/troubleshooting#linux-suid) - Command line execution issues
+- [Linux SUID sandbox error](/photos/faq/troubleshooting#suid-sandbox-error) - Command line execution issues
 
 ## General Installation
 

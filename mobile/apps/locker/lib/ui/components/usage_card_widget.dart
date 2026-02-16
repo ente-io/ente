@@ -5,6 +5,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/states/user_details_state.dart";
 
 class UsageCardWidget extends StatelessWidget {
@@ -99,9 +100,9 @@ class _UsageContent extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
-    final maxFileCount =
-        userDetails?.getLockerFileLimit().clamp(1, double.maxFinite).toInt() ??
-            100;
+    final maxFileCount = _effectiveLockerFileLimit(
+      userDetails,
+    ).clamp(1, double.maxFinite).toInt();
     final userFileCount = userDetails?.fileCount ?? 0;
 
     final showFamilyBreakup = _shouldShowFamilyBreakup();
@@ -248,5 +249,13 @@ class _UsageContent extends StatelessWidget {
     if (userDetails == null) return false;
     if (!userDetails!.isPartOfFamily()) return false;
     return userDetails!.lockerFamilyUsage != null;
+  }
+
+  int _effectiveLockerFileLimit(UserDetails? userDetails) {
+    final currentLimit = userDetails?.getLockerFileLimit() ?? 100;
+    if (!Configuration.instance.isEnteProduction() && currentLimit < 1000) {
+      return 1000;
+    }
+    return currentLimit;
   }
 }

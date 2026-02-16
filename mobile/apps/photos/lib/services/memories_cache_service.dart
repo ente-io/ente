@@ -459,6 +459,7 @@ class MemoriesCacheService {
               memory.peopleMemoryType!,
               memory.personID!,
               memory.personName,
+              isUnnamedCluster: memory.isUnnamedCluster ?? false,
               title: memory.title,
               id: memory.id,
             );
@@ -1038,8 +1039,10 @@ class MemoriesCacheService {
         continue;
       }
       final s = await LanguageService.locals;
+      final hasNonEmptyName =
+          memory.personName != null && memory.personName!.trim().isNotEmpty;
       await NotificationService.instance.scheduleNotification(
-        memory.personName != null
+        hasNonEmptyName && !memory.isUnnamedCluster
             ? s.wishThemAHappyBirthday(name: memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,

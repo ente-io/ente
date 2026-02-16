@@ -128,7 +128,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       _logger.severe("Failed to load collections", e);
       if (mounted && showLoading) {
         setState(() {
-          _error = context.l10n.failedToLoadCollections(e.toString());
+          _error = context.l10n.failedToLoadCollections(
+            context.l10n.somethingWentWrong,
+          );
           _isLoading = false;
         });
       }

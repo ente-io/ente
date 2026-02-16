@@ -59,7 +59,6 @@
   "incorrectRecoveryKeyBody": "Įvestas atkūrimo raktas yra neteisingas.",
   "forgotPassword": "Pamiršau slaptažodį",
   "enterYourRecoveryKey": "Įveskite atkūrimo raktą",
-  "noRecoveryKey": "Neturite atkūrimo rakto?",
   "sorry": "Atsiprašome",
   "noRecoveryKeyNoDecryption": "Dėl mūsų visapusio šifravimo protokolo pobūdžio jūsų duomenų negalima iššifruoti be slaptažodžio arba atkūrimo rakto",
   "verifyEmail": "Patvirtinti el. paštą",
@@ -130,7 +129,6 @@
   "verifyPassword": "Patvirtinkite slaptažodį",
   "recoveryKey": "Atkūrimo raktas",
   "recoveryKeyOnForgotPassword": "Jei pamiršote slaptažodį, vienintelis būdas atkurti duomenis – naudoti šį raktą.",
-  "recoveryKeySaveDescription": "Šio rakto nesaugome, todėl išsaugokite šį 24 žodžių raktą saugioje vietoje.",
   "doThisLater": "Daryti tai vėliau",
   "saveKey": "Išsaugoti raktą",
   "recoveryKeyCopiedToClipboard": "Nukopijuotas atkūrimo raktas į iškarpinę",
@@ -172,6 +170,10 @@
   "confirmYourRecoveryKey": "Patvirtinkite savo atkūrimo raktą",
   "addViewer": "Pridėti žiūrėtoją",
   "addCollaborator": "Pridėti bendradarbį",
+  "admin": "Administratorius",
+  "admins": "Administratoriai",
+  "addAdmin": "Įtraukti administratorių",
+  "addMoreAdmins": "Įtraukti daugiau administratorių",
   "addANewEmail": "Įtraukite naują el. paštą",
   "orPickAnExistingOne": "Arba pasirinkite esamą",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą.",
@@ -216,6 +218,9 @@
   },
   "albumLayout": "Albumo išdėstymas",
   "layoutGrouped": "Sugrupuoti",
+  "layoutContinuous": "Tolydus",
+  "layoutTrip": "Kelionė",
+  "preview": "Peržiūrėti",
   "linkExpiry": "Nuorodos galiojimo laikas",
   "linkExpired": "Nebegalioja",
   "linkEnabled": "Įjungta",
@@ -255,7 +260,10 @@
   "shareWithNonenteUsers": "Bendrinkite su ne „Ente“ naudotojais.",
   "createPublicLink": "Kurti viešą nuorodą",
   "sendLink": "Siųsti nuorodą",
+  "qrCode": "QR kodas",
+  "sendQrCode": "Siųsti QR kodą",
   "copyLink": "Kopijuoti nuorodą",
+  "copyEmbedHtml": "Kopijuoti įterptą HTML",
   "linkHasExpired": "Nuoroda nebegalioja",
   "publicLinkEnabled": "Įjungta viešoji nuoroda",
   "shareALink": "Bendrinkite nuorodą",
@@ -294,6 +302,7 @@
   "enterCodeDescription": "Įveskite draugo pateiktą kodą, kad gautumėte nemokamą saugyklą abiem.",
   "apply": "Taikyti",
   "failedToApplyCode": "Nepavyko pritaikyti kodo.",
+  "invalidReferralCode": "Netinkamas kodas.",
   "enterReferralCode": "Įveskite rekomendacijos kodą",
   "codeAppliedPageTitle": "Pritaikytas kodas",
   "change": "Keisti",
@@ -309,12 +318,11 @@
   "claimMore": "Gaukite daugiau!",
   "theyAlsoGetXGb": "Jie taip pat gauna {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.",
-  "shareTextReferralCode": "„Ente“ rekomendacijos kodas: {referralCode} \n\nTaikykite jį per Nustatymai → Bendrieji → Rekomendacijos, kad gautumėte {referralStorageInGB} GB nemokamai po to, kai užsiregistruosite mokamam planui.\n\nhttps://ente.io",
   "claimFreeStorage": "Gaukite nemokamos saugyklos",
   "inviteYourFriends": "Kviesti savo draugus",
+  "shareCodeEarnStorage": "Bendrinkite savo kodą, uždirbkite saugyklą.",
+  "youBothGet": "Abu gaunate",
   "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos išsamios informacijos. Bandykite dar kartą vėliau.",
-  "referralStep2": "2. Jie užsiregistruoja mokamą planą",
-  "referralStep3": "3. Abu gaunate {storageInGB} GB* nemokamai",
   "referralsAreCurrentlyPaused": "Šiuo metu rekomendacijos yra pristabdytos",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jūsų šeima gavo {storageAmountInGb} GB iki šiol} false {Jūs gavote {storageAmountInGb} GB iki šiol} other {Jūs gavote {storageAmountInGb} GB iki šiol.}}",
   "@claimedStorageSoFar": {
@@ -532,7 +540,6 @@
   "backedUpFolders": "Sukurtos atsarginės aplankų kopijos",
   "backup": "Kurti atsarginę kopiją",
   "freeUpDeviceSpace": "Atlaisvinti įrenginio vietą",
-  "freeUpDeviceSpaceDesc": "Sutaupykite vietos savo įrenginyje išvalydami failus, kurių atsarginės kopijos jau buvo sukurtos.",
   "allClear": "✨ Viskas išvalyta",
   "noDeviceThatCanBeDeleted": "Neturite šiame įrenginyje failų, kuriuos galima ištrinti.",
   "removeDuplicates": "Šalinti dublikatus",
@@ -714,16 +721,6 @@
   "openSettings": "Atverti nustatymus",
   "selectMorePhotos": "Pasirinkti daugiau nuotraukų",
   "existingUser": "Esamas naudotojas",
-  "privateBackups": "Privačios atsarginės kopijos",
-  "forYourMemories": "jūsų prisiminimams",
-  "endtoendEncryptedByDefault": "Pagal numatytąjį užšifruota visapusiškai",
-  "safelyStored": "Saugiai saugoma",
-  "atAFalloutShelter": "priešgaisrinėje slėptuvėje",
-  "designedToOutlive": "Sukurta išgyventi",
-  "available": "Prieinama",
-  "everywhere": "visur",
-  "androidIosWebDesktop": "„Android“, „iOS“, internete ir darbalaukyje",
-  "mobileWebDesktop": "Mobiliuosiuose, internete ir darbalaukyje",
   "newToEnte": "Naujas platformoje „Ente“",
   "pleaseLoginAgain": "Prisijunkite iš naujo.",
   "autoLogoutMessage": "Dėl techninio trikdžio buvote atjungti. Atsiprašome už nepatogumus.",
@@ -740,7 +737,6 @@
   "couldNotBackUpTryLater": "Nepavyko sukurti atsarginės duomenų kopijos.\nBandysime pakartotinai vėliau.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "„Ente“ gali užšifruoti ir išsaugoti failus tik tada, jei suteikiate prieigą prie jų.",
   "pleaseGrantPermissions": "Suteikite leidimus.",
-  "grantPermission": "Suteikti leidimą",
   "privateSharing": "Privatus bendrinimas",
   "shareOnlyWithThePeopleYouWant": "Bendrinkite tik su tais asmenimis, su kuriais norite",
   "usePublicLinksForPeopleNotOnEnte": "Naudokite viešas nuorodas asmenimis, kurie nėra sistemoje „Ente“",
@@ -1054,6 +1050,30 @@
   "loadMessage8": "web.ente.io turi sklandų įkėlėją",
   "loadMessage9": "Naudojame „Xchacha20Poly1305“, kad saugiai užšifruotume jūsų duomenis.",
   "photoDescriptions": "Nuotraukų aprašai",
+  "searchResultFileName": "Failo pavadinimas",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Aprašas",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tipas",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Failo plėtinys",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultCameraModel": "Fotoaparato modelis",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Failai",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Failų tipai ir pavadinimai",
   "location": "Vietovė",
   "moments": "Akimirkos",
@@ -1113,6 +1133,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} laisva",
+  "appVersion": "Versija {versionValue}",
   "verifyIDLabel": "Patvirtinti",
   "fileInfoAddDescHint": "Pridėti aprašymą...",
   "editLocationTagTitle": "Redaguoti vietovę",
@@ -1193,6 +1214,8 @@
   "noImagesWithLocation": "Nėra vaizdų su vietove",
   "unpinAlbum": "Atsegti albumą",
   "pinAlbum": "Prisegti albumą",
+  "pin": "Prisegti",
+  "pinPerson": "Prisegti asmenį",
   "create": "Kurti",
   "viewAll": "Peržiūrėti viską",
   "nothingSharedWithYouYet": "Kol kas su jumis niekuo nesibendrinama.",
@@ -1211,7 +1234,6 @@
   "moveToHiddenAlbum": "Perkelti į paslėptą albumą",
   "fileTypes": "Failų tipai",
   "deleteConfirmDialogBody": "Ši paskyra susieta su kitomis „Ente“ programomis, jei jas naudojate. Jūsų įkelti duomenys per visas „Ente“ programas bus planuojama ištrinti, o jūsų paskyra bus ištrinta negrįžtamai.",
-  "hearUsWhereTitle": "Kaip išgirdote apie „Ente“? (nebūtina)",
   "hearUsExplanation": "Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote.",
   "viewAddOnButton": "Peržiūrėti priedus",
   "addOns": "Priedai",
@@ -1413,7 +1435,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1498,7 +1520,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, =0 {0 nuotraukų} one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1770,7 +1792,6 @@
   "areThey": "Ar jie ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Išsaugoti kaip kitą asmenį",
-  "showLessFaces": "Rodyti mažiau veidų",
   "showMoreFaces": "Rodyti daugiau veidų",
   "ignore": "Ignoruoti",
   "merge": "Sujungti",
@@ -1867,5 +1888,14 @@
   "closeBy": "Arti",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "newCommentNotificationTitle": "Gavote komentarą",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Gavote patiktuką",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "grantPermission": "Suteikti leidimą"
 }

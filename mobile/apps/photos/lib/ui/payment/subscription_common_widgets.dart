@@ -6,63 +6,8 @@ import 'package:photos/gateways/billing/models/subscription.dart';
 import "package:photos/gateways/storage_bonus/models/bonus.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
-
-class SubscriptionHeaderWidget extends StatefulWidget {
-  final bool? isOnboarding;
-  final int? currentUsage;
-
-  const SubscriptionHeaderWidget({
-    super.key,
-    this.isOnboarding,
-    this.currentUsage,
-  });
-
-  @override
-  State<StatefulWidget> createState() {
-    return _SubscriptionHeaderWidgetState();
-  }
-}
-
-class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
-    if (widget.isOnboarding!) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text(
-          AppLocalizations.of(context).enteSubscriptionPitch,
-          style: getEnteTextTheme(context).smallFaint,
-        ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
-        child: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: AppLocalizations.of(context).currentUsageIs,
-                style: textTheme.bodyFaint,
-              ),
-              TextSpan(
-                text: formatBytes(widget.currentUsage!),
-                style: textTheme.body.copyWith(
-                  color: colorScheme.primary700,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-}
 
 class ValidityWidget extends StatelessWidget {
   final Subscription? currentSubscription;
@@ -159,17 +104,13 @@ class SubFaqWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-      child: MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).faqs,
-        ),
+      child: MenuItemWidgetNew(
+        title: AppLocalizations.of(context).faqs,
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: Icon(
           Icons.chevron_right_outlined,
           color: colorScheme.strokeBase,
         ),
-        singleBorderRadius: 4,
-        alignCaptionedTextToLeft: true,
         onTap: () async {
           // ignore: unawaited_futures
           showModalBottomSheet<void>(
@@ -203,6 +144,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
     const borderPadding = 2.5;
     const spaceBetweenButtons = 4.0;
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: LayoutBuilder(
@@ -213,7 +155,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
               2;
           return Container(
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillBaseGrey,
+              color: colorScheme.fillBaseGrey,
               borderRadius: BorderRadius.circular(50),
             ),
             padding: const EdgeInsets.symmetric(
@@ -225,25 +167,6 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
               children: [
                 Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        setIsYearly(false);
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                        ),
-                        width: widthOfButton,
-                        child: Center(
-                          child: Text(
-                            AppLocalizations.of(context).monthly,
-                            style: textTheme.bodyFaint,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: spaceBetweenButtons),
                     GestureDetector(
                       onTap: () {
                         setIsYearly(true);
@@ -262,19 +185,38 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: spaceBetweenButtons),
+                    GestureDetector(
+                      onTap: () {
+                        setIsYearly(false);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            AppLocalizations.of(context).monthly,
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutQuart,
-                  left: _isYearly ? widthOfButton + spaceBetweenButtons : 0,
+                  left: _isYearly ? 0 : widthOfButton + spaceBetweenButtons,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: 8,
                     ),
                     width: widthOfButton,
                     decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                      color: colorScheme.backgroundColour,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: AnimatedSwitcher(

@@ -1,0 +1,30 @@
+Ente, fotoşəkil və videolarınızı avtomatik olaraq ehtiyat nüsxələmək back-up və sistemləşdirmək üçün sadə bir tətbiqdir.
+
+Xatirələrinizi qorumaq üçün məxfiliyə önəm verən bir alternativ axtarırdınızsa, doğru yerdəsiniz. Ente ilə onlar uçdan-uca şifrələnmiş (e2ee) şəkildə saxlanılır. Bu o deməkdir ki, onlara yalnız siz baxa bilərsiniz.
+
+Android, iOS, veb və masaüstü desktop üçün tətbiqlərimiz mövcuddur; fotoşəkilləriniz bütün cihazlarınız arasında uçdan-uca şifrələnmiş (e2ee) şəkildə problemsiz sinxronizasiya olunacaq.
+
+Ente həmçinin albomlarınızı sevdiklərinizlə paylaşmağı çox asanlaşdırır. Siz onları ya birbaşa digər Ente istifadəçiləri ilə uçdan-uca şifrələnmiş şəkildə, ya da hər kəsə açıq keçidlər linklər vasitəsilə paylaşa bilərsiniz.
+
+Şifrələnmiş məlumatlarınız müxtəlif yerlərdə, o cümlədən Parisdəki yeraltı nüvə sığınacağında fall-out shelter saxlanılır. Biz gələcək nəsillərin qayğısına qalmağı ciddiyə alırıq və xatirələrinizin sizdən daha uzunömürlü olmasını təmin etməyi asanlaşdırırıq.
+
+Biz indiyədək olan ən təhlükəsiz fotoşəkil tətbiqini yaratmaq üçün buradayıq, gəlin bu yolda bizə qoşulun!
+
+✨ ÖZƏLLİKLƏR
+- Orijinal keyfiyyətdə ehtiyat nüsxələmə, çünki hər bir piksel önəmlidir
+- Ailə paketləri yaddaş sahəsini ailənizlə paylaşa bilməyiniz üçün
+- Paylaşılan qovluqlar partnyorunuzun da "Kamera" çəkilişlərinizdən zövq almasını istədiyiniz hallar üçün
+- Albom keçidləri şifrə ilə qoruna bilən və müddəti bitməsi təyin edilə bilən linklər
+- Yaddaşda yer boşaltmaq imkanı təhlükəsiz şəkildə nüsxələnmiş faylları silməklə
+- Şəkil redaktoru son toxunuşları əlavə etmək üçün
+- Seçilmişlərə əlavə edin, gizlədin və xatirələrinizi yenidən yaşayın, çünki onlar çox dəyərlidir
+- Google, Apple, xarici disk və digər mənbələrdən tək toxunuşla köçürmə
+- Qara mövzu çünki fotoşəkilləriniz onda daha gözəl görünür
+- 2FA, 3FA və biometrik identifikasiya
+- Və çox daha çoxu!
+
+​💲 TARİFLƏR
+Davamlılığımızı qorumaq və uzunömürlü olmaq bizim üçün önəmli olduğu üçün tam ödənişsiz paketlər təklif etmirik. Bunun əvəzinə biz ailənizlə sərbəst şəkildə paylaşa biləcəyiniz, sərfəli planlar təklif edirik. Daha ətraflı məlumatı ente.io saytından tapa bilərsiniz.
+
+​🙋 DƏSTƏK
+Biz müştərilərimizə canlı insan tərəfindən dəstək göstərməkdən qürur duyuruq. Əgər ödənişli müştərimizsinizsə, team@ente.io ünvanı ilə əlaqə saxlaya bilərsiniz; komandamız 24 saat ərzində sizə cavab verəcəkdir.

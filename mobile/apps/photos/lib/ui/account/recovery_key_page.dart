@@ -61,6 +61,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
+        title: Text(
+          widget.title ?? AppLocalizations.of(context).recoveryKey,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
         backgroundColor: colorScheme.backgroundColour,
         leading: widget.isOnboarding
             ? const SizedBox.shrink()
@@ -72,7 +77,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 },
               ),
       ),
-      body: _getBody(recoveryKey, colorScheme, textTheme),
+      body: SafeArea(
+        child: _getBody(recoveryKey, colorScheme, textTheme),
+      ),
     );
   }
 
@@ -84,116 +91,105 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     return Column(
       children: [
         Expanded(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.title ?? AppLocalizations.of(context).recoveryKey,
-                    style: textTheme.h3Bold,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/recovery_key.png',
+                    width: 101,
+                    height: 82,
                   ),
-                  const SizedBox(height: 40),
-                  Center(
-                    child: Image.asset(
-                      'assets/recovery_key.png',
-                      width: 101,
-                      height: 82,
-                    ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  widget.text ??
+                      AppLocalizations.of(context).recoveryKeyOnForgotPassword,
+                  textAlign: TextAlign.center,
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.textBase,
                   ),
-                  const SizedBox(height: 40),
-                  Text(
-                    widget.text ??
-                        AppLocalizations.of(context)
-                            .recoveryKeyOnForgotPassword,
-                    textAlign: TextAlign.center,
-                    style: textTheme.body.copyWith(
-                      color: colorScheme.textBase,
-                    ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.subText ??
+                      AppLocalizations.of(context).recoveryKeySaveDescription,
+                  textAlign: TextAlign.center,
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.textMuted,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.subText ??
-                        AppLocalizations.of(context).recoveryKeySaveDescription,
-                    textAlign: TextAlign.center,
-                    style: textTheme.body.copyWith(
-                      color: colorScheme.textMuted,
-                    ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.greenBase,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.greenBase,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                recoveryKey,
-                                style: textTheme.body.copyWith(
-                                  color: Colors.white,
-                                  height: 24 / 14,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () async {
-                                await Clipboard.setData(
-                                  ClipboardData(text: recoveryKey),
-                                );
-                                showShortToast(
-                                  context,
-                                  AppLocalizations.of(context)
-                                      .recoveryKeyCopiedToClipboard,
-                                );
-                              },
-                              child: const HugeIcon(
-                                icon: HugeIcons.strokeRoundedCopy01,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              recoveryKey,
+                              style: textTheme.body.copyWith(
                                 color: Colors.white,
-                                size: 24,
+                                height: 24 / 14,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        ButtonWidgetV2(
-                          buttonType: ButtonTypeV2.secondary,
-                          shouldStickToLightTheme: true,
-                          labelText: AppLocalizations.of(context).shareKey,
-                          onTap: () async {
-                            await _shareRecoveryKey(recoveryKey);
-                          },
-                        ),
-                      ],
-                    ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: recoveryKey),
+                              );
+                              showShortToast(
+                                context,
+                                AppLocalizations.of(context)
+                                    .recoveryKeyCopiedToClipboard,
+                              );
+                            },
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedCopy01,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ButtonWidgetV2(
+                        buttonType: ButtonTypeV2.secondary,
+                        shouldStickToLightTheme: true,
+                        labelText: AppLocalizations.of(context).shareKey,
+                        onTap: () async {
+                          await _shareRecoveryKey(recoveryKey);
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
         if (widget.isOnboarding)
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 12,
-              ),
-              child: ButtonWidgetV2(
-                buttonType: ButtonTypeV2.secondary,
-                labelText: widget.doneText,
-                onTap: () async {
-                  await _saveKeys();
-                },
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            child: ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: widget.doneText,
+              onTap: () async {
+                await _saveKeys();
+              },
             ),
           ),
       ],

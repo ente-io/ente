@@ -6,6 +6,7 @@ import {
     Download01Icon,
     Download05Icon,
     Location01Icon,
+    Navigation03Icon,
     RemoveCircleIcon,
     Time04Icon,
     Unarchive03Icon,
@@ -36,6 +37,7 @@ import { t } from "i18next";
  * Operations on selected files.
  */
 export type FileOp =
+    | "sendLink"
     | "download"
     | "fixTime"
     | "favorite"
@@ -207,6 +209,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleFixTime = createFileOpHandler("fixTime");
 
     const handleDownload = createFileOpHandler("download");
+    const handleSendLink = createFileOpHandler("sendLink");
 
     const handleArchive = createFileOpHandler("archive");
 
@@ -358,6 +361,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
                 {isInSearchMode ? (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         {favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
@@ -378,6 +384,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : barMode == "people" ? (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         {favoriteActionButton}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
@@ -401,6 +410,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : collectionSummary?.attributes.has("uncategorized") ? (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
                             <AddPersonButton
@@ -414,6 +426,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : collectionSummary?.attributes.has("sharedIncoming") ? (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
                             <AddPersonButton
@@ -426,6 +441,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : barMode == "hidden-albums" ? (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
                             <AddPersonButton
@@ -437,6 +455,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : (
                     <>
+                        {selectedOwnFileCount > 0 && (
+                            <SendLinkButton onClick={handleSendLink} />
+                        )}
                         {collectionSummary?.id !=
                             PseudoCollectionID.archiveItems &&
                             favoriteActionButton}
@@ -483,6 +504,14 @@ const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("download")}>
         <IconButton {...{ onClick }}>
             <HugeiconsIcon icon={Download01Icon} />
+        </IconButton>
+    </Tooltip>
+);
+
+const SendLinkButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title="Send link">
+        <IconButton {...{ onClick }} aria-label="Send link">
+            <HugeiconsIcon icon={Navigation03Icon} />
         </IconButton>
     </Tooltip>
 );

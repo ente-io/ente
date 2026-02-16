@@ -96,9 +96,9 @@ class _TrashPageState extends State<TrashPage> {
       );
       Navigator.of(context).pop();
     } catch (error) {
-      showToast(
-        context,
-        context.l10n.failedToClearTrash(error.toString()),
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: error,
       );
     } finally {
       await dialog.hide();

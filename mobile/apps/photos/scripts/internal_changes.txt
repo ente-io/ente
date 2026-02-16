@@ -1,3 +1,4 @@
+- Ashil: Enable single file download for locally existing uploaded files.
 - Laurens: (i) Use usearch vectorDB for magic search and discover section
 - Laurens: Make it possible to ignore already named persons
 - Neeraj: Fix iOS native video crash by avoiding FFprobe on problematic files, harden seekbar null handling, and stop audio on swipe dismiss
@@ -7,3 +8,5 @@
 - Neeraj: (i) Show incoming photos in feed
 - Neeraj: Remove internal-user gating for extended collage layouts
 - Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
+- Neeraj: (i) Reduce iOS Live Photo start flicker on long-press preview
+- Neeraj/Aman: Offline mode

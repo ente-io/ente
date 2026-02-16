@@ -7,9 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Realice una copia de seguridad segura de sus códigos 2FA",
+  "featureBackupCodes": "Copia de seguridad y sincronización cifradas de extremo a extremo",
+  "featureSearchEtc": "Busca, Etiqueta, Comparte, Siguiente código y mucho más",
+  "featureOpenSource": "De código abierto y auditado por expertos en seguridad",
+  "signUp": "Registrarse",
   "onBoardingGetStarted": "Primeros pasos",
+  "setupFirstAccount": "Configura tu primera cuenta",
+  "allTabEmptyHint": "No hay nada aquí todavía. Pulsa + para añadir un código o abrir la papelera para recuperar uno.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Escanear un código QR",
   "qrCode": "Código QR",
+  "qr": "Código QR",
   "importEnterSetupKey": "Ingrese una clave de configuración",
   "importAccountPageTitle": "Ingrese los detalles de la cuenta",
   "secretCanNotBeEmpty": "El secreto no puede estar vacío",
@@ -302,6 +312,7 @@
   "checking": "Comprobando...",
   "youAreOnTheLatestVersion": "Estás usando la versión más reciente",
   "warning": "Atención",
+  "note": "Nota",
   "exportWarningDesc": "El archivo exportado contiene información confidencial. Por favor, guárdalo de forma segura.",
   "iUnderStand": "Lo entiendo",
   "@iUnderStand": {
@@ -370,12 +381,14 @@
   "useOffline": "Usar sin copias de seguridad",
   "signInToBackup": "Inicia sesión para hacer una copia de seguridad tus códigos",
   "singIn": "Iniciar sesión",
+  "sigInBackupReminder": "Ente creará una copia de seguridad automática de los códigos después de iniciar sesión.\n\nSeguimos recomendando exportar los códigos como copia de seguridad adicional.",
   "offlineModeWarning": "Ha elegido proceder sin copia de seguridad. Por favor, realice copias de seguridad manuales para asegurarse de que sus códigos están seguros.",
   "showLargeIcons": "Mostrar iconos grandes",
   "compactMode": "Modo compacto",
   "shouldHideCode": "Ocultar códigos",
   "doubleTapToViewHiddenCode": "Puedes tocar dos veces en una entrada para ver el código",
   "focusOnSearchBar": "Enfocar búsqueda al iniciar la aplicación",
+  "minimizeToTrayOnClose": "Minimizar a la bandeja al cerrar",
   "confirmUpdatingkey": "¿Estás seguro de que deseas actualizar la clave secreta?",
   "minimizeAppOnCopy": "Minimizar aplicación al copiar",
   "editCodeAuthMessage": "Autenticar para editar código",
@@ -512,6 +525,7 @@
   "dropReviewAndroid": "Deja una reseña en la Play Store",
   "supportEnte": "Apoya a <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Danos una estrella en GitHub",
+  "free10GB": "10 GB gratis en <bold-green>Ente</bold-green> Fotos",
   "loginWithAuthAccount": "Inicia sesión con tu cuenta de Auth",
   "freeStorageOffer": "10% de descuento en <bold-green>ente</bold-green> fotos",
   "freeStorageOfferDescription": "Usa el cupón \"AUTH\" para obtener un 10% de descuento en el primer año",
@@ -529,17 +543,88 @@
   "errorGenericBody": "Se ha producido un error inesperado durante la importación.",
   "localBackupSettingsTitle": "Copia de seguridad local",
   "localBackupSidebarTitle": "Copia de seguridad local",
+  "enableAutomaticBackups": "Copias de seguridad automáticas",
   "backupDescription": "Esto hará una copia de seguridad automáticamente de sus datos en una ubicación en el dispositivo. Las copias de seguridad se actualizan cada vez que se agregan, editan o eliminan las entradas",
+  "localBackupDailyManualCopy": "Crea una copia de seguridad local diaria al abrir la aplicación. Usa \"Hacer copia de seguridad ahora\" para ejecutar una copia de seguridad manual. Se conservan hasta 5 archivos de las copias de seguridad.",
   "currentLocation": "Ubicación actual de la copia de seguridad:",
   "securityNotice": "Aviso de seguridad",
   "backupSecurityNotice": "Esta copia de seguridad cifrada contiene sus claves 2FA. Si se pierde, es posible que no pueda recuperar sus cuentas. ¡Manténgala segura!",
   "locationUpdatedAndBackupCreated": "¡Ubicación actualizada y copia de seguridad inicial creada!",
   "initialBackupCreated": "¡Copia de seguridad inicial creada!",
+  "backupCreated": "¡Copia de seguridad creada!",
   "noDefaultBackupFolder": "No se ha podido crear la carpeta de copia de seguridad predeterminada.",
   "backupLocationChoiceDescription": "¿Dónde quieres guardar tus copias de seguridad?",
   "chooseBackupLocation": "Elige la ubicación de la copia de seguridad",
   "loadDefaultLocation": "Cargando ubicación predeterminada...",
   "couldNotDetermineLocation": "No se ha podido determinar la ubicación...",
   "saveBackup": "Guardar copia de seguridad",
-  "selectFolderToContinue": "Selecciona un archivo para continuar"
+  "updateBackupPassword": "Actualizar contraseña de la copia de seguridad",
+  "setBackupPassword": "Establecer contraseña de la copia de seguridad",
+  "createBackupNow": "Hacer copia de seguridad ahora",
+  "clearBackupFolder": "Borrar la carpeta de las copias de seguridad",
+  "clearBackupPassword": "Borrar contraseña de la copia de seguridad",
+  "selectBackupFolder": "Seleccionar carpeta para las copias de seguridad",
+  "setBackupFolder": "Establecer la carpeta de las copias de seguridad",
+  "backupFolderLabel": "Carpeta de las copias de seguridad:",
+  "backupPasswordHint": "Tu copia de seguridad será cifrada con esta contraseña.",
+  "authToUpdateBackupPassword": "Autenticar para actualizar contraseña de la copia de seguridad",
+  "authToSetBackupPassword": "Autenticar para establecer la contraseña de la copia de seguridad",
+  "backupPasswordCleared": "Contraseña de la copia de seguridad eliminada",
+  "enableBackupsIosInstruction": "Para habilitar las copias de seguridad en iOS, elija una carpeta en Archivos (por ejemplo \"En mi iPhone\").",
+  "currentBackupFolder": "Ubicación actual de la copia de seguridad:",
+  "selectFolder": "Seleccionar carpeta",
+  "selectFolderToContinue": "Selecciona un archivo para continuar",
+  "iosOnMyDeviceNotSupported": "\"En mi iPhone\" no se puede usar directamente. Por favor, seleccione o cree una carpeta dentro de ella.",
+  "done": "Hecho",
+  "addNew": "Añadir nuevo",
+  "selected": "seleccionado",
+  "moveMultipleToTrashMessage": "¿Está seguro de que desea mover {count} elemento(s) a la papelera?",
+  "nSelected": "{count, plural, one {}=1{1 seleccionado} other{{count} seleccionados}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, one {}=1{1 elemento anclado} other{{count} elementos anclados}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, one {}=1{1 elemento desanclado} other{{count} elementos desanclados}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterPasswordToAegisVault": "Introduzca la contraseña de la bóveda de aegis",
+  "submit": "Enviar",
+  "failedToDecryptAegisVault": "Error al descifrar la bóveda de aegis",
+  "pleaseCheckPasswordAndTryAgain": "Por favor, compruebe su contraseña e inténtelo de nuevo.",
+  "enterPasswordToDecrypt2FASBackup": "Introduzca la contraseña para descifrar la copia de seguridad de 2FAS",
+  "failedToDecrypt2FASExport": "Error al descifrar el fichero exportado de 2FAS",
+  "chooseIcon": "Seleccione el icono",
+  "customOrder": "Orden personalizado",
+  "selectAnOption": "Selecciona una opción",
+  "todaysLogs": "Registros de hoy",
+  "appIcon": "Icono de la aplicación",
+  "importAndOTPGuide": "Exporta tu copia de seguridad desde andOTP usando la opción \"Copia de seguridad\" en Ajustes.\n\nSi tu copia de seguridad está cifrada, deberás introducir la contraseña para descifrarla.",
+  "enterPasswordToDecryptAndOTP": "Introduzca la contraseña para descifrar la copia de seguridad de andOTP",
+  "failedToDecryptAndOTPBackup": "No se pudo descifrar la copia de seguridad de andOTP",
+  "notSupportedForHOTP": "No compatible con HOTP"
 }

@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 
 class SharedEmptyOfflineStateWidget extends StatelessWidget {
   const SharedEmptyOfflineStateWidget({super.key});
@@ -45,10 +45,10 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
+              onTap: () async {
+                await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LandingPageWidget(),
+                    builder: (_) => const EmailEntryPage(),
                   ),
                 );
               },

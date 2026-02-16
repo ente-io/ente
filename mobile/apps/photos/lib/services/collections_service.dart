@@ -1331,11 +1331,13 @@ class CollectionsService {
   Future<void> createShareUrl(
     Collection collection, {
     bool enableCollect = false,
+    bool enableJoin = true,
   }) async {
     try {
       final publicUrl = await collectionShareGateway.createShareUrl(
         collectionID: collection.id,
         enableCollect: enableCollect,
+        enableJoin: enableJoin,
       );
       collection.publicURLs.add(publicUrl);
       await _db.insert(List.from([collection]));

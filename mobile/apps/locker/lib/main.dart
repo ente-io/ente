@@ -176,7 +176,7 @@ Future<void> _init(bool bool, {String? via}) async {
     );
     await LockScreenSettings.instance.init(Configuration.instance);
     await CollectionApiClient.instance.init();
-    await CollectionService.instance.init();
+    await CollectionService.instance.init(preferences);
     await FavoritesService.instance.init();
     await LinksClient.instance.init();
     await LinksService.instance.init();

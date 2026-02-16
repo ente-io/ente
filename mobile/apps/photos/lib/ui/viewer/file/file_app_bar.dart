@@ -312,7 +312,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (isFileUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -618,6 +618,25 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    final existingFolderName =
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
+    if (existingFolderName != null) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(file),
+            albumName: existingFolderName,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
+      }
+      return;
+    }
+
+    final fileToDownload =
+        !file.isRemoteFile ? file.copyWith(localID: null) : file;
     final dialog = createProgressDialog(
       context,
       context.l10n.downloading,
@@ -625,7 +644,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
     await dialog.show();
     try {
-      await downloadToGallery(file);
+      await downloadToGallery(fileToDownload);
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
