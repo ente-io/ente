@@ -32,6 +32,13 @@ type UserRepository struct {
 	PasskeysRepository  *passkey.Repository
 }
 
+// UserInactivityCandidate captures the latest known activity timestamp for an
+// active (non-deleted) user account.
+type UserInactivityCandidate struct {
+	UserID       int64
+	LastActivity int64
+}
+
 // Get returns a user indicated by the userID
 func (repo *UserRepository) Get(userID int64) (ente.User, error) {
 	var user ente.User
@@ -126,6 +133,47 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+// GetActiveUsersByLastActivityBefore returns active users whose latest token
+// activity is older than or equal to beforeTime. Only users having at least one
+// token row are considered. Paging is done by user_id.
+//
+// TODO(inactive-user-deletion): Tokens are not a durable activity source.
+// `RemoveDeletedTokens` prunes logged-out sessions after 30 days, which can make
+// last_activity stale or missing for users who logged out from all devices.
+// Move inactivity selection to a durable, app-wide last-activity signal.
+func (repo *UserRepository) GetActiveUsersByLastActivityBefore(beforeTime int64, afterUserID int64, limit int) ([]UserInactivityCandidate, error) {
+	rows, err := repo.DB.Query(`
+		SELECT
+			u.user_id,
+			MAX(t.last_used_at) AS last_activity
+		FROM users u
+		INNER JOIN tokens t
+			ON t.user_id = u.user_id
+		WHERE u.encrypted_email IS NOT NULL
+			AND u.user_id > $2
+		GROUP BY u.user_id
+		HAVING MAX(t.last_used_at) <= $1
+		ORDER BY u.user_id
+		LIMIT $3`, beforeTime, afterUserID, limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to fetch inactive users")
+	}
+	defer rows.Close()
+
+	result := make([]UserInactivityCandidate, 0)
+	for rows.Next() {
+		var candidate UserInactivityCandidate
+		if err := rows.Scan(&candidate.UserID, &candidate.LastActivity); err != nil {
+			return nil, stacktrace.Propagate(err, "failed to scan inactive user row")
+		}
+		result = append(result, candidate)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to iterate inactive users")
+	}
+	return result, nil
 }
 
 // GetUserUsageWithSubData will return current storage usage & basic information about subscription for given list
