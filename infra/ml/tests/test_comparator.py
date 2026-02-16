@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from comparator.compare import (
     ThresholdConfig,
     compare_platform_matrix,
@@ -234,3 +236,32 @@ def test_compare_platform_matrix_includes_pairwise_reports() -> None:
 
     assert len(reports) == 6
     assert all(report.passed for report in reports)
+
+
+def test_compare_platform_matrix_rejects_duplicate_file_ids() -> None:
+    reference = _result(
+        file_id="man.jpeg",
+        platform="python",
+        clip_seed=6,
+        faces=(_face(200, x=0.25, y=0.12, score=0.9),),
+    )
+    android_primary = _result(
+        file_id="man.jpeg",
+        platform="android",
+        clip_seed=6,
+        faces=(_face(200, x=0.25, y=0.12, score=0.9),),
+    )
+    android_duplicate = _result(
+        file_id="man.jpeg",
+        platform="android",
+        clip_seed=7,
+        faces=(_face(201, x=0.25, y=0.12, score=0.9),),
+    )
+
+    with pytest.raises(ValueError, match="platform 'android' emitted duplicate file_id values"):
+        compare_platform_matrix(
+            {
+                "python": (reference,),
+                "android": (android_primary, android_duplicate),
+            }
+        )

@@ -57,7 +57,12 @@ while (($# > 0)); do
   esac
 done
 
+if [[ "$OUTPUT_DIR" != /* ]]; then
+  OUTPUT_DIR="$ROOT_DIR/$OUTPUT_DIR"
+fi
+
 mkdir -p "$OUTPUT_DIR"
+OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
 PYTHON_OUTPUT_DIR="$OUTPUT_DIR/python"
 mkdir -p "$PYTHON_OUTPUT_DIR"
 

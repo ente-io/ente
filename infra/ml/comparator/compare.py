@@ -199,6 +199,29 @@ def _make_aggregate(values: list[float], threshold: float) -> AggregateMetric:
     )
 
 
+def _index_results(
+    results: Sequence[ParityResult],
+    *,
+    platform: str,
+) -> dict[str, ParityResult]:
+    indexed: dict[str, ParityResult] = {}
+    duplicate_ids: set[str] = set()
+
+    for result in results:
+        if result.file_id in indexed:
+            duplicate_ids.add(result.file_id)
+            continue
+        indexed[result.file_id] = result
+
+    if duplicate_ids:
+        duplicates = ", ".join(sorted(duplicate_ids))
+        raise ValueError(
+            f"platform '{platform}' emitted duplicate file_id values: {duplicates}"
+        )
+
+    return indexed
+
+
 def _match_faces(
     reference_faces: Sequence[FaceResult],
     candidate_faces: Sequence[FaceResult],
@@ -422,7 +445,7 @@ def compare_platform_matrix(
         raise ValueError(f"ground truth platform '{ground_truth_platform}' missing")
 
     by_platform: dict[str, dict[str, ParityResult]] = {
-        platform: {result.file_id: result for result in results}
+        platform: _index_results(results, platform=platform)
         for platform, results in platform_results.items()
     }
 
