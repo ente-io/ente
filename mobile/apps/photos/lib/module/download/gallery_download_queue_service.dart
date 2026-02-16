@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 import "dart:io";
 
 import "package:collection/collection.dart";
@@ -11,6 +12,7 @@ import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/events/gallery_downloads_events.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
@@ -95,7 +97,9 @@ class GalleryDownloadQueueService {
       );
 
   bool get isCompletionBannerVisible =>
-      _showCompletionBanner && completedCount > 0 && _allTasksAreTerminal;
+      _showCompletionBanner &&
+      _allTasksAreTerminal &&
+      (completedCount > 0 || unavailableCount > 0);
 
   bool get isBannerVisible {
     if (_tasks.isEmpty) {
@@ -179,9 +183,17 @@ class GalleryDownloadQueueService {
       if (uploadID == null || fileSize == null || fileSize <= 0) {
         continue;
       }
-      _queuedFilesByID[uploadID] =
+      final queuedFile =
           file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null);
+      _queuedFilesByID[uploadID] = queuedFile;
+      final sourceFileJson = _serializeQueuedFile(queuedFile);
       if (_tasks.containsKey(uploadID)) {
+        final existingTask = _tasks[uploadID];
+        if (existingTask != null && existingTask.sourceFileJson == null) {
+          await _updateTask(
+            existingTask.copyWith(sourceFileJson: sourceFileJson),
+          );
+        }
         duplicateCount++;
         continue;
       }
@@ -192,6 +204,7 @@ class GalleryDownloadQueueService {
         status: DownloadStatus.pending,
         createdAt: createTimestamp++,
         updatedAt: createTimestamp,
+        sourceFileJson: sourceFileJson,
       );
       _tasks[uploadID] = task;
       await _db.upsertTask(task);
@@ -299,6 +312,10 @@ class GalleryDownloadQueueService {
         );
       }
       _tasks[task.id] = task;
+      final queuedFile = _deserializeQueuedFile(task.sourceFileJson);
+      if (queuedFile != null) {
+        _queuedFilesByID[task.id] = queuedFile;
+      }
     }
 
     if (staleIDs.isNotEmpty) {
@@ -439,6 +456,15 @@ class GalleryDownloadQueueService {
   Future<void> _downloadAndSaveToGallery(int fileID) async {
     EnteFile? file = _queuedFilesByID[fileID];
     if (file == null) {
+      final task = _tasks[fileID];
+      if (task != null) {
+        file = _deserializeQueuedFile(task.sourceFileJson);
+        if (file != null) {
+          _queuedFilesByID[fileID] = file;
+        }
+      }
+    }
+    if (file == null) {
       final filesMap = await FilesDB.instance.getFileIDToFileFromIDs([fileID]);
       file = filesMap[fileID];
     }
@@ -565,5 +591,64 @@ class GalleryDownloadQueueService {
 
   void _emitUpdatedEvent() {
     Bus.instance.fire(GalleryDownloadsUpdatedEvent());
+  }
+
+  String _serializeQueuedFile(EnteFile file) {
+    return jsonEncode({
+      "uploadedFileID": file.uploadedFileID,
+      "ownerID": file.ownerID,
+      "collectionID": file.collectionID,
+      "title": file.title,
+      "fileType": file.fileType.index,
+      "encryptedKey": file.encryptedKey,
+      "keyDecryptionNonce": file.keyDecryptionNonce,
+      "fileDecryptionHeader": file.fileDecryptionHeader,
+      "thumbnailDecryptionHeader": file.thumbnailDecryptionHeader,
+      "metadataDecryptionHeader": file.metadataDecryptionHeader,
+      "fileSize": file.fileSize,
+      "pubMmdEncodedJson": file.pubMmdEncodedJson,
+      "pubMmdVersion": file.pubMmdVersion,
+    });
+  }
+
+  EnteFile? _deserializeQueuedFile(String? sourceFileJson) {
+    if (sourceFileJson == null || sourceFileJson.isEmpty) {
+      return null;
+    }
+    try {
+      final Map<String, dynamic> map =
+          jsonDecode(sourceFileJson) as Map<String, dynamic>;
+      final fileTypeIndex = map["fileType"];
+      if (fileTypeIndex is! int) {
+        return null;
+      }
+      final file = EnteFile()
+        ..uploadedFileID = map["uploadedFileID"] as int?
+        ..ownerID = map["ownerID"] as int?
+        ..collectionID = map["collectionID"] as int?
+        ..title = map["title"] as String?
+        ..fileType = getFileType(fileTypeIndex)
+        ..encryptedKey = map["encryptedKey"] as String?
+        ..keyDecryptionNonce = map["keyDecryptionNonce"] as String?
+        ..fileDecryptionHeader = map["fileDecryptionHeader"] as String?
+        ..thumbnailDecryptionHeader =
+            map["thumbnailDecryptionHeader"] as String?
+        ..metadataDecryptionHeader = map["metadataDecryptionHeader"] as String?
+        ..fileSize = map["fileSize"] as int?
+        ..pubMmdEncodedJson = map["pubMmdEncodedJson"] as String?
+        ..pubMmdVersion = map["pubMmdVersion"] as int? ?? 0;
+      if (file.uploadedFileID == null ||
+          file.collectionID == null ||
+          file.fileSize == null ||
+          file.fileDecryptionHeader == null ||
+          file.encryptedKey == null ||
+          file.keyDecryptionNonce == null) {
+        return null;
+      }
+      return file;
+    } catch (e, s) {
+      _logger.warning("Failed to deserialize queued source file", e, s);
+      return null;
+    }
   }
 }

@@ -16,6 +16,7 @@ class GalleryDownloadsDB with SqlDbBase {
   static const columnStatus = "status";
   static const columnError = "error";
   static const columnFilePath = "file_path";
+  static const columnSourceFile = "source_file";
   static const columnCreatedAt = "created_at";
   static const columnUpdatedAt = "updated_at";
 
@@ -38,6 +39,9 @@ class GalleryDownloadsDB with SqlDbBase {
     '''
     CREATE INDEX IF NOT EXISTS gallery_download_tasks_updated_at_index
     ON $tableName($columnUpdatedAt);
+    ''',
+    '''
+    ALTER TABLE $tableName ADD COLUMN $columnSourceFile TEXT;
     ''',
   ];
 
@@ -74,9 +78,10 @@ class GalleryDownloadsDB with SqlDbBase {
         $columnStatus,
         $columnError,
         $columnFilePath,
+        $columnSourceFile,
         $columnCreatedAt,
         $columnUpdatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         task.id,
@@ -86,6 +91,7 @@ class GalleryDownloadsDB with SqlDbBase {
         task.status.name,
         task.error,
         task.filePath,
+        task.sourceFileJson,
         task.createdAt,
         task.updatedAt,
       ],
@@ -104,6 +110,7 @@ class GalleryDownloadsDB with SqlDbBase {
         $columnStatus as status,
         $columnError as error,
         $columnFilePath as filePath,
+        $columnSourceFile as sourceFileJson,
         $columnCreatedAt as createdAt,
         $columnUpdatedAt as updatedAt
       FROM $tableName

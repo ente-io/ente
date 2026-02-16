@@ -13,6 +13,7 @@ class DownloadTask {
   final int totalBytes;
   final int createdAt;
   final int updatedAt;
+  final String? sourceFileJson;
   int bytesDownloaded;
   DownloadStatus status;
   String? error;
@@ -24,6 +25,7 @@ class DownloadTask {
     required this.totalBytes,
     int? createdAt,
     int? updatedAt,
+    this.sourceFileJson,
     this.bytesDownloaded = 0,
     this.status = DownloadStatus.pending,
     this.error,
@@ -46,6 +48,7 @@ class DownloadTask {
         'totalBytes': totalBytes,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
+        'sourceFileJson': sourceFileJson,
         'bytesDownloaded': bytesDownloaded,
         'status': status.name,
         'error': error,
@@ -58,6 +61,7 @@ class DownloadTask {
         totalBytes: map['totalBytes'],
         createdAt: map['createdAt'],
         updatedAt: map['updatedAt'],
+        sourceFileJson: map['sourceFileJson'],
         bytesDownloaded: map['bytesDownloaded'] ?? 0,
         status: DownloadStatus.values.byName(map['status']),
         error: map['error'],
@@ -67,6 +71,7 @@ class DownloadTask {
   DownloadTask copyWith({
     int? createdAt,
     int? updatedAt,
+    String? sourceFileJson,
     int? bytesDownloaded,
     DownloadStatus? status,
     String? error,
@@ -78,6 +83,7 @@ class DownloadTask {
         totalBytes: totalBytes,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? DateTime.now().microsecondsSinceEpoch,
+        sourceFileJson: sourceFileJson ?? this.sourceFileJson,
         bytesDownloaded: bytesDownloaded ?? this.bytesDownloaded,
         status: status ?? this.status,
         error: error ?? this.error,
