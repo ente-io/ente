@@ -233,6 +233,8 @@ run_platform_runner() {
   esac
 }
 
+declare -a failed_platform_runners=()
+
 for platform in "${selected_platforms[@]}"; do
   set +e
   run_platform_runner "$platform"
@@ -245,15 +247,22 @@ for platform in "${selected_platforms[@]}"; do
       ;;
     1)
       echo "Platform runner failed for $platform."
+      failed_platform_runners+=("$platform(exit=1)")
       ;;
     2)
       echo "Platform runner unavailable for $platform."
       ;;
     *)
       echo "Platform runner returned unexpected exit code $platform_run_exit for $platform."
+      failed_platform_runners+=("$platform(exit=$platform_run_exit)")
       ;;
   esac
 done
+
+if ((${#failed_platform_runners[@]} > 0)); then
+  echo "One or more platform runners failed: ${failed_platform_runners[*]}" >&2
+  exit 1
+fi
 
 declare -a compare_args=()
 missing_platform_count=0

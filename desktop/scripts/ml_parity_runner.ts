@@ -498,11 +498,18 @@ const main = async () => {
     const host = new HostClient(args.electronBinPath, args.hostScriptPath, args.userDataPath);
     await host.setDecodeHelperSource(productionDecodeHelperSource());
 
-    // `renderableImageBlob` checks these static build-time flags in shared web code.
-    (globalThis as { electron?: { convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array> } }).electron =
-        {
-            convertToJPEG: (imageData: Uint8Array) => host.convertToJPEG(imageData),
+    // `renderableImageBlob` and shared logging helpers check this shim.
+    (globalThis as {
+        electron?: {
+            convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
+            logToDisk: (message: string) => void;
         };
+    }).electron = {
+        convertToJPEG: (imageData: Uint8Array) => host.convertToJPEG(imageData),
+        logToDisk: (message: string) => {
+            process.stderr.write(`${message}\n`);
+        },
+    };
 
     const { renderableImageBlob } = await import(
         "../../web/packages/gallery/services/convert.ts"
