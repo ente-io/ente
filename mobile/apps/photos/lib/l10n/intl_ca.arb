@@ -59,7 +59,6 @@
   "incorrectRecoveryKeyBody": "La clau de recuperació que has introduït és incorrecta",
   "forgotPassword": "Has oblidat la contrasenya?",
   "enterYourRecoveryKey": "Introdueix la teva clau de recuperació",
-  "noRecoveryKey": "No tens clau de recuperació?",
   "sorry": "Ho sentim",
   "noRecoveryKeyNoDecryption": "A causa de la naturalesa del nostre protocol de xifratge d'extrem a extrem, les teves dades no es poden desxifrar sense la teva contrasenya o clau de recuperació",
   "verifyEmail": "Verifica el correu",
@@ -130,7 +129,6 @@
   "verifyPassword": "Verifica la contrasenya",
   "recoveryKey": "Clau de recuperació",
   "recoveryKeyOnForgotPassword": "Si oblides la teva contrasenya, l'única manera de recuperar les teves dades és amb aquesta clau.",
-  "recoveryKeySaveDescription": "No guardem aquesta clau, si us plau guarda aquesta clau de 24 paraules en un lloc segur.",
   "doThisLater": "Fes-ho més tard",
   "saveKey": "Guarda la clau",
   "recoveryKeyCopiedToClipboard": "Clau de recuperació copiada al porta-retalls",
@@ -306,9 +304,13 @@
   "enterCodeDescription": "Introdueix el codi proporcionat pel teu amic per reclamar emmagatzematge gratuït per a tots dos",
   "apply": "Aplica",
   "failedToApplyCode": "No s'ha pogut aplicar el codi",
+  "invalidReferralCode": "Codi invàlid",
   "enterReferralCode": "Introdueix codi de referència",
   "codeAppliedPageTitle": "Codi aplicat",
+  "changeYourReferralCode": "Canvia el teu codi",
   "change": "Canvia",
+  "saveCode": "Guarda el codi",
+  "referralCodeHint": "Pots personalitzar aquest codi fins a 3 vegades",
   "unavailableReferralCode": "Ho sentim, aquest codi no està disponible.",
   "codeChangeLimitReached": "Ho sentim, has assolit el límit de canvis de codi.",
   "onlyFamilyAdminCanChangeCode": "Si us plau, contacta amb {familyAdminEmail} per canviar el teu codi.",
@@ -317,17 +319,26 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB reclamats!",
   "details": "Detalls",
   "claimMore": "Reclama més!",
+  "earnMoreSpace": "Guanya més espai!",
   "theyAlsoGetXGb": "Ells també obtenen {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB per a ells + {storageAmountInGB} GB per a tu quan millorin el pla.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vegada que algú es registra per a un pla de pagament i aplica el teu codi",
-  "shareTextReferralCode": "Codi de referència d'Ente: {referralCode} \n\nAplica'l a Configuració → General → Referències per obtenir {referralStorageInGB} GB gratis després de registrar-te per a un pla de pagament\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos és una llar privada i segura per a les teves fotos\n* Descarrega Ente Photos des de https://ente.io/app\n* Crea un compte\n* Aplica el codi de referència {referralCode} a Configuració->Referència\n* Aconsegueix {referralStorageInGB}GB gratis quan milloris a un pla de pagament",
   "claimFreeStorage": "Reclama emmagatzematge gratuït",
   "inviteYourFriends": "Convida els teus amics",
+  "earnFreeStorage": "Guanya emmagatzematge gratuït",
+  "shareCodeEarnStorage": "Comparteix el teu codi, guanya emmagatzematge.",
+  "youBothGet": "Tots dos obteniu",
+  "free": "gratis",
   "failedToFetchReferralDetails": "No s'han pogut obtenir els detalls de la referència. Si us plau, torna-ho a provar més tard.",
-  "referralStep2": "2. Es registren per a un pla de pagament",
-  "referralStep3": "3. Tots dos obteniu {storageInGB} GB* gratis",
+  "referralStep1": "1. Personalitza i comparteix el teu codi.",
+  "referralStep2": "2. Es registren a Ente utilitzant el teu codi.",
+  "referralStep3": "3. {storageInGB}GB gratis per a ells + {storageInGB}GB gratis per a tu quan millorin el pla.",
   "referralsAreCurrentlyPaused": "Les referències estan actualment en pausa",
+  "youCanAtMaxDoubleYourStorage": "Pots com a màxim duplicar el teu emmagatzematge",
   "claimedStorageSoFar": "{isFamilyMember, select, true {La teva família ha reclamat {storageAmountInGb} GB fins ara} false {Has reclamat {storageAmountInGb} GB fins ara} other {Has reclamat {storageAmountInGb} GB fins ara!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -345,12 +356,18 @@
   "help": "Ajuda",
   "oopsSomethingWentWrong": "Vaja, alguna cosa ha anat malament",
   "peopleUsingYourCode": "Persones utilitzant el teu codi",
-  "eligible": "eligible",
+  "eligible": "elegible",
   "total": "total",
   "codeUsedByYou": "Codi utilitzat per tu",
   "freeStorageClaimed": "Emmagatzematge gratuït reclamat",
   "freeStorageUsable": "Emmagatzematge gratuït utilitzable",
   "usableReferralStorageInfo": "L'emmagatzematge utilitzable està limitat pel teu pla actual. L'excés d'emmagatzematge reclamat esdevindrà automàticament utilitzable quan milloris el teu pla.",
+  "referralStats": "Estadístiques de referències",
+  "usedYourCode": "han utilitzat el teu codi",
+  "claimedByYou": "reclamat per tu",
+  "earned": "guanyat",
+  "usable": "utilitzable",
+  "referralStorageInfo": "Les referències de subscriptors de pagament guanyen emmagatzematge extra.\n\nPots utilitzar emmagatzematge fins al límit del teu pla. Millora el pla per utilitzar la resta del teu emmagatzematge guanyat.",
   "removeFromAlbumTitle": "Eliminar de l'àlbum?",
   "removeFromAlbum": "Elimina de l'àlbum",
   "itemsWillBeRemovedFromAlbum": "Els elements seleccionats s'eliminaran d'aquest àlbum",
@@ -363,6 +380,8 @@
   "subscribeToChangeLinkSetting": "Necessiteu una subscripció de pagament per canviar aquesta configuració d'enllaç.",
   "subscribe": "Subscriu-te",
   "canOnlyRemoveFilesOwnedByYou": "Només pots eliminar fitxers que siguin teus",
+  "cannotMoveToSharedAlbums": "No es pot moure a àlbums compartits",
+  "cannotMoveToSharedAlbumsMessage": "Els elements només es poden afegir a àlbums compartits, no moure. Vols afegir-los en el seu lloc?",
   "deleteSharedAlbum": "Esborrar àlbum compartit?",
   "deleteAlbum": "Esborra àlbum",
   "deleteAlbumDialog": "Esborrar també les fotos (i vídeos) presents en aquest àlbum de <bold>tots</bold> els altres àlbums dels quals formen part?",
@@ -455,6 +474,10 @@
   "mlConsentPrivacy": "Si us plau, fes clic aquí per a més detalls sobre aquesta funció a la nostra política de privadesa",
   "mlConsentConfirmation": "Ho entenc, i vull activar l'aprenentatge automàtic",
   "magicSearch": "Cerca màgica",
+  "magic": "Màgia",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Descobreix",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -566,6 +589,10 @@
   "backup": "Còpia de seguretat",
   "freeUpDeviceSpace": "Allibera espai al dispositiu",
   "freeUpDeviceSpaceDesc": "Estalvia espai al teu dispositiu netejant fitxers dels quals ja s'ha fet còpia de seguretat.",
+  "freeUpDeviceSpaceDescICloud": "Els fitxers als àlbums compartits d'iCloud no es poden netejar.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Tot net",
   "noDeviceThatCanBeDeleted": "No tens fitxers en aquest dispositiu que es puguin esborrar",
   "removeDuplicates": "Elimina duplicats",
@@ -615,6 +642,8 @@
   "notifications": "Notificacions",
   "sharedPhotoNotifications": "Noves fotos compartides",
   "sharedPhotoNotificationsExplanation": "Rep notificacions quan algú afegeix una foto a un àlbum compartit del qual formes part",
+  "socialNotifications": "M'agrada i comentaris",
+  "socialNotificationsExplanation": "Rep notificacions de m'agrada a les teves fotos i comentaris als àlbums dels quals formes part",
   "advanced": "Avançat",
   "general": "General",
   "security": "Seguretat",
@@ -643,6 +672,7 @@
   "reportBug": "Informa d'error",
   "suggestFeatures": "Suggereix funcionalitats",
   "support": "Suport",
+  "appearance": "Appearance",
   "theme": "Tema",
   "lightTheme": "Clar",
   "darkTheme": "Fosc",
@@ -752,16 +782,6 @@
   "openSettings": "Obre Configuració",
   "selectMorePhotos": "Selecciona més fotos",
   "existingUser": "Usuari existent",
-  "privateBackups": "Còpies de seguretat privades",
-  "forYourMemories": "pels teus records",
-  "endtoendEncryptedByDefault": "Xifratge d'extrem a extrem per defecte",
-  "safelyStored": "Emmagatzematge segur",
-  "atAFalloutShelter": "en un refugi nuclear",
-  "designedToOutlive": "Dissenyat per perdurar",
-  "available": "Disponible",
-  "everywhere": "a tot arreu",
-  "androidIosWebDesktop": "Android, iOS, Web, Escriptori",
-  "mobileWebDesktop": "Mòbil, Web, Escriptori",
   "newToEnte": "Nou a Ente",
   "pleaseLoginAgain": "Si us plau, inicia sessió de nou",
   "autoLogoutMessage": "A causa d'un error tècnic, s'ha tancat la teva sessió. Les nostres disculpes per les molèsties.",
@@ -778,7 +798,6 @@
   "couldNotBackUpTryLater": "No hem pogut fer còpia de seguretat de les teves dades.\nHo reintentarem més tard.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente només pot xifrar i preservar fitxers si li concedeixes accés a ells",
   "pleaseGrantPermissions": "Si us plau, concedeix permisos",
-  "grantPermission": "Concedeix permís",
   "privateSharing": "Compartició privada",
   "shareOnlyWithThePeopleYouWant": "Comparteix només amb la gent que vulguis",
   "usePublicLinksForPeopleNotOnEnte": "Utilitza enllaços públics per a gent que no està a Ente",
@@ -800,6 +819,7 @@
   "name": "Nom",
   "newest": "Més nou",
   "lastUpdated": "Última actualització",
+  "updated": "Actualitzat",
   "deleteEmptyAlbums": "Esborra àlbums buits",
   "deleteEmptyAlbumsWithQuestionMark": "Esborrar àlbums buits?",
   "deleteAlbumsDialogBody": "Això esborrarà tots els àlbums buits. Això és útil quan vols reduir el desordre a la teva llista d'àlbums.",
@@ -1093,6 +1113,46 @@
   "loadMessage8": "web.ente.io té un carregador elegant",
   "loadMessage9": "Utilitzem Xchacha20Poly1305 per xifrar de manera segura les teves dades",
   "photoDescriptions": "Descripcions de fotos",
+  "searchResultFileName": "Nom de fitxer",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Descripció",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tipus",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Extensió de fitxer",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Persona",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Compartit",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Pujat per",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Marca de la càmera",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Model de la càmera",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Fitxers",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Tipus i noms de fitxers",
   "location": "Ubicació",
   "moments": "Moments",
@@ -1152,6 +1212,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} lliures",
+  "appVersion": "Version {versionValue}",
   "verifyIDLabel": "Verifica",
   "fileInfoAddDescHint": "Afegeix una descripció...",
   "editLocationTagTitle": "Edita ubicació",
@@ -1241,6 +1302,7 @@
   "visibility": "Visibilitat",
   "hideFromMemories": "Amaga dels records",
   "showInMemories": "Mostra als records",
+  "showIgnored": "Mostra ignorats",
   "create": "Crea",
   "viewAll": "Veure tot",
   "nothingSharedWithYouYet": "Encara no s'ha compartit res amb tu",
@@ -1259,7 +1321,6 @@
   "moveToHiddenAlbum": "Mou a l'àlbum ocult",
   "fileTypes": "Tipus de fitxers",
   "deleteConfirmDialogBody": "Aquest compte està vinculat a altres aplicacions d'Ente, si en fas servir alguna. Les teves dades pujades, a través de totes les aplicacions d'Ente, es programaran per a l'eliminació, i el teu compte s'esborrarà permanentment.",
-  "hearUsWhereTitle": "Com has conegut Ente? (opcional)",
   "hearUsExplanation": "No rastregem les instal·lacions de l'aplicació. Ens ajudaria que ens diguessis on ens has trobat!",
   "viewAddOnButton": "Veure complements",
   "addOns": "Complements",
@@ -1405,6 +1466,7 @@
   "enterPin": "Introdueix PIN",
   "setNewPin": "Estableix nou PIN",
   "appLock": "Bloqueig d'aplicació",
+  "lockScreenType": "Tipus de bloqueig",
   "noSystemLockFound": "No s'ha trobat bloqueig del sistema",
   "tapToUnlock": "Toca per desbloquejar",
   "tooManyIncorrectAttempts": "Massa intents incorrectes",
@@ -1490,6 +1552,26 @@
   "addNewPerson": "Afegeix nova persona",
   "addNameOrMerge": "Afegeix nom o fusiona",
   "mergeWithExisting": "Fusiona amb existent",
+  "mergeWithPersonTitle": "Fusionar amb {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Totes les fotos d'ambdós grups de cares es fusionaran sota {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nova persona",
   "addName": "Afegeix nom",
   "add": "Afegeix",
@@ -2065,6 +2147,7 @@
     }
   },
   "size": "Mida",
+  "closest": "Més proper",
   "similarity": "Similitud",
   "analyzingPhotosLocally": "Analitzant les teves fotos localment...",
   "lookingForVisualSimilarities": "Buscant similituds visuals...",
@@ -2276,11 +2359,46 @@
   "ritualEmojiUseAction": "Utilitza",
   "ritualSearchEmpty": "Construeix un ritual per mantenir el teu hàbit de fotos.",
   "feed": "Canal",
-  "likedYourPhoto": "Ha donat m'agrada a una foto",
-  "commentedOnYourPhoto": "Ha comentat una foto",
-  "repliedToYourComment": "Ha contestat a un comentari",
-  "likedYourComment": "Ha donat m'agrada a un comentari",
-  "likedYourReply": "Ha donat m'agrada a una resposta",
+  "newCommentNotificationTitle": "Tens un comentari",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Tens un m'agrada",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "Li ha agradat la teva foto",
+  "likedAPhoto": "Li ha agradat una foto",
+  "likedYourVideo": "Li ha agradat el teu vídeo",
+  "commentedOnYourPhoto": "Ha comentat la teva foto",
+  "commentedOnAPhoto": "Ha comentat una foto",
+  "commentedOnYourVideo": "Ha comentat el teu vídeo",
+  "commentedOnAVideo": "Ha comentat un vídeo",
+  "repliedToYourComment": "Ha respost al teu comentari",
+  "repliedToAComment": "Ha respost a un comentari",
+  "likedYourComment": "Li ha agradat el teu comentari",
+  "likedAComment": "Li ha agradat un comentari",
+  "likedYourReply": "Li ha agradat la teva resposta",
+  "likedAReply": "Li ha agradat una resposta",
+  "addedAMemoryTo": "Ha afegit un record a {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Ha afegit {count} records a {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "i 1 altre",
   "andXOthers": "i {count} altres",
   "@andXOthers": {
@@ -2398,7 +2516,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
+  "commentsCount": "{count, plural, one {}=0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {
@@ -2406,5 +2524,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Configuració de cerca",
+  "suggestions": "Suggeriments",
+  "cleanupHiddenFiles": "Neteja fitxers ocults",
+  "cleanupHiddenFilesDescription": "Alguns fitxers en àlbums ocults encara existeixen en àlbums no ocults fent-los visibles fora de la secció oculta. Netejar-los els eliminarà dels àlbums no ocults.",
+  "cleanupComplete": "Neteja completa",
+  "deleteHiddenFilesFromDevice": "Esborra fitxers ocults del dispositiu",
+  "deleteHiddenFilesFromDeviceDescription": "Esborra les còpies locals dels fitxers ocults del teu dispositiu",
+  "deleteOnDeviceFiles": "Esborra fitxers al dispositiu",
+  "noHiddenFilesOnDevice": "No hi ha fitxers ocults al dispositiu",
+  "grantPermission": "Concedeix permís"
 }
