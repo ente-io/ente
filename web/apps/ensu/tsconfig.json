@@ -1,11 +1,17 @@
 {
-    "extends": "../../packages/build-config/tsconfig-next.json",
-    "compilerOptions": { "baseUrl": "./src" },
+    "extends": "../../packages/build-config/tsconfig-typecheck.json",
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "allowJs": true,
+        "incremental": true,
+        "exactOptionalPropertyTypes": false
+    },
     "include": [
         "src",
         "next-env.d.ts",
         "next.config.mjs",
         "../../packages/base/global-electron.d.ts",
         "../../packages/base/components/utils/mui-theme.d.ts"
-    ]
+    ],
+    "exclude": ["node_modules", "out", ".next", ".next-desktop"]
 }

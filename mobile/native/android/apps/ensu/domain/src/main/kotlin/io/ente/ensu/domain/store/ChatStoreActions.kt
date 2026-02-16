@@ -15,6 +15,9 @@ import io.ente.ensu.domain.model.sanitizeTitleText
 import io.ente.ensu.domain.model.sessionTitleFromText
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -534,8 +537,9 @@ internal class ChatStoreActions(
             if (!isActive()) return@launch
 
             val history = historySelection.messages
+            val systemPrompt = buildSystemPrompt()
             val systemMessage = LlmMessage(
-                text = SYSTEM_PROMPT,
+                text = systemPrompt,
                 role = LlmMessageRole.System
             )
             val llmMessages = listOf(systemMessage) + history + LlmMessage(
@@ -1024,7 +1028,8 @@ internal class ChatStoreActions(
         val contextSize = target.contextLength ?: 4096
         val maxOutput = target.maxTokens ?: 1024
         val inputBudget = max(0, contextSize - maxOutput - OVERFLOW_SAFETY_TOKENS)
-        val systemTokens = estimateTokens(SYSTEM_PROMPT)
+        val systemPrompt = buildSystemPrompt()
+        val systemTokens = estimateTokens(systemPrompt)
         val promptTokens = estimatePromptTokens(promptText, promptImageCount)
         val historyTokens = historyMessages.sumOf { estimateTokens(historyText(it)) }
         val inputTokens = systemTokens + promptTokens + historyTokens
@@ -1152,12 +1157,18 @@ internal class ChatStoreActions(
         val imageFiles: List<java.io.File>
     )
 
+    private fun buildSystemPrompt(nowMillis: Long = clock()): String {
+        val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+            .format(Date(nowMillis))
+        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: $dateAndTime. $SYSTEM_PROMPT_BODY"
+    }
+
     companion object {
         private const val MEDIA_MARKER = "<__media__>"
         private const val OVERFLOW_SAFETY_TOKENS = 128
         private const val IMAGE_TOKEN_ESTIMATE = 768
         private const val MAX_CACHED_SESSIONS = 8
-        private const val SYSTEM_PROMPT =
-            "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
+        private const val SYSTEM_PROMPT_BODY =
+            "Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
     }
 }
