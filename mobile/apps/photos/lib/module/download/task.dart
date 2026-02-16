@@ -11,6 +11,8 @@ class DownloadTask {
   final int id;
   final String filename;
   final int totalBytes;
+  final int createdAt;
+  final int updatedAt;
   int bytesDownloaded;
   DownloadStatus status;
   String? error;
@@ -20,11 +22,14 @@ class DownloadTask {
     required this.id,
     required this.filename,
     required this.totalBytes,
+    int? createdAt,
+    int? updatedAt,
     this.bytesDownloaded = 0,
     this.status = DownloadStatus.pending,
     this.error,
     this.filePath,
-  });
+  })  : createdAt = createdAt ?? DateTime.now().microsecondsSinceEpoch,
+        updatedAt = updatedAt ?? DateTime.now().microsecondsSinceEpoch;
 
   double get progress => totalBytes > 0 ? bytesDownloaded / totalBytes : 0.0;
   bool get isCompleted => status == DownloadStatus.completed;
@@ -39,6 +44,8 @@ class DownloadTask {
         'id': id,
         'filename': filename,
         'totalBytes': totalBytes,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
         'bytesDownloaded': bytesDownloaded,
         'status': status.name,
         'error': error,
@@ -49,6 +56,8 @@ class DownloadTask {
         id: map['id'],
         filename: map['filename'],
         totalBytes: map['totalBytes'],
+        createdAt: map['createdAt'],
+        updatedAt: map['updatedAt'],
         bytesDownloaded: map['bytesDownloaded'] ?? 0,
         status: DownloadStatus.values.byName(map['status']),
         error: map['error'],
@@ -56,6 +65,8 @@ class DownloadTask {
       );
 
   DownloadTask copyWith({
+    int? createdAt,
+    int? updatedAt,
     int? bytesDownloaded,
     DownloadStatus? status,
     String? error,
@@ -65,6 +76,8 @@ class DownloadTask {
         id: id,
         filename: filename,
         totalBytes: totalBytes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? DateTime.now().microsecondsSinceEpoch,
         bytesDownloaded: bytesDownloaded ?? this.bytesDownloaded,
         status: status ?? this.status,
         error: error ?? this.error,

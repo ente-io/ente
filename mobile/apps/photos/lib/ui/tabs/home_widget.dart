@@ -61,6 +61,7 @@ import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
 import "package:photos/ui/home/christmas/christmas_utils.dart";
 import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
+import "package:photos/ui/home/gallery_download_banner.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
@@ -977,10 +978,16 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return HomeBottomNavigationBar(
-                _selectedFiles,
-                _selectedAlbums,
-                selectedTabIndex: _selectedTabIndex,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (flagService.internalUser) const GalleryDownloadBanner(),
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    _selectedAlbums,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                ],
               );
             },
           ),

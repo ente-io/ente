@@ -20,6 +20,7 @@ import "package:photos/gateways/social/social_gateway.dart";
 import "package:photos/gateways/trash/trash_gateway.dart";
 import "package:photos/gateways/users/passkey_gateway.dart";
 import "package:photos/gateways/users/users_gateway.dart";
+import "package:photos/module/download/gallery_download_queue_service.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/backup_preference_service.dart";
@@ -243,6 +244,12 @@ DownloadManager get downloadManager {
     ServiceLocator.instance.nonEnteDio,
   );
   return _downloadManager!;
+}
+
+GalleryDownloadQueueService? _galleryDownloadQueueService;
+GalleryDownloadQueueService get galleryDownloadQueueService {
+  _galleryDownloadQueueService ??= GalleryDownloadQueueService.instance;
+  return _galleryDownloadQueueService!;
 }
 
 SmartAlbumsService? _smartAlbumsService;
