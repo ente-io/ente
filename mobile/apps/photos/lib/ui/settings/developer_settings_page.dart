@@ -52,10 +52,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             const SizedBox(height: 40),
             GradientButton(
               onTap: () async {
-                final url = _urlController.text;
+                final url = _urlController.text.trim();
                 _logger.info("Entered endpoint: $url");
                 if (url == "offline") {
                   await localSettings.setAppMode(AppMode.offline);
+                  await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to offline");
                   Navigator.of(context).pop();

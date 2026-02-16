@@ -157,7 +157,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       shouldSurfaceExecutionStates: false,
                       shouldStickToLightTheme: true,
                     ),
-                    if (isOfflineMode) ...[
+                    if (localSettings.showOfflineModeOption) ...[
                       const SizedBox(height: 12),
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
