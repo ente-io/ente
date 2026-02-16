@@ -16,12 +16,15 @@ class EmergencyGateway {
   Future<void> addContact({
     required String email,
     required String encryptedKey,
+    int? recoveryNoticeInDays,
   }) async {
     await _enteDio.post(
       "/emergency-contacts/add",
       data: {
         "email": email,
         "encryptedKey": encryptedKey,
+        if (recoveryNoticeInDays != null)
+          "recoveryNoticeInDays": recoveryNoticeInDays,
       },
     );
   }
@@ -48,6 +51,20 @@ class EmergencyGateway {
         "userID": userID,
         "emergencyContactID": emergencyContactID,
         "state": state,
+      },
+    );
+  }
+
+  /// Updates the recovery notice period for an emergency contact.
+  Future<void> updateRecoveryNotice({
+    required int? emergencyContactID,
+    required int recoveryNoticeInDays,
+  }) async {
+    await _enteDio.post(
+      "/emergency-contacts/update-recovery-notice",
+      data: {
+        "emergencyContactID": emergencyContactID,
+        "recoveryNoticeInDays": recoveryNoticeInDays,
       },
     );
   }
