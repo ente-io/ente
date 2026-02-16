@@ -119,7 +119,7 @@ jobs:
         needs: release-desktop
         env:
             HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
-            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU != '' }}
             HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
         defaults:
@@ -227,11 +227,10 @@ jobs:
               if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
               uses: r0adkll/upload-google-play@v1
               with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
-                  status: draft
 
             - name: Notify Discord
               if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
