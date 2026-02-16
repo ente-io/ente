@@ -7,6 +7,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -31,6 +32,13 @@ Future<void> showSingleFileDeleteSheet(
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
+  if (isOfflineMode) {
+    await deleteFilesOnDeviceOnly(context, [file]);
+    if (onFileRemoved != null && file.localID != null) {
+      onFileRemoved(file);
+    }
+    return;
+  }
   final String bodyHighlight =
       AppLocalizations.of(context).singleFileDeleteHighlight;
   String body = "";

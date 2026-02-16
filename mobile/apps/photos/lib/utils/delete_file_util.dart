@@ -59,7 +59,7 @@ Future<void> deleteFilesFromEverywhere(
       hasLocalOnlyFiles = true;
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid) {
+  if (hasLocalOnlyFiles && Platform.isAndroid && !isOfflineMode) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return;
@@ -219,7 +219,7 @@ Future<void> deleteFilesOnDeviceOnly(
       localOnlyIDs.add(file.localID);
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid) {
+  if (hasLocalOnlyFiles && Platform.isAndroid && !isOfflineMode) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return;
@@ -743,6 +743,11 @@ Future<void> showDeleteSheet(
       context,
       AppLocalizations.of(context).cannotDeleteSharedFiles,
     );
+    return;
+  }
+  if (isOfflineMode) {
+    await deleteFilesOnDeviceOnly(context, deletableFiles);
+    selectedFiles.clearAll();
     return;
   }
   final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);
