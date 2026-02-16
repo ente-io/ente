@@ -7,6 +7,7 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -446,10 +447,23 @@ class _HomePageState extends UploaderPageState<HomePage>
     } catch (e) {
       _logger.severe('Error handling shared files: $e');
       if (mounted) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.l10n.uploadError,
-          'Failed to process shared files: $e',
+          title: context.l10n.uploadError,
+          message: context.l10n.somethingWentWrong,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(
+                  context,
+                  "support@ente.io",
+                  postShare: () {},
+                );
+              },
+            ),
+          ],
         );
       }
     }
