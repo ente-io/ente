@@ -11,16 +11,26 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/bg_qr_card"
+        android:padding="18dp">
 
-        <ImageView
-            android:id="@+id/image_qr"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:contentDescription="@null"
-            android:padding="20dp"
-            android:scaleType="fitCenter" />
+            android:background="@drawable/bg_qr_plate"
+            android:padding="20dp">
+
+            <ImageView
+                android:id="@+id/image_qr"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+
+        </FrameLayout>
 
     </FrameLayout>
 
