@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import io.ente.photos.screensaver.BuildConfig
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivityMainPreviewBinding
 import io.ente.photos.screensaver.diagnostics.AppLog
@@ -38,6 +39,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppLog.initialize(this)
+
+        if (BuildConfig.DEBUG) {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            finish()
+            return
+        }
 
         // Check if album is configured
         val repo = EntePublicAlbumRepository.get(this)
