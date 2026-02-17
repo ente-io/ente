@@ -74,6 +74,17 @@ OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
 PYTHON_OUTPUT_DIR="$OUTPUT_DIR/python"
 rm -rf "$PYTHON_OUTPUT_DIR"
 mkdir -p "$PYTHON_OUTPUT_DIR"
+MANIFEST_B64="$(
+  python3 - "$MANIFEST_PATH" <<'PY'
+import base64
+import pathlib
+import sys
+
+manifest_path = pathlib.Path(sys.argv[1])
+print(base64.b64encode(manifest_path.read_bytes()).decode("ascii"))
+PY
+)"
+CODE_REVISION="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo local)"
 
 echo "Running ML parity suite"
 echo "  suite: $SUITE"
@@ -212,6 +223,218 @@ run_desktop_runner() {
   return 0
 }
 
+platform_device_available() {
+  local platform="$1"
+  python3 - "$platform" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+platform = sys.argv[1]
+
+try:
+    raw = subprocess.check_output(
+        ["flutter", "devices", "--machine"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+except Exception:
+    sys.exit(2)
+
+try:
+    devices = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(2)
+
+def is_match(device: dict[str, object]) -> bool:
+    target = str(device.get("targetPlatform", "")).lower()
+    name = str(device.get("name", "")).lower()
+    if platform == "android":
+        return "android" in target or "android" in name
+    if platform == "ios":
+        return "ios" in target or "iphone" in name or "ipad" in name
+    return False
+
+sys.exit(0 if any(is_match(device) for device in devices) else 1)
+PY
+}
+
+platform_device_id() {
+  local platform="$1"
+  local selected
+  selected="$(
+    python3 - "$platform" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+platform = sys.argv[1]
+
+try:
+    raw = subprocess.check_output(
+        ["flutter", "devices", "--machine"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+except Exception:
+    sys.exit(2)
+
+try:
+    devices = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(2)
+
+def is_match(device: dict[str, object]) -> bool:
+    target = str(device.get("targetPlatform", "")).lower()
+    name = str(device.get("name", "")).lower()
+    if platform == "android":
+        return "android" in target or "android" in name
+    if platform == "ios":
+        return "ios" in target or "iphone" in name or "ipad" in name
+    return False
+
+for device in devices:
+    if is_match(device):
+        print(device.get("id", ""))
+        sys.exit(0)
+
+sys.exit(1)
+PY
+  )"
+
+  if [[ -n "$selected" ]]; then
+    echo "$selected"
+    return 0
+  fi
+
+  return 1
+}
+
+run_mobile_runner() {
+  local platform="$1"
+  local target="$2"
+  local device_id="${3:-}"
+
+  local mobile_dir="$ROOT_DIR/mobile/apps/photos"
+  local driver_path="$mobile_dir/test_driver/ml_parity_driver.dart"
+  local target_path="$mobile_dir/$target"
+  local platform_output_dir="$OUTPUT_DIR/$platform"
+  local output_path="$platform_output_dir/results.json"
+
+  if [[ ! -f "$driver_path" ]]; then
+    echo "Mobile parity driver not found at $driver_path; skipping $platform run."
+    return 2
+  fi
+
+  if [[ ! -f "$target_path" ]]; then
+    echo "Mobile parity test target not found at $target_path; skipping $platform run."
+    return 2
+  fi
+
+  if ! command -v flutter >/dev/null 2>&1; then
+    echo "flutter is required to run mobile parity; skipping $platform run."
+    return 2
+  fi
+
+  if [[ -z "$device_id" ]]; then
+    local platform_available_exit=0
+    if platform_device_available "$platform"; then
+      platform_available_exit=0
+    else
+      platform_available_exit=$?
+    fi
+    case "$platform_available_exit" in
+      0)
+        ;;
+      1)
+        echo "No connected $platform device/simulator detected; skipping $platform run."
+        return 2
+        ;;
+      *)
+        echo "Could not determine $platform device availability; skipping $platform run."
+        return 2
+        ;;
+    esac
+  fi
+
+  if [[ ! -f "$mobile_dir/.dart_tool/package_config.json" ]]; then
+    echo "Running flutter pub get for mobile app"
+    if ! (cd "$mobile_dir" && flutter pub get); then
+      echo "flutter pub get failed; $platform parity output not generated."
+      return 1
+    fi
+  fi
+
+  local flavor=""
+  case "$platform" in
+    android)
+      flavor="${ML_PARITY_ANDROID_FLAVOR:-independent}"
+      ;;
+    ios)
+      flavor="${ML_PARITY_IOS_FLAVOR:-}"
+      ;;
+  esac
+
+  local -a drive_cmd=(
+    flutter drive
+    --driver=test_driver/ml_parity_driver.dart
+    --target="$target"
+  )
+  if [[ -n "$flavor" ]]; then
+    drive_cmd+=(--flavor "$flavor")
+  fi
+  drive_cmd+=(
+    --no-dds
+    --dart-define=ML_PARITY_MANIFEST_B64="$MANIFEST_B64"
+    --dart-define=ML_PARITY_CODE_REVISION="$CODE_REVISION"
+    --dart-define=ML_PARITY_SUITE="$SUITE"
+  )
+  if [[ -n "$device_id" ]]; then
+    drive_cmd+=(-d "$device_id")
+  else
+    local selected_device_id
+    if ! selected_device_id="$(platform_device_id "$platform")"; then
+      echo "Could not resolve a connected $platform device; skipping $platform run."
+      return 2
+    fi
+    drive_cmd+=(-d "$selected_device_id")
+  fi
+
+  echo "Running $platform parity runner"
+  if ! (
+    cd "$mobile_dir"
+    ML_PARITY_DRIVER_OUTPUT="$output_path" "${drive_cmd[@]}"
+  ); then
+    echo "$platform parity runner failed; $platform parity output not generated."
+    return 1
+  fi
+
+  if [[ ! -f "$output_path" ]]; then
+    echo "$platform parity runner finished without output at $output_path."
+    return 1
+  fi
+
+  return 0
+}
+
+run_android_runner() {
+  run_mobile_runner \
+    "android" \
+    "integration_test/ml_parity_android_test.dart" \
+    "${ML_PARITY_ANDROID_DEVICE_ID:-}"
+}
+
+run_ios_runner() {
+  run_mobile_runner \
+    "ios" \
+    "integration_test/ml_parity_ios_test.dart" \
+    "${ML_PARITY_IOS_DEVICE_ID:-}"
+}
+
 run_platform_runner() {
   local platform="$1"
   case "$platform" in
@@ -219,12 +442,10 @@ run_platform_runner() {
       run_desktop_runner
       ;;
     android)
-      echo "Android parity runner is not implemented yet; skipping android run."
-      return 2
+      run_android_runner
       ;;
     ios)
-      echo "iOS parity runner is not implemented yet; skipping ios run."
-      return 2
+      run_ios_runner
       ;;
     *)
       echo "Unknown platform: $platform" >&2
