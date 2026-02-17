@@ -59,6 +59,12 @@ export const photosLogout = async () => {
     }
 
     try {
+        await logoutAppLock();
+    } catch (e) {
+        ignoreError("App lock", e);
+    }
+
+    try {
         logoutUserDetails();
     } catch (e) {
         ignoreError("User details", e);
@@ -104,12 +110,6 @@ export const photosLogout = async () => {
 
     const electron = globalThis.electron;
     if (electron) {
-        try {
-            await logoutAppLock();
-        } catch (e) {
-            ignoreError("App lock", e);
-        }
-
         try {
             await logoutML();
         } catch (e) {

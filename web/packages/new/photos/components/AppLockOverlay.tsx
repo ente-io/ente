@@ -32,6 +32,7 @@ import React, {
     useState,
 } from "react";
 import {
+    appLockCooldownDurationMs,
     attemptDeviceLockUnlock,
     attemptUnlock,
     type DeviceLockUnlockResult,
@@ -745,11 +746,6 @@ interface CooldownScreenProps {
     deviceLockLoading?: boolean;
 }
 
-const cooldownDurationMs = (attemptCount: number): number => {
-    if (attemptCount < 5) return 0;
-    return Math.pow(2, attemptCount - 5) * 30 * 1000;
-};
-
 const CooldownScreen: React.FC<CooldownScreenProps> = ({
     remainingMs,
     cooldownText,
@@ -758,13 +754,13 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
     onDeviceLockUnlock,
     deviceLockLoading,
 }) => {
-    const durationMs = cooldownDurationMs(attemptCount);
+    const durationMs = appLockCooldownDurationMs(attemptCount);
     const progress =
         durationMs > 0
             ? Math.min(100, ((durationMs - remainingMs) / durationMs) * 100)
             : 0;
     const nextAttemptCount = attemptCount + 1;
-    const nextCooldownMs = cooldownDurationMs(nextAttemptCount);
+    const nextCooldownMs = appLockCooldownDurationMs(nextAttemptCount);
     const nextAttemptMessage =
         nextAttemptCount >= 10
             ? t("one_more_wrong_attempt_logout")

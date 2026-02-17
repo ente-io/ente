@@ -9,7 +9,6 @@ import {
     savedPartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import { isDesktop, staticAppTitle } from "ente-base/app";
-import { subscribeMainWindowFocus } from "ente-base/electron";
 import { CenteredRow } from "ente-base/components/containers";
 import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
 import {
@@ -25,8 +24,10 @@ import {
 } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
+import { subscribeMainWindowFocus } from "ente-base/electron";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
+import { updateSessionFromElectronSafeStorageIfNeeded } from "ente-base/session";
 import type { AppUpdate } from "ente-base/types/ipc";
 import {
     initVideoProcessing,
@@ -40,8 +41,12 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
-import { initAppLock, lock } from "ente-new/photos/services/app-lock";
 import { useAppLockSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    initAppLock,
+    lock,
+    refreshAppLockStateFromSession,
+} from "ente-new/photos/services/app-lock";
 import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
@@ -68,6 +73,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
     const [watchFolderView, setWatchFolderView] = useState(false);
+    const [isAppLockReady, setIsAppLockReady] = useState(() => !isDesktop);
     const appLock = useAppLockSnapshot();
     const autoLockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -75,7 +81,23 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
+        const isElectron = !!globalThis.electron;
+        const isAppLockEnabled =
+            localStorage.getItem("appLock.enabled") === "true";
+
         initAppLock();
+        if (!isElectron || !isAppLockEnabled) {
+            setIsAppLockReady(true);
+        }
+        void (async () => {
+            if (!isElectron || !isAppLockEnabled) return;
+            try {
+                await updateSessionFromElectronSafeStorageIfNeeded();
+            } finally {
+                refreshAppLockStateFromSession();
+                setIsAppLockReady(true);
+            }
+        })();
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
@@ -241,7 +263,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
                 <PhotosAppContext value={appContext}>
-                    {!isI18nReady ? (
+                    {!isI18nReady || !isAppLockReady ? (
                         <LoadingIndicator />
                     ) : (
                         <>

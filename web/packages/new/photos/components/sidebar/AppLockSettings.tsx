@@ -7,6 +7,13 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
+import {
+    TitledNestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
 import {
     RowButton,
     RowButtonDivider,
@@ -14,16 +21,11 @@ import {
     RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
-import { TitledMiniDialog } from "ente-base/components/MiniDialog";
-import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
-import {
-    TitledNestedSidebarDrawer,
-    type NestedSidebarDrawerVisibilityProps,
-} from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
+import { t } from "i18next";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     disableAppLock,
     setAutoLockTime,
@@ -31,13 +33,13 @@ import {
     setupPassword,
     setupPin,
 } from "../../services/app-lock";
-import { t } from "i18next";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppLockSnapshot } from "../utils/use-snapshot";
 
-export const AppLockSettings: React.FC<
-    NestedSidebarDrawerVisibilityProps
-> = ({ open, onClose, onRootClose }) => {
+export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
     const state = useAppLockSnapshot();
 
     const [pinDialogOpen, setPinDialogOpen] = useState(false);
@@ -93,7 +95,9 @@ export const AppLockSettings: React.FC<
             );
         } catch (e) {
             log.error("Failed to set up device lock app lock", e);
-            showMiniDialog(errorDialogAttributes(t("device_lock_setup_failed")));
+            showMiniDialog(
+                errorDialogAttributes(t("device_lock_setup_failed")),
+            );
         } finally {
             setIsSettingDeviceLock(false);
         }
@@ -128,7 +132,11 @@ export const AppLockSettings: React.FC<
                             <Stack>
                                 <Typography
                                     variant="small"
-                                    sx={{ px: 1, pb: "6px", color: "text.muted" }}
+                                    sx={{
+                                        px: 1,
+                                        pb: "6px",
+                                        color: "text.muted",
+                                    }}
                                 >
                                     {t("lock_type")}
                                 </Typography>
@@ -138,7 +146,9 @@ export const AppLockSettings: React.FC<
                                         endIcon={
                                             state.lockType === "pin" ? (
                                                 <CheckIcon
-                                                    sx={{ color: "accent.main" }}
+                                                    sx={{
+                                                        color: "accent.main",
+                                                    }}
                                                 />
                                             ) : undefined
                                         }
@@ -150,7 +160,9 @@ export const AppLockSettings: React.FC<
                                         endIcon={
                                             state.lockType === "password" ? (
                                                 <CheckIcon
-                                                    sx={{ color: "accent.main" }}
+                                                    sx={{
+                                                        color: "accent.main",
+                                                    }}
                                                 />
                                             ) : undefined
                                         }
@@ -168,7 +180,9 @@ export const AppLockSettings: React.FC<
                                         endIcon={
                                             state.deviceLockEnabled ? (
                                                 <CheckIcon
-                                                    sx={{ color: "accent.main" }}
+                                                    sx={{
+                                                        color: "accent.main",
+                                                    }}
                                                 />
                                             ) : undefined
                                         }
@@ -256,6 +270,24 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
 
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const confirmInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const queueFocus = useCallback((fn: () => void, delay: number) => {
+        if (focusTimerRef.current) {
+            clearTimeout(focusTimerRef.current);
+        }
+        focusTimerRef.current = setTimeout(fn, delay);
+    }, []);
+
+    useEffect(
+        () => () => {
+            if (focusTimerRef.current) {
+                clearTimeout(focusTimerRef.current);
+                focusTimerRef.current = null;
+            }
+        },
+        [],
+    );
 
     const resetState = useCallback(() => {
         setStep("enter");
@@ -310,15 +342,15 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (pin.some((d) => !d)) return;
         setStep("confirm");
-        setTimeout(() => confirmInputRefs.current[0]?.focus(), 50);
-    }, [pin]);
+        queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
+    }, [pin, queueFocus]);
 
     const handleBack = useCallback(() => {
         setStep("enter");
         setConfirmPin(["", "", "", ""]);
         setError("");
-        setTimeout(() => inputRefs.current[0]?.focus(), 50);
-    }, []);
+        queueFocus(() => inputRefs.current[0]?.focus(), 50);
+    }, [queueFocus]);
 
     const handleConfirm = useCallback(async () => {
         const pinStr = pin.join("");
@@ -326,13 +358,13 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         if (pinStr !== confirmStr) {
             setError(t("pin_mismatch"));
             setConfirmPin(["", "", "", ""]);
-            setTimeout(() => confirmInputRefs.current[0]?.focus(), 50);
+            queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
             return;
         }
         await setupPin(pinStr);
         onComplete();
         resetState();
-    }, [pin, confirmPin, onComplete, resetState]);
+    }, [pin, confirmPin, onComplete, queueFocus, resetState]);
 
     const renderPinInputs = (
         values: string[],
@@ -390,7 +422,9 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
             <Stack sx={{ gap: 1.5, py: 0 }}>
                 {step === "enter" ? (
                     <>
-                        <Typography sx={{ color: "text.muted", textAlign: "left" }}>
+                        <Typography
+                            sx={{ color: "text.muted", textAlign: "left" }}
+                        >
                             {t("enter_pin")}
                         </Typography>
                         {renderPinInputs(pin, inputRefs, false)}
@@ -405,14 +439,24 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                     </>
                 ) : (
                     <>
-                        <Typography sx={{ color: "text.muted", textAlign: "left" }}>
+                        <Typography
+                            sx={{ color: "text.muted", textAlign: "left" }}
+                        >
                             {t("confirm_pin")}
                         </Typography>
-                        {renderPinInputs(confirmPin, confirmInputRefs, true, !!error)}
+                        {renderPinInputs(
+                            confirmPin,
+                            confirmInputRefs,
+                            true,
+                            !!error,
+                        )}
                         {error && (
                             <Typography
                                 variant="small"
-                                sx={{ color: "critical.main", textAlign: "left" }}
+                                sx={{
+                                    color: "critical.main",
+                                    textAlign: "left",
+                                }}
                             >
                                 {error}
                             </Typography>
@@ -457,12 +501,30 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
 
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
+    const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const queueFocus = useCallback((fn: () => void, delay: number) => {
+        if (focusTimerRef.current) {
+            clearTimeout(focusTimerRef.current);
+        }
+        focusTimerRef.current = setTimeout(fn, delay);
+    }, []);
+
+    useEffect(
+        () => () => {
+            if (focusTimerRef.current) {
+                clearTimeout(focusTimerRef.current);
+                focusTimerRef.current = null;
+            }
+        },
+        [],
+    );
 
     useEffect(() => {
         if (open) {
-            setTimeout(() => passwordInputRef.current?.focus(), 300);
+            queueFocus(() => passwordInputRef.current?.focus(), 300);
         }
-    }, [open]);
+    }, [open, queueFocus]);
 
     const resetState = useCallback(() => {
         setStep("enter");
@@ -481,15 +543,15 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (!password) return;
         setStep("confirm");
-        setTimeout(() => confirmPasswordInputRef.current?.focus(), 300);
-    }, [password]);
+        queueFocus(() => confirmPasswordInputRef.current?.focus(), 300);
+    }, [password, queueFocus]);
 
     const handleBack = useCallback(() => {
         setStep("enter");
         setConfirmPassword("");
         setError("");
-        setTimeout(() => passwordInputRef.current?.focus(), 300);
-    }, []);
+        queueFocus(() => passwordInputRef.current?.focus(), 300);
+    }, [queueFocus]);
 
     const handleConfirm = useCallback(async () => {
         if (password !== confirmPassword) {
@@ -525,9 +587,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: {
-                                    ref: passwordInputRef,
-                                },
+                                htmlInput: { ref: passwordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -563,9 +623,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: {
-                                    ref: confirmPasswordInputRef,
-                                },
+                                htmlInput: { ref: confirmPasswordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -619,11 +677,25 @@ const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
     onClose,
     currentValue,
 }) => {
-    const currentIndex = autoLockOptions.findIndex(
+    const persistedIndex = autoLockOptions.findIndex(
         (o) => o.ms === currentValue,
     );
+    const defaultIndex = persistedIndex === -1 ? 0 : persistedIndex;
+    const [selectedIndex, setSelectedIndex] = useState(defaultIndex);
+
+    useEffect(() => {
+        if (!open) return;
+        setSelectedIndex(defaultIndex);
+    }, [open, defaultIndex]);
 
     const handleChange = (_: Event, newValue: number | number[]) => {
+        setSelectedIndex(newValue as number);
+    };
+
+    const handleChangeCommitted = (
+        _: Event | React.SyntheticEvent,
+        newValue: number | number[],
+    ) => {
         const index = newValue as number;
         const option = autoLockOptions[index];
         if (option) setAutoLockTime(option.ms);
@@ -631,6 +703,8 @@ const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
 
     const firstLabel = t(autoLockOptions[0]!.labelKey);
     const lastLabel = t(autoLockOptions[autoLockOptions.length - 1]!.labelKey);
+    const selectedOption =
+        autoLockOptions[selectedIndex] ?? autoLockOptions[0]!;
 
     return (
         <TitledMiniDialog open={open} onClose={onClose} title={t("auto_lock")}>
@@ -640,16 +714,17 @@ const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
                     color="accent.main"
                     textAlign="center"
                 >
-                    {autoLockLabel(currentValue)}
+                    {t(selectedOption.labelKey)}
                 </Typography>
                 <Stack sx={{ px: 1 }}>
                     <Slider
-                        value={currentIndex === -1 ? 0 : currentIndex}
+                        value={selectedIndex}
                         min={0}
                         max={autoLockOptions.length - 1}
                         step={null}
                         marks={autoLockMarks}
                         onChange={handleChange}
+                        onChangeCommitted={handleChangeCommitted}
                         sx={{
                             color: "accent.main",
                             "& .MuiSlider-markActive": {
@@ -672,11 +747,7 @@ const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
                 </Stack>
             </Stack>
             <DialogActions>
-                <FocusVisibleButton
-                    fullWidth
-                    color="accent"
-                    onClick={onClose}
-                >
+                <FocusVisibleButton fullWidth color="accent" onClick={onClose}>
                     {t("done")}
                 </FocusVisibleButton>
             </DialogActions>

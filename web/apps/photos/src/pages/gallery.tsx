@@ -418,7 +418,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         const electron = globalThis.electron;
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
-        let unsubscribeMainWindowFocus = () => {};
+        let unsubscribeMainWindowFocus = () => undefined;
 
         void (async () => {
             if (!haveMasterKeyInSession() || !(await savedAuthToken())) {

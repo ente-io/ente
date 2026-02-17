@@ -128,56 +128,139 @@ const webAuthnChallengeBytes = 32;
 const userVerifiedFlag = 0x04;
 const deviceLockEnablePromptReason = "Enable device lock for Ente";
 const deviceLockUnlockPromptReason = "Unlock Ente";
+const maxInvalidUnlockAttempts = 10;
+const cooldownStartsAtAttempt = 5;
+const cooldownBaseSeconds = 30;
+const unlockAttemptLockName = "ente-app-lock-unlock-attempt";
+
+/**
+ * Return the cooldown duration for a failed-attempt count.
+ *
+ * This policy is shared by both lockout enforcement and cooldown UI.
+ */
+export const appLockCooldownDurationMs = (attemptCount: number): number => {
+    if (attemptCount < cooldownStartsAtAttempt) return 0;
+    return (
+        Math.pow(2, attemptCount - cooldownStartsAtAttempt) *
+        cooldownBaseSeconds *
+        1000
+    );
+};
 
 // -- BroadcastChannel for multi-tab sync --
 
-const _channel = new BroadcastChannel("ente-app-lock");
+const _channel =
+    typeof BroadcastChannel != "undefined"
+        ? new BroadcastChannel("ente-app-lock")
+        : undefined;
 
-_channel.onmessage = (event: MessageEvent) => {
-    const data = event.data as { type: string };
-    if (data.type === "lock") {
-        setSnapshot({ ..._state.snapshot, isLocked: true });
-        hydrateBruteForceStateIfNeeded();
-    } else if (data.type === "unlock") {
+interface AppLockConfigSyncMessage {
+    type: "config-updated";
+    enabled: AppLockState["enabled"];
+    lockType: AppLockState["lockType"];
+    deviceLockEnabled: AppLockState["deviceLockEnabled"];
+    autoLockTimeMs: AppLockState["autoLockTimeMs"];
+}
+
+interface AppLockBruteForceSyncMessage {
+    type: "bruteforce-updated";
+    invalidAttemptCount: AppLockState["invalidAttemptCount"];
+    cooldownExpiresAt: AppLockState["cooldownExpiresAt"];
+}
+
+type AppLockChannelMessage =
+    | { type: "lock" }
+    | { type: "unlock" }
+    | AppLockConfigSyncMessage
+    | AppLockBruteForceSyncMessage;
+
+const postChannelMessage = (payload: AppLockChannelMessage) => {
+    _channel?.postMessage(payload);
+};
+
+const appLockConfigFromSnapshot = (
+    snapshot: AppLockState,
+): Omit<AppLockConfigSyncMessage, "type"> => ({
+    enabled: snapshot.enabled,
+    lockType: snapshot.lockType,
+    deviceLockEnabled: snapshot.deviceLockEnabled,
+    autoLockTimeMs: snapshot.autoLockTimeMs,
+});
+
+const syncConfigAcrossTabs = (snapshot: AppLockState) => {
+    const payload: AppLockConfigSyncMessage = {
+        type: "config-updated",
+        ...appLockConfigFromSnapshot(snapshot),
+    };
+    postChannelMessage(payload);
+};
+
+const syncBruteForceAcrossTabs = (
+    invalidAttemptCount: number,
+    cooldownExpiresAt: number,
+) => {
+    const payload: AppLockBruteForceSyncMessage = {
+        type: "bruteforce-updated",
+        invalidAttemptCount,
+        cooldownExpiresAt,
+    };
+    postChannelMessage(payload);
+};
+
+const setBruteForceSnapshot = (
+    invalidAttemptCount: number,
+    cooldownExpiresAt: number,
+    shouldBroadcast = false,
+) => {
+    if (
+        _state.snapshot.invalidAttemptCount !== invalidAttemptCount ||
+        _state.snapshot.cooldownExpiresAt !== cooldownExpiresAt
+    ) {
         setSnapshot({
             ..._state.snapshot,
-            isLocked: false,
-            invalidAttemptCount: 0,
-            cooldownExpiresAt: 0,
+            invalidAttemptCount,
+            cooldownExpiresAt,
         });
-        stopBruteForceStateHydration();
+    }
+    if (shouldBroadcast) {
+        syncBruteForceAcrossTabs(invalidAttemptCount, cooldownExpiresAt);
     }
 };
 
-// -- Public API --
+const readBruteForceStateFromKV = async () => {
+    const [invalidAttempts, cooldownExpiry] = await Promise.all([
+        getKVN(kvKeyInvalidAttempts),
+        getKVN(kvKeyCooldownExpiresAt),
+    ]);
 
-/**
- * Initialize app lock state from localStorage on cold start.
- *
- * Reads localStorage synchronously so the overlay can render immediately
- * without a flash of unlocked content. Sets isLocked = true if app lock is
- * enabled and the user is logged in.
- *
- * After the synchronous snapshot, asynchronously restores the brute-force
- * attempt count and cooldown expiry from KV DB so that a page refresh cannot
- * bypass the cooldown.
- */
-export const initAppLock = () => {
+    return {
+        invalidAttemptCount: Math.max(0, invalidAttempts ?? 0),
+        cooldownExpiresAt: Math.max(0, cooldownExpiry ?? 0),
+    };
+};
+
+const normalizeLockType = (lockType: string): AppLockState["lockType"] =>
+    lockType === "pin" || lockType === "password" || lockType === "none"
+        ? lockType
+        : "none";
+
+const clampNonNegativeInt = (value: number) =>
+    Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+
+interface PersistedAppLockConfig {
+    enabled: boolean;
+    lockType: AppLockState["lockType"];
+    deviceLockEnabled: boolean;
+    autoLockTimeMs: number;
+}
+
+const readPersistedAppLockConfig = (): PersistedAppLockConfig => {
     const enabled = localStorage.getItem(lsKeyEnabled) === "true";
     const lockTypeRaw = localStorage.getItem(lsKeyLockType);
-    const hasPassphraseLockType =
-        lockTypeRaw === "pin" || lockTypeRaw === "password";
     const hasLegacyDeviceLockType =
         lockTypeRaw === "biometric" || lockTypeRaw === "deviceLock";
     const hasDeviceLockFlag =
         localStorage.getItem(lsKeyDeviceLockEnabled) === "true";
-    const lockType: AppLockState["lockType"] = hasPassphraseLockType
-        ? lockTypeRaw
-        : "none";
-    const deviceLockEnabled = hasDeviceLockFlag || hasLegacyDeviceLockType;
-    const autoLockTimeMs = Number(
-        localStorage.getItem(lsKeyAutoLockTimeMs) ?? "0",
-    );
 
     if (hasLegacyDeviceLockType) {
         localStorage.setItem(lsKeyDeviceLockEnabled, "true");
@@ -187,19 +270,145 @@ export const initAppLock = () => {
     // Remove stale key from removed "hide content when switching apps" setting.
     localStorage.removeItem("appLock.hideContentOnBlur");
 
-    const isLocked = enabled && haveMasterKeyInSession();
+    return {
+        enabled,
+        lockType: normalizeLockType(lockTypeRaw ?? "none"),
+        deviceLockEnabled: hasDeviceLockFlag || hasLegacyDeviceLockType,
+        autoLockTimeMs: clampNonNegativeInt(
+            Number(localStorage.getItem(lsKeyAutoLockTimeMs) ?? "0"),
+        ),
+    };
+};
 
+const setSnapshotFromPersistedConfig = (
+    config: PersistedAppLockConfig,
+    isLocked: boolean,
+) => {
     setSnapshot({
         ..._state.snapshot,
-        enabled,
-        lockType,
-        deviceLockEnabled,
+        enabled: config.enabled,
+        lockType: config.lockType,
+        deviceLockEnabled: config.deviceLockEnabled,
         isLocked,
-        autoLockTimeMs,
+        autoLockTimeMs: config.autoLockTimeMs,
+    });
+    hydrateBruteForceStateIfNeeded();
+};
+
+let _localUnlockAttemptQueue = Promise.resolve();
+
+const withLocalUnlockAttemptLock = async <T>(fn: () => Promise<T>) => {
+    const previous = _localUnlockAttemptQueue;
+    let releaseCurrent: (() => void) | undefined;
+
+    _localUnlockAttemptQueue = new Promise<void>((resolve) => {
+        releaseCurrent = resolve;
     });
 
-    // Restore brute-force state from KV DB so cooldowns survive page refresh.
-    hydrateBruteForceStateIfNeeded();
+    await previous;
+    try {
+        return await fn();
+    } finally {
+        releaseCurrent?.();
+    }
+};
+
+const withUnlockAttemptLock = async <T>(fn: () => Promise<T>) => {
+    const locks =
+        typeof navigator == "undefined"
+            ? undefined
+            : (navigator as Navigator & { locks?: LockManager }).locks;
+
+    if (locks && typeof locks.request == "function") {
+        const result: unknown = await locks.request(
+            unlockAttemptLockName,
+            { mode: "exclusive" },
+            fn,
+        );
+        return result as T;
+    }
+
+    return withLocalUnlockAttemptLock(fn);
+};
+
+if (_channel) {
+    _channel.onmessage = (event: MessageEvent) => {
+        const data = event.data as AppLockChannelMessage;
+
+        switch (data.type) {
+            case "lock":
+                setSnapshot({ ..._state.snapshot, isLocked: true });
+                hydrateBruteForceStateIfNeeded();
+                break;
+            case "unlock":
+                setSnapshot({
+                    ..._state.snapshot,
+                    isLocked: false,
+                    invalidAttemptCount: 0,
+                    cooldownExpiresAt: 0,
+                });
+                stopBruteForceStateHydration();
+                break;
+            case "config-updated": {
+                const lockType = normalizeLockType(data.lockType);
+                const autoLockTimeMs = clampNonNegativeInt(data.autoLockTimeMs);
+
+                if (!data.enabled) {
+                    setSnapshot({
+                        ..._state.snapshot,
+                        enabled: false,
+                        lockType: "none",
+                        deviceLockEnabled: false,
+                        autoLockTimeMs,
+                        isLocked: false,
+                        invalidAttemptCount: 0,
+                        cooldownExpiresAt: 0,
+                    });
+                    stopBruteForceStateHydration();
+                    break;
+                }
+
+                setSnapshot({
+                    ..._state.snapshot,
+                    enabled: data.enabled,
+                    lockType,
+                    deviceLockEnabled: data.deviceLockEnabled,
+                    autoLockTimeMs,
+                });
+                hydrateBruteForceStateIfNeeded();
+                break;
+            }
+            case "bruteforce-updated":
+                setBruteForceSnapshot(
+                    clampNonNegativeInt(data.invalidAttemptCount),
+                    clampNonNegativeInt(data.cooldownExpiresAt),
+                );
+                break;
+        }
+    };
+}
+
+// -- Public API --
+
+/**
+ * Initialize app lock state from localStorage on cold start.
+ *
+ * Reads localStorage synchronously so the overlay can render immediately
+ * without a flash of unlocked content. On desktop startup, it locks
+ * pessimistically while safe-storage hydration is in flight.
+ *
+ * After the synchronous snapshot, asynchronously restores the brute-force
+ * attempt count and cooldown expiry from KV DB so that a page refresh cannot
+ * bypass the cooldown.
+ */
+export const initAppLock = () => {
+    const config = readPersistedAppLockConfig();
+    const hasSession = haveMasterKeyInSession();
+
+    // On desktop, lock pessimistically while safe-storage hydration is in flight.
+    const isLocked = config.enabled && (hasSession || !!globalThis.electron);
+
+    setSnapshotFromPersistedConfig(config, isLocked);
 };
 
 /**
@@ -211,28 +420,14 @@ export const initAppLock = () => {
  */
 const restoreBruteForceState = async (generation: number) => {
     try {
-        const [invalidAttempts, cooldownExpiry] = await Promise.all([
-            getKVN(kvKeyInvalidAttempts),
-            getKVN(kvKeyCooldownExpiresAt),
-        ]);
+        const { invalidAttemptCount, cooldownExpiresAt } =
+            await readBruteForceStateFromKV();
 
         if (generation !== _bruteForceStateHydrationGeneration) {
             return;
         }
 
-        const invalidAttemptCount = invalidAttempts ?? 0;
-        const cooldownExpiresAt = cooldownExpiry ?? 0;
-
-        if (
-            _state.snapshot.invalidAttemptCount !== invalidAttemptCount ||
-            _state.snapshot.cooldownExpiresAt !== cooldownExpiresAt
-        ) {
-            setSnapshot({
-                ..._state.snapshot,
-                invalidAttemptCount,
-                cooldownExpiresAt,
-            });
-        }
+        setBruteForceSnapshot(invalidAttemptCount, cooldownExpiresAt);
     } catch (e) {
         log.error("Failed to restore brute-force state from KV DB", e);
     }
@@ -336,6 +531,34 @@ const isUserVerified = (authenticatorData: ArrayBuffer) => {
     return (flags & userVerifiedFlag) !== 0;
 };
 
+const isArrayBuffer = (value: unknown): value is ArrayBuffer =>
+    value instanceof ArrayBuffer;
+
+const assertionResponseFromCredential = (credential: PublicKeyCredential) => {
+    const response = credential.response as
+        | AuthenticatorAssertionResponse
+        | undefined;
+    if (!response) return undefined;
+
+    if (
+        !isArrayBuffer(response.clientDataJSON) ||
+        !isArrayBuffer(response.authenticatorData) ||
+        !isArrayBuffer(response.signature)
+    ) {
+        return undefined;
+    }
+
+    if (
+        response.clientDataJSON.byteLength === 0 ||
+        response.authenticatorData.byteLength === 0 ||
+        response.signature.byteLength === 0
+    ) {
+        return undefined;
+    }
+
+    return response;
+};
+
 const clearPassphraseMaterial = async () =>
     Promise.all([
         removeKV(kvKeyHash),
@@ -344,11 +567,13 @@ const clearPassphraseMaterial = async () =>
         removeKV(kvKeyMemLimit),
     ]);
 
-const resetBruteForceState = async () =>
-    Promise.all([
+const resetBruteForceState = async (shouldBroadcast = false) => {
+    await Promise.all([
         setKV(kvKeyInvalidAttempts, 0),
         setKV(kvKeyCooldownExpiresAt, 0),
     ]);
+    setBruteForceSnapshot(0, 0, shouldBroadcast);
+};
 
 const unlockLocally = () => {
     setSnapshot({
@@ -358,7 +583,7 @@ const unlockLocally = () => {
         cooldownExpiresAt: 0,
     });
     stopBruteForceStateHydration();
-    _channel.postMessage({ type: "unlock" });
+    postChannelMessage({ type: "unlock" });
 };
 
 /**
@@ -368,7 +593,9 @@ const unlockLocally = () => {
  * Call this after desktop safe-storage restore to prevent auto-login bypass.
  */
 export const refreshAppLockStateFromSession = () => {
-    initAppLock();
+    const config = readPersistedAppLockConfig();
+    const isLocked = config.enabled && haveMasterKeyInSession();
+    setSnapshotFromPersistedConfig(config, isLocked);
 };
 
 /**
@@ -386,56 +613,42 @@ export type SetupDeviceLockResult = "success" | "not-supported" | "failed";
  * Derives a key from the PIN using Argon2id with interactive limits, stores
  * the hash and derivation parameters in KV DB, and enables the lock.
  */
-export const setupPin = async (pin: string) => {
-    const derived = await deriveInteractiveKey(pin);
+const setupPassphraseLock = async (
+    lockType: Extract<AppLockState["lockType"], "pin" | "password">,
+    input: string,
+) => {
+    const derived = await deriveInteractiveKey(input);
     await Promise.all([
         setKV(kvKeyHash, derived.key),
         setKV(kvKeySalt, derived.salt),
         setKV(kvKeyOpsLimit, derived.opsLimit),
         setKV(kvKeyMemLimit, derived.memLimit),
-        resetBruteForceState(),
+        resetBruteForceState(true),
     ]);
 
-    localStorage.setItem(lsKeyLockType, "pin");
+    localStorage.setItem(lsKeyLockType, lockType);
     localStorage.setItem(lsKeyEnabled, "true");
 
     setSnapshot({
         ..._state.snapshot,
         enabled: true,
-        lockType: "pin",
+        lockType,
         invalidAttemptCount: 0,
         cooldownExpiresAt: 0,
     });
     stopBruteForceStateHydration();
+    syncConfigAcrossTabs(_state.snapshot);
 };
+
+export const setupPin = async (pin: string) => setupPassphraseLock("pin", pin);
 
 /**
  * Set up a password for app lock.
  *
  * Same as {@link setupPin} but sets the lock type to "password".
  */
-export const setupPassword = async (password: string) => {
-    const derived = await deriveInteractiveKey(password);
-    await Promise.all([
-        setKV(kvKeyHash, derived.key),
-        setKV(kvKeySalt, derived.salt),
-        setKV(kvKeyOpsLimit, derived.opsLimit),
-        setKV(kvKeyMemLimit, derived.memLimit),
-        resetBruteForceState(),
-    ]);
-
-    localStorage.setItem(lsKeyLockType, "password");
-    localStorage.setItem(lsKeyEnabled, "true");
-
-    setSnapshot({
-        ..._state.snapshot,
-        enabled: true,
-        lockType: "password",
-        invalidAttemptCount: 0,
-        cooldownExpiresAt: 0,
-    });
-    stopBruteForceStateHydration();
-};
+export const setupPassword = async (password: string) =>
+    setupPassphraseLock("password", password);
 
 /**
  * Set up local WebAuthn device lock authentication for app lock.
@@ -459,7 +672,7 @@ export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
                     );
                     if (!unlocked) return "failed";
 
-                    await resetBruteForceState();
+                    await resetBruteForceState(true);
 
                     localStorage.setItem(lsKeyDeviceLockEnabled, "true");
                     localStorage.setItem(lsKeyEnabled, "true");
@@ -472,6 +685,7 @@ export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
                         cooldownExpiresAt: 0,
                     });
                     stopBruteForceStateHydration();
+                    syncConfigAcrossTabs(_state.snapshot);
 
                     return "success";
                 }
@@ -522,7 +736,7 @@ export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
 
         await Promise.all([
             setKV(kvKeyWebAuthnCredentialID, credentialID),
-            resetBruteForceState(),
+            resetBruteForceState(true),
         ]);
 
         localStorage.setItem(lsKeyDeviceLockEnabled, "true");
@@ -536,6 +750,7 @@ export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
             cooldownExpiresAt: 0,
         });
         stopBruteForceStateHydration();
+        syncConfigAcrossTabs(_state.snapshot);
 
         return "success";
     } catch (e) {
@@ -563,6 +778,11 @@ export type DeviceLockUnlockResult = "success" | "failed" | "not-supported";
  * Attempt to unlock the app with a local WebAuthn device lock check.
  *
  * This is a fully local verification flow and does not call any backend API.
+ *
+ * Security note: This flow uses browser-provided credential APIs and validates
+ * challenge/type/origin/credential-id/user-verification locally. It is
+ * designed as a local app-lock boundary, not as a replacement for server-side
+ * WebAuthn authentication ceremonies.
  */
 export const attemptDeviceLockUnlock =
     async (): Promise<DeviceLockUnlockResult> => {
@@ -623,8 +843,25 @@ export const attemptDeviceLockUnlock =
                 return "failed";
             }
 
-            const response =
-                credential.response as AuthenticatorAssertionResponse;
+            if (credential.type !== "public-key") {
+                log.error("Device lock unlock credential type mismatch");
+                return "failed";
+            }
+            if (!(credential.rawId instanceof ArrayBuffer)) {
+                log.error("Device lock unlock credential rawId missing");
+                return "failed";
+            }
+            if (credential.rawId.byteLength === 0) {
+                log.error("Device lock unlock credential rawId is empty");
+                return "failed";
+            }
+
+            const response = assertionResponseFromCredential(credential);
+            if (!response) {
+                log.error("Device lock unlock response is malformed");
+                return "failed";
+            }
+
             const clientData = parseClientDataJSON(response.clientDataJSON);
             if (!clientData) {
                 return "failed";
@@ -685,73 +922,77 @@ export const attemptUnlock = async (input: string): Promise<UnlockResult> => {
         return "failed";
     }
 
-    // Ensure persisted lockout state has been rehydrated before enforcing.
-    await ensureBruteForceStateHydrated();
+    return withUnlockAttemptLock<UnlockResult>(async () => {
+        // Ensure persisted lockout state has been rehydrated before enforcing.
+        await ensureBruteForceStateHydrated();
 
-    // Check cooldown from in-memory state.
-    if (
-        _state.snapshot.cooldownExpiresAt > 0 &&
-        Date.now() < _state.snapshot.cooldownExpiresAt
-    ) {
-        return "cooldown";
-    }
+        // Refresh lockout state from KV so stale tabs cannot reset counters.
+        const persistedState = await readBruteForceStateFromKV();
+        const invalidAttemptCount = Math.max(
+            _state.snapshot.invalidAttemptCount,
+            persistedState.invalidAttemptCount,
+        );
+        const cooldownExpiresAt = Math.max(
+            _state.snapshot.cooldownExpiresAt,
+            persistedState.cooldownExpiresAt,
+        );
+        setBruteForceSnapshot(invalidAttemptCount, cooldownExpiresAt);
 
-    // Read stored derivation parameters and hash from KV DB.
-    const salt = await getKVS(kvKeySalt);
-    const storedHash = await getKVS(kvKeyHash);
-    const opsLimit = await getKVN(kvKeyOpsLimit);
-    const memLimit = await getKVN(kvKeyMemLimit);
+        // Check cooldown from in-memory state.
+        if (
+            _state.snapshot.cooldownExpiresAt > 0 &&
+            Date.now() < _state.snapshot.cooldownExpiresAt
+        ) {
+            return "cooldown";
+        }
 
-    if (!salt || !storedHash || !opsLimit || !memLimit) {
-        log.error("App lock credentials missing from KV DB");
+        // Read stored derivation parameters and hash from KV DB.
+        const salt = await getKVS(kvKeySalt);
+        const storedHash = await getKVS(kvKeyHash);
+        const opsLimit = await getKVN(kvKeyOpsLimit);
+        const memLimit = await getKVN(kvKeyMemLimit);
+
+        if (!salt || !storedHash || !opsLimit || !memLimit) {
+            log.error("App lock credentials missing from KV DB");
+            return "failed";
+        }
+
+        // Derive key from input using the stored parameters.
+        const derivedKey = await deriveKey(input, salt, opsLimit, memLimit);
+
+        if (derivedKey === storedHash) {
+            // Correct input: reset attempts, unlock.
+            await resetBruteForceState(true);
+            unlockLocally();
+            return "success";
+        }
+
+        // Incorrect input: increment attempts.
+        const count = invalidAttemptCount + 1;
+        await setKV(kvKeyInvalidAttempts, count);
+
+        if (count >= maxInvalidUnlockAttempts) {
+            // Too many attempts: signal logout.
+            await setKV(kvKeyCooldownExpiresAt, 0);
+            setBruteForceSnapshot(count, 0, true);
+            return "logout";
+        }
+
+        if (count >= cooldownStartsAtAttempt) {
+            // Enforce cooldown with exponential backoff.
+            const expiresAt = Date.now() + appLockCooldownDurationMs(count);
+            await setKV(kvKeyCooldownExpiresAt, expiresAt);
+            setBruteForceSnapshot(count, expiresAt, true);
+
+            // The current failed attempt has triggered cooldown, so surface the
+            // cooldown state immediately to callers/UI.
+            return "cooldown";
+        } else {
+            setBruteForceSnapshot(count, 0, true);
+        }
+
         return "failed";
-    }
-
-    // Derive key from input using the stored parameters.
-    const derivedKey = await deriveKey(input, salt, opsLimit, memLimit);
-
-    if (derivedKey === storedHash) {
-        // Correct input: reset attempts, unlock.
-        await resetBruteForceState();
-        unlockLocally();
-        return "success";
-    }
-
-    // Incorrect input: increment attempts.
-    const count = _state.snapshot.invalidAttemptCount + 1;
-    await setKV(kvKeyInvalidAttempts, count);
-
-    if (count >= 10) {
-        // Too many attempts: signal logout.
-        await setKV(kvKeyCooldownExpiresAt, 0);
-        setSnapshot({
-            ..._state.snapshot,
-            invalidAttemptCount: count,
-            cooldownExpiresAt: 0,
-        });
-        return "logout";
-    }
-
-    if (count >= 5) {
-        // Enforce cooldown with exponential backoff.
-        const cooldownSeconds = Math.pow(2, count - 5) * 30;
-        const expiresAt = Date.now() + cooldownSeconds * 1000;
-        await setKV(kvKeyCooldownExpiresAt, expiresAt);
-
-        setSnapshot({
-            ..._state.snapshot,
-            invalidAttemptCount: count,
-            cooldownExpiresAt: expiresAt,
-        });
-
-        // The current failed attempt has triggered cooldown, so surface the
-        // cooldown state immediately to callers/UI.
-        return "cooldown";
-    } else {
-        setSnapshot({ ..._state.snapshot, invalidAttemptCount: count });
-    }
-
-    return "failed";
+    });
 };
 
 /**
@@ -760,7 +1001,7 @@ export const attemptUnlock = async (input: string): Promise<UnlockResult> => {
 export const lock = () => {
     setSnapshot({ ..._state.snapshot, isLocked: true });
     hydrateBruteForceStateIfNeeded();
-    _channel.postMessage({ type: "lock" });
+    postChannelMessage({ type: "lock" });
 };
 
 /**
@@ -784,14 +1025,19 @@ export const logoutAppLock = async () => {
 
     stopBruteForceStateHydration();
     _state = new AppLockModuleState();
+    syncConfigAcrossTabs(_state.snapshot);
+    syncBruteForceAcrossTabs(0, 0);
+    postChannelMessage({ type: "unlock" });
 };
 
 /**
  * Update the auto-lock delay.
  */
 export const setAutoLockTime = (ms: number) => {
-    localStorage.setItem(lsKeyAutoLockTimeMs, String(ms));
-    setSnapshot({ ..._state.snapshot, autoLockTimeMs: ms });
+    const autoLockTimeMs = clampNonNegativeInt(ms);
+    localStorage.setItem(lsKeyAutoLockTimeMs, String(autoLockTimeMs));
+    setSnapshot({ ..._state.snapshot, autoLockTimeMs });
+    syncConfigAcrossTabs(_state.snapshot);
 };
 
 /**
@@ -822,4 +1068,6 @@ export const disableAppLock = async () => {
         cooldownExpiresAt: 0,
     });
     stopBruteForceStateHydration();
+    syncConfigAcrossTabs(_state.snapshot);
+    syncBruteForceAcrossTabs(0, 0);
 };

@@ -44,7 +44,10 @@ const attachMainWindowFocusBridgeIfNeeded = () => {
 };
 
 const detachMainWindowFocusBridgeIfNeeded = () => {
-    if (!hasAttachedMainWindowFocusBridge || mainWindowFocusListeners.size > 0) {
+    if (
+        !hasAttachedMainWindowFocusBridge ||
+        mainWindowFocusListeners.size > 0
+    ) {
         return;
     }
 
