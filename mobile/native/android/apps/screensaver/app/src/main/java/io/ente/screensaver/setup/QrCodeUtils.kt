@@ -137,7 +137,7 @@ object QrCodeUtils {
         val outerRadius = size * 0.26f
         canvas.drawRoundRect(RectF(left, top, right, bottom), outerRadius, outerRadius, outerPaint)
 
-        val ringThickness = size * 0.22f
+        val ringThickness = size * 0.16f
         val innerRect = RectF(
             left + ringThickness,
             top + ringThickness,
