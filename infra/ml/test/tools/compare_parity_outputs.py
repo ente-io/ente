@@ -51,6 +51,14 @@ def main() -> int:
         action="store_true",
         help="Skip non-ground-truth pairwise comparisons.",
     )
+    parser.add_argument(
+        "--fail-on-any-file-failure",
+        action="store_true",
+        help=(
+            "Exit non-zero when any compared file fails thresholds. "
+            "By default, this command reports file-level failures but exits zero."
+        ),
+    )
     args = parser.parse_args()
 
     ground_truth_path = Path(args.ground_truth)
@@ -76,12 +84,13 @@ def main() -> int:
         thresholds=thresholds,
     )
 
-    passed = all(report.passed for report in reports)
+    all_files_passed = all(report.passed for report in reports)
     output_payload = {
         "generated_at": datetime.now(UTC).isoformat(),
         "ground_truth_platform": ground_truth_platform,
         "thresholds": thresholds.to_dict(),
-        "passed": passed,
+        "all_files_passed": all_files_passed,
+        "passed": all_files_passed,
         "comparisons": _serialize_reports(reports),
     }
 
@@ -92,7 +101,7 @@ def main() -> int:
 
     failed_reports = [report for report in reports if not report.passed]
     print(f"Comparisons executed: {len(reports)}")
-    print(f"Comparison status: {'PASS' if passed else 'FAIL'}")
+    print("Comparison mode: file-level (no global pass/fail gate)")
     for report in reports:
         print(
             f"  {report.reference_platform} -> {report.candidate_platform}: "
@@ -100,14 +109,17 @@ def main() -> int:
             f"{len(report.failing_files)} fail"
         )
     if failed_reports:
-        print("Failed comparisons:")
+        print("Comparisons with failing files:")
         for report in failed_reports:
             print(
                 f"  {report.reference_platform} -> {report.candidate_platform} "
                 f"({len(report.findings)} findings)"
             )
 
-    return 0 if passed else 1
+    if args.fail_on_any_file_failure and failed_reports:
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":

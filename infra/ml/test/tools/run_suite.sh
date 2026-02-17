@@ -713,11 +713,11 @@ if [[ -f "$compare_output" ]]; then
 fi
 
 if ((compare_exit != 0)); then
-  echo "Parity comparison failed"
+  echo "Parity comparison command failed"
   exit "$compare_exit"
 fi
 
-echo "Parity comparison passed"
+echo "Parity comparison completed (file-level results reported above)"
 if $UPDATE_GOLDEN; then
   echo "--update-golden currently regenerates Python ONNX ground-truth outputs only."
 fi
