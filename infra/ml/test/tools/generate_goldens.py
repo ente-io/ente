@@ -30,6 +30,22 @@ def _git_revision(default: str = "local") -> str:
     return completed.stdout.strip() or default
 
 
+def _repo_root(ml_dir: Path) -> Path:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(ml_dir), "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return ml_dir.parents[2]
+    root = completed.stdout.strip()
+    if not root:
+        return ml_dir.parents[2]
+    return Path(root)
+
+
 def _resolve_repo_relative(path_value: str, *, repo_root: Path) -> Path:
     path = Path(path_value)
     if path.is_absolute():
@@ -109,17 +125,17 @@ def main() -> int:
     )
     parser.add_argument(
         "--manifest",
-        default="infra/ml/ground_truth/manifest.json",
+        default="infra/ml/test/ground_truth/manifest.json",
         help="Path to manifest.json file.",
     )
     parser.add_argument(
         "--output-dir",
-        default="infra/ml/ground_truth/goldens",
+        default="infra/ml/test/ground_truth/goldens",
         help="Directory where generated parity files are written.",
     )
     parser.add_argument(
         "--model-cache-dir",
-        default="infra/ml/.cache/onnx_models",
+        default="infra/ml/test/.cache/onnx_models",
         help="Directory where ONNX models are cached locally.",
     )
     parser.add_argument(
@@ -130,7 +146,7 @@ def main() -> int:
     args = parser.parse_args()
 
     ml_dir = Path(__file__).resolve().parents[1]
-    repo_root = ml_dir.parents[1]
+    repo_root = _repo_root(ml_dir)
 
     manifest_path = _resolve_repo_relative(args.manifest, repo_root=repo_root)
     output_dir = _resolve_repo_relative(args.output_dir, repo_root=repo_root)

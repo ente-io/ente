@@ -156,7 +156,7 @@ jobs:
                   args=(
                       --suite "$PARITY_SUITE"
                       --platforms "$PARITY_PLATFORMS"
-                      --output-dir "infra/ml/out/parity"
+                      --output-dir "infra/ml/test/out/parity"
                   )
                   if [[ "$PARITY_FAIL_ON_MISSING" == "true" ]]; then
                       args+=(--fail-on-missing-platform)
@@ -165,12 +165,12 @@ jobs:
                       args+=(--allow-empty-comparison)
                   fi
 
-                  bash infra/ml/tools/run_suite.sh "${args[@]}"
+                  bash infra/ml/test/tools/run_suite.sh "${args[@]}"
 
             - name: Upload parity artifacts
               if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: "ml-indexing-parity-${{ github.run_id }}-${{ github.run_attempt }}"
-                  path: "infra/ml/out/parity/**"
+                  path: "infra/ml/test/out/parity/**"
                   if-no-files-found: ignore

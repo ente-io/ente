@@ -56,17 +56,18 @@ interface PendingRequest {
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 const DESKTOP_ROOT = path.join(REPO_ROOT, "desktop");
-const ML_DIR = path.join(REPO_ROOT, "infra", "ml");
+const ML_DIR = path.join(REPO_ROOT, "infra", "ml", "test");
 
 const DEFAULT_MANIFEST_PATH = path.join(
     REPO_ROOT,
     "infra",
     "ml",
+    "test",
     "ground_truth",
     "manifest.json",
 );
 
-const DEFAULT_OUTPUT_DIR = path.join(REPO_ROOT, "infra", "ml", "out", "parity", "desktop");
+const DEFAULT_OUTPUT_DIR = path.join(REPO_ROOT, "infra", "ml", "test", "out", "parity", "desktop");
 const DEFAULT_HOST_SCRIPT_PATH = path.join(REPO_ROOT, "desktop", "scripts", "ml_parity_host.js");
 const DEFAULT_ELECTRON_BIN_PATH = path.join(
     REPO_ROOT,
@@ -75,7 +76,7 @@ const DEFAULT_ELECTRON_BIN_PATH = path.join(
     ".bin",
     "electron",
 );
-const DEFAULT_USER_DATA_PATH = path.join(REPO_ROOT, "infra", "ml", ".cache", "desktop-user-data");
+const DEFAULT_USER_DATA_PATH = path.join(REPO_ROOT, "infra", "ml", "test", ".cache", "desktop-user-data");
 
 const MODEL_FILE_NAMES: Record<string, string> = {
     clip: "mobileclip_s2_image_opset18_rgba_opt.onnx",
@@ -86,7 +87,7 @@ const MODEL_FILE_NAMES: Record<string, string> = {
 const usage = () => {
     process.stderr.write(`Usage: desktop/scripts/ml_parity_runner.ts [flags]\n\n`);
     process.stderr.write(`Flags:\n`);
-    process.stderr.write(`  --manifest <path>        Path to parity manifest (default: infra/ml/ground_truth/manifest.json)\n`);
+    process.stderr.write(`  --manifest <path>        Path to parity manifest (default: infra/ml/test/ground_truth/manifest.json)\n`);
     process.stderr.write(`  --output-dir <path>      Output directory for desktop parity JSONs\n`);
     process.stderr.write(`  --electron-bin <path>    Electron binary path\n`);
     process.stderr.write(`  --host-script <path>     Host script path\n`);

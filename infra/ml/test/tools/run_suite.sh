@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-ML_DIR="$ROOT_DIR/infra/ml"
-MANIFEST_PATH="$ROOT_DIR/infra/ml/ground_truth/manifest.json"
+ROOT_DIR="$(
+  git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null \
+    || (cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)
+)"
+ML_DIR="$ROOT_DIR/infra/ml/test"
+UV_PROJECT_DIR="$ROOT_DIR/infra/ml"
+MANIFEST_PATH="$ROOT_DIR/infra/ml/test/ground_truth/manifest.json"
 TEST_DATA_DIR="$ML_DIR/test_data/ml-indexing/v1"
 
 SUITE="smoke"
@@ -11,11 +15,11 @@ PLATFORMS="all"
 UPDATE_GOLDEN=false
 FAIL_ON_MISSING_PLATFORM=false
 ALLOW_EMPTY_COMPARISON=false
-OUTPUT_DIR="$ROOT_DIR/infra/ml/out/parity"
+OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
 
 usage() {
   cat <<EOF
-Usage: infra/ml/tools/run_suite.sh [flags]
+Usage: infra/ml/test/tools/run_suite.sh [flags]
 
 Flags:
   --suite smoke|full
@@ -152,8 +156,8 @@ PY
 echo "Downloaded fixture files: $downloaded_count"
 
 echo "Generating Python goldens"
-uv run --project "$ML_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
-  --manifest "infra/ml/ground_truth/manifest.json" \
+uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
+  --manifest "infra/ml/test/ground_truth/manifest.json" \
   --output-dir "$PYTHON_OUTPUT_DIR"
 
 declare -a selected_platforms=()
@@ -515,7 +519,7 @@ fi
 
 compare_output="$OUTPUT_DIR/comparison_report.json"
 compare_cmd=(
-  uv run --project "$ML_DIR" --no-sync python "$ML_DIR/tools/compare_parity_outputs.py"
+  uv run --project "$UV_PROJECT_DIR" --no-sync python "$ML_DIR/tools/compare_parity_outputs.py"
   --ground-truth "$PYTHON_OUTPUT_DIR/results.json"
   --output "$compare_output"
 )

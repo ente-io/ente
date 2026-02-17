@@ -140,7 +140,7 @@ void _validatePlatform(String expectedPlatform) {
 List<_ManifestItem> _loadManifestItems() {
   if (_manifestB64.isEmpty) {
     throw StateError(
-      "Missing ML_PARITY_MANIFEST_B64 dart define; run via infra/ml/tools/run_suite.sh",
+      "Missing ML_PARITY_MANIFEST_B64 dart define; run via infra/ml/test/tools/run_suite.sh",
     );
   }
   final manifestBytes = base64Decode(_manifestB64);

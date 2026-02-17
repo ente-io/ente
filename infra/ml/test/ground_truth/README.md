@@ -9,7 +9,7 @@ This directory stores the Python ground-truth assets for the ML indexing parity 
   flow using Pillow + OpenCV + ONNX Runtime.
 
 Runtime outputs (`goldens/*.json`, `goldens/results.json`, and
-`infra/ml/out/parity/**`) are generated on demand and are gitignored.
+`infra/ml/test/out/parity/**`) are generated on demand and are gitignored.
 
 ## Dataset Source
 
@@ -21,14 +21,14 @@ The default corpus is sourced from:
 
 `manifest.json` in this directory uses:
 
-- `source`: local runtime path under `infra/ml/test_data/...`
+- `source`: local runtime path under `infra/ml/test/test_data/...`
 - `source_url`: remote raw fixture URL used by `run_suite.sh` for download
 - `source_sha256`: integrity check value used during download and generation
 
 ## ONNX Models
 
 `generate_goldens.py` downloads and caches the mobile indexing ONNX models under
-`infra/ml/.cache/onnx_models/`:
+`infra/ml/test/.cache/onnx_models/`:
 
 - `mobileclip_s2_image.onnx`
 - `yolov5s_face_640_640_dynamic.onnx`
@@ -40,21 +40,21 @@ HEIC/HEIF decoding requires the `pillow-heif` plugin (declared in
 ## Generate Goldens
 
 ```bash
-uv run --project infra/ml --no-sync --with pillow-heif python infra/ml/tools/generate_goldens.py \
-  --manifest infra/ml/ground_truth/manifest.json \
-  --output-dir infra/ml/out/parity/python
+uv run --project infra/ml --no-sync --with pillow-heif python infra/ml/test/tools/generate_goldens.py \
+  --manifest infra/ml/test/ground_truth/manifest.json \
+  --output-dir infra/ml/test/out/parity/python
 ```
 
 `generate_goldens.py` expects fixture files to already be present locally.
-`run_suite.sh` is responsible for clearing `infra/ml/test_data/ml-indexing/v1`,
+`run_suite.sh` is responsible for clearing `infra/ml/test/test_data/ml-indexing/v1`,
 downloading fixtures, and then calling the generator.
 
 ## Compare Against Platforms
 
 ```bash
-uv run --project infra/ml python infra/ml/tools/compare_parity_outputs.py \
-  --ground-truth infra/ml/out/parity/python/results.json \
-  --platform-result android=infra/ml/out/parity/android/results.json \
-  --platform-result ios=infra/ml/out/parity/ios/results.json \
-  --platform-result desktop=infra/ml/out/parity/desktop/results.json
+uv run --project infra/ml python infra/ml/test/tools/compare_parity_outputs.py \
+  --ground-truth infra/ml/test/out/parity/python/results.json \
+  --platform-result android=infra/ml/test/out/parity/android/results.json \
+  --platform-result ios=infra/ml/test/out/parity/ios/results.json \
+  --platform-result desktop=infra/ml/test/out/parity/desktop/results.json
 ```
