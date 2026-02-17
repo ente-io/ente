@@ -1,10 +1,10 @@
-name: "Screensaver Android"
+name: "Photos TV Release"
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - "screensaver-v*"
+      - "tv-v*"
 
 env:
   NDK_VERSION: "27.0.12077973"
@@ -14,19 +14,19 @@ permissions:
 
 jobs:
   release:
-    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/screensaver-v') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/tv-v') }}
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: mobile/native/android/apps/screensaver
+        working-directory: mobile/native/android/apps/tv
     env:
-      SIGNING_KEY_B64: ${{ secrets.SIGNING_KEY_SCREENSAVER || secrets.SIGNING_KEY }}
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_SCREENSAVER || secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_SCREENSAVER || secrets.SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_SCREENSAVER || secrets.SIGNING_STORE_PASSWORD }}
-      SIGNING_KEY_FILE: "screensaver-release.jks"
-      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_SCREENSAVER || secrets.SERVICE_ACCOUNT_JSON }}
-      PLAYSTORE_PACKAGE_NAME: "io.ente.photos.screensaver"
+      SIGNING_KEY_B64: ${{ secrets.SIGNING_KEY_TV }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_TV }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_TV }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_TV }}
+      SIGNING_KEY_FILE: "tv-release.jks"
+      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_TV }}
+      PLAYSTORE_PACKAGE_NAME: "io.ente.photos.tv"
       PLAYSTORE_TRACK: "internal"
 
     steps:
@@ -79,11 +79,11 @@ jobs:
         id: artifacts
         run: |
           mkdir -p artifacts
-          APK_NAME="ente-screensaver-${{ github.ref_name }}.apk"
+          APK_NAME="ente-tv-${{ github.ref_name }}.apk"
           cp app/build/outputs/apk/release/app-release.apk "artifacts/$APK_NAME"
 
           if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
-            AAB_NAME="ente-screensaver-${{ github.ref_name }}.aab"
+            AAB_NAME="ente-tv-${{ github.ref_name }}.aab"
             cp app/build/outputs/bundle/release/app-release.aab "artifacts/$AAB_NAME"
             echo "has_aab=true" >> "$GITHUB_OUTPUT"
           else
@@ -93,10 +93,11 @@ jobs:
           sha256sum artifacts/* > artifacts/sha256sum
 
       - name: Create draft GitHub release
-        if: ${{ startsWith(github.ref, 'refs/tags/screensaver-v') }}
+        if: ${{ startsWith(github.ref, 'refs/tags/tv-v') }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "mobile/native/android/apps/screensaver/artifacts/*"
+          name: "tv-android-${{ github.ref_name }}"
+          artifacts: "mobile/native/android/apps/tv/artifacts/*"
           draft: true
           allowUpdates: true
           updateOnlyUnreleased: true
@@ -107,6 +108,6 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ env.PLAYSTORE_PACKAGE_NAME }}
-          releaseFiles: mobile/native/android/apps/screensaver/app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: mobile/native/android/apps/tv/app/build/outputs/bundle/release/app-release.aab
           track: ${{ env.PLAYSTORE_TRACK }}
           status: draft

@@ -19,6 +19,7 @@ import io.ente.photos.screensaver.prefs.PreferencesRepository
 import io.ente.photos.screensaver.settings.SettingsActivity
 import io.ente.photos.screensaver.setup.SetupActivity
 import io.ente.photos.screensaver.slideshow.SlideshowController
+import io.ente.photos.screensaver.power.ScreenWakeLockManager
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     // Preview mode dependencies
     private var preferencesRepository: PreferencesRepository? = null
     private var slideshowController: SlideshowController? = null
+    private var wakeLockManager: ScreenWakeLockManager? = null
     private var hideHintRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +76,7 @@ class MainActivity : AppCompatActivity() {
             imageLoader = AppImageLoader.get(this),
             preferencesRepository = preferencesRepository!!,
         )
+        wakeLockManager = ScreenWakeLockManager(this)
 
         // Show hint and auto-hide after 6 seconds
         previewBinding!!.hintSettings.visibility = View.VISIBLE
@@ -93,6 +96,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         if (previewBinding != null) {
+            wakeLockManager?.acquire()
+
             // Preview mode: start slideshow
             scope.launch {
                 val settings = preferencesRepository?.get()
@@ -111,6 +116,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        wakeLockManager?.release()
         slideshowController?.stop()
         super.onStop()
     }
@@ -118,6 +124,9 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         hideHintRunnable?.let { handler.removeCallbacks(it) }
         hideHintRunnable = null
+
+        wakeLockManager?.release()
+        wakeLockManager = null
 
         slideshowController?.stop()
         slideshowController = null

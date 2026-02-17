@@ -8,6 +8,7 @@ import io.ente.photos.screensaver.imageloading.AppImageLoader
 import io.ente.photos.screensaver.databinding.ActivityPreviewBinding
 import io.ente.photos.screensaver.diagnostics.AppLog
 import io.ente.photos.screensaver.permissions.MediaPermissions
+import io.ente.photos.screensaver.power.ScreenWakeLockManager
 import io.ente.photos.screensaver.prefs.PhotoSourceType
 import io.ente.photos.screensaver.prefs.PreferencesRepository
 import io.ente.photos.screensaver.slideshow.SlideshowController
@@ -22,6 +23,7 @@ class PreviewActivity : AppCompatActivity() {
 
     private lateinit var preferencesRepository: PreferencesRepository
     private lateinit var slideshowController: SlideshowController
+    private lateinit var wakeLockManager: ScreenWakeLockManager
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -46,10 +48,13 @@ class PreviewActivity : AppCompatActivity() {
             imageLoader = AppImageLoader.get(this),
             preferencesRepository = preferencesRepository,
         )
+        wakeLockManager = ScreenWakeLockManager(this)
     }
 
     override fun onStart() {
         super.onStart()
+        wakeLockManager.acquire()
+
         scope.launch {
             val settings = preferencesRepository.get()
             val needsPermission = settings.sourceType == PhotoSourceType.MEDIASTORE
@@ -70,11 +75,13 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        wakeLockManager.release()
         slideshowController.stop()
         super.onStop()
     }
 
     override fun onDestroy() {
+        wakeLockManager.release()
         super.onDestroy()
         scope.cancel()
     }
