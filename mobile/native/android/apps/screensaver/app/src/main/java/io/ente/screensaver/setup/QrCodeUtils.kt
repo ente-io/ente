@@ -1,3 +1,5 @@
+@file:Suppress("PackageDirectoryMismatch")
+
 package io.ente.photos.screensaver.setup
 
 import android.content.Context
