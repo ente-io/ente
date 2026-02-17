@@ -192,8 +192,12 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun applyChangeAlbumSubtitleMaxWidth() {
         val viewBinding = binding ?: return
-        val maxWidthPx = resources.displayMetrics.widthPixels / 2
-        viewBinding.rowChangeAlbumSubtitle.maxWidth = maxWidthPx
+        viewBinding.rowChangeAlbum.post {
+            val rowWidth = viewBinding.rowChangeAlbum.width
+                .takeIf { it > 0 }
+                ?: resources.displayMetrics.widthPixels
+            viewBinding.rowChangeAlbumSubtitle.maxWidth = (rowWidth * 0.5f).toInt()
+        }
     }
 
     private fun setupRowFocusStyling(rows: List<View>) {
