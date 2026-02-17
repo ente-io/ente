@@ -94,6 +94,21 @@ import {
 } from "./photoswipe";
 import { PublicLikeModal } from "./PublicLikeModal";
 
+const fileViewerBackStateKey = "__enteFileViewerBackState";
+
+const addFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    state && typeof state == "object"
+        ? {
+              ...(state as Record<string, unknown>),
+              [fileViewerBackStateKey]: marker,
+          }
+        : { [fileViewerBackStateKey]: marker };
+
+const hasFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    !!state &&
+    typeof state == "object" &&
+    (state as Record<string, unknown>)[fileViewerBackStateKey] == marker;
+
 /**
  * Derived data for a file that is needed to display the file viewer controls
  * etc associated with the file.
@@ -424,6 +439,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
+    const shouldCloseOnBrowserBack = !user;
 
     // There are 3 things involved in this dance:
     //
@@ -445,6 +461,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // We also need to maintain a ref to the currently displayed dialog since we
     // might need to ask it to refresh its contents.
     const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+    const handleCloseRef = useRef<() => void>(() => undefined);
+    const browserBackStateRef = useRef<string | undefined>(undefined);
 
     // Whenever we get a callback from our custom PhotoSwipe instance, we also
     // get the active file on which that action was performed as an argument. We
@@ -630,6 +648,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setIsFullscreen(false);
         onClose();
     }, [onTriggerRemotePull, onClose]);
+
+    // Keep the latest close callback available to non-react event handlers
+    // without forcing effects that register handlers to re-run.
+    handleCloseRef.current = handleClose;
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -2516,6 +2538,41 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleDownloadBarAction,
         handleMore,
     ]);
+
+    useEffect(() => {
+        if (!open || !shouldCloseOnBrowserBack) return;
+
+        // In public albums, consume one browser-back action to close the
+        // viewer overlay instead of navigating away from the shared link.
+        const stateMarker = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        browserBackStateRef.current = stateMarker;
+
+        const currentState: unknown = window.history.state;
+        const viewerState = addFileViewerBackStateMarker(
+            currentState,
+            stateMarker,
+        );
+        window.history.pushState(viewerState, "", window.location.href);
+
+        const handlePopState = () => {
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+            handleCloseRef.current();
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+
+            const latestHistoryState: unknown = window.history.state;
+            if (hasFileViewerBackStateMarker(latestHistoryState, stateMarker)) {
+                window.history.back();
+            }
+        };
+    }, [open, shouldCloseOnBrowserBack]);
 
     const handleFileMetadataUpdate = useMemo(() => {
         return onRemoteFilesPull
