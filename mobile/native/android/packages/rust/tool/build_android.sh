@@ -11,9 +11,51 @@ CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/sync"
 PATCH_SCRIPT="$REPO_ROOT/rust/ensu/inference/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 OUT_DIR="$ROOT/src/main/jniLibs"
+CORE_KOTLIN_OUT_DIR="$REPO_ROOT/mobile/native/android/apps/ensu/crypto-auth-core/src/main/java"
+RUST_KOTLIN_OUT_DIR="$ROOT/src/main/kotlin"
 SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 NDK_VERSION="${NDK_VERSION:-}"
 NDK_ROOT_PATH=""
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  HOST_LIB_EXT="dylib"
+elif [[ "$(uname -s)" == "Linux" ]]; then
+  HOST_LIB_EXT="so"
+else
+  HOST_LIB_EXT="dll"
+fi
+
+ensure_uniffi_bindgen() {
+  if command -v uniffi-bindgen >/dev/null 2>&1; then
+    local version
+    version="$(uniffi-bindgen --version 2>/dev/null || true)"
+    if [[ "$version" == *"0.31."* ]]; then
+      return
+    fi
+    echo "Found incompatible $version, installing uniffi-bindgen 0.31.x"
+  fi
+
+  cargo install --locked --version 0.31.0 uniffi_bindgen
+}
+
+generate_kotlin_bindings() {
+  local crate_dir="$1"
+  local lib_name="$2"
+  local out_dir="$3"
+
+  pushd "$crate_dir" >/dev/null
+  cargo build --release
+
+  local lib_path="$crate_dir/target/release/lib${lib_name}.${HOST_LIB_EXT}"
+  if [[ ! -f "$lib_path" ]]; then
+    echo "Expected $lib_path to exist" >&2
+    exit 1
+  fi
+
+  mkdir -p "$out_dir"
+  uniffi-bindgen generate "$lib_path" --language kotlin --out-dir "$out_dir"
+  popd >/dev/null
+}
 
 if [[ -z "$SDK_ROOT" ]]; then
   for candidate in "$HOME/Library/Android/sdk" "$HOME/Android/Sdk" "$HOME/Android/sdk"; do
@@ -74,3 +116,19 @@ for CRATE_DIR in "$CORE_UNIFFI_RUST_DIR" "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_U
     build --release
   popd >/dev/null
 done
+
+ensure_uniffi_bindgen
+
+# Remove stale generated bindings to avoid duplicate symbol conflicts.
+rm -f "$CORE_KOTLIN_OUT_DIR/io/ente/ensu/crypto/core.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/inference_rs/inference.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/inference_rs/inference_rs_uniffi.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/ensu_db/db.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/llmchat_db/llmchat_db_uniffi.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/ensu_sync/sync.kt"
+rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/llmchat_sync/llmchat_sync_uniffi.kt"
+
+generate_kotlin_bindings "$CORE_UNIFFI_RUST_DIR" "core" "$CORE_KOTLIN_OUT_DIR"
+generate_kotlin_bindings "$INFERENCE_UNIFFI_RUST_DIR" "inference" "$RUST_KOTLIN_OUT_DIR"
+generate_kotlin_bindings "$CHATDB_UNIFFI_RUST_DIR" "db" "$RUST_KOTLIN_OUT_DIR"
+generate_kotlin_bindings "$CHAT_SYNC_UNIFFI_RUST_DIR" "sync" "$RUST_KOTLIN_OUT_DIR"
