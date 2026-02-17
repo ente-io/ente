@@ -15,10 +15,6 @@ class DiagnosticsActivity : AppCompatActivity() {
         binding = ActivityDiagnosticsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.buttonRefresh.setOnClickListener {
-            binding.textLogs.text = dumpLogs()
-        }
-
         binding.textLogs.text = dumpLogs()
     }
 
