@@ -1,5 +1,3 @@
-@file:Suppress("PackageDirectoryMismatch")
-
 package io.ente.photos.screensaver.diagnostics
 
 import android.os.Bundle
