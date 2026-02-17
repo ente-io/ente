@@ -44,7 +44,7 @@ object QrCodeUtils {
 
         val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        canvas.drawColor(Color.WHITE)
+        canvas.drawColor(Color.TRANSPARENT)
 
         val moduleSize = sizePx / totalModules.toFloat()
         val dotRadius = moduleSize * 0.46f
