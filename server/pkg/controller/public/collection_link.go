@@ -46,6 +46,18 @@ type CollectionLinkController struct {
 }
 
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
+	if req.EnableComment {
+		enabled, err := c.CollectionRepo.IsCommentAndReactionsEnabled(ctx, req.CollectionID)
+		if err != nil {
+			return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		}
+		if !enabled {
+			return ente.PublicURL{}, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("comments and reactions are disabled for this album"),
+				"",
+			)
+		}
+	}
 	app := auth.GetApp(ctx)
 	for attempt := 0; attempt < 5; attempt++ {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
@@ -125,6 +137,18 @@ func (c *CollectionLinkController) Disable(ctx context.Context, cID int64) error
 }
 
 func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
+	if req.EnableComment != nil && *req.EnableComment {
+		enabled, err := c.CollectionRepo.IsCommentAndReactionsEnabled(ctx, req.CollectionID)
+		if err != nil {
+			return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		}
+		if !enabled {
+			return ente.PublicURL{}, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("comments and reactions are disabled for this album"),
+				"",
+			)
+		}
+	}
 	publicCollectionToken, err := c.CollectionLinkRepo.GetActiveCollectionLinkRow(ctx, req.CollectionID)
 	if err != nil {
 		return ente.PublicURL{}, err

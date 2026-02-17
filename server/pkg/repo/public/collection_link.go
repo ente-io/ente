@@ -85,8 +85,21 @@ func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) er
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64, app ente.App) (map[int64][]ente.PublicURL, error) {
-	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_comment, enable_join, min_role, pw_nonce, mem_limit, ops_limit FROM
-                                                   public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
+	rows, err := pcr.DB.QueryContext(ctx, `SELECT pct.collection_id,
+			pct.access_token,
+			pct.valid_till,
+			pct.device_limit,
+			pct.enable_download,
+			pct.enable_collect,
+			(pct.enable_comment AND COALESCE(c.enable_comment_and_reactions, TRUE)) AS enable_comment,
+			pct.enable_join,
+			pct.min_role,
+			pct.pw_nonce,
+			pct.mem_limit,
+			pct.ops_limit
+		FROM public_collection_tokens pct
+		INNER JOIN collections c ON c.collection_id = pct.collection_id
+		WHERE pct.collection_id = ANY($1) AND pct.is_disabled = FALSE`,
 		pq.Array(collectionIDs))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -126,9 +139,12 @@ func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Con
 // GetActiveCollectionLinkRow will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetActiveCollectionLinkRow(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
-	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit,
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_comment, enable_join, min_role FROM
-                                                   public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
+	row := pcr.DB.QueryRowContext(ctx, `SELECT pct.id, pct.collection_id, pct.access_token, pct.valid_till, pct.device_limit,
+       pct.is_disabled, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect,
+       (pct.enable_comment AND COALESCE(c.enable_comment_and_reactions, TRUE)) AS enable_comment, pct.enable_join, pct.min_role
+       FROM public_collection_tokens pct
+       INNER JOIN collections c ON c.collection_id = pct.collection_id
+       WHERE pct.collection_id = $1 and pct.is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
@@ -194,12 +210,19 @@ func (pcr *CollectionLinkRepo) AccessedInPast(ctx context.Context, shareID int64
 
 func (pcr *CollectionLinkRepo) GetCollectionSummaryByToken(ctx context.Context, accessToken string) (ente.PublicCollectionSummary, error) {
 	row := pcr.DB.QueryRowContext(ctx,
-		`SELECT sct.id, sct.collection_id, sct.is_disabled, sct.valid_till, sct.device_limit, sct.pw_hash, sct.enable_comment,
-       sct.created_at, sct.updated_at, count(ah.share_id)
+		`SELECT sct.id,
+		        sct.collection_id,
+		        sct.is_disabled,
+		        sct.valid_till,
+		        sct.device_limit,
+		        sct.pw_hash,
+		        (sct.enable_comment AND COALESCE(c.enable_comment_and_reactions, TRUE)) AS enable_comment,
+		        sct.created_at,
+		        sct.updated_at,
+		        (SELECT count(*) FROM public_collection_access_history ah WHERE ah.share_id = sct.id) AS device_access_count
 		from public_collection_tokens sct
-		LEFT JOIN public_collection_access_history ah ON sct.id = ah.share_id
-		where access_token = $1
-		group by sct.id`, accessToken)
+		INNER JOIN collections c ON c.collection_id = sct.collection_id
+		where access_token = $1`, accessToken)
 	var result = ente.PublicCollectionSummary{}
 	err := row.Scan(&result.ID, &result.CollectionID, &result.IsDisabled, &result.ValidTill, &result.DeviceLimit,
 		&result.PassHash, &result.EnableComment, &result.CreatedAt, &result.UpdatedAt, &result.DeviceAccessCount)

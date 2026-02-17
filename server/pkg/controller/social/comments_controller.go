@@ -4,6 +4,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/repo"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -11,8 +12,9 @@ import (
 
 // CommentsController wires comment-specific business logic.
 type CommentsController struct {
-	Repo       *socialrepo.CommentsRepository
-	AccessCtrl access.Controller
+	Repo           *socialrepo.CommentsRepository
+	CollectionRepo *repo.CollectionRepository
+	AccessCtrl     access.Controller
 }
 
 // CreateCommentRequest encapsulates parameters for adding a comment.
@@ -81,6 +83,9 @@ func (c *CommentsController) Create(ctx *gin.Context, req CreateCommentRequest) 
 		}); err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
+	}
+	if err := c.ensureCommentAndReactionsEnabled(ctx, req.CollectionID); err != nil {
+		return "", err
 	}
 
 	var parentComment *socialentity.Comment
@@ -162,6 +167,9 @@ func (c *CommentsController) UpdatePayload(ctx *gin.Context, req UpdateCommentRe
 	} else if !hasUserID || comment.UserID != userID {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
+	if err := c.ensureCommentAndReactionsEnabled(ctx, comment.CollectionID); err != nil {
+		return err
+	}
 	return c.Repo.UpdateCipher(ctx, req.CommentID, req.Cipher, req.Nonce)
 }
 
@@ -206,6 +214,20 @@ func (c *CommentsController) Delete(ctx *gin.Context, req DeleteCommentRequest) 
 		}
 	}
 	return c.Repo.SoftDelete(ctx, req.CommentID)
+}
+
+func (c *CommentsController) ensureCommentAndReactionsEnabled(ctx *gin.Context, collectionID int64) error {
+	if c.CollectionRepo == nil {
+		return nil
+	}
+	enabled, err := c.CollectionRepo.IsCommentAndReactionsEnabled(ctx, collectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if !enabled {
+		return ente.NewBadRequestWithMessage("comments and reactions are disabled for this collection")
+	}
+	return nil
 }
 
 func validateReplyFileContext(parent *socialentity.Comment, requestedFileID *int64) error {

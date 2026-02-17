@@ -53,6 +53,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	app := collection.App
 	collection.Owner.ID = ownerID
 	collection.UpdationTime = time.Microseconds()
+	collection.EnableCommentAndReactions = true
 	// [20th Dec 2022] Patch on server side untill majority of the existing mobile clients upgrade to a version higher > 0.7.0
 	// https://github.com/ente-io/photos-app/pull/725
 	if collection.Type == "CollectionType.album" {
@@ -189,6 +190,16 @@ func (c *CollectionController) Rename(userID int64, cID int64, encryptedName str
 		return stacktrace.Propagate(err, "")
 	}
 	return nil
+}
+
+func (c *CollectionController) UpdateCommentAndReactions(ctx *gin.Context, userID int64, req ente.UpdateCommentAndReactionsRequest) error {
+	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return stacktrace.Propagate(
+		c.CollectionRepo.UpdateCommentAndReactionsSetting(ctx, req.CollectionID, req.EnableCommentAndReactions, time.Microseconds()),
+		"",
+	)
 }
 
 // UpdateMagicMetadata updates the magic metadata for given collection
