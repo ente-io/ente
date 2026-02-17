@@ -316,9 +316,10 @@ Future<String> _downloadFixture({
 
   final extensionPath = "${fixtureFile.path}$extensionHint";
   final extensionFile = File(extensionPath);
-  if (!extensionFile.existsSync()) {
-    await fixtureFile.copy(extensionPath);
+  if (extensionFile.existsSync()) {
+    await extensionFile.delete();
   }
+  await fixtureFile.copy(extensionPath);
   return extensionPath;
 }
 
