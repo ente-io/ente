@@ -35,7 +35,7 @@ ensure_uniffi_bindgen() {
     echo "Found incompatible $version, installing uniffi-bindgen 0.31.x"
   fi
 
-  cargo install --locked --version 0.31.0 uniffi_bindgen
+  cargo install --locked --version 0.31.0 uniffi --features cli --bin uniffi-bindgen
 }
 
 generate_kotlin_bindings() {
