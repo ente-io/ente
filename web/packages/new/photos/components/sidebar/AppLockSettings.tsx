@@ -17,16 +17,19 @@ import {
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
+import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import {
     TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import {
-    setupPin,
-    setupPassword,
     disableAppLock,
     setAutoLockTime,
+    setupDeviceLock,
+    setupPassword,
+    setupPin,
 } from "../../services/app-lock";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -39,6 +42,7 @@ export const AppLockSettings: React.FC<
 
     const [pinDialogOpen, setPinDialogOpen] = useState(false);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [isSettingDeviceLock, setIsSettingDeviceLock] = useState(false);
     const [autoLockDialogOpen, setAutoLockDialogOpen] = useState(false);
     const { showMiniDialog } = useBaseContext();
 
@@ -71,6 +75,29 @@ export const AppLockSettings: React.FC<
     const handleSelectPassword = useCallback(() => {
         setPasswordDialogOpen(true);
     }, []);
+
+    const handleSelectDeviceLock = useCallback(async () => {
+        if (isSettingDeviceLock) return;
+
+        setIsSettingDeviceLock(true);
+        try {
+            const result = await setupDeviceLock();
+            if (result === "success") return;
+
+            showMiniDialog(
+                errorDialogAttributes(
+                    result === "not-supported"
+                        ? t("device_lock_not_supported")
+                        : t("device_lock_setup_failed"),
+                ),
+            );
+        } catch (e) {
+            log.error("Failed to set up device lock app lock", e);
+            showMiniDialog(errorDialogAttributes(t("device_lock_setup_failed")));
+        } finally {
+            setIsSettingDeviceLock(false);
+        }
+    }, [isSettingDeviceLock, showMiniDialog]);
 
     const handlePinSetupComplete = useCallback(() => {
         setPinDialogOpen(false);
@@ -128,6 +155,26 @@ export const AppLockSettings: React.FC<
                                             ) : undefined
                                         }
                                         onClick={handleSelectPassword}
+                                    />
+                                    <RowButtonDivider />
+                                    <RowButton
+                                        label={t("device_lock")}
+                                        caption={
+                                            isSettingDeviceLock
+                                                ? t("loading")
+                                                : undefined
+                                        }
+                                        disabled={isSettingDeviceLock}
+                                        endIcon={
+                                            state.deviceLockEnabled ? (
+                                                <CheckIcon
+                                                    sx={{ color: "accent.main" }}
+                                                />
+                                            ) : undefined
+                                        }
+                                        onClick={() =>
+                                            void handleSelectDeviceLock()
+                                        }
                                     />
                                 </RowButtonGroup>
                             </Stack>

@@ -24,6 +24,7 @@ import {
     type JoinAlbumContext,
 } from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
+import { refreshAppLockStateFromSession } from "ente-new/photos/services/app-lock";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -127,6 +128,9 @@ const Page: React.FC = () => {
                 });
             } else {
                 await updateSessionFromElectronSafeStorageIfNeeded();
+                if (globalThis.electron) {
+                    refreshAppLockStateFromSession();
+                }
                 if (
                     (await masterKeyFromSession()) &&
                     (await savedAuthToken())

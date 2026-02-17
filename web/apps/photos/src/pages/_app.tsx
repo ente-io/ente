@@ -75,7 +75,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
-        if (isDesktop) initAppLock();
+        initAppLock();
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
@@ -163,9 +163,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Auto-lock when the tab/window becomes hidden (desktop only).
+    // Auto-lock when the tab/window becomes hidden.
     useEffect(() => {
-        if (!isDesktop || !appLock.enabled) return;
+        if (!appLock.enabled) return;
 
         const handleVisibilityChange = () => {
             if (document.hidden && !appLock.isLocked) {
@@ -247,7 +247,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                         <>
                             {isChangingRoute && <TranslucentLoadingOverlay />}
                             <Component {...pageProps} />
-                            {isDesktop && <AppLockOverlay />}
+                            <AppLockOverlay />
                         </>
                     )}
                 </PhotosAppContext>

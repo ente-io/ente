@@ -1058,14 +1058,9 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && (
-                    <RowButtonGroup>
-                        <RowButton
-                            label={t("app_lock")}
-                            onClick={handleAppLock}
-                        />
-                    </RowButtonGroup>
-                )}
+                <RowButtonGroup>
+                    <RowButton label={t("app_lock")} onClick={handleAppLock} />
+                </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}

@@ -158,6 +158,18 @@ export interface Electron {
      */
     toggleAutoLaunch: () => Promise<void>;
 
+    /**
+     * Return true if native device lock authentication is available.
+     */
+    isDeviceLockSupported: () => Promise<boolean>;
+
+    /**
+     * Prompt native device lock authentication.
+     *
+     * Returns true on successful authentication.
+     */
+    promptDeviceLock: (reason: string) => Promise<boolean>;
+
     // - App update
 
     /**

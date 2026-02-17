@@ -2,10 +2,12 @@
  * @file Full-viewport lock screen overlay for the app lock feature.
  *
  * Renders as a sibling of the page Component in _app.tsx, covering all content
- * when the app is locked. Supports PIN (4-digit) and password input modes,
- * with brute-force cooldown display and a logout escape hatch.
+ * when the app is locked. Supports PIN (4-digit), password, and local
+ * WebAuthn device lock unlock modes, with brute-force cooldown display and a
+ * logout escape hatch.
  */
 
+import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {
     Box,
@@ -29,12 +31,17 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { attemptUnlock, type UnlockResult } from "../services/app-lock";
+import {
+    attemptDeviceLockUnlock,
+    attemptUnlock,
+    type DeviceLockUnlockResult,
+    type UnlockResult,
+} from "../services/app-lock";
 import { useAppLockSnapshot } from "./utils/use-snapshot";
 
 /**
  * A full-viewport overlay that blocks interaction with the app until the user
- * authenticates with their PIN or password.
+ * authenticates with their PIN, password, or local device lock challenge.
  *
  * Renders nothing when the app is not locked.
  */
@@ -110,8 +117,15 @@ export const AppLockOverlay: React.FC = () => {
                         appLock={appLock}
                         onLogout={() => setShowLogoutConfirm(true)}
                     />
-                ) : (
+                ) : appLock.lockType === "password" ? (
                     <PasswordUnlockForm
+                        appLock={appLock}
+                        onLogout={() => setShowLogoutConfirm(true)}
+                    />
+                ) : appLock.deviceLockEnabled ? (
+                    <DeviceLockUnlockForm />
+                ) : (
+                    <PinUnlockForm
                         appLock={appLock}
                         onLogout={() => setShowLogoutConfirm(true)}
                     />
@@ -200,6 +214,17 @@ const useCooldownState = (
     };
 };
 
+const deviceLockErrorText = (result: DeviceLockUnlockResult) => {
+    switch (result) {
+        case "not-supported":
+            return t("device_lock_not_supported");
+        case "failed":
+            return t("device_lock_login_failed");
+        case "success":
+            return undefined;
+    }
+};
+
 // -- PIN unlock form --
 
 const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
@@ -208,6 +233,8 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
     const [pin, setPin] = useState(["", "", "", ""]);
     const [error, setError] = useState<string>();
     const [loading, setLoading] = useState(false);
+    const [deviceLockLoading, setDeviceLockLoading] = useState(false);
+    const isDeviceLockUnlockInProgress = useRef(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
     const cooldownText = cooldown.text;
@@ -274,6 +301,24 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
         focusPinInput(0);
     }, [fullPin, loading, logout, focusPinInput]);
 
+    const handleDeviceLockUnlock = useCallback(async () => {
+        if (isDeviceLockUnlockInProgress.current) return;
+        isDeviceLockUnlockInProgress.current = true;
+        setDeviceLockLoading(true);
+        setError(undefined);
+
+        try {
+            const result = await attemptDeviceLockUnlock();
+            setError(deviceLockErrorText(result));
+        } catch (e) {
+            log.error("Device lock unlock attempt failed", e);
+            setError(t("generic_error"));
+        } finally {
+            setDeviceLockLoading(false);
+            isDeviceLockUnlockInProgress.current = false;
+        }
+    }, []);
+
     // Auto-submit when all 4 digits are entered.
     useEffect(() => {
         if (fullPin.length === 4) {
@@ -289,6 +334,12 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
                     cooldownText={cooldownText}
                     attemptCount={appLock.invalidAttemptCount}
                     onLogout={onLogout}
+                    onDeviceLockUnlock={
+                        appLock.deviceLockEnabled
+                            ? () => void handleDeviceLockUnlock()
+                            : undefined
+                    }
+                    deviceLockLoading={deviceLockLoading}
                 />
             </AppLockCard>
         );
@@ -357,6 +408,22 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
                     error={error}
                     attemptCount={appLock.invalidAttemptCount}
                 />
+                {appLock.deviceLockEnabled && (
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        disabled={loading || deviceLockLoading}
+                        onClick={() => {
+                            void handleDeviceLockUnlock();
+                        }}
+                    >
+                        {deviceLockLoading ? (
+                            <CircularProgress size={18} color="inherit" />
+                        ) : (
+                            t("device_lock_login")
+                        )}
+                    </FocusVisibleButton>
+                )}
             </Stack>
         </AppLockCard>
     );
@@ -374,6 +441,8 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string>();
     const [loading, setLoading] = useState(false);
+    const [deviceLockLoading, setDeviceLockLoading] = useState(false);
+    const isDeviceLockUnlockInProgress = useRef(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
     const cooldownText = cooldown.text;
@@ -399,6 +468,24 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
         [password, loading, logout],
     );
 
+    const handleDeviceLockUnlock = useCallback(async () => {
+        if (isDeviceLockUnlockInProgress.current) return;
+        isDeviceLockUnlockInProgress.current = true;
+        setDeviceLockLoading(true);
+        setError(undefined);
+
+        try {
+            const result = await attemptDeviceLockUnlock();
+            setError(deviceLockErrorText(result));
+        } catch (e) {
+            log.error("Device lock unlock attempt failed", e);
+            setError(t("generic_error"));
+        } finally {
+            setDeviceLockLoading(false);
+            isDeviceLockUnlockInProgress.current = false;
+        }
+    }, []);
+
     if (cooldownText) {
         return (
             <AppLockCard>
@@ -407,6 +494,12 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                     cooldownText={cooldownText}
                     attemptCount={appLock.invalidAttemptCount}
                     onLogout={onLogout}
+                    onDeviceLockUnlock={
+                        appLock.deviceLockEnabled
+                            ? () => void handleDeviceLockUnlock()
+                            : undefined
+                    }
+                    deviceLockLoading={deviceLockLoading}
                 />
             </AppLockCard>
         );
@@ -462,11 +555,97 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                 >
                     {t("unlock")}
                 </FocusVisibleButton>
+                {appLock.deviceLockEnabled && (
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        disabled={loading || deviceLockLoading}
+                        onClick={() => {
+                            void handleDeviceLockUnlock();
+                        }}
+                    >
+                        {deviceLockLoading ? (
+                            <CircularProgress size={18} color="inherit" />
+                        ) : (
+                            t("device_lock_login")
+                        )}
+                    </FocusVisibleButton>
+                )}
 
                 <ErrorMessage
                     error={error}
                     attemptCount={appLock.invalidAttemptCount}
                 />
+            </Stack>
+        </AppLockCard>
+    );
+};
+
+// -- Device lock unlock form --
+
+const DeviceLockUnlockForm: React.FC = () => {
+    const [error, setError] = useState<string>();
+    const [loading, setLoading] = useState(false);
+    const isUnlockInProgress = useRef(false);
+
+    const handleDeviceLockUnlock = useCallback(async () => {
+        if (isUnlockInProgress.current) return;
+        isUnlockInProgress.current = true;
+        setLoading(true);
+        setError(undefined);
+
+        try {
+            const result: DeviceLockUnlockResult =
+                await attemptDeviceLockUnlock();
+            setError(deviceLockErrorText(result));
+        } catch (e) {
+            log.error("Device lock unlock attempt failed", e);
+            setError(t("generic_error"));
+        } finally {
+            setLoading(false);
+            isUnlockInProgress.current = false;
+        }
+    }, []);
+
+    return (
+        <AppLockCard>
+            <Stack
+                spacing={3}
+                alignItems="center"
+                sx={{ maxWidth: 340, width: "100%" }}
+            >
+                <FingerprintIcon sx={{ fontSize: 48, color: "text.muted" }} />
+                <Typography variant="h3">{t("app_locked")}</Typography>
+                <Typography
+                    variant="small"
+                    color="text.muted"
+                    textAlign="center"
+                >
+                    {t("device_lock_login_instructions")}
+                </Typography>
+
+                <FocusVisibleButton
+                    fullWidth
+                    color="accent"
+                    disabled={loading}
+                    onClick={() => {
+                        void handleDeviceLockUnlock();
+                    }}
+                >
+                    {loading ? (
+                        <CircularProgress size={18} color="inherit" />
+                    ) : (
+                        t("device_lock_login")
+                    )}
+                </FocusVisibleButton>
+
+                <Typography
+                    variant="small"
+                    color={error ? "critical.main" : "text.muted"}
+                    textAlign="center"
+                >
+                    {error ?? t("device_lock_verify_description")}
+                </Typography>
             </Stack>
         </AppLockCard>
     );
@@ -562,6 +741,8 @@ interface CooldownScreenProps {
     cooldownText: string;
     attemptCount: number;
     onLogout: () => void;
+    onDeviceLockUnlock?: () => void;
+    deviceLockLoading?: boolean;
 }
 
 const cooldownDurationMs = (attemptCount: number): number => {
@@ -574,6 +755,8 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
     cooldownText,
     attemptCount,
     onLogout,
+    onDeviceLockUnlock,
+    deviceLockLoading,
 }) => {
     const durationMs = cooldownDurationMs(attemptCount);
     const progress =
@@ -660,6 +843,21 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
             >
                 {nextAttemptMessage}
             </Typography>
+            {onDeviceLockUnlock && (
+                <FocusVisibleButton
+                    fullWidth
+                    color="accent"
+                    onClick={onDeviceLockUnlock}
+                    disabled={deviceLockLoading}
+                    sx={{ mt: 1 }}
+                >
+                    {deviceLockLoading ? (
+                        <CircularProgress size={18} color="inherit" />
+                    ) : (
+                        t("device_lock_login")
+                    )}
+                </FocusVisibleButton>
+            )}
             <FocusVisibleButton
                 fullWidth
                 color="secondary"
@@ -693,7 +891,7 @@ const handleUnlockResult = (
             setLoading(false);
             break;
         case "logout":
-            void Promise.resolve(logout());
+            logout();
             setLoading(false);
             break;
         case "failed":
