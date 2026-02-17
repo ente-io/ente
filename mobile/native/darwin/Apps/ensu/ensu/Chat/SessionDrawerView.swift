@@ -6,7 +6,6 @@ struct SessionDrawerView: View {
     let currentSessionId: UUID?
     let isLoggedIn: Bool
     let email: String?
-    let onNewChat: () -> Void
     let onSelectSession: (ChatSession) -> Void
     let onDeleteSession: (ChatSession) -> Void
     let onSync: () -> Void
@@ -59,12 +58,13 @@ struct SessionDrawerView: View {
                         expands: false
                     )
                 }
-                .padding(.bottom, EnsuSpacing.md)
+                .padding(.bottom, EnsuSpacing.sm)
             }
 
             headerControls
         }
-        .padding(EnsuSpacing.lg)
+        .padding(.horizontal, EnsuSpacing.lg)
+        .padding(.vertical, EnsuSpacing.md)
         .background(EnsuColor.backgroundBase)
     }
 
@@ -73,10 +73,11 @@ struct SessionDrawerView: View {
             searchField
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            newChatButton
+            if hasSearchQuery {
+                clearSearchButton
+            }
         }
     }
-
     private var searchField: some View {
         HStack(spacing: EnsuSpacing.sm) {
             Image("Search01Icon")
@@ -103,16 +104,12 @@ struct SessionDrawerView: View {
         !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private var newChatButton: some View {
+    private var clearSearchButton: some View {
         Button(action: {
             hapticTap()
-            if hasSearchQuery {
-                searchQuery = ""
-            } else {
-                onNewChat()
-            }
+            searchQuery = ""
         }) {
-            Image(hasSearchQuery ? "Cancel01Icon" : "PlusSignIcon")
+            Image("Cancel01Icon")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 18, height: 18)

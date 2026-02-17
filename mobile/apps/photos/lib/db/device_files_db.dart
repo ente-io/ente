@@ -109,6 +109,32 @@ extension DeviceFiles on FilesDB {
     }
   }
 
+  Future<List<String>> getDeviceCollectionNamesForLocalID(
+    String localID,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT dc.name as name
+      FROM device_files df
+      INNER JOIN device_collections dc ON dc.id = df.path_id
+      WHERE df.id = ?
+      ORDER BY dc.name COLLATE NOCASE ASC
+      ''',
+      [localID],
+    );
+
+    final names = <String>{};
+    for (final row in rows) {
+      final name = (row["name"] as String?)?.trim();
+      if (name != null && name.isNotEmpty) {
+        names.add(name);
+      }
+    }
+
+    return names.toList(growable: false);
+  }
+
   Future<Set<String>> getDevicePathIDs() async {
     final db = await sqliteAsyncDB;
     final rows = await db.getAll(

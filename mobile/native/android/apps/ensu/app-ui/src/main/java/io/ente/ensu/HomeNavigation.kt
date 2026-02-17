@@ -51,6 +51,7 @@ internal fun HomeNavigation(
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
     onOpenDrawer: () -> Unit,
+    onNewChat: () -> Unit,
     onAttachmentDownloads: () -> Unit,
     onShowLogShareDialog: () -> Unit,
     onAttachmentSelected: (AttachmentType) -> Unit,
@@ -67,13 +68,12 @@ internal fun HomeNavigation(
                         EnsuTopBar(
                             sessionTitle = currentSession?.title,
                             showBrand = appState.chat.messages.isEmpty(),
-                            isLoggedIn = appState.auth.isLoggedIn,
                             attachmentDownloads = appState.chat.attachmentDownloads,
                             attachmentDownloadProgress = appState.chat.attachmentDownloadProgress,
                             modelDownloadStatus = appState.chat.downloadStatus,
                             modelDownloadPercent = appState.chat.downloadPercent,
                             onOpenDrawer = onOpenDrawer,
-                            onSignIn = onSignIn,
+                            onNewChat = onNewChat,
                             onAttachmentDownloads = onAttachmentDownloads
                         )
                         androidx.compose.material3.HorizontalDivider(color = EnsuColor.border())

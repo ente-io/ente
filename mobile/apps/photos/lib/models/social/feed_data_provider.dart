@@ -431,9 +431,6 @@ class FeedDataProvider {
     required int userID,
     int limit = 50,
   }) async {
-    if (!flagService.internalUser) {
-      return [];
-    }
     final sharedPhotoFeedCutoffTime =
         kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
 

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -47,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -59,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
+import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
 import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
@@ -122,22 +126,29 @@ internal fun MessageList(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = if (messages.isNotEmpty()) messages.size else 0
     )
+    val haptic = rememberEnsuHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
     var isAutoScrolling by remember { mutableStateOf(false) }
+    var lastHapticLength by remember { mutableStateOf(0) }
     var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
     var lastUserMessageId by remember { mutableStateOf<String?>(null) }
-    var keepStreamingVisible by remember { mutableStateOf(false) }
-    var lastStreamingParentForOutro by remember { mutableStateOf<String?>(null) }
     val isAtBottom by remember {
         derivedStateOf {
             !listState.canScrollForward
         }
     }
 
+    val streamingAnchorId = if (isGenerating) streamingParentId else null
+
     val lastMessage = messages.lastOrNull()
     LaunchedEffect(isGenerating, lastMessage?.id) {
+        if (isGenerating) {
+            autoScrollEnabled = true
+            lastHapticLength = 0
+        }
+
         if (lastMessage == null) {
             lastUserMessageId = null
         } else if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
@@ -145,17 +156,6 @@ internal fun MessageList(
             if (!listState.isScrollInProgress || isAtBottom) {
                 autoScrollEnabled = true
             }
-        }
-    }
-
-    LaunchedEffect(isGenerating, streamingParentId) {
-        if (isGenerating) {
-            keepStreamingVisible = true
-            lastStreamingParentForOutro = streamingParentId
-        } else if (keepStreamingVisible) {
-            delay(1200)
-            keepStreamingVisible = false
-            lastStreamingParentForOutro = null
         }
     }
 
@@ -174,15 +174,32 @@ internal fun MessageList(
         }
     }
 
+    LaunchedEffect(isAtBottom, isGenerating) {
+        if (isGenerating && isAtBottom) {
+            autoScrollEnabled = true
+        }
+    }
 
-    LaunchedEffect(messages.size, streamingParentId, isGenerating, autoScrollEnabled) {
-        val shouldScrollForNewUserMessage = messages.lastOrNull()?.author == MessageAuthor.User
-        if (!autoScrollEnabled || isGenerating || !shouldScrollForNewUserMessage) return@LaunchedEffect
+    LaunchedEffect(streamingResponse, isGenerating) {
+        if (!isGenerating) return@LaunchedEffect
+        val length = streamingResponse.length
+        if (length > lastHapticLength) {
+            haptic.perform(HapticFeedbackType.TextHandleMove)
+            lastHapticLength = length
+        }
+    }
+
+    LaunchedEffect(messages.size, streamingResponse, streamingParentId, isGenerating, autoScrollEnabled) {
+        if (!autoScrollEnabled) return@LaunchedEffect
         val targetIndex = messages.size
         if (targetIndex >= 0) {
             isAutoScrolling = true
             try {
-                listState.animateScrollToItem(targetIndex)
+                if (isGenerating) {
+                    listState.animateScrollToItem(targetIndex)
+                } else {
+                    listState.scrollToItem(targetIndex)
+                }
             } finally {
                 isAutoScrolling = false
             }
@@ -238,11 +255,8 @@ internal fun MessageList(
         ),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
     ) {
-        items(messages, key = { it.id }) { message ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
+        messages.forEach { message ->
+            item(key = message.id) {
                 when (message.author) {
                     MessageAuthor.User -> {
                         UserMessageBubble(
@@ -258,44 +272,29 @@ internal fun MessageList(
                             message = message,
                             branchSelections = branchSelections,
                             onRetry = { onRetryMessage(message) },
-                            onBranchChange = onBranchChange
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible =
-                        (isGenerating && streamingParentId == message.id) ||
-                            (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id),
-                    enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
-                        scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                        shrinkVertically(animationSpec = tween(durationMillis = 220))
-                ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                        StreamingMessageBubble(
-                            text = streamingResponse,
-                            isGenerating = isGenerating
+                            onBranchChange = onBranchChange,
+                            showsMetadata = true,
+                            showOutroRive = false
                         )
                     }
                 }
             }
+
+            if (isGenerating && streamingAnchorId == message.id) {
+                item(key = "streaming") {
+                    StreamingMessageBubble(
+                        text = streamingResponse,
+                        isGenerating = true
+                    )
+                }
+            }
         }
 
-        item(key = "streaming") {
-            AnimatedVisibility(
-                visible =
-                    (isGenerating && streamingParentId == null) ||
-                        (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == null),
-                enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
-                    scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                    shrinkVertically(animationSpec = tween(durationMillis = 220))
-            ) {
+        if (isGenerating && streamingAnchorId == null) {
+            item(key = "streaming") {
                 StreamingMessageBubble(
                     text = streamingResponse,
-                    isGenerating = isGenerating
+                    isGenerating = true
                 )
             }
         }
@@ -529,7 +528,9 @@ private fun AssistantMessageBubble(
     message: ChatMessage,
     branchSelections: Map<String, Int>,
     onRetry: () -> Unit,
-    onBranchChange: (String, Int) -> Unit
+    onBranchChange: (String, Int) -> Unit,
+    showsMetadata: Boolean,
+    showOutroRive: Boolean
 ) {
     val clipboard = LocalClipboardManager.current
     val haptic = rememberEnsuHaptics()
@@ -542,6 +543,7 @@ private fun AssistantMessageBubble(
         Box {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
@@ -582,23 +584,50 @@ private fun AssistantMessageBubble(
             )
         }
 
-        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp), verticalAlignment = Alignment.CenterVertically) {
-            TimestampText(message.timestampMillis)
-            if (message.branchCount > 1) {
-                BranchSwitcher(
-                    currentIndex = branchSelections[message.id] ?: 1,
-                    totalCount = message.branchCount,
-                    onPrevious = {
-                        val current = branchSelections[message.id] ?: 1
-                        onBranchChange(message.id, (current - 1).coerceAtLeast(1))
-                    },
-                    onNext = {
-                        val current = branchSelections[message.id] ?: 1
-                        onBranchChange(message.id, (current + 1).coerceAtMost(message.branchCount))
-                    }
+        if (showOutroRive) {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = EnsuSpacing.sm.dp)
+                    .width(115.dp)
+                    .height(52.5.dp),
+                contentAlignment = Alignment.TopStart
+            ) {
+                ensuRiveAnimation(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(y = (-4).dp),
+                    alignment = RiveAlignment.TOP_LEFT,
+                    outroTrigger = true,
+                    outroInputName = "outro",
+                    clipContent = false
                 )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = showsMetadata,
+            enter = fadeIn(animationSpec = tween(durationMillis = 300)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 150))
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp), verticalAlignment = Alignment.CenterVertically) {
+                    TimestampText(message.timestampMillis)
+                    if (message.branchCount > 1) {
+                        BranchSwitcher(
+                            currentIndex = branchSelections[message.id] ?: 1,
+                            totalCount = message.branchCount,
+                            onPrevious = {
+                                val current = branchSelections[message.id] ?: 1
+                                onBranchChange(message.id, (current - 1).coerceAtLeast(1))
+                            },
+                            onNext = {
+                                val current = branchSelections[message.id] ?: 1
+                                onBranchChange(message.id, (current + 1).coerceAtMost(message.branchCount))
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -671,8 +700,9 @@ private fun StreamingMessageBubble(
     text: String,
     isGenerating: Boolean
 ) {
+    var renderedText by remember { mutableStateOf(text) }
     var showCursor by remember { mutableStateOf(true) }
-    val shouldBlink = text.isNotBlank()
+    val shouldBlink = isGenerating && renderedText.isNotBlank()
 
     LaunchedEffect(shouldBlink) {
         if (!shouldBlink) {
@@ -685,11 +715,13 @@ private fun StreamingMessageBubble(
         }
     }
 
-    var renderedText by remember { mutableStateOf(text) }
-
-    LaunchedEffect(text) {
+    LaunchedEffect(text, isGenerating) {
+        if (!isGenerating) {
+            renderedText = ""
+            return@LaunchedEffect
+        }
         if (text.isBlank()) {
-            renderedText = text
+            renderedText = ""
             return@LaunchedEffect
         }
         // Throttle markdown re-rendering while streaming to reduce dropped frames.
@@ -697,23 +729,14 @@ private fun StreamingMessageBubble(
         renderedText = text
     }
 
-    val riveWidth = 115.dp
-    val riveHeight = 52.5.dp
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        ensuRiveAnimation(
+    if (isGenerating && renderedText.isNotBlank()) {
+        Column(
             modifier = Modifier
-                .width(riveWidth)
-                .height(riveHeight),
-            outroTrigger = !isGenerating,
-            outroInputName = "outro"
-        )
-
-        if (renderedText.isNotBlank()) {
-            Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+                .fillMaxWidth()
+                .padding(horizontal = EnsuSpacing.sm.dp)
+                .padding(vertical = EnsuSpacing.md.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
             MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
     }

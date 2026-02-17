@@ -128,6 +128,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget build(BuildContext context) {
     colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bool isFamilyChildUser = _hasLoadedData &&
+        _userDetails.isPartOfFamily() &&
+        !_userDetails.isFamilyAdmin();
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundColour,
@@ -141,13 +144,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          widget.isOnboarding
-              ? AppLocalizations.of(context).selectYourPlan
-              : AppLocalizations.of(context).subscription,
-          style: textTheme.largeBold,
-        ),
-        centerTitle: true,
+        title: isFamilyChildUser
+            ? null
+            : Text(
+                widget.isOnboarding
+                    ? AppLocalizations.of(context).selectYourPlan
+                    : AppLocalizations.of(context).subscription,
+                style: textTheme.largeBold,
+              ),
+        centerTitle: !isFamilyChildUser,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

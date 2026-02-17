@@ -232,19 +232,19 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     final l10n = AppLocalizations.of(context);
     final features = [
       (
-        "assets/onboarding_lock.png",
+        "assets/onboarding_1.png",
         l10n.searchAndDiscover,
         "",
         l10n.searchAndDiscoverDesc,
       ),
       (
-        "assets/onboarding_safe.png",
+        "assets/onboarding_2.png",
         l10n.shareYourMemories,
         "",
         l10n.shareYourMemoriesDesc,
       ),
       (
-        "assets/onboarding_sync.png",
+        "assets/onboarding_3.png",
         l10n.privateAndSecureBackups,
         "",
         l10n.privateAndSecureBackupsDesc,

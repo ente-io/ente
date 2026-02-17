@@ -15,8 +15,8 @@ enum EnsuColor {
     static let textMuted = Color(PlatformColor.dynamic(light: "#8A8680", dark: "#777777"))
     static let border = Color(PlatformColor.dynamic(light: "#D4D0C8", dark: "#2A2A2A"))
     static let fillFaint = Color(PlatformColor.dynamic(light: "#F0EBE4", dark: "#1E1E1E"))
-    static let accent = Color(PlatformColor.dynamic(light: "#F4D93B", dark: "#F4D93B"))
-    static let action = Color(PlatformColor.dynamic(light: "#1A1A1A", dark: "#F4D93B"))
+    static let accent = Color(PlatformColor.dynamic(light: "#FDCE13", dark: "#FDCE13"))
+    static let action = Color(PlatformColor.dynamic(light: "#1A1A1A", dark: "#FDCE13"))
     static let userMessageText = Color(PlatformColor.dynamic(light: "#555555", dark: "#999999"))
 
     static let error = Color(hex: "#FF4444")

@@ -2,6 +2,7 @@ import "dart:convert";
 import "dart:math";
 import "dart:typed_data";
 
+import "package:dio/dio.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/cupertino.dart";
 import "package:logging/logging.dart";
@@ -15,7 +16,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/ui/common/user_dialogs.dart";
-import "package:photos/utils/dialog_util.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/utils/email_util.dart";
 import "package:pointycastle/pointycastle.dart";
 import "package:pointycastle/random/fortuna_random.dart";
@@ -40,19 +41,25 @@ class EmergencyContactService {
   static final EmergencyContactService instance =
       EmergencyContactService._privateConstructor();
 
-  Future<bool> addContact(BuildContext context, String email) async {
+  Future<bool> addContact(
+    BuildContext context,
+    String email, {
+    int recoveryNoticeInDays = 30,
+  }) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).invalidEmailAddress,
-        AppLocalizations.of(context).enterValidEmail,
+        title: AppLocalizations.of(context).letsTryThatAgain,
+        message: AppLocalizations.of(context).enterValidEmail,
+        assetPath: "assets/warning-green.png",
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).oops,
-        AppLocalizations.of(context).youCannotShareWithYourself,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).youCannotShareWithYourself,
+        assetPath: "assets/warning-green.png",
       );
       return false;
     }
@@ -69,6 +76,7 @@ class EmergencyContactService {
     await _gateway.addContact(
       email: email.trim(),
       encryptedKey: CryptoUtil.bin2base64(encryptedKey),
+      recoveryNoticeInDays: recoveryNoticeInDays,
     );
     return true;
   }
@@ -94,6 +102,31 @@ class EmergencyContactService {
       );
     } catch (e, s) {
       Logger("EmergencyContact").severe('failed to update contact', e, s);
+      rethrow;
+    }
+  }
+
+  Future<bool> updateRecoveryNotice(
+    EmergencyContact contact,
+    int recoveryNoticeInDays,
+  ) async {
+    try {
+      await _gateway.updateRecoveryNotice(
+        emergencyContactID: contact.emergencyContact.id,
+        recoveryNoticeInDays: recoveryNoticeInDays,
+      );
+      return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final message = e.response?.data?["message"] as String?;
+        if (message != null && message.contains("active recovery session")) {
+          return false;
+        }
+      }
+      _logger.severe("failed to update recovery notice", e);
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to update recovery notice", e, s);
       rethrow;
     }
   }

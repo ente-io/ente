@@ -25,55 +25,107 @@ struct MessageListView: View {
     @State private var lastContentHeight: CGFloat = 0
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
+    @State private var suppressAutoScrollAfterGeneration = false
+    @State private var showStreamingBubble = false
+    @State private var streamingWasGenerating = false
+    @State private var streamingTextStorageId = UUID().uuidString
+    @State private var streamingHideWorkItem: DispatchWorkItem?
+    private let streamingOutroDuration: TimeInterval = 0.52
 
     var body: some View {
         GeometryReader { proxy in
             ScrollViewReader { scrollProxy in
-                ScrollView {
-                    messageListContent(containerHeight: proxy.size.height)
-                }
-                .id(sessionId)
-                .coordinateSpace(name: "scroll")
-                .simultaneousGesture(
-                    DragGesture()
-                        .onChanged { _ in
-                            isUserDragging = true
-                            autoScrollEnabled = false
-                            onDismissKeyboard()
+                ZStack(alignment: .bottomLeading) {
+                    ScrollView {
+                        messageListContent(containerHeight: proxy.size.height)
+                    }
+                    .id(sessionId)
+                    .coordinateSpace(name: "scroll")
+                    .simultaneousGesture(
+                        DragGesture()
+                            .onChanged { _ in
+                                isUserDragging = true
+                                autoScrollEnabled = false
+                                onDismissKeyboard()
+                            }
+                            .onEnded { _ in
+                                isUserDragging = false
+                                if isAtBottom {
+                                    autoScrollEnabled = true
+                                }
+                            }
+                    )
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded {
+                                onDismissKeyboard()
+                            }
+                    )
+                    .onPreferenceChange(BottomOffsetKey.self) { value in
+                        let threshold: CGFloat = EnsuSpacing.xxxl
+                        let distanceToBottom = value - proxy.size.height
+                        isAtBottom = distanceToBottom <= threshold
+                    }
+                    .onPreferenceChange(ContentHeightKey.self) { newHeight in
+                        let delta = newHeight - lastContentHeight
+                        lastContentHeight = newHeight
+                        if delta > 1, autoScrollEnabled, !isUserDragging {
+                            scrollToBottom(scrollProxy, force: true, animated: false)
                         }
-                        .onEnded { _ in
-                            isUserDragging = false
-                            if isAtBottom {
-                                autoScrollEnabled = true
+                    }
+                    .onChange(of: currentScrollChange) { newValue in
+                        handleScrollChange(newValue, scrollProxy: scrollProxy)
+                    }
+                    .onAppear {
+                        lastScrollChange = currentScrollChange
+                        didInitialScroll = false
+                        showStreamingBubble = isGenerating
+                        streamingWasGenerating = isGenerating
+                        scheduleInitialScroll(scrollProxy)
+                    }
+                    .onChange(of: isGenerating) { generating in
+                        if generating {
+                            streamingHideWorkItem?.cancel()
+                            streamingHideWorkItem = nil
+                            showStreamingBubble = true
+                            suppressAutoScrollAfterGeneration = false
+                        } else {
+                            suppressAutoScrollAfterGeneration = true
+                            if streamingWasGenerating {
+                                let workItem = DispatchWorkItem {
+                                    showStreamingBubble = false
+                                    suppressAutoScrollAfterGeneration = false
+                                    streamingHideWorkItem = nil
+                                }
+                                streamingHideWorkItem?.cancel()
+                                streamingHideWorkItem = workItem
+                                DispatchQueue.main.asyncAfter(deadline: .now() + streamingOutroDuration, execute: workItem)
                             }
                         }
-                )
-                .simultaneousGesture(
-                    TapGesture()
-                        .onEnded {
-                            onDismissKeyboard()
-                        }
-                )
-                .onPreferenceChange(BottomOffsetKey.self) { value in
-                    let threshold: CGFloat = EnsuSpacing.xxxl
-                    let distanceToBottom = value - proxy.size.height
-                    isAtBottom = distanceToBottom <= threshold
-                }
-                .onPreferenceChange(ContentHeightKey.self) { newHeight in
-                    let delta = newHeight - lastContentHeight
-                    lastContentHeight = newHeight
-                    let lastMessageIsUser = messages.last?.role == .user
-                    if delta > 1, autoScrollEnabled, !isUserDragging, !isGenerating, lastMessageIsUser {
-                        scrollToBottom(scrollProxy, force: true, animated: true)
+                        streamingWasGenerating = generating
                     }
-                }
-                .onChange(of: currentScrollChange) { newValue in
-                    handleScrollChange(newValue, scrollProxy: scrollProxy)
-                }
-                .onAppear {
-                    lastScrollChange = currentScrollChange
-                    didInitialScroll = false
-                    scheduleInitialScroll(scrollProxy)
+                    .onChange(of: sessionId) { _ in
+                        streamingHideWorkItem?.cancel()
+                        streamingHideWorkItem = nil
+                        showStreamingBubble = isGenerating
+                        streamingWasGenerating = isGenerating
+                    }
+
+                    if showStreamingBubble {
+                        EnsuBrandIllustration(
+                            width: 115,
+                            height: 52.5,
+                            outroTrigger: !isGenerating,
+                            outroInputName: "outro",
+                            clipsContent: false,
+                            riveAlignment: .center
+                        )
+                        .offset(y: -4)
+                        .frame(width: 115, height: 52.5, alignment: .top)
+                        .padding(.bottom, floatingStreamingBottomPadding)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .allowsHitTesting(false)
+                    }
                 }
             }
         }
@@ -101,9 +153,8 @@ struct MessageListView: View {
         if newValue.messagesCount != previous.messagesCount {
             if !didInitialScroll {
                 scheduleInitialScroll(scrollProxy)
-            } else if messages.last?.role == .user {
-                autoScrollEnabled = true
-                scrollToBottom(scrollProxy, force: true, animated: true)
+            } else {
+                scrollToBottom(scrollProxy, animated: newValue.isGenerating)
             }
         }
 
@@ -111,6 +162,10 @@ struct MessageListView: View {
             autoScrollEnabled = true
             didInitialScroll = false
             scheduleInitialScroll(scrollProxy)
+        }
+
+        if newValue.streamingLength != previous.streamingLength {
+            scrollToBottom(scrollProxy, animated: false)
         }
 
         if newValue.keyboardHeight != previous.keyboardHeight {
@@ -127,7 +182,14 @@ struct MessageListView: View {
         }
 
         if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging && !isGenerating {
+            if autoScrollEnabled && !isUserDragging {
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+        }
+
+        if newValue.isGenerating != previous.isGenerating {
+            if newValue.isGenerating {
+                autoScrollEnabled = true
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
@@ -135,6 +197,7 @@ struct MessageListView: View {
         if newValue.isAtBottom != previous.isAtBottom {
             if newValue.isAtBottom && !isUserDragging {
                 autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
     }
@@ -182,27 +245,29 @@ struct MessageListView: View {
                             onCopy: { onCopy(message) },
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },
-                            onOpenAttachment: openAttachment
+                            onOpenAttachment: openAttachment,
+                            showsMetadata: true,
+                            showOutroRive: false
                         )
                         .id(message.id)
                         .transition(messageTransition)
                     }
 
                     if isGenerating, streamingParentId == message.id {
-                        StreamingBubbleView(text: streamingResponse)
+                        inlineStreamingTextBubble
                             .id("streaming-\(message.id.uuidString)")
                     }
                 }
 
                 if isGenerating, streamingParentId == nil {
-                    StreamingBubbleView(text: streamingResponse)
+                    inlineStreamingTextBubble
                         .id("streaming")
                 }
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
-            .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
+            .animation(nil, value: messages.count)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -222,8 +287,39 @@ struct MessageListView: View {
         )
     }
 
+    private var inlineStreamingTextBubble: some View {
+        let trimmed = streamingResponse.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasText = !trimmed.isEmpty
+
+        return HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 0) {
+                TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                    let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
+                    let showCursor = phase == 0
+                    AssistantMessageRenderer(
+                        text: streamingResponse,
+                        isStreaming: true,
+                        storageId: streamingTextStorageId,
+                        showsCursor: showCursor
+                    )
+                }
+            }
+            .padding(.vertical, hasText ? EnsuSpacing.md : 0)
+            .padding(.horizontal, EnsuSpacing.sm)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .foregroundStyle(EnsuColor.textPrimary)
+    }
+
     private var messageTransition: AnyTransition {
-        .move(edge: .bottom).combined(with: .opacity)
+        .identity
+    }
+
+    private var floatingStreamingBottomPadding: CGFloat {
+        let floatingGap: CGFloat = 36
+        let minPadding = EnsuSpacing.xxxl + floatingGap
+        let inputPadding = inputBarHeight > 0 ? inputBarHeight + floatingGap : minPadding
+        return max(minPadding, inputPadding)
     }
 
     private var contentBottomPadding: CGFloat {
@@ -289,4 +385,3 @@ struct MessageListView: View {
     }
 }
 #endif
-

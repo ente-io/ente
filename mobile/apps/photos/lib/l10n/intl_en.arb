@@ -134,6 +134,8 @@
   "changeEmail": "Change email",
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
+  "readyToBackupTitle": "Ready to backup",
+  "readyToBackupSubtitle": "Your photos will sync in the background. The first backup may take some time.",
   "contactSupport": "Contact support",
   "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
   "@locationPickerTip": {
@@ -527,6 +529,8 @@
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
   "selectFolders": "Select folders",
+  "backupToEnte": "Backup to Ente",
+  "selectAlbumsToBackUpToEnte": "Select albums to back up to Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
@@ -791,6 +795,26 @@
   "youAreOnAFamilyPlan": "You are on a family plan!",
   "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
+  "youAreOnAFamilyPlanSubtitle": "You are on a family plan.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " manages this plan.\nReach out to them for any changes.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Leave family plan",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Need help? Contact ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",
   "rateTheApp": "Rate the app",
@@ -985,27 +1009,39 @@
   "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
-  "alreadyAvailableOnDeviceTitle": "Already available on device",
-  "alreadyAvailableOnDeviceBodyAndroid": "You can find this file in the \"{folderName}\" folder. Download it again?",
-  "@alreadyAvailableOnDeviceBodyAndroid": {
-    "description": "Dialog body shown before re-downloading when the file is already present on device on Android",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} is already available in the {albumName} album on your device",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
     "placeholders": {
-      "folderName": {
+      "fileName": {
         "type": "String"
-      }
-    }
-  },
-  "alreadyAvailableOnDeviceBodyIOS": "You can find this file in the \"{albumName}\" album. Download it again?",
-  "@alreadyAvailableOnDeviceBodyIOS": {
-    "description": "Dialog body shown before re-downloading when the file is already present on device on iOS",
-    "placeholders": {
+      },
       "albumName": {
         "type": "String"
       }
     }
   },
-  "alreadyAvailableOnDeviceBodyUnknown": "This file is already on your device. Download it again?",
-  "downloadAnyway": "Download anyway",
+  "downloadSkippedInSelectionSingleFile": "Download of {fileName} skipped as it is already available in the {albumName} album on your device",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Download of {fileCount} files skipped as they are already on your device",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Press and hold to play video",
   "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",
@@ -1804,10 +1840,94 @@
   "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Trusted contacts",
-  "addTrustedContact": "Add Trusted Contact",
+  "addTrustedContact": "Add trusted contact",
+  "chooseFromAnExistingContact": "Choose from an existing contact",
+  "chooseARecoveryTime": "Choose a recovery time",
+  "addContact": "Add contact",
   "removeInvite": "Remove invite",
   "recoveryWarning": "A trusted contact is trying to access your account",
   "rejectRecovery": "Reject recovery",
+  "cannotUpdateRecoveryTime": "Cannot update recovery time",
+  "cannotUpdateRecoveryTimeMessage": "Recovery time cannot be changed while there is an active recovery session. Please reject or wait for the recovery to complete.",
+  "updateTime": "Update time",
+  "revokeInvite": "Revoke invite",
+  "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "You have added {email} as a trusted contact. They have accepted your invite.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Cancel invite",
+  "cancelInviteDesc": "If you delete this invite, you'll need to send a new one if you change your mind.",
+  "removeContactDesc": "If you delete this contact, you'll need to send a new invitation, and the contact will have to accept it again.",
+  "removeContact": "Remove contact",
+  "letsTryThatAgain": "Let's try that again",
+  "removeYourselfDesc": "If you remove yourself as a trusted contact, you'll lose access to {email}'s account after their inactivity period.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Cancel recovery",
+  "cancelRecoveryDesc": "Are you sure you want to cancel recovery of {email}'s account?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Start recovery",
+  "startRecoveryDesc": "Are you sure you want to initiate recovery for {email}'s account?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "You can recover {email}'s account in {days} days after starting the recovery process.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "You can recover {email}'s account after {time}.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Or remove yourself as {email}'s trusted contact",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Recovery initiated",
   "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
   "@recoveryInitiatedDesc": {
@@ -1846,6 +1966,19 @@
       "email": {
         "type": "String",
         "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "confirmAddingTrustedContacts": "You are about to add {count} trusted contacts. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
       },
       "numOfDays": {
         "type": "int",
@@ -1983,6 +2116,10 @@
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} turning {age} soon",
   "lastTimeWithThem": "Last time with {name}",
+  "unnamedPeopleSpotlight": "A familiar face",
+  "unnamedPeopleYouAndThem": "You two",
+  "unnamedPeopleDoingSomethingTogether": "Doing it together",
+  "unnamedPeopleLastTimeYouSawThem": "Last time together",
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",

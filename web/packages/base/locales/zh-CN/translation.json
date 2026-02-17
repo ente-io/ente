@@ -521,6 +521,7 @@
     "done": "已完成",
     "share_link_section_title": "或共享一个链接",
     "remove_link": "移除链接",
+    "link_created": "",
     "create_public_link": "创建公开链接",
     "public_link_created": "公开链接已创建",
     "public_link_enabled": "公开链接已启用",

@@ -1,4 +1,5 @@
 - Ashil: Fix widnow controls hiding app UI on iPadOS
+- Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
 - Ashil: Enable single file download for locally existing uploaded files.
 - Laurens: (i) Use usearch vectorDB for magic search and discover section
 - Laurens: Make it possible to ignore already named persons

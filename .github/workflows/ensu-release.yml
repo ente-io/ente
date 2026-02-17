@@ -1,0 +1,243 @@
+name: "Release (ensu)"
+
+on:
+    push:
+        # Run when a tag matching the pattern "ensu-v*" is pushed
+        tags:
+            - "ensu-v*"
+    # Also allow manually running the workflow
+    workflow_dispatch:
+
+env:
+    NDK_VERSION: "27.0.12077973"
+
+permissions:
+    contents: write
+
+jobs:
+    release-desktop:
+        strategy:
+            fail-fast: false
+            matrix:
+                platform:
+                    - os: ubuntu-22.04
+                      rust-target: x86_64-unknown-linux-gnu
+                    - os: macos-latest
+                      rust-target: x86_64-apple-darwin
+                    - os: macos-latest
+                      rust-target: aarch64-apple-darwin
+                    - os: windows-latest
+                      rust-target: x86_64-pc-windows-msvc
+
+        runs-on: ${{ matrix.platform.os }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - name: Install Rust stable
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: ${{ matrix.platform.rust-target }}
+
+            - name: Set macOS deployment target
+              if: matrix.platform.os == 'macos-latest'
+              run: |
+                  echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+                  echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+
+            - name: Install dependencies (Ubuntu only)
+              if: matrix.platform.os == 'ubuntu-22.04'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+            - name: Rust cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      rust/apps/ensu/src-tauri/target
+                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
+
+            - name: Install web dependencies
+              working-directory: web
+              run: yarn install --frozen-lockfile
+
+            - name: Build WASM
+              working-directory: web
+              run: yarn build:wasm
+
+            - name: Install Tauri dependencies
+              working-directory: rust/apps/ensu
+              run: yarn install
+
+            - name: Fetch Rust dependencies
+              shell: bash
+              working-directory: rust/apps/ensu/src-tauri
+              run: cargo fetch
+
+            - name: Patch llama.cpp mtmd sources
+              shell: bash
+              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
+
+            - name: Build and release Tauri app
+              uses: tauri-apps/tauri-action@v0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+                  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
+                  CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
+              with:
+                  projectPath: rust/apps/ensu
+                  tagName: ${{ github.ref_name }}
+                  releaseName: "Ensu Desktop ${{ github.ref_name }}"
+                  releaseBody: |
+                      Desktop release for Ensu
+
+                      **Platforms:**
+                      - Linux (AppImage, deb)
+                      - macOS (dmg, app)
+                      - Windows (msi, exe)
+
+                      Download the appropriate file for your platform below.
+                  releaseDraft: true
+                  prerelease: false
+                  args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+
+    build-android:
+        runs-on: ubuntu-latest
+        needs: release-desktop
+        env:
+            HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
+            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU != '' }}
+            HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
+
+        defaults:
+            run:
+                working-directory: mobile/native/android/apps/ensu
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
+
+            - name: Install NDK
+              run: |
+                  echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+                  echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+            - name: Install cargo-ndk
+              run: cargo install cargo-ndk
+
+            - name: Build Rust libraries
+              run: |
+                  cd ../../packages/rust/tool
+                  ./build_android.sh
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_HOME }}
+                  NDK_VERSION: ${{ env.NDK_VERSION }}
+
+            - name: Print Android release capabilities
+              run: |
+                  echo "HAS_ANDROID_SIGNING=${HAS_ANDROID_SIGNING}"
+                  echo "HAS_PLAYSTORE_SERVICE_ACCOUNT=${HAS_PLAYSTORE_SERVICE_ACCOUNT}"
+                  echo "HAS_DISCORD_WEBHOOK=${HAS_DISCORD_WEBHOOK}"
+
+            - name: Setup signing keys
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: |
+                  echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > ensu-release.keystore
+                  cat > key.properties << EOF
+                  storeFile=ensu-release.keystore
+                  storePassword=${{ secrets.SIGNING_STORE_PASSWORD_ENSU }}
+                  keyAlias=${{ secrets.SIGNING_KEY_ALIAS_ENSU }}
+                  keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
+                  EOF
+
+            - name: Build signed release APK
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: ./gradlew :app-ui:assembleRelease
+
+            - name: Build signed release AAB (PlayStore)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: ./gradlew :app-ui:bundleRelease
+
+            - name: Build unsigned debug APK (fallback)
+              if: env.HAS_ANDROID_SIGNING != 'true'
+              run: ./gradlew :app-ui:assembleDebug
+
+            - name: Collect Android artifacts (signed APK)
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: |
+                  mkdir -p artifacts
+                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ github.ref_name }}.apk
+
+            - name: Collect Android artifacts (signed AAB)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: |
+                  cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
+
+            - name: Collect Android artifacts (unsigned fallback)
+              if: env.HAS_ANDROID_SIGNING != 'true'
+              run: |
+                  mkdir -p artifacts
+                  cp app-ui/build/outputs/apk/debug/app-ui-debug.apk artifacts/ensu-${{ github.ref_name }}-unsigned.apk
+
+            - name: Attach Android artifacts to draft GitHub release
+              if: startsWith(github.ref, 'refs/tags/ensu-v')
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: "mobile/native/android/apps/ensu/artifacts/*"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload Android artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ensu-android-artifacts
+                  path: mobile/native/android/apps/ensu/artifacts/*
+
+            - name: Upload AAB to PlayStore
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              uses: r0adkll/upload-google-play@v1
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU }}
+                  packageName: io.ente.ensu
+                  releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
+                  track: internal
+
+            - name: Notify Discord
+              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  nodetail: true
+                  title: "🤖 Internal draft release available for Ensu"
+                  description: "Draft release uploaded to Play Store internal track"
+                  color: 0x4CAF50

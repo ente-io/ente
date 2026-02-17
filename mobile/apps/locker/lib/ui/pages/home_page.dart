@@ -7,6 +7,7 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -216,12 +217,9 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
   bool _isLoading = true;
-  bool _hasLoadedFromDb = false;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
-  bool get _isLoadingFromDb => !_hasLoadedFromDb && _isLoading;
-  bool get _isSyncingWithServer =>
-      _hasLoadedFromDb && !_hasCompletedInitialLoad;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -449,10 +447,23 @@ class _HomePageState extends UploaderPageState<HomePage>
     } catch (e) {
       _logger.severe('Error handling shared files: $e');
       if (mounted) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.l10n.uploadError,
-          'Failed to process shared files: $e',
+          title: context.l10n.uploadError,
+          message: context.l10n.somethingWentWrong,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(
+                  context,
+                  "support@ente.io",
+                  postShare: () {},
+                );
+              },
+            ),
+          ],
         );
       }
     }
@@ -526,7 +537,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
-          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
@@ -535,7 +545,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
-          _hasLoadedFromDb = true;
           _hasCompletedInitialLoad =
               CollectionService.instance.hasCompletedFirstSync();
         });
@@ -648,7 +657,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: _isSyncingWithServer,
+                  isSyncing: _isSyncing,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -701,16 +710,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
-    if (_isLoadingFromDb) {
-      final colorScheme = getEnteColorScheme(context);
-      return Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          color: colorScheme.primary700,
-        ),
-      );
-    }
-
     if (_error != null) {
       return Center(
         child: Padding(
@@ -748,10 +747,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(),
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isLoading: _isSyncing),
         ),
       );
     }
@@ -761,10 +760,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isLoading: _isSyncing),
                 ),
               )
             : SingleChildScrollView(
