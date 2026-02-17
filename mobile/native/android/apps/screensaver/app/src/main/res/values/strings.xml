@@ -154,6 +154,11 @@
     <string name="setup_button_hide_manual">Hide manual entry</string>
     <string name="setup_manual_entry_title">Manual Entry</string>
     <string name="setup_qr_instructions">Scan this QR code with your phone to configure the album</string>
+    <string name="setup_bullet_network">Make sure your phone and TV are on
+the same network</string>
+    <string name="setup_bullet_scan">Scan this QR code and open the link</string>
+    <string name="setup_bullet_album">Paste the public link of the Ente album
+you want to see on your TV</string>
 
     <!-- Settings refactor -->
     <string name="pref_change_album">Change album</string>

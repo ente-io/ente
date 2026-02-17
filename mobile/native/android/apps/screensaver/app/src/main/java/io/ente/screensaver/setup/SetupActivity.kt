@@ -1,11 +1,11 @@
 package io.ente.photos.screensaver.setup
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Base64
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import fi.iki.elonen.NanoHTTPD
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivitySetupBinding
@@ -106,22 +106,32 @@ class SetupActivity : AppCompatActivity() {
         val addresses = NetworkUtils.getLocalIpv4Addresses()
 
         if (port == null || addresses.isEmpty()) {
+            binding.textSetupHint.isVisible = true
             binding.textSetupHint.text = getString(R.string.setup_no_network)
             binding.imageQr.setImageDrawable(null)
-            binding.imageQr.setBackgroundColor(Color.TRANSPARENT)
             return
         }
 
         val primaryUrl = addresses.firstOrNull()?.let { buildSetupUrl(it.address, port) }
         if (primaryUrl == null) {
+            binding.textSetupHint.isVisible = true
             binding.textSetupHint.text = getString(R.string.setup_no_network)
             binding.imageQr.setImageDrawable(null)
-            binding.imageQr.setBackgroundColor(Color.TRANSPARENT)
             return
         }
 
-        binding.textSetupHint.text = getString(R.string.setup_wifi_hint)
-        binding.imageQr.setImageBitmap(QrCodeUtils.renderQrCode(primaryUrl, 520))
+        binding.textSetupHint.isVisible = false
+        binding.imageQr.post {
+            val qrSize = minOf(binding.imageQr.width, binding.imageQr.height).takeIf { it > 0 } ?: 520
+            binding.imageQr.setImageBitmap(
+                QrCodeUtils.renderQrCode(
+                    context = this,
+                    text = primaryUrl,
+                    sizePx = qrSize,
+                    centerLogoResId = R.drawable.ente_qr_logo,
+                ),
+            )
+        }
     }
 
     private fun generatePairingCode(): String {
