@@ -1501,32 +1501,53 @@ final class ChatViewModel: ObservableObject {
                 return Double(tokenCount) / (Double(totalTimeMs) / 1000.0)
             }()
 
-            let meta: [AttachmentMeta] = []
-            if let inserted = try? chatDb.insertMessage(
-                sessionUuid: parent.sessionId.uuidString,
-                sender: .other,
-                text: trimmed,
-                parentMessageUuid: parent.id.uuidString,
-                attachments: meta
-            ), let assistantId = UUID(uuidString: inserted.uuid) {
-                logger.info("Message created", details: "id=\(assistantId.uuidString) session=\(parent.sessionId.uuidString) role=assistant")
-                let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
-                let assistant = MessageNode(
-                    id: assistantId,
-                    sessionId: parent.sessionId,
-                    parentId: parent.id,
-                    role: .assistant,
-                    text: trimmed,
-                    timestamp: timestamp,
-                    attachments: [],
-                    isInterrupted: interrupted,
-                    tokensPerSecond: tokensPerSecond
-                )
+            if isActiveGeneration {
+                let meta: [AttachmentMeta] = []
+                do {
+                    let inserted = try chatDb.insertMessage(
+                        sessionUuid: parent.sessionId.uuidString,
+                        sender: .other,
+                        text: trimmed,
+                        parentMessageUuid: parent.id.uuidString,
+                        attachments: meta
+                    )
 
-                messageStore[parent.sessionId, default: []].append(assistant)
-                invalidateChildrenCache(for: parent.sessionId)
-                updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
-                updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
+                    if let assistantId = UUID(uuidString: inserted.uuid) {
+                        logger.info("Message created", details: "id=\(assistantId.uuidString) session=\(parent.sessionId.uuidString) role=assistant")
+                        let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
+                        let assistant = MessageNode(
+                            id: assistantId,
+                            sessionId: parent.sessionId,
+                            parentId: parent.id,
+                            role: .assistant,
+                            text: trimmed,
+                            timestamp: timestamp,
+                            attachments: [],
+                            isInterrupted: interrupted,
+                            tokensPerSecond: tokensPerSecond
+                        )
+
+                        messageStore[parent.sessionId, default: []].append(assistant)
+                        invalidateChildrenCache(for: parent.sessionId)
+                        updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
+                        updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
+                    } else {
+                        logger.warning(
+                            "Skipping assistant message persistence",
+                            details: "session=\(parent.sessionId.uuidString) parent=\(parent.id.uuidString) interrupted=\(interrupted) reason=invalid_uuid"
+                        )
+                    }
+                } catch {
+                    logger.warning(
+                        "Skipping assistant message persistence",
+                        details: "session=\(parent.sessionId.uuidString) parent=\(parent.id.uuidString) interrupted=\(interrupted) error=\(error)"
+                    )
+                }
+            } else {
+                logger.info(
+                    "Dropped stale generation response",
+                    details: "session=\(parent.sessionId.uuidString) parent=\(parent.id.uuidString) interrupted=\(interrupted)"
+                )
             }
         }
 
