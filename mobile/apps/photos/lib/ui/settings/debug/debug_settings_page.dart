@@ -86,6 +86,29 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                             ),
                           ),
                           MenuItemWidgetNew(
+                            title: "Use Cloudflare upload proxy",
+                            leadingIconWidget: _buildIconWidget(
+                              context,
+                              HugeIcons.strokeRoundedUpload04,
+                            ),
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => localSettings.isCFUploadProxyEnabled,
+                              onChanged: () async {
+                                final newValue =
+                                    !localSettings.isCFUploadProxyEnabled;
+                                await localSettings
+                                    .setCFUploadProxyEnabled(newValue);
+                                setState(() {});
+                                showShortToast(
+                                  context,
+                                  newValue
+                                      ? "Cloudflare upload proxy enabled."
+                                      : "Cloudflare upload proxy disabled.",
+                                );
+                              },
+                            ),
+                          ),
+                          MenuItemWidgetNew(
                             title: "Enable database logging",
                             leadingIconWidget: _buildIconWidget(
                               context,

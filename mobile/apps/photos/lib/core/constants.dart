@@ -43,6 +43,7 @@ const supportEmail = 'support@ente.io';
 const multipartPartSize = 20 * 1024 * 1024;
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
+const kUploadProxyEndpoint = 'https://uploader.ente.io';
 const kAccountsUrl = 'https://accounts.ente.io';
 const kCasUrl = 'https://cas.ente.io';
 const kFamilyUrl = 'https://family.ente.io';

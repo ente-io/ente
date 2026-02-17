@@ -6,6 +6,7 @@ import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/errors.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -72,6 +73,12 @@ class MultiPartUploader {
   int get multipartPartSizeForUpload {
     return multipartPartSize;
   }
+
+  bool get _shouldUseCFUploadProxy =>
+      !_featureFlagService.disableCFWorker &&
+      _featureFlagService.cloudflareUploadWorker &&
+      localSettings.isCFUploadProxyEnabled &&
+      Configuration.instance.isEnteProduction();
 
   int calculatePartCount(int fileSize) {
     // If the feature flag is disabled, return 1
@@ -259,6 +266,7 @@ class MultiPartUploader {
     final partsLength = partsURLs.length;
     final etags = partInfo.partETags ?? <int, String>{};
     final partMd5s = partInfo.partMd5s;
+    final useUploadProxy = _shouldUseCFUploadProxy;
 
     int i = 0;
     final partSize = partInfo.partSize ?? multipartPartSizeForUpload;
@@ -308,14 +316,17 @@ class MultiPartUploader {
 
       // Add MD5 header if available for this part
       if (partMd5s != null && i < partMd5s.length) {
-        headers['Content-MD5'] = partMd5s[i];
+        headers[useUploadProxy ? 'CONTENT-MD5' : 'Content-MD5'] = partMd5s[i];
       } else if (kDebugMode) {
         AssertionError('Part MD5s not available for part ${i + 1}');
+      }
+      if (useUploadProxy) {
+        headers["UPLOAD-URL"] = partURL;
       }
 
       try {
         final response = await _s3Dio.put(
-          partURL,
+          useUploadProxy ? "$kUploadProxyEndpoint/multipart-upload" : partURL,
           data: encryptedFile.openRead(
             i * partSize,
             isLastPart ? null : (i + 1) * partSize,
@@ -325,7 +336,9 @@ class MultiPartUploader {
           ),
         );
 
-        final eTag = response.headers.value("etag");
+        final eTag = useUploadProxy
+            ? _extractProxyETag(response.data)
+            : response.headers.value("etag");
 
         if (eTag?.isEmpty ?? true) {
           throw Exception('ETAG_MISSING');
@@ -365,6 +378,7 @@ class MultiPartUploader {
     Map<int, String> partEtags,
     String completeURL,
   ) async {
+    final useUploadProxy = _shouldUseCFUploadProxy;
     final body = convertJs2Xml({
       'CompleteMultipartUpload': partEtags.entries
           .map(
@@ -378,10 +392,13 @@ class MultiPartUploader {
 
     try {
       await _s3Dio.post(
-        completeURL,
+        useUploadProxy
+            ? "$kUploadProxyEndpoint/multipart-complete"
+            : completeURL,
         data: body,
         options: Options(
           contentType: "text/xml",
+          headers: useUploadProxy ? {"UPLOAD-URL": completeURL} : null,
         ),
       );
       await _db.updateTrackUploadStatus(
@@ -392,5 +409,15 @@ class MultiPartUploader {
       Logger("MultipartUpload").severe("upload failed for key $objectKey}", e);
       rethrow;
     }
+  }
+
+  String? _extractProxyETag(dynamic responseData) {
+    if (responseData is Map) {
+      final etag = responseData["etag"];
+      if (etag is String) {
+        return etag;
+      }
+    }
+    return null;
   }
 }
