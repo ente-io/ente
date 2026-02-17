@@ -37,6 +37,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         dataStore = SsaverPreferenceDataStore(applicationContext)
+        applyChangeAlbumSubtitleMaxWidth()
 
         viewBinding.rowChangeAlbum.setOnClickListener {
             startActivity(Intent(this, SetupActivity::class.java))
@@ -95,6 +96,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        applyChangeAlbumSubtitleMaxWidth()
         updateSetScreensaverVisibility()
         updateAlbumSubtitle()
         updateShuffleValue()
@@ -186,6 +188,12 @@ class SettingsActivity : AppCompatActivity() {
                 viewBinding.rowChangeAlbumSubtitle.isVisible = true
             }
         }
+    }
+
+    private fun applyChangeAlbumSubtitleMaxWidth() {
+        val viewBinding = binding ?: return
+        val maxWidthPx = resources.displayMetrics.widthPixels / 2
+        viewBinding.rowChangeAlbumSubtitle.maxWidth = maxWidthPx
     }
 
     private fun setupRowFocusStyling(rows: List<View>) {
