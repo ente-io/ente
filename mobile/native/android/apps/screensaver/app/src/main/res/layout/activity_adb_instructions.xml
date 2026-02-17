@@ -19,19 +19,10 @@
         android:paddingEnd="56dp"
         android:paddingBottom="40dp">
 
-        <ImageView
-            android:id="@+id/image_adb_logo"
-            android:layout_width="110dp"
-            android:layout_height="76dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@null"
-            android:src="@drawable/ente_photos_logo_dark" />
-
         <TextView
             android:id="@+id/text_adb_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             android:fontFamily="@font/opensans_bold"
             android:text="@string/adb_title"
             android:textColor="#111111"
