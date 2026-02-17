@@ -1,7 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/settings_container"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:ignore="MergeRootFrame" />
+    android:background="@android:color/black"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:id="@+id/settings_logo"
+                android:layout_width="188dp"
+                android:layout_height="132dp"
+                android:layout_gravity="start|top"
+                android:layout_marginStart="96dp"
+                android:layout_marginTop="48dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:src="@drawable/ente_photos_logo" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/row_change_album"
+                style="@style/Widget.SSaver.SettingsRow"
+                android:text="@string/pref_change_album" />
+
+            <LinearLayout
+                android:id="@+id/row_set_screensaver_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/ssaver_settings_divider_strong" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/row_set_screensaver"
+                    style="@style/Widget.SSaver.SettingsRow"
+                    android:text="@string/button_set_screensaver" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/ssaver_settings_divider_subtle" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/row_shuffle"
+                    style="@style/Widget.SSaver.SettingsRow"
+                    android:text="@string/pref_title_shuffle" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/ssaver_settings_divider_subtle" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/row_interval"
+                    style="@style/Widget.SSaver.SettingsRow"
+                    android:text="@string/pref_title_slideshow_interval" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/ssaver_settings_divider_subtle" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/row_advanced"
+                    style="@style/Widget.SSaver.SettingsRow"
+                    android:text="@string/pref_advanced" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

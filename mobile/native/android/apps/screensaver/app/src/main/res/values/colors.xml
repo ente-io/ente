@@ -15,5 +15,11 @@
     <color name="ssaver_surface_focus">#1A08C225</color>
     <color name="ssaver_text_on_primary">#FFFFFF</color>
 
+    <color name="ssaver_settings_row_default">#111111</color>
+    <color name="ssaver_settings_row_gradient_start">#2E2E2E</color>
+    <color name="ssaver_settings_row_gradient_end">#949494</color>
+    <color name="ssaver_settings_divider_strong">#FFD9D9D9</color>
+    <color name="ssaver_settings_divider_subtle">#30D9D9D9</color>
+
     <color name="ic_launcher_background">#08C225</color>
 </resources>

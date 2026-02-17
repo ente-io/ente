@@ -164,6 +164,9 @@
     <string name="pref_adb_instructions_summary">Show ADB command to grant required permission</string>
     <string name="pref_clock_summary">Display clock on screensaver</string>
     <string name="advanced_settings_title">Advanced</string>
+    <string name="settings_shuffle_enabled">Shuffle enabled</string>
+    <string name="settings_shuffle_disabled">Shuffle disabled</string>
+    <string name="settings_interval_updated">Slideshow interval set to %1$s</string>
 
     <!-- MainActivity preview mode -->
     <string name="hint_press_down_settings">Press Down Arrow for Settings</string>
