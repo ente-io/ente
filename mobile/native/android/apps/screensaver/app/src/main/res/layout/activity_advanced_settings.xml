@@ -45,9 +45,10 @@
                 android:orientation="vertical">
 
                 <View
+                    android:id="@+id/divider_diagnostics"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/ssaver_settings_divider_strong" />
+                    android:background="@color/ssaver_settings_divider_subtle" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/row_diagnostics"
