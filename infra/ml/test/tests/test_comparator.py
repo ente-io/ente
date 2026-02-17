@@ -108,6 +108,10 @@ def test_compare_result_sets_passes_when_within_thresholds() -> None:
     assert report.passed is True
     assert report.findings == ()
     assert report.aggregates["clip_cosine_distance"].count == 1
+    assert report.total_reference_files == 1
+    assert report.passing_files == ("man.jpeg",)
+    assert report.failing_files == ()
+    assert report.file_statuses[0].passed is True
 
 
 def test_compare_result_sets_fails_on_clip_drift() -> None:
@@ -161,6 +165,13 @@ def test_compare_result_sets_fails_on_face_count_mismatch() -> None:
 
     assert report.passed is False
     assert any(finding.metric == "face_count" for finding in report.findings)
+    assert report.total_reference_files == 1
+    assert report.passing_files == ()
+    assert report.failing_files == ("people.jpeg",)
+    assert report.file_statuses[0].file_id == "people.jpeg"
+    assert any(
+        failure.metric == "face_count" for failure in report.file_statuses[0].failures
+    )
 
 
 def test_aggregate_gate_failure_is_reported() -> None:

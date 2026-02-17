@@ -93,6 +93,12 @@ def main() -> int:
     failed_reports = [report for report in reports if not report.passed]
     print(f"Comparisons executed: {len(reports)}")
     print(f"Comparison status: {'PASS' if passed else 'FAIL'}")
+    for report in reports:
+        print(
+            f"  {report.reference_platform} -> {report.candidate_platform}: "
+            f"{len(report.passing_files)}/{report.total_reference_files} files pass, "
+            f"{len(report.failing_files)} fail"
+        )
     if failed_reports:
         print("Failed comparisons:")
         for report in failed_reports:

@@ -148,20 +148,48 @@ class ComparisonFinding:
 
 
 @dataclass(frozen=True)
+class FileComparisonStatus:
+    file_id: str
+    passed: bool
+    failures: tuple[ComparisonFinding, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "file_id": self.file_id,
+            "passed": self.passed,
+            "failure_count": len(self.failures),
+            "failures": [failure.to_dict() for failure in self.failures],
+        }
+
+
+@dataclass(frozen=True)
 class ComparisonReport:
     reference_platform: str
     candidate_platform: str
+    total_reference_files: int
     checked_files: int
     missing_files: tuple[str, ...]
     extra_files: tuple[str, ...]
     aggregates: Mapping[str, AggregateMetric]
     findings: tuple[ComparisonFinding, ...]
+    file_statuses: tuple[FileComparisonStatus, ...]
+    passing_files: tuple[str, ...]
+    failing_files: tuple[str, ...]
     passed: bool
 
     def to_dict(self) -> dict[str, Any]:
+        file_summary = {
+            "total_reference_files": self.total_reference_files,
+            "checked_files": self.checked_files,
+            "pass_count": len(self.passing_files),
+            "fail_count": len(self.failing_files),
+            "passing_files": list(self.passing_files),
+            "failing_files": list(self.failing_files),
+        }
         return {
             "reference_platform": self.reference_platform,
             "candidate_platform": self.candidate_platform,
+            "total_reference_files": self.total_reference_files,
             "checked_files": self.checked_files,
             "missing_files": list(self.missing_files),
             "extra_files": list(self.extra_files),
@@ -170,6 +198,10 @@ class ComparisonReport:
                 for metric_name, metric in self.aggregates.items()
             },
             "findings": [finding.to_dict() for finding in self.findings],
+            "file_summary": file_summary,
+            "file_statuses": [file_status.to_dict() for file_status in self.file_statuses],
+            "passing_files": list(self.passing_files),
+            "failing_files": list(self.failing_files),
             "passed": self.passed,
         }
 
@@ -264,9 +296,17 @@ def compare_result_sets(
     missing_files = tuple(sorted(set(reference_results) - set(candidate_results)))
     extra_files = tuple(sorted(set(candidate_results) - set(reference_results)))
     findings: list[ComparisonFinding] = []
+    file_failures: dict[str, list[ComparisonFinding]] = {
+        file_id: [] for file_id in reference_results
+    }
+
+    def add_finding(finding: ComparisonFinding) -> None:
+        findings.append(finding)
+        if finding.file_id in file_failures:
+            file_failures[finding.file_id].append(finding)
 
     for missing_file in missing_files:
-        findings.append(
+        add_finding(
             ComparisonFinding(
                 file_id=missing_file,
                 metric="file_presence",
@@ -274,7 +314,7 @@ def compare_result_sets(
             ),
         )
     for extra_file in extra_files:
-        findings.append(
+        add_finding(
             ComparisonFinding(
                 file_id=extra_file,
                 metric="file_presence",
@@ -296,7 +336,7 @@ def compare_result_sets(
         clip_distance = cosine_distance(reference.clip.embedding, candidate.clip.embedding)
         clip_distances.append(clip_distance)
         if clip_distance > clip_threshold:
-            findings.append(
+            add_finding(
                 ComparisonFinding(
                     file_id=file_id,
                     metric="clip_cosine_distance",
@@ -307,7 +347,7 @@ def compare_result_sets(
             )
 
         if len(reference.faces) != len(candidate.faces):
-            findings.append(
+            add_finding(
                 ComparisonFinding(
                     file_id=file_id,
                     metric="face_count",
@@ -324,7 +364,7 @@ def compare_result_sets(
             iou_error = 1.0 - iou
             iou_errors.append(iou_error)
             if iou < thresholds.box_iou_threshold:
-                findings.append(
+                add_finding(
                     ComparisonFinding(
                         file_id=file_id,
                         metric="face_box_iou",
@@ -340,7 +380,7 @@ def compare_result_sets(
                     candidate_face.landmarks,
                 )
             except ValueError:
-                findings.append(
+                add_finding(
                     ComparisonFinding(
                         file_id=file_id,
                         metric="landmarks",
@@ -350,7 +390,7 @@ def compare_result_sets(
             else:
                 landmark_errors.append(landmark_error)
                 if landmark_error > thresholds.landmark_error_threshold:
-                    findings.append(
+                    add_finding(
                         ComparisonFinding(
                             file_id=file_id,
                             metric="landmark_error",
@@ -363,7 +403,7 @@ def compare_result_sets(
             score_delta = abs(reference_face.score - candidate_face.score)
             score_deltas.append(score_delta)
             if score_delta > thresholds.score_delta_threshold:
-                findings.append(
+                add_finding(
                     ComparisonFinding(
                         file_id=file_id,
                         metric="score_delta",
@@ -379,7 +419,7 @@ def compare_result_sets(
             )
             face_embedding_distances.append(embedding_distance)
             if embedding_distance > thresholds.face_embedding_cosine_distance:
-                findings.append(
+                add_finding(
                     ComparisonFinding(
                         file_id=file_id,
                         metric="face_embedding_cosine_distance",
@@ -409,7 +449,7 @@ def compare_result_sets(
     for metric_name, metric in aggregates.items():
         if metric.passed:
             continue
-        findings.append(
+        add_finding(
             ComparisonFinding(
                 file_id="*aggregate*",
                 metric=metric_name,
@@ -420,14 +460,34 @@ def compare_result_sets(
         )
 
     report_findings = tuple(findings)
+    sorted_reference_files = sorted(reference_results)
+    file_statuses = tuple(
+        FileComparisonStatus(
+            file_id=file_id,
+            passed=not file_failures[file_id],
+            failures=tuple(file_failures[file_id]),
+        )
+        for file_id in sorted_reference_files
+    )
+    passing_files = tuple(
+        file_status.file_id for file_status in file_statuses if file_status.passed
+    )
+    failing_files = tuple(
+        file_status.file_id for file_status in file_statuses if not file_status.passed
+    )
+
     return ComparisonReport(
         reference_platform=reference_platform,
         candidate_platform=candidate_platform,
+        total_reference_files=len(reference_results),
         checked_files=len(shared_file_ids),
         missing_files=missing_files,
         extra_files=extra_files,
         aggregates=aggregates,
         findings=report_findings,
+        file_statuses=file_statuses,
+        passing_files=passing_files,
+        failing_files=failing_files,
         passed=not report_findings,
     )
 

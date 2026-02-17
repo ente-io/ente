@@ -464,6 +464,171 @@ run_platform_runner() {
   esac
 }
 
+render_file_level_report_tables() {
+  local report_path="$1"
+  python3 - "$report_path" <<'PY'
+from __future__ import annotations
+
+import json
+import sys
+from collections import OrderedDict
+from pathlib import Path
+
+LOWER_IS_WORSE_METRICS = {"face_box_iou"}
+
+
+def _fmt_float(value: float) -> str:
+    return f"{value:.6f}"
+
+
+def _summarize_metric_failures(metric: str, failures: list[dict[str, object]]) -> str:
+    numeric_values = [
+        float(value)
+        for value in (failure.get("value") for failure in failures)
+        if isinstance(value, (int, float))
+    ]
+    threshold_values = [
+        float(threshold)
+        for threshold in (failure.get("threshold") for failure in failures)
+        if isinstance(threshold, (int, float))
+    ]
+    threshold = threshold_values[0] if threshold_values else None
+    occurrence_count = len(failures)
+
+    if numeric_values:
+        if metric in LOWER_IS_WORSE_METRICS:
+            worst_value = min(numeric_values)
+            if threshold is None:
+                return (
+                    f"{metric} x{occurrence_count}: "
+                    f"worst={_fmt_float(worst_value)}"
+                )
+            shortfall = threshold - worst_value
+            return (
+                f"{metric} x{occurrence_count}: "
+                f"worst={_fmt_float(worst_value)} < {_fmt_float(threshold)} "
+                f"(shortfall {_fmt_float(shortfall)})"
+            )
+
+        worst_value = max(numeric_values)
+        if threshold is None:
+            return (
+                f"{metric} x{occurrence_count}: "
+                f"worst={_fmt_float(worst_value)}"
+            )
+        overshoot = worst_value - threshold
+        return (
+            f"{metric} x{occurrence_count}: "
+            f"worst={_fmt_float(worst_value)} > {_fmt_float(threshold)} "
+            f"(overshoot {_fmt_float(overshoot)})"
+        )
+
+    message = str(failures[0].get("message", "threshold violation"))
+    return f"{metric} x{occurrence_count}: {message}"
+
+
+def _summarize_file_failures(failures: list[dict[str, object]]) -> str:
+    if not failures:
+        return "-"
+
+    by_metric: "OrderedDict[str, list[dict[str, object]]]" = OrderedDict()
+    for failure in failures:
+        metric = str(failure.get("metric", "unknown_metric"))
+        by_metric.setdefault(metric, []).append(failure)
+
+    return "; ".join(
+        _summarize_metric_failures(metric, metric_failures)
+        for metric, metric_failures in by_metric.items()
+    )
+
+
+def _escape_cell(value: str) -> str:
+    return value.replace("|", "\\|")
+
+
+report_path = Path(sys.argv[1])
+if not report_path.exists():
+    print(f"Comparison report not found at {report_path}")
+    raise SystemExit(0)
+
+payload = json.loads(report_path.read_text())
+ground_truth_platform = str(payload.get("ground_truth_platform", "python"))
+comparisons = payload.get("comparisons", [])
+if not isinstance(comparisons, list) or not comparisons:
+    print("No platform comparisons were generated.")
+    raise SystemExit(0)
+
+printed_any_table = False
+for comparison in comparisons:
+    if not isinstance(comparison, dict):
+        continue
+    if comparison.get("reference_platform") != ground_truth_platform:
+        continue
+
+    candidate_platform = str(comparison.get("candidate_platform", "unknown"))
+    file_summary = comparison.get("file_summary") or {}
+    if not isinstance(file_summary, dict):
+        file_summary = {}
+    total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
+    pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
+    fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
+
+    file_statuses = comparison.get("file_statuses", [])
+    if not isinstance(file_statuses, list):
+        file_statuses = []
+
+    rows: list[tuple[str, str, str]] = []
+    if file_statuses:
+        for file_status in file_statuses:
+            if not isinstance(file_status, dict):
+                continue
+            file_id = str(file_status.get("file_id", ""))
+            passed = bool(file_status.get("passed", False))
+            failures = file_status.get("failures", [])
+            if not isinstance(failures, list):
+                failures = []
+            status = "PASS" if passed else "FAIL"
+            details = _summarize_file_failures(failures)
+            rows.append((file_id, status, details))
+    else:
+        passing_files = [str(file_id) for file_id in comparison.get("passing_files", [])]
+        failing_files = [str(file_id) for file_id in comparison.get("failing_files", [])]
+        for file_id in passing_files:
+            rows.append((file_id, "PASS", "-"))
+        for file_id in failing_files:
+            rows.append((file_id, "FAIL", "No failure detail available in report"))
+
+    if not rows:
+        continue
+
+    rows.sort(key=lambda row: (row[1] == "PASS", row[0]))
+
+    print()
+    print(
+        f"### {candidate_platform} vs {ground_truth_platform} "
+        f"({pass_count} pass / {fail_count} fail / {total_files} total)"
+    )
+    print("| File | Status | Failure Details |")
+    print("| --- | --- | --- |")
+    for file_id, status, details in rows:
+        print(
+            "| "
+            + " | ".join(
+                (
+                    _escape_cell(file_id),
+                    status,
+                    _escape_cell(details),
+                )
+            )
+            + " |"
+        )
+    printed_any_table = True
+
+if not printed_any_table:
+    print("No ground-truth platform comparisons were available for file-level tables.")
+PY
+}
+
 declare -a failed_platform_runners=()
 
 for platform in "${selected_platforms[@]}"; do
@@ -543,6 +708,9 @@ compare_exit=$?
 set -e
 
 echo "Comparison report: $compare_output"
+if [[ -f "$compare_output" ]]; then
+  render_file_level_report_tables "$compare_output"
+fi
 
 if ((compare_exit != 0)); then
   echo "Parity comparison failed"
