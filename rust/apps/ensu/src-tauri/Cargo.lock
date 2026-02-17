@@ -877,7 +877,7 @@ dependencies = [
 
 [[package]]
 name = "ensu-tauri"
-version = "0.0.1"
+version = "0.1.3"
 dependencies = [
  "ensu-db",
  "ensu-sync",

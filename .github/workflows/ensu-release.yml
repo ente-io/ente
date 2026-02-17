@@ -42,6 +42,37 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
+            - name: Align Ensu desktop version with release tag
+              if: startsWith(github.ref, 'refs/tags/ensu-v')
+              shell: bash
+              run: |
+                  VERSION_NAME="${GITHUB_REF_NAME#ensu-v}"
+                  export VERSION_NAME
+                  echo "Using Ensu desktop version ${VERSION_NAME} from tag ${GITHUB_REF_NAME}"
+
+                  sed -i.bak -E "s/^version = \".*\"$/version = \"${VERSION_NAME}\"/" rust/apps/ensu/src-tauri/Cargo.toml
+                  rm -f rust/apps/ensu/src-tauri/Cargo.toml.bak
+
+                  node <<'NODE'
+                  const fs = require("fs");
+                  const version = process.env.VERSION_NAME;
+                  const files = [
+                    "rust/apps/ensu/src-tauri/tauri.conf.json",
+                    "rust/apps/ensu/package.json",
+                  ];
+
+                  for (const file of files) {
+                    const json = JSON.parse(fs.readFileSync(file, "utf8"));
+                    if (json.package && typeof json.package === "object") {
+                      json.package.version = version;
+                    }
+                    if (typeof json.version === "string") {
+                      json.version = version;
+                    }
+                    fs.writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+                  }
+                  NODE
+
             - name: Install Rust stable
               uses: dtolnay/rust-toolchain@stable
               with:
@@ -131,6 +162,13 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
+
+            - name: Align Ensu Android versionName with release tag
+              if: startsWith(github.ref, 'refs/tags/ensu-v')
+              run: |
+                  VERSION_NAME="${GITHUB_REF_NAME#ensu-v}"
+                  sed -i -E "s/versionName = \".*\"/versionName = \"${VERSION_NAME}\"/" app-ui/build.gradle.kts
+                  echo "Using Ensu Android versionName=${VERSION_NAME}"
 
             - name: Setup JDK 17
               uses: actions/setup-java@v4
