@@ -34,15 +34,20 @@
 
     <string name="adb_title">ADB setup</string>
     <string name="adb_subtitle">Run this once from a computer on the same network.</string>
-    <string name="adb_commands_label">Commands</string>
+    <string name="adb_commands_label">Grant permission command</string>
     <string name="adb_bullet_network">Make sure your computer and TV are on the same network</string>
     <string name="adb_bullet_terminal">Open Terminal (macOS) or Command Prompt (Windows)</string>
-    <string name="adb_bullet_command">Type the commands below and press Return/Enter</string>
-    <string name="adb_wireless_title">Pair via Wireless Debugging (optional)</string>
-    <string name="adb_wireless_steps">On the TV, enable Developer options and turn on Wireless debugging. Choose “Pair device with pairing code”, then run these commands on your computer.</string>
-    <string name="adb_wireless_commands" translatable="false">adb pair &lt;TV_IP&gt;:&lt;PAIR_PORT&gt;
-adb connect &lt;TV_IP&gt;:&lt;ADB_PORT&gt;</string>
-    <string name="adb_finish_note">After running these commands, return to this app and select “Set as screensaver” again.</string>
+    <string name="adb_bullet_command">Follow the 2 steps below and press Return/Enter for each command</string>
+    <string name="adb_step1_title">Step 1: Pair via Wireless Debugging</string>
+    <string name="adb_step1_body">On the TV, enable Developer options and turn on Wireless debugging. Choose “Pair device with pairing code”.</string>
+    <string name="adb_step1_pair_label">1) Run the pairing command:</string>
+    <string name="adb_wireless_pair_command" translatable="false">adb pair &lt;TV_IP&gt;:&lt;PAIR_PORT&gt;</string>
+    <string name="adb_step1_enter_code_label">2) Enter the 6-digit pairing code shown on your TV in Terminal/Cmd.</string>
+    <string name="adb_step1_connect_label">3) Then connect to the TV:</string>
+    <string name="adb_wireless_connect_command" translatable="false">adb connect &lt;TV_IP&gt;:&lt;ADB_PORT&gt;</string>
+    <string name="adb_step2_title">Step 2: Run the grant command</string>
+    <string name="adb_step2_body">After adb connect succeeds, run this command:</string>
+    <string name="adb_finish_note">Then return to this app and select “Set as screensaver” again.</string>
 
     <string name="setup">Setup</string>
     <string name="setup_title">Connect Ente Public Album</string>

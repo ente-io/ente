@@ -13,6 +13,16 @@ class AdbInstructionsActivity : AppCompatActivity() {
         binding = ActivityAdbInstructionsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.textCommands.text = ScreensaverConfigurator.adbCommands(this)
+        binding.textCommands.text = formatGrantCommandForDisplay(ScreensaverConfigurator.adbCommands(this))
+    }
+
+    private fun formatGrantCommandForDisplay(command: String): String {
+        val tail = "android.permission.WRITE_SECURE_SETTINGS"
+        val splitIndex = command.indexOf(tail)
+        if (splitIndex <= 0) return command
+
+        val first = command.substring(0, splitIndex).trimEnd()
+        val second = command.substring(splitIndex)
+        return "$first \\\n$second"
     }
 }
