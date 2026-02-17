@@ -5,7 +5,7 @@ The foreground must be padded so it fits inside circular/squircle masks without 
 
 ## Sources
 - **Foreground artwork**: provided by design (transparent PNG, 1024×1024).
-- **Background color**: currently `#FFEEDD` (see `res/values/colors.xml`).
+- **Background color**: currently `#FDCE13` (see `res/values/colors.xml`).
 
 ## Steps
 
@@ -28,7 +28,7 @@ The foreground must be padded so it fits inside circular/squircle masks without 
 3. **Set the adaptive background color**
    - Update `res/values/colors.xml`:
      ```xml
-     <color name="ic_launcher_background">#FFEEDD</color>
+     <color name="ic_launcher_background">#FDCE13</color>
      ```
    - Adaptive icon XMLs already reference this color:
      - `res/mipmap-anydpi-v26/ic_launcher.xml`

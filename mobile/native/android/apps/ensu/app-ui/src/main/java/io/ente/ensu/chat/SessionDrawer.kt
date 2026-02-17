@@ -57,7 +57,6 @@ fun SessionDrawer(
     selectedSessionId: String?,
     isLoggedIn: Boolean,
     userEmail: String?,
-    onNewChat: () -> Unit,
     onSelectSession: (ChatSession) -> Unit,
     onDeleteSession: (ChatSession) -> Unit,
     onSync: () -> Unit,
@@ -90,7 +89,6 @@ fun SessionDrawer(
                 isLoggedIn = isLoggedIn,
                 searchQuery = searchQuery,
                 onSearchChange = { searchQuery = it },
-                onNewChat = onNewChat,
                 onSync = onSync
             )
 
@@ -120,14 +118,13 @@ private fun DrawerHeader(
     isLoggedIn: Boolean,
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onNewChat: () -> Unit,
     onSync: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(EnsuColor.backgroundBase())
-            .padding(EnsuSpacing.lg.dp)
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp)
     ) {
         if (isLoggedIn) {
             Row(
@@ -144,14 +141,13 @@ private fun DrawerHeader(
                 )
             }
 
-            Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+            Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
         }
 
         DrawerSearchControls(
             query = searchQuery,
             onQueryChange = onSearchChange,
             onClearSearch = { onSearchChange("") },
-            onNewChat = onNewChat,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -193,7 +189,6 @@ private fun DrawerSearchControls(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
-    onNewChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasQuery = query.isNotBlank()
@@ -209,11 +204,13 @@ private fun DrawerSearchControls(
             modifier = Modifier.weight(1f)
         )
 
-        DrawerNewChatButton(
-            iconRes = if (hasQuery) HugeIcons.Cancel01Icon else HugeIcons.PlusSignIcon,
-            contentDescription = if (hasQuery) "Clear search" else "New Chat",
-            onClick = if (hasQuery) onClearSearch else onNewChat
-        )
+        if (hasQuery) {
+            DrawerSearchActionButton(
+                iconRes = HugeIcons.Cancel01Icon,
+                contentDescription = "Clear search",
+                onClick = onClearSearch
+            )
+        }
     }
 }
 
@@ -255,7 +252,7 @@ private fun DrawerSearchField(
 }
 
 @Composable
-private fun DrawerNewChatButton(
+private fun DrawerSearchActionButton(
     iconRes: Int,
     contentDescription: String,
     onClick: () -> Unit

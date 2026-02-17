@@ -89,6 +89,11 @@ struct SignInComingSoonDialog: View {
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: EnsuSpacing.lg) {
+                Image("EnsuDucky")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 120)
+
                 Text(title)
                     .font(EnsuTypography.large)
                     .foregroundStyle(EnsuColor.textPrimary)
@@ -224,6 +229,7 @@ struct ChatAppBar: View {
     let modelDownloadState: DownloadToastState?
     let onMenu: () -> Void
     let onSignIn: () -> Void
+    let onNewChat: () -> Void
     let onAttachmentDownloads: () -> Void
 
     private let centerInset: CGFloat = 72
@@ -301,6 +307,19 @@ struct ChatAppBar: View {
                             ModelProgressIndicator(state: progress)
                         }
                     }
+
+                    Button(action: {
+                        hapticTap()
+                        onNewChat()
+                    }) {
+                        Image("PlusSignIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                            .frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 

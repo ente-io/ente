@@ -548,7 +548,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 return widget.homePage;
               },
             ),
-            (route) => route.isFirst,
+            (route) => false,
           );
         } catch (e, s) {
           _logger.severe(e, s);

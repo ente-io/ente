@@ -11,6 +11,9 @@ import "package:photos/module/download/task.dart";
 class DownloadManager {
   final _logger = Logger('DownloadManager');
   static const int downloadChunkSize = 40 * 1024 * 1024;
+  static const String noConnectionError = 'NO_CONNECTION';
+  static const String notEnoughStorageError = 'NOT_ENOUGH_STORAGE';
+  static const String unavailableError = 'UNAVAILABLE';
 
   final Dio _dio;
 
@@ -236,7 +239,15 @@ class DownloadManager {
         return;
       }
       _logger.warning('Error downloading ${task.filename}', e);
-      task = task.copyWith(status: DownloadStatus.error, error: e.toString());
+      final isNetworkError = _isNetworkError(e);
+      final isStorageError = _isStorageError(e);
+      final String errorCode = _getErrorCode(e);
+      task = task.copyWith(
+        status: isNetworkError || isStorageError
+            ? DownloadStatus.paused
+            : DownloadStatus.error,
+        error: errorCode,
+      );
       _updateTask(task);
       if (!completer.isCompleted) {
         completer.complete(DownloadResult(task, false));
@@ -413,5 +424,49 @@ class DownloadManager {
     _streams.clear();
 
     _tasks.clear();
+  }
+
+  bool _isNetworkError(Object error) {
+    if (error is DioException) {
+      return error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.unknown;
+    }
+    if (error is SocketException) {
+      return true;
+    }
+    if (error is FileSystemException && error.message.contains('Connection')) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _isStorageError(Object error) {
+    if (error is FileSystemException) {
+      final code = error.osError?.errorCode;
+      return code == 28 || code == 112;
+    }
+    if (error is DioException && error.error != null) {
+      return _isStorageError(error.error!);
+    }
+    return false;
+  }
+
+  String _getErrorCode(Object error) {
+    if (_isStorageError(error)) {
+      return notEnoughStorageError;
+    }
+    if (_isNetworkError(error)) {
+      return noConnectionError;
+    }
+    if (error is DioException) {
+      final status = error.response?.statusCode;
+      if (status == 404 || status == 410) {
+        return unavailableError;
+      }
+    }
+    return error.toString();
   }
 }

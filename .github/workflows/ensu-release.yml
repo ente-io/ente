@@ -9,7 +9,6 @@ on:
     workflow_dispatch:
 
 env:
-    RUST_VERSION: "1.83"
     NDK_VERSION: "27.0.12077973"
 
 permissions:
@@ -120,7 +119,7 @@ jobs:
         needs: release-desktop
         env:
             HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
-            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU != '' }}
             HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
         defaults:
@@ -150,7 +149,6 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
               with:
-                  toolchain: ${{ env.RUST_VERSION }}
                   targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
             - name: Install cargo-ndk
@@ -158,7 +156,7 @@ jobs:
 
             - name: Build Rust libraries
               run: |
-                  cd ../../../packages/rust/tool
+                  cd ../../packages/rust/tool
                   ./build_android.sh
               env:
                   ANDROID_HOME: ${{ env.ANDROID_HOME }}
@@ -181,19 +179,27 @@ jobs:
                   keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
                   EOF
 
-            - name: Build signed release APK and AAB
+            - name: Build signed release APK
               if: env.HAS_ANDROID_SIGNING == 'true'
-              run: ./gradlew :app-ui:assembleRelease :app-ui:bundleRelease
+              run: ./gradlew :app-ui:assembleRelease
+
+            - name: Build signed release AAB (PlayStore)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: ./gradlew :app-ui:bundleRelease
 
             - name: Build unsigned debug APK (fallback)
               if: env.HAS_ANDROID_SIGNING != 'true'
               run: ./gradlew :app-ui:assembleDebug
 
-            - name: Collect Android artifacts (signed)
+            - name: Collect Android artifacts (signed APK)
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ github.ref_name }}.apk
+
+            - name: Collect Android artifacts (signed AAB)
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              run: |
                   cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
 
             - name: Collect Android artifacts (unsigned fallback)
@@ -221,11 +227,10 @@ jobs:
               if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
               uses: r0adkll/upload-google-play@v1
               with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
-                  status: draft
 
             - name: Notify Discord
               if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'

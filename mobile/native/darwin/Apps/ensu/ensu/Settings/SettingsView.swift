@@ -5,6 +5,7 @@ import Foundation
 struct SettingsView: View {
     let isLoggedIn: Bool
     let email: String?
+    let showsSignInOption: Bool
     let onSignOut: () -> Void
     let onSignIn: () -> Void
 
@@ -117,6 +118,7 @@ struct SettingsView: View {
     }
 
     private var shouldShowSignInRow: Bool {
+        guard showsSignInOption else { return false }
         guard !isLoggedIn else { return false }
         guard !trimmedQuery.isEmpty else { return true }
         let q = trimmedQuery.lowercased()
@@ -222,6 +224,7 @@ import SwiftUI
 struct SettingsView: View {
     let isLoggedIn: Bool
     let email: String?
+    let showsSignInOption: Bool
     let onSignOut: () -> Void
     let onSignIn: () -> Void
 

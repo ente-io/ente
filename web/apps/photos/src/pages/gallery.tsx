@@ -1009,6 +1009,7 @@ const Page: React.FC = () => {
                     );
                     const publicURL = await createPublicURL(
                         quickLinkCollection.id,
+                        { enableJoin: false },
                     );
                     const resolvedURL = await resolveQuickLinkURL(
                         publicURL.url,
@@ -1335,7 +1336,10 @@ const Page: React.FC = () => {
                     quickLinkNameForFiles([file]),
                 );
                 await addToCollection(quickLinkCollection, [file]);
-                const publicURL = await createPublicURL(quickLinkCollection.id);
+                const publicURL = await createPublicURL(
+                    quickLinkCollection.id,
+                    { enableJoin: false },
+                );
                 const resolvedURL = await resolveQuickLinkURL(
                     publicURL.url,
                     quickLinkCollection.key,

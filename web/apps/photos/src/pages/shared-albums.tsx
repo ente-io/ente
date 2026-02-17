@@ -28,10 +28,7 @@ import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
-import {
-    useIsSmallWidth,
-    useIsTouchscreen,
-} from "ente-base/components/utils/hooks";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -756,7 +753,6 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     collectionKey,
     credentials,
 }) => {
-    const isTouchscreen = useIsTouchscreen();
     const { handleJoinAlbum } = useJoinAlbum({
         publicCollection,
         accessToken,
@@ -773,7 +769,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     }
 
     const handleGetEnte = () => {
-        window.open(getEnteURL(isTouchscreen), "_blank", "noopener");
+        window.location.href = getEnteURL();
     };
 
     return (
@@ -843,7 +839,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             flex: 1,
             gap: 1,
             alignItems: "center",
-            mx: -2,
+            mx: -1.5,
             "@media (width < 720px)": { mx: -1 },
         }}
     >
@@ -913,8 +909,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     spacing={1}
                     sx={{
                         alignItems: "center",
-                        mr: -1.5,
-                        "@media (width < 720px)": { mr: -1 },
+                        "@media (width > 720px)": { mr: -1.5 },
                     }}
                 >
                     {onShowFeed && !hasSelection && (

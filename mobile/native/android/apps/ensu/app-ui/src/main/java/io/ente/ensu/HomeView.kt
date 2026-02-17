@@ -248,13 +248,6 @@ fun HomeView(
                 selectedSessionId = appState.chat.currentSessionId,
                 isLoggedIn = appState.auth.isLoggedIn,
                 userEmail = appState.auth.email,
-                onNewChat = {
-                    // We're already on the chat route when the drawer is visible.
-                    // Avoid re-navigating to the same destination, which causes an unnecessary transition.
-                    store.startNewSessionDraft()
-                    store.persistSelectedSession(scope, null)
-                    scope.launch { drawerState.close() }
-                },
                 onSelectSession = { session ->
                     // Same reason as above: just swap the session in-place.
                     store.selectSession(session.id)
@@ -298,6 +291,10 @@ fun HomeView(
             onSignIn = handleSignInRequest,
             onSignOut = { isShowingSignOutDialog = true },
             onOpenDrawer = openDrawer,
+            onNewChat = {
+                store.startNewSessionDraft()
+                store.persistSelectedSession(scope, null)
+            },
             onAttachmentDownloads = { showAttachmentDownloads = true },
             onShowLogShareDialog = { showLogShareDialog = true },
             onAttachmentSelected = handleAttachmentSelected,
