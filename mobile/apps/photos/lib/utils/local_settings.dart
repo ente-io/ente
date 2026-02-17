@@ -71,6 +71,7 @@ class LocalSettings {
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
+  static const _kCFUploadProxyEnabled = "ls.cf_upload_proxy_enabled";
   static const _kSharedPhotoFeedCutoffTime = "ls.shared_photo_feed_cutoff_time";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
@@ -404,6 +405,13 @@ class LocalSettings {
 
   Future<void> setInternalUserDisabled(bool value) async {
     await _prefs.setBool(_kInternalUserDisabled, value);
+  }
+
+  bool get isCFUploadProxyEnabled =>
+      _prefs.getBool(_kCFUploadProxyEnabled) ?? true;
+
+  Future<void> setCFUploadProxyEnabled(bool value) async {
+    await _prefs.setBool(_kCFUploadProxyEnabled, value);
   }
 
   int getOrCreateSharedPhotoFeedCutoffTime() {
