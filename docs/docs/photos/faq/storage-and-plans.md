@@ -577,6 +577,8 @@ You can view and manage your payment method by clicking on the green subscriptio
 
 You will be able to see all of your previous invoices, with details regarding their payment status. In case of failed payments, you will also have an option to retry those charges.
 
+If you would like to change your payment method entirely (e.g., switch between App Store, Play Store, PayPal, or crypto), please contact [support@ente.io](mailto:support@ente.io).
+
 ### How can I cancel my subscription? {#cancel-subscription}
 
 You can cancel your subscription by clicking on the green subscription card within the Ente app, and selecting the "Cancel subscription" button.
