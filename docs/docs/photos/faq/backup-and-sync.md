@@ -240,6 +240,10 @@ During migration, Ente rechecks all local photos against what is already uploade
 
 This is temporary. Once verification finishes, the duplicate view disappears and only the synced photo remains.
 
+### When I choose "Delete Both" on a photo, why do I still see it in my device's native gallery? {#delete-both-photo-still-visible}
+
+When you select "Delete Both", Ente deletes the copy stored in Ente as well as the copy stored on your device. However, if you have Google Photos backup or iCloud backup enabled, the cloud copy from those services will still be visible in your native gallery. That copy is managed by Google or Apple, not by Ente.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
