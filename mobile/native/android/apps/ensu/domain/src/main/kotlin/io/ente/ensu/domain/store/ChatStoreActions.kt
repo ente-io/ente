@@ -616,22 +616,44 @@ internal class ChatStoreActions(
                 tokenCount.toDouble() / (totalTimeMs / 1000.0)
             } else null
 
-            val inserted = chatRepository.insertMessage(
-                sessionId = sessionId,
-                parentId = parentMessage.id,
-                author = MessageAuthor.Assistant,
-                text = finalText,
-                attachments = emptyList()
-            )
+            if (shouldUpdateUi) {
+                val inserted = runCatching {
+                    chatRepository.insertMessage(
+                        sessionId = sessionId,
+                        parentId = parentMessage.id,
+                        author = MessageAuthor.Assistant,
+                        text = finalText,
+                        attachments = emptyList()
+                    )
+                }.getOrElse { error ->
+                    logRepository.log(
+                        LogLevel.Warning,
+                        "Skipping assistant message persistence",
+                        details = "session=$sessionId parent=${parentMessage.id} interrupted=$interrupted",
+                        tag = "Chat",
+                        throwable = error
+                    )
+                    null
+                }
 
-            val assistantMessage = inserted.copy(
-                isInterrupted = interrupted,
-                tokensPerSecond = tokensPerSecond
-            )
+                if (inserted != null) {
+                    val assistantMessage = inserted.copy(
+                        isInterrupted = interrupted,
+                        tokensPerSecond = tokensPerSecond
+                    )
 
-            messageStore.getOrPut(sessionId) { mutableListOf() }.add(assistantMessage)
-            updateSelectionForParent(sessionId, parentMessage.id, assistantMessage.id)
-            updateCurrentSessionPreview(sessionId, finalText, assistantMessage.timestampMillis)
+                    messageStore.getOrPut(sessionId) { mutableListOf() }.add(assistantMessage)
+                    updateSelectionForParent(sessionId, parentMessage.id, assistantMessage.id)
+                    updateCurrentSessionPreview(sessionId, finalText, assistantMessage.timestampMillis)
+                }
+            } else {
+                logRepository.log(
+                    LogLevel.Info,
+                    "Dropped stale generation response",
+                    details = "session=$sessionId parent=${parentMessage.id} interrupted=$interrupted",
+                    tag = "Chat"
+                )
+            }
         }
 
         if (shouldUpdateUi) {
