@@ -14,8 +14,8 @@ import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconB
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { isSameDay } from "ente-base/date";
-import { formattedDate } from "ente-base/i18n-date";
 import { ut } from "ente-base/i18n";
+import { formattedDate } from "ente-base/i18n-date";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime } from "ente-media/file-metadata";
@@ -70,25 +70,27 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
         }
     }, [open, collection.id]);
 
-    const annotatedFiles = useMemo(
-        (): FileListAnnotatedFile[] =>
-            files
-                .filter((file) => file.metadata.fileType !== FileType.video)
-                .map((file) => ({
-                    file,
-                    timelineDateString: fileTimelineDateString(file),
-                })),
-        [files],
-    );
+    const annotatedFiles = useMemo((): FileListAnnotatedFile[] => {
+        if (!open) return [];
+
+        return files
+            .filter((file) => file.metadata.fileType !== FileType.video)
+            .map((file) => ({
+                file,
+                timelineDateString: fileTimelineDateString(file),
+            }));
+    }, [open, files]);
 
     const selectedFile = useMemo(() => {
+        if (!open) return undefined;
+
         for (const [key, value] of Object.entries(selected)) {
             if (typeof value !== "boolean" || !value) continue;
             const selectedFileID = Number(key);
             return files.find(({ id }) => id === selectedFileID);
         }
         return undefined;
-    }, [selected, files]);
+    }, [open, selected, files]);
 
     const handleItemClick = useCallback(
         (index: number) => {
@@ -145,7 +147,10 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                 },
             }}
         >
-            <Stack sx={{ width: "100%", height: "100%" }} aria-busy={isSubmitting}>
+            <Stack
+                sx={{ width: "100%", height: "100%" }}
+                aria-busy={isSubmitting}
+            >
                 <Stack
                     sx={{
                         px: 2,
@@ -156,7 +161,10 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                         borderColor: "divider",
                     }}
                 >
-                    <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", gap: 1 }}
+                    >
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography id={titleID} variant="h5">
                                 {t("select_cover_photo")}
@@ -180,7 +188,13 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                 </Stack>
 
                 <DialogContent
-                    sx={{ px: 2, py: 0, flex: 1, minHeight: 0, display: "flex" }}
+                    sx={{
+                        px: 2,
+                        py: 0,
+                        flex: 1,
+                        minHeight: 0,
+                        display: "flex",
+                    }}
                 >
                     <AutoSizer>
                         {({ width, height }) =>
@@ -228,7 +242,8 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                                 color: "text.muted",
                                 opacity: 0.55,
                                 backgroundColor: "transparent",
-                                transition: "opacity 150ms ease, background-color 150ms ease",
+                                transition:
+                                    "opacity 150ms ease, background-color 150ms ease",
                                 "&:hover": {
                                     opacity: 0.9,
                                     backgroundColor: "fill.fainter",
@@ -246,7 +261,8 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                         }
                         loading={submittingAction === "reset-to-default"}
                         disabled={
-                            isSubmitting && submittingAction !== "reset-to-default"
+                            isSubmitting &&
+                            submittingAction !== "reset-to-default"
                         }
                         sx={actionButtonSx}
                     >

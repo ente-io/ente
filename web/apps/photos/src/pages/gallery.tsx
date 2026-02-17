@@ -416,11 +416,18 @@ const Page: React.FC = () => {
         () =>
             !activeCollection
                 ? []
-                : state.collectionFiles.filter(
-                      ({ collectionID }) =>
-                          collectionID === activeCollection.id,
-                  ),
-        [activeCollection, state.collectionFiles],
+                : isInSearchMode
+                  ? state.collectionFiles.filter(
+                        ({ collectionID }) =>
+                            collectionID === activeCollection.id,
+                    )
+                  : filteredFiles,
+        [
+            activeCollection,
+            isInSearchMode,
+            state.collectionFiles,
+            filteredFiles,
+        ],
     );
     const selectedFilesInView = useMemo(
         () => getSelectedFiles(selected, filteredFiles),
