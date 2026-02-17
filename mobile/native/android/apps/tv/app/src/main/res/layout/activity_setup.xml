@@ -14,7 +14,7 @@
         android:background="@drawable/bg_setup_card"
         android:orientation="horizontal"
         android:paddingStart="56dp"
-        android:paddingTop="40dp"
+        android:paddingTop="0dp"
         android:paddingEnd="44dp"
         android:paddingBottom="0dp">
 
@@ -23,12 +23,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
+            android:paddingTop="40dp"
             android:paddingEnd="20dp">
 
             <ImageView
                 android:id="@+id/image_setup_logo"
-                android:layout_width="110dp"
-                android:layout_height="76dp"
+                android:layout_width="88dp"
+                android:layout_height="61dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"
                 android:src="@drawable/ente_photos_logo_dark" />

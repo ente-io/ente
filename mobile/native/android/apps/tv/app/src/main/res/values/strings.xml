@@ -24,7 +24,7 @@
     <string name="section_settings_logs">Settings &amp; logs</string>
     <string name="setup">Setup</string>
     <string name="settings">Settings</string>
-    <string name="button_set_screensaver">Set as screensaver</string>
+    <string name="button_set_screensaver">Set as default screensaver</string>
 
     <string name="adb_title">ADB setup</string>
     <string name="adb_bullet_network">Make sure your computer and TV are on the same network</string>
@@ -39,7 +39,7 @@
     <string name="adb_wireless_connect_command" translatable="false">adb connect &lt;TV_IP&gt;:&lt;ADB_PORT&gt;</string>
     <string name="adb_step2_title">Step 2: Run the grant command</string>
     <string name="adb_step2_body">After adb connect succeeds, run this command:</string>
-    <string name="adb_finish_note">Then return to this app and select “Set as screensaver” again.</string>
+    <string name="adb_finish_note">Then return to this app and select “Set as default screensaver” again.</string>
 
     <string name="setup_no_network">Connect this TV to your network to enable QR setup.</string>
     <string name="setup_server_running">Setup server running on port %1$d</string>
@@ -114,7 +114,7 @@
     <string name="setup_bullet_network">Make sure your phone and TV are on
 the same network</string>
     <string name="setup_bullet_scan">Scan this QR code and open the link</string>
-    <string name="setup_bullet_album">Paste the public link of the Ente album
+    <string name="setup_bullet_album">Copy and Paste the public link of the Ente album
 you want to see on your TV</string>
 
     <!-- Settings refactor -->

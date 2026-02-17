@@ -15,14 +15,14 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp">
+            android:layout_height="100dp"
+            android:paddingStart="60dp">
 
             <ImageView
                 android:id="@+id/settings_logo"
-                android:layout_width="94dp"
-                android:layout_height="66dp"
+                android:layout_width="75dp"
+                android:layout_height="53dp"
                 android:layout_gravity="start|top"
-                android:layout_marginStart="48dp"
                 android:layout_marginTop="24dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"

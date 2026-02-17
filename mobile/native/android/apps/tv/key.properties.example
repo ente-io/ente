@@ -1,4 +1,4 @@
-storeFile=app/keystore/ente-screensaver-release.jks
+storeFile=keystore/ente-tv-release.jks
 storePassword=CHANGE_ME
-keyAlias=ente_screensaver
+keyAlias=ente_tv_release
 keyPassword=CHANGE_ME
