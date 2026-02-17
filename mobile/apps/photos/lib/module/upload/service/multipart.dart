@@ -9,20 +9,21 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/errors.dart";
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/gateways/files/file_upload_gateway.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 
 class MultiPartUploader {
-  final Dio _enteDio;
   final Dio _s3Dio;
   final UploadLocksDB _db;
   final FlagService _featureFlagService;
   late final Logger _logger = Logger("MultiPartUploader");
+  FileUploadGateway get _gateway => fileUploadGateway;
 
   MultiPartUploader(
-    this._enteDio,
+    Dio _, // unused, kept for backwards compatibility
     this._s3Dio,
     this._db,
     this._featureFlagService,
@@ -95,27 +96,13 @@ class MultiPartUploader {
       if (flagService.enableUploadV2 &&
           partMd5s != null &&
           partMd5s.isNotEmpty) {
-        final response = await _enteDio.post(
-          "/files/multipart-upload-url",
-          data: {
-            "contentLength": contentLength,
-            "partLength": partLength,
-            "partMd5s": partMd5s,
-          },
-        );
-        urls = MultipartUploadURLs.fromMap(
-          (response.data as Map).cast<String, dynamic>(),
+        urls = await _gateway.getMultipartUploadUrl(
+          contentLength: contentLength,
+          partLength: partLength,
+          partMd5s: partMd5s,
         );
       } else {
-        final response = await _enteDio.get(
-          "/files/multipart-upload-urls",
-          queryParameters: {
-            "count": count,
-          },
-        );
-        urls = MultipartUploadURLs.fromMap(
-          (response.data as Map).cast<String, dynamic>(),
-        );
+        urls = await _gateway.getMultipartUploadUrls(count);
       }
       // Validate server respected the requested count/segmentation
       if (urls.partsURLs.length != recomputedCount ||

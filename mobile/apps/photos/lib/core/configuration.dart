@@ -8,6 +8,7 @@ import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/app_mode.dart";
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
@@ -16,6 +17,7 @@ import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
@@ -23,9 +25,9 @@ import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/api/user/key_attributes.dart';
-import 'package:photos/models/api/user/key_gen_result.dart';
-import 'package:photos/models/api/user/private_key_attributes.dart';
+import 'package:photos/gateways/users/models/key_attributes.dart';
+import 'package:photos/gateways/users/models/key_gen_result.dart';
+import 'package:photos/gateways/users/models/private_key_attributes.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
@@ -223,6 +225,7 @@ class Configuration {
 
     // Clear all database tables
     await FilesDB.instance.clearTable();
+    await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
@@ -539,6 +542,7 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+    await localSettings.setAppMode(AppMode.online);
     Bus.instance.fire(SignedInEvent());
   }
 

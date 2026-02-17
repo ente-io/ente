@@ -7,6 +7,7 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -218,6 +219,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isLoading = true;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -445,10 +447,23 @@ class _HomePageState extends UploaderPageState<HomePage>
     } catch (e) {
       _logger.severe('Error handling shared files: $e');
       if (mounted) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.l10n.uploadError,
-          'Failed to process shared files: $e',
+          title: context.l10n.uploadError,
+          message: context.l10n.somethingWentWrong,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(
+                  context,
+                  "support@ente.io",
+                  postShare: () {},
+                );
+              },
+            ),
+          ],
         );
       }
     }
@@ -496,16 +511,25 @@ class _HomePageState extends UploaderPageState<HomePage>
         });
       }
 
-      final collections = await CollectionService.instance.getCollections();
+      var collections = await CollectionService.instance.getCollections();
       await _loadRecentFiles(collections);
+
+      // If collections are empty and first sync is complete, ensure default
+      // collections are created. This handles the case where default collections
+      // setup was skipped during initialization due to the master key not being
+      // available yet.
+      final hasCompletedFirstSync =
+          CollectionService.instance.hasCompletedFirstSync();
+      if (collections.isEmpty && hasCompletedFirstSync) {
+        _logger.info("No collections found after sync, setting up defaults");
+        await CollectionService.instance.setupDefaultCollections();
+        // Reload collections after setup
+        collections = await CollectionService.instance.getCollections();
+        await _loadRecentFiles(collections);
+      }
 
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
-
-      // Only mark initial load complete when first sync has finished
-      // This prevents empty state while sync is in progress
-      final hasCompletedFirstSync =
-          CollectionService.instance.hasCompletedFirstSync();
 
       if (mounted) {
         setState(() {
@@ -633,7 +657,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: !_hasCompletedInitialLoad || _isLoading,
+                  isSyncing: _isSyncing,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -723,10 +747,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(),
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isLoading: _isSyncing),
         ),
       );
     }
@@ -736,10 +760,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isLoading: _isSyncing),
                 ),
               )
             : SingleChildScrollView(

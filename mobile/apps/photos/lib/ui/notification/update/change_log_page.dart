@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -8,6 +7,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:photos/ui/notification/update/change_log_strings.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -19,6 +19,14 @@ class ChangeLogPage extends StatefulWidget {
 }
 
 class _ChangeLogPageState extends State<ChangeLogPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
@@ -90,27 +98,37 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   }
 
   Widget _getChangeLog(BuildContext ctx) {
-    final scrollController = ScrollController();
+    final strings = ChangeLogStrings.forLocale(Localizations.localeOf(context));
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        context.l10n.cLTitle1,
-        context.l10n.cLDesc1,
+        strings.title1,
+        description: strings.desc1,
+        items: [
+          strings.desc1Item1,
+          strings.desc1Item2,
+        ],
         isFeature: true,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle2,
-        context.l10n.cLDesc2,
+        strings.title2,
+        description: strings.desc2,
+        isFeature: true,
+      ),
+      ChangeLogEntry(
+        strings.title3,
+        description: strings.desc3,
         isFeature: true,
       ),
     ]);
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
-        controller: scrollController,
+        controller: _scrollController,
         thumbVisibility: true,
         thickness: 2.0,
         child: ListView.builder(
+          controller: _scrollController,
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {

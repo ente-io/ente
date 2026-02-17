@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_accounts/models/user_details.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
@@ -544,7 +545,7 @@ class FileUploader {
       if (userDetails == null) {
         return;
       }
-      final maxFileCount = userDetails.getLockerFileLimit();
+      final maxFileCount = _effectiveLockerFileLimit(userDetails);
       final currentFileCount =
           userDetails.isPartOfFamily() && userDetails.lockerFamilyUsage != null
               ? userDetails.lockerFamilyUsage!.familyFileCount
@@ -563,6 +564,14 @@ class FileUploader {
         _logger.severe('Error checking file count limit', e);
       }
     }
+  }
+
+  int _effectiveLockerFileLimit(UserDetails userDetails) {
+    final currentLimit = userDetails.getLockerFileLimit();
+    if (!Configuration.instance.isEnteProduction() && currentLimit < 1000) {
+      return 1000;
+    }
+    return currentLimit;
   }
 
   /*

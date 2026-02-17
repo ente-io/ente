@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -6,6 +7,7 @@ import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
@@ -92,15 +94,31 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
+          title: l10n.emailVerificationToggle,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
+          title: l10n.passkey,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
           title: l10n.appLock,
           category: l10n.security,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
-          title: l10n.appearance,
-          category: l10n.appearance,
-          page: const ThemeSettingsPage(),
+          title: l10n.viewActiveSessions,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
         ),
+        if (Platform.isAndroid || kDebugMode)
+          _SearchableSetting(
+            title: l10n.appearance,
+            category: l10n.appearance,
+            page: const ThemeSettingsPage(),
+          ),
       ],
       _SearchableSetting(
         title: l10n.general,
@@ -278,12 +296,12 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                         controller: _searchController,
                         focusNode: _focusNode,
                         onChanged: _onSearchChanged,
-                        style: textTheme.body.copyWith(
+                        style: textTheme.small.copyWith(
                           color: colorScheme.textBase,
                         ),
                         decoration: InputDecoration(
                           hintText: l10n.searchSettings,
-                          hintStyle: textTheme.body.copyWith(
+                          hintStyle: textTheme.small.copyWith(
                             color: colorScheme.textMuted,
                           ),
                           border: InputBorder.none,
@@ -329,7 +347,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         children: [
           Text(
             l10n.suggestions,
-            style: textTheme.body.copyWith(
+            style: textTheme.small.copyWith(
               color: colorScheme.textBase,
             ),
           ),
@@ -359,7 +377,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       return Center(
         child: Text(
           context.l10n.noResultsFound,
-          style: textTheme.body.copyWith(
+          style: textTheme.small.copyWith(
             color: colorScheme.textMuted,
           ),
         ),
@@ -376,7 +394,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () => _onSettingTapped(setting),
           child: Container(
-            height: 60,
+            height: 56,
             decoration: BoxDecoration(
               color: colorScheme.backdropBase,
               borderRadius: BorderRadius.circular(20),
@@ -391,7 +409,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                     children: [
                       Text(
                         setting.title,
-                        style: textTheme.body.copyWith(
+                        style: textTheme.small.copyWith(
                           color: colorScheme.textBase,
                         ),
                       ),

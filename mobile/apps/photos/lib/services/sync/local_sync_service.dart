@@ -1,33 +1,34 @@
-import 'dart:async';
-import 'dart:io';
+import "dart:async";
+import "dart:io";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
-import 'package:photo_manager/photo_manager.dart';
+import "package:flutter/foundation.dart";
+import "package:logging/logging.dart";
+import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/cache/lru_map.dart";
-import 'package:photos/core/configuration.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/errors.dart";
-import 'package:photos/core/event_bus.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/core/user_config.dart";
 import "package:photos/db/common/conflict_algo.dart";
-import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/file_updation_db.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/db/device_files_db.dart";
+import "package:photos/db/file_updation_db.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/events/backup_folders_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
-import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/models/file/file.dart';
+import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/import/diff.dart";
 import "package:photos/services/sync/import/local_assets.dart";
 import "package:photos/services/sync/import/model.dart";
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:synchronized/synchronized.dart';
-import 'package:tuple/tuple.dart';
+import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
+import "package:tuple/tuple.dart";
 
 // This map is used to track if a iOS origin file is being fetched for uploading
 // or ML processing. In such cases, we want to ignore these files if they come in response
@@ -40,6 +41,8 @@ class LocalSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   late Debouncer _changeCallbackDebouncer;
+  StreamSubscription<PermissionGrantedEvent>? _permissionGrantedSubscription;
+  bool _isChangeCallbackRegistered = false;
   final Lock _lock = Lock();
 
   static const kDbUpdationTimeKey = "db_updation_time";
@@ -58,8 +61,17 @@ class LocalSyncService {
     if (permissionService.hasGrantedPermissions()) {
       _registerChangeCallback();
     } else {
-      Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (_permissionGrantedSubscription != null) {
+        await _permissionGrantedSubscription!.cancel();
+      }
+      _permissionGrantedSubscription =
+          Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
+        if (isOfflineMode) {
+          // Offline onboarding grants permission without explicitly invoking
+          // SyncService, so trigger local import right away.
+          unawaited(checkAndSync());
+        }
       });
     }
   }
@@ -85,7 +97,7 @@ class LocalSyncService {
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
-    final int ownerID = Configuration.instance.getUserID()!;
+    final int ownerID = Configuration.instance.getUserIDV2();
 
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
@@ -164,12 +176,15 @@ class LocalSyncService {
 
   Future<bool> syncAll() async {
     if (!Configuration.instance.isLoggedIn()) {
-      _logger.warning("syncCall called when user is not logged in");
-      return false;
+      if (!isOfflineMode) {
+        _logger.warning("syncAll called when user is not logged in");
+        return false;
+      }
     }
     final stopwatch = EnteWatch("localSyncAll")..start();
 
-    final localAssets = await getAllLocalAssets();
+    final localAssets =
+        await getAllLocalAssets(needsTitle: isOfflineMode ? true : null);
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
@@ -177,7 +192,7 @@ class LocalSyncService {
     _logger.info(
       "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
     );
-    final int ownerID = Configuration.instance.getUserID()!;
+    final int ownerID = Configuration.instance.getUserIDV2();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
@@ -389,6 +404,10 @@ class LocalSyncService {
   }
 
   void _registerChangeCallback() {
+    if (_isChangeCallbackRegistered) {
+      return;
+    }
+    _isChangeCallbackRegistered = true;
     _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.

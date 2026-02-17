@@ -9,7 +9,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
@@ -18,6 +18,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 typedef ManualPersonAssignmentResult = ({
@@ -39,6 +40,8 @@ class PersonService {
   static PersonService? _instance;
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
+  static const double kDefaultAutoMergeThreshold = 0.24;
+  static double autoMergeThreshold = kDefaultAutoMergeThreshold;
 
   Future<List<PersonEntity>>? _cachedPersonsFuture;
   int _lastCacheRefreshTime = 0;
@@ -60,6 +63,11 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    final settings = LocalSettings(prefs);
+    final savedAutoMerge = settings.autoMergeThresholdOverride;
+    if (savedAutoMerge != null) {
+      autoMergeThreshold = savedAutoMerge.clamp(0.0, 1.0);
+    }
     await _instance!.refreshPersonCache();
   }
 
@@ -430,6 +438,10 @@ class PersonService {
   Future<bool> fetchRemoteClusterFeedback({
     bool skipClusterUpdateIfNoChange = true,
   }) async {
+    if (isOfflineMode) {
+      logger.finest("Skip fetching remote clusters in offline mode");
+      return false;
+    }
     final int changedEntities =
         await entityService.syncEntity(EntityType.cgroup);
     final bool changed = changedEntities > 0;
@@ -689,6 +701,8 @@ class PersonService {
   }) async {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
     _lastCacheRefreshTime = 0; // Invalidate cache
+    _cachedPersonsFuture =
+        null; // Force refresh even if last sync time unchanged
     return result;
   }
 

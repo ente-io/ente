@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
-import 'package:photos/models/api/user/key_attributes.dart';
+import 'package:photos/gateways/users/models/key_attributes.dart';
 
 Logger _logger = Logger("Validator");
 

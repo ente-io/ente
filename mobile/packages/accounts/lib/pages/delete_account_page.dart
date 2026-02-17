@@ -11,6 +11,7 @@ import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialogs.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
 
@@ -186,6 +187,11 @@ class DeleteAccountPage extends StatelessWidget {
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);
       await UserService.instance.deleteAccount(context, challengeResponseStr);
+      if (!context.mounted) {
+        return;
+      }
+      showShortToast(context, context.strings.yourAccountHasBeenDeleted);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

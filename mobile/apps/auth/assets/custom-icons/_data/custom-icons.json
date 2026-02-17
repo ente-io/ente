@@ -118,6 +118,13 @@
       "title": "availity"
     },
     {
+      "title": "Avenue",
+      "altNames": [
+        "avenue.us",
+        "Avenue Securities"
+      ]
+    },
+    {
       "title": "AvistaZ.to",
       "slug": "avistaz"
     },
@@ -286,6 +293,9 @@
         "Brave Rewards",
         "Brave Browser"
       ]
+    },
+    {
+      "title": "btcturk"
     },
     {
       "title": "Bugzilla"
@@ -958,6 +968,13 @@
       ]
     },
     {
+      "title": "Laneros",
+      "slug": "laneros",
+      "altNames": [
+        "laneros.com"
+      ]
+    },
+    {
       "title": "LaunchDarkly",
       "hex": "858585"
     },
@@ -1330,6 +1347,10 @@
       "title": "Peerberry"
     },
     {
+      "title": "Perkbox",
+      "slug": "perkbox"
+    },
+    {
       "title": "Pingvin Share"
     },
     {
@@ -1637,6 +1658,12 @@
       "hex": "EDA920"
     },
     {
+      "title": "Stoat",
+      "altNames": [
+        "stoat.chat"
+      ] 
+    },
+    {
       "title": "Stripchat",
       "slug": "stripchat",
       "altNames": [
@@ -1931,6 +1958,9 @@
       "title": "Wealthfront"
     },
     {
+      "title": "Wealthify"
+    },
+    {
       "title": "Wealthsimple"
     },
     {
@@ -2138,12 +2168,25 @@
       "slug": "netim"
     },
     {
+      "title": "nexo"
+    },
+    {
       "title": "Wordfence",
       "slug": "wordfence"
     },
     {
       "title": "Hytale",
       "slug": "hytale"
+    },
+    {
+      "title": "Manage My Health",
+      "name": "Manage My Health",
+      "slug": "managemyhealth",
+      "altNames": ["managemyhealth", "Manage My Health NZ"]
+    },
+    {
+      "title": "Pufferfish Host",
+      "slug": "pufferfish_host"
     }
   ]
 }

@@ -92,9 +92,6 @@ implemented, are in various blog posts announcing these features.
   Since then, we have also added the ability to password protect public links,
   and configure a duration after which the link will automatically expire.
 
-We are now working on the other requested features around sharing, including
-comments and reactions.
-
 ## Limitations
 
 Peer-to-peer sharing between Ente users and creating public links are available on every plan, including the free tier. Free plan users can create public links with a device limit of 5, while paid users can create public links with no device limit.

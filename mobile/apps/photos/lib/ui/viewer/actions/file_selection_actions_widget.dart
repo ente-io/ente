@@ -150,8 +150,7 @@ class _FileSelectionActionsWidgetState
         !widget.selectedFiles.files.any(
           (element) => element.fileType == FileType.video,
         );
-    final showDownloadOption =
-        widget.selectedFiles.files.any((element) => element.localID == null);
+    final showDownloadOption = hasUploadedFileIDs;
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
@@ -178,6 +177,14 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_forever_outlined,
           labelText: AppLocalizations.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+        ),
+      );
+    } else if (widget.type == GalleryType.cleanupHiddenFromDevice) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: AppLocalizations.of(context).deleteFromDevice,
+          onTap: _deleteSelectedFromDevice,
         ),
       );
     } else if (widget.type == GalleryType.deleteSuggestions) {
@@ -251,7 +258,7 @@ class _FileSelectionActionsWidgetState
 
       final showUploadIcon = widget.type == GalleryType.localFolder &&
           split.ownedByCurrentUser.isEmpty;
-      if (widget.type.showAddToAlbum()) {
+      if (widget.type.showAddToAlbum() && !isOfflineMode) {
         if (showUploadIcon) {
           items.add(
             SelectionActionButton(
@@ -1018,8 +1025,11 @@ class _FileSelectionActionsWidgetState
         _cachedCollectionForSharedLink!,
       );
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareText(
+      const description =
+          'Check out, comment and react on photos privately with Ente\'s end to end encryption';
+      await shareLinkWithDescription(
         url,
+        description: description,
         context: context,
         key: sendLinkButtonKey,
       );
@@ -1043,42 +1053,167 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<void> _download(List<EnteFile> files) async {
-    final totalFiles = files.length;
-    int downloadedFiles = 0;
+  Future<void> _deleteSelectedFromDevice() async {
+    final filesToDelete = widget.selectedFiles.files.toList();
+    final l10n = AppLocalizations.of(context);
 
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).downloading +
-          " ($downloadedFiles/$totalFiles)",
-      isDismissible: true,
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: l10n.deleteFromDevice,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            try {
+              await deleteFilesOnDeviceOnly(context, filesToDelete);
+            } catch (e) {
+              if (context.mounted) {
+                await showGenericErrorDialog(context: context, error: e);
+              }
+              rethrow;
+            }
+          },
+        ),
+        ButtonWidget(
+          labelText: l10n.cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+        ),
+      ],
+      body: l10n.theseItemsWillBeDeletedFromYourDevice,
+      actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    await dialog.show();
-    try {
-      final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
-      final futures = <Future>[];
-      for (final file in files) {
-        if (file.localID == null) {
-          futures.add(
-            taskQueue.add(() async {
-              await downloadToGallery(file);
-              downloadedFiles++;
-              dialog.update(
-                message: AppLocalizations.of(context).downloading +
-                    " ($downloadedFiles/$totalFiles)",
-              );
-            }),
-          );
+
+    if (actionResult?.action == ButtonAction.first) {
+      widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _download(List<EnteFile> files) async {
+    if (files.isEmpty) {
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    final existingLocalFolderNames = await Future.wait(
+      files.map(
+        (file) => getExistingLocalFolderNameForDownloadSkipToast(file),
+      ),
+    );
+
+    final filesToDownload = <EnteFile>[];
+    final skippedFiles = <EnteFile>[];
+    String? skippedSingleFolderName;
+    for (int i = 0; i < files.length; i++) {
+      final file = files[i];
+      final existingLocalFolderName = existingLocalFolderNames[i];
+      if (existingLocalFolderName != null) {
+        skippedFiles.add(file);
+        skippedSingleFolderName = existingLocalFolderName;
+        continue;
+      }
+      filesToDownload.add(
+        file.isRemoteFile ? file.copyWith() : file.copyWith(localID: null),
+      );
+    }
+    final skippedFilesCount = skippedFiles.length;
+    int addedToQueueCount = 0;
+
+    if (filesToDownload.isNotEmpty) {
+      if (flagService.internalUser) {
+        try {
+          final enqueueResult =
+              await galleryDownloadQueueService.enqueueFiles(filesToDownload);
+          addedToQueueCount = enqueueResult.addedCount;
+        } catch (e) {
+          _logger.warning("Failed to enqueue files for download", e);
+          await showGenericErrorDialog(context: context, error: e);
+          return;
+        }
+      } else {
+        final totalFiles = filesToDownload.length;
+        int downloadedFiles = 0;
+
+        final dialog = createProgressDialog(
+          context,
+          AppLocalizations.of(context).downloading +
+              " ($downloadedFiles/$totalFiles)",
+          isDismissible: true,
+        );
+        await dialog.show();
+        try {
+          final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
+          final futures = <Future>[];
+          for (final file in filesToDownload) {
+            futures.add(
+              taskQueue.add(() async {
+                await downloadToGallery(file);
+                downloadedFiles++;
+                dialog.update(
+                  message: AppLocalizations.of(context).downloading +
+                      " ($downloadedFiles/$totalFiles)",
+                );
+              }),
+            );
+          }
+          await Future.wait(futures);
+          addedToQueueCount = downloadedFiles;
+          await dialog.hide();
+        } catch (e) {
+          _logger.warning("Failed to save files", e);
+          await dialog.hide();
+          await showGenericErrorDialog(context: context, error: e);
+          return;
         }
       }
-      await Future.wait(futures);
-      await dialog.hide();
+    }
+
+    if (skippedFilesCount > 0) {
+      String finalMessage;
+      if (skippedFilesCount == 1) {
+        final skippedFile = skippedFiles.first;
+        finalMessage = l10n.downloadSkippedInSelectionSingleFile(
+          fileName: getDownloadSkipToastFileName(skippedFile),
+          albumName: skippedSingleFolderName ?? l10n.gallery,
+        );
+      } else {
+        finalMessage = l10n.downloadSkippedInSelectionMultipleFiles(
+          fileCount: skippedFilesCount,
+        );
+      }
+      showToast(
+        context,
+        finalMessage,
+        iosLongToastLengthInSec: 4,
+      );
+    }
+
+    if (!flagService.internalUser &&
+        skippedFilesCount == 0 &&
+        addedToQueueCount > 0) {
+      showToast(
+        context,
+        AppLocalizations.of(context).filesSavedToGallery,
+        iosLongToastLengthInSec: 4,
+      );
+    }
+
+    if (addedToQueueCount == 0 && skippedFilesCount == 0) {
+      return;
+    }
+
+    if (skippedFilesCount == 0) {
       widget.selectedFiles.clearAll();
-      showToast(context, AppLocalizations.of(context).filesSavedToGallery);
-    } catch (e) {
-      _logger.warning("Failed to save files", e);
-      await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+    } else {
+      widget.selectedFiles.replaceSelection(skippedFiles.toSet());
     }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -27,12 +27,25 @@ enum PeopleSortKey {
   lastUpdated,
 }
 
+/// Bit positions for offline-related boolean flags stored as a single integer.
+/// IMPORTANT: Never reorder or remove values. Only append new values at the end.
+enum OfflineFlag {
+  mlConsent,
+  mapEnabled,
+  getStartedBannerDismissed,
+  facesBannerDismissed,
+  nameFaceBannerDismissed,
+  seenMLEnablingBanner,
+  mlProgressBannerDismissed,
+  offlineSettingsBannerDismissed,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
-  static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
+  static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
@@ -58,14 +71,41 @@ class LocalSettings {
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
+  static const _kSharedPhotoFeedCutoffTime = "ls.shared_photo_feed_cutoff_time";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
+  static const _kAppLockEnabled = "ls.app_lock_enabled";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
+  static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
+  static const _kDefaultClusteringDistanceOverride =
+      "ml_debug.default_clustering_distance";
+  static const _kAppMode = "ls.app_mode";
+  static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
+
+  static const _kOfflineFlags = "ls.offline_flags";
+  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
 
   final SharedPreferences _prefs;
 
+  AppMode? _cachedAppMode;
+
   LocalSettings(this._prefs);
+
+  bool _getFlag(OfflineFlag flag) {
+    final bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    return (bitmap & (1 << flag.index)) != 0;
+  }
+
+  Future<void> _setFlag(OfflineFlag flag, bool value) {
+    var bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    if (value) {
+      bitmap |= (1 << flag.index);
+    } else {
+      bitmap &= ~(1 << flag.index);
+    }
+    return _prefs.setInt(_kOfflineFlags, bitmap);
+  }
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0];
@@ -133,6 +173,12 @@ class LocalSettings {
     await _prefs.setBool(kPeopleSortSimilaritySelected, value);
   }
 
+  bool get appLockEnabledCached => _prefs.getBool(_kAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) async {
+    await _prefs.setBool(_kAppLockEnabled, value);
+  }
+
   GroupType getGalleryGroupType() {
     final groupTypeString = _prefs.getString(kGalleryGroupType);
     if (groupTypeString != null) {
@@ -190,11 +236,49 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLLocalIndexingEnabled =>
-      _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
+  bool get offlineMLConsent => _getFlag(OfflineFlag.mlConsent);
+
+  Future<void> setOfflineMLConsent(bool value) =>
+      _setFlag(OfflineFlag.mlConsent, value);
+
+  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? true;
+
+  Future<void> setOfflineMapEnabled(bool value) async {
+    await _prefs.setBool(_kOfflineMapEnabled, value);
+    await _setFlag(OfflineFlag.mapEnabled, value);
+  }
+
+  bool get isMLLocalIndexingEnabled {
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    return _prefs.getBool(key) ?? enoughRamForLocalIndexing;
+  }
 
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
+
+  double? get autoMergeThresholdOverride =>
+      _prefs.getDouble(_kAutoMergeThresholdOverride);
+
+  Future<void> setAutoMergeThresholdOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kAutoMergeThresholdOverride);
+      return;
+    }
+    await _prefs.setDouble(_kAutoMergeThresholdOverride, value);
+  }
+
+  double? get defaultClusteringDistanceOverride =>
+      _prefs.getDouble(_kDefaultClusteringDistanceOverride);
+
+  Future<void> setDefaultClusteringDistanceOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kDefaultClusteringDistanceOverride);
+      return;
+    }
+    await _prefs.setDouble(_kDefaultClusteringDistanceOverride, value);
+  }
 
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
@@ -227,15 +311,18 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
-    return isMLLocalIndexingEnabled;
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    final nextValue = !(_prefs.getBool(key) ?? enoughRamForLocalIndexing);
+    await _prefs.setBool(key, nextValue);
+    return nextValue;
   }
 
   bool get hasSeenMLEnablingBanner =>
-      _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
-  Future<void> setHasSeenMLEnablingBanner() async {
-    await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
-  }
+      _getFlag(OfflineFlag.seenMLEnablingBanner);
+  Future<void> setHasSeenMLEnablingBanner() =>
+      _setFlag(OfflineFlag.seenMLEnablingBanner, true);
 
   bool hasSeenMemoryLane(String personId) {
     final seenIds = _prefs.getStringList(_memoryLaneSeenKey);
@@ -319,6 +406,18 @@ class LocalSettings {
     await _prefs.setBool(_kInternalUserDisabled, value);
   }
 
+  int getOrCreateSharedPhotoFeedCutoffTime() {
+    final existingCutoff = _prefs.getInt(_kSharedPhotoFeedCutoffTime);
+    if (existingCutoff != null) {
+      return existingCutoff;
+    }
+
+    // files.added_time is stored in microseconds since epoch.
+    final cutoff = DateTime.now().microsecondsSinceEpoch;
+    _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
+    return cutoff;
+  }
+
   int wrapped2025ResumeIndex() {
     return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
   }
@@ -345,4 +444,63 @@ class LocalSettings {
   Future<void> setChristmasBannerEnabled(bool value) async {
     await _prefs.setBool(_kChristmasBannerEnabled, value);
   }
+
+  AppMode get appMode {
+    if (_cachedAppMode != null) return _cachedAppMode!;
+
+    final savedIndex = _prefs.getInt(_kAppMode);
+    if (savedIndex != null &&
+        savedIndex >= 0 &&
+        savedIndex < AppMode.values.length) {
+      _cachedAppMode = AppMode.values[savedIndex];
+      return _cachedAppMode!;
+    }
+
+    _cachedAppMode = AppMode.online;
+    return _cachedAppMode!;
+  }
+
+  bool get isAppModeSet => _prefs.containsKey(_kAppMode);
+
+  Future<void> setAppMode(AppMode mode) async {
+    await _prefs.setInt(_kAppMode, mode.index);
+    _cachedAppMode = mode;
+  }
+
+  bool get showOfflineModeOption =>
+      _prefs.getBool(_kShowOfflineModeOption) ?? true;
+
+  Future<void> setShowOfflineModeOption(bool value) async {
+    await _prefs.setBool(_kShowOfflineModeOption, value);
+  }
+
+  bool get isOfflineGetStartedBannerDismissed =>
+      _getFlag(OfflineFlag.getStartedBannerDismissed);
+
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.getStartedBannerDismissed, value);
+
+  bool get isMLProgressBannerDismissed =>
+      _getFlag(OfflineFlag.mlProgressBannerDismissed);
+
+  Future<void> setMLProgressBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.mlProgressBannerDismissed, value);
+
+  bool get isOfflineFacesBannerDismissed =>
+      _getFlag(OfflineFlag.facesBannerDismissed);
+
+  Future<void> setOfflineFacesBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.facesBannerDismissed, value);
+
+  bool get isOfflineNameFaceBannerDismissed =>
+      _getFlag(OfflineFlag.nameFaceBannerDismissed);
+
+  Future<void> setOfflineNameFaceBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.nameFaceBannerDismissed, value);
+
+  bool get isOfflineSettingsBannerDismissed =>
+      _getFlag(OfflineFlag.offlineSettingsBannerDismissed);
+
+  Future<void> setOfflineSettingsBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.offlineSettingsBannerDismissed, value);
 }

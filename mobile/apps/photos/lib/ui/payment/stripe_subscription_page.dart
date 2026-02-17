@@ -4,11 +4,10 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/subscription_purchased_event.dart";
+import 'package:photos/gateways/billing/models/billing_plan.dart';
+import 'package:photos/gateways/billing/models/subscription.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/billing/billing_plan.dart';
-import 'package:photos/models/api/billing/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
@@ -18,10 +17,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
@@ -30,7 +27,6 @@ import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
 import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
-import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class StripeSubscriptionPage extends StatefulWidget {
@@ -62,6 +58,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
   final Logger logger = Logger("StripeSubscriptionPage");
+  String? _selectedPlanProductID;
 
   Future<void> _fetchSub() async {
     return _userService
@@ -82,6 +79,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       }
 
       return _filterStripeForUI().then((value) {
+        _syncOnboardingSelection();
         _hasLoadedData = true;
         setState(() {});
       });
@@ -98,6 +96,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       final isYearlyPlan = plan.period == 'year';
       return isYearlyPlan == _showYearlyPlan;
     }).toList();
+    _syncOnboardingSelection();
     if (mounted) {
       setState(() {});
     }
@@ -129,64 +128,59 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget build(BuildContext context) {
     colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bool isFamilyChildUser = _hasLoadedData &&
+        _userDetails.isPartOfFamily() &&
+        !_userDetails.isFamilyAdmin();
 
     return Scaffold(
-      appBar: widget.isOnboarding
-          ? AppBar(
-              scrolledUnderElevation: 0,
-              elevation: 0,
-              title: Hero(
-                tag: "subscription",
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 4,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
-                  roundedEdges: const Radius.circular(10),
-                  unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
-                ),
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: isFamilyChildUser
+            ? null
+            : Text(
+                widget.isOnboarding
+                    ? AppLocalizations.of(context).selectYourPlan
+                    : AppLocalizations.of(context).subscription,
+                style: textTheme.largeBold,
               ),
-            )
-          : AppBar(
-              scrolledUnderElevation: 0,
-              toolbarHeight: 48,
-              leadingWidth: 48,
-              leading: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: const Icon(
-                  Icons.arrow_back_outlined,
-                ),
-              ),
-            ),
+        centerTitle: !isFamilyChildUser,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TitleBarTitleWidget(
-                  title: widget.isOnboarding
-                      ? AppLocalizations.of(context).selectYourPlan
-                      : AppLocalizations.of(context).subscription,
-                ),
-                _isFreePlanUser() || !_hasLoadedData
-                    ? const SizedBox.shrink()
-                    : Text(
-                        convertBytesToReadableFormat(
-                          _userDetails.getTotalStorage(),
-                        ),
-                        style: textTheme.smallMuted,
-                      ),
-              ],
-            ),
-          ),
           Expanded(child: _getBody()),
         ],
       ),
+      bottomNavigationBar: widget.isOnboarding &&
+              _hasLoadedData &&
+              !(_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin())
+          ? Container(
+              color: colorScheme.backgroundColour,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+                  child: ButtonWidgetV2(
+                    buttonType: ButtonTypeV2.primary,
+                    labelText: AppLocalizations.of(context).continueLabel,
+                    isDisabled: _selectedPlanProductID == null,
+                    onTap: _selectedPlanProductID == null
+                        ? null
+                        : _onOnboardingContinueTap,
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -213,13 +207,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     final widgets = <Widget>[];
 
     widgets.add(
-      SubscriptionHeaderWidget(
-        isOnboarding: widget.isOnboarding,
-        currentUsage: _userDetails.getFamilyOrPersonalUsage(),
-      ),
-    );
-
-    widgets.add(
       SubscriptionToggle(
         onToggle: (p0) {
           _showYearlyPlan = p0;
@@ -233,44 +220,42 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: _getStripePlanWidgets(),
       ),
-      const Padding(padding: EdgeInsets.all(4)),
     ]);
 
-    if (_currentSubscription != null) {
+    final hasAddOnBonus =
+        _userDetails.bonusData?.getAddOnBonuses().isNotEmpty ?? false;
+    final shouldShowValidity = _currentSubscription != null &&
+        (!_currentSubscription!.isFreePlan() || hasAddOnBonus);
+    if (shouldShowValidity) {
       widgets.add(
         ValidityWidget(
           currentSubscription: _currentSubscription,
           bonusData: _userDetails.bonusData,
         ),
       );
-      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
-      widgets.add(const SizedBox(height: 20));
-    } else {
-      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
-      const SizedBox(height: 56);
+      widgets.add(const SizedBox(height: 8));
     }
 
     if (_currentSubscription!.productID == freeProductID) {
       widgets.add(
         SubFaqWidget(isOnboarding: widget.isOnboarding),
       );
+      if (!widget.isOnboarding) {
+        widgets.add(const SizedBox(height: 8));
+      }
     }
 
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-          child: MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).manageFamily,
-            ),
+          child: MenuItemWidgetNew(
+            title: AppLocalizations.of(context).manageFamily,
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            singleBorderRadius: 4,
-            alignCaptionedTextToLeft: true,
             onTap: () async {
               // ignore: unawaited_futures
               _billingService.launchFamilyPortal(context, _userDetails);
@@ -285,17 +270,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
-          child: MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Manage payment method",
-            ),
+          child: MenuItemWidgetNew(
+            title: "Manage payment method",
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
-            singleBorderRadius: 4,
-            alignCaptionedTextToLeft: true,
             onTap: () async {
               _redirectToPaymentPortal();
             },
@@ -384,10 +365,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     final String title = isRenewCancelled
         ? AppLocalizations.of(context).renewSubscription
         : AppLocalizations.of(context).cancelSubscription;
-    return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: title,
-      ),
+    return MenuItemWidgetNew(
+      title: title,
       alwaysShowSuccessState: false,
       surfaceExecutionStates: false,
       menuItemColor: colorScheme.fillFaint,
@@ -395,8 +374,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Icons.chevron_right_outlined,
         color: colorScheme.strokeBase,
       ),
-      singleBorderRadius: 4,
-      alignCaptionedTextToLeft: true,
       onTap: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
@@ -468,7 +445,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
-    bool foundActivePlan = false;
     for (final plan in _plans) {
       final productID = plan.stripeID;
       if (productID.isEmpty) {
@@ -476,166 +452,213 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       }
       final isActive = _hasActiveSubscription &&
           _currentSubscription!.productID == productID;
-      if (isActive) {
-        foundActivePlan = true;
-      }
       planWidgets.add(
         GestureDetector(
           onTap: () async {
-            if (widget.isOnboarding && plan.id == freeProductID) {
-              Bus.instance.fire(SubscriptionPurchasedEvent());
-              // ignore: unawaited_futures
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const HomeWidget();
-                  },
-                ),
-                (route) => false,
-              );
-              unawaited(
-                _billingService.verifySubscription(
-                  freeProductID,
-                  "",
-                  paymentProvider: "ente",
-                ),
-              );
-            } else {
-              if (isActive) {
-                return;
-              }
-              // prompt user to cancel their active subscription form other
-              // payment providers
-              if (!_isStripeSubscriber &&
-                  _hasActiveSubscription &&
-                  _currentSubscription!.productID != freeProductID) {
-                await showErrorDialog(
-                  context,
-                  AppLocalizations.of(context).sorry,
-                  AppLocalizations.of(context).cancelOtherSubscription(
-                    paymentProvider: _currentSubscription!.paymentProvider,
-                  ),
-                );
-                return;
-              }
-              final int addOnBonus =
-                  _userDetails.bonusData?.totalAddOnBonus() ?? 0;
-              if (_userDetails.getFamilyOrPersonalUsage() >
-                  (plan.storage + addOnBonus)) {
-                logger.warning(
-                  " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
-                  " plan storage ${convertBytesToReadableFormat(plan.storage)} "
-                  "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
-                  "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
-                );
-                await showErrorDialog(
-                  context,
-                  AppLocalizations.of(context).sorry,
-                  AppLocalizations.of(context).youCannotDowngradeToThisPlan,
-                );
-                return;
-              }
-              String stripPurChaseAction = 'buy';
-              if (_isStripeSubscriber && _hasActiveSubscription) {
-                // confirm if user wants to change plan or not
-                final result = await showChoiceDialog(
-                  context,
-                  title: AppLocalizations.of(context).confirmPlanChange,
-                  body: AppLocalizations.of(context)
-                      .areYouSureYouWantToChangeYourPlan,
-                  firstButtonLabel: AppLocalizations.of(context).yes,
-                );
-                if (result!.action == ButtonAction.first) {
-                  stripPurChaseAction = 'update';
-                } else {
-                  return;
-                }
-              }
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return PaymentWebPage(
-                      planId: plan.stripeID,
-                      actionType: stripPurChaseAction,
-                    );
-                  },
-                ),
-              ).then((value) => onWebPaymentGoBack(value));
+            if (widget.isOnboarding) {
+              setState(() {
+                _selectedPlanProductID = productID;
+              });
+              return;
             }
+            if (isActive) {
+              return;
+            }
+            // prompt user to cancel their active subscription form other
+            // payment providers
+            if (!_isStripeSubscriber &&
+                _hasActiveSubscription &&
+                _currentSubscription!.productID != freeProductID) {
+              await showErrorDialog(
+                context,
+                AppLocalizations.of(context).sorry,
+                AppLocalizations.of(context).cancelOtherSubscription(
+                  paymentProvider: _currentSubscription!.paymentProvider,
+                ),
+              );
+              return;
+            }
+            final int addOnBonus =
+                _userDetails.bonusData?.totalAddOnBonus() ?? 0;
+            if (_userDetails.getFamilyOrPersonalUsage() >
+                (plan.storage + addOnBonus)) {
+              logger.warning(
+                " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
+                " plan storage ${convertBytesToReadableFormat(plan.storage)} "
+                "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
+                "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
+              );
+              await showErrorDialog(
+                context,
+                AppLocalizations.of(context).sorry,
+                AppLocalizations.of(context).youCannotDowngradeToThisPlan,
+              );
+              return;
+            }
+            String stripPurChaseAction = 'buy';
+            if (_isStripeSubscriber && _hasActiveSubscription) {
+              // confirm if user wants to change plan or not
+              final result = await showChoiceDialog(
+                context,
+                title: AppLocalizations.of(context).confirmPlanChange,
+                body: AppLocalizations.of(context)
+                    .areYouSureYouWantToChangeYourPlan,
+                firstButtonLabel: AppLocalizations.of(context).yes,
+              );
+              if (result!.action == ButtonAction.first) {
+                stripPurChaseAction = 'update';
+              } else {
+                return;
+              }
+            }
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return PaymentWebPage(
+                    planId: plan.stripeID,
+                    actionType: stripPurChaseAction,
+                  );
+                },
+              ),
+            ).then((value) => onWebPaymentGoBack(value));
           },
           child: SubscriptionPlanWidget(
             storage: plan.storage,
             price: plan.price,
             period: plan.period,
-            isActive: isActive && !_hideCurrentPlanSelection,
+            isActive: widget.isOnboarding
+                ? _selectedPlanProductID == productID
+                : isActive && !_hideCurrentPlanSelection,
             isPopular: _isPopularPlan(plan),
             isOnboarding: widget.isOnboarding,
           ),
         ),
       );
     }
-    if (!foundActivePlan && _hasActiveSubscription) {
-      _addCurrentPlanWidget(planWidgets);
-    }
     return planWidgets;
-  }
-
-  bool _isFreePlanUser() {
-    return _currentSubscription != null &&
-        freeProductID == _currentSubscription!.productID;
   }
 
   bool _isPopularPlan(BillingPlan plan) {
     return popularProductIDs.contains(plan.id);
   }
 
-  void _addCurrentPlanWidget(List<Widget> planWidgets) {
-    // don't add current plan if it's monthly plan but UI is showing yearly plans
-    // and vice versa.
-
-    if (_showYearlyPlan != _currentSubscription!.isYearlyPlan() &&
-        _currentSubscription!.productID != freeProductID) {
+  void _syncOnboardingSelection() {
+    if (!widget.isOnboarding) {
       return;
     }
-    int activePlanIndex = 0;
-    for (; activePlanIndex < _plans.length; activePlanIndex++) {
-      if (_plans[activePlanIndex].storage > _currentSubscription!.storage) {
-        break;
+    final visibleProductIDs = _plans
+        .map((plan) => plan.stripeID)
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    if (_selectedPlanProductID != null &&
+        visibleProductIDs.contains(_selectedPlanProductID)) {
+      return;
+    }
+    final currentProductID = _currentSubscription?.productID;
+    if (currentProductID != null &&
+        visibleProductIDs.contains(currentProductID)) {
+      _selectedPlanProductID = currentProductID;
+      return;
+    }
+    _selectedPlanProductID =
+        visibleProductIDs.isNotEmpty ? visibleProductIDs.first : null;
+  }
+
+  Future<void> _onOnboardingContinueTap() async {
+    final selectedPlanProductID = _selectedPlanProductID;
+    if (selectedPlanProductID == null) {
+      return;
+    }
+
+    if (selectedPlanProductID == freeProductID) {
+      Bus.instance.fire(SubscriptionPurchasedEvent());
+      // ignore: unawaited_futures
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const HomeWidget();
+          },
+        ),
+        (route) => false,
+      );
+      unawaited(
+        _billingService.verifySubscription(
+          freeProductID,
+          "",
+          paymentProvider: "ente",
+        ),
+      );
+      return;
+    }
+
+    final BillingPlan? selectedPlan = _plans
+        .where((plan) => plan.stripeID == selectedPlanProductID)
+        .firstOrNull;
+    if (selectedPlan == null) {
+      return;
+    }
+
+    final isActive = _hasActiveSubscription &&
+        _currentSubscription!.productID == selectedPlanProductID;
+    if (isActive) {
+      return;
+    }
+
+    if (!_isStripeSubscriber &&
+        _hasActiveSubscription &&
+        _currentSubscription!.productID != freeProductID) {
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).sorry,
+        AppLocalizations.of(context).cancelOtherSubscription(
+          paymentProvider: _currentSubscription!.paymentProvider,
+        ),
+      );
+      return;
+    }
+
+    final int addOnBonus = _userDetails.bonusData?.totalAddOnBonus() ?? 0;
+    if (_userDetails.getFamilyOrPersonalUsage() >
+        (selectedPlan.storage + addOnBonus)) {
+      logger.warning(
+        " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
+        " plan storage ${convertBytesToReadableFormat(selectedPlan.storage)} "
+        "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
+        "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (selectedPlan.storage + addOnBonus))}",
+      );
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).sorry,
+        AppLocalizations.of(context).youCannotDowngradeToThisPlan,
+      );
+      return;
+    }
+
+    String stripPurChaseAction = 'buy';
+    if (_isStripeSubscriber && _hasActiveSubscription) {
+      final result = await showChoiceDialog(
+        context,
+        title: AppLocalizations.of(context).confirmPlanChange,
+        body: AppLocalizations.of(context).areYouSureYouWantToChangeYourPlan,
+        firstButtonLabel: AppLocalizations.of(context).yes,
+      );
+      if (result!.action == ButtonAction.first) {
+        stripPurChaseAction = 'update';
+      } else {
+        return;
       }
     }
-    planWidgets.insert(
-      activePlanIndex,
-      GestureDetector(
-        onTap: () {
-          if (_currentSubscription!.isFreePlan() && widget.isOnboarding) {
-            Bus.instance.fire(SubscriptionPurchasedEvent());
-            // ignore: unawaited_futures
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const HomeWidget();
-                },
-              ),
-              (route) => false,
-            );
-            unawaited(
-              _billingService.verifySubscription(
-                freeProductID,
-                "",
-                paymentProvider: "ente",
-              ),
-            );
-          }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return PaymentWebPage(
+            planId: selectedPlan.stripeID,
+            actionType: stripPurChaseAction,
+          );
         },
-        child: SubscriptionPlanWidget(
-          storage: _currentSubscription!.storage,
-          price: _currentSubscription!.price,
-          period: _currentSubscription!.period,
-          isActive: _currentSubscription!.isValid(),
-          isOnboarding: widget.isOnboarding,
-        ),
       ),
-    );
+    ).then((value) => onWebPaymentGoBack(value));
   }
 }

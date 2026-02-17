@@ -4,14 +4,13 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { FeedIcon } from "components/Collections/CollectionHeader";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useState } from "react";
-import { getSignUpOrInstallURL } from "utils/public-album";
+import { getEnteURL } from "utils/public-album";
 
 interface TopNavButtonsProps {
     onAddPhotos?: () => void;
@@ -35,7 +34,6 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const isTouchscreen = useIsTouchscreen();
 
     const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
     const { handleJoinAlbum } = useJoinAlbum({
@@ -52,22 +50,6 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
             setTimeout(() => setShowCopiedMessage(false), 2000);
         }
     };
-
-    const handleSignUpOrInstall = () => {
-        if (typeof window !== "undefined") {
-            window.open(
-                getSignUpOrInstallURL(isTouchscreen),
-                "_blank",
-                "noopener",
-            );
-        }
-    };
-
-    const buttonText = enableJoin
-        ? t("join_album")
-        : isTouchscreen
-          ? t("install")
-          : t("sign_up");
 
     return (
         <>
@@ -96,15 +78,17 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     </NavButton>
                 )}
 
-                {(!onAddPhotos || enableJoin) && (
-                    <SignUpButton
-                        onClick={
-                            enableJoin ? handleJoinAlbum : handleSignUpOrInstall
-                        }
-                    >
-                        {buttonText}
-                    </SignUpButton>
-                )}
+                <SignUpButton
+                    onClick={
+                        enableJoin
+                            ? handleJoinAlbum
+                            : () => {
+                                  window.location.href = getEnteURL();
+                              }
+                    }
+                >
+                    {enableJoin ? t("join_album") : t("try_ente")}
+                </SignUpButton>
             </ButtonContainer>
 
             <Notification

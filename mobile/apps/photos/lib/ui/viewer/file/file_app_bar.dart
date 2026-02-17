@@ -12,7 +12,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -68,6 +67,8 @@ class FileAppBarState extends State<FileAppBar> {
   bool isGuestView = false;
   bool shouldLoopVideo = localSettings.shouldLoopVideo();
   bool _reloadActions = false;
+  bool _isMenuOpen = false;
+  bool _pendingActionsReload = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -100,19 +101,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   void _onSharedCollectionChanged() {
-    if (mounted) {
-      setState(() {
-        _reloadActions = true;
-      });
-    }
+    _requestActionsReload();
   }
 
   void _onThumbnailFallbackChanged() {
-    if (mounted) {
-      setState(() {
-        _reloadActions = true;
-      });
-    }
+    _requestActionsReload();
   }
 
   @override
@@ -195,6 +188,33 @@ class FileAppBarState extends State<FileAppBar> {
     );
   }
 
+  void _requestActionsReload() {
+    if (_isMenuOpen) {
+      _pendingActionsReload = true;
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
+  }
+
+  void _handleMenuOpened() {
+    _isMenuOpen = true;
+  }
+
+  void _handleMenuClosed() {
+    _isMenuOpen = false;
+    if (_pendingActionsReload && mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
+  }
+
   List<Widget> _getActions() {
     _actions.clear();
 
@@ -268,7 +288,7 @@ class FileAppBarState extends State<FileAppBar> {
         Center(child: FavoriteWidget(widget.file)),
       );
     }
-    if (!isFileUploaded) {
+    if (!isFileUploaded && !isOfflineMode) {
       _actions.add(
         UploadIconWidget(
           file: widget.file,
@@ -291,7 +311,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (isFileUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -473,10 +493,13 @@ class FileAppBarState extends State<FileAppBar> {
       _actions.add(
         PopupMenuButton(
           tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+          onOpened: _handleMenuOpened,
           itemBuilder: (context) {
             return items;
           },
+          onCanceled: _handleMenuClosed,
           onSelected: (dynamic value) async {
+            _handleMenuClosed();
             if (value == 1) {
               await _download(widget.file);
             } else if (value == 2) {
@@ -594,14 +617,43 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    final existingFolderName =
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
+    if (existingFolderName != null) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(file),
+            albumName: existingFolderName,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
+      }
+      return;
+    }
+
+    final fileToDownload =
+        !file.isRemoteFile ? file.copyWith(localID: null) : file;
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles([fileToDownload]);
+      } catch (e) {
+        _logger.warning("Failed to save file", e);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
-      context.l10n.downloading,
+      AppLocalizations.of(context).downloading,
       isDismissible: true,
     );
     await dialog.show();
     try {
-      await downloadToGallery(file);
+      await downloadToGallery(fileToDownload);
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {

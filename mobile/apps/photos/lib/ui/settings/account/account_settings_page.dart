@@ -119,6 +119,7 @@ class AccountSettingsPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       MenuItemWidgetNew(
                         title: AppLocalizations.of(context).deleteAccount,
+                        titleColor: colorScheme.warning700,
                         leadingIconWidget: _buildIconWidget(
                           context,
                           HugeIcons.strokeRoundedDelete02,
@@ -147,7 +148,9 @@ class AccountSettingsPage extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return HugeIcon(
       icon: icon,
-      color: isDestructive ? colorScheme.warning700 : colorScheme.strokeBase,
+      color: isDestructive
+          ? colorScheme.warning700
+          : colorScheme.menuItemIconStroke,
       size: 20,
     );
   }
@@ -225,7 +228,6 @@ class AccountSettingsPage extends StatelessWidget {
               return RecoveryKeyPage(
                 recoveryKey,
                 AppLocalizations.of(context).ok,
-                showAppBar: true,
                 onDone: () {},
               );
             },

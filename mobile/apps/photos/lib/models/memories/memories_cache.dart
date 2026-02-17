@@ -72,6 +72,7 @@ class MemoriesCache {
 class ToShowMemory {
   final String title;
   final List<int> fileUploadedIDs;
+  final List<int>? fileLocalIntIDs;
   final MemoryType type;
   final int firstTimeToShow;
   final int lastTimeToShow;
@@ -80,6 +81,7 @@ class ToShowMemory {
 
   final String? personID;
   final String? personName;
+  final bool? isUnnamedCluster;
   final bool? isBirthday;
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
@@ -106,8 +108,10 @@ class ToShowMemory {
     this.lastTimeToShow,
     this.id,
     this.calculationTime, {
+    this.fileLocalIntIDs,
     this.personID,
     this.personName,
+    this.isUnnamedCluster,
     this.isBirthday,
     this.peopleMemoryType,
     this.clipMemoryType,
@@ -124,9 +128,14 @@ class ToShowMemory {
           "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
         );
 
-  factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
+  factory ToShowMemory.fromSmartMemory(
+    SmartMemory memory,
+    DateTime calcTime, {
+    List<int>? fileLocalIntIDs,
+  }) {
     String? personID;
     String? personName;
+    bool? isUnnamedCluster;
     bool? isBirthday;
     PeopleMemoryType? peopleMemoryType;
     ClipMemoryType? clipMemoryType;
@@ -134,6 +143,7 @@ class ToShowMemory {
     if (memory is PeopleMemory) {
       personID = memory.personID;
       personName = memory.personName;
+      isUnnamedCluster = memory.isUnnamedCluster;
       isBirthday = memory.isBirthday;
       peopleMemoryType = memory.peopleMemoryType;
     } else if (memory is TripMemory) {
@@ -141,19 +151,22 @@ class ToShowMemory {
     } else if (memory is ClipMemory) {
       clipMemoryType = memory.clipMemoryType;
     }
+    final fileUploadedIDs = memory.memories
+        .where((m) => m.file.uploadedFileID != null)
+        .map((m) => m.file.uploadedFileID!)
+        .toList();
     return ToShowMemory(
       memory.title,
-      memory.memories
-          .where((m) => m.file.uploadedFileID != null)
-          .map((m) => m.file.uploadedFileID!)
-          .toList(),
+      fileUploadedIDs,
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
       memory.id,
       calcTime.microsecondsSinceEpoch,
+      fileLocalIntIDs: fileLocalIntIDs,
       personID: personID,
       personName: personName,
+      isUnnamedCluster: isUnnamedCluster,
       isBirthday: isBirthday,
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
@@ -170,9 +183,13 @@ class ToShowMemory {
       json['lastTimeToShow'],
       json['id'] ?? newID(json['type'] as String),
       json['calculationTime'],
+      fileLocalIntIDs: json['fileLocalIntIDs'] != null
+          ? List<int>.from(json['fileLocalIntIDs'])
+          : null,
       personID: json['personID'],
       isBirthday: json['isBirthday'],
       personName: json['personName'],
+      isUnnamedCluster: json['isUnnamedCluster'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
           : null,
@@ -192,6 +209,7 @@ class ToShowMemory {
     return {
       'title': title,
       'fileUploadedIDs': fileUploadedIDs.toList(),
+      if (fileLocalIntIDs != null) 'fileLocalIntIDs': fileLocalIntIDs!.toList(),
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,
@@ -200,6 +218,7 @@ class ToShowMemory {
       'personID': personID,
       'isBirthday': isBirthday,
       'personName': personName,
+      'isUnnamedCluster': isUnnamedCluster,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
       'location': location != null

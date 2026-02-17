@@ -35,7 +35,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/offer"
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
-	"github.com/GoKillers/libsodium-go/sodium"
 	"github.com/dlmiddlecote/sqlstats"
 	"github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/api"
@@ -131,8 +130,6 @@ func main() {
 	db := setupDatabase()
 	defer db.Close()
 
-	sodium.Init()
-
 	hostName, err := os.Hostname()
 	if err != nil {
 		log.Fatal("Could not get host name", err)
@@ -217,7 +214,7 @@ func main() {
 	stripeClients := billing.GetStripeClients()
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, commonBillController, discordController)
+		billingRepo, fileRepo, userRepo, remoteStoreRepository, commonBillController, discordController)
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -226,7 +223,12 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+	remoteStoreController := &remoteStoreCtrl.Controller{
+		Repo:        remoteStoreRepository,
+		BillingCtrl: billingController,
+		UserRepo:    userRepo,
+		FamilyRepo:  familyRepo,
+	}
 
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
@@ -322,11 +324,12 @@ func main() {
 	}
 
 	familyController := &family.Controller{
-		FamilyRepo:    familyRepo,
-		BillingCtrl:   billingController,
-		UserRepo:      userRepo,
-		UserCacheCtrl: userCacheCtrl,
-		UsageRepo:     usageRepo,
+		FamilyRepo:      familyRepo,
+		BillingCtrl:     billingController,
+		UserRepo:        userRepo,
+		UserCacheCtrl:   userCacheCtrl,
+		UsageRepo:       usageRepo,
+		RemoteStoreRepo: remoteStoreRepository,
 	}
 
 	collectionLinkCtrl := &publicCtrl.CollectionLinkController{
@@ -1065,6 +1068,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	castDb castRepo.Repository) {
+	const deletedTokenRetentionDays = 397 // 13 months using a fixed-day approximation
+
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
 		log.Info("Skipping cron jobs")
@@ -1077,7 +1082,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	})
 
 	schedule(c, "@every 24h", func() {
-		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(30))
+		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(deletedTokenRetentionDays))
 		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
 		_ = collectionLinkRepo.CleanupAccessHistory(context.Background())
 		_ = fileLinkRepo.CleanupAccessHistory(context.Background())

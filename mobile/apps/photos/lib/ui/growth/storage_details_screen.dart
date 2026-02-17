@@ -2,8 +2,8 @@ import "dart:math";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:photos/gateways/storage_bonus/models/storage_bonus.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -121,8 +121,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                             Expanded(
                               child: _StatCard(
                                 value: data.refCount.toString(),
-                                label: AppLocalizations.of(context)
-                                    .usedYourCode,
+                                label:
+                                    AppLocalizations.of(context).usedYourCode,
                                 cardColor: cardColor,
                               ),
                             ),
@@ -130,8 +130,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                             Expanded(
                               child: _StatCard(
                                 value: data.refUpgradeCount.toString(),
-                                label:
-                                    AppLocalizations.of(context).eligible,
+                                label: AppLocalizations.of(context).eligible,
                                 cardColor: cardColor,
                               ),
                             ),
@@ -145,8 +144,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                               Expanded(
                                 child: _StatCard(
                                   value: "1",
-                                  label: AppLocalizations.of(context)
-                                      .claimedByYou,
+                                  label:
+                                      AppLocalizations.of(context).claimedByYou,
                                   cardColor: cardColor,
                                 ),
                               ),

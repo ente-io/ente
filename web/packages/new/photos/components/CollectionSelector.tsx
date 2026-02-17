@@ -69,6 +69,12 @@ export interface CollectionSelectorAttributes {
      */
     activeCollectionID?: number;
     /**
+     * If true, only show hidden albums in the collection selector.
+     *
+     * This is used when uploading from the hidden albums section.
+     */
+    showHiddenCollections?: boolean;
+    /**
      * Callback invoked when the user selects the option to create a new
      * collection.
      */

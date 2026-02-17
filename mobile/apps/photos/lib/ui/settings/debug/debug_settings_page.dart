@@ -143,8 +143,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                                 value: () =>
                                     localSettings.isChristmasBannerEnabled,
                                 onChanged: () async {
-                                  await localSettings
-                                      .setChristmasBannerEnabled(
+                                  await localSettings.setChristmasBannerEnabled(
                                     !localSettings.isChristmasBannerEnabled,
                                   );
                                   Bus.instance.fire(ChristmasBannerEvent());
@@ -231,7 +230,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     return HugeIcon(
       icon: icon,
-      color: colorScheme.strokeBase,
+      color: colorScheme.menuItemIconStroke,
       size: 20,
     );
   }

@@ -8,10 +8,11 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.da
 /// A menu item widget with the new design system.
 /// Features:
 /// - 20px border radius
-/// - 16px padding
+/// - 16px horizontal padding
 /// - Background color: Light #FFFFFF, Dark #212121
 class MenuItemWidgetNew extends StatefulWidget {
   final String title;
+  final String? subText;
 
   /// Color for the title text
   final Color? titleColor;
@@ -59,6 +60,7 @@ class MenuItemWidgetNew extends StatefulWidget {
 
   const MenuItemWidgetNew({
     required this.title,
+    this.subText,
     this.titleColor,
     this.leadingIcon,
     this.leadingIconColor,
@@ -144,12 +146,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
 
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
+    final bool hasSubText =
+        widget.subText != null && widget.subText!.isNotEmpty;
+    final verticalPadding = hasSubText ? 9.0 : 16.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
       clipBehavior: Clip.none,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(circularRadius),
         color: effectiveMenuItemColor,
@@ -165,12 +170,35 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
               leadingIconWidget: widget.leadingIconWidget,
             ),
           Expanded(
-            child: Text(
-              widget.title,
-              style: widget.titleColor != null
-                  ? textTheme.small.copyWith(color: widget.titleColor)
-                  : textTheme.small,
-            ),
+            child: hasSubText
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: widget.titleColor != null
+                            ? textTheme.small.copyWith(color: widget.titleColor)
+                            : textTheme.small,
+                      ),
+                      Text(
+                        widget.subText!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.tinyMuted.copyWith(height: 17 / 10),
+                      ),
+                    ],
+                  )
+                : Text(
+                    widget.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: widget.titleColor != null
+                        ? textTheme.small.copyWith(color: widget.titleColor)
+                        : textTheme.small,
+                  ),
           ),
           TrailingWidget(
             executionStateNotifier: executionStateNotifier,
@@ -235,9 +263,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     }
     setState(() {
       if (widget.pressedColor == null) {
-        hasPassedGestureCallbacks()
-            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
-            : menuItemColor = widget.menuItemColor;
+        if (hasPassedGestureCallbacks()) {
+          final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+          // Pressed color: Light #F5F5F5, Dark #2C2C2C
+          // These are the result of overlaying fillFaintPressed on the base color
+          menuItemColor =
+              isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF5F5F5);
+        } else {
+          menuItemColor = widget.menuItemColor;
+        }
       } else {
         menuItemColor = widget.pressedColor;
       }
@@ -272,8 +306,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
-    setState(() {
-      menuItemColor = widget.menuItemColor;
-    });
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () {
+        if (mounted) {
+          setState(() {
+            menuItemColor = widget.menuItemColor;
+          });
+        }
+      },
+    );
   }
 }

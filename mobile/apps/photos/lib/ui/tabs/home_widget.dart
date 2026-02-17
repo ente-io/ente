@@ -8,7 +8,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
-import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
@@ -19,11 +18,13 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/account_configured_event.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
+import "package:photos/events/opened_settings_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/events/subscription_purchased_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
@@ -35,6 +36,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
@@ -51,16 +53,15 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
-import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
 import "package:photos/ui/home/christmas/christmas_utils.dart";
 import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
+import "package:photos/ui/home/gallery_download_banner.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
@@ -71,15 +72,16 @@ import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
+import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
-import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -88,7 +90,10 @@ import "package:receive_sharing_intent/receive_sharing_intent.dart";
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     super.key,
+    this.startWithoutAccount = false,
   });
+
+  final bool startWithoutAccount;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -97,9 +102,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
-  static final _settingsPage = SettingsPage(
-    emailNotifier: UserService.instance.emailValueNotifier,
-  );
 
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
@@ -135,10 +137,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
+  StreamSubscription<Uri?>? _authDeepLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
   late StreamSubscription<ChristmasBannerEvent>
       _christmasBannerEventSubscription;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -152,6 +156,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
 
       if (event.selectedIndex == 3) {
@@ -161,14 +166,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       if (event.source != TabChangedEventSource.pageView) {
         debugPrint(
-          "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
+          "TabChange going from $previousTabIndex to ${event.selectedIndex} source: ${event.source}",
         );
         if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn,
-          );
+          final pageDelta = (event.selectedIndex - previousTabIndex).abs();
+          if (pageDelta <= 1) {
+            _pageController.animateToPage(
+              event.selectedIndex,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeIn,
+            );
+          } else {
+            _pageController.jumpToPage(event.selectedIndex);
+          }
         }
       }
     });
@@ -180,7 +190,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
       // fetch user flags on login
-      flagService.flags;
+      if (!isOfflineMode) {
+        flagService.flags;
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -195,6 +207,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _appModeChangedEventSubscription =
+        Bus.instance.on<AppModeChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
@@ -358,19 +376,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
           Configuration.instance.isLoggedIn();
 
-      // Check for trip layout and show in webview
-      if (collection.pubMagicMetadata.layout == "trip") {
-        await routeToPage(
-          context,
-          WebPage(
-            collection.displayName,
-            uri.toString(),
-            canOpenInBrowser: true,
-          ),
-        );
-        return;
-      }
-
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs[0];
       if (!publicUrl.enableDownload) {
@@ -524,6 +529,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _permissionGrantedEvent.cancel();
+    _appModeChangedEventSubscription.cancel();
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
@@ -532,6 +538,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription.cancel();
+    _authDeepLinkSubscription?.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _christmasBannerEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
@@ -710,6 +717,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          final isStartWithoutAccountFlow = widget.startWithoutAccount &&
+              !Configuration.instance.hasConfiguredAccount() &&
+              !localSettings.isAppModeSet;
+          if (isStartWithoutAccountFlow) {
+            Navigator.pop(context);
+            return;
+          }
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
               _selectedFiles.clearAll();
@@ -743,11 +757,18 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Drawer(
                     width: double.infinity,
                     shape: const RoundedRectangleBorder(),
-                    child: _settingsPage,
+                    child: SettingsPage(
+                      emailNotifier: UserService.instance.emailValueNotifier,
+                    ),
                   ),
                 )
               : null,
-          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
+          onDrawerChanged: (isOpened) {
+            isSettingsOpen = isOpened;
+            if (isOpened) {
+              Bus.instance.fire(OpenedSettingsEvent());
+            }
+          },
           body: Stack(
             children: [
               Builder(
@@ -791,8 +812,37 @@ class _HomeWidgetState extends State<HomeWidget> {
           ///screens the have different appbar colours.
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
-            child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isOnSearchTabNotifier,
+              builder: (context, isOnSearchTab, _) {
+                return AnimatedBuilder(
+                  animation: IndexOfStackNotifier(),
+                  builder: (context, _) {
+                    final colorScheme = getEnteColorScheme(context);
+                    final resultsBackground = EnteTheme.isDark(context)
+                        ? const Color.fromRGBO(22, 22, 22, 1)
+                        : colorScheme.backgroundElevated2;
+                    final isSearchResults =
+                        isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    final isOnLandingPage =
+                        !Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode;
+                    final isOnOnlineGrantPermissionScreen =
+                        Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            _shouldShowPermissionWidget();
+                    return AppBar(
+                      backgroundColor: isOnLandingPage
+                          ? colorScheme.greenBase
+                          : isSearchResults
+                              ? resultsBackground
+                              : isOnOnlineGrantPermissionScreen
+                                  ? colorScheme.backgroundColour
+                                  : colorScheme.backgroundBase,
+                    );
+                  },
+                );
+              },
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -802,9 +852,21 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      final isOfflineEntryFlowEnabled =
+          widget.startWithoutAccount && offlineMode;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      final canResumePersistedOfflineMode =
+          hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
+      if (isOfflineEntryFlowEnabled || canResumePersistedOfflineMode) {
+        if (_shouldShowPermissionWidget()) {
+          return const GrantPermissionsWidget(startWithoutAccount: true);
+        }
+      } else {
+        return const LandingPageWidget();
+      }
     }
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
@@ -918,46 +980,16 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return Container(
-                decoration: value
-                    ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
-                        boxShadow: shadowFloatFaintLight,
-                      )
-                    : null,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidget()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 225),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.4),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    HomeBottomNavigationBar(
-                      _selectedFiles,
-                      _selectedAlbums,
-                      selectedTabIndex: _selectedTabIndex,
-                    ),
-                  ],
-                ),
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (flagService.internalUser) const GalleryDownloadBanner(),
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    _selectedAlbums,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                ],
               );
             },
           ),
@@ -995,7 +1027,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    appLinks.uriLinkStream.listen(
+    _authDeepLinkSubscription = appLinks.uriLinkStream.listen(
       (link) {
         _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
@@ -1061,7 +1093,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
             ? int.tryParse(albumIdRaw)
             : null;
+        var canOpenRitual = true;
         if (ritualId.isNotEmpty) {
+          final ritual = findRitualById(ritualId);
+          canOpenRitual = ritual != null
+              ? await requestHiddenRitualAccess(context, ritual)
+              : await requestHiddenRitualAccessForAlbumId(context, albumId);
+          if (!mounted || !canOpenRitual) {
+            return;
+          }
           // Ensure the camera is stacked on top of the ritual page so the user
           // lands on the ritual details after adding photos via a notification.
           // ignore: unawaited_futures
@@ -1070,12 +1110,27 @@ class _HomeWidgetState extends State<HomeWidget> {
             RitualPage(ritualId: ritualId),
           );
         }
+        if (!canOpenRitual) return;
         // ignore: unawaited_futures
         routeToPage(
           context,
           RitualCameraPage(
             ritualId: ritualId,
             albumId: albumId,
+          ),
+        );
+        return;
+      }
+      if (uri != null && uri.host.toLowerCase() == "feed") {
+        if (!Configuration.instance.isLoggedIn()) {
+          return;
+        }
+        final target = FeedNavigationTarget.fromUri(uri);
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          FeedScreen(
+            initialTarget: target,
           ),
         );
         return;
@@ -1128,6 +1183,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowLoadingWidget() {
+    if (isOfflineMode) {
+      return false;
+    }
     if (flagService.enableOnlyBackupFuturePhotos) {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
@@ -1139,6 +1197,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowBackupHook() {
+    if (isOfflineMode) {
+      return false;
+    }
     final bool noFoldersSelected =
         !backupPreferenceService.hasSelectedAnyBackupFolder;
     final bool hasLimitedPermission =
@@ -1153,6 +1214,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (_personSyncTriggered) {
       return;
     }
+    if (isOfflineMode) {
+      return;
+    }
     _personSyncTriggered = true;
     entityService.syncEntities().then((_) {
       PersonService.instance.refreshPersonCache();
@@ -1161,6 +1225,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _ensureCollectionsSync() {
     if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
       return;
     }
     if (!(backupPreferenceService.hasSkippedOnboardingPermission ||

@@ -15,6 +15,7 @@ class FlagService {
   static const int _uploadV2Flag = 1 << 0;
   static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
+  static const int _videoStreamingFlag = 1 << 3;
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -70,15 +71,13 @@ class FlagService {
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
+  bool get usearchForSearch => internalUser;
+
   String get castUrl => flags.castUrl;
 
   String get customDomain => flags.customDomain;
 
   String get embedUrl => flags.embedUrl;
-
-  bool get addToAlbumFeature => internalUser;
-
-  bool get widgetSharedAlbums => internalUser;
 
   bool get useNativeVideoEditor => true;
 
@@ -90,13 +89,11 @@ class FlagService {
 
   bool get stopStreamProcess => true;
 
-  bool get streamEnabledByDefault => internalUser;
+  bool get streamEnabledByDefault => _isServerFlagEnabled(_videoStreamingFlag);
 
   bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
-
-  bool get showSharedAlbumsInMoveSheet => internalUser;
 
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);

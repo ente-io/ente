@@ -42,6 +42,7 @@ class ThumbnailWidget extends StatefulWidget {
   final Duration? diskLoadDeferDuration;
   final Duration? serverLoadDeferDuration;
   final int thumbnailSize;
+  final bool useRequestedThumbnailSizeForLocalCache;
   final bool shouldShowOwnerAvatar;
   final bool shouldShowFavoriteIcon;
 
@@ -64,6 +65,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
+    this.useRequestedThumbnailSizeForLocalCache = false,
     this.shouldShowFavoriteIcon = true,
     this.shouldShowVideoDuration = false,
     this.shouldShowVideoOverlayIcon = true,
@@ -85,6 +87,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   int? optimizedImageWidth;
   String? _localThumbnailQueueTaskId;
   static const _maxLocalThumbnailRetries = 8;
+
+  int get _localCacheThumbnailSize {
+    if (widget.useRequestedThumbnailSizeForLocalCache) {
+      return widget.thumbnailSize;
+    }
+    return thumbnailSmallSize;
+  }
 
   @override
   void initState() {
@@ -200,14 +209,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
       }
 
-      if (widget.file.fileType == FileType.video) {
-        if (widget.shouldShowVideoDuration) {
-          contentChildren
-              .add(VideoOverlayDuration(duration: widget.file.duration!));
-        } else if (widget.shouldShowVideoOverlayIcon) {
-          contentChildren.add(const VideoOverlayIcon());
-        }
-      } else if (widget.shouldShowLivePhotoOverlay &&
+      if (widget.file.fileType != FileType.video &&
+          widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
@@ -238,7 +241,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && !widget.file.isUploaded) {
+    if (!widget.rawThumbnail && widget.file.fileType == FileType.video) {
+      if (widget.shouldShowVideoDuration) {
+        viewChildren.add(
+          VideoOverlayDuration(duration: widget.file.duration),
+        );
+      } else if (widget.shouldShowVideoOverlayIcon) {
+        viewChildren.add(const VideoOverlayIcon());
+      }
+    }
+    if (widget.shouldShowSyncStatus &&
+        !widget.file.isUploaded &&
+        !isOfflineMode) {
       viewChildren.add(const UnSyncedIcon());
     }
 
@@ -296,7 +310,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(widget.file, _localCacheThumbnailSize);
       if (cachedSmallThumbnail != null) {
         final imageProvider = Image.memory(
           cachedSmallThumbnail,
@@ -357,7 +371,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       ThumbnailInMemoryLruCache.put(
         widget.file,
         thumbData,
-        thumbnailSmallSize,
+        _localCacheThumbnailSize,
       );
     }).catchError((e) {
       _errorLoadingLocalThumbnail = true;

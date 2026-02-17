@@ -59,7 +59,6 @@
   "incorrectRecoveryKeyBody": "Vámi zadaný obnovovací klíč je nesprávný",
   "forgotPassword": "Zapomenuté heslo",
   "enterYourRecoveryKey": "Zadejte svůj obnovovací klíč",
-  "noRecoveryKey": "Nemáte obnovovací klíč?",
   "sorry": "Omlouváme se",
   "noRecoveryKeyNoDecryption": "Vzhledem k povaze našeho protokolu koncového šifrování nemohou být Vaše data dešifrována bez Vašeho hesla nebo obnovovacího klíče",
   "verifyEmail": "Ověřit e-mail",
@@ -130,7 +129,6 @@
   "verifyPassword": "Ověřit heslo",
   "recoveryKey": "Obnovovací klíč",
   "recoveryKeyOnForgotPassword": "Pokud zapomenete své heslo, jediný způsob jak obnovit Vaše data je pomocí tohoto klíče.",
-  "recoveryKeySaveDescription": "Tento 24slovný klíč neuchováváme, uschovejte si jej prosím na bezpečném místě.",
   "doThisLater": "Udělat později",
   "saveKey": "Uložit klíč",
   "recoveryKeyCopiedToClipboard": "Obnovovací klíč zkopírován do schránky",
@@ -321,11 +319,14 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB získáno!",
   "details": "Detaily",
   "claimMore": "Získat více!",
+  "earnMoreSpace": "Získejte více prostoru!",
   "theyAlsoGetXGb": "Získají také {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB pro ně + {storageAmountInGB} GB pro Vás když zvýší svůj tarif.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB pokaždé, když se někdo zaregistruje do placeného plánu a použije Váš kód",
-  "shareTextReferralCode": "Kód pro doporučení Ente: {referralCode} \n\nPoužijte jej v Nastavení → Obecné → Doporučení a získejte {referralStorageInGB} GB zdarma po registraci k placenému plánu.\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos je soukromý a bezpečný domov pro vaše fotografie\n* Stáhněte si Ente Photos z https://ente.io/app\n* Založte si účet\n* Použijte referenční kód {referralCode} v Nastavení->Doporučení\n* Získejte {referralStorageInGB}GB zdarma, když přejdete na placený tarif",
   "claimFreeStorage": "Získat úložiště zdarma",
   "inviteYourFriends": "Pozvěte své přátele",
   "earnFreeStorage": "Získat úložiště zdarma",
@@ -333,9 +334,9 @@
   "youBothGet": "Oba získáte",
   "free": "zdarma",
   "failedToFetchReferralDetails": "Nelze načíst podrobnosti o doporučení. Zkuste to prosím znovu později.",
-  "referralStep1": "1. Přizpůsobte a sdílejte svůj kód se svými přáteli.",
-  "referralStep2": "2. Zaregistrují se k placenému plánu",
-  "referralStep3": "3. Oba získáte {storageInGB} GB* zdarma",
+  "referralStep1": "1. Upravte a sdílejte svůj kód.",
+  "referralStep2": "2. Zaregistrují se pomocí Vašeho kódu.",
+  "referralStep3": "3. {storageInGB}GB zdarma pro ně + {storageInGB}GB zdarma pro Vás když zvýší svůj tarif.",
   "referralsAreCurrentlyPaused": "Doporučení jsou momentálně pozastavena",
   "youCanAtMaxDoubleYourStorage": "Maximálně můžete zdvojnásobit své úložiště",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Vaše rodina dosud získala {storageAmountInGb} GB} false {Dosud jste získali {storageAmountInGb} GB} other {Dosud jste získali {storageAmountInGb} GB!}}",
@@ -379,6 +380,8 @@
   "subscribeToChangeLinkSetting": "Pro změnu nastavení odkazu potřebujete placené předplatné.",
   "subscribe": "Odebírat",
   "canOnlyRemoveFilesOwnedByYou": "Můžete odstranit pouze Vámi vlastněné soubory",
+  "cannotMoveToSharedAlbums": "Nelze přesunout do sdílených alb",
+  "cannotMoveToSharedAlbumsMessage": "Položky mohou být pouze přidány do sdílených alb, nikoliv přesunuty. Chcete je tedy místo toho přidat?",
   "deleteSharedAlbum": "Smazat sdílené album?",
   "deleteAlbum": "Odstranit album",
   "deleteAlbumDialog": "Odstranit také fotografie (a videa) obsažená v tomto albu ze <bold>všech</bold> ostatních alb, jejichž součástí jsou?",
@@ -471,6 +474,10 @@
   "mlConsentPrivacy": "Klikněte prosím zde pro více informací o této funkci v našich zásadách ochrany osobních údajů",
   "mlConsentConfirmation": "Rozumím a chci povolit strojové učení",
   "magicSearch": "Magické vyhledávání",
+  "magic": "Magie",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Objevit",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -581,7 +588,6 @@
   "backedUpFolders": "Zálohované složky",
   "backup": "Zálohování",
   "freeUpDeviceSpace": "Uvolnit místo na zařízení",
-  "freeUpDeviceSpaceDesc": "Uvolněte místo ve svém zařízení vymazáním souborů, které již byly zálohovány.",
   "allClear": "✨ Vše v pořádku",
   "noDeviceThatCanBeDeleted": "Na tomto zařízení nemáte žádné soubory, které by mohly být odstraněny",
   "removeDuplicates": "Odstranit duplikáty",
@@ -769,16 +775,6 @@
   "openSettings": "Otevřít Nastavení",
   "selectMorePhotos": "Vybrat více fotografií",
   "existingUser": "Existující uživatel",
-  "privateBackups": "Soukromé zálohy",
-  "forYourMemories": "pro Vaše vzpomínky",
-  "endtoendEncryptedByDefault": "Koncově šifrováno ve výchozím nastavení",
-  "safelyStored": "Bezpečně uloženo",
-  "atAFalloutShelter": "v protiatomovém krytu",
-  "designedToOutlive": "Navrženo k přežití",
-  "available": "Dostupné",
-  "everywhere": "všude",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobil, Web, Desktop",
   "newToEnte": "Nový uživatel Ente",
   "pleaseLoginAgain": "Prosím, přihlaste se znovu",
   "autoLogoutMessage": "Z technických důvodů jste byli odhlášeni. Omlouváme se za způsobené nepříjemnosti.",
@@ -795,7 +791,6 @@
   "couldNotBackUpTryLater": "Vaše data se nepodařilo zálohovat.\nZkusíme to znovu později.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente může šifrovat a uchovávat soubory pouze v případě, že mu k nim udělíte přístup",
   "pleaseGrantPermissions": "Prosím, udělte oprávnění",
-  "grantPermission": "Udělit oprávnění",
   "privateSharing": "Soukromé sdílení",
   "shareOnlyWithThePeopleYouWant": "Sdílejte pouze s lidmi, se kterými chcete",
   "usePublicLinksForPeopleNotOnEnte": "Používejte veřejné odkazy pro osoby, které nejsou na Ente",
@@ -817,6 +812,7 @@
   "name": "Název",
   "newest": "Nejnovější",
   "lastUpdated": "Naposledy aktualizováno",
+  "updated": "Aktualizováno",
   "deleteEmptyAlbums": "Odstranit prázdná alba",
   "deleteEmptyAlbumsWithQuestionMark": "Odstranit prázdná alba?",
   "deleteAlbumsDialogBody": "Tímto se odstraní všechna prázdná alba. Toto je užitečné, pokud chcete zredukovat nepořádek ve Vašem seznamu alb.",
@@ -957,7 +953,7 @@
   "pressAndHoldToPlayVideo": "Stiskněte a podržte pro přehrání videa",
   "pressAndHoldToPlayVideoDetailed": "Stiskněte a podržte prst na obrázku aby se spustilo přehrávání videa",
   "downloadFailed": "Stahování selhalo",
-  "deduplicateFiles": "Odduplikovat soubory",
+  "deduplicateFiles": "Duplicitní soubory",
   "deselectAll": "Zrušit výběr všech",
   "reviewDeduplicateItems": "Prosím, zkontrolujte a smažte položky, které považujete za duplicitní.",
   "clubByCaptureTime": "Seskupit podle doby zachycení",
@@ -1110,6 +1106,46 @@
   "loadMessage8": "web.ente.io má šikovný nástroj pro nahrávání souborů",
   "loadMessage9": "K bezpečnému šifrování Vašich dat používáme Xchacha20Poly1305",
   "photoDescriptions": "Popisky fotografií",
+  "searchResultFileName": "Název souboru",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Popisek",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Typ",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Koncovka souboru",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Osoba",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Sdíleno",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Nahráno uživatelem",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Značka kamery",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Model kamery",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Soubory",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Typy a názvy souborů",
   "location": "Poloha",
   "moments": "Momenty",
@@ -1259,6 +1295,7 @@
   "visibility": "Viditelnost",
   "hideFromMemories": "Skrýt ze vzpomínek",
   "showInMemories": "Zobrazit ve vzpomínkách",
+  "showIgnored": "Zobrazit ignorované",
   "create": "Vytvořit",
   "viewAll": "Zobrazit vše",
   "nothingSharedWithYouYet": "Zatím s Vámi nebylo nic sdíleno",
@@ -1277,7 +1314,6 @@
   "moveToHiddenAlbum": "Přesunout do skrytého alba",
   "fileTypes": "Typy souborů",
   "deleteConfirmDialogBody": "Tento účet je propojen s dalšími aplikacemi Ente, pokud je používáte. Vaše nahraná data ve všech aplikacích Ente budou naplánována k odstranění a Váš účet bude trvale smazán.",
-  "hearUsWhereTitle": "Jak jste se dozvěděli o Ente? (volitelné)",
   "hearUsExplanation": "Nesledujeme instalace aplikace. Pomůže nám, když nám sdělíte, kde jste nás našli!",
   "viewAddOnButton": "Zobrazit doplňky",
   "addOns": "Doplňky",
@@ -1423,6 +1459,7 @@
   "enterPin": "Zadejte PIN",
   "setNewPin": "Nastavit nový PIN",
   "appLock": "Zámek aplikace",
+  "lockScreenType": "Typ zámku",
   "noSystemLockFound": "Zámek systému nenalezen",
   "tapToUnlock": "Klepnutím odemknete",
   "tooManyIncorrectAttempts": "Příliš mnoho neúspěšných pokusů",
@@ -1508,6 +1545,26 @@
   "addNewPerson": "Přidat novou osobu",
   "addNameOrMerge": "Přidat jméno nebo sloučit",
   "mergeWithExisting": "Sloučit s existujícím",
+  "mergeWithPersonTitle": "Sloučit s {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Všechny fotografie z obou skupin obličejů budou sloučeny pod {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nová osoba",
   "addName": "Přidat název",
   "add": "Přidat",
@@ -1913,7 +1970,6 @@
   "areThey": "Jsou to ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Uložit jako jinou osobu",
-  "showLessFaces": "Zobrazit méně obličejů",
   "showMoreFaces": "Zobrazit více obličejů",
   "ignore": "Ignorovat",
   "merge": "Sloučit",
@@ -2083,6 +2139,7 @@
     }
   },
   "size": "Velikost",
+  "closest": "Nejbližší",
   "similarity": "Podobnost",
   "analyzingPhotosLocally": "Analyzuji Vaše fotografie lokálně...",
   "lookingForVisualSimilarities": "Hledání vizuálních podobností...",
@@ -2099,10 +2156,6 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "cLTitle1": "Komentáře a reakce",
-  "cLDesc1": "Představujeme komentáře a reakce na sdílené fotografie. Můžete reagovat nebo komentovat fotografii tím, že ji otevřete a použijete akce v dolní části. Všechny příchozí komentáře a reakce budou viditelné na záložce Sdílené.",
-  "cLTitle2": "Správce alb",
-  "cLDesc2": "Nyní můžete přiřadit jiného uživatele Ente jako správce Vašeho alba. Tímto budou moci přidat další diváky a spolupracovníky, odstranit fotografie z alba, a dokonce navrhovat účastníkům odstranit jejich fotografie.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2298,11 +2351,6 @@
   "ritualEmojiUseAction": "Použít",
   "ritualSearchEmpty": "Vytvořte rituál, abyste udrželi svůj návyk s fotografiemi v chodu.",
   "feed": "Kanál",
-  "likedYourPhoto": "Líbí se fotografie",
-  "commentedOnYourPhoto": "Okomentoval(a) fotografii",
-  "repliedToYourComment": "Odpověděl(a) na komentář",
-  "likedYourComment": "Líbí se komentář",
-  "likedYourReply": "Líbí se odpověď",
   "and1Other": "a 1 další",
   "andXOthers": "a {count} další",
   "@andXOthers": {
@@ -2428,5 +2476,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Nastavení vyhledávání",
+  "suggestions": "Doporučení",
+  "grantPermission": "Udělit oprávnění"
 }

@@ -2,6 +2,7 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
 import {
     CollectionShare,
+    type CollectionShareIntent,
     type CollectionShareProps,
 } from "components/Collections/CollectionShare";
 import type { FileListHeaderOrFooter } from "components/FileList";
@@ -125,6 +126,23 @@ export const GalleryBarAndListHeader: React.FC<
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
         useModalVisibility();
+    const [collectionShareIntent, setCollectionShareIntent] =
+        useState<CollectionShareIntent>();
+
+    const openCollectionShare = useCallback(() => {
+        setCollectionShareIntent(undefined);
+        showCollectionShare();
+    }, [showCollectionShare]);
+
+    const openCollectionManageLink = useCallback(() => {
+        setCollectionShareIntent("manage-link");
+        showCollectionShare();
+    }, [showCollectionShare]);
+
+    const closeCollectionShare = useCallback(() => {
+        setCollectionShareIntent(undefined);
+        collectionShareVisibilityProps.onClose();
+    }, [collectionShareVisibilityProps]);
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -159,44 +177,52 @@ export const GalleryBarAndListHeader: React.FC<
         const collectionSummary = toShowCollectionSummaries.get(
             activeCollectionID!,
         );
+        // Render the full CollectionHeader for pseudo-collections (e.g. trash)
+        // so header actions/menus are available even without a real collection.
+        const shouldRenderCollectionHeader =
+            mode != "people" &&
+            collectionSummary &&
+            (activeCollection ||
+                collectionSummary.id <= PseudoCollectionID.all);
+
         setFileListHeader({
-            component:
-                mode != "people" && activeCollection ? (
-                    <CollectionHeader
-                        {...{
-                            activeCollection,
-                            setActiveCollectionID,
-                            isActiveCollectionDownloadInProgress,
-                            onRemotePull,
-                            onAddSaveGroup,
-                            onMarkTempDeleted,
-                            onAddFileToCollection,
-                            onRemoteFilesPull,
-                            onVisualFeedback,
-                            fileNormalCollectionIDs,
-                            collectionNameByID,
-                            onSelectCollection,
-                            onSelectPerson,
-                        }}
-                        collectionSummary={collectionSummary!}
-                        onCollectionShare={showCollectionShare}
-                        onCollectionCast={showCollectionCast}
+            component: shouldRenderCollectionHeader ? (
+                <CollectionHeader
+                    {...{
+                        activeCollection,
+                        setActiveCollectionID,
+                        isActiveCollectionDownloadInProgress,
+                        onRemotePull,
+                        onAddSaveGroup,
+                        onMarkTempDeleted,
+                        onAddFileToCollection,
+                        onRemoteFilesPull,
+                        onVisualFeedback,
+                        fileNormalCollectionIDs,
+                        collectionNameByID,
+                        onSelectCollection,
+                        onSelectPerson,
+                    }}
+                    collectionSummary={collectionSummary}
+                    onCollectionShare={openCollectionShare}
+                    onCollectionManageLink={openCollectionManageLink}
+                    onCollectionCast={showCollectionCast}
+                />
+            ) : mode != "people" && collectionSummary ? (
+                <GalleryItemsHeaderAdapter>
+                    <GalleryItemsSummary
+                        name={collectionSummary.name}
+                        fileCount={collectionSummary.fileCount}
                     />
-                ) : mode != "people" && collectionSummary ? (
-                    <GalleryItemsHeaderAdapter>
-                        <GalleryItemsSummary
-                            name={collectionSummary.name}
-                            fileCount={collectionSummary.fileCount}
-                        />
-                    </GalleryItemsHeaderAdapter>
-                ) : activePerson ? (
-                    <PeopleHeader
-                        person={activePerson}
-                        {...{ onSelectPerson, people }}
-                    />
-                ) : (
-                    <></>
-                ),
+                </GalleryItemsHeaderAdapter>
+            ) : activePerson ? (
+                <PeopleHeader
+                    person={activePerson}
+                    {...{ onSelectPerson, people }}
+                />
+            ) : (
+                <></>
+            ),
             height: 68,
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -209,6 +235,8 @@ export const GalleryBarAndListHeader: React.FC<
         isActiveCollectionDownloadInProgress,
         activePerson,
         showCollectionShare,
+        openCollectionShare,
+        openCollectionManageLink,
         showCollectionCast,
         onRemotePull,
         onAddSaveGroup,
@@ -264,10 +292,12 @@ export const GalleryBarAndListHeader: React.FC<
                 <>
                     <CollectionShare
                         {...collectionShareVisibilityProps}
+                        onClose={closeCollectionShare}
                         collectionSummary={
                             toShowCollectionSummaries.get(activeCollectionID!)!
                         }
                         collection={activeCollection}
+                        intent={collectionShareIntent}
                         {...{
                             user,
                             emailByUserID,

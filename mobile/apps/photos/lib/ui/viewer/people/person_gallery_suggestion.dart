@@ -10,7 +10,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
@@ -197,7 +196,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     return faceCrops;
   }
 
-  void _navigateToCluster() {
+  Future<void> _navigateToCluster() async {
     if (allSuggestions.isEmpty ||
         currentSuggestionIndex >= allSuggestions.length) {
       return;
@@ -210,7 +209,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     sortedFiles.sort(
       (a, b) => b.creationTime!.compareTo(a.creationTime!),
     );
-    Navigator.of(context).push(
+    final result = await Navigator.of(context).push<ClusterPageResult>(
       MaterialPageRoute(
         builder: (context) => ClusterPage(
           sortedFiles,
@@ -220,6 +219,46 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         ),
       ),
     );
+
+    if (!mounted || result != ClusterPageResult.ignoredPerson) {
+      return;
+    }
+
+    await _consumeCurrentSuggestionAfterExternalAction();
+  }
+
+  Future<void> _consumeCurrentSuggestionAfterExternalAction() async {
+    if (isProcessing ||
+        allSuggestions.isEmpty ||
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
+
+    setState(() {
+      isProcessing = true;
+    });
+
+    try {
+      await _animateOut();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        hasCurrentSuggestion = false;
+      });
+      await _prepareNextSuggestion();
+    } catch (e, s) {
+      _logger.severe(
+        "Error consuming suggestion after external action",
+        e,
+        s,
+      );
+      if (mounted) {
+        setState(() {
+          isProcessing = false;
+        });
+      }
+    }
   }
 
   Future<void> _handleUserChoice(bool accepted) async {
@@ -424,6 +463,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    const primaryActionColor = Color(0xFF08C225);
+    final cardRadius = BorderRadius.circular(20);
+    final actionButtonRadius = BorderRadius.circular(14);
+    const closeButtonSize = 24.0;
 
     return SlideTransition(
       position: _slideAnimation!,
@@ -439,12 +482,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: colorScheme.fillFaint,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colorScheme.strokeFainter,
-                    width: 1,
-                  ),
+                  color: colorScheme.backgroundElevated2,
+                  borderRadius: cardRadius,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -496,19 +535,15 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: colorScheme.warning700,
-                                  width: 1,
-                                ),
+                                color: colorScheme.fillFaint,
+                                borderRadius: actionButtonRadius,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.close,
-                                    color: colorScheme.warning500,
+                                    color: colorScheme.textBase,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -518,7 +553,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                             ? textTheme.bodyBold
                                             : textTheme.body)
                                         .copyWith(
-                                      color: colorScheme.warning500,
+                                      color: colorScheme.textBase,
                                     ),
                                   ),
                                 ],
@@ -538,15 +573,15 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: colorScheme.primary500,
-                                borderRadius: BorderRadius.circular(8),
+                                color: primaryActionColor,
+                                borderRadius: actionButtonRadius,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Icon(
                                     Icons.check,
-                                    color: textBaseDark,
+                                    color: Colors.white,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -556,7 +591,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                             ? textTheme.bodyBold
                                             : textTheme.body)
                                         .copyWith(
-                                      color: textBaseDark,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ],
@@ -591,17 +626,24 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
               ),
               if (widget.onClose != null)
                 Positioned(
-                  top: 4,
-                  right: 12,
+                  top: 16,
+                  right: 24,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: widget.onClose,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Icon(
+                      width: closeButtonSize,
+                      height: closeButtonSize,
+                      decoration: BoxDecoration(
+                        color: colorScheme.fillFaint,
+                        borderRadius: BorderRadius.circular(
+                          closeButtonSize / 2,
+                        ),
+                      ),
+                      child: const Icon(
                         Icons.close,
-                        size: 16,
-                        color: colorScheme.textBase,
+                        size: 14,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -643,11 +685,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
               decoration: ShapeDecoration(
                 shape: faceThumbnailSquircleBorder(
                   side: 72,
-                  borderSide: BorderSide(
-                    color: getEnteColorScheme(context).strokeFainter,
-                    width: 1,
-                  ),
                 ),
+                color: getEnteColorScheme(context).fillFaint,
               ),
               child: FaceThumbnailSquircleClip(
                 child: (i == -1)

@@ -19,13 +19,11 @@ class CollageWithTwoItems extends StatefulWidget {
     this.second, {
     super.key,
     this.onControllerReady,
-    this.enableExtendedLayouts = false,
     this.onSelectionClearSetter,
   });
 
   final EnteFile first, second;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
-  final bool enableExtendedLayouts;
   final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
@@ -108,17 +106,16 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems>
             });
           },
         ),
-        if (widget.enableExtendedLayouts)
-          CollageLayoutIconButton(
-            child: ThirdVariantIcon(
-              isActive: _variant == Variant.third,
-            ),
-            onTap: () {
-              setState(() {
-                _variant = Variant.third;
-              });
-            },
+        CollageLayoutIconButton(
+          child: ThirdVariantIcon(
+            isActive: _variant == Variant.third,
           ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.third;
+            });
+          },
+        ),
       ],
     );
   }

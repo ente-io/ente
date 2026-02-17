@@ -18,6 +18,36 @@ class StorageCardWidget extends StatefulWidget {
   State<StorageCardWidget> createState() => _StorageCardWidgetState();
 }
 
+class _DotsPainter extends CustomPainter {
+  static const double _dotRadius = 1.45;
+  static const double _horizontalSpacing = 15.65;
+  static const double _verticalSpacing = 15.65;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.024)
+      ..style = PaintingStyle.fill;
+
+    final horizontalCount = (size.width / _horizontalSpacing).ceil() + 1;
+    final verticalCount = (size.height / _verticalSpacing).ceil() + 1;
+
+    for (int row = 0; row < verticalCount; row++) {
+      for (int col = 0; col < horizontalCount; col++) {
+        final x = col * _horizontalSpacing + (_horizontalSpacing / 2);
+        final y = row * _verticalSpacing + (_verticalSpacing / 2);
+
+        if (x <= size.width + _dotRadius && y <= size.height + _dotRadius) {
+          canvas.drawCircle(Offset(x, y), _dotRadius, paint);
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class _StorageCardWidgetState extends State<StorageCardWidget> {
   final _logger = Logger((_StorageCardWidgetState).toString());
   int? familyMemberStorageLimit;
@@ -54,27 +84,40 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   Widget containerForUserDetails(
     UserDetails? userDetails,
   ) {
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 130),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        gradient: const LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Color(0xFF212121),
-            Color(0xFF434343),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 130),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: const LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Color(0xFF212121),
+              Color(0xFF434343),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _DotsPainter(),
+                size: Size.infinite,
+              ),
+            ),
+            userDetails is UserDetails
+                ? _userDetails(userDetails)
+                : const Center(
+                    child: EnteLoadingWidget(
+                      color: strokeBaseDark,
+                    ),
+                  ),
           ],
         ),
       ),
-      child: userDetails is UserDetails
-          ? _userDetails(userDetails)
-          : const Center(
-              child: EnteLoadingWidget(
-                color: strokeBaseDark,
-              ),
-            ),
     );
   }
 

@@ -6,13 +6,16 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
-import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/viewer/people/merge_clusters_to_person_sheet.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -36,6 +39,13 @@ class _PeopleSelectionActionWidgetState
   late Future<Map<String, PersonEntity>> personEntitiesMapFuture;
   final _logger = Logger("PeopleSelectionActionWidget");
 
+  bool _isUnnamedIgnoredPerson(PersonEntity person) {
+    final normalizedName = person.data.name.trim().toLowerCase();
+    return normalizedName.isEmpty ||
+        normalizedName == "(ignored)" ||
+        normalizedName == "(hidden)";
+  }
+
   @override
   void initState() {
     super.initState();
@@ -49,9 +59,9 @@ class _PeopleSelectionActionWidgetState
     super.dispose();
   }
 
-  List<String> _getSelectedPersonIds() {
+  List<String> _getSelectedPersonIds(Map<String, PersonEntity> personMap) {
     return widget.selectedPeople.personIds
-        .where((id) => !id.startsWith('cluster_'))
+        .where((id) => !id.startsWith('cluster_') && personMap.containsKey(id))
         .toList();
   }
 
@@ -90,48 +100,72 @@ class _PeopleSelectionActionWidgetState
         }
         final personMap = snapshot.data!;
         final List<SelectionActionButton> items = [];
-        final selectedPersonIds = _getSelectedPersonIds();
+        final selectedPersonIds = _getSelectedPersonIds(personMap);
         final selectedClusterIds = _getSelectedClusterIds();
         final onlyOnePerson =
             selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
         final onlyPersonSelected =
             selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
+        final ignoredSelectedPersonIds = selectedPersonIds
+            .where((id) => personMap[id]?.data.isIgnored ?? false)
+            .toList();
+        final onlyIgnoredPersonsSelected =
+            ignoredSelectedPersonIds.isNotEmpty &&
+                selectedClusterIds.isEmpty &&
+                ignoredSelectedPersonIds.length == selectedPersonIds.length;
         final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
         final bool showEditAction = onlyOnePerson;
         final bool showReviewAction = onlyOnePerson;
-        final bool showMergeAction = selectedClusterIds.isNotEmpty;
-        final bool showResetAction = onlyOnePerson;
-        final bool showAutoAddAction = onlyPersonSelected;
-        final bool showPinAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => !(personMap[id]?.data.isPinned ?? false),
-            );
-        final bool showUnpinAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => personMap[id]?.data.isPinned ?? false,
-            );
-        final bool showHideFromMemoriesAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => !(personMap[id]?.data.hideFromMemories ?? false),
-            );
-        final bool showShowInMemoriesAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => personMap[id]?.data.hideFromMemories ?? false,
-            );
-        final bool showIgnoreAction =
-            selectedClusterIds.isNotEmpty && selectedPersonIds.isEmpty;
+        final bool showMergeAction =
+            onlyIgnoredPersonsSelected ? false : selectedClusterIds.isNotEmpty;
+        final bool showResetAction =
+            onlyIgnoredPersonsSelected ? false : onlyOnePerson;
+        final bool showShowPersonAction = onlyIgnoredPersonsSelected;
+        final bool showAutoAddAction =
+            onlyIgnoredPersonsSelected ? false : onlyPersonSelected;
+        final bool showPinAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => !(personMap[id]?.data.isPinned ?? false),
+                );
+        final bool showUnpinAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => personMap[id]?.data.isPinned ?? false,
+                );
+        final bool showHideFromMemoriesAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+                );
+        final bool showShowInMemoriesAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => personMap[id]?.data.hideFromMemories ?? false,
+                );
+        final bool hasNonIgnoredSelectedPerson = selectedPersonIds.any(
+          (id) => !(personMap[id]?.data.isIgnored ?? true),
+        );
+        final bool showIgnoreAction = onlyIgnoredPersonsSelected
+            ? false
+            : selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
         final bool hasVisibleAction = showEditAction ||
             showReviewAction ||
             showIgnoreAction ||
             showMergeAction ||
             showResetAction ||
+            showShowPersonAction ||
             showPinAction ||
             showUnpinAction ||
             showHideFromMemoriesAction ||
@@ -180,6 +214,14 @@ class _PeopleSelectionActionWidgetState
             icon: Icons.remove_outlined,
             onTap: _onResetPerson,
             shouldShow: showResetAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).showPerson,
+            icon: Icons.visibility_outlined,
+            onTap: _onShowPerson,
+            shouldShow: showShowPersonAction,
           ),
         );
         items.add(
@@ -260,10 +302,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onEditPerson() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -279,10 +321,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onReviewSuggestion() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -294,7 +336,8 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _autoAddToAlbum() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.isEmpty) return;
     showCollectionActionSheet(
       context,
@@ -305,10 +348,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _updatePinState(bool shouldPin) async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    if (selectedPersonIds.isEmpty) return;
     try {
       final personMap = await personEntitiesMapFuture;
+      final selectedPersonIds = _getSelectedPersonIds(personMap);
+      if (selectedPersonIds.isEmpty) return;
       for (final personID in selectedPersonIds) {
         final person = personMap[personID];
         if (person == null || person.data.name.isEmpty) continue;
@@ -327,10 +370,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _updateHideFromMemoriesState(bool shouldHide) async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    if (selectedPersonIds.isEmpty) return;
     try {
       final personMap = await personEntitiesMapFuture;
+      final selectedPersonIds = _getSelectedPersonIds(personMap);
+      if (selectedPersonIds.isEmpty) return;
       for (final personID in selectedPersonIds) {
         final person = personMap[personID];
         if (person == null || person.data.name.isEmpty) continue;
@@ -349,10 +392,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onResetPerson() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -373,12 +416,13 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onIgnore() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     final selectedClusterIds = _getSelectedClusterIds();
     if (selectedPersonIds.isEmpty && selectedClusterIds.isEmpty) return;
     final multiple = (selectedPersonIds.length + selectedClusterIds.length) > 1;
 
-    await showChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: multiple
           ? AppLocalizations.of(context).areYouSureYouWantToIgnoreThesePersons
@@ -387,62 +431,194 @@ class _PeopleSelectionActionWidgetState
           ? AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed
           : AppLocalizations.of(context).thePersonWillNotBeDisplayed,
       firstButtonLabel: AppLocalizations.of(context).yesIgnore,
+    );
+    if (!mounted || result?.action != ButtonAction.first) {
+      return;
+    }
+
+    try {
+      await _ignoreSelectedItems(
+        personMap: personMap,
+        selectedPersonIds: selectedPersonIds,
+        selectedClusterIds: selectedClusterIds,
+      );
+    } catch (e, s) {
+      _logger.severe('Ignoring a cluster failed', e, s);
+    }
+  }
+
+  Future<void> _ignoreSelectedItems({
+    required Map<String, PersonEntity> personMap,
+    required List<String> selectedPersonIds,
+    required List<String> selectedClusterIds,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final personIdsToIgnore = selectedPersonIds.where((personID) {
+      final person = personMap[personID];
+      return person != null && !person.data.isIgnored;
+    }).toList();
+    final total = selectedClusterIds.length + personIdsToIgnore.length;
+    if (total == 0) {
+      widget.selectedPeople.clearAll();
+      return;
+    }
+
+    final shouldShowProgressDialog = total > 1;
+    final dialog = shouldShowProgressDialog
+        ? createProgressDialog(
+            context,
+            _bulkIgnoreProgressMessage(l10n, 0, total),
+          )
+        : null;
+    if (dialog != null) {
+      await dialog.show();
+    }
+    var completed = 0;
+    var hasUpdates = false;
+    var completedAll = false;
+
+    try {
+      for (final clusterID in selectedClusterIds) {
+        await ClusterFeedbackService.instance.ignoreCluster(
+          clusterID,
+          firePeopleChangedEvent: false,
+        );
+        completed++;
+        hasUpdates = true;
+        dialog?.update(
+          message: _bulkIgnoreProgressMessage(l10n, completed, total),
+        );
+      }
+
+      for (final personID in personIdsToIgnore) {
+        final person = personMap[personID];
+        if (person == null) continue;
+        final ignoredPerson = person.copyWith(
+          data: person.data.copyWith(isHidden: true),
+        );
+        await PersonService.instance.updatePerson(ignoredPerson);
+        completed++;
+        hasUpdates = true;
+        dialog?.update(
+          message: _bulkIgnoreProgressMessage(l10n, completed, total),
+        );
+      }
+
+      completedAll = true;
+    } finally {
+      if (completedAll) {
+        widget.selectedPeople.clearAll();
+      }
+      if (hasUpdates) {
+        Bus.instance.fire(PeopleChangedEvent());
+      }
+      if (dialog != null) {
+        await dialog.hide();
+      }
+    }
+  }
+
+  String _bulkIgnoreProgressMessage(
+    AppLocalizations l10n,
+    int completed,
+    int total,
+  ) {
+    return "${l10n.pleaseWait} ($completed/$total)";
+  }
+
+  Future<void> _onShowPerson() async {
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
+    if (selectedPersonIds.isEmpty) return;
+    final ignoredSelectedPersonIds = selectedPersonIds
+        .where((id) => personMap[id]?.data.isIgnored ?? false)
+        .toList();
+    if (ignoredSelectedPersonIds.length != selectedPersonIds.length) {
+      return;
+    }
+    final multiple = ignoredSelectedPersonIds.length > 1;
+
+    await showChoiceDialog(
+      context,
+      title: multiple
+          ? AppLocalizations.of(context)
+              .areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
+          : AppLocalizations.of(context)
+              .areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+      firstButtonLabel: multiple
+          ? AppLocalizations.of(context).yesShowPeople
+          : AppLocalizations.of(context).yesShowPerson,
       firstButtonOnTap: () async {
         try {
-          for (final clusterID in selectedClusterIds) {
-            await ClusterFeedbackService.instance.ignoreCluster(clusterID);
-          }
-          final personMap = await personEntitiesMapFuture;
-          for (final personID in selectedPersonIds) {
+          for (final personID in ignoredSelectedPersonIds) {
             final person = personMap[personID];
             if (person == null) continue;
-            final ignoredPerson = person.copyWith(
-              data: person.data.copyWith(name: "", isHidden: true),
-            );
-            await PersonService.instance.updatePerson(ignoredPerson);
+            if (_isUnnamedIgnoredPerson(person)) {
+              await PersonService.instance.deletePerson(person.remoteID);
+            } else {
+              await PersonService.instance.updateAttributes(
+                person.remoteID,
+                isHidden: false,
+              );
+            }
           }
           Bus.instance.fire(PeopleChangedEvent());
           widget.selectedPeople.clearAll();
         } catch (e, s) {
-          _logger.severe('Ignoring a cluster failed', e, s);
+          _logger.severe('Failed to show person(s)', e, s);
         }
       },
     );
   }
 
   Future<void> _onMerge() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     final selectedClusterIds = _getSelectedClusterIds();
     if (selectedClusterIds.isEmpty) return;
 
-    final personMap = await personEntitiesMapFuture;
     if (!mounted) return;
     final namedSelectedPersonIds =
         _getNamedSelectedPersonIds(selectedPersonIds, personMap);
 
     String? targetPersonId;
+    PersonEntity? targetPerson;
+    String? seedClusterId;
     if (namedSelectedPersonIds.length == 1) {
       targetPersonId = namedSelectedPersonIds.first;
+      targetPerson = personMap[targetPersonId];
     } else {
-      final initialPersons =
-          await AddFilesToPersonPage.prefetchNamedPersons(context);
-      if (!mounted) return;
-      if (initialPersons == null || initialPersons.isEmpty) {
-        return;
-      }
-      targetPersonId = await showMergeClustersToPersonSheet(
-        context,
-        initialPersons: initialPersons,
+      final initialPersons = await SearchService.instance.getAllFace(
+        null,
+        minClusterSize: kMinimumClusterSizeAllFaces,
       );
       if (!mounted) return;
+      final namedPersons = initialPersons
+          .where(
+            (result) =>
+                (result.params[kPersonParamID] as String?)?.isNotEmpty ?? false,
+          )
+          .toList();
+      final selection = await showMergeClustersToPersonPage(
+        context,
+        initialPersons: namedPersons,
+        seedClusterId: selectedClusterIds.first,
+      );
+      if (!mounted) return;
+      targetPersonId = selection?.personId;
+      seedClusterId = selection?.seedClusterId;
+      targetPerson = selection?.person;
     }
 
     if (targetPersonId == null || targetPersonId.isEmpty) return;
 
-    final person = personMap[targetPersonId];
+    final person = targetPerson ?? personMap[targetPersonId];
     if (person == null) return;
     try {
       for (final clusterID in selectedClusterIds) {
+        if (seedClusterId != null && clusterID == seedClusterId) {
+          continue;
+        }
         await ClusterFeedbackService.instance.addClusterToExistingPerson(
           clusterID: clusterID,
           person: person,

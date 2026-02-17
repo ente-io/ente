@@ -10,11 +10,6 @@ import (
 	"golang.org/x/crypto/nacl/box"
 )
 
-func init() {
-	// Initialize libsodium
-	InitSodiumForTest()
-}
-
 func TestEncryptWithSameNonce(t *testing.T) {
 	// Test that both implementations produce identical output with the same nonce
 	data := "Hello, World!"

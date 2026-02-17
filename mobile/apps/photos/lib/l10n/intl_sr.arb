@@ -48,7 +48,6 @@
   "incorrectRecoveryKeyBody": "Унети кључ за опоравак је натачан",
   "forgotPassword": "Заборавио сам лозинку",
   "enterYourRecoveryKey": "Унесите Ваш кључ за опоравак",
-  "noRecoveryKey": "Немате кључ за опоравак?",
   "sorry": "Извините",
   "noRecoveryKeyNoDecryption": "Због природе нашег протокола за крај-до-крај енкрипцију, ваши подаци не могу бити дешифровани без ваше лозинке или кључа за опоравак",
   "verifyEmail": "Верификуј е-пошту",
@@ -115,7 +114,6 @@
   "verifyPassword": "Верификујте лозинку",
   "recoveryKey": "Кључ за опоравак",
   "recoveryKeyOnForgotPassword": "Ако заборавите лозинку, једини начин на који можете повратити податке је са овим кључем.",
-  "recoveryKeySaveDescription": "Не чувамо овај кључ, молимо да сачувате кључ од 24 речи на сигурном месту.",
   "doThisLater": "Уради ово касније",
   "saveKey": "Сачувај кључ",
   "recoveryKeyCopiedToClipboard": "Кључ за опоравак је копиран у међуспремник",
@@ -288,8 +286,6 @@
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ сваки пут када се неко претплати на неку од наших понуда и при том унесе ваш код",
   "claimFreeStorage": "Освоји бесплатан простор на диску",
   "inviteYourFriends": "Позови своје пријатеље",
-  "referralStep2": "2. Они се претплате на понуду која се плаћа",
-  "referralStep3": "3. Обоје добијате {storageInGB} ГБ* бесплатно",
   "referralsAreCurrentlyPaused": "Препоручивање је тренутно паузирано",
   "faq": "Честа питања",
   "help": "Помоћ",
@@ -621,13 +617,6 @@
   "openSettings": "Отвори подешавања",
   "selectMorePhotos": "Изабери још фотографија",
   "existingUser": "Постојећи корисник",
-  "privateBackups": "Приватни бекапи",
-  "forYourMemories": "за твоје успомене",
-  "safelyStored": "Сигурно похрањено",
-  "atAFalloutShelter": "у подземном бункеру",
-  "designedToOutlive": "Направљено да надживи",
-  "available": "Доступно",
-  "everywhere": "свуда",
   "newToEnte": "Нови на Енте",
   "pleaseLoginAgain": "Молимо, улогујте се поново",
   "autoLogoutMessage": "Излоговани сте услед техничке грешке. Извињавамо се за непријатност.",
@@ -644,7 +633,6 @@
   "couldNotBackUpTryLater": "Нисмо могли да бекапујемо ваше податке.\nПокушаћемо касније.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Енте може да екриптује и сачува фајлове једино ако дозволите приступ њима",
   "pleaseGrantPermissions": "Молимо, дозволите приступ",
-  "grantPermission": "Дозволите приступ",
   "privateSharing": "Приватно дељење",
   "shareOnlyWithThePeopleYouWant": "Дели само са људима са којима желиш",
   "usePublicLinksForPeopleNotOnEnte": "Користи јавне линкове за људима који нису на Енте",
@@ -887,7 +875,6 @@
   "areThey": "Да ли је то",
   "questionmark": "?",
   "saveAsAnotherPerson": "Сачувај као другу особу",
-  "showLessFaces": "Прикажи мање лица",
   "showMoreFaces": "Прикажи још лица",
   "ignore": "Игнориши",
   "merge": "Споји",
@@ -916,5 +903,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "grantPermission": "Дозволите приступ"
 }

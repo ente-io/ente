@@ -1023,5 +1023,7 @@
   "usageFamily": "Family",
   "searchSettings": "Search settings",
   "suggestions": "Suggestions",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "viewActiveSessions": "View active sessions",
+  "authToViewYourActiveSessions": "Please authenticate to view your active sessions"
 }

@@ -22,7 +22,7 @@ import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 
 const double kContainerHeight = 36;
 
@@ -42,8 +42,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !flagService.hasGrantedMLConsent &&
-      flagService.hasSyncedAccountFlags() &&
+  bool _showMlBanner = !hasGrantedMLConsent &&
+      (isOfflineMode || flagService.hasSyncedAccountFlags()) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
 
@@ -81,8 +81,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !flagService.hasGrantedMLConsent &&
-            !localSettings.hasSeenMLEnablingBanner;
+        _showMlBanner =
+            !hasGrantedMLConsent && !localSettings.hasSeenMLEnablingBanner;
         setState(() {});
       }
     });
@@ -148,7 +148,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   onTap: () async => {
                     await routeToPage(
                       context,
-                      const EnableMachineLearningConsent(),
+                      const MachineLearningSettingsPage(),
                       forceCustomPageRoute: true,
                     ),
                   },

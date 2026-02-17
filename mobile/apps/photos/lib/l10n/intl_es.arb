@@ -59,7 +59,6 @@
   "incorrectRecoveryKeyBody": "La clave de recuperación introducida es incorrecta",
   "forgotPassword": "Olvidé mi contraseña",
   "enterYourRecoveryKey": "Introduce tu clave de recuperación",
-  "noRecoveryKey": "¿Sin clave de recuperación?",
   "sorry": "Lo sentimos",
   "noRecoveryKeyNoDecryption": "Debido a la naturaleza de nuestro protocolo de cifrado de extremo a extremo, tus datos no pueden ser descifrados sin tu contraseña o clave de recuperación",
   "verifyEmail": "Verificar correo electrónico",
@@ -67,6 +66,7 @@
   "checkInboxAndSpamFolder": "Revisa tu bandeja de entrada (y spam) para completar la verificación",
   "tapToEnterCode": "Toca para introducir el código",
   "resendEmail": "Reenviar correo electrónico",
+  "resendCode": "Reenviar código",
   "weHaveSendEmailTo": "Hemos enviado un correo a <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
@@ -88,6 +88,7 @@
   "weakStrength": "Poco segura",
   "strongStrength": "Segura",
   "moderateStrength": "Moderada",
+  "strongPassword": "Contraseña segura",
   "passwordStrength": "Seguridad de la contraseña: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -130,7 +131,6 @@
   "verifyPassword": "Verificar contraseña",
   "recoveryKey": "Clave de recuperación",
   "recoveryKeyOnForgotPassword": "Si olvidas tu contraseña, la única forma de recuperar tus datos es con esta clave.",
-  "recoveryKeySaveDescription": "Nosotros no almacenamos esta clave. Por favor, guarda esta clave de 24 palabras en un lugar seguro.",
   "doThisLater": "Hacerlo más tarde",
   "saveKey": "Guardar Clave",
   "recoveryKeyCopiedToClipboard": "Clave de recuperación copiada al portapapeles",
@@ -153,9 +153,10 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Copia y pega este código\na tu aplicación de autenticador",
   "tapToCopy": "toca para copiar",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Escanea este código QR con tu aplicación de autenticación",
+  "twoFAVerification": "Verificación de 2FA",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Ingresa el código de seis dígitos de tu aplicación de autenticación",
   "confirm": "Confirmar",
-  "setupComplete": "Configuración completa",
+  "setupComplete": "Configuración completada",
   "saveYourRecoveryKeyIfYouHaventAlready": "Guarda tu clave de recuperación si aún no lo has hecho",
   "thisCanBeUsedToRecoverYourAccountIfYou": "Esto puede utilizarse para recuperar tu cuenta si pierdes tu segundo factor",
   "twofactorAuthenticationPageTitle": "Autenticación en dos pasos",
@@ -321,11 +322,14 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "¡{storageAmountInGB} GB reclamados!",
   "details": "Detalles",
   "claimMore": "¡Obtén más!",
+  "earnMoreSpace": "¡Consigue más espacio!",
   "theyAlsoGetXGb": "También obtienen {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB para ellos + {storageAmountInGB} GB para ti cuando actualicen.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código",
-  "shareTextReferralCode": "Código de referido de Ente: {referralCode} \n\nAñádelo en Ajustes → General → Referidos para obtener {referralStorageInGB} GB gratis tras comprar un plan de pago.\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.io/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
   "claimFreeStorage": "Obtén almacenamiento gratuito",
   "inviteYourFriends": "Invita a tus amigos",
   "earnFreeStorage": "Gana almacenamiento gratuito",
@@ -333,9 +337,9 @@
   "youBothGet": "Ambos obtienen",
   "free": "gratis",
   "failedToFetchReferralDetails": "No se pueden obtener los detalles de la referencia. Por favor, inténtalo de nuevo más tarde.",
-  "referralStep1": "1. Personaliza y comparte tu código con tus amigos.",
-  "referralStep2": "2. Se suscriben a un plan de pago",
-  "referralStep3": "3. Ambos obtienen {storageInGB} GB* gratis",
+  "referralStep1": "1. Personaliza y comparte tu código.",
+  "referralStep2": "2. Se inscriben a Ente usando tu código.",
+  "referralStep3": "3. {storageInGB}GB gratis para ellos + {storageInGB}GB gratis para ti cuando actualicen.",
   "referralsAreCurrentlyPaused": "Las referencias están actualmente en pausa",
   "youCanAtMaxDoubleYourStorage": "Puedes maximizar el doble de tu almacenamiento",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Tu familia ha obtenido {storageAmountInGb} GB hasta el momento} false {Tú has obtenido {storageAmountInGb} GB hasta el momento} other {¡Tú has obtenido {storageAmountInGb} GB hasta el momento!}}",
@@ -379,6 +383,8 @@
   "subscribeToChangeLinkSetting": "Necesitas una suscripción de pago para cambiar la configuración de este enlace.",
   "subscribe": "Suscribirse",
   "canOnlyRemoveFilesOwnedByYou": "Sólo puede eliminar archivos de tu propiedad",
+  "cannotMoveToSharedAlbums": "No se puede mover a álbumes compartidos",
+  "cannotMoveToSharedAlbumsMessage": "Los elementos solo pueden añadirse a los álbumes compartidos, no movidos. ¿Te gustaría añadir en su lugar?",
   "deleteSharedAlbum": "¿Borrar álbum compartido?",
   "deleteAlbum": "Borrar álbum",
   "deleteAlbumDialog": "¿También eliminar las fotos (y los vídeos) presentes en este álbum de <bold>todos</bold> los otros álbumes de los que forman parte?",
@@ -471,6 +477,10 @@
   "mlConsentPrivacy": "Por favor, haz clic aquí para más detalles sobre esta característica en nuestra política de privacidad",
   "mlConsentConfirmation": "Entiendo y deseo habilitar el aprendizaje automático",
   "magicSearch": "Búsqueda mágica",
+  "magic": "Magia",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Descubrir",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -581,7 +591,6 @@
   "backedUpFolders": "Carpetas con copia de seguridad",
   "backup": "Copia de seguridad",
   "freeUpDeviceSpace": "Liberar espacio del dispositivo",
-  "freeUpDeviceSpaceDesc": "Ahorra espacio en tu dispositivo limpiando archivos que tienen copia de seguridad.",
   "allClear": "✨ Todo limpio",
   "noDeviceThatCanBeDeleted": "No tienes archivos en este dispositivo que puedan ser borrados",
   "removeDuplicates": "Eliminar duplicados",
@@ -769,16 +778,6 @@
   "openSettings": "Abrir Ajustes",
   "selectMorePhotos": "Seleccionar más fotos",
   "existingUser": "Usuario existente",
-  "privateBackups": "Copias de seguridad privadas",
-  "forYourMemories": "para tus recuerdos",
-  "endtoendEncryptedByDefault": "Encriptado de extremo a extremo por defecto",
-  "safelyStored": "Almacenado con seguridad",
-  "atAFalloutShelter": "en un refugio blindado",
-  "designedToOutlive": "Diseñado para sobrevivir",
-  "available": "Disponible",
-  "everywhere": "todas partes",
-  "androidIosWebDesktop": "Android, iOS, Web, Computadora",
-  "mobileWebDesktop": "Celular, Web, Computadora",
   "newToEnte": "Nuevo en Ente",
   "pleaseLoginAgain": "Por favor, vuelve a iniciar sesión",
   "autoLogoutMessage": "Debido a un fallo técnico, has sido desconectado. Nuestras disculpas por las molestias.",
@@ -795,7 +794,6 @@
   "couldNotBackUpTryLater": "No pudimos hacer una copia de seguridad de tus datos.\nVolveremos a intentarlo más tarde.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente puede cifrar y preservar archivos solo si concedes acceso a ellos",
   "pleaseGrantPermissions": "Por favor, concede permiso",
-  "grantPermission": "Conceder permiso",
   "privateSharing": "Compartir en privado",
   "shareOnlyWithThePeopleYouWant": "Comparte solo con la gente que quieres",
   "usePublicLinksForPeopleNotOnEnte": "Usar enlaces públicos para personas que no están en Ente",
@@ -817,6 +815,7 @@
   "name": "Nombre",
   "newest": "Más reciente",
   "lastUpdated": "Última actualización",
+  "updated": "Actualizado",
   "deleteEmptyAlbums": "Eliminar álbumes vacíos",
   "deleteEmptyAlbumsWithQuestionMark": "¿Eliminar álbumes vacíos?",
   "deleteAlbumsDialogBody": "Esto eliminará todos los álbumes vacíos. Esto es útil cuando quieres reducir el desorden en tu lista de álbumes.",
@@ -915,6 +914,8 @@
   "sortAlbumsBy": "Ordenar por",
   "sortNewestFirst": "Más recientes primero",
   "sortOldestFirst": "Más antiguos primero",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Renombrar",
   "leaveSharedAlbum": "¿Dejar álbum compartido?",
   "leaveAlbum": "Abandonar álbum",
@@ -1110,6 +1111,46 @@
   "loadMessage8": "web.ente.io tiene un cargador sofisticado",
   "loadMessage9": "Utilizamos Xchacha20Poly1305 para cifrar tus datos de forma segura",
   "photoDescriptions": "Descripciones de fotos",
+  "searchResultFileName": "Nombre del archivo",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Descripción",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tipo",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Extensión del archivo",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Persona",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Compartido",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Subido por",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Fabricante de la cámara",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Modelo de cámara",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Archivos",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Tipos de archivo y nombres",
   "location": "Ubicación",
   "moments": "Momentos",
@@ -1259,6 +1300,7 @@
   "visibility": "Visibilidad",
   "hideFromMemories": "Ocultar de los recuerdos",
   "showInMemories": "Mostrar en recuerdos",
+  "showIgnored": "Mostrar ignorados",
   "create": "Crear",
   "viewAll": "Ver todo",
   "nothingSharedWithYouYet": "Aún no hay nada compartido contigo",
@@ -1277,7 +1319,6 @@
   "moveToHiddenAlbum": "Mover al álbum oculto",
   "fileTypes": "Tipos de archivos",
   "deleteConfirmDialogBody": "Esta cuenta está vinculada a otras aplicaciones de Ente, si utilizas alguna. Se programará la eliminación de los datos cargados en todas las aplicaciones de Ente, y tu cuenta se eliminará permanentemente.",
-  "hearUsWhereTitle": "¿Cómo escuchaste acerca de Ente? (opcional)",
   "hearUsExplanation": "No rastreamos las aplicaciones instaladas. ¡Nos ayudarías si nos dijeras dónde nos encontraste!",
   "viewAddOnButton": "Ver complementos",
   "addOns": "Complementos",
@@ -1382,7 +1423,7 @@
   "stopCastingBody": "¿Quieres dejar de transmitir?",
   "castIPMismatchTitle": "Error al transmitir álbum",
   "castIPMismatchBody": "Por favor, asegúrate de estar en la misma red que el televisor.",
-  "pairingComplete": "Emparejamiento completo",
+  "pairingComplete": "Emparejamiento completado",
   "savingEdits": "Guardando las ediciones...",
   "autoPair": "Emparejamiento automático",
   "pairWithPin": "Emparejar con PIN",
@@ -1423,6 +1464,7 @@
   "enterPin": "Ingresa tu contraseña",
   "setNewPin": "Ingresa tu nuevo PIN",
   "appLock": "Bloqueo de aplicación",
+  "lockScreenType": "Tipo de bloqueo",
   "noSystemLockFound": "Bloqueo de sistema no encontrado",
   "tapToUnlock": "Toca para desbloquear",
   "tooManyIncorrectAttempts": "Demasiados intentos incorrectos",
@@ -1508,6 +1550,26 @@
   "addNewPerson": "Añadir nueva persona",
   "addNameOrMerge": "Añadir nombre o combinar",
   "mergeWithExisting": "Combinar con existente",
+  "mergeWithPersonTitle": "¿Fusionar con {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Todas las fotos de ambos grupos de caras se combinarán en {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nueva persona",
   "addName": "Añadir nombre",
   "add": "Añadir",
@@ -2083,6 +2145,7 @@
     }
   },
   "size": "Tamaño",
+  "closest": "Más cercano",
   "similarity": "Similitud",
   "analyzingPhotosLocally": "Analizando tus fotos localmente...",
   "lookingForVisualSimilarities": "Buscando similitudes visuales...",
@@ -2099,10 +2162,6 @@
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
   "deletingDash": "Eliminando - ",
-  "cLTitle1": "Comentarios y reacciones",
-  "cLDesc1": "Estamos introduciendo comentarios y reacciones sobre las fotos compartidas. Puedes reaccionar o comentar una foto abriéndola y usando las acciones en la parte inferior. Todos los comentarios y reacciones entrantes serán visibles en la pestaña Compartir.",
-  "cLTitle2": "Administradores para álbumes",
-  "cLDesc2": "Ahora puedes asignar otro usuario de Ente como administrador de tu álbum. Con esto, podrá añadir otros televidentes y colaboradores, eliminar fotos de los álbumes e incluso sugerir a los participantes que eliminen sus fotos.",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2298,11 +2357,12 @@
   "ritualEmojiUseAction": "Uso",
   "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico.",
   "feed": "Actividad",
-  "likedYourPhoto": "Le gustó una foto",
-  "commentedOnYourPhoto": "Comentó en una foto",
-  "repliedToYourComment": "Respondió a un comentario",
-  "likedYourComment": "Le gustó un comentario",
-  "likedYourReply": "Le gustó una respuesta",
+  "commentedOnYourPhoto": "Comentó en tu foto",
+  "commentedOnAPhoto": "Comentó en una foto",
+  "commentedOnYourVideo": "Comentó en tu vídeo",
+  "commentedOnAVideo": "Comentó en un video",
+  "repliedToYourComment": "Respondido a tu comentario",
+  "repliedToAComment": "Respondió a un comentario",
   "and1Other": "y 1 más",
   "andXOthers": "y {count} más",
   "@andXOthers": {
@@ -2428,5 +2488,40 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Ajustes de búsqueda",
+  "suggestions": "Sugerencias",
+  "cleanupHiddenFiles": "Limpiar archivos ocultos",
+  "cleanupComplete": "Limpieza completada",
+  "deleteHiddenFilesFromDevice": "Eliminar archivos ocultos del dispositivo",
+  "deleteHiddenFilesFromDeviceDescription": "Eliminar copias locales de archivos ocultos de tu dispositivo",
+  "deleteOnDeviceFiles": "Eliminar en archivos de dispositivo",
+  "noHiddenFilesOnDevice": "No hay archivos ocultos en el dispositivo",
+  "welcome": "Te damos la bienvenida",
+  "grantPermission": "Conceder permiso",
+  "privateAI": "IA privada",
+  "getStarted": "Comenzar",
+  "unlockSmartFeatures": "Desbloquear funciones inteligentes",
+  "offlineEnableSharingTitle": "Comienza a compartir aquí",
+  "loginToEnte": "Iniciar sesión en Ente",
+  "searchAndDiscover": "Buscar y descubrir",
+  "shareYourMemories": "Comparte tus recuerdos",
+  "shareYourMemoriesDesc": "Comparte tus álbumes, crea enlaces, colecciona fotos y deja un comentario",
+  "privateAndSecureBackups": "Copias de seguridad privadas y seguras",
+  "mlProgressBannerTitle": "¡Espera un momento!",
+  "mlProgressBannerDescription": "Tus fotos están siendo procesadas en el dispositivo para detectar caras, objetos y más.",
+  "mlProgressBannerStatus": "{indexed} de {total} fotos procesadas",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "¿Quieres guardar estas caras?",
+  "offlineFacesBannerSubtitle": "Regístrate para etiquetar a la gente y encontrarla fácilmente más tarde.",
+  "offlineNameFaceBannerTitle": "Dale un nombre a esta cara"
 }

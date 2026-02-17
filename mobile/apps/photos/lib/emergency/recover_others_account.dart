@@ -1,16 +1,22 @@
+import "dart:async";
 import "dart:convert";
+import "dart:typed_data";
 
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:password_strength/password_strength.dart';
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
+import "package:photos/gateways/users/models/key_attributes.dart";
+import "package:photos/gateways/users/models/set_keys_request.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/user/key_attributes.dart";
-import "package:photos/models/api/user/set_keys_request.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/models/text_input_type_v2.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -35,275 +41,194 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   static const kStrongPasswordStrengthThreshold = 0.7;
 
   final _logger = Logger((_RecoverOthersAccountState).toString());
-  final _passwordController1 = TextEditingController(),
-      _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+  final _passwordController1 = TextEditingController();
+  final _passwordController2 = TextEditingController();
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
   double _passwordStrength = 0.0;
-  bool _password1Visible = false;
-  bool _password2Visible = false;
-  final _password1FocusNode = FocusNode();
-  final _password2FocusNode = FocusNode();
-  bool _password1InFocus = false;
-  bool _password2InFocus = false;
 
   bool _passwordsMatch = false;
   bool _isPasswordValid = false;
+  bool _showPasswordStrength = false;
+  Timer? _passwordStrengthTimer;
 
   @override
-  void initState() {
-    super.initState();
-    _password1FocusNode.addListener(() {
-      setState(() {
-        _password1InFocus = _password1FocusNode.hasFocus;
-      });
-    });
-    _password2FocusNode.addListener(() {
-      setState(() {
-        _password2InFocus = _password2FocusNode.hasFocus;
-      });
-    });
+  void dispose() {
+    _passwordStrengthTimer?.cancel();
+    _passwordController1.dispose();
+    _passwordController2.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final title = AppLocalizations.of(context).resetPasswordTitle;
+    final isFormValid = _passwordsMatch && _isPasswordValid;
 
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
-
-    String title = AppLocalizations.of(context).setPasswordTitle;
-    title = AppLocalizations.of(context).resetPasswordTitle;
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.content,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        elevation: 0,
+        title: Text(
+          title,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(title),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordsMatch && _isPasswordValid,
-        buttonText: title,
-        onPressedFunction: () {
-          _updatePassword();
-          FocusScope.of(context).unfocus();
-        },
+      body: _getBody(colorScheme, textTheme),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: title,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  await _updatePassword();
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _getBody(String buttonTextAndHeading) {
+  Widget _getBody(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     final email = widget.sessions.user.email;
-    var passwordStrengthText = AppLocalizations.of(context).weakStrength;
-    var passwordStrengthColor = Colors.redAccent;
-    if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = AppLocalizations.of(context).strongStrength;
-      passwordStrengthColor = Colors.greenAccent;
-    } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = AppLocalizations.of(context).moderateStrength;
-      passwordStrengthColor = Colors.orangeAccent;
+    String? passwordMessage;
+    TextInputMessageType passwordMessageType = TextInputMessageType.guide;
+
+    if (_passwordInInputBox.isNotEmpty && _showPasswordStrength) {
+      if (_passwordStrength > kStrongPasswordStrengthThreshold) {
+        passwordMessage = AppLocalizations.of(context).strongPassword;
+        passwordMessageType = TextInputMessageType.success;
+      } else if (_passwordStrength <= kMildPasswordStrengthThreshold) {
+        passwordMessage = AppLocalizations.of(context).weakStrength;
+        passwordMessageType = TextInputMessageType.alert;
+      }
     }
-    return Column(
-      children: [
-        Expanded(
-          child: AutofillGroup(
-            child: ListView(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    buttonTextAndHeading,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+
+    String? confirmPasswordMessage;
+    TextInputMessageType confirmPasswordMessageType =
+        TextInputMessageType.guide;
+
+    if (_passwordInInputConfirmationBox.isNotEmpty &&
+        _passwordInInputBox.isNotEmpty) {
+      if (_passwordsMatch) {
+        confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
+        confirmPasswordMessageType = TextInputMessageType.success;
+      } else {
+        confirmPasswordMessage =
+            AppLocalizations.of(context).passwordsDontMatch;
+        confirmPasswordMessageType = TextInputMessageType.error;
+      }
+    }
+
+    return SafeArea(
+      child: AutofillGroup(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ListView(
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                "Enter new password for $email account. You will be able "
+                "to use this password to login into $email account.",
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              ),
+              const SizedBox(height: 24),
+              Visibility(
+                visible: false,
+                child: TextFormField(
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  initialValue: email,
+                  textInputAction: TextInputAction.next,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    "Enter new password for $email account. You will be able "
-                    "to use this password to login into $email account.",
-                    textAlign: TextAlign.start,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontSize: 14),
-                  ),
-                ),
-                const Padding(padding: EdgeInsets.all(12)),
-                Visibility(
-                  // hidden textForm for suggesting auto-fill service for saving
-                  // password
-                  visible: false,
-                  child: TextFormField(
-                    autofillHints: const [
-                      AutofillHints.email,
-                    ],
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    initialValue: email,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    autofillHints: const [AutofillHints.newPassword],
-                    decoration: InputDecoration(
-                      fillColor:
-                          _isPasswordValid ? _validFieldValueColor : null,
-                      filled: true,
-                      hintText: AppLocalizations.of(context).password,
-                      contentPadding: const EdgeInsets.all(20),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _password1InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password1Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password1Visible = !_password1Visible;
-                                });
-                              },
-                            )
-                          : _isPasswordValid
-                              ? Icon(
-                                  Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
-                                )
-                              : null,
-                    ),
-                    obscureText: !_password1Visible,
-                    controller: _passwordController1,
-                    autofocus: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.visiblePassword,
-                    onChanged: (password) {
-                      setState(() {
-                        _passwordInInputBox = password;
-                        _passwordStrength = estimatePasswordStrength(password);
-                        _isPasswordValid =
-                            _passwordStrength >= kMildPasswordStrengthThreshold;
-                        _passwordsMatch = _passwordInInputBox ==
-                            _passwordInInputConfirmationBox;
-                      });
-                    },
-                    textInputAction: TextInputAction.next,
-                    focusNode: _password1FocusNode,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.visiblePassword,
-                    controller: _passwordController2,
-                    obscureText: !_password2Visible,
-                    autofillHints: const [AutofillHints.newPassword],
-                    onEditingComplete: () => TextInput.finishAutofillContext(),
-                    decoration: InputDecoration(
-                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
-                      filled: true,
-                      hintText: AppLocalizations.of(context).confirmPassword,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
-                      suffixIcon: _password2InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password2Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password2Visible = !_password2Visible;
-                                });
-                              },
-                            )
-                          : _passwordsMatch
-                              ? Icon(
-                                  Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
-                                )
-                              : null,
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    focusNode: _password2FocusNode,
-                    onChanged: (cnfPassword) {
-                      setState(() {
-                        _passwordInInputConfirmationBox = cnfPassword;
-                        if (_passwordInInputBox != '') {
-                          _passwordsMatch = _passwordInInputBox ==
-                              _passwordInInputConfirmationBox;
+              ),
+              TextInputWidgetV2(
+                label: AppLocalizations.of(context).password,
+                hintText: AppLocalizations.of(context).password,
+                textEditingController: _passwordController1,
+                isPasswordInput: true,
+                isRequired: true,
+                autoCorrect: false,
+                autofillHints: const [AutofillHints.newPassword],
+                message: passwordMessage,
+                messageType: passwordMessageType,
+                onChange: (password) {
+                  if (password != _passwordInInputBox) {
+                    _passwordStrengthTimer?.cancel();
+                    setState(() {
+                      _passwordInInputBox = password;
+                      _passwordStrength = estimatePasswordStrength(password);
+                      _isPasswordValid =
+                          _passwordStrength >= kMildPasswordStrengthThreshold;
+                      _passwordsMatch = _passwordInInputBox ==
+                          _passwordInInputConfirmationBox;
+                      _showPasswordStrength = false;
+                    });
+                    _passwordStrengthTimer = Timer(
+                      const Duration(seconds: 1),
+                      () {
+                        if (mounted) {
+                          setState(() {
+                            _showPasswordStrength = true;
+                          });
                         }
-                      });
-                    },
-                  ),
-                ),
-                Opacity(
-                  opacity:
-                      (_passwordInInputBox != '') && _password1InFocus ? 1 : 0,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Text(
-                      AppLocalizations.of(context).passwordStrength(
-                        passwordStrengthValue: passwordStrengthText,
-                      ),
-                      style: TextStyle(
-                        color: passwordStrengthColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Padding(padding: EdgeInsets.all(20)),
-              ],
-            ),
+                      },
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              TextInputWidgetV2(
+                label: AppLocalizations.of(context).confirmPassword,
+                hintText: AppLocalizations.of(context).confirmPassword,
+                textEditingController: _passwordController2,
+                isPasswordInput: true,
+                isRequired: true,
+                autoCorrect: false,
+                autofillHints: const [AutofillHints.newPassword],
+                finishAutofillContextOnEditingComplete: true,
+                message: confirmPasswordMessage,
+                messageType: confirmPasswordMessageType,
+                onChange: (confirmPassword) {
+                  setState(() {
+                    _passwordInInputConfirmationBox = confirmPassword;
+                    if (_passwordInInputBox.isNotEmpty) {
+                      _passwordsMatch = _passwordInInputBox ==
+                          _passwordInInputConfirmationBox;
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
-  void _updatePassword() async {
+  Future<void> _updatePassword() async {
     final dialog = createProgressDialog(
       context,
       AppLocalizations.of(context).generatingEncryptionKeys,
@@ -365,7 +290,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e).ignore();
+      showGenericErrorBottomSheet(context: context, error: e).ignore();
     }
   }
 }

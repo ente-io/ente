@@ -4,8 +4,10 @@ import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -30,6 +32,20 @@ Future<void> showSingleFileDeleteSheet(
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
+  if (isOfflineMode) {
+    if (file.localID == null) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
+      return;
+    }
+    await deleteFilesOnDeviceOnly(context, [file]);
+    if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+      onFileRemoved(file);
+    }
+    return;
+  }
   final String bodyHighlight =
       AppLocalizations.of(context).singleFileDeleteHighlight;
   String body = "";
@@ -143,7 +159,9 @@ Future<void> showSingleFileDeleteSheet(
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
-  guardedCheckPanorama(file).ignore();
+  if (file.canEditMetaInfo && file.isPanorama() == null) {
+    guardedCheckPanorama(file).ignore();
+  }
   Bus.instance.fire(
     DetailsSheetEvent(
       localID: file.localID,

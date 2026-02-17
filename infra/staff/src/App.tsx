@@ -29,6 +29,16 @@ export const setToken = (newToken: string) => {
 export const getEmail = () => email;
 export const getToken = () => token;
 
+const isNumericUserId = (value: string): boolean => /^\d+$/.test(value);
+
+const buildUserSearchUrl = (input: string): string => {
+    const trimmedInput = input.trim();
+    if (isNumericUserId(trimmedInput)) {
+        return `${apiOrigin}/admin/user?id=${encodeURIComponent(trimmedInput)}`;
+    }
+    return `${apiOrigin}/admin/user?email=${encodeURIComponent(trimmedInput)}`;
+};
+
 const App: React.FC = () => {
     const [localEmail, setLocalEmail] = useState<string>("");
     const [localToken, setLocalToken] = useState<string>("");
@@ -90,9 +100,8 @@ const App: React.FC = () => {
         setFetchSuccess(false);
         const startTime = Date.now();
         try {
-            const encodedEmail = encodeURIComponent(email);
-
-            const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+            const userSearchInput = localEmail.trim() || email.trim();
+            const url = buildUserSearchUrl(userSearchInput);
             const response = await fetch(url, {
                 headers: {
                     "Content-Type": "application/json",
@@ -105,6 +114,7 @@ const App: React.FC = () => {
             const userDataResponse: UserResponse =
                 (await response.json()) as UserResponse;
             console.log("API Response:", userDataResponse);
+            setEmail(userDataResponse.user.email || userSearchInput);
 
             const extractedUserData: UserData = {
                 user: {
@@ -179,7 +189,7 @@ const App: React.FC = () => {
             const delay = Math.max(3000 - elapsedTime, 0);
             setTimeout(() => {
                 setLoading(false);
-                setError("Invalid token or email id");
+                setError("Invalid token or email/user id");
             }, delay);
         }
     };

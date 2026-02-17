@@ -23,14 +23,13 @@ import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/app_localizations.dart';
 import 'package:locker/services/collections/collections_api_client.dart';
-import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/trash/trash_db.dart";
 import 'package:locker/services/trash/trash_service.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -100,7 +99,8 @@ Future<void> _initSystemTray() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.locker);
-  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final adaptiveThemeMode = await AdaptiveTheme.getThemeMode();
+  final savedThemeMode = _themeMode(adaptiveThemeMode);
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
@@ -112,7 +112,8 @@ Future<void> _runInForeground() async {
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
-        builder: (args) => App(locale: locale),
+        builder: (args) =>
+            App(locale: locale, savedThemeMode: adaptiveThemeMode),
         lockScreen: LockScreen(Configuration.instance),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
@@ -160,12 +161,10 @@ Future<void> _init(bool bool, {String? via}) async {
 
     await CryptoUtil.init();
 
-    await CollectionDB.instance.init();
-    await TrashDB.instance.init();
+    await LockerDB.instance.init();
 
     await Configuration.instance.init([
-      CollectionDB.instance,
-      TrashDB.instance,
+      LockerDB.instance,
     ]);
 
     await Network.instance.init(Configuration.instance);
@@ -177,7 +176,7 @@ Future<void> _init(bool bool, {String? via}) async {
     );
     await LockScreenSettings.instance.init(Configuration.instance);
     await CollectionApiClient.instance.init();
-    await CollectionService.instance.init();
+    await CollectionService.instance.init(preferences);
     await FavoritesService.instance.init();
     await LinksClient.instance.init();
     await LinksService.instance.init();

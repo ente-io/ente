@@ -242,7 +242,7 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		"origin":  origin,
 	})
 	alertMessage := fmt.Sprintf("custom domain %s", reqId)
-	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	domain, err := m.RemoteStoreRepo.GetEffectiveDomain(c, ownerID)
 	if err != nil {
 		logger.WithError(err).Error("domainFetchFailed")
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainFetchFailed")
@@ -298,7 +298,7 @@ func (m *CollectionLinkMiddleware) attachAnonIdentity(c *gin.Context, collection
 		return ente.ErrAuthenticationRequired
 	}
 	if m.AnonUsersRepo != nil {
-		anonUser, err := m.AnonUsersRepo.GetByID(c.Request.Context(), anonID)
+		anonUser, err := m.AnonUsersRepo.GetByID(c, anonID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return ente.ErrAuthenticationRequired

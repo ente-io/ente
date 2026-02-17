@@ -1,41 +1,38 @@
-import "dart:async";
 import 'dart:io';
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/ui/common/gradient_button.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
-import "package:share_plus/share_plus.dart";
-import 'package:step_progress_indicator/step_progress_indicator.dart';
+import 'package:photos/utils/share_util.dart';
+import 'package:share_plus/share_plus.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
-  final bool? showAppBar;
   final String recoveryKey;
   final String doneText;
   final Function()? onDone;
-  final bool? isDismissible;
   final String? title;
   final String? text;
   final String? subText;
-  final bool showProgressBar;
+  final bool isOnboarding;
 
   const RecoveryKeyPage(
     this.recoveryKey,
     this.doneText, {
     super.key,
-    this.showAppBar,
     this.onDone,
-    this.isDismissible,
     this.title,
     this.text,
     this.subText,
-    this.showProgressBar = false,
+    this.isOnboarding = false,
   });
 
   @override
@@ -43,210 +40,160 @@ class RecoveryKeyPage extends StatefulWidget {
 }
 
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
-  bool _hasTriedToSave = false;
   final _recoveryKeyFile = File(
     Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
   );
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
     if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
       throw AssertionError(
         'recovery code should have $mnemonicKeyWordCount words',
       );
     }
-    final double topPadding = widget.showAppBar!
-        ? 40
-        : widget.showProgressBar
-            ? 32
-            : 120;
 
     return Scaffold(
-      appBar: widget.showProgressBar
-          ? AppBar(
-              automaticallyImplyLeading: false,
-              elevation: 0,
-              title: Hero(
-                tag: "recovery_key",
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 3,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
-                  roundedEdges: const Radius.circular(10),
-                  unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
-                ),
-              ),
-            )
-          : widget.showAppBar!
-              ? AppBar(
-                  elevation: 0,
-                  title: Text(
-                    widget.title ?? AppLocalizations.of(context).recoveryKey,
-                  ),
-                )
-              : null,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(20, topPadding, 20, 20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: constraints.maxWidth,
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      widget.showAppBar!
-                          ? const SizedBox.shrink()
-                          : Text(
-                              widget.title ??
-                                  AppLocalizations.of(context).recoveryKey,
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                      Padding(
-                        padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
-                      ),
-                      Text(
-                        widget.text ??
-                            AppLocalizations.of(context)
-                                .recoveryKeyOnForgotPassword,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Padding(padding: EdgeInsets.only(top: 24)),
-                      DottedBorder(
-                        color: const Color.fromRGBO(17, 127, 56, 1),
-                        //color of dotted/dash line
-                        strokeWidth: 1,
-                        //thickness of dash/dots
-                        dashPattern: const [6, 6],
-                        radius: const Radius.circular(8),
-                        //dash patterns, 10 is dash width, 6 is space width
-                        child: SizedBox(
-                          //inner container
-                          // height: 120, //height of inner container
-                          width: double
-                              .infinity, //width to 100% match to parent container.
-                          // ignore: prefer_const_literals_to_create_immutables
-                          child: Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  await Clipboard.setData(
-                                    ClipboardData(text: recoveryKey),
-                                  );
-                                  showShortToast(
-                                    context,
-                                    AppLocalizations.of(context)
-                                        .recoveryKeyCopiedToClipboard,
-                                  );
-                                  setState(() {
-                                    _hasTriedToSave = true;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color.fromRGBO(
-                                        49,
-                                        155,
-                                        86,
-                                        .2,
-                                      ),
-                                    ),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(2),
-                                    ),
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .recoveryKeyBoxColor,
-                                  ),
-                                  padding: const EdgeInsets.all(20),
-                                  width: double.infinity,
-                                  child: Text(
-                                    recoveryKey,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          widget.subText ??
-                              AppLocalizations.of(context)
-                                  .recoveryKeySaveDescription,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 42),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _saveOptions(context, recoveryKey),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ), // columnEnds
-                ),
-              ),
-            );
-          },
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          widget.title ?? AppLocalizations.of(context).recoveryKey,
+          style: textTheme.largeBold,
         ),
+        centerTitle: true,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: widget.isOnboarding
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                color: colorScheme.content,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+      ),
+      body: SafeArea(
+        child: _getBody(recoveryKey, colorScheme, textTheme),
       ),
     );
   }
 
-  List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
-    final List<Widget> childrens = [];
-    if (!_hasTriedToSave) {
-      childrens.add(
-        ElevatedButton(
-          style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-          onPressed: () async {
-            await _saveKeys();
-          },
-          child: Text(AppLocalizations.of(context).doThisLater),
+  Widget _getBody(
+    String recoveryKey,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/recovery_key.png',
+                    width: 101,
+                    height: 82,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  widget.text ??
+                      AppLocalizations.of(context).recoveryKeyOnForgotPassword,
+                  textAlign: TextAlign.center,
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.textBase,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.subText ??
+                      AppLocalizations.of(context).recoveryKeySaveDescription,
+                  textAlign: TextAlign.center,
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.greenBase,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              recoveryKey,
+                              style: textTheme.body.copyWith(
+                                color: Colors.white,
+                                height: 24 / 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: recoveryKey),
+                              );
+                              showShortToast(
+                                context,
+                                AppLocalizations.of(context)
+                                    .recoveryKeyCopiedToClipboard,
+                              );
+                            },
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedCopy01,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ButtonWidgetV2(
+                        buttonType: ButtonTypeV2.secondary,
+                        shouldStickToLightTheme: true,
+                        labelText: AppLocalizations.of(context).shareKey,
+                        onTap: () async {
+                          await _shareRecoveryKey(recoveryKey);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      );
-      childrens.add(const SizedBox(height: 10));
-    }
-
-    childrens.add(
-      GradientButton(
-        onTap: () async {
-          await _shareRecoveryKey(recoveryKey);
-        },
-        text: AppLocalizations.of(context).saveKey,
-      ),
+        if (widget.isOnboarding)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            child: ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: widget.doneText,
+              onTap: () async {
+                await _saveKeys();
+              },
+            ),
+          ),
+      ],
     );
-    if (_hasTriedToSave) {
-      childrens.add(const SizedBox(height: 10));
-      childrens.add(
-        ElevatedButton(
-          child: Text(widget.doneText),
-          onPressed: () async {
-            await _saveKeys();
-          },
-        ),
-      );
-    }
-    childrens.add(const SizedBox(height: 12));
-    return childrens;
   }
 
   Future _shareRecoveryKey(String recoveryKey) async {
@@ -258,15 +205,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(_recoveryKeyFile.path)],
+        sharePositionOrigin: shareButtonRect(context, null),
       ),
     );
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _hasTriedToSave = true;
-        });
-      }
-    });
   }
 
   Future<void> _saveKeys() async {

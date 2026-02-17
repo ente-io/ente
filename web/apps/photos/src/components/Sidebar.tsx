@@ -1,13 +1,15 @@
-import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
-import CategoryIcon from "@mui/icons-material/Category";
+import {
+    Delete02Icon,
+    Download05Icon,
+    ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
     Dialog,
@@ -71,6 +73,7 @@ import {
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { AppLockSettings } from "ente-new/photos/components/sidebar/AppLockSettings";
+import { ShapeIcon } from "ente-new/photos/components/icons/ShapeIcon";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
 import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
@@ -704,6 +707,8 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
 }) => {
+    const shortcutIconSize = 20;
+
     const handleOpenUncategorizedSection = () =>
         void onShowCollectionSummary(uncategorizedCollectionSummaryID).then(
             onCloseSidebar,
@@ -731,19 +736,29 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     return (
         <>
             <RowButton
-                startIcon={<CategoryIcon />}
+                startIcon={<ShapeIcon />}
                 label={t("section_uncategorized")}
                 caption={summaryCaption(uncategorizedCollectionSummaryID)}
                 onClick={handleOpenUncategorizedSection}
             />
             <RowButton
-                startIcon={<ArchiveOutlinedIcon />}
+                startIcon={
+                    <HugeiconsIcon
+                        icon={Download05Icon}
+                        size={shortcutIconSize}
+                    />
+                }
                 label={t("section_archive")}
                 caption={summaryCaption(PseudoCollectionID.archiveItems)}
                 onClick={handleOpenArchiveSection}
             />
             <RowButton
-                startIcon={<VisibilityOffIcon />}
+                startIcon={
+                    <HugeiconsIcon
+                        icon={ViewOffSlashIcon}
+                        size={shortcutIconSize}
+                    />
+                }
                 label={t("section_hidden")}
                 caption={
                     <LockOutlinedIcon
@@ -756,7 +771,12 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 onClick={handleOpenHiddenSection}
             />
             <RowButton
-                startIcon={<DeleteOutlineIcon />}
+                startIcon={
+                    <HugeiconsIcon
+                        icon={Delete02Icon}
+                        size={shortcutIconSize}
+                    />
+                }
                 label={t("section_trash")}
                 caption={summaryCaption(PseudoCollectionID.trash)}
                 onClick={handleOpenTrashSection}
@@ -1283,6 +1303,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Français";
         case "de-DE":
             return "Deutsch";
+        case "ca-ES":
+            return "Català";
         case "zh-CN":
             return "中文";
         case "nl-NL":

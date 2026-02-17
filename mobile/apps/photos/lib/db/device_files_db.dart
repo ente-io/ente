@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/freeable_space_info.dart';
 import 'package:photos/models/upload_strategy.dart';
 import "package:photos/services/sync/import/model.dart";
 import 'package:sqflite/sqlite_api.dart';
@@ -107,6 +107,32 @@ extension DeviceFiles on FilesDB {
       _logger.severe("failed to getDevicePathIDToLocalIDMap", e);
       rethrow;
     }
+  }
+
+  Future<List<String>> getDeviceCollectionNamesForLocalID(
+    String localID,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT dc.name as name
+      FROM device_files df
+      INNER JOIN device_collections dc ON dc.id = df.path_id
+      WHERE df.id = ?
+      ORDER BY dc.name COLLATE NOCASE ASC
+      ''',
+      [localID],
+    );
+
+    final names = <String>{};
+    for (final row in rows) {
+      final name = (row["name"] as String?)?.trim();
+      if (name != null && name.isNotEmpty) {
+        names.add(name);
+      }
+    }
+
+    return names.toList(growable: false);
   }
 
   Future<Set<String>> getDevicePathIDs() async {
@@ -353,10 +379,11 @@ extension DeviceFiles on FilesDB {
     return FileLoadResult(dedupe, files.length == limit);
   }
 
-  Future<BackedUpFileIDs> getBackedUpForDeviceCollection(
+  Future<FreeableFileIDs> getFreeableFileIDsForDeviceCollection(
     String pathID,
-    int ownerID,
-  ) async {
+    int ownerID, {
+    Set<String> excludeLocalIDs = const {},
+  }) async {
     final db = await sqliteAsyncDB;
     const String rawQuery = '''
     SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID},
@@ -375,6 +402,7 @@ extension DeviceFiles on FilesDB {
     int localSize = 0;
     for (final result in results) {
       final String localID = result[FilesDB.columnLocalID] as String;
+      if (excludeLocalIDs.contains(localID)) continue;
       final int? fileSize = result[FilesDB.columnFileSize] as int?;
       if (!localIDs.contains(localID) && fileSize != null) {
         localSize += fileSize;
@@ -382,7 +410,7 @@ extension DeviceFiles on FilesDB {
       localIDs.add(localID);
       uploadedIDs.add(result[FilesDB.columnUploadedFileID] as int);
     }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
+    return FreeableFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<List<DeviceCollection>> getDeviceCollections({

@@ -2,8 +2,8 @@ import "package:dio/dio.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/gateways/storage_bonus/models/storage_bonus.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -41,6 +41,7 @@ class _ApplyCodeContent extends StatefulWidget {
 
 class _ApplyCodeContentState extends State<_ApplyCodeContent> {
   late TextEditingController _controller;
+  late FocusNode _codeFocusNode;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -48,13 +49,22 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _codeFocusNode = FocusNode();
     _controller.addListener(_onTextChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 30), () {
+        if (mounted) {
+          _codeFocusNode.requestFocus();
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
+    _codeFocusNode.dispose();
     super.dispose();
   }
 
@@ -143,6 +153,7 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
           ),
           child: TextField(
             controller: _controller,
+            focusNode: _codeFocusNode,
             inputFormatters: [UpperCaseTextFormatter()],
             textCapitalization: TextCapitalization.characters,
             style: textTheme.body,
@@ -162,7 +173,8 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
         Text(
           _errorMessage ?? AppLocalizations.of(context).enterCodeDescription,
           style: textTheme.mini.copyWith(
-            color: _errorMessage != null ? warningRedColor : colorScheme.textMuted,
+            color:
+                _errorMessage != null ? warningRedColor : colorScheme.textMuted,
           ),
         ),
         const SizedBox(height: 20),

@@ -5,14 +5,13 @@ import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { FeedIcon } from "components/Collections/CollectionHeader";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useState } from "react";
-import { getSignUpOrInstallURL } from "utils/public-album";
+import { getEnteURL } from "utils/public-album";
 
 interface MobileNavBarProps {
     onAddPhotos?: () => void;
@@ -38,7 +37,6 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const isTouchscreen = useIsTouchscreen();
 
     const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
     const { handleJoinAlbum } = useJoinAlbum({
@@ -69,22 +67,6 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
         }
     };
 
-    const handleSignUpOrInstall = () => {
-        if (typeof window !== "undefined") {
-            window.open(
-                getSignUpOrInstallURL(isTouchscreen),
-                "_blank",
-                "noopener",
-            );
-        }
-    };
-
-    const buttonText = enableJoin
-        ? t("join_album")
-        : isTouchscreen
-          ? t("install")
-          : t("sign_up");
-
     return (
         <>
             <MobileNavContainer>
@@ -99,7 +81,18 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
                     {onShowFeed && (
                         <MobileNavButton onClick={onShowFeed}>
-                            <FeedIcon />
+                            <Box
+                                sx={{
+                                    width: 16,
+                                    height: 16,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    "& svg": { width: "100%", height: "100%" },
+                                }}
+                            >
+                                <FeedIcon />
+                            </Box>
                         </MobileNavButton>
                     )}
 
@@ -119,17 +112,17 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                         </MobileNavButton>
                     )}
 
-                    {(!onAddPhotos || enableJoin) && (
-                        <MobileSignUpButton
-                            onClick={
-                                enableJoin
-                                    ? handleJoinAlbum
-                                    : handleSignUpOrInstall
-                            }
-                        >
-                            {buttonText}
-                        </MobileSignUpButton>
-                    )}
+                    <MobileSignUpButton
+                        onClick={
+                            enableJoin
+                                ? handleJoinAlbum
+                                : () => {
+                                      window.location.href = getEnteURL();
+                                  }
+                        }
+                    >
+                        {enableJoin ? t("join_album") : t("try_ente")}
+                    </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>
 
