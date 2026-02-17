@@ -38,7 +38,7 @@
         android:icon="@mipmap/icon_green"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SSaver">
+        android:theme="@style/Theme.EntePhotos">
 
         <activity
             android:name=".main.MainActivity"

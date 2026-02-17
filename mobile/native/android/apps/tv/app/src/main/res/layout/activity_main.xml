@@ -70,7 +70,7 @@
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_settings"
-                style="@style/Widget.SSaver.Button.Secondary"
+                style="@style/Widget.EntePhotos.Button.Secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -78,7 +78,7 @@
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_diagnostics"
-                style="@style/Widget.SSaver.Button.Secondary"
+                style="@style/Widget.EntePhotos.Button.Secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

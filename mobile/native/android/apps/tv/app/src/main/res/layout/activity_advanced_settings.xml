@@ -36,7 +36,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/row_clear_cache"
-                style="@style/Widget.SSaver.SettingsRow"
+                style="@style/Widget.EntePhotos.SettingsRow"
                 android:text="@string/ente_cache_clear" />
 
             <LinearLayout
@@ -52,7 +52,7 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/row_diagnostics"
-                    style="@style/Widget.SSaver.SettingsRow"
+                    style="@style/Widget.EntePhotos.SettingsRow"
                     android:text="@string/diagnostics" />
             </LinearLayout>
 

@@ -1,4 +1,4 @@
-# Ente Screensaver (Android TV)
+# Ente Photos (Android TV)
 
 A lightweight Android TV screensaver that plays photos from an Ente public album.
 
@@ -17,7 +17,7 @@ A lightweight Android TV screensaver that plays photos from an Ente public album
 4. If the TV blocks changes, open **ADB instructions** and run:
 
    ```
-   adb shell pm grant io.ente.photos.screensaver android.permission.WRITE_SECURE_SETTINGS
+   adb shell pm grant io.ente.photos.tv android.permission.WRITE_SECURE_SETTINGS
    ```
 
    Then tap **Set as screensaver** again.

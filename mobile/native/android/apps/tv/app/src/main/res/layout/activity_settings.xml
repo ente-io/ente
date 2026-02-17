@@ -36,7 +36,7 @@
 
             <LinearLayout
                 android:id="@+id/row_change_album"
-                style="@style/Widget.SSaver.SettingsRowContainer">
+                style="@style/Widget.EntePhotos.SettingsRowContainer">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -46,12 +46,12 @@
 
                     <TextView
                         android:id="@+id/row_change_album_title"
-                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        style="@style/Widget.EntePhotos.SettingsRowTitle"
                         android:text="@string/pref_change_album" />
 
                     <TextView
                         android:id="@+id/row_change_album_subtitle"
-                        style="@style/Widget.SSaver.SettingsRowSubtitle"
+                        style="@style/Widget.EntePhotos.SettingsRowSubtitle"
                         android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>
@@ -70,11 +70,11 @@
 
                 <LinearLayout
                     android:id="@+id/row_set_screensaver"
-                    style="@style/Widget.SSaver.SettingsRowContainer">
+                    style="@style/Widget.EntePhotos.SettingsRowContainer">
 
                     <TextView
                         android:id="@+id/row_set_screensaver_title"
-                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        style="@style/Widget.EntePhotos.SettingsRowTitle"
                         android:text="@string/button_set_screensaver" />
                 </LinearLayout>
             </LinearLayout>
@@ -92,11 +92,11 @@
 
                 <LinearLayout
                     android:id="@+id/row_shuffle"
-                    style="@style/Widget.SSaver.SettingsRowContainer">
+                    style="@style/Widget.EntePhotos.SettingsRowContainer">
 
                     <TextView
                         android:id="@+id/row_shuffle_title"
-                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        style="@style/Widget.EntePhotos.SettingsRowTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -104,7 +104,7 @@
 
                     <TextView
                         android:id="@+id/row_shuffle_value"
-                        style="@style/Widget.SSaver.SettingsRowValue"
+                        style="@style/Widget.EntePhotos.SettingsRowValue"
                         android:text="@string/settings_toggle_off" />
                 </LinearLayout>
             </LinearLayout>
@@ -122,11 +122,11 @@
 
                 <LinearLayout
                     android:id="@+id/row_interval"
-                    style="@style/Widget.SSaver.SettingsRowContainer">
+                    style="@style/Widget.EntePhotos.SettingsRowContainer">
 
                     <TextView
                         android:id="@+id/row_interval_title"
-                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        style="@style/Widget.EntePhotos.SettingsRowTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -134,7 +134,7 @@
 
                     <TextView
                         android:id="@+id/row_interval_value"
-                        style="@style/Widget.SSaver.SettingsRowValue"
+                        style="@style/Widget.EntePhotos.SettingsRowValue"
                         android:text="@string/ente_album_loading" />
                 </LinearLayout>
             </LinearLayout>
@@ -152,11 +152,11 @@
 
                 <LinearLayout
                     android:id="@+id/row_advanced"
-                    style="@style/Widget.SSaver.SettingsRowContainer">
+                    style="@style/Widget.EntePhotos.SettingsRowContainer">
 
                     <TextView
                         android:id="@+id/row_advanced_title"
-                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        style="@style/Widget.EntePhotos.SettingsRowTitle"
                         android:text="@string/pref_advanced" />
                 </LinearLayout>
             </LinearLayout>

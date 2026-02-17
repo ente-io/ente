@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SSaver"
+rootProject.name = "EntePhotos"
 include(":app")

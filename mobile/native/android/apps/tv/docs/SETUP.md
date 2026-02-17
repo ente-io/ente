@@ -1,4 +1,4 @@
-# Ente Screensaver Setup
+# Ente Photos Setup
 
 ## Step 1: Connect Album
 1. Open the app → **Step 1: Connect album**.
@@ -12,7 +12,7 @@
 2. If it fails, open **ADB instructions** and run:
 
    ```
-   adb shell pm grant io.ente.photos.screensaver android.permission.WRITE_SECURE_SETTINGS
+   adb shell pm grant io.ente.photos.tv android.permission.WRITE_SECURE_SETTINGS
    ```
 
 3. Tap **Set as screensaver** again.

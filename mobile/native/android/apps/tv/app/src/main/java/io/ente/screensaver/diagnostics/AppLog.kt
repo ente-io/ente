@@ -89,9 +89,9 @@ object AppLog {
         persist(line)
 
         if (level == "ERROR") {
-            Log.e("SSaver", line, error)
+            Log.e("EntePhotos", line, error)
         } else {
-            Log.d("SSaver", line)
+            Log.d("EntePhotos", line)
         }
     }
 
