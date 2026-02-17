@@ -37,7 +37,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         dataStore = SsaverPreferenceDataStore(applicationContext)
-        applyChangeAlbumSubtitleMaxWidth()
+        applyChangeAlbumValueMaxWidth()
 
         viewBinding.rowChangeAlbum.setOnClickListener {
             startActivity(Intent(this, SetupActivity::class.java))
@@ -96,9 +96,9 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyChangeAlbumSubtitleMaxWidth()
+        applyChangeAlbumValueMaxWidth()
         updateSetScreensaverVisibility()
-        updateAlbumSubtitle()
+        updateAlbumValue()
         updateShuffleValue()
         updateIntervalValue()
     }
@@ -174,29 +174,25 @@ class SettingsActivity : AppCompatActivity() {
         viewBinding.rowIntervalValue.text = value
     }
 
-    private fun updateAlbumSubtitle() {
+    private fun updateAlbumValue() {
         val viewBinding = binding ?: return
         scope.launch {
-            val config = EntePublicAlbumRepository.get(this@SettingsActivity).getConfig()
-            val title = config?.albumName?.takeIf { it.isNotBlank() }
-                ?: config?.publicUrl?.let { albumLabelFromUrl(it) }
+            val repo = EntePublicAlbumRepository.get(this@SettingsActivity)
+            val title = repo.getAlbumName(refreshIfMissing = true)
+                ?: repo.getConfig()?.publicUrl?.let { albumLabelFromUrl(it) }
 
-            if (title.isNullOrBlank()) {
-                viewBinding.rowChangeAlbumSubtitle.isVisible = false
-            } else {
-                viewBinding.rowChangeAlbumSubtitle.text = title
-                viewBinding.rowChangeAlbumSubtitle.isVisible = true
-            }
+            viewBinding.rowChangeAlbumValue.text =
+                title?.takeIf { it.isNotBlank() } ?: getString(R.string.settings_album_not_set)
         }
     }
 
-    private fun applyChangeAlbumSubtitleMaxWidth() {
+    private fun applyChangeAlbumValueMaxWidth() {
         val viewBinding = binding ?: return
         viewBinding.rowChangeAlbum.post {
             val rowWidth = viewBinding.rowChangeAlbum.width
                 .takeIf { it > 0 }
                 ?: resources.displayMetrics.widthPixels
-            viewBinding.rowChangeAlbumSubtitle.maxWidth = (rowWidth * 0.5f).toInt()
+            viewBinding.rowChangeAlbumValue.maxWidth = (rowWidth * 0.5f).toInt()
         }
     }
 
@@ -239,8 +235,8 @@ class SettingsActivity : AppCompatActivity() {
         refreshRowTextSizes()
     }
 
-    private fun albumLabelFromUrl(publicUrl: String): String {
-        val uri = runCatching { Uri.parse(publicUrl) }.getOrNull() ?: return publicUrl
+    private fun albumLabelFromUrl(publicUrl: String): String? {
+        val uri = runCatching { Uri.parse(publicUrl) }.getOrNull() ?: return null
 
         val queryName = listOf("name", "title", "album")
             .firstNotNullOfOrNull { key -> uri.getQueryParameter(key)?.trim()?.takeIf { it.isNotBlank() } }
@@ -258,7 +254,7 @@ class SettingsActivity : AppCompatActivity() {
             ?.trim()
             ?.takeIf { it.isNotBlank() }
 
-        return pathLabel ?: (uri.host?.removePrefix("www.") ?: publicUrl)
+        return pathLabel
     }
 
     override fun onDestroy() {

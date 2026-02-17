@@ -109,6 +109,7 @@ dependencies {
     // Setup via phone (QR + local HTTP form).
     implementation("org.nanohttpd:nanohttpd:2.3.1")
     implementation("com.google.zxing:core:3.5.3")
+    implementation("io.github.g0dkar:qrcode-kotlin:4.3.0")
 }
 
 val rustCoreDir = rootProject.file("../../../../../rust/uniffi/core")

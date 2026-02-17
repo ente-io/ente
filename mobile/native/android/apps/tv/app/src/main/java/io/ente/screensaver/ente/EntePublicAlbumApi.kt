@@ -26,6 +26,10 @@ class EntePublicAlbumApi(
 
     data class CollectionInfo(
         val albumName: String?,
+        val encryptedNameB64: String?,
+        val nameDecryptionNonceB64: String?,
+        val encryptedPathB64: String?,
+        val pathDecryptionNonceB64: String?,
         val passwordEnabled: Boolean,
         val nonce: String?,
         val opsLimit: Long?,
@@ -66,19 +70,31 @@ class EntePublicAlbumApi(
         )
 
         val collection = json.getJSONObject("collection")
-        val albumName = collection.optString("name")?.trim()?.takeIf { it.isNotBlank() }
+        val albumName = optNonBlank(collection, "name")
+        val encryptedName = optNonBlank(collection, "encryptedName", "encrypted_name")
+        val nameNonce = optNonBlank(collection, "nameDecryptionNonce", "name_decryption_nonce")
 
-        val publicUrls = collection.optJSONArray("publicURLs") ?: JSONArray()
+        val attributes = collection.optJSONObject("attributes")
+        val encryptedPath = optNonBlank(attributes, "encryptedPath", "encrypted_path")
+        val pathNonce = optNonBlank(attributes, "pathDecryptionNonce", "path_decryption_nonce")
+
+        val publicUrls = collection.optJSONArray("publicURLs")
+            ?: collection.optJSONArray("public_urls")
+            ?: JSONArray()
         val firstUrl = if (publicUrls.length() > 0) publicUrls.optJSONObject(0) else null
 
-        val passwordEnabled = firstUrl?.optBoolean("passwordEnabled", false) ?: false
+        val passwordEnabled = optBoolean(firstUrl, false, "passwordEnabled", "password_enabled")
 
-        val nonce = firstUrl?.optString("nonce")?.takeIf { it.isNotBlank() }
-        val opsLimit = firstUrl?.optLong("opsLimit").takeIf { it != null && it > 0 }
-        val memLimit = firstUrl?.optLong("memLimit").takeIf { it != null && it > 0 }
+        val nonce = optNonBlank(firstUrl, "nonce")
+        val opsLimit = optPositiveLong(firstUrl, "opsLimit", "ops_limit")
+        val memLimit = optPositiveLong(firstUrl, "memLimit", "mem_limit")
 
         return CollectionInfo(
             albumName = albumName,
+            encryptedNameB64 = encryptedName,
+            nameDecryptionNonceB64 = nameNonce,
+            encryptedPathB64 = encryptedPath,
+            pathDecryptionNonceB64 = pathNonce,
             passwordEnabled = passwordEnabled,
             nonce = nonce,
             opsLimit = opsLimit,
@@ -237,6 +253,49 @@ class EntePublicAlbumApi(
         }
 
         return builder.build()
+    }
+
+    private fun optNonBlank(obj: JSONObject?, vararg keys: String): String? {
+        obj ?: return null
+        for (key in keys) {
+            if (!obj.has(key)) continue
+            val value = obj.optString(key, "").trim()
+            if (value.isNotEmpty() && !value.equals("null", ignoreCase = true)) {
+                return value
+            }
+        }
+        return null
+    }
+
+    private fun optPositiveLong(obj: JSONObject?, vararg keys: String): Long? {
+        obj ?: return null
+        for (key in keys) {
+            if (!obj.has(key)) continue
+            val raw = obj.opt(key) ?: continue
+            val parsed = when (raw) {
+                is Number -> raw.toLong()
+                is String -> raw.toLongOrNull()
+                else -> null
+            } ?: continue
+            if (parsed > 0L) return parsed
+        }
+        return null
+    }
+
+    private fun optBoolean(obj: JSONObject?, default: Boolean, vararg keys: String): Boolean {
+        obj ?: return default
+        for (key in keys) {
+            if (!obj.has(key)) continue
+            val raw = obj.opt(key)
+            val parsed = when (raw) {
+                is Boolean -> raw
+                is Number -> raw.toInt() != 0
+                is String -> raw.equals("true", ignoreCase = true) || raw == "1"
+                else -> null
+            }
+            if (parsed != null) return parsed
+        }
+        return default
     }
 
     private suspend fun executeString(request: Request): String = withContext(Dispatchers.IO) {

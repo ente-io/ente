@@ -30,6 +30,12 @@ class EnteSetupServer(
     }
 
     private val repo = EntePublicAlbumRepository.get(appContext)
+    private val encryptionKeyB64Url: String by lazy {
+        Base64.encodeToString(
+            encryptionKey,
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+        )
+    }
 
     private val pairingMismatchLock = Any()
     private var pairingMismatchCount = 0
@@ -392,9 +398,10 @@ class EnteSetupServer(
                 const passwordInput = document.getElementById('password');
                 if (!form || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
 
+                const embeddedEk = '${escapeHtml(encryptionKeyB64Url)}';
                 const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
                 const hashParams = new URLSearchParams(hash);
-                const ek = hashParams.get('ek');
+                const ek = embeddedEk || hashParams.get('ek');
 
                 const bytesToBase64 = (bytes) => {
                   let binary = '';

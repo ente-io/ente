@@ -129,6 +129,7 @@ you want to see on your TV</string>
     <string name="settings_interval_updated">Slideshow interval set to %1$s</string>
     <string name="settings_toggle_on">On</string>
     <string name="settings_toggle_off">Off</string>
+    <string name="settings_album_not_set">Not set</string>
 
     <!-- MainActivity preview mode -->
     <string name="hint_press_down_settings">Press Down Arrow for Settings</string>

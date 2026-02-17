@@ -38,22 +38,18 @@
                 android:id="@+id/row_change_album"
                 style="@style/Widget.EntePhotos.SettingsRowContainer">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/row_change_album_title"
+                    style="@style/Widget.EntePhotos.SettingsRowTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="@string/pref_change_album" />
 
-                    <TextView
-                        android:id="@+id/row_change_album_title"
-                        style="@style/Widget.EntePhotos.SettingsRowTitle"
-                        android:text="@string/pref_change_album" />
-
-                    <TextView
-                        android:id="@+id/row_change_album_subtitle"
-                        style="@style/Widget.EntePhotos.SettingsRowSubtitle"
-                        android:visibility="gone" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/row_change_album_value"
+                    style="@style/Widget.EntePhotos.SettingsRowValue"
+                    android:text="@string/settings_album_not_set" />
             </LinearLayout>
 
             <LinearLayout

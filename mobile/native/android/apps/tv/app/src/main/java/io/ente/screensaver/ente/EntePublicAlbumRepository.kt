@@ -40,6 +40,79 @@ class EntePublicAlbumRepository private constructor(
 
     suspend fun getConfig(): EntePublicAlbumConfig? = configRepo.get()
 
+    suspend fun getAlbumName(refreshIfMissing: Boolean = true): String? {
+        val config = configRepo.get() ?: return null
+        val currentName = config.albumName?.trim()?.takeIf { it.isNotBlank() }
+        if (currentName != null || !refreshIfMissing) return currentName
+
+        val collectionInfo = runCatching {
+            api.getCollectionInfo(credentials(config))
+        }.onFailure { e ->
+            AppLog.error("Ente", "Failed to refresh album name", e)
+        }.getOrNull() ?: return null
+
+        val resolvedName = resolveCollectionName(
+            collectionInfo = collectionInfo,
+            collectionKeyB64 = config.collectionKeyB64,
+        )
+
+        if (!resolvedName.isNullOrBlank()) {
+            configRepo.save(config.copy(albumName = resolvedName))
+        }
+
+        return resolvedName
+    }
+
+    private fun resolveCollectionName(
+        collectionInfo: EntePublicAlbumApi.CollectionInfo,
+        collectionKeyB64: String,
+    ): String? {
+        val plaintextName = collectionInfo.albumName?.trim()?.takeIf { it.isNotBlank() }
+        if (plaintextName != null) return plaintextName
+
+        val decryptedName = decryptSecretboxUtf8(
+            encryptedB64 = collectionInfo.encryptedNameB64,
+            nonceB64 = collectionInfo.nameDecryptionNonceB64,
+            collectionKeyB64 = collectionKeyB64,
+            label = "collection name",
+        )
+        if (!decryptedName.isNullOrBlank()) return decryptedName
+
+        val decryptedPath = decryptSecretboxUtf8(
+            encryptedB64 = collectionInfo.encryptedPathB64,
+            nonceB64 = collectionInfo.pathDecryptionNonceB64,
+            collectionKeyB64 = collectionKeyB64,
+            label = "collection path",
+        )
+
+        return decryptedPath
+            ?.split('/')
+            ?.lastOrNull { it.isNotBlank() }
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+    }
+
+    private fun decryptSecretboxUtf8(
+        encryptedB64: String?,
+        nonceB64: String?,
+        collectionKeyB64: String,
+        label: String,
+    ): String? {
+        val encrypted = encryptedB64?.takeIf { it.isNotBlank() } ?: return null
+        val nonce = nonceB64?.takeIf { it.isNotBlank() } ?: return null
+
+        return runCatching {
+            val decrypted = EnteCrypto.decryptBoxKey(
+                encryptedKeyB64 = encrypted,
+                keyDecryptionNonceB64 = nonce,
+                collectionKeyB64 = collectionKeyB64,
+            )
+            String(decrypted, Charsets.UTF_8).trim().takeIf { it.isNotBlank() }
+        }.onFailure { e ->
+            AppLog.error("Ente", "Failed to decrypt $label", e)
+        }.getOrNull()
+    }
+
     suspend fun setConfigFromUrl(
         publicUrl: String,
         password: String? = null,
@@ -166,7 +239,10 @@ class EntePublicAlbumRepository private constructor(
 
         val updatedConfig = baseConfig.copy(
             accessTokenJWT = accessTokenJWT,
-            albumName = collectionInfo.albumName,
+            albumName = resolveCollectionName(
+                collectionInfo = collectionInfo,
+                collectionKeyB64 = baseConfig.collectionKeyB64,
+            ),
         )
 
         if (existing != null && (existing.accessToken != updatedConfig.accessToken ||
