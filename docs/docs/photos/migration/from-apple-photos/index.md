@@ -54,3 +54,7 @@ rest.
 
 If you run into any issues during this migration, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
+
+> Note: It is recommended to import from Apple Photos via mobile rather than
+> desktop, as mobile upload preserves your album structure and metadata,
+> including edits.
