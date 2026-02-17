@@ -260,7 +260,7 @@ Referral bonus storage is not included when you join a family plan. You will onl
 
 When you join a family plan, your individual plan (including any referral bonuses) is replaced by the shared family storage. Referral bonus storage does not carry over or get added on top of the family plan.
 
-(Example: If you were on the free 10 GB plan with an additional 10 GB from referrals — 20 GB total — and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
+(Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
 
 ## Student Discounts
 
