@@ -17,6 +17,7 @@ import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
@@ -224,6 +225,7 @@ class Configuration {
 
     // Clear all database tables
     await FilesDB.instance.clearTable();
+    await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();

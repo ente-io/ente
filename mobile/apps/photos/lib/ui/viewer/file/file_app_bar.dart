@@ -12,7 +12,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -637,9 +636,19 @@ class FileAppBarState extends State<FileAppBar> {
 
     final fileToDownload =
         !file.isRemoteFile ? file.copyWith(localID: null) : file;
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles([fileToDownload]);
+      } catch (e) {
+        _logger.warning("Failed to save file", e);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
-      context.l10n.downloading,
+      AppLocalizations.of(context).downloading,
       isDismissible: true,
     );
     await dialog.show();

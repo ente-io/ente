@@ -307,6 +307,12 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
+    if (!isBackground && flagService.internalUser) {
+      _logger.info("GalleryDownloadQueueService init $tlog");
+      await galleryDownloadQueueService.init();
+      _logger.info("GalleryDownloadQueueService init done $tlog");
+    }
+
     _logger.info("RitualsService init $tlog");
     await ritualsService.init();
     _logger.info("RitualsService init done $tlog");

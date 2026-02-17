@@ -1125,45 +1125,59 @@ class _FileSelectionActionsWidgetState
       );
     }
     final skippedFilesCount = skippedFiles.length;
+    int addedToQueueCount = 0;
 
     if (filesToDownload.isNotEmpty) {
-      final totalFiles = filesToDownload.length;
-      int downloadedFiles = 0;
-
-      final dialog = createProgressDialog(
-        context,
-        AppLocalizations.of(context).downloading +
-            " ($downloadedFiles/$totalFiles)",
-        isDismissible: true,
-      );
-      await dialog.show();
-      try {
-        final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
-        final futures = <Future>[];
-        for (final file in filesToDownload) {
-          futures.add(
-            taskQueue.add(() async {
-              await downloadToGallery(file);
-              downloadedFiles++;
-              dialog.update(
-                message: AppLocalizations.of(context).downloading +
-                    " ($downloadedFiles/$totalFiles)",
-              );
-            }),
-          );
+      if (flagService.internalUser) {
+        try {
+          final enqueueResult =
+              await galleryDownloadQueueService.enqueueFiles(filesToDownload);
+          addedToQueueCount = enqueueResult.addedCount;
+        } catch (e) {
+          _logger.warning("Failed to enqueue files for download", e);
+          await showGenericErrorDialog(context: context, error: e);
+          return;
         }
-        await Future.wait(futures);
-        await dialog.hide();
-      } catch (e) {
-        _logger.warning("Failed to save files", e);
-        await dialog.hide();
-        await showGenericErrorDialog(context: context, error: e);
-        return;
+      } else {
+        final totalFiles = filesToDownload.length;
+        int downloadedFiles = 0;
+
+        final dialog = createProgressDialog(
+          context,
+          AppLocalizations.of(context).downloading +
+              " ($downloadedFiles/$totalFiles)",
+          isDismissible: true,
+        );
+        await dialog.show();
+        try {
+          final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
+          final futures = <Future>[];
+          for (final file in filesToDownload) {
+            futures.add(
+              taskQueue.add(() async {
+                await downloadToGallery(file);
+                downloadedFiles++;
+                dialog.update(
+                  message: AppLocalizations.of(context).downloading +
+                      " ($downloadedFiles/$totalFiles)",
+                );
+              }),
+            );
+          }
+          await Future.wait(futures);
+          addedToQueueCount = downloadedFiles;
+          await dialog.hide();
+        } catch (e) {
+          _logger.warning("Failed to save files", e);
+          await dialog.hide();
+          await showGenericErrorDialog(context: context, error: e);
+          return;
+        }
       }
     }
 
-    String finalMessage;
     if (skippedFilesCount > 0) {
+      String finalMessage;
       if (skippedFilesCount == 1) {
         final skippedFile = skippedFiles.first;
         finalMessage = l10n.downloadSkippedInSelectionSingleFile(
@@ -1175,15 +1189,26 @@ class _FileSelectionActionsWidgetState
           fileCount: skippedFilesCount,
         );
       }
-    } else {
-      finalMessage = AppLocalizations.of(context).filesSavedToGallery;
+      showToast(
+        context,
+        finalMessage,
+        iosLongToastLengthInSec: 4,
+      );
     }
 
-    showToast(
-      context,
-      finalMessage,
-      iosLongToastLengthInSec: 4,
-    );
+    if (!flagService.internalUser &&
+        skippedFilesCount == 0 &&
+        addedToQueueCount > 0) {
+      showToast(
+        context,
+        AppLocalizations.of(context).filesSavedToGallery,
+        iosLongToastLengthInSec: 4,
+      );
+    }
+
+    if (addedToQueueCount == 0 && skippedFilesCount == 0) {
+      return;
+    }
 
     if (skippedFilesCount == 0) {
       widget.selectedFiles.clearAll();
