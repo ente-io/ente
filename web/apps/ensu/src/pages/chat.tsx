@@ -2472,6 +2472,28 @@ const Page: React.FC = () => {
     const handleDeleteSession = useCallback(
         async (sessionId: string) => {
             if (!chatKey) return;
+
+            if (currentSessionIdRef.current === sessionId) {
+                generationTokenRef.current += 1;
+                pendingCancelRef.current = false;
+                stopRequestedRef.current = false;
+
+                const jobId = currentJobIdRef.current;
+                currentJobIdRef.current = null;
+                providerRef.current?.cancelGeneration(jobId ?? -1);
+
+                setIsGenerating(false);
+                setIsStreamingOutro(false);
+                setIsDownloading(false);
+                setDownloadStatus(null);
+                setStreamingParentId(null);
+                setStreamingText("");
+                streamingBufferRef.current = "";
+                streamingChunksRef.current = [];
+                streamingCreatedAtRef.current = null;
+                lastGenerationRef.current = null;
+            }
+
             await deleteSession(sessionId, chatKey);
             removeSessionFromState(sessionId);
             void syncChat(chatKey);

@@ -179,37 +179,26 @@ jobs:
                   keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
                   EOF
 
-            - name: Build signed release APK
+            - name: Build signed Android artifacts
               if: env.HAS_ANDROID_SIGNING == 'true'
-              run: ./gradlew :app-ui:assembleRelease
+              run: |
+                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
+                      ./gradlew :app-ui:assembleRelease :app-ui:bundleRelease
+                  else
+                      ./gradlew :app-ui:assembleRelease
+                  fi
 
-            - name: Build signed release AAB (PlayStore)
-              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
-              run: ./gradlew :app-ui:bundleRelease
-
-            - name: Build unsigned debug APK (fallback)
-              if: env.HAS_ANDROID_SIGNING != 'true'
-              run: ./gradlew :app-ui:assembleDebug
-
-            - name: Collect Android artifacts (signed APK)
+            - name: Collect Android artifacts (signed)
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ github.ref_name }}.apk
-
-            - name: Collect Android artifacts (signed AAB)
-              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
-              run: |
-                  cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
-
-            - name: Collect Android artifacts (unsigned fallback)
-              if: env.HAS_ANDROID_SIGNING != 'true'
-              run: |
-                  mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/debug/app-ui-debug.apk artifacts/ensu-${{ github.ref_name }}-unsigned.apk
+                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
+                      cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
+                  fi
 
             - name: Attach Android artifacts to draft GitHub release
-              if: startsWith(github.ref, 'refs/tags/ensu-v')
+              if: startsWith(github.ref, 'refs/tags/ensu-v') && env.HAS_ANDROID_SIGNING == 'true'
               uses: ncipollo/release-action@v1
               with:
                   artifacts: "mobile/native/android/apps/ensu/artifacts/*"
@@ -218,6 +207,7 @@ jobs:
                   updateOnlyUnreleased: true
 
             - name: Upload Android artifacts
+              if: env.HAS_ANDROID_SIGNING == 'true'
               uses: actions/upload-artifact@v4
               with:
                   name: ensu-android-artifacts
