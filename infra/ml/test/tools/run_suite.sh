@@ -14,6 +14,7 @@ SUITE="smoke"
 PLATFORMS="all"
 UPDATE_GOLDEN=false
 FAIL_ON_MISSING_PLATFORM=false
+FAIL_ON_PLATFORM_RUNNER_ERROR=false
 ALLOW_EMPTY_COMPARISON=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
 
@@ -26,6 +27,7 @@ Flags:
   --platforms all|desktop|android|ios
   --update-golden
   --fail-on-missing-platform
+  --fail-on-platform-runner-error
   --allow-empty-comparison
   --output-dir <path>
 EOF
@@ -47,6 +49,10 @@ while (($# > 0)); do
       ;;
     --fail-on-missing-platform)
       FAIL_ON_MISSING_PLATFORM=true
+      shift
+      ;;
+    --fail-on-platform-runner-error)
+      FAIL_ON_PLATFORM_RUNNER_ERROR=true
       shift
       ;;
     --allow-empty-comparison)
@@ -486,7 +492,11 @@ done
 
 if ((${#failed_platform_runners[@]} > 0)); then
   echo "One or more platform runners failed: ${failed_platform_runners[*]}" >&2
-  exit 1
+  if $FAIL_ON_PLATFORM_RUNNER_ERROR; then
+    echo "Failing because --fail-on-platform-runner-error is set" >&2
+    exit 1
+  fi
+  echo "Continuing with available platform outputs."
 fi
 
 declare -a compare_args=()

@@ -15,6 +15,7 @@ const MODEL_FILE_NAMES = {
     face_detection: "yolov5s_face_opset18_rgba_opt_nosplits.onnx",
     face_embedding: "mobilefacenet_opset15.onnx",
 };
+const HOST_RESPONSE_PREFIX = "__ML_PARITY_JSON__";
 
 const SCRIPT_DIR = __dirname;
 const DESKTOP_DIR = path.resolve(SCRIPT_DIR, "..");
@@ -198,7 +199,7 @@ const modelMetadata = async (userDataPath) => {
 };
 
 const sendResponse = (payload) => {
-    process.stdout.write(`${JSON.stringify(payload)}\n`);
+    process.stdout.write(`${HOST_RESPONSE_PREFIX}${JSON.stringify(payload)}\n`);
 };
 
 const createWorkerState = async () => {

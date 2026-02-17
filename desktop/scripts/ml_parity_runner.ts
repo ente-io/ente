@@ -11,10 +11,6 @@ import { performance } from "node:perf_hooks";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 
-import { indexCLIP } from "../../web/packages/new/photos/services/ml/clip.ts";
-import { createImageBitmapAndData } from "../../web/packages/new/photos/services/ml/decode.ts";
-import { indexFaces } from "../../web/packages/new/photos/services/ml/face.ts";
-
 interface ManifestItem {
     file_id: string;
     source: string;
@@ -53,6 +49,30 @@ interface PendingRequest {
     reject: (reason: unknown) => void;
 }
 
+interface WebMLBindings {
+    indexCLIP: (image: unknown, electron: unknown) => Promise<{ embedding: number[] }>;
+    indexFaces: (file: unknown, image: unknown, electron: unknown) => Promise<{
+        faces: Array<{
+            detection: {
+                box: {
+                    x: number;
+                    y: number;
+                    width: number;
+                    height: number;
+                };
+                landmarks: Array<{
+                    x: number;
+                    y: number;
+                }>;
+            };
+            score: number;
+            embedding: number[];
+        }>;
+    }>;
+    createImageBitmapAndData: (...args: unknown[]) => Promise<unknown>;
+    renderableImageBlob: (blob: Blob, fileName: string) => Promise<Blob>;
+}
+
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 const DESKTOP_ROOT = path.join(REPO_ROOT, "desktop");
@@ -83,6 +103,7 @@ const MODEL_FILE_NAMES: Record<string, string> = {
     face_detection: "yolov5s_face_opset18_rgba_opt_nosplits.onnx",
     face_embedding: "mobilefacenet_opset15.onnx",
 };
+const HOST_RESPONSE_PREFIX = "__ML_PARITY_JSON__";
 
 const usage = () => {
     process.stderr.write(`Usage: desktop/scripts/ml_parity_runner.ts [flags]\n\n`);
@@ -228,12 +249,19 @@ class HostClient {
         });
 
         this.rl.on("line", (line) => {
-            if (!line.trim()) {
+            const trimmed = line.trim();
+            if (!trimmed) {
                 return;
             }
+            if (!trimmed.startsWith(HOST_RESPONSE_PREFIX)) {
+                process.stderr.write(`[ml_parity_runner] host stdout (non-protocol): ${trimmed}\n`);
+                return;
+            }
+
+            const payload = trimmed.slice(HOST_RESPONSE_PREFIX.length);
             let message: HostResponse;
             try {
-                message = JSON.parse(line) as HostResponse;
+                message = JSON.parse(payload) as HostResponse;
             } catch (error) {
                 this.rejectAll(new Error(`Failed to parse host JSON response: ${String(error)}`));
                 return;
@@ -469,7 +497,68 @@ const ensureModelMetadata = (metadata: Record<string, string>) => {
     return normalized;
 };
 
-const productionDecodeHelperSource = () => {
+const ensureSimilarityTransformationNodeShim = async () => {
+    const dependencyDir = path.join(REPO_ROOT, "web", "node_modules", "similarity-transformation");
+    const packageJSONPath = path.join(dependencyDir, "package.json");
+
+    try {
+        await fs.access(packageJSONPath);
+    } catch {
+        return;
+    }
+
+    const packageJSON = JSON.parse(await fs.readFile(packageJSONPath, "utf8")) as {
+        main?: string;
+        module?: string;
+    };
+    if (typeof packageJSON.main === "string" && packageJSON.main.trim()) {
+        return;
+    }
+
+    const moduleEntry = packageJSON.module?.trim();
+    if (!moduleEntry) {
+        return;
+    }
+
+    const modulePath = path.join(dependencyDir, moduleEntry);
+    try {
+        await fs.access(modulePath);
+    } catch {
+        return;
+    }
+
+    const indexJSPath = path.join(dependencyDir, "index.js");
+    try {
+        await fs.access(indexJSPath);
+        return;
+    } catch {
+        // Create a local shim only for parity runner compatibility under Node CJS resolution.
+    }
+
+    const normalizedEntry = moduleEntry.startsWith("./") ? moduleEntry : `./${moduleEntry}`;
+    await fs.writeFile(indexJSPath, `module.exports = require("${normalizedEntry}");\n`);
+};
+
+const loadWebMLBindings = async (): Promise<WebMLBindings> => {
+    await ensureSimilarityTransformationNodeShim();
+
+    const [clipModule, decodeModule, faceModule, convertModule] = await Promise.all([
+        import("../../web/packages/new/photos/services/ml/clip.ts"),
+        import("../../web/packages/new/photos/services/ml/decode.ts"),
+        import("../../web/packages/new/photos/services/ml/face.ts"),
+        import("../../web/packages/gallery/services/convert.ts"),
+    ]);
+
+    return {
+        indexCLIP: clipModule.indexCLIP as WebMLBindings["indexCLIP"],
+        indexFaces: faceModule.indexFaces as WebMLBindings["indexFaces"],
+        createImageBitmapAndData:
+            decodeModule.createImageBitmapAndData as WebMLBindings["createImageBitmapAndData"],
+        renderableImageBlob: convertModule.renderableImageBlob as WebMLBindings["renderableImageBlob"],
+    };
+};
+
+const productionDecodeHelperSource = (createImageBitmapAndData: (...args: unknown[]) => Promise<unknown>) => {
     const source = createImageBitmapAndData.toString();
     if (!source.includes("createImageBitmap") || !source.includes("OffscreenCanvas")) {
         throw new Error(
@@ -496,8 +585,11 @@ const main = async () => {
         throw new Error(`Manifest has no items: ${args.manifestPath}`);
     }
 
+    const webBindings = await loadWebMLBindings();
     const host = new HostClient(args.electronBinPath, args.hostScriptPath, args.userDataPath);
-    await host.setDecodeHelperSource(productionDecodeHelperSource());
+    await host.setDecodeHelperSource(
+        productionDecodeHelperSource(webBindings.createImageBitmapAndData),
+    );
 
     // `renderableImageBlob` and shared logging helpers check this shim.
     (globalThis as {
@@ -511,10 +603,6 @@ const main = async () => {
             process.stderr.write(`${message}\n`);
         },
     };
-
-    const { renderableImageBlob } = await import(
-        "../../web/packages/gallery/services/convert.ts"
-    );
 
     const codeRevision = await gitRevision();
 
@@ -537,117 +625,137 @@ const main = async () => {
         }>;
         timing_ms: Record<string, number>;
     }> = [];
+    const errors: Array<{
+        file_id: string;
+        error: string;
+        timing_ms: number;
+        stack?: string;
+    }> = [];
 
     try {
         for (let i = 0; i < items.length; i += 1) {
             const item = items[i]!;
-            const sourcePath = resolveMLPath(item.source);
-            await fs.access(sourcePath);
-
-            if (item.source_sha256) {
-                const sourceHash = await sha256Hex(sourcePath);
-                if (sourceHash.toLowerCase() !== item.source_sha256.toLowerCase()) {
-                    throw new Error(
-                        `source hash mismatch for ${item.file_id}: expected ${item.source_sha256}, got ${sourceHash}`,
-                    );
-                }
-            }
-
-            process.stdout.write(`Desktop parity indexing ${i + 1}/${items.length}: ${item.file_id}\n`);
-
             const totalStart = performance.now();
-
-            const decodeStart = performance.now();
-            const sourceBlob = new Blob([await fs.readFile(sourcePath)]);
-            const renderableBlob = await renderableImageBlob(
-                sourceBlob,
-                path.basename(sourcePath),
-            );
-
-            const renderableDir = path.join(args.userDataPath, "renderable-cache");
-            await fs.mkdir(renderableDir, { recursive: true });
-            const renderablePath = path.join(
-                renderableDir,
-                `${safeFileName(item.file_id)}${extensionFromSource(sourcePath)}`,
-            );
-            await fs.writeFile(
-                renderablePath,
-                new Uint8Array(await renderableBlob.arrayBuffer()),
-            );
-
-            let decoded: DecodedImage;
             try {
-                decoded = await host.decodeImage(
+                const sourcePath = resolveMLPath(item.source);
+                await fs.access(sourcePath);
+
+                if (item.source_sha256) {
+                    const sourceHash = await sha256Hex(sourcePath);
+                    if (sourceHash.toLowerCase() !== item.source_sha256.toLowerCase()) {
+                        throw new Error(
+                            `source hash mismatch for ${item.file_id}: expected ${item.source_sha256}, got ${sourceHash}`,
+                        );
+                    }
+                }
+
+                process.stdout.write(`Desktop parity indexing ${i + 1}/${items.length}: ${item.file_id}\n`);
+
+                const decodeStart = performance.now();
+                const sourceBlob = new Blob([await fs.readFile(sourcePath)]);
+                const renderableBlob = await webBindings.renderableImageBlob(
+                    sourceBlob,
+                    path.basename(sourcePath),
+                );
+
+                const renderableDir = path.join(args.userDataPath, "renderable-cache");
+                await fs.mkdir(renderableDir, { recursive: true });
+                const renderablePath = path.join(
+                    renderableDir,
+                    `${safeFileName(item.file_id)}${extensionFromSource(sourcePath)}`,
+                );
+                await fs.writeFile(
                     renderablePath,
-                    renderableBlob.type || undefined,
+                    new Uint8Array(await renderableBlob.arrayBuffer()),
                 );
-            } finally {
-                await fs.rm(renderablePath, { force: true });
+
+                let decoded: DecodedImage;
+                try {
+                    decoded = await host.decodeImage(
+                        renderablePath,
+                        renderableBlob.type || undefined,
+                    );
+                } finally {
+                    await fs.rm(renderablePath, { force: true });
+                }
+                const decodeMS = performance.now() - decodeStart;
+
+                const imageData = {
+                    width: decoded.width,
+                    height: decoded.height,
+                    data: decoded.rgba,
+                };
+                const image = {
+                    data: imageData,
+                };
+                const fileStub = {
+                    id: i + 1,
+                };
+
+                let faceMS = 0;
+                let clipMS = 0;
+
+                const facePromise = (async () => {
+                    const startedAt = performance.now();
+                    const value = await webBindings.indexFaces(
+                        fileStub as never,
+                        image as never,
+                        electronProxy as never,
+                    );
+                    faceMS = performance.now() - startedAt;
+                    return value;
+                })();
+
+                const clipPromise = (async () => {
+                    const startedAt = performance.now();
+                    const value = await webBindings.indexCLIP(image as never, electronProxy as never);
+                    clipMS = performance.now() - startedAt;
+                    return value;
+                })();
+
+                const [faceIndex, clipIndex] = await Promise.all([facePromise, clipPromise]);
+
+                const totalMS = performance.now() - totalStart;
+
+                partialResults.push({
+                    file_id: item.file_id,
+                    clip: {
+                        embedding: clipIndex.embedding,
+                    },
+                    faces: faceIndex.faces.map((face) => ({
+                        box: [
+                            face.detection.box.x,
+                            face.detection.box.y,
+                            face.detection.box.width,
+                            face.detection.box.height,
+                        ] as [number, number, number, number],
+                        landmarks: face.detection.landmarks.map(
+                            (point) => [point.x, point.y] as [number, number],
+                        ),
+                        score: face.score,
+                        embedding: face.embedding,
+                    })),
+                    timing_ms: {
+                        decode: decodeMS,
+                        face_index: faceMS,
+                        clip_index: clipMS,
+                        total: totalMS,
+                    },
+                });
+            } catch (error: unknown) {
+                const elapsedMS = performance.now() - totalStart;
+                const message = error instanceof Error ? error.message : String(error);
+                process.stderr.write(
+                    `[ml_parity_runner] failed to index ${item.file_id}: ${message}\n`,
+                );
+                const stack = error instanceof Error ? error.stack : undefined;
+                errors.push({
+                    file_id: item.file_id,
+                    error: message,
+                    timing_ms: elapsedMS,
+                    ...(stack ? { stack } : {}),
+                });
             }
-            const decodeMS = performance.now() - decodeStart;
-
-            const imageData = {
-                width: decoded.width,
-                height: decoded.height,
-                data: decoded.rgba,
-            };
-            const image = {
-                data: imageData,
-            };
-            const fileStub = {
-                id: i + 1,
-            };
-
-            let faceMS = 0;
-            let clipMS = 0;
-
-            const facePromise = (async () => {
-                const startedAt = performance.now();
-                const value = await indexFaces(
-                    fileStub as never,
-                    image as never,
-                    electronProxy as never,
-                );
-                faceMS = performance.now() - startedAt;
-                return value;
-            })();
-
-            const clipPromise = (async () => {
-                const startedAt = performance.now();
-                const value = await indexCLIP(image as never, electronProxy as never);
-                clipMS = performance.now() - startedAt;
-                return value;
-            })();
-
-            const [faceIndex, clipIndex] = await Promise.all([facePromise, clipPromise]);
-
-            const totalMS = performance.now() - totalStart;
-
-            partialResults.push({
-                file_id: item.file_id,
-                clip: {
-                    embedding: clipIndex.embedding,
-                },
-                faces: faceIndex.faces.map((face) => ({
-                    box: [
-                        face.detection.box.x,
-                        face.detection.box.y,
-                        face.detection.box.width,
-                        face.detection.box.height,
-                    ] as [number, number, number, number],
-                    landmarks: face.detection.landmarks.map(
-                        (point) => [point.x, point.y] as [number, number],
-                    ),
-                    score: face.score,
-                    embedding: face.embedding,
-                })),
-                timing_ms: {
-                    decode: decodeMS,
-                    face_index: faceMS,
-                    clip_index: clipMS,
-                    total: totalMS,
-                },
-            });
         }
 
         const models = ensureModelMetadata(await host.modelMetadata());
@@ -677,6 +785,7 @@ const main = async () => {
                 {
                     platform: "desktop",
                     results: finalResults,
+                    ...(errors.length > 0 ? { errors } : {}),
                 },
                 null,
                 2,
@@ -686,6 +795,9 @@ const main = async () => {
         process.stdout.write(
             `Generated ${finalResults.length} desktop parity result(s) at ${args.outputDir}\n`,
         );
+        if (errors.length > 0) {
+            process.stdout.write(`Desktop parity recorded ${errors.length} per-file error(s)\n`);
+        }
         process.stdout.write(`Combined output: ${combinedOutputPath}\n`);
     } finally {
         await host.shutdown();
