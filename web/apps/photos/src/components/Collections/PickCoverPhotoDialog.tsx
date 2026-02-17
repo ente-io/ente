@@ -1,23 +1,27 @@
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
-    Button,
     Dialog,
     DialogActions,
     DialogContent,
+    IconButton,
     Stack,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
+import { ut } from "ente-base/i18n";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { type SelectedState } from "utils/file";
 import { FileList, type FileListAnnotatedFile } from "../FileList";
@@ -33,6 +37,8 @@ interface PickCoverPhotoDialogProps {
     onResetToDefault: () => Promise<boolean>;
 }
 
+type SubmittingAction = "use-selected-photo" | "reset-to-default";
+
 /**
  * Picker dialog for selecting a single file to use as an album cover.
  */
@@ -47,14 +53,20 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
     onResetToDefault,
 }) => {
     const isFullScreen = useIsSmallWidth();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const titleID = useId();
+    const descriptionID = useId();
+    const [submittingAction, setSubmittingAction] = useState<
+        SubmittingAction | undefined
+    >();
     const [selected, setSelected] = useState<SelectedState>(
         createEmptySelection(collection.id),
     );
+    const isSubmitting = Boolean(submittingAction);
 
     useEffect(() => {
         if (open) {
             setSelected(createEmptySelection(collection.id));
+            setSubmittingAction(undefined);
         }
     }, [open, collection.id]);
 
@@ -90,29 +102,36 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
     const handleUseSelectedPhoto = useCallback(async () => {
         if (!selectedFile) return;
 
-        setIsSubmitting(true);
+        setSubmittingAction("use-selected-photo");
         try {
             const didUpdate = await onUseSelectedPhoto(selectedFile);
             if (didUpdate) onClose();
         } finally {
-            setIsSubmitting(false);
+            setSubmittingAction(undefined);
         }
     }, [onUseSelectedPhoto, onClose, selectedFile]);
 
     const handleResetToDefault = useCallback(async () => {
-        setIsSubmitting(true);
+        setSubmittingAction("reset-to-default");
         try {
             const didReset = await onResetToDefault();
             if (didReset) onClose();
         } finally {
-            setIsSubmitting(false);
+            setSubmittingAction(undefined);
         }
     }, [onResetToDefault, onClose]);
+
+    const actionButtonSx = isFullScreen
+        ? { flex: 1, minHeight: "44px" }
+        : { minHeight: "44px" };
+    const helperText = ut("Only images can be used as cover photos.");
 
     return (
         <Dialog
             open={open}
             onClose={isSubmitting ? undefined : onClose}
+            aria-labelledby={titleID}
+            aria-describedby={descriptionID}
             fullWidth
             fullScreen={isFullScreen}
             slotProps={{
@@ -126,35 +145,38 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                 },
             }}
         >
-            <Stack sx={{ width: "100%", height: "100%" }}>
+            <Stack sx={{ width: "100%", height: "100%" }} aria-busy={isSubmitting}>
                 <Stack
-                    direction="row"
                     sx={{
-                        alignItems: "center",
-                        gap: 1,
                         px: 2,
                         pt: 2,
                         pb: 1,
+                        gap: 1,
+                        borderBottom: 1,
+                        borderColor: "divider",
                     }}
                 >
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="h5">
-                            {t("select_cover_photo")}
-                        </Typography>
-                        <Typography
-                            variant="small"
-                            sx={{
-                                color: "text.muted",
-                                fontWeight: "regular",
-                            }}
-                            noWrap
-                        >
-                            {collection.name}
-                        </Typography>
-                    </Box>
-                    {!isSubmitting && (
-                        <DialogCloseIconButton onClose={onClose} />
-                    )}
+                    <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography id={titleID} variant="h5">
+                                {t("select_cover_photo")}
+                            </Typography>
+                            <Typography
+                                id={descriptionID}
+                                variant="small"
+                                sx={{
+                                    color: "text.muted",
+                                    fontWeight: "regular",
+                                }}
+                                noWrap
+                            >
+                                {collection.name}
+                            </Typography>
+                        </Box>
+                        {!isSubmitting && (
+                            <DialogCloseIconButton onClose={onClose} />
+                        )}
+                    </Stack>
                 </Stack>
 
                 <DialogContent
@@ -187,33 +209,66 @@ export const PickCoverPhotoDialog: React.FC<PickCoverPhotoDialogProps> = ({
                 <DialogActions
                     sx={{
                         px: 2,
-                        pt: 1,
-                        pb: 2,
+                        py: 1.5,
                         gap: 1,
+                        borderTop: 1,
+                        borderColor: "divider",
+                        flexWrap: isFullScreen ? "wrap" : undefined,
+                        alignItems: "center",
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Button
+                    <Tooltip title={helperText} placement="top-start" arrow>
+                        <IconButton
+                            aria-label={helperText}
+                            size="small"
+                            sx={{
+                                width: "38px",
+                                height: "38px",
+                                color: "text.muted",
+                                opacity: 0.55,
+                                backgroundColor: "transparent",
+                                transition: "opacity 150ms ease, background-color 150ms ease",
+                                "&:hover": {
+                                    opacity: 0.9,
+                                    backgroundColor: "fill.fainter",
+                                },
+                            }}
+                        >
+                            <InfoOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    {!isFullScreen && <Box sx={{ flex: 1 }} />}
+                    <LoadingButton
                         color={canResetToDefault ? "secondary" : "inherit"}
                         onClick={
                             canResetToDefault ? handleResetToDefault : onClose
                         }
-                        disabled={isSubmitting}
-                        sx={isFullScreen ? { flex: 1 } : undefined}
+                        loading={submittingAction === "reset-to-default"}
+                        disabled={
+                            isSubmitting && submittingAction !== "reset-to-default"
+                        }
+                        sx={actionButtonSx}
                     >
                         {canResetToDefault
                             ? t("reset_to_default")
                             : t("cancel")}
-                    </Button>
-                    <Button
+                    </LoadingButton>
+                    <LoadingButton
                         variant="contained"
                         color="primary"
                         onClick={handleUseSelectedPhoto}
-                        disabled={isSubmitting || !selectedFile}
-                        sx={isFullScreen ? { flex: 1 } : undefined}
+                        loading={submittingAction === "use-selected-photo"}
+                        disabled={
+                            !selectedFile ||
+                            (isSubmitting &&
+                                submittingAction !== "use-selected-photo")
+                        }
+                        autoFocus={Boolean(selectedFile)}
+                        sx={actionButtonSx}
                     >
                         {t("use_selected_photo")}
-                    </Button>
+                    </LoadingButton>
                 </DialogActions>
             </Stack>
         </Dialog>
