@@ -92,7 +92,7 @@ This section is for implementation agents to keep a running log so handoffs stay
 - [x] W6: Implement iOS parity runner
 - [x] W7: Implement comparator and report generator
 - [x] W8: Implement one-command local orchestration (`run_suite.sh`)
-- [ ] W9: Add selective CI workflow for indexing-related path changes
+- [x] W9: Add manual-only CI workflow (`workflow_dispatch` only, no automatic triggers)
 - [ ] W10: Document usage and maintenance (`README`, golden update instructions)
 
 Framework completion for this branch is W1-W10.
@@ -110,6 +110,7 @@ Continuous corpus expansion/threshold tightening is tracked as ongoing maintenan
 | 2026-02-16 | Codex (GPT-5) | Implemented W5/W6 mobile parity runners with shared harness that executes the production mobile isolate ML pipeline (`IsolateOperation.analyzeImage` -> `analyzeImageStatic`) on Android and iOS, emits shared-schema outputs through an integration-test driver, and wired `run_suite.sh` to launch platform-specific Flutter drive targets and persist `results.json` under `infra/ml/out/parity/<platform>/`. | `mobile/apps/photos/integration_test/ml_parity_shared.dart`, `mobile/apps/photos/integration_test/ml_parity_android_test.dart`, `mobile/apps/photos/integration_test/ml_parity_ios_test.dart`, `mobile/apps/photos/test_driver/ml_parity_driver.dart`, `infra/ml/tools/run_suite.sh`, `infra/ml/ml-indexing-parity-test-plan.md` | `dart format mobile/apps/photos/integration_test/ml_parity_shared.dart mobile/apps/photos/integration_test/ml_parity_android_test.dart mobile/apps/photos/integration_test/ml_parity_ios_test.dart mobile/apps/photos/test_driver/ml_parity_driver.dart`; `flutter analyze mobile/apps/photos/integration_test/ml_parity_shared.dart mobile/apps/photos/integration_test/ml_parity_android_test.dart mobile/apps/photos/integration_test/ml_parity_ios_test.dart mobile/apps/photos/test_driver/ml_parity_driver.dart`; `bash -n infra/ml/tools/run_suite.sh`; `infra/ml/tools/run_suite.sh --suite smoke --platforms android --allow-empty-comparison --output-dir /tmp/ml_parity_android_smoke3`; `infra/ml/tools/run_suite.sh --suite smoke --platforms ios --allow-empty-comparison --output-dir /tmp/ml_parity_ios_smoke2` (fails in this environment with missing iOS module `receive_sharing_intent`) | Implement W9 selective parity CI workflow and W10 maintenance/docs updates. |
 | 2026-02-17 | Codex (GPT-5) | Made Android/iOS parity runners robust to per-file inference/decode failures so runs still emit `results.json` and proceed to comparison; regenerated missing Flutter Rust Bridge artifacts required by Android builds; validated both Android and iOS parity runners now execute end-to-end against real emulator/simulator devices and write outputs. | `mobile/apps/photos/integration_test/ml_parity_shared.dart`, `mobile/apps/photos/ios/Podfile`, `mobile/apps/photos/ios/Podfile.lock`, `mobile/apps/photos/ios/Runner.xcodeproj/project.pbxproj`, generated FRB artifacts under gitignored `mobile/apps/photos/lib/src/rust/*` and `mobile/packages/rust/rust/src/frb_generated.rs` | `dart run melos run codegen:rust:photos`; `dart run melos run codegen:rust:packages`; `dart format mobile/apps/photos/integration_test/ml_parity_shared.dart`; `flutter analyze mobile/apps/photos/integration_test/ml_parity_shared.dart`; `ML_PARITY_ANDROID_DEVICE_ID=emulator-5554 infra/ml/tools/run_suite.sh --suite smoke --platforms android --output-dir /tmp/ml_parity_android_live`; `ML_PARITY_IOS_DEVICE_ID=78739D64-4BF5-4A4F-89CA-5F538B5FF68D infra/ml/tools/run_suite.sh --suite smoke --platforms ios --output-dir /tmp/ml_parity_ios_live` | Move to W9 (selective CI workflow) and W10 (maintenance docs), then tune thresholds/known exceptions for currently failing HEIC edge cases surfaced by parity reports. |
 | 2026-02-17 | Codex (GPT-5) | Clarified rollout semantics so framework completion is explicitly W1-W10, and reframed Phase 4 as ongoing maintenance (continuous corpus expansion/threshold tightening) rather than a release-gated checklist item. | `infra/ml/ml-indexing-parity-test-plan.md` | `nl -ba infra/ml/ml-indexing-parity-test-plan.md` | Complete W9 selective CI workflow and W10 docs to declare the initial framework done. |
+| 2026-02-17 | Codex (GPT-5) | Implemented W9 by adding a parity CI workflow that is explicitly manual-only (`workflow_dispatch` only): it wires parity inputs (`suite`, `platforms`, strictness flags, optional device IDs), provisions CI dependencies, runs `infra/ml/tools/run_suite.sh`, and uploads parity artifacts for inspection. | `.github/workflows/ml-indexing-parity.yml`, `infra/ml/ml-indexing-parity-test-plan.md` | `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ml-indexing-parity.yml")'`; `nl -ba .github/workflows/ml-indexing-parity.yml`; `nl -ba infra/ml/ml-indexing-parity-test-plan.md` | Implement W10 usage and maintenance docs (runner prerequisites, manual workflow usage, and golden update guidance). |
 
 ### Decisions and Rationale Log
 | Date | Decision | Rationale | Impacted Files |
@@ -123,6 +124,7 @@ Continuous corpus expansion/threshold tightening is tracked as ongoing maintenan
 | 2026-02-16 | Desktop parity decode must use the same conversion+bitmap decode path as production (`renderableImageBlob` then `createImageBitmapAndData` semantics), sourced from one shared implementation. | Decode differences can hide regressions in orientation/format handling; parity coverage is only trustworthy if decode semantics match production and stay coupled as code evolves. | `web/packages/new/photos/services/ml/decode.ts`, `web/packages/new/photos/services/ml/blob.ts`, `desktop/scripts/ml_parity_host.js`, `desktop/scripts/ml_parity_runner.ts`, `infra/ml/tools/run_suite.sh` |
 | 2026-02-17 | Mobile parity runners should not abort the full platform run on single-fixture decode/inference errors; they should continue and emit partial results plus per-file errors. | This preserves runner reliability and enables comparator-based reporting (`missing_files` + drift findings) instead of hard runner failure when platform-specific decode/plugin behavior differs. | `mobile/apps/photos/integration_test/ml_parity_shared.dart` |
 | 2026-02-17 | Treat Phase 4 as ongoing maintenance, not as a completion gate for the initial parity framework rollout. | Allows the branch to be considered complete once W1-W10 are done, while keeping corpus growth and threshold tightening as continuous quality work over time. | `infra/ml/ml-indexing-parity-test-plan.md` |
+| 2026-02-17 | Keep parity CI as explicit manual invocation only (`workflow_dispatch`) with no automatic PR/push/schedule triggers. | Matches branch policy for resource-intensive/device-dependent parity runs and prevents accidental automatic execution while W10 docs/maintenance hardening are still in progress. | `.github/workflows/ml-indexing-parity.yml`, `infra/ml/ml-indexing-parity-test-plan.md` |
 
 ### Open Questions / Blockers
 | Date | Owner | Blocker | Unblocked By |
@@ -143,7 +145,7 @@ Continuous corpus expansion/threshold tightening is tracked as ongoing maintenan
 3. Verify face embeddings parity across platforms and ground truth.
 4. Cover a broad corpus (formats, content types, edge cases) with deterministic, repeatable checks.
 5. Provide a single local command to run the suite and produce a clear report.
-6. Run in CI only when indexing-related code changes.
+6. Run in CI via explicit manual trigger (`workflow_dispatch`) when parity validation is requested.
 
 ## Non-Goals (Current Phase)
 1. No forced mobile/desktop pipeline convergence in this phase.
@@ -288,20 +290,18 @@ Flags:
 
 Target runtime: 10-20 minutes for full local run (with caching).
 
-## CI Integration (Selective)
+## CI Integration (Manual-Only)
 Workflow: `.github/workflows/ml-indexing-parity.yml`
 
 Trigger policy:
-1. `pull_request` only when indexing-related paths change.
-2. `workflow_dispatch` for manual runs.
+1. `workflow_dispatch` only.
 
-Jobs:
-1. Desktop parity job.
-2. Android parity job.
-3. iOS parity job.
-4. Aggregate compare/report job.
+Execution model:
+1. Single parity job on `macos-latest`.
+2. Job accepts manual inputs for `suite`, `platforms`, strictness flags, and optional device IDs.
+3. Job runs `infra/ml/tools/run_suite.sh` and uploads `infra/ml/out/parity/**` artifacts.
 
-No automatic run for unrelated PRs.
+No automatic pull-request, push, or schedule triggers.
 
 ## Test Scenarios
 1. File format coverage:
@@ -325,7 +325,7 @@ No automatic run for unrelated PRs.
 ## Rollout
 1. Phase 1: Build Python ground truth pipeline + schema + comparator + desktop runner.
 2. Phase 2: Add Android/iOS runners and one-command orchestration.
-3. Phase 3: Add selective PR CI workflow, complete branch-level usage/maintenance docs, and tune thresholds on real corpus for an initial stable framework release.
+3. Phase 3: Add manual-only CI workflow, complete branch-level usage/maintenance docs, and tune thresholds on real corpus for an initial stable framework release.
 4. Phase 4 (ongoing maintenance, not a release gate): Expand corpus continuously and tighten thresholds where stable as fixtures and platform behavior evolve.
 
 ## Assumptions and Defaults

@@ -1,0 +1,176 @@
+name: "ML Indexing Parity"
+
+on:
+    workflow_dispatch: # Manual trigger only. No automatic PR/push/schedule triggers.
+        inputs:
+            suite:
+                description: "Parity corpus selection"
+                required: true
+                default: "smoke"
+                type: choice
+                options:
+                    - smoke
+                    - full
+            platforms:
+                description: "Platform runner(s) to execute"
+                required: true
+                default: "all"
+                type: choice
+                options:
+                    - all
+                    - desktop
+                    - android
+                    - ios
+            fail_on_missing_platform:
+                description: "Fail if any selected platform output is missing"
+                required: false
+                default: false
+                type: boolean
+            allow_empty_comparison:
+                description: "Allow completion when no platform output is produced"
+                required: false
+                default: false
+                type: boolean
+            android_device_id:
+                description: "Optional explicit Flutter Android device ID"
+                required: false
+                default: ""
+                type: string
+            ios_device_id:
+                description: "Optional explicit Flutter iOS device ID"
+                required: false
+                default: ""
+                type: string
+
+env:
+    FLUTTER_VERSION: "3.32.8"
+
+permissions:
+    contents: read
+
+jobs:
+    parity:
+        if: github.event_name == 'workflow_dispatch'
+        runs-on: macos-latest
+        timeout-minutes: 120
+        defaults:
+            run:
+                shell: bash
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Setup Python 3.12
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
+
+            - name: Setup Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+
+            - name: Enable Yarn 1.22.22
+              run: |
+                  corepack enable
+                  corepack prepare yarn@1.22.22 --activate
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Install desktop dependencies
+              run: yarn --cwd desktop install --frozen-lockfile
+
+            - name: Install web dependencies
+              run: yarn --cwd web install --frozen-lockfile
+
+            - name: Install Python parity dependencies
+              run: uv sync --project infra/ml
+
+            - name: Install Flutter Rust Bridge codegen
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Install mobile package dependencies (core)
+              run: flutter pub get
+              working-directory: mobile/packages/rust
+
+            - name: Generate Rust bindings (core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
+            - name: Install mobile app dependencies (photos)
+              run: flutter pub get
+              working-directory: mobile/apps/photos
+
+            - name: Generate Rust bindings (photos)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/apps/photos
+
+            - name: Set Android device override
+              if: ${{ github.event.inputs.android_device_id != '' }}
+              run: echo "ML_PARITY_ANDROID_DEVICE_ID=${{ github.event.inputs.android_device_id }}" >> "$GITHUB_ENV"
+
+            - name: Resolve iOS simulator
+              if: ${{ github.event.inputs.platforms == 'ios' || github.event.inputs.platforms == 'all' }}
+              run: |
+                  if [[ -n "${{ github.event.inputs.ios_device_id }}" ]]; then
+                      echo "ML_PARITY_IOS_DEVICE_ID=${{ github.event.inputs.ios_device_id }}" >> "$GITHUB_ENV"
+                      exit 0
+                  fi
+
+                  simulator_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 16/{print $2; exit}')"
+                  if [[ -z "$simulator_id" ]]; then
+                      simulator_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/{print $2; exit}')"
+                  fi
+                  if [[ -z "$simulator_id" ]]; then
+                      echo "No available iOS simulator found" >&2
+                      exit 1
+                  fi
+
+                  xcrun simctl boot "$simulator_id" || true
+                  xcrun simctl bootstatus "$simulator_id" -b
+                  echo "ML_PARITY_IOS_DEVICE_ID=$simulator_id" >> "$GITHUB_ENV"
+
+            - name: Run ML indexing parity suite
+              env:
+                  PARITY_SUITE: ${{ github.event.inputs.suite }}
+                  PARITY_PLATFORMS: ${{ github.event.inputs.platforms }}
+                  PARITY_FAIL_ON_MISSING: ${{ github.event.inputs.fail_on_missing_platform }}
+                  PARITY_ALLOW_EMPTY: ${{ github.event.inputs.allow_empty_comparison }}
+              run: |
+                  args=(
+                      --suite "$PARITY_SUITE"
+                      --platforms "$PARITY_PLATFORMS"
+                      --output-dir "infra/ml/out/parity"
+                  )
+                  if [[ "$PARITY_FAIL_ON_MISSING" == "true" ]]; then
+                      args+=(--fail-on-missing-platform)
+                  fi
+                  if [[ "$PARITY_ALLOW_EMPTY" == "true" ]]; then
+                      args+=(--allow-empty-comparison)
+                  fi
+
+                  bash infra/ml/tools/run_suite.sh "${args[@]}"
+
+            - name: Upload parity artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: "ml-indexing-parity-${{ github.run_id }}-${{ github.run_attempt }}"
+                  path: "infra/ml/out/parity/**"
+                  if-no-files-found: ignore
