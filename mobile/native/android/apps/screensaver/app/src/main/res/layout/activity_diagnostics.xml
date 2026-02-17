@@ -31,20 +31,10 @@
                 android:textColor="#111111"
                 android:textSize="30sp" />
 
-            <TextView
-                android:id="@+id/text_logs_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/opensans_semibold"
-                android:text="@string/diagnostics_logs_title"
-                android:textColor="#333333"
-                android:textSize="16sp" />
-
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_adb_command"
                 android:padding="14dp"
