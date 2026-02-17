@@ -1,55 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:fillViewport="true"
+    android:paddingStart="48dp"
+    android:paddingTop="40dp"
+    android:paddingEnd="48dp"
+    android:paddingBottom="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_setup_card"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="56dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="56dp"
+        android:paddingBottom="40dp">
+
+        <ImageView
+            android:id="@+id/image_adb_logo"
+            android:layout_width="110dp"
+            android:layout_height="76dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:src="@drawable/ente_photos_logo_dark" />
 
         <TextView
+            android:id="@+id/text_adb_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/opensans_bold"
             android:text="@string/adb_title"
-            android:textColor="@color/ssaver_text_primary"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/adb_subtitle"
-            android:textColor="@color/ssaver_text_secondary"
-            android:textSize="14sp" />
+            android:textColor="#111111"
+            android:textSize="30sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginTop="18dp"
+            android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/adb_commands_label"
-                android:textColor="@color/ssaver_text_secondary"
-                android:textSize="12sp" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/text_commands"
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_setup_bullet" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:fontFamily="@font/opensans_bold"
+                    android:lineSpacingExtra="1dp"
+                    android:text="@string/adb_bullet_network"
+                    android:textColor="#111111"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/ssaver_text_primary"
-                android:textIsSelectable="true"
-                android:textSize="13sp" />
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_setup_bullet" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:fontFamily="@font/opensans_bold"
+                    android:lineSpacingExtra="1dp"
+                    android:text="@string/adb_bullet_terminal"
+                    android:textColor="#111111"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_setup_bullet" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:fontFamily="@font/opensans_bold"
+                    android:lineSpacingExtra="1dp"
+                    android:text="@string/adb_bullet_command"
+                    android:textColor="#111111"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:fontFamily="@font/opensans_semibold"
+            android:text="@string/adb_commands_label"
+            android:textColor="#444444"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/text_commands"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_adb_command"
+            android:fontFamily="monospace"
+            android:padding="14dp"
+            android:textColor="#F5F5F5"
+            android:textIsSelectable="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/opensans_bold"
+            android:text="@string/adb_wireless_title"
+            android:textColor="#111111"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/opensans_semibold"
+            android:lineSpacingExtra="1dp"
+            android:text="@string/adb_wireless_steps"
+            android:textColor="#222222"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/text_wireless_commands"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_adb_command"
+            android:fontFamily="monospace"
+            android:padding="14dp"
+            android:text="@string/adb_wireless_commands"
+            android:textColor="#F5F5F5"
+            android:textIsSelectable="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/opensans_semibold"
+            android:lineSpacingExtra="1dp"
+            android:text="@string/adb_finish_note"
+            android:textColor="#222222"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

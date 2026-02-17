@@ -34,7 +34,15 @@
 
     <string name="adb_title">ADB setup</string>
     <string name="adb_subtitle">Run this once from a computer on the same network.</string>
-    <string name="adb_commands_label">Command:</string>
+    <string name="adb_commands_label">Commands</string>
+    <string name="adb_bullet_network">Make sure your computer and TV are on the same network</string>
+    <string name="adb_bullet_terminal">Open Terminal (macOS) or Command Prompt (Windows)</string>
+    <string name="adb_bullet_command">Type the commands below and press Return/Enter</string>
+    <string name="adb_wireless_title">Pair via Wireless Debugging (optional)</string>
+    <string name="adb_wireless_steps">On the TV, enable Developer options and turn on Wireless debugging. Choose “Pair device with pairing code”, then run these commands on your computer.</string>
+    <string name="adb_wireless_commands" translatable="false">adb pair &lt;TV_IP&gt;:&lt;PAIR_PORT&gt;
+adb connect &lt;TV_IP&gt;:&lt;ADB_PORT&gt;</string>
+    <string name="adb_finish_note">After running these commands, return to this app and select “Set as screensaver” again.</string>
 
     <string name="setup">Setup</string>
     <string name="setup_title">Connect Ente Public Album</string>
