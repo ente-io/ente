@@ -34,10 +34,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <LinearLayout
                 android:id="@+id/row_change_album"
-                style="@style/Widget.SSaver.SettingsRow"
-                android:text="@string/pref_change_album" />
+                style="@style/Widget.SSaver.SettingsRowContainer">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/row_change_album_title"
+                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        android:text="@string/pref_change_album" />
+
+                    <TextView
+                        android:id="@+id/row_change_album_subtitle"
+                        style="@style/Widget.SSaver.SettingsRowSubtitle"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/row_set_screensaver_container"
@@ -51,10 +68,15 @@
                     android:layout_height="1dp"
                     android:background="@color/ssaver_settings_divider_subtle" />
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <LinearLayout
                     android:id="@+id/row_set_screensaver"
-                    style="@style/Widget.SSaver.SettingsRow"
-                    android:text="@string/button_set_screensaver" />
+                    style="@style/Widget.SSaver.SettingsRowContainer">
+
+                    <TextView
+                        android:id="@+id/row_set_screensaver_title"
+                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        android:text="@string/button_set_screensaver" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -68,10 +90,23 @@
                     android:layout_height="1dp"
                     android:background="@color/ssaver_settings_divider_subtle" />
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <LinearLayout
                     android:id="@+id/row_shuffle"
-                    style="@style/Widget.SSaver.SettingsRow"
-                    android:text="@string/pref_title_shuffle" />
+                    style="@style/Widget.SSaver.SettingsRowContainer">
+
+                    <TextView
+                        android:id="@+id/row_shuffle_title"
+                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pref_title_shuffle" />
+
+                    <TextView
+                        android:id="@+id/row_shuffle_value"
+                        style="@style/Widget.SSaver.SettingsRowValue"
+                        android:text="@string/settings_toggle_off" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -85,10 +120,23 @@
                     android:layout_height="1dp"
                     android:background="@color/ssaver_settings_divider_subtle" />
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <LinearLayout
                     android:id="@+id/row_interval"
-                    style="@style/Widget.SSaver.SettingsRow"
-                    android:text="@string/pref_title_slideshow_interval" />
+                    style="@style/Widget.SSaver.SettingsRowContainer">
+
+                    <TextView
+                        android:id="@+id/row_interval_title"
+                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pref_title_slideshow_interval" />
+
+                    <TextView
+                        android:id="@+id/row_interval_value"
+                        style="@style/Widget.SSaver.SettingsRowValue"
+                        android:text="@string/ente_album_loading" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -102,10 +150,15 @@
                     android:layout_height="1dp"
                     android:background="@color/ssaver_settings_divider_subtle" />
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <LinearLayout
                     android:id="@+id/row_advanced"
-                    style="@style/Widget.SSaver.SettingsRow"
-                    android:text="@string/pref_advanced" />
+                    style="@style/Widget.SSaver.SettingsRowContainer">
+
+                    <TextView
+                        android:id="@+id/row_advanced_title"
+                        style="@style/Widget.SSaver.SettingsRowTitle"
+                        android:text="@string/pref_advanced" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>

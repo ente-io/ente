@@ -167,6 +167,8 @@
     <string name="settings_shuffle_enabled">Shuffle enabled</string>
     <string name="settings_shuffle_disabled">Shuffle disabled</string>
     <string name="settings_interval_updated">Slideshow interval set to %1$s</string>
+    <string name="settings_toggle_on">On</string>
+    <string name="settings_toggle_off">Off</string>
 
     <!-- MainActivity preview mode -->
     <string name="hint_press_down_settings">Press Down Arrow for Settings</string>

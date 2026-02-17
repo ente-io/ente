@@ -1,8 +1,10 @@
 package io.ente.photos.screensaver.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -12,14 +14,20 @@ import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivitySettingsBinding
 import io.ente.photos.screensaver.diagnostics.AdbInstructionsActivity
 import io.ente.photos.screensaver.diagnostics.ScreensaverConfigurator
+import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.prefs.SsaverPreferenceDataStore
 import io.ente.photos.screensaver.setup.SetupActivity
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
 
+    private val scope = MainScope()
     private var binding: ActivitySettingsBinding? = null
     private var dataStore: SsaverPreferenceDataStore? = null
-    private var settingsRows: List<TextView> = emptyList()
+    private var settingsRows: List<View> = emptyList()
+    private var rowTitleByContainer: Map<View, TextView> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +78,13 @@ class SettingsActivity : AppCompatActivity() {
             viewBinding.rowInterval,
             viewBinding.rowAdvanced,
         )
+        rowTitleByContainer = mapOf(
+            viewBinding.rowChangeAlbum to viewBinding.rowChangeAlbumTitle,
+            viewBinding.rowSetScreensaver to viewBinding.rowSetScreensaverTitle,
+            viewBinding.rowShuffle to viewBinding.rowShuffleTitle,
+            viewBinding.rowInterval to viewBinding.rowIntervalTitle,
+            viewBinding.rowAdvanced to viewBinding.rowAdvancedTitle,
+        )
         setupRowFocusStyling(settingsRows)
 
         viewBinding.rowChangeAlbum.post {
@@ -81,6 +96,9 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateSetScreensaverVisibility()
+        updateAlbumSubtitle()
+        updateShuffleValue()
+        updateIntervalValue()
     }
 
     private fun toggleShuffle() {
@@ -95,6 +113,16 @@ class SettingsActivity : AppCompatActivity() {
             R.string.settings_shuffle_disabled
         }
         Toast.makeText(this, getString(messageRes), Toast.LENGTH_SHORT).show()
+        updateShuffleValue()
+    }
+
+    private fun updateShuffleValue() {
+        val store = dataStore ?: return
+        val viewBinding = binding ?: return
+        val shuffleEnabled = store.getBoolean(KEY_PREF_SHUFFLE, true)
+        viewBinding.rowShuffleValue.text = getString(
+            if (shuffleEnabled) R.string.settings_toggle_on else R.string.settings_toggle_off,
+        )
     }
 
     private fun showIntervalDialog() {
@@ -116,35 +144,66 @@ class SettingsActivity : AppCompatActivity() {
                     getString(R.string.settings_interval_updated, entries[which]),
                     Toast.LENGTH_SHORT,
                 ).show()
+                updateIntervalValue()
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
-    private fun setupRowFocusStyling(rows: List<TextView>) {
+    private fun updateIntervalValue() {
+        val store = dataStore ?: return
+        val viewBinding = binding ?: return
+
+        val entries = resources.getStringArray(R.array.pref_interval_entries)
+        val values = resources.getStringArray(R.array.pref_interval_values)
+        if (entries.isEmpty() || values.isEmpty() || entries.size != values.size) return
+
+        val currentValue = store.getString(KEY_PREF_INTERVAL_MS, DEFAULT_INTERVAL_MS)
+        val index = values.indexOf(currentValue).takeIf { it >= 0 } ?: 0
+        viewBinding.rowIntervalValue.text = entries[index]
+    }
+
+    private fun updateAlbumSubtitle() {
+        val viewBinding = binding ?: return
+        scope.launch {
+            val config = EntePublicAlbumRepository.get(this@SettingsActivity).getConfig()
+            val title = config?.albumName?.takeIf { it.isNotBlank() }
+                ?: config?.publicUrl?.let { albumLabelFromUrl(it) }
+
+            if (title.isNullOrBlank()) {
+                viewBinding.rowChangeAlbumSubtitle.isVisible = false
+            } else {
+                viewBinding.rowChangeAlbumSubtitle.text = title
+                viewBinding.rowChangeAlbumSubtitle.isVisible = true
+            }
+        }
+    }
+
+    private fun setupRowFocusStyling(rows: List<View>) {
         rows.forEach { row ->
-            row.setTextSize(TypedValue.COMPLEX_UNIT_SP, ROW_TEXT_SIZE_NORMAL_SP)
-            row.setOnFocusChangeListener { view, hasFocus ->
-                val textView = view as? TextView ?: return@setOnFocusChangeListener
+            val titleView = rowTitleByContainer[row] ?: return@forEach
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, ROW_TEXT_SIZE_NORMAL_SP)
+            row.setOnFocusChangeListener { _, hasFocus ->
                 val textSize = if (hasFocus) {
                     ROW_TEXT_SIZE_FOCUSED_SP
                 } else {
                     ROW_TEXT_SIZE_NORMAL_SP
                 }
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+                titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
             }
         }
     }
 
     private fun refreshRowTextSizes() {
         settingsRows.forEach { row ->
+            val titleView = rowTitleByContainer[row] ?: return@forEach
             val textSize = if (row.hasFocus()) {
                 ROW_TEXT_SIZE_FOCUSED_SP
             } else {
                 ROW_TEXT_SIZE_NORMAL_SP
             }
-            row.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
         }
     }
 
@@ -160,11 +219,35 @@ class SettingsActivity : AppCompatActivity() {
         refreshRowTextSizes()
     }
 
+    private fun albumLabelFromUrl(publicUrl: String): String {
+        val uri = runCatching { Uri.parse(publicUrl) }.getOrNull() ?: return publicUrl
+
+        val queryName = listOf("name", "title", "album")
+            .firstNotNullOfOrNull { key -> uri.getQueryParameter(key)?.trim()?.takeIf { it.isNotBlank() } }
+        if (!queryName.isNullOrBlank()) return queryName
+
+        val token = uri.getQueryParameter("t")?.trim().orEmpty()
+        val pathLabel = uri.pathSegments
+            .asReversed()
+            .firstOrNull { segment ->
+                val clean = segment.trim()
+                clean.isNotBlank() && clean != token && clean.lowercase() !in setOf("a", "album", "albums", "share")
+            }
+            ?.replace('-', ' ')
+            ?.replace('_', ' ')
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+
+        return pathLabel ?: (uri.host?.removePrefix("www.") ?: publicUrl)
+    }
+
     override fun onDestroy() {
         dataStore?.close()
         dataStore = null
         settingsRows = emptyList()
+        rowTitleByContainer = emptyMap()
         binding = null
+        scope.cancel()
         super.onDestroy()
     }
 
