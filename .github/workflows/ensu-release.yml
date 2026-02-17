@@ -132,13 +132,6 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Align Ensu Android versionName with release tag
-              if: startsWith(github.ref, 'refs/tags/ensu-v')
-              run: |
-                  VERSION_NAME="${GITHUB_REF_NAME#ensu-v}"
-                  sed -i -E "s/versionName = \".*\"/versionName = \"${VERSION_NAME}\"/" app-ui/build.gradle.kts
-                  echo "Using Ensu Android versionName=${VERSION_NAME}"
-
             - name: Setup JDK 17
               uses: actions/setup-java@v4
               with:
