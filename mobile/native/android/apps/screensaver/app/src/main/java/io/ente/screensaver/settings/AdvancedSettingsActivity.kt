@@ -3,11 +3,9 @@ package io.ente.photos.screensaver.settings
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivityAdvancedSettingsBinding
 import io.ente.photos.screensaver.diagnostics.DiagnosticsActivity
@@ -21,7 +19,6 @@ class AdvancedSettingsActivity : AppCompatActivity() {
     private val scope = MainScope()
     private var binding: ActivityAdvancedSettingsBinding? = null
     private var advancedRows: List<TextView> = emptyList()
-    private var dividerAboveByRow: Map<TextView, View> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +53,6 @@ class AdvancedSettingsActivity : AppCompatActivity() {
         }
 
         advancedRows = listOf(viewBinding.rowClearCache, viewBinding.rowDiagnostics)
-        dividerAboveByRow = mapOf(viewBinding.rowDiagnostics to viewBinding.dividerDiagnostics)
         setupRowFocusStyling(advancedRows)
 
         viewBinding.rowClearCache.post {
@@ -81,7 +77,6 @@ class AdvancedSettingsActivity : AppCompatActivity() {
                     ROW_TEXT_SIZE_NORMAL_SP
                 }
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
-                refreshDividerStyles()
             }
         }
     }
@@ -95,30 +90,10 @@ class AdvancedSettingsActivity : AppCompatActivity() {
             }
             row.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
         }
-        refreshDividerStyles()
-    }
-
-    private fun refreshDividerStyles() {
-        if (dividerAboveByRow.isEmpty()) return
-
-        val subtleColor = ContextCompat.getColor(this, R.color.ssaver_settings_divider_subtle)
-        val strongColor = ContextCompat.getColor(this, R.color.ssaver_settings_divider_strong)
-
-        dividerAboveByRow.values.forEach { divider ->
-            divider.setBackgroundColor(subtleColor)
-        }
-
-        val visibleRows = advancedRows.filter { it.isShown }
-        val focusedIndex = visibleRows.indexOfFirst { it.hasFocus() }
-        if (focusedIndex == -1 || focusedIndex >= visibleRows.lastIndex) return
-
-        val nextRow = visibleRows[focusedIndex + 1]
-        dividerAboveByRow[nextRow]?.setBackgroundColor(strongColor)
     }
 
     override fun onDestroy() {
         advancedRows = emptyList()
-        dividerAboveByRow = emptyMap()
         binding = null
         scope.cancel()
         super.onDestroy()

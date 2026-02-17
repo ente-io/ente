@@ -3,12 +3,10 @@ package io.ente.photos.screensaver.settings
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivitySettingsBinding
@@ -22,7 +20,6 @@ class SettingsActivity : AppCompatActivity() {
     private var binding: ActivitySettingsBinding? = null
     private var dataStore: SsaverPreferenceDataStore? = null
     private var settingsRows: List<TextView> = emptyList()
-    private var dividerAboveByRow: Map<TextView, View> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,12 +69,6 @@ class SettingsActivity : AppCompatActivity() {
             viewBinding.rowShuffle,
             viewBinding.rowInterval,
             viewBinding.rowAdvanced,
-        )
-        dividerAboveByRow = mapOf(
-            viewBinding.rowSetScreensaver to viewBinding.dividerSetScreensaver,
-            viewBinding.rowShuffle to viewBinding.dividerShuffle,
-            viewBinding.rowInterval to viewBinding.dividerInterval,
-            viewBinding.rowAdvanced to viewBinding.dividerAdvanced,
         )
         setupRowFocusStyling(settingsRows)
 
@@ -142,7 +133,6 @@ class SettingsActivity : AppCompatActivity() {
                     ROW_TEXT_SIZE_NORMAL_SP
                 }
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
-                refreshDividerStyles()
             }
         }
     }
@@ -156,25 +146,6 @@ class SettingsActivity : AppCompatActivity() {
             }
             row.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
         }
-        refreshDividerStyles()
-    }
-
-    private fun refreshDividerStyles() {
-        if (dividerAboveByRow.isEmpty()) return
-
-        val subtleColor = ContextCompat.getColor(this, R.color.ssaver_settings_divider_subtle)
-        val strongColor = ContextCompat.getColor(this, R.color.ssaver_settings_divider_strong)
-
-        dividerAboveByRow.values.forEach { divider ->
-            divider.setBackgroundColor(subtleColor)
-        }
-
-        val visibleRows = settingsRows.filter { it.isShown }
-        val focusedIndex = visibleRows.indexOfFirst { it.hasFocus() }
-        if (focusedIndex == -1 || focusedIndex >= visibleRows.lastIndex) return
-
-        val nextRow = visibleRows[focusedIndex + 1]
-        dividerAboveByRow[nextRow]?.setBackgroundColor(strongColor)
     }
 
     private fun updateSetScreensaverVisibility() {
@@ -193,7 +164,6 @@ class SettingsActivity : AppCompatActivity() {
         dataStore?.close()
         dataStore = null
         settingsRows = emptyList()
-        dividerAboveByRow = emptyMap()
         binding = null
         super.onDestroy()
     }
