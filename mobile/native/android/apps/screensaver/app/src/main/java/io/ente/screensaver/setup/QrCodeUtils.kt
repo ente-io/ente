@@ -23,7 +23,6 @@ object QrCodeUtils {
 
     private const val QR_DOT_COLOR = "#101114"
     private const val FINDER_GREEN = "#08C225"
-    private const val LOGO_BADGE_STROKE = "#E6E6E6"
 
     fun renderQrCode(
         context: Context,
@@ -65,11 +64,8 @@ object QrCodeUtils {
             FinderRect(finderTopLeftX, finderBottomLeftY),
         )
 
-        val logoCutoutModules = (((moduleCount * 0.18f).toInt()).coerceAtLeast(7)).let {
-            if (it % 2 == 0) it + 1 else it
-        }
-        val logoCutoutStart = QUIET_ZONE_MODULES + (moduleCount - logoCutoutModules) / 2
-        val logoCutoutEndExclusive = logoCutoutStart + logoCutoutModules
+        val qrCenterModules = QUIET_ZONE_MODULES + moduleCount / 2f
+        val logoCutoutRadiusModules = max(4f, moduleCount * 0.10f)
 
         for (y in 0 until moduleCount) {
             for (x in 0 until moduleCount) {
@@ -79,14 +75,15 @@ object QrCodeUtils {
                 val drawY = y + QUIET_ZONE_MODULES
 
                 if (finderRects.any { it.contains(drawX, drawY) }) continue
-                if (drawX in logoCutoutStart until logoCutoutEndExclusive &&
-                    drawY in logoCutoutStart until logoCutoutEndExclusive
-                ) {
-                    continue
-                }
 
-                val centerX = (drawX + 0.5f) * moduleSize
-                val centerY = (drawY + 0.5f) * moduleSize
+                val moduleCenterX = drawX + 0.5f
+                val moduleCenterY = drawY + 0.5f
+                val dx = moduleCenterX - qrCenterModules
+                val dy = moduleCenterY - qrCenterModules
+                if (dx * dx + dy * dy <= logoCutoutRadiusModules * logoCutoutRadiusModules) continue
+
+                val centerX = moduleCenterX * moduleSize
+                val centerY = moduleCenterY * moduleSize
                 canvas.drawCircle(centerX, centerY, dotRadius, modulePaint)
             }
         }
@@ -105,7 +102,7 @@ object QrCodeUtils {
             canvas = canvas,
             sizePx = sizePx,
             moduleSize = moduleSize,
-            logoCutoutModules = logoCutoutModules,
+            logoCutoutRadiusModules = logoCutoutRadiusModules,
             centerLogoResId = centerLogoResId,
         )
 
@@ -159,30 +156,16 @@ object QrCodeUtils {
         canvas: Canvas,
         sizePx: Int,
         moduleSize: Float,
-        logoCutoutModules: Int,
+        logoCutoutRadiusModules: Float,
         @DrawableRes centerLogoResId: Int,
     ) {
         val logoBitmap = BitmapFactory.decodeResource(context.resources, centerLogoResId) ?: return
 
-        val cutoutPx = logoCutoutModules * moduleSize
-        val logoSize = min(sizePx * 0.19f, cutoutPx * 0.95f)
-        val badgeRadius = logoSize * 0.58f
+        val cutoutDiameterPx = logoCutoutRadiusModules * moduleSize * 2f
+        val logoSize = min(sizePx * 0.17f, cutoutDiameterPx * 0.82f)
 
         val cx = sizePx / 2f
         val cy = sizePx / 2f
-
-        val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            style = Paint.Style.FILL
-        }
-        val badgeStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor(LOGO_BADGE_STROKE)
-            style = Paint.Style.STROKE
-            strokeWidth = max(1f, logoSize * 0.02f)
-        }
-
-        canvas.drawCircle(cx, cy, badgeRadius, badgePaint)
-        canvas.drawCircle(cx, cy, badgeRadius, badgeStroke)
 
         val halfLogo = logoSize / 2f
         val destination = RectF(

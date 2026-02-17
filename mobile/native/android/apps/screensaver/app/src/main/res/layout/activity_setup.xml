@@ -126,12 +126,12 @@
 
             <ImageView
                 android:id="@+id/image_setup_ducky"
-                android:layout_width="320dp"
+                android:layout_width="312dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"
-                android:src="@drawable/setup_ducky"
-                android:translationX="-18dp" />
+                android:src="@drawable/setup_ducky" />
 
         </LinearLayout>
 
