@@ -106,6 +106,7 @@ class SettingsActivity : AppCompatActivity() {
         val shuffleEnabled = store.getBoolean(KEY_PREF_SHUFFLE, true)
         val nextValue = !shuffleEnabled
         store.putBoolean(KEY_PREF_SHUFFLE, nextValue)
+        setShuffleValue(nextValue)
 
         val messageRes = if (nextValue) {
             R.string.settings_shuffle_enabled
@@ -113,15 +114,18 @@ class SettingsActivity : AppCompatActivity() {
             R.string.settings_shuffle_disabled
         }
         Toast.makeText(this, getString(messageRes), Toast.LENGTH_SHORT).show()
-        updateShuffleValue()
     }
 
     private fun updateShuffleValue() {
         val store = dataStore ?: return
-        val viewBinding = binding ?: return
         val shuffleEnabled = store.getBoolean(KEY_PREF_SHUFFLE, true)
+        setShuffleValue(shuffleEnabled)
+    }
+
+    private fun setShuffleValue(enabled: Boolean) {
+        val viewBinding = binding ?: return
         viewBinding.rowShuffleValue.text = getString(
-            if (shuffleEnabled) R.string.settings_toggle_on else R.string.settings_toggle_off,
+            if (enabled) R.string.settings_toggle_on else R.string.settings_toggle_off,
         )
     }
 
@@ -144,7 +148,7 @@ class SettingsActivity : AppCompatActivity() {
                     getString(R.string.settings_interval_updated, entries[which]),
                     Toast.LENGTH_SHORT,
                 ).show()
-                updateIntervalValue()
+                setIntervalValue(entries[which])
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
@@ -153,7 +157,6 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun updateIntervalValue() {
         val store = dataStore ?: return
-        val viewBinding = binding ?: return
 
         val entries = resources.getStringArray(R.array.pref_interval_entries)
         val values = resources.getStringArray(R.array.pref_interval_values)
@@ -161,7 +164,12 @@ class SettingsActivity : AppCompatActivity() {
 
         val currentValue = store.getString(KEY_PREF_INTERVAL_MS, DEFAULT_INTERVAL_MS)
         val index = values.indexOf(currentValue).takeIf { it >= 0 } ?: 0
-        viewBinding.rowIntervalValue.text = entries[index]
+        setIntervalValue(entries[index])
+    }
+
+    private fun setIntervalValue(value: String) {
+        val viewBinding = binding ?: return
+        viewBinding.rowIntervalValue.text = value
     }
 
     private fun updateAlbumSubtitle() {
