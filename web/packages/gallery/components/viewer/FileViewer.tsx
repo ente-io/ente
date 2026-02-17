@@ -439,7 +439,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
-    const shouldCloseOnBrowserBack = !user;
+    const shouldCloseOnBrowserBack = !!publicAlbumsCredentials;
 
     // There are 3 things involved in this dance:
     //
