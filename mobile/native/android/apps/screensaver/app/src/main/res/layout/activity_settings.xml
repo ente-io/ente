@@ -15,15 +15,15 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="100dp">
 
             <ImageView
                 android:id="@+id/settings_logo"
-                android:layout_width="188dp"
-                android:layout_height="132dp"
+                android:layout_width="94dp"
+                android:layout_height="66dp"
                 android:layout_gravity="start|top"
-                android:layout_marginStart="96dp"
-                android:layout_marginTop="48dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="24dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"
                 android:src="@drawable/ente_photos_logo" />

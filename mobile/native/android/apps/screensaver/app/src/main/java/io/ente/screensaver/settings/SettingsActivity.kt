@@ -2,6 +2,8 @@ package io.ente.photos.screensaver.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.TypedValue
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +19,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private var binding: ActivitySettingsBinding? = null
     private var dataStore: SsaverPreferenceDataStore? = null
+    private var settingsRows: List<TextView> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +63,18 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(Intent(this, AdvancedSettingsActivity::class.java))
         }
 
+        settingsRows = listOf(
+            viewBinding.rowChangeAlbum,
+            viewBinding.rowSetScreensaver,
+            viewBinding.rowShuffle,
+            viewBinding.rowInterval,
+            viewBinding.rowAdvanced,
+        )
+        setupRowFocusStyling(settingsRows)
+
         viewBinding.rowChangeAlbum.post {
             viewBinding.rowChangeAlbum.requestFocus()
+            refreshRowTextSizes()
         }
     }
 
@@ -109,13 +122,48 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun setupRowFocusStyling(rows: List<TextView>) {
+        rows.forEach { row ->
+            row.setTextSize(TypedValue.COMPLEX_UNIT_SP, ROW_TEXT_SIZE_NORMAL_SP)
+            row.setOnFocusChangeListener { view, hasFocus ->
+                val textView = view as? TextView ?: return@setOnFocusChangeListener
+                val textSize = if (hasFocus) {
+                    ROW_TEXT_SIZE_FOCUSED_SP
+                } else {
+                    ROW_TEXT_SIZE_NORMAL_SP
+                }
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+            }
+        }
+    }
+
+    private fun refreshRowTextSizes() {
+        settingsRows.forEach { row ->
+            val textSize = if (row.hasFocus()) {
+                ROW_TEXT_SIZE_FOCUSED_SP
+            } else {
+                ROW_TEXT_SIZE_NORMAL_SP
+            }
+            row.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+        }
+    }
+
     private fun updateSetScreensaverVisibility() {
-        binding?.rowSetScreensaverContainer?.isVisible = !ScreensaverConfigurator.isScreensaverConfigured(this)
+        val viewBinding = binding ?: return
+        val shouldShowSetScreensaver = !ScreensaverConfigurator.isScreensaverConfigured(this)
+        viewBinding.rowSetScreensaverContainer.isVisible = shouldShowSetScreensaver
+
+        if (!shouldShowSetScreensaver && viewBinding.rowSetScreensaver.hasFocus()) {
+            viewBinding.rowChangeAlbum.requestFocus()
+        }
+
+        refreshRowTextSizes()
     }
 
     override fun onDestroy() {
         dataStore?.close()
         dataStore = null
+        settingsRows = emptyList()
         binding = null
         super.onDestroy()
     }
@@ -124,5 +172,8 @@ class SettingsActivity : AppCompatActivity() {
         private const val KEY_PREF_SHUFFLE = "pref_shuffle"
         private const val KEY_PREF_INTERVAL_MS = "pref_interval_ms"
         private const val DEFAULT_INTERVAL_MS = "60000"
+
+        private const val ROW_TEXT_SIZE_NORMAL_SP = 32f
+        private const val ROW_TEXT_SIZE_FOCUSED_SP = 36f
     }
 }

@@ -33,7 +33,7 @@
 
     <style name="Widget.SSaver.SettingsRow" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">136dp</item>
+        <item name="android:layout_height">68dp</item>
         <item name="android:background">@drawable/bg_settings_row</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
@@ -41,13 +41,13 @@
         <item name="android:fontFamily">@font/opensans_bold</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:paddingStart">122dp</item>
-        <item name="android:paddingEnd">48dp</item>
+        <item name="android:paddingStart">60dp</item>
+        <item name="android:paddingEnd">24dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:textSize">64sp</item>
-        <item name="android:letterSpacing">-0.05</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.03</item>
     </style>
 
     <style name="TextAppearance.SSaver.ListItem" parent="TextAppearance.AppCompat.Medium">
