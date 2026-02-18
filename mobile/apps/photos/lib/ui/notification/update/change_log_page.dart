@@ -99,15 +99,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
 
   Widget _getChangeLog(BuildContext ctx) {
     final strings = ChangeLogStrings.forLocale(Localizations.localeOf(context));
-    final List<ChangeLogEntry> items = [];
-    items.addAll([
+    final items = <ChangeLogEntry>[
       ChangeLogEntry(
         strings.title1,
         description: strings.desc1,
         items: [
           strings.desc1Item1,
           strings.desc1Item2,
-        ],
+        ].where((item) => item.trim().isNotEmpty).toList(growable: false),
         isFeature: true,
       ),
       ChangeLogEntry(
@@ -120,7 +119,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         description: strings.desc3,
         isFeature: true,
       ),
-    ]);
+    ]
+        .where(
+          (entry) =>
+              entry.title.trim().isNotEmpty ||
+              (entry.description?.trim().isNotEmpty ?? false) ||
+              entry.items.isNotEmpty,
+        )
+        .toList(growable: false);
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
