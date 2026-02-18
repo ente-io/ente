@@ -62,7 +62,7 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
@@ -91,6 +91,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
+import { quickLinkDateRangeForCreationTimes } from "utils/quick-link";
 import { getEnteURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
@@ -886,6 +887,21 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     onShowFeed,
     hasSelection,
 }) => {
+    const memoriesDateRange = useMemo(() => {
+        if (!publicFiles.length) return undefined;
+
+        // publicFiles is already creation-time sorted, so the ends hold min/max.
+        const firstCreationTime = fileCreationTime(publicFiles[0]!);
+        const lastCreationTime = fileCreationTime(
+            publicFiles[publicFiles.length - 1]!,
+        );
+
+        return quickLinkDateRangeForCreationTimes(
+            Math.min(firstCreationTime, lastCreationTime),
+            Math.max(firstCreationTime, lastCreationTime),
+        );
+    }, [publicFiles]);
+
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
@@ -902,6 +918,19 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     <GalleryItemsSummary
                         name={publicCollection.name}
                         fileCount={publicFiles.length}
+                        endIcon={
+                            memoriesDateRange ? (
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted", ml: "-6px" }}
+                                >
+                                    <Box component="span" sx={{ mr: "6px" }}>
+                                        {"\u00b7"}
+                                    </Box>
+                                    {memoriesDateRange}
+                                </Typography>
+                            ) : undefined
+                        }
                         nameProps={{ noWrap: true }}
                     />
                 </Box>
