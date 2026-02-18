@@ -21,12 +21,11 @@ This directory contains the ML indexing parity framework for Android, iOS, deskt
 ## Local Run (One Command)
 
 ```bash
-bash infra/ml/test/tools/run_suite.sh --suite smoke --platforms all
+bash infra/ml/test/tools/run_suite.sh
 ```
 
 Common flags:
 
-- `--suite smoke|full`
 - `--platforms all|desktop|android|ios`
 - `--fail-on-missing-platform`
 - `--fail-on-platform-runner-error`
@@ -47,7 +46,6 @@ Workflow: `.github/workflows/ml-indexing-parity.yml`
 
 Run via `workflow_dispatch` and choose:
 
-- `suite`
 - `platforms`
 - strictness flags
 - optional explicit Android/iOS device IDs
@@ -64,7 +62,7 @@ Use this process when corpus/threshold/model behavior changes intentionally:
 2. Regenerate and compare with a real run:
 
 ```bash
-bash infra/ml/test/tools/run_suite.sh --suite full --platforms all --output-dir infra/ml/test/out/parity
+bash infra/ml/test/tools/run_suite.sh --platforms all --output-dir infra/ml/test/out/parity
 ```
 
 3. Review `infra/ml/test/out/parity/parity_report.html`, `comparison_report.json`, and per-platform `results.json` files.

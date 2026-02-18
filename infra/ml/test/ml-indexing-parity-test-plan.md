@@ -283,13 +283,12 @@ Default behavior:
 6. Clearly mark unavailable/failed platform runs.
 
 Flags:
-1. `--suite smoke|full`
-2. `--platforms all|desktop|android|ios`
-3. `--fail-on-missing-platform`
-4. `--fail-on-platform-runner-error`
-5. `--allow-empty-comparison` (optional override when intentionally running without any platform outputs)
-6. `--output-dir ...`
-7. `--verbose` (optional, streams full logs/tables to terminal)
+1. `--platforms all|desktop|android|ios`
+2. `--fail-on-missing-platform`
+3. `--fail-on-platform-runner-error`
+4. `--allow-empty-comparison` (optional override when intentionally running without any platform outputs)
+5. `--output-dir ...`
+6. `--verbose` (optional, streams full logs/tables to terminal)
 
 Target runtime: 10-20 minutes for full local run (with caching).
 
@@ -301,7 +300,7 @@ Trigger policy:
 
 Execution model:
 1. Single parity job on `macos-latest`.
-2. Job accepts manual inputs for `suite`, `platforms`, strictness flags, and optional device IDs.
+2. Job accepts manual inputs for `platforms`, strictness flags, and optional device IDs.
 3. Job runs `infra/ml/test/tools/run_suite.sh` and uploads `infra/ml/test/out/parity/**` artifacts.
 
 No automatic pull-request, push, or schedule triggers.

@@ -3,14 +3,6 @@ name: "ML Indexing Parity"
 on:
     workflow_dispatch: # Manual trigger only. No automatic PR/push/schedule triggers.
         inputs:
-            suite:
-                description: "Parity corpus selection"
-                required: true
-                default: "smoke"
-                type: choice
-                options:
-                    - smoke
-                    - full
             platforms:
                 description: "Platform runner(s) to execute"
                 required: true
@@ -148,13 +140,11 @@ jobs:
 
             - name: Run ML indexing parity suite
               env:
-                  PARITY_SUITE: ${{ github.event.inputs.suite }}
                   PARITY_PLATFORMS: ${{ github.event.inputs.platforms }}
                   PARITY_FAIL_ON_MISSING: ${{ github.event.inputs.fail_on_missing_platform }}
                   PARITY_ALLOW_EMPTY: ${{ github.event.inputs.allow_empty_comparison }}
               run: |
                   args=(
-                      --suite "$PARITY_SUITE"
                       --platforms "$PARITY_PLATFORMS"
                       --output-dir "infra/ml/test/out/parity"
                   )

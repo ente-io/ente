@@ -10,7 +10,6 @@ UV_PROJECT_DIR="$ROOT_DIR/infra/ml"
 MANIFEST_PATH="$ROOT_DIR/infra/ml/test/ground_truth/manifest.json"
 TEST_DATA_DIR="$ML_DIR/test_data/ml-indexing/v1"
 
-SUITE="smoke"
 PLATFORMS="all"
 FAIL_ON_MISSING_PLATFORM=false
 FAIL_ON_PLATFORM_RUNNER_ERROR=false
@@ -23,7 +22,6 @@ usage() {
 Usage: infra/ml/test/tools/run_suite.sh [flags]
 
 Flags:
-  --suite smoke|full                     (default: smoke)
   --platforms all|desktop|android|ios   (default: all)
   --fail-on-missing-platform            (default: disabled)
   --fail-on-platform-runner-error       (default: disabled)
@@ -38,10 +36,6 @@ EOF
 
 while (($# > 0)); do
   case "$1" in
-    --suite)
-      SUITE="$2"
-      shift 2
-      ;;
     --platforms)
       PLATFORMS="$2"
       shift 2
@@ -109,7 +103,6 @@ PY
 CODE_REVISION="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo local)"
 
 echo "Running ML parity suite"
-echo "  suite: $SUITE"
 echo "  platforms: $PLATFORMS"
 echo "  output_dir: $OUTPUT_DIR"
 echo "  verbose: $VERBOSE"
@@ -427,7 +420,6 @@ run_mobile_runner() {
     --no-dds
     --dart-define=ML_PARITY_MANIFEST_B64="$MANIFEST_B64"
     --dart-define=ML_PARITY_CODE_REVISION="$CODE_REVISION"
-    --dart-define=ML_PARITY_SUITE="$SUITE"
   )
   if [[ -n "$device_id" ]]; then
     drive_cmd+=(-d "$device_id")
