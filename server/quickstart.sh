@@ -210,6 +210,8 @@ apps:
     cast: http://localhost:3004
     # Public locker (share) app
     public-locker: http://localhost:3005
+    # Public paste app
+    public-paste: http://localhost:3008
     # Embed app for embedded album sharing
     embed-albums: http://localhost:3006
     # Set this to the URL where your accounts web app is running, primarily used for

@@ -95,6 +95,11 @@ apps:
     # If you're running a self-hosted instance and wish to serve public links for locker,
     # set this to the URL where your albums web app is running.
     public-locker:
+    # Default is https://paste.ente.io
+    #
+    # If you're running a self-hosted instance and wish to serve Ente Paste,
+    # set this to the URL where your paste web app is running.
+    public-paste:
     # Default is https://cast.ente.io
     cast:
     # Default is https://accounts.ente.io
