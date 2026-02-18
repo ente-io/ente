@@ -12,4 +12,4 @@
 - Neeraj: Remove internal-user gating for extended collage layouts
 - Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
 - Neeraj: Reduce iOS Live Photo start flicker on long-press preview
-- Neeraj/Aman: Offline mode
+- Neeraj/Aman: (disabled) Offline mode
