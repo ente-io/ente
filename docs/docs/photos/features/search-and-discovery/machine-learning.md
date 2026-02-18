@@ -111,7 +111,7 @@ The indexes created by machine learning are synced across all your devices autom
 - Indexes are encrypted before syncing
 - No need to re-index on every device
 
-## Local Indexing Configuration
+## Local Indexing
 
 ### Disabling local indexing on mobile
 
@@ -119,7 +119,7 @@ On mobile devices with low RAM (4-6GB) and large photo libraries, indexing might
 
 **To disable local indexing on mobile:**
 
-Open `Settings > Machine learning > Configuration` and disable local indexing.
+Open `Settings > Machine learning` and disable local indexing.
 
 This way, you can continue to use ML features without impacting your phone's performance. The desktop app will handle indexing, and the indexes will sync to your mobile device.
 

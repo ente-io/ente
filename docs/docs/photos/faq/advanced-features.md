@@ -294,7 +294,7 @@ Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets).
 
 ### How do I configure which albums appear on my widget? {#configure-widget-albums}
 
-Open `Settings > Home widget > Albums widget` in the Ente app.
+Open `Settings > Widgets > Albums widget` in the Ente app.
 
 From here, you can select which albums to display. By default, the **Favorites** album is selected. You can select multiple albums to show more variety on your home screen.
 
@@ -308,7 +308,7 @@ To use the People widget:
 
 1. Enable face recognition in `Settings > Machine learning`
 2. Wait for face indexing to complete
-3. Open `Settings > Home widget > People widget` to select people
+3. Open `Settings > Widgets > People widget` to select people
 
 Learn more about [Face recognition](/photos/features/search-and-discovery/face-recognition).
 
@@ -338,7 +338,7 @@ The Memories widget can display three types of memories:
 - **Past Years**: Memories from past years
 - **Smart Memories**: AI-curated memorable moments
 
-You can toggle which memory types appear by opening `Settings > Home widget > Memories widget`.
+You can toggle which memory types appear by opening `Settings > Widgets > Memories widget`.
 
 ### Are widgets available on desktop or web? {#widgets-platform-availability}
 
