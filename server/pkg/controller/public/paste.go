@@ -11,15 +11,15 @@ import (
 	entebase "github.com/ente-io/museum/ente/base"
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/repo/public"
-	"github.com/ente-io/museum/pkg/utils/random"
 	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/lithammer/shortuuid/v3"
 )
 
 const (
-	pasteAccessTokenLength = 12
+	pasteAccessTokenLength = 10
 	maxCiphertextBytes     = 64 * 1024
 	pasteTTL               = 24 * time.Hour
 	guardTTL               = 2 * time.Minute
@@ -42,10 +42,7 @@ func (c *PasteController) Create(
 
 	expiresAt := timeUtil.Microseconds() + pasteTTL.Microseconds()
 	for attempt := 0; attempt < 5; attempt++ {
-		accessToken, err := random.GenerateAlphaNumString(pasteAccessTokenLength)
-		if err != nil {
-			return nil, stacktrace.Propagate(err, "failed to generate access token")
-		}
+		accessToken := strings.ToUpper(shortuuid.New()[0:pasteAccessTokenLength])
 		idPtr, err := entebase.NewID("ppt")
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "failed to generate paste id")

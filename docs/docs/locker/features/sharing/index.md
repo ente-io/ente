@@ -26,12 +26,21 @@ with people who don't use Ente.
 
 Learn more about [Public links](/locker/features/sharing/public-links).
 
+### Share text via Ente Paste
+
+Use Ente Paste when you need to share sensitive text quickly with a one-time
+link. Pastes are end-to-end encrypted, deleted after first open, and expire
+after 24 hours.
+
+Learn more about [Ente Paste](/locker/features/sharing/ente-paste).
+
 ## What you can share
 
-| Content     | Share with Ente users | Share via public link |
-| ----------- | --------------------- | --------------------- |
-| Collections | Yes                   | No                    |
-| Items       | No                    | Yes                   |
+| Content     | Share with Ente users | Share via public link | Share via Ente Paste |
+| ----------- | --------------------- | --------------------- | -------------------- |
+| Collections | Yes                   | No                    | No                   |
+| Items       | No                    | Yes                   | No                   |
+| Text        | No                    | No                    | Yes                  |
 
 To share with other Ente users, organize items into a collection and share the
 collection. To share individual items with anyone (including non-Ente users),
