@@ -12,7 +12,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/src/rust/api/motion_photo_api.dart";
 import 'package:photos/ui/notification/toast.dart';
@@ -54,7 +53,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
-  bool get _enableLivePhotoFlickerFix => flagService.internalUser;
 
   @override
   void initState() {
@@ -251,7 +249,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     final controller = VideoController(_player);
     setState(() {
       _videoController = controller;
-      _isVideoFrameReady = !_enableLivePhotoFlickerFix;
+      _isVideoFrameReady = false;
     });
 
     try {
@@ -266,7 +264,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       if (!mounted || _videoController != controller) return;
       setState(() {
         _videoController = null;
-        _isVideoFrameReady = !_enableLivePhotoFlickerFix;
+        _isVideoFrameReady = false;
       });
       return;
     }
@@ -276,22 +274,16 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       await _player.pause();
     }
 
-    if (_enableLivePhotoFlickerFix) {
-      try {
-        await controller.waitUntilFirstFrameRendered
-            .timeout(const Duration(seconds: 2));
-      } catch (e, s) {
-        _logger.info("First frame wait failed for ${_enteFile.tag}", e, s);
-      }
+    try {
+      await controller.waitUntilFirstFrameRendered
+          .timeout(const Duration(seconds: 2));
+    } catch (e, s) {
+      _logger.info("First frame wait failed for ${_enteFile.tag}", e, s);
     }
 
     if (_showVideo) {
       await _player.seek(Duration.zero);
       await _player.play();
-    }
-
-    if (!_enableLivePhotoFlickerFix) {
-      return;
     }
 
     if (!mounted || _videoController != controller) return;
