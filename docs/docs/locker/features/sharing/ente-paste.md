@@ -24,7 +24,7 @@ expires after 24 hours.
 
 ## Limits
 
-- Maximum text length: 5000 characters.
+- Maximum text length: 4000 characters.
 - Anonymous usage: no Ente account required to create or open a paste.
 - One-time access: opening the link consumes it.
 

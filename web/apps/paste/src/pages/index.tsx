@@ -7,6 +7,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import {
     decryptMetadataJSON,
     encryptMetadataJSON,
@@ -20,7 +21,7 @@ import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
 import { consumePaste, createPaste, setGuard } from "../services/paste";
 
-const maxChars = 5000;
+const maxChars = 4000;
 
 type PageMode = "create" | "view";
 
@@ -38,6 +39,20 @@ const waitUntilVisible = () =>
         };
         document.addEventListener("visibilitychange", onVisible);
     });
+
+const textFieldSx = {
+    "& .MuiOutlinedInput-root.MuiInputBase-multiline": {
+        borderRadius: "16px",
+        bgcolor: "background.paper2",
+        alignItems: "flex-start",
+        paddingTop: "10px",
+        paddingBottom: "10px",
+    },
+    "& .MuiInputBase-inputMultiline": {
+        paddingTop: "0 !important",
+        paddingBottom: "0 !important",
+    },
+};
 
 const Page: React.FC = () => {
     const [mode, setMode] = useState<PageMode>("create");
@@ -161,148 +176,269 @@ const Page: React.FC = () => {
             <Box
                 sx={{
                     minHeight: "100dvh",
-                    background:
-                        "radial-gradient(circle at top right, #b8ffd9 0%, #eaf7ee 45%, #f7fbf8 100%)",
-                    p: { xs: 2, md: 4 },
+                    bgcolor: "accent.main",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    p: { xs: 1, md: 3 },
+                    boxSizing: "border-box",
                 }}
             >
                 <Box
                     sx={{
-                        maxWidth: 760,
-                        mx: "auto",
-                        mt: { xs: 2, md: 6 },
-                        p: { xs: 3, md: 5 },
-                        borderRadius: 4,
+                        minHeight: {
+                            xs: "calc(100dvh - 16px)",
+                            md: "calc(100dvh - 48px)",
+                        },
+                        width: "100%",
                         bgcolor: "background.default",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+                        borderRadius: { xs: "20px", md: "40px" },
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        "& ::selection": {
+                            backgroundColor: "accent.main",
+                            color: "fixed.white",
+                        },
+                        "& ::-moz-selection": {
+                            backgroundColor: "accent.main",
+                            color: "fixed.white",
+                        },
                     }}
                 >
-                    <Stack spacing={2.5}>
-                        <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                            Ente Paste
-                        </Typography>
-                        <Typography color="text.muted">
-                            End-to-end encrypted paste sharing for quick, sensitive
-                            text. We cannot read your content.
-                        </Typography>
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                            <Chip color="success" label="24 hour retention max" />
-                            <Chip color="success" label="One-time view" />
-                            <Chip color="success" label="Purged after open" />
-                        </Stack>
+                    <Box
+                        sx={{
+                            mt: { xs: 4, md: 5 },
+                            alignSelf: { xs: "center", md: "flex-end" },
+                            mr: { xs: 0, md: 6 },
+                        }}
+                    >
+                        <a
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: "block",
+                                lineHeight: 0,
+                                color: "inherit",
+                                textDecoration: "none",
+                            }}
+                        >
+                            <EnteLogoBox
+                                sx={{
+                                    color: "accent.main",
+                                    "& svg": { color: "accent.main" },
+                                    "& svg path": { fill: "accent.main" },
+                                }}
+                            >
+                                <EnteLogo height={28} />
+                            </EnteLogoBox>
+                        </a>
+                    </Box>
 
-                        {mode === "create" && (
-                            <>
-                                <TextField
-                                    multiline
-                                    minRows={10}
-                                    placeholder="Paste text (keys, snippets, notes, instructions...)"
-                                    value={inputText}
-                                    onChange={(e) => setInputText(e.target.value)}
-                                    inputProps={{ maxLength: maxChars }}
-                                />
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Typography variant="mini" color="text.muted">
-                                        {inputText.length}/{maxChars}
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        onClick={handleCreate}
-                                        disabled={creating}
-                                    >
-                                        {creating ? "Creating..." : "Create secure link"}
-                                    </Button>
-                                </Box>
+                    <Box
+                        sx={{
+                            width: "100%",
+                            maxWidth: 760,
+                            px: { xs: 3, md: 5 },
+                            pb: { xs: 5, md: 7 },
+                            mt: { xs: 3, md: 4 },
+                        }}
+                    >
+                        <Stack spacing={2.5}>
+                            <Typography
+                                variant="h3"
+                                sx={{ fontWeight: 700, color: "text.base" }}
+                            >
+                                Ente Paste
+                            </Typography>
+                            <Typography color="text.muted">
+                                End-to-end encrypted paste sharing for quick,
+                                sensitive text. We cannot read your content.
+                            </Typography>
+                            <Stack
+                                direction="row"
+                                spacing={1}
+                                flexWrap="wrap"
+                                useFlexGap
+                            >
+                                <Chip variant="outlined" label="24 hour retention max" />
+                                <Chip variant="outlined" label="One-time view" />
+                                <Chip variant="outlined" label="Purged after open" />
+                            </Stack>
 
-                                {createError && (
-                                    <Typography color="error">{createError}</Typography>
-                                )}
-
-                                {createdLink && (
-                                    <Stack
-                                        spacing={2}
+                            {mode === "create" && (
+                                <>
+                                    <TextField
+                                        multiline
+                                        minRows={10}
+                                        placeholder="Paste text (keys, snippets, notes, instructions...)"
+                                        value={inputText}
+                                        onChange={(e) =>
+                                            setInputText(e.target.value)
+                                        }
+                                        inputProps={{ maxLength: maxChars }}
+                                        sx={textFieldSx}
+                                    />
+                                    <Box
                                         sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            bgcolor: "background.muted",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
                                         }}
                                     >
-                                        <Typography sx={{ fontWeight: 600 }}>
-                                            Your one-time link
-                                        </Typography>
-                                        <TextField
-                                            value={createdLink}
-                                            multiline
-                                            minRows={2}
-                                            InputProps={{ readOnly: true }}
-                                        />
-                                        <Stack
-                                            direction={{ xs: "column", sm: "row" }}
-                                            spacing={1}
-                                        >
-                                            <Button
-                                                variant="outlined"
-                                                onClick={() => copyText(createdLink)}
-                                            >
-                                                Copy
-                                            </Button>
-                                            <Button
-                                                variant="outlined"
-                                                onClick={() => shareLink(createdLink)}
-                                            >
-                                                Share
-                                            </Button>
-                                        </Stack>
-                                    </Stack>
-                                )}
-                            </>
-                        )}
-
-                        {mode === "view" && (
-                            <>
-                                {consuming && (
-                                    <Stack direction="row" spacing={1.5} alignItems="center">
-                                        <CircularProgress size={18} />
-                                        <Typography>
-                                            Opening secure paste...
-                                        </Typography>
-                                    </Stack>
-                                )}
-                                {consumeError && (
-                                    <Typography color="error">{consumeError}</Typography>
-                                )}
-                                {resolvedText && (
-                                    <Stack spacing={2}>
-                                        <Typography sx={{ fontWeight: 600 }}>
-                                            Paste contents
-                                        </Typography>
-                                        <TextField
-                                            multiline
-                                            minRows={10}
-                                            value={resolvedText}
-                                            InputProps={{ readOnly: true }}
-                                        />
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => copyText(resolvedText)}
-                                        >
-                                            Copy text
-                                        </Button>
                                         <Typography variant="mini" color="text.muted">
-                                            This paste has now been removed from Ente
-                                            servers.
+                                            {inputText.length}/{maxChars}
                                         </Typography>
-                                    </Stack>
-                                )}
-                            </>
-                        )}
-                    </Stack>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleCreate}
+                                            disabled={creating}
+                                            sx={{
+                                                textTransform: "none",
+                                                borderRadius: "14px",
+                                                bgcolor: "accent.main",
+                                                color: "accent.contrastText",
+                                                "&:hover": {
+                                                    bgcolor: "accent.dark",
+                                                },
+                                            }}
+                                        >
+                                            {creating
+                                                ? "Creating..."
+                                                : "Create secure link"}
+                                        </Button>
+                                    </Box>
+
+                                    {createError && (
+                                        <Typography color="error">{createError}</Typography>
+                                    )}
+
+                                    {createdLink && (
+                                        <Stack
+                                            spacing={2}
+                                            sx={{
+                                                p: 2.5,
+                                                borderRadius: "20px",
+                                                bgcolor: "background.paper2",
+                                                border: "1px solid",
+                                                borderColor: "stroke.faint",
+                                            }}
+                                        >
+                                            <Typography sx={{ fontWeight: 600 }}>
+                                                Your one-time link
+                                            </Typography>
+                                            <TextField
+                                                value={createdLink}
+                                                multiline
+                                                minRows={2}
+                                                InputProps={{ readOnly: true }}
+                                                sx={{
+                                                    "& .MuiOutlinedInput-root.MuiInputBase-multiline":
+                                                        {
+                                                            borderRadius: "12px",
+                                                            bgcolor:
+                                                                "background.default",
+                                                            alignItems:
+                                                                "flex-start",
+                                                            paddingTop: "10px",
+                                                            paddingBottom:
+                                                                "10px",
+                                                        },
+                                                    "& .MuiInputBase-inputMultiline":
+                                                        {
+                                                            paddingTop:
+                                                                "0 !important",
+                                                            paddingBottom:
+                                                                "0 !important",
+                                                        },
+                                                    "& .MuiOutlinedInput-root": {
+                                                        borderRadius: "12px",
+                                                        bgcolor: "background.default",
+                                                    },
+                                                }}
+                                            />
+                                            <Stack
+                                                direction={{ xs: "column", sm: "row" }}
+                                                spacing={1}
+                                            >
+                                                <Button
+                                                    variant="outlined"
+                                                    onClick={() => copyText(createdLink)}
+                                                    sx={{
+                                                        textTransform: "none",
+                                                        borderRadius: "12px",
+                                                    }}
+                                                >
+                                                    Copy
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    onClick={() => shareLink(createdLink)}
+                                                    sx={{
+                                                        textTransform: "none",
+                                                        borderRadius: "12px",
+                                                    }}
+                                                >
+                                                    Share
+                                                </Button>
+                                            </Stack>
+                                        </Stack>
+                                    )}
+                                </>
+                            )}
+
+                            {mode === "view" && (
+                                <>
+                                    {consuming && (
+                                        <Stack
+                                            direction="row"
+                                            spacing={1.5}
+                                            alignItems="center"
+                                        >
+                                            <CircularProgress
+                                                size={18}
+                                                sx={{ color: "accent.main" }}
+                                            />
+                                            <Typography>Opening secure paste...</Typography>
+                                        </Stack>
+                                    )}
+                                    {consumeError && (
+                                        <Typography color="error">{consumeError}</Typography>
+                                    )}
+                                    {resolvedText && (
+                                        <Stack spacing={2}>
+                                            <Typography sx={{ fontWeight: 600 }}>
+                                                Paste contents
+                                            </Typography>
+                                            <TextField
+                                                multiline
+                                                minRows={10}
+                                                value={resolvedText}
+                                                InputProps={{ readOnly: true }}
+                                                sx={textFieldSx}
+                                            />
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => copyText(resolvedText)}
+                                                sx={{
+                                                    alignSelf: "flex-start",
+                                                    textTransform: "none",
+                                                    borderRadius: "12px",
+                                                }}
+                                            >
+                                                Copy text
+                                            </Button>
+                                            <Typography variant="mini" color="text.muted">
+                                                This paste has now been removed from Ente
+                                                servers.
+                                            </Typography>
+                                        </Stack>
+                                    )}
+                                </>
+                            )}
+                        </Stack>
+                    </Box>
                 </Box>
             </Box>
         </>
@@ -310,4 +446,3 @@ const Page: React.FC = () => {
 };
 
 export default Page;
-
