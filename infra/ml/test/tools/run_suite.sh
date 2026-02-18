@@ -243,6 +243,389 @@ sys.exit(1)
 PY
 }
 
+resolve_android_tool_path() {
+  local binary_name="$1"
+  local relative_path="$2"
+  local sdk_root=""
+  local candidate=""
+
+  if command -v "$binary_name" >/dev/null 2>&1; then
+    command -v "$binary_name"
+    return 0
+  fi
+
+  for sdk_root in "${ANDROID_SDK_ROOT:-}" "${ANDROID_HOME:-}" "$HOME/Library/Android/sdk"; do
+    if [[ -z "$sdk_root" ]]; then
+      continue
+    fi
+
+    candidate="$sdk_root/$relative_path"
+    if [[ -x "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+pick_ios_simulator_udid() {
+  local preferred_udid="${1:-}"
+  python3 - "$preferred_udid" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+preferred_udid = sys.argv[1]
+
+try:
+    raw = subprocess.check_output(
+        ["xcrun", "simctl", "list", "devices", "available", "--json"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    payload = json.loads(raw)
+except Exception:
+    sys.exit(2)
+
+devices_by_runtime = payload.get("devices", {})
+candidates: list[tuple[tuple[object, ...], str]] = []
+
+for runtime, devices in devices_by_runtime.items():
+    runtime_lower = str(runtime).lower()
+    if "ios" not in runtime_lower:
+        continue
+    if any(blocked in runtime_lower for blocked in ("tvos", "watchos", "visionos")):
+        continue
+
+    for device in devices:
+        if not bool(device.get("isAvailable", True)):
+            continue
+
+        udid = str(device.get("udid", "")).strip()
+        if not udid:
+            continue
+
+        name = str(device.get("name", "")).strip()
+        state = str(device.get("state", "")).strip().lower()
+
+        score = (
+            0 if state == "booted" else 1,
+            0 if "iphone" in name.lower() else 1,
+            name.lower(),
+            udid.lower(),
+        )
+        candidates.append((score, udid))
+
+if preferred_udid:
+    for _, udid in candidates:
+        if udid == preferred_udid:
+            print(udid)
+            sys.exit(0)
+
+if not candidates:
+    sys.exit(1)
+
+candidates.sort(key=lambda entry: entry[0])
+print(candidates[0][1])
+PY
+}
+
+wait_for_ios_simulator_boot() {
+  local udid="$1"
+  local timeout_seconds="${2:-180}"
+  python3 - "$udid" "$timeout_seconds" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import time
+
+udid = sys.argv[1]
+timeout_seconds = float(sys.argv[2])
+deadline = time.time() + timeout_seconds
+
+while time.time() < deadline:
+    try:
+        raw = subprocess.check_output(
+            ["xcrun", "simctl", "list", "devices", "--json"],
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        payload = json.loads(raw)
+    except Exception:
+        time.sleep(2.0)
+        continue
+
+    for devices in payload.get("devices", {}).values():
+        for device in devices:
+            if str(device.get("udid", "")).strip() != udid:
+                continue
+            state = str(device.get("state", "")).strip().lower()
+            if state == "booted":
+                sys.exit(0)
+            break
+    time.sleep(2.0)
+
+sys.exit(1)
+PY
+}
+
+ensure_ios_simulator_running() {
+  local explicit_device_id="${ML_PARITY_IOS_DEVICE_ID:-}"
+  local preferred_udid="$explicit_device_id"
+  local selected_udid=""
+
+  if [[ -n "$explicit_device_id" ]]; then
+    if preflight_platform_device_id_available "ios" "$explicit_device_id"; then
+      return 0
+    fi
+  elif preflight_platform_device_available "ios"; then
+    return 0
+  fi
+
+  if ! command -v xcrun >/dev/null 2>&1; then
+    echo "iOS auto-boot skipped: xcrun is unavailable."
+    return 1
+  fi
+
+  if ! selected_udid="$(pick_ios_simulator_udid "$preferred_udid")"; then
+    echo "iOS auto-boot skipped: no available iOS simulator could be selected."
+    return 1
+  fi
+
+  if [[ -z "$selected_udid" ]]; then
+    echo "iOS auto-boot skipped: simulator selection returned an empty UDID."
+    return 1
+  fi
+
+  if [[ -n "$explicit_device_id" && "$explicit_device_id" != "$selected_udid" ]]; then
+    echo "Configured iOS device '$explicit_device_id' is unavailable; using simulator '$selected_udid' instead."
+  fi
+
+  echo "Auto-booting iOS simulator: $selected_udid"
+  set +e
+  xcrun simctl boot "$selected_udid" >/dev/null 2>&1
+  local boot_exit=$?
+  set -e
+  if ((boot_exit != 0)); then
+    local simulator_line=""
+    simulator_line="$(xcrun simctl list devices "$selected_udid" 2>/dev/null | tr -d '\r' || true)"
+    if ! printf '%s\n' "$simulator_line" | grep -q "Booted"; then
+      echo "iOS auto-boot failed for simulator '$selected_udid'."
+      return 1
+    fi
+  fi
+
+  if ! wait_for_ios_simulator_boot "$selected_udid" "${ML_PARITY_IOS_BOOT_TIMEOUT_SECONDS:-180}"; then
+    echo "iOS simulator '$selected_udid' did not reach Booted state in time."
+    return 1
+  fi
+
+  export ML_PARITY_IOS_DEVICE_ID="$selected_udid"
+  echo "iOS simulator ready: $selected_udid"
+  return 0
+}
+
+pick_android_avd_name() {
+  local emulator_bin="$1"
+  local preferred_avd="${ML_PARITY_ANDROID_AVD:-}"
+  local listed_avds=""
+
+  listed_avds="$("$emulator_bin" -list-avds 2>/dev/null || true)"
+  if [[ -z "$listed_avds" ]]; then
+    return 1
+  fi
+
+  if [[ -n "$preferred_avd" ]]; then
+    if printf '%s\n' "$listed_avds" | grep -Fxq "$preferred_avd"; then
+      echo "$preferred_avd"
+      return 0
+    fi
+    echo "Configured Android AVD '$preferred_avd' was not found; selecting the first available AVD."
+  fi
+
+  printf '%s\n' "$listed_avds" | awk 'NF {print; exit}'
+  return 0
+}
+
+list_android_emulator_serials() {
+  local adb_bin="$1"
+  python3 - "$adb_bin" <<'PY'
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+
+adb_bin = sys.argv[1]
+emulator_line = re.compile(r"^(emulator-\d+)\s+\S+$")
+
+try:
+    output = subprocess.check_output(
+        [adb_bin, "devices"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+except Exception:
+    sys.exit(0)
+
+for line in output.splitlines()[1:]:
+    match = emulator_line.match(line.strip())
+    if match:
+        print(match.group(1))
+PY
+}
+
+wait_for_android_emulator_boot() {
+  local adb_bin="$1"
+  local timeout_seconds="${2:-300}"
+  local existing_serials_csv="${3:-}"
+  python3 - "$adb_bin" "$timeout_seconds" "$existing_serials_csv" <<'PY'
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+import time
+
+adb_bin = sys.argv[1]
+timeout_seconds = float(sys.argv[2])
+existing_serials = {value for value in sys.argv[3].split(",") if value}
+deadline = time.time() + timeout_seconds
+emulator_line = re.compile(r"^(emulator-\d+)\s+device$")
+
+while time.time() < deadline:
+    try:
+        output = subprocess.check_output(
+            [adb_bin, "devices"],
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    except Exception:
+        time.sleep(2.0)
+        continue
+
+    serials: list[str] = []
+    for line in output.splitlines()[1:]:
+        match = emulator_line.match(line.strip())
+        if match:
+            serials.append(match.group(1))
+
+    for serial in serials:
+        if serial in existing_serials:
+            continue
+
+        try:
+            boot_completed = (
+                subprocess.check_output(
+                    [adb_bin, "-s", serial, "shell", "getprop", "sys.boot_completed"],
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                    timeout=5,
+                )
+                .strip()
+                .replace("\r", "")
+            )
+        except Exception:
+            continue
+
+        if boot_completed == "1":
+            print(serial)
+            sys.exit(0)
+
+    time.sleep(2.0)
+
+sys.exit(1)
+PY
+}
+
+ensure_android_emulator_running() {
+  local explicit_device_id="${ML_PARITY_ANDROID_DEVICE_ID:-}"
+  local emulator_bin=""
+  local adb_bin=""
+  local avd_name=""
+  local booted_serial=""
+  local existing_emulator_serials_csv=""
+  local emulator_log="${PLATFORM_LOG_DIR:-$LOG_DIR/platforms}/android_emulator_boot.log"
+
+  if [[ -n "$explicit_device_id" ]]; then
+    if preflight_platform_device_id_available "android" "$explicit_device_id"; then
+      return 0
+    fi
+  elif preflight_platform_device_available "android"; then
+    return 0
+  fi
+
+  if ! emulator_bin="$(resolve_android_tool_path "emulator" "emulator/emulator")"; then
+    echo "Android auto-boot skipped: emulator tool is unavailable."
+    return 1
+  fi
+
+  if ! adb_bin="$(resolve_android_tool_path "adb" "platform-tools/adb")"; then
+    echo "Android auto-boot skipped: adb tool is unavailable."
+    return 1
+  fi
+
+  if ! avd_name="$(pick_android_avd_name "$emulator_bin")"; then
+    echo "Android auto-boot skipped: no AVDs are available."
+    return 1
+  fi
+
+  "$adb_bin" start-server >/dev/null 2>&1 || true
+  existing_emulator_serials_csv="$(
+    list_android_emulator_serials "$adb_bin" | tr '\n' ',' | sed 's/,$//'
+  )"
+
+  echo "Auto-booting Android emulator: $avd_name"
+  nohup "$emulator_bin" -avd "$avd_name" -no-snapshot-save -no-boot-anim >"$emulator_log" 2>&1 &
+
+  if ! booted_serial="$(
+    wait_for_android_emulator_boot \
+      "$adb_bin" \
+      "${ML_PARITY_ANDROID_BOOT_TIMEOUT_SECONDS:-300}" \
+      "$existing_emulator_serials_csv"
+  )"; then
+    echo "Android emulator '$avd_name' did not report boot completion in time. Boot log: $emulator_log"
+    return 1
+  fi
+
+  if [[ -n "$explicit_device_id" && "$explicit_device_id" != "$booted_serial" ]]; then
+    echo "Configured Android device '$explicit_device_id' is unavailable; using emulator '$booted_serial' instead."
+  fi
+
+  export ML_PARITY_ANDROID_DEVICE_ID="$booted_serial"
+  echo "Android emulator ready: $booted_serial"
+  return 0
+}
+
+ensure_selected_mobile_devices_running() {
+  local -a auto_boot_failures=()
+
+  for platform in "${selected_platforms[@]}"; do
+    case "$platform" in
+      android)
+        if ! ensure_android_emulator_running; then
+          auto_boot_failures+=("android")
+        fi
+        ;;
+      ios)
+        if ! ensure_ios_simulator_running; then
+          auto_boot_failures+=("ios")
+        fi
+        ;;
+    esac
+  done
+
+  if ((${#auto_boot_failures[@]} > 0)); then
+    echo "Auto-boot did not guarantee device availability for: ${auto_boot_failures[*]}"
+    echo "Proceeding to preflight checks with configured strictness."
+  fi
+}
+
 run_preflight_checks() {
   local desktop_dir="$ROOT_DIR/desktop"
   local web_dir="$ROOT_DIR/web"
@@ -381,6 +764,9 @@ run_preflight_checks() {
 
   echo "Preflight checks passed"
 }
+
+echo "Ensuring selected mobile simulators/emulators are running"
+ensure_selected_mobile_devices_running
 
 echo "Running preflight checks"
 run_preflight_checks
