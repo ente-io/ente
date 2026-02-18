@@ -110,6 +110,10 @@
     line-height: 20px;
 }
 
+.pswp-ente-public-album .pswp__button--ente-logo {
+    display: none;
+}
+
 @media (width >= 450px) {
     .pswp-ente .pswp__counter {
         margin-top: 22px;
@@ -194,6 +198,37 @@
     .pswp-ente .pswp__button--close {
         margin-right: -2px;
     }
+
+    .pswp-ente-public-album
+        .pswp__top-bar
+        .pswp__button:not(.pswp__button--ente-logo):not(.pswp__button--zoom) {
+        margin-top: 1px;
+    }
+
+    .pswp-ente-public-album .pswp__counter,
+    .pswp-ente-public-album .pswp__button--zoom {
+        display: none;
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 21.5px;
+        margin-inline-start: 4px;
+        margin-inline-end: 0;
+        width: auto;
+        min-width: 0;
+        padding-inline: 0;
+        height: 20px;
+        color: rgb(255 255 255 / 0.85);
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo .pswp__ente-logo-svg {
+        display: block;
+        height: 15px;
+        width: auto;
+    }
 }
 
 @media (width < 350px) {
@@ -207,6 +242,10 @@
 
     .pswp-ente .pswp__button--close {
         margin-right: -4px;
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo {
+        margin-inline-start: 2px;
     }
 }
 

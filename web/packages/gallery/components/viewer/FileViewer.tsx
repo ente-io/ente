@@ -777,15 +777,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
+    const isPublicAlbum = shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
+
     // Called when the like button (heart) is clicked.
     // - If public album: toggle like (unlike if already liked, else show modal)
     // - If gallery view: show album selector (like) OR unlike selector/direct delete
     // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
-        // Detect public album: albums-only build OR we have public album credentials
-        const isPublicAlbum =
-            shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
-
         if (isPublicAlbum) {
             const file = activeAnnotatedFileRef.current?.file;
             if (!file || !publicAlbumsCredentials) {
@@ -1074,6 +1072,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         activeCollectionID,
         getUserFileReactions,
         user?.id,
+        isPublicAlbum,
         publicAlbumsCredentials,
         collectionKey,
     ]);
@@ -2484,6 +2483,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                isPublicAlbum,
                 showSocialButtons,
                 enableComment,
                 showFullscreenButton,
@@ -2529,6 +2529,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         disableDownload,
         showFullscreenButton,
         haveUser,
+        isPublicAlbum,
         handleClose,
         handleAnnotate,
         handleViewInfo,

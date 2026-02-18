@@ -584,6 +584,7 @@ export default function PublicCollectionGallery() {
                     <NavbarBase
                         sx={[
                             {
+                                flex: "0 0 60px",
                                 px: "24px",
                                 "@media (width < 720px)": { px: "4px" },
                             },
