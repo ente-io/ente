@@ -17,6 +17,7 @@ FAIL_ON_MISSING_PLATFORM=false
 FAIL_ON_PLATFORM_RUNNER_ERROR=false
 ALLOW_EMPTY_COMPARISON=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
+VERBOSE=false
 
 usage() {
   cat <<EOF
@@ -30,6 +31,7 @@ Flags:
   --fail-on-platform-runner-error
   --allow-empty-comparison
   --output-dir <path>
+  --verbose
 EOF
 }
 
@@ -63,6 +65,10 @@ while (($# > 0)); do
       OUTPUT_DIR="$2"
       shift 2
       ;;
+    --verbose)
+      VERBOSE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -81,6 +87,11 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
+LOG_DIR="$OUTPUT_DIR/logs"
+rm -rf "$LOG_DIR"
+mkdir -p "$LOG_DIR"
+PLATFORM_LOG_DIR="$LOG_DIR/platforms"
+mkdir -p "$PLATFORM_LOG_DIR"
 PYTHON_OUTPUT_DIR="$OUTPUT_DIR/python"
 rm -rf "$PYTHON_OUTPUT_DIR"
 mkdir -p "$PYTHON_OUTPUT_DIR"
@@ -100,6 +111,7 @@ echo "Running ML parity suite"
 echo "  suite: $SUITE"
 echo "  platforms: $PLATFORMS"
 echo "  output_dir: $OUTPUT_DIR"
+echo "  verbose: $VERBOSE"
 
 echo "Preparing local fixture directory: $TEST_DATA_DIR"
 rm -rf "$TEST_DATA_DIR"
@@ -162,9 +174,19 @@ PY
 echo "Downloaded fixture files: $downloaded_count"
 
 echo "Generating Python goldens"
-uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
-  --manifest "infra/ml/test/ground_truth/manifest.json" \
-  --output-dir "$PYTHON_OUTPUT_DIR"
+goldens_log="$LOG_DIR/generate_goldens.log"
+if $VERBOSE; then
+  uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
+    --manifest "infra/ml/test/ground_truth/manifest.json" \
+    --output-dir "$PYTHON_OUTPUT_DIR"
+else
+  if ! uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif python "$ML_DIR/tools/generate_goldens.py" \
+    --manifest "infra/ml/test/ground_truth/manifest.json" \
+    --output-dir "$PYTHON_OUTPUT_DIR" >"$goldens_log" 2>&1; then
+    echo "Python golden generation failed. Log: $goldens_log" >&2
+    exit 1
+  fi
+fi
 
 declare -a selected_platforms=()
 case "$PLATFORMS" in
@@ -632,24 +654,98 @@ PY
 render_html_report() {
   local report_path="$1"
   local html_output_path="$OUTPUT_DIR/parity_report.html"
+  local renderer_log="$LOG_DIR/render_html_report.log"
+  local rendered_path=""
 
-  if ! python3 "$ML_DIR/tools/render_parity_html_report.py" \
-    --report "$report_path" \
-    --output "$html_output_path"; then
-    echo "Failed to render HTML parity report at $html_output_path"
-    return 1
+  if $VERBOSE; then
+    rendered_path="$(
+      python3 "$ML_DIR/tools/render_parity_html_report.py" \
+        --report "$report_path" \
+        --output "$html_output_path"
+    )"
+  else
+    if ! rendered_path="$(
+      python3 "$ML_DIR/tools/render_parity_html_report.py" \
+        --report "$report_path" \
+        --output "$html_output_path" \
+        2>"$renderer_log"
+    )"; then
+      echo "Failed to render HTML parity report at $html_output_path. Log: $renderer_log"
+      return 1
+    fi
   fi
 
-  echo "HTML parity report: $html_output_path"
+  LAST_HTML_REPORT="${rendered_path##*$'\n'}"
+  if [[ -z "$LAST_HTML_REPORT" ]]; then
+    LAST_HTML_REPORT="$html_output_path"
+  fi
   return 0
 }
 
+render_compact_summary() {
+  local report_path="$1"
+  shift
+  python3 - "$report_path" "$@" <<'PY'
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+selected_platforms = sys.argv[2:]
+
+if not report_path.exists():
+    print("File-level summary unavailable: comparison report not found.")
+    raise SystemExit(0)
+
+payload = json.loads(report_path.read_text())
+ground_truth_platform = str(payload.get("ground_truth_platform", "python"))
+comparisons = payload.get("comparisons", [])
+if not isinstance(comparisons, list):
+    comparisons = []
+
+summary_by_platform: dict[str, tuple[int, int, int]] = {}
+for comparison in comparisons:
+    if not isinstance(comparison, dict):
+        continue
+    if str(comparison.get("reference_platform", "")) != ground_truth_platform:
+        continue
+
+    candidate_platform = str(comparison.get("candidate_platform", "unknown"))
+    file_summary = comparison.get("file_summary") or {}
+    if not isinstance(file_summary, dict):
+        file_summary = {}
+    pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
+    fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
+    total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
+    summary_by_platform[candidate_platform] = (pass_count, fail_count, total_files)
+
+print(f"File-level summary (vs {ground_truth_platform}):")
+for platform in selected_platforms:
+    if platform == ground_truth_platform:
+        continue
+    if platform in summary_by_platform:
+        pass_count, fail_count, total_files = summary_by_platform[platform]
+        print(f"  {platform}: {pass_count} pass / {fail_count} fail / {total_files} total")
+    else:
+        print(f"  {platform}: unavailable (no platform results)")
+PY
+}
+
+LAST_HTML_REPORT=""
 declare -a failed_platform_runners=()
 
 for platform in "${selected_platforms[@]}"; do
+  platform_log="$PLATFORM_LOG_DIR/$platform.log"
   set +e
-  run_platform_runner "$platform"
-  platform_run_exit=$?
+  if $VERBOSE; then
+    run_platform_runner "$platform" 2>&1 | tee "$platform_log"
+    platform_run_exit=${PIPESTATUS[0]}
+  else
+    run_platform_runner "$platform" >"$platform_log" 2>&1
+    platform_run_exit=$?
+  fi
   set -e
 
   case "$platform_run_exit" in
@@ -657,14 +753,14 @@ for platform in "${selected_platforms[@]}"; do
       echo "Platform runner completed for $platform."
       ;;
     1)
-      echo "Platform runner failed for $platform."
+      echo "Platform runner failed for $platform. Log: $platform_log"
       failed_platform_runners+=("$platform(exit=1)")
       ;;
     2)
-      echo "Platform runner unavailable for $platform."
+      echo "Platform runner unavailable for $platform. Log: $platform_log"
       ;;
     *)
-      echo "Platform runner returned unexpected exit code $platform_run_exit for $platform."
+      echo "Platform runner returned unexpected exit code $platform_run_exit for $platform. Log: $platform_log"
       failed_platform_runners+=("$platform(exit=$platform_run_exit)")
       ;;
   esac
@@ -686,9 +782,13 @@ for platform in "${selected_platforms[@]}"; do
   platform_output="$OUTPUT_DIR/$platform/results.json"
   if [[ -f "$platform_output" ]]; then
     compare_args+=(--platform-result "$platform=$platform_output")
-    echo "Using $platform output: $platform_output"
+    if $VERBOSE; then
+      echo "Using $platform output: $platform_output"
+    fi
   else
-    echo "Platform output unavailable for $platform at $platform_output"
+    if $VERBOSE; then
+      echo "Platform output unavailable for $platform at $platform_output"
+    fi
     missing_platform_count=$((missing_platform_count + 1))
   fi
 done
@@ -708,6 +808,7 @@ if ((${#compare_args[@]} == 0)); then
 fi
 
 compare_output="$OUTPUT_DIR/comparison_report.json"
+compare_log="$LOG_DIR/comparison.log"
 compare_cmd=(
   uv run --project "$UV_PROJECT_DIR" --no-sync python "$ML_DIR/tools/compare_parity_outputs.py"
   --ground-truth "$PYTHON_OUTPUT_DIR/results.json"
@@ -719,22 +820,37 @@ if ((${#compare_args[@]} > 0)); then
 fi
 
 set +e
-"${compare_cmd[@]}"
-compare_exit=$?
+if $VERBOSE; then
+  "${compare_cmd[@]}" 2>&1 | tee "$compare_log"
+  compare_exit=${PIPESTATUS[0]}
+else
+  "${compare_cmd[@]}" >"$compare_log" 2>&1
+  compare_exit=$?
+fi
 set -e
 
 echo "Comparison report: $compare_output"
 if [[ -f "$compare_output" ]]; then
-  render_file_level_report_tables "$compare_output"
-  render_html_report "$compare_output"
+  if $VERBOSE; then
+    render_file_level_report_tables "$compare_output"
+  fi
+  if ! render_html_report "$compare_output"; then
+    echo "Continuing without HTML report due to renderer failure."
+  fi
+  render_compact_summary "$compare_output" "${selected_platforms[@]}"
+  if [[ -n "$LAST_HTML_REPORT" ]]; then
+    echo "HTML parity report: $LAST_HTML_REPORT"
+    echo "HTML parity report URL: file://$LAST_HTML_REPORT"
+  fi
 fi
 
 if ((compare_exit != 0)); then
-  echo "Parity comparison command failed"
+  echo "Parity comparison command failed. Log: $compare_log"
   exit "$compare_exit"
 fi
 
-echo "Parity comparison completed (file-level results reported above)"
+echo "Detailed logs: $LOG_DIR"
+echo "Parity comparison completed"
 if $UPDATE_GOLDEN; then
   echo "--update-golden currently regenerates Python ONNX ground-truth outputs only."
 fi

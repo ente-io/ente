@@ -31,6 +31,7 @@ Common flags:
 - `--fail-on-missing-platform`
 - `--allow-empty-comparison`
 - `--output-dir <path>`
+- `--verbose` (stream full runner/comparator logs to terminal)
 
 Outputs go to `infra/ml/test/out/parity/` by default, including:
 
