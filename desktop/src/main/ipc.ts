@@ -28,6 +28,10 @@ import {
 } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import {
+    isDeviceLockSupported,
+    promptDeviceLock,
+} from "./services/device-lock";
+import {
     openDirectory,
     openLogDirectory,
     selectDirectory,
@@ -127,6 +131,12 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("isAutoLaunchEnabled", () => autoLauncher.isEnabled());
 
     ipcMain.handle("toggleAutoLaunch", () => autoLauncher.toggleAutoLaunch());
+
+    ipcMain.handle("isDeviceLockSupported", () => isDeviceLockSupported());
+
+    ipcMain.handle("promptDeviceLock", (_, reason: string) =>
+        promptDeviceLock(reason),
+    );
 
     // - App update
 

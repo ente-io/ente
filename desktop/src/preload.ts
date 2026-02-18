@@ -129,6 +129,11 @@ const isAutoLaunchEnabled = () => ipcRenderer.invoke("isAutoLaunchEnabled");
 
 const toggleAutoLaunch = () => ipcRenderer.invoke("toggleAutoLaunch");
 
+const isDeviceLockSupported = () => ipcRenderer.invoke("isDeviceLockSupported");
+
+const promptDeviceLock = (reason: string) =>
+    ipcRenderer.invoke("promptDeviceLock", reason);
+
 const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
@@ -365,6 +370,8 @@ contextBridge.exposeInMainWorld("electron", {
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,
     toggleAutoLaunch,
+    isDeviceLockSupported,
+    promptDeviceLock,
     onMainWindowFocus,
     onOpenEnteURL,
 

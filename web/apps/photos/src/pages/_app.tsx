@@ -24,13 +24,16 @@ import {
 } from "ente-base/components/utils/hooks-app";
 import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
+import { subscribeMainWindowFocus } from "ente-base/electron";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
+import { updateSessionFromElectronSafeStorageIfNeeded } from "ente-base/session";
 import type { AppUpdate } from "ente-base/types/ipc";
 import {
     initVideoProcessing,
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
+import { AppLockOverlay } from "ente-new/photos/components/AppLockOverlay";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -38,6 +41,12 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { useAppLockSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    initAppLock,
+    lock,
+    refreshAppLockStateFromSession,
+} from "ente-new/photos/services/app-lock";
 import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
@@ -46,7 +55,7 @@ import { PhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
@@ -64,11 +73,31 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
     const [watchFolderView, setWatchFolderView] = useState(false);
+    const [isAppLockReady, setIsAppLockReady] = useState(() => !isDesktop);
+    const appLock = useAppLockSnapshot();
+    const autoLockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
+        const isElectron = !!globalThis.electron;
+        const isAppLockEnabled =
+            localStorage.getItem("appLock.enabled") === "true";
+
+        initAppLock();
+        if (!isElectron || !isAppLockEnabled) {
+            setIsAppLockReady(true);
+        }
+        void (async () => {
+            if (!isElectron || !isAppLockEnabled) return;
+            try {
+                await updateSessionFromElectronSafeStorageIfNeeded();
+            } finally {
+                refreshAppLockStateFromSession();
+                setIsAppLockReady(true);
+            }
+        })();
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
@@ -156,6 +185,49 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Auto-lock when the tab/window becomes hidden.
+    useEffect(() => {
+        if (!appLock.enabled) return;
+
+        const handleVisibilityChange = () => {
+            if (document.hidden && !appLock.isLocked) {
+                autoLockTimerRef.current = setTimeout(() => {
+                    lock();
+                }, appLock.autoLockTimeMs);
+            }
+            if (!document.hidden && autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange,
+            );
+            if (autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+    }, [appLock.enabled, appLock.isLocked, appLock.autoLockTimeMs]);
+
+    // On Electron, clear the auto-lock timer when the main window regains focus.
+    useEffect(() => {
+        if (!appLock.enabled) return;
+
+        const handleFocus = () => {
+            if (autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+
+        return subscribeMainWindowFocus(handleFocus);
+    }, [appLock.enabled]);
+
     const baseContext = useMemo(
         () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
@@ -191,12 +263,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
                 <PhotosAppContext value={appContext}>
-                    {!isI18nReady ? (
+                    {!isI18nReady || !isAppLockReady ? (
                         <LoadingIndicator />
                     ) : (
                         <>
                             {isChangingRoute && <TranslucentLoadingOverlay />}
                             <Component {...pageProps} />
+                            <AppLockOverlay />
                         </>
                     )}
                 </PhotosAppContext>
