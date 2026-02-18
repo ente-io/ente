@@ -148,15 +148,42 @@ class ComparisonFinding:
 
 
 @dataclass(frozen=True)
+class FileMetricMeasurement:
+    metric: str
+    value: float | None
+    threshold: float | None
+    passed: bool
+    direction: str | None = None
+    count: int | None = None
+    applicable: bool = True
+    message: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "metric": self.metric,
+            "value": self.value,
+            "threshold": self.threshold,
+            "passed": self.passed,
+            "direction": self.direction,
+            "count": self.count,
+            "applicable": self.applicable,
+            "message": self.message,
+        }
+        return payload
+
+
+@dataclass(frozen=True)
 class FileComparisonStatus:
     file_id: str
     passed: bool
+    metrics: tuple[FileMetricMeasurement, ...]
     failures: tuple[ComparisonFinding, ...]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "file_id": self.file_id,
             "passed": self.passed,
+            "metrics": [metric.to_dict() for metric in self.metrics],
             "failure_count": len(self.failures),
             "failures": [failure.to_dict() for failure in self.failures],
         }
@@ -299,11 +326,41 @@ def compare_result_sets(
     file_failures: dict[str, list[ComparisonFinding]] = {
         file_id: [] for file_id in reference_results
     }
+    file_metrics: dict[str, list[FileMetricMeasurement]] = {
+        file_id: [] for file_id in reference_results
+    }
 
     def add_finding(finding: ComparisonFinding) -> None:
         findings.append(finding)
         if finding.file_id in file_failures:
             file_failures[finding.file_id].append(finding)
+
+    def add_file_metric(
+        *,
+        file_id: str,
+        metric: str,
+        value: float | None,
+        threshold: float | None,
+        passed: bool,
+        direction: str | None = None,
+        count: int | None = None,
+        applicable: bool = True,
+        message: str | None = None,
+    ) -> None:
+        if file_id not in file_metrics:
+            return
+        file_metrics[file_id].append(
+            FileMetricMeasurement(
+                metric=metric,
+                value=value,
+                threshold=threshold,
+                passed=passed,
+                direction=direction,
+                count=count,
+                applicable=applicable,
+                message=message,
+            )
+        )
 
     for missing_file in missing_files:
         add_finding(
@@ -312,6 +369,15 @@ def compare_result_sets(
                 metric="file_presence",
                 message=f"Missing from {candidate_platform}",
             ),
+        )
+        add_file_metric(
+            file_id=missing_file,
+            metric="file_presence",
+            value=0.0,
+            threshold=1.0,
+            passed=False,
+            direction="==",
+            message=f"Missing from {candidate_platform}",
         )
     for extra_file in extra_files:
         add_finding(
@@ -335,6 +401,15 @@ def compare_result_sets(
 
         clip_distance = cosine_distance(reference.clip.embedding, candidate.clip.embedding)
         clip_distances.append(clip_distance)
+        add_file_metric(
+            file_id=file_id,
+            metric="clip_cosine_distance",
+            value=clip_distance,
+            threshold=clip_threshold,
+            passed=clip_distance <= clip_threshold,
+            direction="<=",
+            message="CLIP cosine distance",
+        )
         if clip_distance > clip_threshold:
             add_finding(
                 ComparisonFinding(
@@ -345,6 +420,35 @@ def compare_result_sets(
                     threshold=clip_threshold,
                 ),
             )
+
+        reference_face_count = len(reference.faces)
+        candidate_face_count = len(candidate.faces)
+        add_file_metric(
+            file_id=file_id,
+            metric="reference_face_count",
+            value=float(reference_face_count),
+            threshold=None,
+            passed=True,
+            message=f"{reference_platform} face count",
+        )
+        add_file_metric(
+            file_id=file_id,
+            metric="candidate_face_count",
+            value=float(candidate_face_count),
+            threshold=None,
+            passed=True,
+            message=f"{candidate_platform} face count",
+        )
+        face_count_delta = abs(reference_face_count - candidate_face_count)
+        add_file_metric(
+            file_id=file_id,
+            metric="face_count_delta",
+            value=float(face_count_delta),
+            threshold=0.0,
+            passed=face_count_delta == 0,
+            direction="<=",
+            message="Absolute face count difference",
+        )
 
         if len(reference.faces) != len(candidate.faces):
             add_finding(
@@ -357,10 +461,25 @@ def compare_result_sets(
             )
 
         matches = _match_faces(reference.faces, candidate.faces)
+        add_file_metric(
+            file_id=file_id,
+            metric="matched_face_count",
+            value=float(len(matches)),
+            threshold=None,
+            passed=True,
+            count=len(matches),
+            message="Greedy IoU face matches",
+        )
+
+        file_ious: list[float] = []
+        file_landmark_errors: list[float] = []
+        file_score_deltas: list[float] = []
+        file_embedding_distances: list[float] = []
         for reference_index, candidate_index, iou in matches:
             reference_face = reference.faces[reference_index]
             candidate_face = candidate.faces[candidate_index]
 
+            file_ious.append(iou)
             iou_error = 1.0 - iou
             iou_errors.append(iou_error)
             if iou < thresholds.box_iou_threshold:
@@ -388,6 +507,7 @@ def compare_result_sets(
                     ),
                 )
             else:
+                file_landmark_errors.append(landmark_error)
                 landmark_errors.append(landmark_error)
                 if landmark_error > thresholds.landmark_error_threshold:
                     add_finding(
@@ -401,6 +521,7 @@ def compare_result_sets(
                     )
 
             score_delta = abs(reference_face.score - candidate_face.score)
+            file_score_deltas.append(score_delta)
             score_deltas.append(score_delta)
             if score_delta > thresholds.score_delta_threshold:
                 add_finding(
@@ -417,6 +538,7 @@ def compare_result_sets(
                 reference_face.embedding,
                 candidate_face.embedding,
             )
+            file_embedding_distances.append(embedding_distance)
             face_embedding_distances.append(embedding_distance)
             if embedding_distance > thresholds.face_embedding_cosine_distance:
                 add_finding(
@@ -426,8 +548,108 @@ def compare_result_sets(
                         message="Face embedding cosine distance exceeded threshold",
                         value=embedding_distance,
                         threshold=thresholds.face_embedding_cosine_distance,
-                    ),
-                )
+                        ),
+                    )
+
+        if file_ious:
+            min_iou = min(file_ious)
+            add_file_metric(
+                file_id=file_id,
+                metric="face_box_iou_min",
+                value=min_iou,
+                threshold=thresholds.box_iou_threshold,
+                passed=min_iou >= thresholds.box_iou_threshold,
+                direction=">=",
+                count=len(file_ious),
+                message="Minimum IoU across matched faces",
+            )
+        else:
+            add_file_metric(
+                file_id=file_id,
+                metric="face_box_iou_min",
+                value=None,
+                threshold=thresholds.box_iou_threshold,
+                passed=reference_face_count == 0 and candidate_face_count == 0,
+                direction=">=",
+                count=0,
+                applicable=False,
+                message="No matched faces",
+            )
+
+        if file_landmark_errors:
+            max_landmark_error = max(file_landmark_errors)
+            add_file_metric(
+                file_id=file_id,
+                metric="landmark_error_max",
+                value=max_landmark_error,
+                threshold=thresholds.landmark_error_threshold,
+                passed=max_landmark_error <= thresholds.landmark_error_threshold,
+                direction="<=",
+                count=len(file_landmark_errors),
+                message="Maximum landmark error across matched faces",
+            )
+        else:
+            add_file_metric(
+                file_id=file_id,
+                metric="landmark_error_max",
+                value=None,
+                threshold=thresholds.landmark_error_threshold,
+                passed=reference_face_count == 0 and candidate_face_count == 0,
+                direction="<=",
+                count=0,
+                applicable=False,
+                message="No matched faces",
+            )
+
+        if file_score_deltas:
+            max_score_delta = max(file_score_deltas)
+            add_file_metric(
+                file_id=file_id,
+                metric="score_delta_max",
+                value=max_score_delta,
+                threshold=thresholds.score_delta_threshold,
+                passed=max_score_delta <= thresholds.score_delta_threshold,
+                direction="<=",
+                count=len(file_score_deltas),
+                message="Maximum face score delta across matched faces",
+            )
+        else:
+            add_file_metric(
+                file_id=file_id,
+                metric="score_delta_max",
+                value=None,
+                threshold=thresholds.score_delta_threshold,
+                passed=reference_face_count == 0 and candidate_face_count == 0,
+                direction="<=",
+                count=0,
+                applicable=False,
+                message="No matched faces",
+            )
+
+        if file_embedding_distances:
+            max_embedding_distance = max(file_embedding_distances)
+            add_file_metric(
+                file_id=file_id,
+                metric="face_embedding_cosine_distance_max",
+                value=max_embedding_distance,
+                threshold=thresholds.face_embedding_cosine_distance,
+                passed=max_embedding_distance <= thresholds.face_embedding_cosine_distance,
+                direction="<=",
+                count=len(file_embedding_distances),
+                message="Maximum face embedding cosine distance across matched faces",
+            )
+        else:
+            add_file_metric(
+                file_id=file_id,
+                metric="face_embedding_cosine_distance_max",
+                value=None,
+                threshold=thresholds.face_embedding_cosine_distance,
+                passed=reference_face_count == 0 and candidate_face_count == 0,
+                direction="<=",
+                count=0,
+                applicable=False,
+                message="No matched faces",
+            )
 
     aggregates = {
         "clip_cosine_distance": _make_aggregate(clip_distances, clip_threshold),
@@ -465,6 +687,7 @@ def compare_result_sets(
         FileComparisonStatus(
             file_id=file_id,
             passed=not file_failures[file_id],
+            metrics=tuple(file_metrics[file_id]),
             failures=tuple(file_failures[file_id]),
         )
         for file_id in sorted_reference_files

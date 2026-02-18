@@ -629,6 +629,21 @@ if not printed_any_table:
 PY
 }
 
+render_html_report() {
+  local report_path="$1"
+  local html_output_path="$OUTPUT_DIR/parity_report.html"
+
+  if ! python3 "$ML_DIR/tools/render_parity_html_report.py" \
+    --report "$report_path" \
+    --output "$html_output_path"; then
+    echo "Failed to render HTML parity report at $html_output_path"
+    return 1
+  fi
+
+  echo "HTML parity report: $html_output_path"
+  return 0
+}
+
 declare -a failed_platform_runners=()
 
 for platform in "${selected_platforms[@]}"; do
@@ -696,6 +711,7 @@ compare_output="$OUTPUT_DIR/comparison_report.json"
 compare_cmd=(
   uv run --project "$UV_PROJECT_DIR" --no-sync python "$ML_DIR/tools/compare_parity_outputs.py"
   --ground-truth "$PYTHON_OUTPUT_DIR/results.json"
+  --no-pairwise
   --output "$compare_output"
 )
 if ((${#compare_args[@]} > 0)); then
@@ -710,6 +726,7 @@ set -e
 echo "Comparison report: $compare_output"
 if [[ -f "$compare_output" ]]; then
   render_file_level_report_tables "$compare_output"
+  render_html_report "$compare_output"
 fi
 
 if ((compare_exit != 0)); then
