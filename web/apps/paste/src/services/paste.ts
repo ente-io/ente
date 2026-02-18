@@ -15,8 +15,14 @@ export interface PastePayload {
     kdfOpsLimit: number;
 }
 
-const parseError = async (response: Response) => {
-    if (response.status === 410 || response.status === 404) {
+const parseError = async (
+    response: Response,
+    context: "create" | "guard" | "consume",
+) => {
+    if (
+        (context === "consume" || context === "guard") &&
+        (response.status === 410 || response.status === 404)
+    ) {
         return "This paste has expired or was already opened.";
     }
     try {
@@ -35,7 +41,7 @@ export const createPaste = async (payload: PastePayload) => {
         body: JSON.stringify(payload),
     });
     if (!response.ok) {
-        throw new Error(await parseError(response));
+        throw new Error(await parseError(response, "create"));
     }
     return (await response.json()) as CreatePasteResponse;
 };
@@ -48,7 +54,7 @@ export const setGuard = async (accessToken: string) => {
         body: JSON.stringify({ accessToken }),
     });
     if (!response.ok) {
-        throw new Error(await parseError(response));
+        throw new Error(await parseError(response, "guard"));
     }
 };
 
@@ -63,7 +69,7 @@ export const consumePaste = async (accessToken: string) => {
         body: JSON.stringify({ accessToken }),
     });
     if (!response.ok) {
-        throw new Error(await parseError(response));
+        throw new Error(await parseError(response, "consume"));
     }
     return (await response.json()) as PastePayload;
 };

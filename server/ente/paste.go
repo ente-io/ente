@@ -1,8 +1,16 @@
 package ente
 
 import (
+	"encoding/base64"
 	"strings"
 	"unicode"
+)
+
+const (
+	pasteKdfSaltBytes             = 16
+	pasteKdfNonceMaxLength        = 64
+	pasteKdfMemLimitInteractive   = 64 * 1024 * 1024
+	pasteKdfOpsLimitInteractive   = 2
 )
 
 type CreatePasteRequest struct {
@@ -31,7 +39,18 @@ func (r *CreatePasteRequest) Validate(maxCiphertextBytes int) error {
 	if len(r.EncryptedPasteKey) > maxCiphertextBytes || len(r.EncryptedPasteKeyNonce) > maxCiphertextBytes {
 		return NewBadRequestWithMessage("key material too large")
 	}
-	if r.KdfMemLimit <= 0 || r.KdfOpsLimit <= 0 {
+	if len(r.KdfNonce) > pasteKdfNonceMaxLength {
+		return NewBadRequestWithMessage("invalid key derivation parameters")
+	}
+	kdfNonce, err := base64.StdEncoding.DecodeString(r.KdfNonce)
+	if err != nil {
+		kdfNonce, err = base64.RawStdEncoding.DecodeString(r.KdfNonce)
+	}
+	if err != nil || len(kdfNonce) != pasteKdfSaltBytes {
+		return NewBadRequestWithMessage("invalid key derivation parameters")
+	}
+	if r.KdfMemLimit != pasteKdfMemLimitInteractive ||
+		r.KdfOpsLimit != pasteKdfOpsLimitInteractive {
 		return NewBadRequestWithMessage("invalid key derivation parameters")
 	}
 	return nil

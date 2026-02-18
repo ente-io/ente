@@ -7,7 +7,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     decryptBox,
     decryptMetadataJSON,
@@ -48,19 +48,47 @@ const waitUntilVisible = () =>
         document.addEventListener("visibilitychange", onVisible);
     });
 
-const textFieldSx = {
-    "& .MuiOutlinedInput-root.MuiInputBase-multiline": {
-        borderRadius: "16px",
-        bgcolor: "background.paper2",
+const textFieldSx = (
+    radius = "16px",
+    bgColor = "background.paper2",
+    borderColor = "stroke.faint",
+) => ({
+    margin: 0,
+    "& .MuiFilledInput-root": {
+        borderRadius: radius,
+        bgcolor: bgColor,
+        border: "1px solid",
+        borderColor,
         alignItems: "flex-start",
-        paddingTop: "10px",
-        paddingBottom: "10px",
+        boxSizing: "border-box",
+        padding: "10px 12px",
+        "&:before": { display: "none" },
+        "&:after": { display: "none" },
+        "&:hover:not(.Mui-disabled, .Mui-error):before": { display: "none" },
+        "&:hover": {
+            bgcolor: bgColor,
+        },
+        "&.Mui-focused": {
+            bgcolor: bgColor,
+            borderColor: "accent.main",
+        },
+    },
+    "& .MuiInputBase-input": {
+        padding: "0 !important",
     },
     "& .MuiInputBase-inputMultiline": {
-        paddingTop: "0 !important",
-        paddingBottom: "0 !important",
+        padding: "0 !important",
+        margin: "0 !important",
     },
-};
+    "& .MuiFilledInput-inputMultiline": {
+        padding: "0 !important",
+        margin: "0 !important",
+    },
+    "& textarea": {
+        padding: "0 !important",
+        margin: "0 !important",
+    },
+});
 
 const createFragmentSecret = () => newID("").slice(0, fragmentSecretLength);
 
@@ -100,6 +128,7 @@ const Page: React.FC = () => {
     const [resolvedText, setResolvedText] = useState<string | null>(null);
 
     const startedConsumeRef = useRef(false);
+    const createdLinkRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const cleanPath = window.location.pathname.replace(/^\/+|\/+$/g, "");
@@ -156,6 +185,26 @@ const Page: React.FC = () => {
 
         void run();
     }, [mode, accessToken]);
+
+    useEffect(() => {
+        if (!createdLink || mode !== "create") return;
+        const linkCard = createdLinkRef.current;
+        if (!linkCard) return;
+
+        const rect = linkCard.getBoundingClientRect();
+        const viewportHeight =
+            window.innerHeight || document.documentElement.clientHeight;
+        const isOutOfViewport = rect.top < 0 || rect.bottom > viewportHeight;
+        if (!isOutOfViewport) return;
+
+        const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+        linkCard.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "start",
+        });
+    }, [createdLink, mode]);
 
     const handleCreate = async () => {
         setCreateError(null);
@@ -237,12 +286,13 @@ const Page: React.FC = () => {
                             xs: "calc(100dvh - 16px)",
                             md: "calc(100dvh - 48px)",
                         },
+                        flex: 1,
                         width: "100%",
                         bgcolor: "background.default",
                         borderRadius: { xs: "20px", md: "40px" },
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
+                        display: "grid",
+                        gridTemplateRows: "1fr auto",
+                        alignItems: "stretch",
                         "& ::selection": {
                             backgroundColor: "accent.main",
                             color: "fixed.white",
@@ -255,41 +305,12 @@ const Page: React.FC = () => {
                 >
                     <Box
                         sx={{
-                            mt: { xs: 4, md: 5 },
-                            alignSelf: { xs: "center", md: "flex-end" },
-                            mr: { xs: 0, md: 6 },
-                        }}
-                    >
-                        <a
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                display: "block",
-                                lineHeight: 0,
-                                color: "inherit",
-                                textDecoration: "none",
-                            }}
-                        >
-                            <EnteLogoBox
-                                sx={{
-                                    color: "accent.main",
-                                    "& svg": { color: "accent.main" },
-                                    "& svg path": { fill: "accent.main" },
-                                }}
-                            >
-                                <EnteLogo height={28} />
-                            </EnteLogoBox>
-                        </a>
-                    </Box>
-
-                    <Box
-                        sx={{
                             width: "100%",
                             maxWidth: 760,
+                            mx: "auto",
                             px: { xs: 3, md: 5 },
-                            pb: { xs: 5, md: 7 },
-                            mt: { xs: 3, md: 4 },
+                            pb: { xs: 2, md: 2.5 },
+                            mt: { xs: 4, md: 5 },
                         }}
                     >
                         <Stack spacing={2.5}>
@@ -312,11 +333,34 @@ const Page: React.FC = () => {
                                 <Chip variant="outlined" label="24 hour retention max" />
                                 <Chip variant="outlined" label="One-time view" />
                                 <Chip variant="outlined" label="Purged after open" />
+                                <Chip
+                                    variant="filled"
+                                    label="Open source"
+                                    component="a"
+                                    href="https://github.com/ente-io/ente"
+                                    target="_blank"
+                                    rel="noopener"
+                                    clickable
+                                    sx={{
+                                        textDecoration: "none",
+                                        bgcolor: "accent.main",
+                                        color: "fixed.white",
+                                        border: "1px solid",
+                                        borderColor: "accent.main",
+                                        "&:hover": {
+                                            bgcolor: "accent.dark",
+                                            borderColor: "accent.dark",
+                                        },
+                                    }}
+                                />
                             </Stack>
 
                             {mode === "create" && (
                                 <>
                                     <TextField
+                                        variant="filled"
+                                        hiddenLabel
+                                        InputProps={{ disableUnderline: true }}
                                         multiline
                                         minRows={10}
                                         placeholder="Paste text (keys, snippets, notes, instructions...)"
@@ -325,7 +369,7 @@ const Page: React.FC = () => {
                                             setInputText(e.target.value)
                                         }
                                         inputProps={{ maxLength: maxChars }}
-                                        sx={textFieldSx}
+                                        sx={textFieldSx()}
                                     />
                                     <Box
                                         sx={{
@@ -363,47 +407,38 @@ const Page: React.FC = () => {
 
                                     {createdLink && (
                                         <Stack
+                                            ref={createdLinkRef}
                                             spacing={2}
                                             sx={{
                                                 p: 2.5,
                                                 borderRadius: "20px",
-                                                bgcolor: "background.paper2",
+                                                bgcolor: "background.paper",
                                                 border: "1px solid",
-                                                borderColor: "stroke.faint",
+                                                borderColor: "stroke.muted",
+                                                scrollMarginTop: {
+                                                    xs: "16px",
+                                                    md: "24px",
+                                                },
                                             }}
                                         >
                                             <Typography sx={{ fontWeight: 600 }}>
                                                 Your one-time link
                                             </Typography>
                                             <TextField
+                                                variant="filled"
+                                                hiddenLabel
                                                 value={createdLink}
                                                 multiline
                                                 minRows={2}
-                                                InputProps={{ readOnly: true }}
-                                                sx={{
-                                                    "& .MuiOutlinedInput-root.MuiInputBase-multiline":
-                                                        {
-                                                            borderRadius: "12px",
-                                                            bgcolor:
-                                                                "background.default",
-                                                            alignItems:
-                                                                "flex-start",
-                                                            paddingTop: "10px",
-                                                            paddingBottom:
-                                                                "10px",
-                                                        },
-                                                    "& .MuiInputBase-inputMultiline":
-                                                        {
-                                                            paddingTop:
-                                                                "0 !important",
-                                                            paddingBottom:
-                                                                "0 !important",
-                                                        },
-                                                    "& .MuiOutlinedInput-root": {
-                                                        borderRadius: "12px",
-                                                        bgcolor: "background.default",
-                                                    },
+                                                InputProps={{
+                                                    readOnly: true,
+                                                    disableUnderline: true,
                                                 }}
+                                                sx={textFieldSx(
+                                                    "12px",
+                                                    "background.default",
+                                                    "stroke.muted",
+                                                )}
                                             />
                                             <Stack
                                                 direction={{ xs: "column", sm: "row" }}
@@ -451,7 +486,23 @@ const Page: React.FC = () => {
                                         </Stack>
                                     )}
                                     {consumeError && (
-                                        <Typography color="error">{consumeError}</Typography>
+                                        <Stack spacing={1.5} alignItems="flex-start">
+                                            <Typography color="error">
+                                                {consumeError}
+                                            </Typography>
+                                            <Button
+                                                variant="outlined"
+                                                component="a"
+                                                href="/"
+                                                sx={{
+                                                    mt: 0.75,
+                                                    textTransform: "none",
+                                                    borderRadius: "12px",
+                                                }}
+                                            >
+                                                Create new paste
+                                            </Button>
+                                        </Stack>
                                     )}
                                     {resolvedText && (
                                         <Stack spacing={2}>
@@ -459,12 +510,21 @@ const Page: React.FC = () => {
                                                 Paste contents
                                             </Typography>
                                             <TextField
+                                                variant="filled"
+                                                hiddenLabel
                                                 multiline
                                                 minRows={10}
                                                 value={resolvedText}
-                                                InputProps={{ readOnly: true }}
-                                                sx={textFieldSx}
+                                                InputProps={{
+                                                    readOnly: true,
+                                                    disableUnderline: true,
+                                                }}
+                                                sx={textFieldSx()}
                                             />
+                                            <Typography variant="mini" color="text.muted">
+                                                This paste has now been removed from Ente
+                                                servers.
+                                            </Typography>
                                             <Button
                                                 variant="outlined"
                                                 onClick={() => copyText(resolvedText)}
@@ -476,14 +536,81 @@ const Page: React.FC = () => {
                                             >
                                                 Copy text
                                             </Button>
-                                            <Typography variant="mini" color="text.muted">
-                                                This paste has now been removed from Ente
-                                                servers.
-                                            </Typography>
                                         </Stack>
                                     )}
                                 </>
                             )}
+                        </Stack>
+                    </Box>
+                    <Box
+                        sx={{
+                            width: "100%",
+                            maxWidth: 760,
+                            mx: "auto",
+                            px: { xs: 3, md: 5 },
+                            pt: { xs: 2, md: 2.5 },
+                            pb: { xs: 3, md: 3.5 },
+                        }}
+                    >
+                        <Stack spacing={1.25} alignItems="center">
+                            <a
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noopener"
+                                style={{
+                                    display: "block",
+                                    lineHeight: 0,
+                                    color: "inherit",
+                                    textDecoration: "none",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        color: "accent.main",
+                                        "& svg": { color: "accent.main" },
+                                        "& svg path": { fill: "accent.main" },
+                                    }}
+                                >
+                                    <EnteLogo height={20} />
+                                </Box>
+                            </a>
+                            <Typography variant="mini" color="text.muted">
+                                <a
+                                    href="https://ente.io/photos"
+                                    target="_blank"
+                                    rel="noopener"
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Photos
+                                </a>{" "}
+                                {"\u2022"}{" "}
+                                <a
+                                    href="https://ente.io/locker"
+                                    target="_blank"
+                                    rel="noopener"
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Documents
+                                </a>{" "}
+                                {"\u2022"}{" "}
+                                <a
+                                    href="https://ente.io/auth"
+                                    target="_blank"
+                                    rel="noopener"
+                                    style={{
+                                        color: "inherit",
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Auth Codes
+                                </a>
+                            </Typography>
                         </Stack>
                     </Box>
                 </Box>
