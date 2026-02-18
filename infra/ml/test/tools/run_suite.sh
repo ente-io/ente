@@ -19,6 +19,7 @@ CONTINUE_ON_MISSING_DEVICES=true
 REQUIRE_COMPARISON_PASS=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
 VERBOSE=false
+RENDER_DETECTION_OVERLAYS=false
 
 usage() {
   cat <<EOF
@@ -33,6 +34,7 @@ Flags:
   --allow-empty-comparison              (default: disabled)
   --output-dir <path>                   (default: infra/ml/test/out/parity)
   --verbose                             (default: disabled)
+  --render-detection-overlays           (default: disabled; render annotated face detection images to out/parity/detections/<platform>/)
 EOF
 }
 
@@ -68,6 +70,10 @@ while (($# > 0)); do
       ;;
     --verbose)
       VERBOSE=true
+      shift
+      ;;
+    --render-detection-overlays)
+      RENDER_DETECTION_OVERLAYS=true
       shift
       ;;
     -h|--help)
@@ -124,6 +130,7 @@ echo "  continue_on_missing_devices: $CONTINUE_ON_MISSING_DEVICES"
 echo "  fail_on_missing_platform: $FAIL_ON_MISSING_PLATFORM"
 echo "  fail_on_platform_runner_error: $FAIL_ON_PLATFORM_RUNNER_ERROR"
 echo "  allow_empty_comparison: $ALLOW_EMPTY_COMPARISON"
+echo "  render_detection_overlays: $RENDER_DETECTION_OVERLAYS"
 
 declare -a selected_platforms=()
 case "$PLATFORMS" in
@@ -1499,6 +1506,37 @@ for platform in selected_platforms:
 PY
 }
 
+render_detection_overlays() {
+  local overlays_log="$LOG_DIR/render_detection_overlays.log"
+  local overlays_output_dir="$OUTPUT_DIR/detections"
+  local -a overlay_platforms=("${selected_platforms[@]}" "python")
+  local -a overlay_cmd=(
+    uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif
+    python "$ML_DIR/tools/render_face_detection_overlays.py"
+    --manifest "$MANIFEST_PATH"
+    --parity-dir "$OUTPUT_DIR"
+  )
+
+  for platform in "${overlay_platforms[@]}"; do
+    overlay_cmd+=(--platform "$platform")
+  done
+
+  if $VERBOSE; then
+    "${overlay_cmd[@]}" 2>&1 | tee "$overlays_log"
+    local overlay_exit=${PIPESTATUS[0]}
+    if ((overlay_exit != 0)); then
+      return "$overlay_exit"
+    fi
+  else
+    if ! "${overlay_cmd[@]}" >"$overlays_log" 2>&1; then
+      return 1
+    fi
+  fi
+
+  echo "Detection overlays: $overlays_output_dir"
+  return 0
+}
+
 comparison_report_passed() {
   local report_path="$1"
   python3 - "$report_path" <<'PY'
@@ -1631,6 +1669,13 @@ if [[ -f "$compare_output" ]]; then
   if [[ -n "$LAST_MARKDOWN_REPORT" ]]; then
     echo "Markdown parity report (LLM): $LAST_MARKDOWN_REPORT"
     echo "Agent note: for extensive results beyond the printed summary, read $LAST_MARKDOWN_REPORT."
+  fi
+fi
+
+if $RENDER_DETECTION_OVERLAYS; then
+  if ! render_detection_overlays; then
+    echo "Failed to render detection overlays. Log: $LOG_DIR/render_detection_overlays.log" >&2
+    exit 1
   fi
 fi
 

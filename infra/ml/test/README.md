@@ -32,6 +32,7 @@ Common flags:
 - `--allow-empty-comparison`
 - `--output-dir <path>`
 - `--verbose` (stream full runner/comparator logs to terminal)
+- `--render-detection-overlays` (generate annotated detection images under `out/parity/detections/<platform>/`; includes selected platforms plus `python` ground truth)
 
 Outputs go to `infra/ml/test/out/parity/` by default, including:
 
@@ -39,6 +40,27 @@ Outputs go to `infra/ml/test/out/parity/` by default, including:
 - `parity_report.html` (readable HTML report with per-file metrics for both pass and fail files)
 
 `run_suite.sh` compares each available platform against Python ground truth (`python -> <platform>`); non-ground-truth pairwise comparisons are excluded by default.
+
+## Detection Overlay Visualizer
+
+Render face detection overlays (box + score + landmarks) for each platform output:
+
+```bash
+uv run --project infra/ml --no-sync --with pillow-heif \
+  python infra/ml/test/tools/render_face_detection_overlays.py \
+  --parity-dir infra/ml/test/out/parity \
+  --platform ios \
+  --platform android
+```
+
+By default this writes annotated images to:
+
+- `infra/ml/test/out/parity/detections/<platform>/*.png`
+
+Useful optional filters:
+
+- `--file-id <fixture_name>` (repeatable)
+- `--output-dir <custom_dir>`
 
 ## Manual CI Run
 
