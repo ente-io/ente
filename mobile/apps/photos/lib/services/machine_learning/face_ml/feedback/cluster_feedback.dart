@@ -1458,7 +1458,7 @@ class ClusterFeedbackService<T> {
 
   Future<void> _prepareClusterCentroidVectorDbForSuggestionsInternal() async {
     try {
-      if (!flagService.usearchForSearch) return;
+      if (!flagService.usearchForSuggestions) return;
       if (!flagService.hasGrantedMLConsent) return;
       if (!await _clusterCentroidVectorDB.checkIfMigrationDone()) {
         await _mlDataDBForCentroidVectorDb
@@ -1479,7 +1479,7 @@ class ClusterFeedbackService<T> {
   }
 
   Future<bool> _canUseClusterCentroidVectorDbForSuggestions() async {
-    if (!flagService.usearchForSearch) return false;
+    if (!flagService.usearchForSuggestions) return false;
     if (!flagService.hasGrantedMLConsent) return false;
     if (await _clusterCentroidVectorDB.checkIfMigrationDone()) return true;
     unawaited(_prepareClusterCentroidVectorDbForSuggestions());
