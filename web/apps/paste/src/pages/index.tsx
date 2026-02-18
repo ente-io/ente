@@ -265,7 +265,6 @@ const Page: React.FC = () => {
     return (
         <>
             <Head>
-                <meta name="robots" content="noindex, nofollow" />
                 <meta
                     name="description"
                     content="Share sensitive text with one-time, end-to-end encrypted links that auto-expire after 24 hours."
