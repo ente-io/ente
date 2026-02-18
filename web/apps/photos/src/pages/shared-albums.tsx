@@ -3,7 +3,15 @@
 import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    Stack,
+    styled,
+    Tooltip,
+    useMediaQuery,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -87,7 +95,13 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
@@ -479,6 +493,10 @@ export default function PublicCollectionGallery() {
     const addPhotosEnabled = !!onAddPhotos;
 
     const hasSelection = selected.count > 0;
+    const isMobileHeaderLayout = useMediaQuery("(width < 720px)");
+    const fileListHeaderHeightForViewport = isMobileHeaderLayout
+        ? fileListHeaderHeightMobile
+        : fileListHeaderHeight;
 
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
@@ -498,7 +516,7 @@ export default function PublicCollectionGallery() {
                               }}
                           />
                       ),
-                      height: fileListHeaderHeight,
+                      height: fileListHeaderHeightForViewport,
                   }
                 : undefined,
         [
@@ -509,6 +527,7 @@ export default function PublicCollectionGallery() {
             showPublicFeed,
             commentsEnabled,
             hasSelection,
+            fileListHeaderHeightForViewport,
         ],
     );
 
@@ -676,6 +695,7 @@ export default function PublicCollectionGallery() {
             />
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
+                fullWidthOnMobile
             />
             {publicCollection && collectionKey.current && (
                 <PublicFeedSidebar
@@ -874,6 +894,13 @@ interface FileListHeaderProps {
 const fileListHeaderHeight = 84;
 
 /**
+ * The height (in px) of {@link FileListHeader} on mobile.
+ *
+ * Keep this fixed so the virtualized list has a stable header row height.
+ */
+const fileListHeaderHeightMobile = 132;
+
+/**
  * A header shown before the listing of files.
  *
  * It scrolls along with the content. It has a fixed height,
@@ -887,6 +914,8 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     onShowFeed,
     hasSelection,
 }) => {
+    const showHeaderActions = !hasSelection && !!(onShowFeed || downloadEnabled);
+
     const memoriesDateRange = useMemo(() => {
         if (!publicFiles.length) return undefined;
 
@@ -913,7 +942,15 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
-            <SpacedRow>
+            <SpacedRow
+                sx={{
+                    "@media (width < 720px)": {
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: 1,
+                    },
+                }}
+            >
                 <Box sx={{ minWidth: 0 }}>
                     <GalleryItemsSummary
                         name={publicCollection.name}
@@ -931,41 +968,47 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                 </Typography>
                             ) : undefined
                         }
-                        nameProps={{ noWrap: true }}
+                        nameProps={{
+                            noWrap: true,
+                            sx: { maxWidth: "100%" },
+                        }}
                     />
                 </Box>
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                        alignItems: "center",
-                        "@media (width > 720px)": { mr: -1.5 },
-                    }}
-                >
-                    {onShowFeed && !hasSelection && (
-                        <IconButton onClick={onShowFeed}>
-                            <Box
-                                sx={{
-                                    width: 24,
-                                    height: 24,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <FeedIcon />
-                            </Box>
-                        </IconButton>
-                    )}
-                    {downloadEnabled && !hasSelection && (
-                        <IconButton onClick={downloadAllFiles}>
-                            <HugeiconsIcon
-                                icon={Download01Icon}
-                                strokeWidth={1.6}
-                            />
-                        </IconButton>
-                    )}
-                </Stack>
+                {showHeaderActions && (
+                    <Stack
+                        direction="row"
+                        spacing={0}
+                        sx={{
+                            alignItems: "center",
+                            "@media (width > 720px)": { mr: -1.5 },
+                            "@media (width < 720px)": { ml: -1.5 },
+                        }}
+                    >
+                        {onShowFeed && (
+                            <IconButton onClick={onShowFeed}>
+                                <Box
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <FeedIcon />
+                                </Box>
+                            </IconButton>
+                        )}
+                        {downloadEnabled && (
+                            <IconButton onClick={downloadAllFiles}>
+                                <HugeiconsIcon
+                                    icon={Download01Icon}
+                                    strokeWidth={1.6}
+                                />
+                            </IconButton>
+                        )}
+                    </Stack>
+                )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
