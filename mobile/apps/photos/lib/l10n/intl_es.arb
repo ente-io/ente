@@ -1519,7 +1519,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, one {}=1 {Añadido 1 archivo a {personName}} other {Añadidos {count} archivos a {personName}}}",
+  "addedFilesToPerson": "{count, plural, =1 {Añadido 1 archivo a {personName}} other {Añadidos {count} archivos a {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1533,7 +1533,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {1 archivo ya está enlazado a {personName}} other {{count} archivos ya están enlazados a {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 archivo ya está enlazado a {personName}} other {{count} archivos ya están enlazados a {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1614,7 +1614,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
-  "adminsSuccessfullyAdded": "{count, plural, one {}=0 {No se han añadido administradores} =1 {1 administrador añadido con éxito} other {{count} administradores añadidos con éxito}}",
+  "adminsSuccessfullyAdded": "{count, plural, =0 {No se han añadido administradores} =1 {1 administrador añadido con éxito} other {{count} administradores añadidos con éxito}}",
   "@adminsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1624,7 +1624,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, one {}=0 {Añade admin} =1 {¡Añade admin} other {¡Añade administradores}}",
+  "addAdmins": "{count, plural, =0 {Añade admin} =1 {¡Añade admin} other {¡Añade administradores}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -2028,7 +2028,7 @@
   "font": "Fuente",
   "background": "Fondo",
   "align": "Alinear",
-  "addedToAlbums": "{count, plural, one {}=1{Añadido con éxito a 1 álbum} other{Añadido con éxito a {count} álbumes}}",
+  "addedToAlbums": "{count, plural, =1{Añadido con éxito a 1 álbum} other{Añadido con éxito a {count} álbumes}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2067,7 +2067,7 @@
   "findSimilarImages": "Buscar imágenes similares",
   "noSimilarImagesFound": "No se encontraron imágenes similares",
   "yourPhotosLookUnique": "Tus fotos se ven únicas",
-  "similarGroupsFound": "{count, plural, one {}=1{{count} grupo encontrado} other{{count} grupos encontrados}}",
+  "similarGroupsFound": "{count, plural, =1{{count} grupo encontrado} other{{count} grupos encontrados}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2400,7 +2400,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, one {}=1{1 como} other{{count} me gusta}}",
+  "likesCount": "{count, plural, =1{1 como} other{{count} me gusta}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2421,7 +2421,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, one {}=1{Error al dar \"Me gusta\" a 1 álbum} other{Error al dar \"Me gusta\" a {count} álbumes}}",
+  "failedToLikeAlbums": "{count, plural, =1{Error al dar \"Me gusta\" a 1 álbum} other{Error al dar \"Me gusta\" a {count} álbumes}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2434,7 +2434,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, one {}=1{1 álbum} other{{count} álbumes}}",
+  "albumsCount": "{count, plural, =1{1 álbum} other{{count} álbumes}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -2480,7 +2480,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, one {}=0{Sin comentarios} =1{1 comentario} other{{count} comentarios}}",
+  "commentsCount": "{count, plural, =0{Sin comentarios} =1{1 comentario} other{{count} comentarios}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {
