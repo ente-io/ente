@@ -1,2 +1,0 @@
-- Faster search and discovery
-- Shared photos in feed
