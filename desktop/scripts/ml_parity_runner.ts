@@ -41,7 +41,7 @@ interface HostResponse {
     id: number | null;
     ok: boolean;
     result?: unknown;
-    error?: string;
+    error?: unknown;
 }
 
 interface PendingRequest {
@@ -217,6 +217,39 @@ const float32ArrayFromBase64 = (payload: string) => {
     return array;
 };
 
+const stringifyUnknown = (value: unknown) => {
+    if (typeof value === "string") {
+        return value;
+    }
+    try {
+        const serialized = JSON.stringify(value);
+        if (typeof serialized === "string") {
+            return serialized;
+        }
+        return String(value);
+    } catch {
+        return String(value);
+    }
+};
+
+const normalizeHostErrorPayload = (value: unknown) => {
+    if (value && typeof value === "object") {
+        const maybeError = value as Record<string, unknown>;
+        const messageCandidate =
+            (typeof maybeError.message === "string" && maybeError.message) ||
+            (typeof maybeError.error === "string" && maybeError.error);
+        if (messageCandidate && messageCandidate !== "[object Object]") {
+            return messageCandidate;
+        }
+    }
+
+    const normalized = stringifyUnknown(value);
+    if (normalized === "[object Object]") {
+        return "Host request failed with opaque object error ([object Object]); see preceding host logs for context.";
+    }
+    return normalized;
+};
+
 class HostClient {
     private readonly process: ChildProcessWithoutNullStreams;
     private readonly rl: readline.Interface;
@@ -270,7 +303,7 @@ class HostClient {
             if (message.id === null || message.id === undefined) {
                 if (!message.ok) {
                     process.stderr.write(
-                        `[ml_parity_runner] host emitted error without request id: ${message.error ?? "unknown error"}\n`,
+                        `[ml_parity_runner] host emitted error without request id: ${normalizeHostErrorPayload(message.error ?? "unknown error")}\n`,
                     );
                 }
                 return;
@@ -285,7 +318,7 @@ class HostClient {
             if (message.ok) {
                 pending.resolve(message.result);
             } else {
-                pending.reject(new Error(message.error ?? "Host request failed"));
+                pending.reject(new Error(normalizeHostErrorPayload(message.error ?? "Host request failed")));
             }
         });
 
@@ -495,6 +528,36 @@ const ensureModelMetadata = (metadata: Record<string, string>) => {
         normalized[modelName] = normalized[modelName] || `${fileName}:unknown`;
     }
     return normalized;
+};
+
+const normalizeUnknownError = (error: unknown): { message: string; stack?: string } => {
+    if (error instanceof Error) {
+        return {
+            message: error.message,
+            ...(typeof error.stack === "string" && error.stack.length > 0 ? { stack: error.stack } : {}),
+        };
+    }
+
+    if (typeof error === "string") {
+        return { message: error };
+    }
+
+    if (error && typeof error === "object") {
+        const maybeError = error as Record<string, unknown>;
+        const messageCandidate =
+            (typeof maybeError.message === "string" && maybeError.message) ||
+            (typeof maybeError.error === "string" && maybeError.error) ||
+            stringifyUnknown(error);
+        const stackCandidate = typeof maybeError.stack === "string" ? maybeError.stack : undefined;
+        return {
+            message: messageCandidate,
+            ...(stackCandidate ? { stack: stackCandidate } : {}),
+        };
+    }
+
+    return {
+        message: String(error),
+    };
 };
 
 const ensureSimilarityTransformationNodeShim = async () => {
@@ -744,16 +807,15 @@ const main = async () => {
                 });
             } catch (error: unknown) {
                 const elapsedMS = performance.now() - totalStart;
-                const message = error instanceof Error ? error.message : String(error);
+                const normalizedError = normalizeUnknownError(error);
                 process.stderr.write(
-                    `[ml_parity_runner] failed to index ${item.file_id}: ${message}\n`,
+                    `[ml_parity_runner] failed to index ${item.file_id}: ${normalizedError.message}\n`,
                 );
-                const stack = error instanceof Error ? error.stack : undefined;
                 errors.push({
                     file_id: item.file_id,
-                    error: message,
+                    error: normalizedError.message,
                     timing_ms: elapsedMS,
-                    ...(stack ? { stack } : {}),
+                    ...(normalizedError.stack ? { stack: normalizedError.stack } : {}),
                 });
             }
         }

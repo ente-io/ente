@@ -14,6 +14,9 @@ PLATFORMS="all"
 FAIL_ON_MISSING_PLATFORM=false
 FAIL_ON_PLATFORM_RUNNER_ERROR=false
 ALLOW_EMPTY_COMPARISON=false
+STRICT=false
+CONTINUE_ON_MISSING_DEVICES=true
+REQUIRE_COMPARISON_PASS=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
 VERBOSE=false
 
@@ -23,6 +26,8 @@ Usage: infra/ml/test/tools/run_suite.sh [flags]
 
 Flags:
   --platforms all|desktop|android|ios   (default: all)
+  --strict                              (optional future mode; enforces full pass and complete platform coverage)
+  --continue-on-missing-devices         (default: enabled, except in --strict mode; continue when android/ios devices are unavailable)
   --fail-on-missing-platform            (default: disabled)
   --fail-on-platform-runner-error       (default: disabled)
   --allow-empty-comparison              (default: disabled)
@@ -36,6 +41,14 @@ while (($# > 0)); do
     --platforms)
       PLATFORMS="$2"
       shift 2
+      ;;
+    --strict)
+      STRICT=true
+      shift
+      ;;
+    --continue-on-missing-devices)
+      CONTINUE_ON_MISSING_DEVICES=true
+      shift
       ;;
     --fail-on-missing-platform)
       FAIL_ON_MISSING_PLATFORM=true
@@ -69,6 +82,13 @@ while (($# > 0)); do
   esac
 done
 
+if $STRICT; then
+  CONTINUE_ON_MISSING_DEVICES=false
+  FAIL_ON_MISSING_PLATFORM=true
+  FAIL_ON_PLATFORM_RUNNER_ERROR=true
+  REQUIRE_COMPARISON_PASS=true
+fi
+
 if [[ "$OUTPUT_DIR" != /* ]]; then
   OUTPUT_DIR="$ROOT_DIR/$OUTPUT_DIR"
 fi
@@ -99,15 +119,279 @@ echo "Running ML parity suite"
 echo "  platforms: $PLATFORMS"
 echo "  output_dir: $OUTPUT_DIR"
 echo "  verbose: $VERBOSE"
+echo "  strict: $STRICT"
+echo "  continue_on_missing_devices: $CONTINUE_ON_MISSING_DEVICES"
 echo "  fail_on_missing_platform: $FAIL_ON_MISSING_PLATFORM"
 echo "  fail_on_platform_runner_error: $FAIL_ON_PLATFORM_RUNNER_ERROR"
 echo "  allow_empty_comparison: $ALLOW_EMPTY_COMPARISON"
 
-echo "Preparing local fixture directory: $TEST_DATA_DIR"
-rm -rf "$TEST_DATA_DIR"
+declare -a selected_platforms=()
+case "$PLATFORMS" in
+  all)
+    selected_platforms=(desktop android ios)
+    ;;
+  desktop|android|ios)
+    selected_platforms=("$PLATFORMS")
+    ;;
+  *)
+    echo "Unsupported --platforms value: $PLATFORMS" >&2
+    exit 1
+    ;;
+esac
+
+sha256_file() {
+  python3 - "$1" <<'PY'
+import hashlib
+import sys
+
+path = sys.argv[1]
+digest = hashlib.sha256()
+with open(path, "rb") as file:
+    for chunk in iter(lambda: file.read(1024 * 1024), b""):
+        digest.update(chunk)
+print(digest.hexdigest())
+PY
+}
+
+cache_key_for_url() {
+  python3 - "$1" <<'PY'
+import hashlib
+import sys
+
+print(hashlib.sha256(sys.argv[1].encode("utf-8")).hexdigest())
+PY
+}
+
+preflight_platform_device_available() {
+  local platform="$1"
+  python3 - "$platform" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+platform = sys.argv[1]
+
+try:
+    raw = subprocess.check_output(
+        ["flutter", "devices", "--machine"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+except Exception:
+    sys.exit(2)
+
+try:
+    devices = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(2)
+
+def is_match(device: dict[str, object]) -> bool:
+    target = str(device.get("targetPlatform", "")).lower()
+    name = str(device.get("name", "")).lower()
+    if platform == "android":
+        return "android" in target or "android" in name
+    if platform == "ios":
+        return "ios" in target or "iphone" in name or "ipad" in name
+    return False
+
+sys.exit(0 if any(is_match(device) for device in devices) else 1)
+PY
+}
+
+preflight_platform_device_id_available() {
+  local platform="$1"
+  local device_id="$2"
+  python3 - "$platform" "$device_id" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+platform = sys.argv[1]
+device_id = sys.argv[2]
+
+try:
+    raw = subprocess.check_output(
+        ["flutter", "devices", "--machine"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+except Exception:
+    sys.exit(2)
+
+try:
+    devices = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(2)
+
+def is_platform_match(device: dict[str, object]) -> bool:
+    target = str(device.get("targetPlatform", "")).lower()
+    name = str(device.get("name", "")).lower()
+    if platform == "android":
+        return "android" in target or "android" in name
+    if platform == "ios":
+        return "ios" in target or "iphone" in name or "ipad" in name
+    return False
+
+for device in devices:
+    if str(device.get("id", "")) == device_id and is_platform_match(device):
+        sys.exit(0)
+sys.exit(1)
+PY
+}
+
+run_preflight_checks() {
+  local desktop_dir="$ROOT_DIR/desktop"
+  local web_dir="$ROOT_DIR/web"
+  local runner_path="$desktop_dir/scripts/ml_parity_runner.ts"
+  local mobile_dir="$ROOT_DIR/mobile/apps/photos"
+  local driver_path="$mobile_dir/test_driver/ml_parity_driver.dart"
+  local -a preflight_errors=()
+  local -a preflight_warnings=()
+
+  for platform in "${selected_platforms[@]}"; do
+    case "$platform" in
+      desktop)
+        if [[ ! -f "$runner_path" ]]; then
+          preflight_errors+=("desktop parity runner not found at $runner_path")
+        fi
+        if [[ ! -d "$desktop_dir/node_modules" ]]; then
+          preflight_errors+=("desktop dependencies missing: $desktop_dir/node_modules")
+        fi
+        if [[ ! -d "$web_dir/node_modules" ]]; then
+          preflight_errors+=("web dependencies missing: $web_dir/node_modules")
+        fi
+        if ! command -v npx >/dev/null 2>&1; then
+          preflight_errors+=("npx is required for desktop parity")
+        fi
+        if ! command -v yarn >/dev/null 2>&1; then
+          preflight_errors+=("yarn is required for desktop parity compilation")
+        fi
+        ;;
+      android|ios)
+        if ! command -v flutter >/dev/null 2>&1; then
+          preflight_errors+=("flutter is required for $platform parity")
+          continue
+        fi
+        if [[ ! -f "$driver_path" ]]; then
+          preflight_errors+=("mobile parity driver not found at $driver_path")
+        fi
+
+        local target_path=""
+        local explicit_device_id=""
+        if [[ "$platform" == "android" ]]; then
+          target_path="$mobile_dir/integration_test/ml_parity_android_test.dart"
+          explicit_device_id="${ML_PARITY_ANDROID_DEVICE_ID:-}"
+        else
+          target_path="$mobile_dir/integration_test/ml_parity_ios_test.dart"
+          explicit_device_id="${ML_PARITY_IOS_DEVICE_ID:-}"
+        fi
+        if [[ ! -f "$target_path" ]]; then
+          preflight_errors+=("$platform parity test target not found at $target_path")
+        fi
+
+        local device_available_exit=0
+        if [[ -n "$explicit_device_id" ]]; then
+          if preflight_platform_device_id_available "$platform" "$explicit_device_id"; then
+            device_available_exit=0
+          else
+            device_available_exit=$?
+          fi
+          case "$device_available_exit" in
+            0)
+              ;;
+            1)
+              if $CONTINUE_ON_MISSING_DEVICES; then
+                preflight_warnings+=(
+                  "$platform device id '$explicit_device_id' is unavailable; continuing due to --continue-on-missing-devices"
+                )
+              else
+                preflight_errors+=(
+                  "$platform device id '$explicit_device_id' is unavailable (set --continue-on-missing-devices to continue anyway)"
+                )
+              fi
+              ;;
+            *)
+              if $CONTINUE_ON_MISSING_DEVICES; then
+                preflight_warnings+=(
+                  "could not verify $platform device id '$explicit_device_id'; continuing due to --continue-on-missing-devices"
+                )
+              else
+                preflight_errors+=(
+                  "could not verify $platform device id '$explicit_device_id' (set --continue-on-missing-devices to continue anyway)"
+                )
+              fi
+              ;;
+          esac
+        else
+          if preflight_platform_device_available "$platform"; then
+            device_available_exit=0
+          else
+            device_available_exit=$?
+          fi
+
+          case "$device_available_exit" in
+            0)
+              ;;
+            1)
+              if $CONTINUE_ON_MISSING_DEVICES; then
+                preflight_warnings+=(
+                  "no connected $platform device/simulator detected; continuing due to --continue-on-missing-devices"
+                )
+              else
+                preflight_errors+=(
+                  "no connected $platform device/simulator detected (set --continue-on-missing-devices to continue anyway)"
+                )
+              fi
+              ;;
+            *)
+              if $CONTINUE_ON_MISSING_DEVICES; then
+                preflight_warnings+=(
+                  "could not determine $platform device availability; continuing due to --continue-on-missing-devices"
+                )
+              else
+                preflight_errors+=(
+                  "could not determine $platform device availability (set --continue-on-missing-devices to continue anyway)"
+                )
+              fi
+              ;;
+          esac
+        fi
+        ;;
+    esac
+  done
+
+  if ((${#preflight_warnings[@]} > 0)); then
+    echo "Preflight warnings:"
+    for warning in "${preflight_warnings[@]}"; do
+      echo "  - $warning"
+    done
+  fi
+
+  if ((${#preflight_errors[@]} > 0)); then
+    echo "Preflight failed:" >&2
+    for error in "${preflight_errors[@]}"; do
+      echo "  - $error" >&2
+    done
+    exit 1
+  fi
+
+  echo "Preflight checks passed"
+}
+
+echo "Running preflight checks"
+run_preflight_checks
+
+echo "Syncing local fixture directory (cached): $TEST_DATA_DIR"
 mkdir -p "$TEST_DATA_DIR"
+fixture_metadata_dir="$TEST_DATA_DIR/.source-metadata"
+mkdir -p "$fixture_metadata_dir"
 
 downloaded_count=0
+reused_count=0
 while IFS=$'\t' read -r source_rel source_url source_sha; do
   if [[ -z "$source_rel" ]]; then
     continue
@@ -121,30 +405,92 @@ while IFS=$'\t' read -r source_rel source_url source_sha; do
   target_dir="$(dirname "$target_path")"
   mkdir -p "$target_dir"
 
-  tmp_path="$target_path.tmp"
-  curl -fsSL --retry 3 --retry-delay 1 "$source_url" -o "$tmp_path"
-  mv "$tmp_path" "$target_path"
+  cache_key="$(cache_key_for_url "$source_url")"
+  etag_path="$fixture_metadata_dir/$cache_key.etag"
 
-  if [[ -n "$source_sha" ]]; then
-    actual_sha="$(
-      python3 - "$target_path" <<'PY'
-import hashlib
-import sys
+  should_download=false
+  reason=""
 
-path = sys.argv[1]
-digest = hashlib.sha256()
-with open(path, "rb") as file:
-    for chunk in iter(lambda: file.read(1024 * 1024), b""):
-        digest.update(chunk)
-print(digest.hexdigest())
-PY
-    )"
+  if [[ ! -f "$target_path" ]]; then
+    should_download=true
+    reason="missing local fixture"
+  fi
+
+  if [[ -f "$target_path" && -n "$source_sha" ]]; then
+    actual_sha="$(sha256_file "$target_path")"
     if [[ "$actual_sha" != "$source_sha" ]]; then
-      echo "SHA-256 mismatch for $source_rel: expected $source_sha got $actual_sha" >&2
-      exit 1
+      should_download=true
+      reason="local SHA-256 mismatch"
     fi
   fi
-  downloaded_count=$((downloaded_count + 1))
+
+  remote_headers=""
+  if remote_headers="$(curl -fsSI --retry 3 --retry-delay 1 "$source_url" 2>/dev/null)"; then
+    remote_etag="$(
+      printf '%s\n' "$remote_headers" | awk -F': ' 'tolower($1)=="etag"{print $2; exit}' | tr -d '\r'
+    )"
+
+    if [[ -n "$remote_etag" ]]; then
+      local_etag=""
+      if [[ -f "$etag_path" ]]; then
+        local_etag="$(tr -d '\r\n' <"$etag_path")"
+      fi
+      if [[ "$local_etag" != "$remote_etag" ]]; then
+        should_download=true
+        if [[ -z "$reason" ]]; then
+          reason="remote ETag changed"
+        fi
+      fi
+    elif [[ -f "$target_path" ]]; then
+      should_download=true
+      if [[ -z "$reason" ]]; then
+        reason="remote ETag unavailable"
+      fi
+    fi
+  else
+    if [[ -f "$target_path" ]]; then
+      should_download=true
+      if [[ -z "$reason" ]]; then
+        reason="failed to fetch remote metadata"
+      fi
+    fi
+    remote_etag=""
+  fi
+
+  if $should_download; then
+    tmp_path="$target_path.tmp"
+    if ! curl -fsSL --retry 3 --retry-delay 1 "$source_url" -o "$tmp_path"; then
+      rm -f "$tmp_path"
+      echo "Failed to download fixture from $source_url" >&2
+      exit 1
+    fi
+
+    if [[ -n "$source_sha" ]]; then
+      actual_sha="$(sha256_file "$tmp_path")"
+      if [[ "$actual_sha" != "$source_sha" ]]; then
+        rm -f "$tmp_path"
+        echo "SHA-256 mismatch for $source_rel: expected $source_sha got $actual_sha" >&2
+        exit 1
+      fi
+    fi
+
+    mv "$tmp_path" "$target_path"
+    downloaded_count=$((downloaded_count + 1))
+    if [[ -n "$remote_etag" ]]; then
+      printf '%s\n' "$remote_etag" >"$etag_path"
+    else
+      rm -f "$etag_path"
+    fi
+
+    if $VERBOSE; then
+      echo "Downloaded fixture: $source_rel ($reason)"
+    fi
+  else
+    reused_count=$((reused_count + 1))
+    if $VERBOSE; then
+      echo "Reused cached fixture: $source_rel"
+    fi
+  fi
 done < <(
   python3 - "$MANIFEST_PATH" <<'PY'
 import json
@@ -161,7 +507,7 @@ for item in items:
     print(f"{source}\t{source_url}\t{source_sha}")
 PY
 )
-echo "Downloaded fixture files: $downloaded_count"
+echo "Fixture sync summary: downloaded=$downloaded_count reused=$reused_count"
 
 echo "Generating Python goldens"
 goldens_log="$LOG_DIR/generate_goldens.log"
@@ -177,20 +523,6 @@ else
     exit 1
   fi
 fi
-
-declare -a selected_platforms=()
-case "$PLATFORMS" in
-  all)
-    selected_platforms=(desktop android ios)
-    ;;
-  desktop|android|ios)
-    selected_platforms=("$PLATFORMS")
-    ;;
-  *)
-    echo "Unsupported --platforms value: $PLATFORMS" >&2
-    exit 1
-    ;;
-esac
 
 echo "Clearing stale platform output directories"
 for platform in "${selected_platforms[@]}"; do
@@ -360,6 +692,27 @@ run_mobile_runner() {
   if ! command -v flutter >/dev/null 2>&1; then
     echo "flutter is required to run mobile parity; skipping $platform run."
     return 2
+  fi
+
+  if [[ -n "$device_id" ]]; then
+    local configured_device_exit=0
+    if preflight_platform_device_id_available "$platform" "$device_id"; then
+      configured_device_exit=0
+    else
+      configured_device_exit=$?
+    fi
+    case "$configured_device_exit" in
+      0)
+        ;;
+      1)
+        echo "Configured $platform device id '$device_id' is unavailable; skipping $platform run."
+        return 2
+        ;;
+      *)
+        echo "Could not verify configured $platform device id '$device_id'; skipping $platform run."
+        return 2
+        ;;
+    esac
   fi
 
   if [[ -z "$device_id" ]]; then
@@ -722,6 +1075,22 @@ for platform in selected_platforms:
 PY
 }
 
+comparison_report_passed() {
+  local report_path="$1"
+  python3 - "$report_path" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+if not report_path.exists():
+    sys.exit(2)
+
+payload = json.loads(report_path.read_text())
+sys.exit(0 if bool(payload.get("passed", False)) else 1)
+PY
+}
+
 LAST_HTML_REPORT=""
 declare -a failed_platform_runners=()
 
@@ -836,6 +1205,20 @@ fi
 if ((compare_exit != 0)); then
   echo "Parity comparison command failed. Log: $compare_log"
   exit "$compare_exit"
+fi
+
+if $REQUIRE_COMPARISON_PASS; then
+  if comparison_report_passed "$compare_output"; then
+    echo "Strict mode: comparison report passed."
+  else
+    comparison_pass_exit=$?
+    if ((comparison_pass_exit == 2)); then
+      echo "Strict mode failed: comparison report is missing at $compare_output" >&2
+    else
+      echo "Strict mode failed: comparison report contains parity failures." >&2
+    fi
+    exit 1
+  fi
 fi
 
 echo "Detailed logs: $LOG_DIR"
