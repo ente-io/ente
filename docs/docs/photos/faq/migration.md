@@ -108,19 +108,19 @@ There is currently no built-in filter to automatically remove partner-shared pho
 
 ### Why is it recommended to migrate Apple Photos from mobile? {#why-migrate-apple-photos-from-mobile}
 
-It is highly recommended to import from Apple Photos via mobile rather than desktop, as mobile upload preserves metadata, while desktop upload may lose metadata (reason stated [below](#why-do-some-photos-migrated-from-apple-photos-desktop-show-incorrect-or-missing-metadata)), requires manual export and sequential naming for live photos.
-
-### Why do some photos migrated from Apple Photos (desktop) show incorrect or missing metadata? {#why-do-some-photos-migrated-from-apple-photos-desktop-show-incorrect-or-missing-metadata}
-
-Some photos may not have EXIF metadata embedded directly within the image file. In these cases, Apple Photos exports metadata into separate `.XMP` sidecar files instead of writing it into the photo itself.
-
-Currently, the desktop app does not read metadata from separate XMP sidecar files— it can only recognize metadata that is embedded within the file.
-
-We recommend to upload the photos using the iPhone app as iOS exports typically include embedded metadata, which ensures dates and other details are preserved correctly.
+It is highly recommended to import from Apple Photos via mobile rather than desktop, as mobile upload preserves metadata, while desktop upload may lose metadata (reason stated [below](#can-i-import-apple-photos-via-desktop)), requires manual export and sequential naming for live photos.
 
 ### Can I import Apple Photos via desktop? {#can-i-import-apple-photos-via-desktop}
 
-It is highly recommended to import from Apple Photos via mobile rather than desktop. However, for any reason, if desktop is the only way to import, you can follow the steps below:
+It is highly recommended to import from Apple Photos via mobile rather than desktop.
+
+Some photos may not have EXIF metadata embedded directly within the image file. In these cases, Apple Photos exports metadata into separate `.XMP` sidecar files instead of writing it into the photo itself.
+
+Currently, the desktop app does not read metadata from separate XMP sidecar files — it can only recognize metadata that is embedded within the file.
+
+We recommend to upload the photos using the iPhone app as iOS exports typically include embedded metadata, which ensures dates and other details are preserved correctly.
+
+However, for any reason, if desktop is the only way to import, you can follow the steps below:
 
 #### 1. Export your data from the Apple Photos app.
 
