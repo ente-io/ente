@@ -29,6 +29,7 @@ Common flags:
 - `--suite smoke|full`
 - `--platforms all|desktop|android|ios`
 - `--fail-on-missing-platform`
+- `--fail-on-platform-runner-error`
 - `--allow-empty-comparison`
 - `--output-dir <path>`
 - `--verbose` (stream full runner/comparator logs to terminal)

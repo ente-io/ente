@@ -12,7 +12,6 @@ TEST_DATA_DIR="$ML_DIR/test_data/ml-indexing/v1"
 
 SUITE="smoke"
 PLATFORMS="all"
-UPDATE_GOLDEN=false
 FAIL_ON_MISSING_PLATFORM=false
 FAIL_ON_PLATFORM_RUNNER_ERROR=false
 ALLOW_EMPTY_COMPARISON=false
@@ -24,14 +23,16 @@ usage() {
 Usage: infra/ml/test/tools/run_suite.sh [flags]
 
 Flags:
-  --suite smoke|full
-  --platforms all|desktop|android|ios
-  --update-golden
-  --fail-on-missing-platform
-  --fail-on-platform-runner-error
-  --allow-empty-comparison
-  --output-dir <path>
-  --verbose
+  --suite smoke|full                     (default: smoke)
+  --platforms all|desktop|android|ios   (default: all)
+  --fail-on-missing-platform            (default: disabled)
+  --fail-on-platform-runner-error       (default: disabled)
+  --allow-empty-comparison              (default: disabled)
+  --output-dir <path>                   (default: infra/ml/test/out/parity)
+  --verbose                             (default: disabled)
+
+Deprecated:
+  --update-golden                       (ignored; parity outputs are runtime-generated)
 EOF
 }
 
@@ -46,7 +47,7 @@ while (($# > 0)); do
       shift 2
       ;;
     --update-golden)
-      UPDATE_GOLDEN=true
+      echo "Warning: --update-golden is deprecated and ignored." >&2
       shift
       ;;
     --fail-on-missing-platform)
@@ -112,6 +113,9 @@ echo "  suite: $SUITE"
 echo "  platforms: $PLATFORMS"
 echo "  output_dir: $OUTPUT_DIR"
 echo "  verbose: $VERBOSE"
+echo "  fail_on_missing_platform: $FAIL_ON_MISSING_PLATFORM"
+echo "  fail_on_platform_runner_error: $FAIL_ON_PLATFORM_RUNNER_ERROR"
+echo "  allow_empty_comparison: $ALLOW_EMPTY_COMPARISON"
 
 echo "Preparing local fixture directory: $TEST_DATA_DIR"
 rm -rf "$TEST_DATA_DIR"
@@ -851,6 +855,3 @@ fi
 
 echo "Detailed logs: $LOG_DIR"
 echo "Parity comparison completed"
-if $UPDATE_GOLDEN; then
-  echo "--update-golden currently regenerates Python ONNX ground-truth outputs only."
-fi

@@ -285,10 +285,11 @@ Default behavior:
 Flags:
 1. `--suite smoke|full`
 2. `--platforms all|desktop|android|ios`
-3. `--update-golden`
-4. `--fail-on-missing-platform`
+3. `--fail-on-missing-platform`
+4. `--fail-on-platform-runner-error`
 5. `--allow-empty-comparison` (optional override when intentionally running without any platform outputs)
 6. `--output-dir ...`
+7. `--verbose` (optional, streams full logs/tables to terminal)
 
 Target runtime: 10-20 minutes for full local run (with caching).
 
