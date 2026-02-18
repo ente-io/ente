@@ -1,1 +1,2 @@
-- Bug fixes & performance improvements
+- Faster search and discovery
+- Shared photos in feed

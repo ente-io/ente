@@ -33,17 +33,16 @@ class ChangeLogStrings {
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Clean up hidden',
+      title1: 'Faster search and discovery',
       desc1:
-          'Two new actions are available for managing hidden files on mobile',
-      desc1Item1:
-          'Clean up hidden files: Removes hidden files from any non-hidden albums they also belong to, so they only live in Hidden.',
-      desc1Item2:
-          'Delete hidden files from device: Removes local copies of hidden files from your device to free up space.',
-      title2: 'Hide shared albums',
-      desc2: 'You can now hide albums that have been shared with you.',
-      title3: 'Device album search',
-      desc3: 'Now easily search within your device folders.',
+          'Search is now even faster. We have done some improvements on our embeddings DB to make it feel instant',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Shared photos in feed',
+      desc2:
+          'Photos added to shared albums would now appear in your feed, making it easier to find recently shared photos and comment on them',
+      title3: '',
+      desc3: '',
     ),
     'cs': ChangeLogStrings(
       title1: 'Vyčistit skryté',
