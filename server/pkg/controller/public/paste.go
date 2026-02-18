@@ -203,7 +203,7 @@ func isLikelyPreviewRequest(ctx *gin.Context) bool {
 
 	previewUATokens := []string{
 		"bot", "crawler", "spider", "preview", "slackbot", "discordbot",
-		"twitterbot", "facebookexternalhit", "whatsapp", "telegrambot",
+		"twitterbot", "facebookexternalhit", "whatsappbot", "telegrambot",
 		"linkedinbot", "skypeuripreview", "googlebot",
 	}
 	for _, token := range previewUATokens {

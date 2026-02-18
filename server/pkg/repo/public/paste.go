@@ -26,9 +26,19 @@ func (r *PasteRepository) Insert(
 	expiresAt int64,
 ) error {
 	_, err := r.DB.ExecContext(ctx, `INSERT INTO public_paste_tokens
-		(id, access_token, encrypted_data, decryption_header, expires_at)
-		VALUES ($1, $2, $3, $4, $5)`,
-		id, accessToken, req.EncryptedData, req.DecryptionHeader, expiresAt)
+		(id, access_token, encrypted_data, decryption_header, encrypted_paste_key, encrypted_paste_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		id,
+		accessToken,
+		req.EncryptedData,
+		req.DecryptionHeader,
+		req.EncryptedPasteKey,
+		req.EncryptedPasteKeyNonce,
+		req.KdfNonce,
+		req.KdfMemLimit,
+		req.KdfOpsLimit,
+		expiresAt,
+	)
 	if err == nil {
 		return nil
 	}
@@ -62,9 +72,17 @@ func (r *PasteRepository) ConsumeByToken(
 	row := r.DB.QueryRowContext(ctx, `DELETE FROM public_paste_tokens
 		WHERE access_token = $1
 		  AND expires_at > now_utc_micro_seconds()
-		RETURNING encrypted_data, decryption_header`, accessToken)
+		RETURNING encrypted_data, decryption_header, encrypted_paste_key, encrypted_paste_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit`, accessToken)
 	payload := ente.PastePayload{}
-	if err := row.Scan(&payload.EncryptedData, &payload.DecryptionHeader); err != nil {
+	if err := row.Scan(
+		&payload.EncryptedData,
+		&payload.DecryptionHeader,
+		&payload.EncryptedPasteKey,
+		&payload.EncryptedPasteKeyNonce,
+		&payload.KdfNonce,
+		&payload.KdfMemLimit,
+		&payload.KdfOpsLimit,
+	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ente.ErrNotFound
 		}
@@ -81,4 +99,3 @@ func (r *PasteRepository) CleanupExpired(ctx context.Context) error {
 	}
 	return nil
 }
-

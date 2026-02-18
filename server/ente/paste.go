@@ -6,8 +6,13 @@ import (
 )
 
 type CreatePasteRequest struct {
-	EncryptedData    string `json:"encryptedData" binding:"required"`
-	DecryptionHeader string `json:"decryptionHeader" binding:"required"`
+	EncryptedData          string `json:"encryptedData" binding:"required"`
+	DecryptionHeader       string `json:"decryptionHeader" binding:"required"`
+	EncryptedPasteKey      string `json:"encryptedPasteKey" binding:"required"`
+	EncryptedPasteKeyNonce string `json:"encryptedPasteKeyNonce" binding:"required"`
+	KdfNonce               string `json:"kdfNonce" binding:"required"`
+	KdfMemLimit            int64  `json:"kdfMemLimit" binding:"required"`
+	KdfOpsLimit            int64  `json:"kdfOpsLimit" binding:"required"`
 }
 
 func (r *CreatePasteRequest) Validate(maxCiphertextBytes int) error {
@@ -16,6 +21,18 @@ func (r *CreatePasteRequest) Validate(maxCiphertextBytes int) error {
 	}
 	if len(r.EncryptedData) > maxCiphertextBytes || len(r.DecryptionHeader) > maxCiphertextBytes {
 		return NewBadRequestWithMessage("encrypted payload too large")
+	}
+
+	if strings.TrimSpace(r.EncryptedPasteKey) == "" ||
+		strings.TrimSpace(r.EncryptedPasteKeyNonce) == "" ||
+		strings.TrimSpace(r.KdfNonce) == "" {
+		return NewBadRequestWithMessage("invalid key material")
+	}
+	if len(r.EncryptedPasteKey) > maxCiphertextBytes || len(r.EncryptedPasteKeyNonce) > maxCiphertextBytes {
+		return NewBadRequestWithMessage("key material too large")
+	}
+	if r.KdfMemLimit <= 0 || r.KdfOpsLimit <= 0 {
+		return NewBadRequestWithMessage("invalid key derivation parameters")
 	}
 	return nil
 }
@@ -44,8 +61,13 @@ func (r *PasteTokenRequest) Validate() error {
 }
 
 type PastePayload struct {
-	EncryptedData    string `json:"encryptedData"`
-	DecryptionHeader string `json:"decryptionHeader"`
+	EncryptedData          string `json:"encryptedData"`
+	DecryptionHeader       string `json:"decryptionHeader"`
+	EncryptedPasteKey      string `json:"encryptedPasteKey"`
+	EncryptedPasteKeyNonce string `json:"encryptedPasteKeyNonce"`
+	KdfNonce               string `json:"kdfNonce"`
+	KdfMemLimit            int64  `json:"kdfMemLimit"`
+	KdfOpsLimit            int64  `json:"kdfOpsLimit"`
 }
 
 func isAlphaNumeric(s string) bool {

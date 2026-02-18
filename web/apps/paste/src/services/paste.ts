@@ -8,6 +8,11 @@ export interface CreatePasteResponse {
 export interface PastePayload {
     encryptedData: string;
     decryptionHeader: string;
+    encryptedPasteKey: string;
+    encryptedPasteKeyNonce: string;
+    kdfNonce: string;
+    kdfMemLimit: number;
+    kdfOpsLimit: number;
 }
 
 const parseError = async (response: Response) => {

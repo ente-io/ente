@@ -9,19 +9,27 @@ import {
 } from "@mui/material";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import {
+    decryptBox,
     decryptMetadataJSON,
+    deriveInteractiveKey,
+    deriveKey,
+    encryptBox,
     encryptMetadataJSON,
-    fromB64,
-    fromB64URLSafeNoPadding,
     generateKey,
-    toB64,
-    toB64URLSafeNoPadding,
 } from "ente-base/crypto";
+import { newID } from "ente-base/id";
 import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
-import { consumePaste, createPaste, setGuard } from "../services/paste";
+import {
+    consumePaste,
+    createPaste,
+    setGuard,
+    type PastePayload,
+} from "../services/paste";
 
 const maxChars = 4000;
+const fragmentSecretLength = 12;
+const fragmentSecretPattern = /^[0-9A-Za-z]{12}$/;
 
 type PageMode = "create" | "view";
 
@@ -52,6 +60,30 @@ const textFieldSx = {
         paddingTop: "0 !important",
         paddingBottom: "0 !important",
     },
+};
+
+const createFragmentSecret = () => newID("").slice(0, fragmentSecretLength);
+
+const resolvePasteKey = async (
+    fragmentSecret: string,
+    payload: PastePayload,
+) => {
+    if (!fragmentSecretPattern.test(fragmentSecret)) {
+        throw new Error("Invalid key in URL");
+    }
+    const keyEncryptionKey = await deriveKey(
+        fragmentSecret,
+        payload.kdfNonce,
+        payload.kdfOpsLimit,
+        payload.kdfMemLimit,
+    );
+    return await decryptBox(
+        {
+            encryptedData: payload.encryptedPasteKey,
+            nonce: payload.encryptedPasteKeyNonce,
+        },
+        keyEncryptionKey,
+    );
 };
 
 const Page: React.FC = () => {
@@ -88,18 +120,22 @@ const Page: React.FC = () => {
             setConsumeError(null);
 
             try {
-                const keyFromFragment = window.location.hash.slice(1).trim();
-                if (!keyFromFragment) {
+                const fragmentSecret = window.location.hash.slice(1).trim();
+                if (!fragmentSecret) {
                     throw new Error("Missing key in URL");
                 }
-                const key = await toB64(
-                    await fromB64URLSafeNoPadding(keyFromFragment),
-                );
 
                 await waitUntilVisible();
                 await setGuard(accessToken);
                 const payload = await consumePaste(accessToken);
-                const decrypted = (await decryptMetadataJSON(payload, key)) as {
+                const key = await resolvePasteKey(fragmentSecret, payload);
+                const decrypted = (await decryptMetadataJSON(
+                    {
+                        encryptedData: payload.encryptedData,
+                        decryptionHeader: payload.decryptionHeader,
+                    },
+                    key,
+                )) as {
                     text?: string;
                 };
 
@@ -135,13 +171,20 @@ const Page: React.FC = () => {
         setCreating(true);
         try {
             const key = await generateKey();
-            const keyURL = await toB64URLSafeNoPadding(await fromB64(key));
+            const fragmentSecret = createFragmentSecret();
             const encrypted = await encryptMetadataJSON({ text: inputText }, key);
+            const keyEncryptionKey = await deriveInteractiveKey(fragmentSecret);
+            const encryptedPasteKey = await encryptBox(key, keyEncryptionKey.key);
             const response = await createPaste({
                 encryptedData: encrypted.encryptedData,
                 decryptionHeader: encrypted.decryptionHeader,
+                encryptedPasteKey: encryptedPasteKey.encryptedData,
+                encryptedPasteKeyNonce: encryptedPasteKey.nonce,
+                kdfNonce: keyEncryptionKey.salt,
+                kdfMemLimit: keyEncryptionKey.memLimit,
+                kdfOpsLimit: keyEncryptionKey.opsLimit,
             });
-            const link = `${window.location.origin}/${response.accessToken}#${keyURL}`;
+            const link = `${window.location.origin}/${response.accessToken}#${fragmentSecret}`;
             setCreatedLink(link);
         } catch (error) {
             const message =
@@ -172,6 +215,10 @@ const Page: React.FC = () => {
         <>
             <Head>
                 <meta name="robots" content="noindex, nofollow" />
+                <meta
+                    name="description"
+                    content="Share sensitive text with one-time, end-to-end encrypted links that auto-expire after 24 hours."
+                />
             </Head>
             <Box
                 sx={{
