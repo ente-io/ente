@@ -88,8 +88,8 @@ def _percentile(values: Sequence[float], percentile: float) -> float:
 
 @dataclass(frozen=True)
 class ThresholdConfig:
-    clip_cosine_distance: float = 0.010
-    cross_platform_clip_cosine_distance: float = 0.010
+    clip_cosine_distance: float = 0.015
+    cross_platform_clip_cosine_distance: float = 0.015
     face_embedding_cosine_distance: float = 0.015
     box_iou_threshold: float = 0.98
     landmark_error_threshold: float = 0.03
