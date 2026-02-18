@@ -522,7 +522,11 @@ export const _suggestionsAndChoicesForPerson = async (
     // Randomly sample faces to limit the O(n^2) cost.
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
-    const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
+    const strictMedianSimilarityThreshold = 0.48;
+    const relaxedMedianSimilarityThreshold = 0.46;
+
+    const multiFaceClusters: FaceCluster[] = [];
+    const singletonClusters: FaceCluster[] = [];
     const rejectedClusters: FaceCluster[] = [];
     for (const cluster of localClusters) {
         const { id, faces } = cluster;
@@ -536,33 +540,80 @@ export const _suggestionsAndChoicesForPerson = async (
             continue;
         }
 
-        // Ignore singleton clusters.
-        if (faces.length < 2) continue;
-
-        const sampledOtherEmbeddings = randomSample(faces, 50)
-            .map((id) => embeddingByFaceID.get(id))
-            .filter((e) => !!e);
-
-        // Sort all cosine similarities pairs, and consider their median.
-        const csims: number[] = [];
-        for (const other of sampledOtherEmbeddings) {
-            for (const embedding of sampledPersonEmbeddings) {
-                csims.push(dotProduct(embedding, other));
-            }
+        if (faces.length < 2) {
+            singletonClusters.push(cluster);
+            continue;
         }
-        csims.sort();
-
-        if (csims.length == 0) continue;
-
-        const medianSim = csims[Math.floor(csims.length / 2)]!;
-        if (medianSim > 0.48) {
-            candidateClustersAndSimilarity.push([cluster, medianSim]);
-        }
+        multiFaceClusters.push(cluster);
     }
 
-    // Sort suggestions by the (median) cosine similarity.
-    candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
-    const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
+    const scoreClustersByMedianSimilarity = (clusters: FaceCluster[]) => {
+        const clustersAndSimilarity: [FaceCluster, number][] = [];
+        for (const cluster of clusters) {
+            const { faces } = cluster;
+
+            const sampledOtherEmbeddings = randomSample(faces, 50)
+                .map((id) => embeddingByFaceID.get(id))
+                .filter((e) => !!e);
+
+            // Sort all cosine similarities pairs, and consider their median.
+            const csims: number[] = [];
+            for (const other of sampledOtherEmbeddings) {
+                for (const embedding of sampledPersonEmbeddings) {
+                    csims.push(dotProduct(embedding, other));
+                }
+            }
+            csims.sort();
+
+            if (csims.length == 0) continue;
+
+            const medianSim = csims[Math.floor(csims.length / 2)]!;
+            clustersAndSimilarity.push([cluster, medianSim]);
+        }
+        // Sort suggestions by the (median) cosine similarity.
+        clustersAndSimilarity.sort(([, a], [, b]) => b - a);
+        return clustersAndSimilarity;
+    };
+
+    const selectCandidateClusters = ({
+        candidates,
+        minMedianSimilarity,
+    }: {
+        candidates: [FaceCluster, number][];
+        minMedianSimilarity: number;
+    }) =>
+        candidates
+            .filter(
+                ([, medianSimilarity]) =>
+                    medianSimilarity > minMedianSimilarity,
+            )
+            .map(([cluster]) => cluster);
+
+    // Keep singleton suggestions as a last resort to minimize regressions while
+    // still reducing "no suggestions" outcomes.
+    const multiFaceCandidateClustersAndSimilarity =
+        scoreClustersByMedianSimilarity(multiFaceClusters);
+    let suggestionMode = "strict_non_singleton";
+    let suggestedClusters = selectCandidateClusters({
+        candidates: multiFaceCandidateClustersAndSimilarity,
+        minMedianSimilarity: strictMedianSimilarityThreshold,
+    });
+    if (suggestedClusters.length == 0) {
+        suggestionMode = "relaxed_non_singleton";
+        suggestedClusters = selectCandidateClusters({
+            candidates: multiFaceCandidateClustersAndSimilarity,
+            minMedianSimilarity: relaxedMedianSimilarityThreshold,
+        });
+    }
+    if (suggestedClusters.length == 0) {
+        suggestionMode = "strict_with_singletons";
+        const singletonCandidateClustersAndSimilarity =
+            scoreClustersByMedianSimilarity(singletonClusters);
+        suggestedClusters = selectCandidateClusters({
+            candidates: singletonCandidateClustersAndSimilarity,
+            minMedianSimilarity: strictMedianSimilarityThreshold,
+        });
+    }
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
@@ -627,7 +678,7 @@ export const _suggestionsAndChoicesForPerson = async (
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
     log.info(
-        `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
+        `Generated ${suggestions.length} suggestions for ${person.id} using ${suggestionMode} (${Date.now() - startTime} ms)`,
     );
 
     return { choices, suggestions };
