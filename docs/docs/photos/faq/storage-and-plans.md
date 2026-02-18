@@ -579,7 +579,9 @@ The same prorating calculation applies as described above.
 
 ### How can I update my payment method? {#update-payment}
 
-You can view and manage your payment method by clicking on the green subscription card within the Ente app, and selecting the "Manage payment method" button.
+You can view and manage your payment method via Settings > click on the Storage (subscription) card at the top > Manage payment method.
+
+You can also access this via Settings > Account > Manage subscription > Manage payment method.
 
 **Note:** On iOS, the "Manage payment method" option is not available. iOS users must manage their subscriptions and payment methods through the Apple App Store.
 
@@ -589,7 +591,9 @@ If you would like to change your payment method entirely (e.g., switch between A
 
 ### How can I cancel my subscription? {#cancel-subscription}
 
-You can cancel your subscription by clicking on the green subscription card within the Ente app, and selecting the "Cancel subscription" button.
+You can cancel your subscription via Settings > click on the Storage (subscription) card at the top > Cancel subscription.
+
+This can also be done via Settings > Account > Manage subscription > Cancel subscription.
 
 After cancellation, you'll have access to your data for 30 days, after which it will be deleted. Make sure to export your photos before the grace period ends if you want to keep them.
 
