@@ -1,8 +1,9 @@
+- Laurens: (I) Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Ashil: Fix widnow controls hiding app UI on iPadOS
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
 - Ashil: Enable single file download for locally existing uploaded files.
-- Laurens: (i) Use usearch vectorDB for magic search and discover section
+- Laurens: Use usearch vectorDB for magic search and discover section
 - Laurens: Make it possible to ignore already named persons
 - Neeraj: Fix iOS native video crash by avoiding FFprobe on problematic files, harden seekbar null handling, and stop audio on swipe dismiss
 - Ashil: Fix pinch to zoom opening info sheet on video
