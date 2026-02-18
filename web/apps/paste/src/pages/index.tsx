@@ -65,17 +65,10 @@ const textFieldSx = (
         "&:before": { display: "none" },
         "&:after": { display: "none" },
         "&:hover:not(.Mui-disabled, .Mui-error):before": { display: "none" },
-        "&:hover": {
-            bgcolor: bgColor,
-        },
-        "&.Mui-focused": {
-            bgcolor: bgColor,
-            borderColor: "accent.main",
-        },
+        "&:hover": { bgcolor: bgColor },
+        "&.Mui-focused": { bgcolor: bgColor, borderColor: "accent.main" },
     },
-    "& .MuiInputBase-input": {
-        padding: "0 !important",
-    },
+    "& .MuiInputBase-input": { padding: "0 !important" },
     "& .MuiInputBase-inputMultiline": {
         padding: "0 !important",
         margin: "0 !important",
@@ -84,10 +77,7 @@ const textFieldSx = (
         padding: "0 !important",
         margin: "0 !important",
     },
-    "& textarea": {
-        padding: "0 !important",
-        margin: "0 !important",
-    },
+    "& textarea": { padding: "0 !important", margin: "0 !important" },
 });
 
 const createFragmentSecret = () => newID("").slice(0, fragmentSecretLength);
@@ -141,7 +131,8 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (mode !== "view" || !accessToken || startedConsumeRef.current) return;
+        if (mode !== "view" || !accessToken || startedConsumeRef.current)
+            return;
         startedConsumeRef.current = true;
 
         const run = async () => {
@@ -164,11 +155,9 @@ const Page: React.FC = () => {
                         decryptionHeader: payload.decryptionHeader,
                     },
                     key,
-                )) as {
-                    text?: string;
-                };
+                )) as { text?: string };
 
-                if (!decrypted || typeof decrypted.text !== "string") {
+                if (typeof decrypted.text !== "string") {
                     throw new Error("Unable to decrypt paste");
                 }
                 setResolvedText(decrypted.text);
@@ -221,9 +210,15 @@ const Page: React.FC = () => {
         try {
             const key = await generateKey();
             const fragmentSecret = createFragmentSecret();
-            const encrypted = await encryptMetadataJSON({ text: inputText }, key);
+            const encrypted = await encryptMetadataJSON(
+                { text: inputText },
+                key,
+            );
             const keyEncryptionKey = await deriveInteractiveKey(fragmentSecret);
-            const encryptedPasteKey = await encryptBox(key, keyEncryptionKey.key);
+            const encryptedPasteKey = await encryptBox(
+                key,
+                keyEncryptionKey.key,
+            );
             const response = await createPaste({
                 encryptedData: encrypted.encryptedData,
                 decryptionHeader: encrypted.decryptionHeader,
@@ -237,7 +232,9 @@ const Page: React.FC = () => {
             setCreatedLink(link);
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : "Failed to create paste";
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create paste";
             setCreateError(message);
         } finally {
             setCreating(false);
@@ -249,12 +246,17 @@ const Page: React.FC = () => {
     };
 
     const shareLink = async (url: string) => {
-        if (!navigator.share) {
+        const share = (
+            navigator as Navigator & {
+                share?: (data?: ShareData) => Promise<void>;
+            }
+        ).share;
+        if (typeof share !== "function") {
             await copyText(url);
             return;
         }
         try {
-            await navigator.share({ url });
+            await share.call(navigator, { url });
         } catch {
             // no-op on cancel
         }
@@ -330,9 +332,18 @@ const Page: React.FC = () => {
                                 flexWrap="wrap"
                                 useFlexGap
                             >
-                                <Chip variant="outlined" label="24 hour retention max" />
-                                <Chip variant="outlined" label="One-time view" />
-                                <Chip variant="outlined" label="Purged after open" />
+                                <Chip
+                                    variant="outlined"
+                                    label="24 hour retention max"
+                                />
+                                <Chip
+                                    variant="outlined"
+                                    label="One-time view"
+                                />
+                                <Chip
+                                    variant="outlined"
+                                    label="Purged after open"
+                                />
                                 <Chip
                                     variant="filled"
                                     label="Open source"
@@ -360,7 +371,10 @@ const Page: React.FC = () => {
                                     <TextField
                                         variant="filled"
                                         hiddenLabel
-                                        InputProps={{ disableUnderline: true }}
+                                        slotProps={{
+                                            input: { disableUnderline: true },
+                                            htmlInput: { maxLength: maxChars },
+                                        }}
                                         multiline
                                         minRows={10}
                                         placeholder="Paste text (keys, snippets, notes, instructions...)"
@@ -368,7 +382,6 @@ const Page: React.FC = () => {
                                         onChange={(e) =>
                                             setInputText(e.target.value)
                                         }
-                                        inputProps={{ maxLength: maxChars }}
                                         sx={textFieldSx()}
                                     />
                                     <Box
@@ -378,7 +391,10 @@ const Page: React.FC = () => {
                                             alignItems: "center",
                                         }}
                                     >
-                                        <Typography variant="mini" color="text.muted">
+                                        <Typography
+                                            variant="mini"
+                                            color="text.muted"
+                                        >
                                             {inputText.length}/{maxChars}
                                         </Typography>
                                         <Button
@@ -402,7 +418,9 @@ const Page: React.FC = () => {
                                     </Box>
 
                                     {createError && (
-                                        <Typography color="error">{createError}</Typography>
+                                        <Typography color="error">
+                                            {createError}
+                                        </Typography>
                                     )}
 
                                     {createdLink && (
@@ -421,7 +439,9 @@ const Page: React.FC = () => {
                                                 },
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: 600 }}>
+                                            <Typography
+                                                sx={{ fontWeight: 600 }}
+                                            >
                                                 Your one-time link
                                             </Typography>
                                             <TextField
@@ -430,9 +450,11 @@ const Page: React.FC = () => {
                                                 value={createdLink}
                                                 multiline
                                                 minRows={2}
-                                                InputProps={{
-                                                    readOnly: true,
-                                                    disableUnderline: true,
+                                                slotProps={{
+                                                    input: {
+                                                        readOnly: true,
+                                                        disableUnderline: true,
+                                                    },
                                                 }}
                                                 sx={textFieldSx(
                                                     "12px",
@@ -441,12 +463,17 @@ const Page: React.FC = () => {
                                                 )}
                                             />
                                             <Stack
-                                                direction={{ xs: "column", sm: "row" }}
+                                                direction={{
+                                                    xs: "column",
+                                                    sm: "row",
+                                                }}
                                                 spacing={1}
                                             >
                                                 <Button
                                                     variant="outlined"
-                                                    onClick={() => copyText(createdLink)}
+                                                    onClick={() =>
+                                                        copyText(createdLink)
+                                                    }
                                                     sx={{
                                                         textTransform: "none",
                                                         borderRadius: "12px",
@@ -456,7 +483,9 @@ const Page: React.FC = () => {
                                                 </Button>
                                                 <Button
                                                     variant="outlined"
-                                                    onClick={() => shareLink(createdLink)}
+                                                    onClick={() =>
+                                                        shareLink(createdLink)
+                                                    }
                                                     sx={{
                                                         textTransform: "none",
                                                         borderRadius: "12px",
@@ -482,11 +511,16 @@ const Page: React.FC = () => {
                                                 size={18}
                                                 sx={{ color: "accent.main" }}
                                             />
-                                            <Typography>Opening secure paste...</Typography>
+                                            <Typography>
+                                                Opening secure paste...
+                                            </Typography>
                                         </Stack>
                                     )}
                                     {consumeError && (
-                                        <Stack spacing={1.5} alignItems="flex-start">
+                                        <Stack
+                                            spacing={1.5}
+                                            alignItems="flex-start"
+                                        >
                                             <Typography color="error">
                                                 {consumeError}
                                             </Typography>
@@ -506,7 +540,9 @@ const Page: React.FC = () => {
                                     )}
                                     {resolvedText && (
                                         <Stack spacing={2}>
-                                            <Typography sx={{ fontWeight: 600 }}>
+                                            <Typography
+                                                sx={{ fontWeight: 600 }}
+                                            >
                                                 Paste contents
                                             </Typography>
                                             <TextField
@@ -515,19 +551,26 @@ const Page: React.FC = () => {
                                                 multiline
                                                 minRows={10}
                                                 value={resolvedText}
-                                                InputProps={{
-                                                    readOnly: true,
-                                                    disableUnderline: true,
+                                                slotProps={{
+                                                    input: {
+                                                        readOnly: true,
+                                                        disableUnderline: true,
+                                                    },
                                                 }}
                                                 sx={textFieldSx()}
                                             />
-                                            <Typography variant="mini" color="text.muted">
-                                                This paste has now been removed from Ente
-                                                servers.
+                                            <Typography
+                                                variant="mini"
+                                                color="text.muted"
+                                            >
+                                                This paste has now been removed
+                                                from Ente servers.
                                             </Typography>
                                             <Button
                                                 variant="outlined"
-                                                onClick={() => copyText(resolvedText)}
+                                                onClick={() =>
+                                                    copyText(resolvedText)
+                                                }
                                                 sx={{
                                                     alignSelf: "flex-start",
                                                     textTransform: "none",

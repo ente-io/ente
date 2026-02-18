@@ -1,8 +1,6 @@
 {
     "extends": "ente-build-config/tsconfig-next.json",
-    "compilerOptions": {
-        "baseUrl": "./src"
-    },
+    "compilerOptions": { "baseUrl": "./src" },
     "include": [
         "src",
         "next-env.d.ts",

@@ -27,7 +27,7 @@ const parseError = async (
     }
     try {
         const data = (await response.json()) as { message?: string };
-        if (data?.message) return data.message;
+        if (data.message) return data.message;
     } catch {
         // no-op
     }
@@ -62,10 +62,7 @@ export const consumePaste = async (accessToken: string) => {
     const response = await fetch(await apiURL("/paste/consume"), {
         method: "POST",
         credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Paste-Consume": "1",
-        },
+        headers: { "Content-Type": "application/json", "X-Paste-Consume": "1" },
         body: JSON.stringify({ accessToken }),
     });
     if (!response.ok) {
