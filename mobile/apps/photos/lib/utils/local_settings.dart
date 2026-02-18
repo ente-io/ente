@@ -468,7 +468,7 @@ class LocalSettings {
     return _cachedAppMode!;
   }
 
-  bool get isAppModeSet => _prefs.containsKey(_kAppMode);
+  bool get isAppModeSet => false;
 
   Future<void> setAppMode(AppMode mode) async {
     await _prefs.setInt(_kAppMode, mode.index);
