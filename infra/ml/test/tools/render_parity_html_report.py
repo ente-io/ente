@@ -4,8 +4,11 @@ from __future__ import annotations
 import argparse
 import html
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+
+IST = timezone(timedelta(hours=5, minutes=30), name="IST")
 
 
 def _format_value(value: object) -> str:
@@ -24,6 +27,25 @@ def _status_class(passed: bool) -> str:
 
 def _status_label(passed: bool) -> str:
     return "PASS" if passed else "FAIL"
+
+
+def _format_generated_timestamp(value: object) -> str:
+    if value is None:
+        return "-"
+
+    raw = str(value).strip()
+    if not raw:
+        return "-"
+
+    normalized = raw[:-1] + "+00:00" if raw.endswith("Z") else raw
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return raw
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(IST).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _platform_stats(report_dir: Path) -> dict[str, dict[str, Any]]:
@@ -194,6 +216,7 @@ def render_report(
 
     report_dir = report_path.parent
     platform_stats = _platform_stats(report_dir)
+    generated_at = _format_generated_timestamp(payload.get("generated_at"))
 
     html_parts: list[str] = []
     html_parts.append("<!doctype html><html><head><meta charset='utf-8'><title>ML Indexing Parity Report</title>")
@@ -216,7 +239,7 @@ def render_report(
 
     html_parts.append("<h1>ML Indexing Parity Report</h1>")
     html_parts.append(
-        f"<p><span class='chip'>Generated: {html.escape(str(payload.get('generated_at', '-')))}</span>"
+        f"<p><span class='chip'>Generated (IST): {html.escape(generated_at)}</span>"
         f"<span class='chip'>Ground truth: {html.escape(ground_truth_platform)}</span>"
         f"<span class='chip'>Comparisons shown: {len(comparisons)}</span></p>"
     )
