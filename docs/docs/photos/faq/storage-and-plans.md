@@ -254,6 +254,14 @@ Open `Settings > General > Family plans`, find the member you want to remove, cl
 - They'll revert to the free 10 GB plan unless they purchase their own subscription
 - Photos they've already uploaded remain accessible to them
 
+### What happens to referral bonus storage if I join someone's family plan? {#referral-bonus-family-plan}
+
+Referral bonus storage is not included when you join a family plan. You will only have access to the shared family storage.
+
+When you join a family plan, your individual plan (including any referral bonuses) is replaced by the shared family storage. Referral bonus storage does not carry over or get added on top of the family plan.
+
+(Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
+
 ## Student Discounts
 
 ### Does Ente offer discounts to students? {#student-discount}
