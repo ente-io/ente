@@ -67,8 +67,9 @@ This guide ensures consistency across all Ente Photos documentation.
 
 Use consistent format with `>` separator:
 
-- **Settings > Backup > Backed up folders**
-- **Preferences > Advanced > Machine learning**
+- **Settings > Backup > Backed up folders** (mobile)
+- **Settings > Machine learning** (mobile)
+- **Preferences > Machine learning** (desktop)
 
 ### Links and References
 
@@ -265,7 +266,7 @@ This may take 10-30 minutes for large libraries.
 
 **On mobile:**
 
-1. Open `Settings > General > Advanced > Machine learning`
+1. Open `Settings > Machine learning`
 2. Enable "Face recognition"
 3. Wait for indexing to complete
 
@@ -285,7 +286,7 @@ Learn more in the [Machine learning guide](/photos/features/search-and-discovery
 ```markdown
 ### How to enable face recognition?
 
-On mobile you can enable face recognition in the settings. Go to the three horizontal lines button at the top left, then go to General, then Advanced, and you'll find Machine learning where you can enable it.
+On mobile you can enable face recognition in the settings. Go to the three horizontal lines button at the top left, then you'll find Machine learning where you can enable it.
 
 For more details, see: /photos/features/search-and-discovery/machine-learning
 ```

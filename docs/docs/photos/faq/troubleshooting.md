@@ -26,7 +26,7 @@ ML processing can cause crashes during large video uploads, especially on mobile
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, disable "Face recognition" and "Magic search", try uploading the videos again, then re-enable ML after upload completes.
+Open `Settings > Machine learning`, disable "Face recognition" and "Magic search", try uploading the videos again, then re-enable ML after upload completes.
 
 **On desktop:**
 
@@ -38,7 +38,7 @@ Video streaming can cause crashes when combined with ML on some devices:
 
 **On iOS:**
 
-Open `Settings > General > Advanced`, disable "Video streaming" or "Enable video playback", try uploading again, then re-enable after upload completes.
+Open `Settings`, disable "Video streaming" or "Enable video playback", try uploading again, then re-enable after upload completes.
 
 Learn more about [Video Streaming](/photos/features/utilities/video-streaming).
 
@@ -74,7 +74,7 @@ If the Ente app crashes when watching videos or when machine learning is enabled
 
 **On mobile:**
 
-Open `Settings > General > Advanced`, disable "Machine learning" and "Video streaming" (or "Enable video playback"), then restart the app.
+Open `Settings`, disable "Machine learning" and "Video streaming" (or "Enable video playback"), then restart the app.
 
 Learn more about [Video Streaming](/photos/features/utilities/video-streaming#troubleshooting).
 

@@ -16,7 +16,7 @@ you and your friend receive an additional 10 GB of storage.
 
 ## Find your referral code
 
-You can find your referral code under `Settings > General > Referrals`.
+You can find your referral code under `Settings > Referrals`.
 
 <div align="center">
 
@@ -26,7 +26,7 @@ You can find your referral code under `Settings > General > Referrals`.
 
 ## Apply a referral code
 
-Referral codes can be applied within `Settings > General > Referrals > Apply Code`.
+Referral codes can be applied within `Settings > Referrals > Apply Code`.
 
 <div align="center">
 
@@ -37,7 +37,7 @@ Referral codes can be applied within `Settings > General > Referrals > Apply Cod
 ## Customize your referral code
 
 You can personalize your referral code to make it easier to share. To change your
-code, go to `Settings > General > Referrals` and tap on your current code.
+code, go to `Settings > Referrals` and tap on your current code.
 
 Requirements for custom referral codes:
 

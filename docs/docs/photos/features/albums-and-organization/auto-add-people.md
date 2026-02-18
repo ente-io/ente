@@ -9,7 +9,7 @@ Automatically add photos of specific people to any album you can edit. Once set 
 
 ## Requirements
 
-- Mobile app with [Machine learning](/photos/features/search-and-discovery/machine-learning) enabled (Settings > General > Advanced > Machine learning / Local indexing)
+- Mobile app with [Machine learning](/photos/features/search-and-discovery/machine-learning) enabled (Settings > Machine learning / Local indexing)
 - People must be named in [Face recognition](/photos/features/search-and-discovery/face-recognition) so they appear in the picker
 - You must own the album or be an admin/collaborator (not available for Favorites or Uncategorized)
 - Only photos you upload are auto-added; items uploaded by other contributors stay unchanged

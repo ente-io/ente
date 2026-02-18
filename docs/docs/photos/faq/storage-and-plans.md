@@ -185,11 +185,11 @@ If a family member accepted your invitation but their account shows 0 GB of avai
 
 **Solution 1: Check if they actually accepted the invite**
 
-Open `Settings > General > Family plans`, check the "Members" list, and confirm their status shows "Active" (not "Invited" or "Pending"). If still showing as "Invited", ask them to check their email and accept the invitation.
+Open `Settings > Family plans`, check the "Members" list, and confirm their status shows "Active" (not "Invited" or "Pending"). If still showing as "Invited", ask them to check their email and accept the invitation.
 
 **Solution 2: Check if you've set a storage limit**
 
-Open `Settings > General > Family plans`, find the member in the list, click the edit icon next to their name, and check if a storage limit is set to 0 GB or a very low amount. Either increase the limit or click "Remove Limit" to give them unlimited access to the family plan storage.
+Open `Settings > Family plans`, find the member in the list, click the edit icon next to their name, and check if a storage limit is set to 0 GB or a very low amount. Either increase the limit or click "Remove Limit" to give them unlimited access to the family plan storage.
 
 **Solution 3: Have the member log out and log back in**
 
@@ -245,7 +245,7 @@ Common reasons and solutions:
 
 ### How do I remove someone from my family plan? {#remove-family-member}
 
-Open `Settings > General > Family plans`, find the member you want to remove, click the remove/trash icon next to their name, and confirm the removal.
+Open `Settings > Family plans`, find the member you want to remove, click the remove/trash icon next to their name, and confirm the removal.
 
 **What happens when you remove someone:**
 
@@ -320,7 +320,7 @@ Contact [support@ente.io](mailto:support@ente.io) if you have questions about yo
 
 Use our [referral program](/photos/features/account/referral-program/):
 
-Open `Settings > General > Referrals`, share your referral code with friends, and when they upgrade to a paid plan, both you and your friend get 10 GB free.
+Open `Settings > Referrals`, share your referral code with friends, and when they upgrade to a paid plan, both you and your friend get 10 GB free.
 
 ### How much storage can I earn through referrals? {#referral-storage-limit}
 
