@@ -221,7 +221,7 @@ Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente
 
 If the app crashes when watching videos or using machine learning, especially on iOS or older devices:
 
-1. Open `Settings > General > Advanced`
+1. Open `Settings`
 2. Disable "Video streaming" or "Enable video playback"
 3. Disable "Machine learning" if crashes continue
 4. Restart the app
@@ -268,7 +268,7 @@ Notifications are currently only available on mobile apps. See the [Notification
 
 ### How do I manage notification settings? {#manage-notifications}
 
-Open `Settings > General > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
+Open `Settings > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
 
 ## Home Widgets
 
@@ -294,7 +294,7 @@ Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets).
 
 ### How do I configure which albums appear on my widget? {#configure-widget-albums}
 
-Open `Settings > General > Home widget > Albums widget` in the Ente app.
+Open `Settings > Home widget > Albums widget` in the Ente app.
 
 From here, you can select which albums to display. By default, the **Favorites** album is selected. You can select multiple albums to show more variety on your home screen.
 
@@ -306,9 +306,9 @@ The People widget displays photos of specific people from your library. To ident
 
 To use the People widget:
 
-1. Enable face recognition in `Settings > General > Advanced > Machine learning`
+1. Enable face recognition in `Settings > Machine learning`
 2. Wait for face indexing to complete
-3. Open `Settings > General > Home widget > People widget` to select people
+3. Open `Settings > Home widget > People widget` to select people
 
 Learn more about [Face recognition](/photos/features/search-and-discovery/face-recognition).
 
@@ -338,7 +338,7 @@ The Memories widget can display three types of memories:
 - **Past Years**: Memories from past years
 - **Smart Memories**: AI-curated memorable moments
 
-You can toggle which memory types appear by opening `Settings > General > Home widget > Memories widget`.
+You can toggle which memory types appear by opening `Settings > Home widget > Memories widget`.
 
 ### Are widgets available on desktop or web? {#widgets-platform-availability}
 

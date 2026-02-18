@@ -51,7 +51,7 @@ Magic search is part of Ente's machine learning features. You must enable it man
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, enable **Machine learning** and/or **Local indexing**, and wait for indexing to complete.
+Open `Settings > Machine learning`, enable **Machine learning** and/or **Local indexing**, and wait for indexing to complete.
 
 **On desktop:**
 

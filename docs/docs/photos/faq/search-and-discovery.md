@@ -118,7 +118,7 @@ If you're searching for objects (like "food", "car", "dog") or trying to find fa
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning` and toggle ON face recognition and magic search.
+Open `Settings > Machine learning` and toggle ON face recognition and magic search.
 
 **On desktop:**
 
@@ -136,7 +136,7 @@ Face recognition requires enabling **Machine Learning** first:
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, enable "Face recognition", and wait for indexing to complete.
+Open `Settings > Machine learning`, enable "Face recognition", and wait for indexing to complete.
 
 **On desktop:**
 
@@ -284,7 +284,7 @@ Magic search is enabled when you enable machine learning:
 
 **On mobile:**
 
-- `Settings > General > Advanced > Machine learning`
+- `Settings > Machine learning`
 
 **On desktop:**
 

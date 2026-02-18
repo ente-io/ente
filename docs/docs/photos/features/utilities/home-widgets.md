@@ -57,18 +57,18 @@ Displays photos featuring selected people from your library. This widget helps y
 
 ### Widget Settings
 
-Open `Settings > General > Home widget` in the Ente app to configure your widgets.
+Open `Settings > Home widget` in the Ente app to configure your widgets.
 
 ### Configuring the Albums Widget
 
-1. Open `Settings > General > Home widget > Albums widget`
+1. Open `Settings > Home widget > Albums widget`
 2. Select which albums you want to display on your home screen
 3. By default, the **Favorites** album is selected
 4. You can select multiple albums to include more variety
 
 ### Configuring the People Widget
 
-1. Open `Settings > General > Home widget > People widget`
+1. Open `Settings > Home widget > People widget`
 2. Select which people you want to feature
 3. Only people detected by face recognition will appear as options
 
@@ -76,7 +76,7 @@ Open `Settings > General > Home widget` in the Ente app to configure your widget
 
 ### Configuring the Memories Widget
 
-1. Open `Settings > General > Home widget > Memories widget`
+1. Open `Settings > Home widget > Memories widget`
 2. Toggle which memory types to include:
     - **On This Day**: Photos from this date in previous years
     - **Past Years**: Yearly memories
@@ -116,7 +116,7 @@ Widgets display photos that are backed up to Ente. Make sure your photos are syn
 
 If you want to use the People widget, enable face recognition in advance so the app can detect and group faces in your photos.
 
-Open `Settings > General > Advanced > Machine learning` and enable face recognition.
+Open `Settings > Machine learning` and enable face recognition.
 
 ### Keep the App Updated
 

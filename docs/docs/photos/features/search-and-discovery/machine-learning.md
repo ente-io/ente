@@ -40,7 +40,7 @@ You can enable machine learning on either the mobile app or the desktop app.
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning` and enable **Machine learning** and/or **Local indexing**.
+Open `Settings > Machine learning` and enable **Machine learning** and/or **Local indexing**.
 
 **On desktop:**
 
@@ -69,7 +69,7 @@ After enabling machine learning, the app needs to download and index your photos
 
 While indexing is in progress:
 
-- **Mobile**: Check `Settings > General > Advanced > Machine learning` for indexing status
+- **Mobile**: Check `Settings > Machine learning` for indexing status
 - **Desktop**: Progress shown in the app
 - **Search bar**: May show indexing status when clicked
 
@@ -119,7 +119,7 @@ On mobile devices with low RAM (4-6GB) and large photo libraries, indexing might
 
 **To disable local indexing on mobile:**
 
-Open `Settings > General > Advanced > Machine learning > Configuration` and disable local indexing.
+Open `Settings > Machine learning > Configuration` and disable local indexing.
 
 This way, you can continue to use ML features without impacting your phone's performance. The desktop app will handle indexing, and the indexes will sync to your mobile device.
 
