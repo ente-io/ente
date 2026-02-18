@@ -28,9 +28,6 @@ Flags:
   --allow-empty-comparison              (default: disabled)
   --output-dir <path>                   (default: infra/ml/test/out/parity)
   --verbose                             (default: disabled)
-
-Deprecated:
-  --update-golden                       (ignored; parity outputs are runtime-generated)
 EOF
 }
 
@@ -39,10 +36,6 @@ while (($# > 0)); do
     --platforms)
       PLATFORMS="$2"
       shift 2
-      ;;
-    --update-golden)
-      echo "Warning: --update-golden is deprecated and ignored." >&2
-      shift
       ;;
     --fail-on-missing-platform)
       FAIL_ON_MISSING_PLATFORM=true
