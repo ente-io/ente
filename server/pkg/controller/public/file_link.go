@@ -36,10 +36,7 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	if actorUserID != file.OwnerID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(actorUserID, true)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
+	// No subscription gating for file links.
 	for attempt := 0; attempt < 5; attempt++ {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
@@ -110,10 +107,7 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	if fileLinkRow.OwnerID != userID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
+	// No subscription gating for file links.
 	if req.ValidTill != nil {
 		fileLinkRow.ValidTill = *req.ValidTill
 	}
