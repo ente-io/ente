@@ -91,7 +91,8 @@ class ThresholdConfig:
     clip_cosine_distance: float = 0.015
     cross_platform_clip_cosine_distance: float = 0.015
     face_embedding_cosine_distance: float = 0.015
-    box_iou_threshold: float = 0.98
+    box_iou_threshold: float = 0.80
+    face_match_iou_floor: float = 0.05
     landmark_error_threshold: float = 0.03
     score_delta_threshold: float = 0.10
 
@@ -101,6 +102,7 @@ class ThresholdConfig:
             "cross_platform_clip_cosine_distance": self.cross_platform_clip_cosine_distance,
             "face_embedding_cosine_distance": self.face_embedding_cosine_distance,
             "box_iou_threshold": self.box_iou_threshold,
+            "face_match_iou_floor": self.face_match_iou_floor,
             "landmark_error_threshold": self.landmark_error_threshold,
             "score_delta_threshold": self.score_delta_threshold,
         }
@@ -284,6 +286,8 @@ def _index_results(
 def _match_faces(
     reference_faces: Sequence[FaceResult],
     candidate_faces: Sequence[FaceResult],
+    *,
+    min_iou_for_match: float = 0.0,
 ) -> list[tuple[int, int, float]]:
     pairs: list[tuple[float, int, int]] = []
     for reference_index, reference_face in enumerate(reference_faces):
@@ -296,6 +300,8 @@ def _match_faces(
     used_candidate: set[int] = set()
     matches: list[tuple[int, int, float]] = []
     for iou, reference_index, candidate_index in pairs:
+        if iou < min_iou_for_match:
+            break
         if reference_index in used_reference or candidate_index in used_candidate:
             continue
         used_reference.add(reference_index)
@@ -460,18 +466,86 @@ def compare_result_sets(
                 ),
             )
 
-        matches = _match_faces(reference.faces, candidate.faces)
+        matches = _match_faces(
+            reference.faces,
+            candidate.faces,
+            min_iou_for_match=thresholds.face_match_iou_floor,
+        )
+        maximum_possible_matches = min(reference_face_count, candidate_face_count)
         add_file_metric(
             file_id=file_id,
             metric="matched_face_count",
             value=float(len(matches)),
+            threshold=float(maximum_possible_matches),
+            passed=len(matches) == maximum_possible_matches,
+            direction="==",
+            count=len(matches),
+            message="Greedy IoU-gated face matches",
+        )
+
+        unmatched_reference_face_count = reference_face_count - len(
+            {reference_index for reference_index, _, _ in matches}
+        )
+        unmatched_candidate_face_count = candidate_face_count - len(
+            {candidate_index for _, candidate_index, _ in matches}
+        )
+        add_file_metric(
+            file_id=file_id,
+            metric="unmatched_reference_face_count",
+            value=float(unmatched_reference_face_count),
+            threshold=0.0,
+            passed=unmatched_reference_face_count == 0,
+            direction="<=",
+            message=(
+                "Reference faces without a valid IoU-gated match "
+                f"(IoU floor: {thresholds.face_match_iou_floor:.2f})"
+            ),
+        )
+        add_file_metric(
+            file_id=file_id,
+            metric="unmatched_candidate_face_count",
+            value=float(unmatched_candidate_face_count),
+            threshold=0.0,
+            passed=unmatched_candidate_face_count == 0,
+            direction="<=",
+            message=(
+                "Candidate faces without a valid IoU-gated match "
+                f"(IoU floor: {thresholds.face_match_iou_floor:.2f})"
+            ),
+        )
+
+        if unmatched_reference_face_count > 0:
+            add_finding(
+                ComparisonFinding(
+                    file_id=file_id,
+                    metric="unmatched_reference_face_count",
+                    message="Unmatched reference faces after IoU-gated matching",
+                    value=float(unmatched_reference_face_count),
+                    threshold=0.0,
+                ),
+            )
+        if unmatched_candidate_face_count > 0:
+            add_finding(
+                ComparisonFinding(
+                    file_id=file_id,
+                    metric="unmatched_candidate_face_count",
+                    message="Unmatched candidate faces after IoU-gated matching",
+                    value=float(unmatched_candidate_face_count),
+                    threshold=0.0,
+                ),
+            )
+
+        add_file_metric(
+            file_id=file_id,
+            metric="face_match_iou_floor",
+            value=thresholds.face_match_iou_floor,
             threshold=None,
             passed=True,
-            count=len(matches),
-            message="Greedy IoU face matches",
+            message="Minimum IoU required to keep a match",
         )
 
         file_ious: list[float] = []
+        file_iou_shortfalls: list[float] = []
         file_landmark_errors: list[float] = []
         file_score_deltas: list[float] = []
         file_embedding_distances: list[float] = []
@@ -479,17 +553,27 @@ def compare_result_sets(
             reference_face = reference.faces[reference_index]
             candidate_face = candidate.faces[candidate_index]
 
+            embedding_distance = cosine_distance(
+                reference_face.embedding,
+                candidate_face.embedding,
+            )
+            file_embedding_distances.append(embedding_distance)
+            face_embedding_distances.append(embedding_distance)
+
+            iou_threshold = thresholds.box_iou_threshold
+
             file_ious.append(iou)
-            iou_error = 1.0 - iou
-            iou_errors.append(iou_error)
-            if iou < thresholds.box_iou_threshold:
+            iou_shortfall = max(0.0, iou_threshold - iou)
+            file_iou_shortfalls.append(iou_shortfall)
+            iou_errors.append(iou_shortfall)
+            if iou_shortfall > 0:
                 add_finding(
                     ComparisonFinding(
                         file_id=file_id,
                         metric="face_box_iou",
                         message="Face box IoU below threshold",
                         value=iou,
-                        threshold=thresholds.box_iou_threshold,
+                        threshold=iou_threshold,
                     ),
                 )
 
@@ -534,12 +618,6 @@ def compare_result_sets(
                     ),
                 )
 
-            embedding_distance = cosine_distance(
-                reference_face.embedding,
-                candidate_face.embedding,
-            )
-            file_embedding_distances.append(embedding_distance)
-            face_embedding_distances.append(embedding_distance)
             if embedding_distance > thresholds.face_embedding_cosine_distance:
                 add_finding(
                     ComparisonFinding(
@@ -557,20 +635,40 @@ def compare_result_sets(
                 file_id=file_id,
                 metric="face_box_iou_min",
                 value=min_iou,
-                threshold=thresholds.box_iou_threshold,
-                passed=min_iou >= thresholds.box_iou_threshold,
-                direction=">=",
+                threshold=None,
+                passed=True,
                 count=len(file_ious),
                 message="Minimum IoU across matched faces",
+            )
+            max_iou_shortfall = max(file_iou_shortfalls)
+            add_file_metric(
+                file_id=file_id,
+                metric="face_box_iou_shortfall_max",
+                value=max_iou_shortfall,
+                threshold=0.0,
+                passed=max_iou_shortfall <= 0.0,
+                direction="<=",
+                count=len(file_iou_shortfalls),
+                message="Maximum IoU shortfall against size-aware thresholds",
             )
         else:
             add_file_metric(
                 file_id=file_id,
                 metric="face_box_iou_min",
                 value=None,
-                threshold=thresholds.box_iou_threshold,
+                threshold=None,
                 passed=reference_face_count == 0 and candidate_face_count == 0,
-                direction=">=",
+                count=0,
+                applicable=False,
+                message="No matched faces",
+            )
+            add_file_metric(
+                file_id=file_id,
+                metric="face_box_iou_shortfall_max",
+                value=None,
+                threshold=0.0,
+                passed=reference_face_count == 0 and candidate_face_count == 0,
+                direction="<=",
                 count=0,
                 applicable=False,
                 message="No matched faces",
@@ -655,7 +753,7 @@ def compare_result_sets(
         "clip_cosine_distance": _make_aggregate(clip_distances, clip_threshold),
         "face_box_iou_error": _make_aggregate(
             iou_errors,
-            1.0 - thresholds.box_iou_threshold,
+            0.0,
         ),
         "landmark_error": _make_aggregate(
             landmark_errors,

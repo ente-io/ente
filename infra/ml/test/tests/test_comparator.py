@@ -53,6 +53,29 @@ def _face(seed: int, *, x: float, y: float, score: float) -> FaceResult:
     )
 
 
+def _face_with_box(
+    seed: int,
+    *,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    score: float,
+) -> FaceResult:
+    return FaceResult(
+        box=(x, y, width, height),
+        landmarks=(
+            (x + width * 0.30, y + height * 0.35),
+            (x + width * 0.70, y + height * 0.35),
+            (x + width * 0.50, y + height * 0.55),
+            (x + width * 0.35, y + height * 0.78),
+            (x + width * 0.65, y + height * 0.78),
+        ),
+        score=score,
+        embedding=_unit_vector(192, seed=seed),
+    )
+
+
 def _result(
     *,
     file_id: str,
@@ -148,6 +171,108 @@ def test_compare_result_sets_fails_on_clip_drift() -> None:
     assert any(finding.metric == "clip_cosine_distance" for finding in report.findings)
 
 
+def test_compare_result_sets_passes_when_iou_above_single_loose_threshold() -> None:
+    reference_face = _face_with_box(
+        310,
+        x=0.20,
+        y=0.20,
+        width=0.20,
+        height=0.20,
+        score=0.92,
+    )
+    reference = _result(
+        file_id="loose-iou-face.webp",
+        platform="python",
+        clip_seed=11,
+        faces=(reference_face,),
+    )
+    candidate_face = _face_with_box(
+        310,
+        x=0.21,
+        y=0.21,
+        width=0.20,
+        height=0.20,
+        score=0.92,
+    )
+    candidate = ParityResult(
+        file_id=reference.file_id,
+        clip=reference.clip,
+        faces=(candidate_face,),
+        runner_metadata=_metadata("android"),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="android",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.passed is True
+    assert not any(finding.metric == "face_box_iou" for finding in report.findings)
+    file_status = report.file_statuses[0]
+    iou_shortfall_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "face_box_iou_shortfall_max"
+    )
+    assert iou_shortfall_metric.passed is True
+    assert iou_shortfall_metric.value == pytest.approx(0.0)
+
+
+def test_compare_result_sets_fails_when_iou_below_single_loose_threshold() -> None:
+    reference_face = _face_with_box(
+        701,
+        x=0.20,
+        y=0.20,
+        width=0.20,
+        height=0.20,
+        score=0.92,
+    )
+    reference = _result(
+        file_id="loose-iou-fail-face.webp",
+        platform="python",
+        clip_seed=21,
+        faces=(reference_face,),
+    )
+    candidate_face = _face_with_box(
+        999,
+        x=0.23,
+        y=0.23,
+        width=0.20,
+        height=0.20,
+        score=0.92,
+    )
+    candidate = ParityResult(
+        file_id=reference.file_id,
+        clip=reference.clip,
+        faces=(candidate_face,),
+        runner_metadata=_metadata("android"),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="android",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.passed is False
+    iou_failures = [finding for finding in report.findings if finding.metric == "face_box_iou"]
+    assert iou_failures
+    assert iou_failures[0].threshold == pytest.approx(0.80)
+
+    file_status = report.file_statuses[0]
+    iou_shortfall_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "face_box_iou_shortfall_max"
+    )
+    assert iou_shortfall_metric.passed is False
+    assert iou_shortfall_metric.value is not None
+    assert iou_shortfall_metric.value > 0.0
+
+
 def test_compare_result_sets_fails_on_face_count_mismatch() -> None:
     reference = _result(
         file_id="people.jpeg",
@@ -187,6 +312,77 @@ def test_compare_result_sets_fails_on_face_count_mismatch() -> None:
         if metric.metric == "face_count_delta"
     )
     assert face_count_metric.passed is False
+
+
+def test_compare_result_sets_reports_unmatched_faces_after_iou_gating() -> None:
+    reference = _result(
+        file_id="offset-face.jpeg",
+        platform="python",
+        clip_seed=19,
+        faces=(
+            _face_with_box(
+                901,
+                x=0.10,
+                y=0.10,
+                width=0.20,
+                height=0.20,
+                score=0.88,
+            ),
+        ),
+    )
+    candidate = _result(
+        file_id="offset-face.jpeg",
+        platform="desktop",
+        clip_seed=19,
+        faces=(
+            _face_with_box(
+                902,
+                x=0.70,
+                y=0.70,
+                width=0.20,
+                height=0.20,
+                score=0.88,
+            ),
+        ),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="desktop",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.passed is False
+    assert any(
+        finding.metric == "unmatched_reference_face_count" for finding in report.findings
+    )
+    assert any(
+        finding.metric == "unmatched_candidate_face_count" for finding in report.findings
+    )
+    assert not any(finding.metric == "face_box_iou" for finding in report.findings)
+
+    file_status = report.file_statuses[0]
+    matched_metric = next(
+        metric for metric in file_status.metrics if metric.metric == "matched_face_count"
+    )
+    assert matched_metric.value == pytest.approx(0.0)
+    assert matched_metric.passed is False
+
+    unmatched_reference_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "unmatched_reference_face_count"
+    )
+    unmatched_candidate_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "unmatched_candidate_face_count"
+    )
+    assert unmatched_reference_metric.value == pytest.approx(1.0)
+    assert unmatched_candidate_metric.value == pytest.approx(1.0)
+    assert unmatched_reference_metric.passed is False
+    assert unmatched_candidate_metric.passed is False
 
 
 def test_aggregate_gate_failure_is_reported() -> None:
