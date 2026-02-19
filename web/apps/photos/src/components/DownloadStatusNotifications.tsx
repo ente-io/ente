@@ -6,7 +6,14 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { Box, Button, Dialog, keyframes, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    keyframes,
+    styled,
+    Typography,
+} from "@mui/material";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
@@ -227,7 +234,9 @@ export const DownloadStatusNotifications: React.FC<
                 }
 
                 // Title is always the album name (truncated)
-                const filesCountTitle = t("files_count", { count: group.total });
+                const filesCountTitle = t("files_count", {
+                    count: group.total,
+                });
                 const title =
                     group.total === 1 && group.title === filesCountTitle
                         ? `${group.total} ${fileLabel}`
@@ -254,7 +263,9 @@ export const DownloadStatusNotifications: React.FC<
                             [theme.breakpoints.down("sm")]: {
                                 "&&": {
                                     bottom: `${index * 70 + 16}px`,
-                                    ...(fullWidthOnMobile ? { left: "8px" } : {}),
+                                    ...(fullWidthOnMobile
+                                        ? { left: "8px" }
+                                        : {}),
                                 },
                                 width: fullWidthOnMobile
                                     ? "calc(100vw - 16px)"

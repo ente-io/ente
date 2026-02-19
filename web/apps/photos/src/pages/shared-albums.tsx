@@ -101,18 +101,12 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
-import { quickLinkDateRangeForCreationTimes } from "utils/quick-link";
 import { getEnteURL } from "utils/public-album";
+import { quickLinkDateRangeForCreationTimes } from "utils/quick-link";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -740,10 +734,7 @@ const GreenButton = styled(Button)(() => ({
     "&:hover": { backgroundColor: "#07A820" },
 }));
 
-const navbarActionButtonSx = {
-    borderRadius: "16px",
-    paddingBlock: "11px",
-};
+const navbarActionButtonSx = { borderRadius: "16px", paddingBlock: "11px" };
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
@@ -1010,7 +1001,10 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                         variant="small"
                                         sx={{ color: "text.muted", ml: "-6px" }}
                                     >
-                                        <Box component="span" sx={{ mr: "6px" }}>
+                                        <Box
+                                            component="span"
+                                            sx={{ mr: "6px" }}
+                                        >
                                             {"\u00b7"}
                                         </Box>
                                         {memoriesDateRange}
