@@ -152,7 +152,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildTwoPhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemHeight = (widget.gridSize - gap) / 2;
 
     return Column(
@@ -173,7 +173,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildThreePhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
@@ -207,7 +207,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildFourPlusPhotos(List<EnteFile> files, int extraCount) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
