@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 IST = timezone(timedelta(hours=5, minutes=30), name="IST")
+_STATUS_ORDER = {"fail": 0, "warning": 1, "pass": 2}
 
 
 def _format_value(value: object) -> str:
@@ -18,6 +19,28 @@ def _format_value(value: object) -> str:
     if value is None:
         return "-"
     return str(value)
+
+
+def _optional_bool(value: object) -> bool | None:
+    return value if isinstance(value, bool) else None
+
+
+def _normalize_status(value: object, *, passed: bool | None = None) -> str:
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in _STATUS_ORDER:
+            return normalized
+    if passed is not None:
+        return "pass" if passed else "fail"
+    return "fail"
+
+
+def _status_label(value: object, *, passed: bool | None = None) -> str:
+    return _normalize_status(value, passed=passed).upper()
+
+
+def _status_rank(value: object, *, passed: bool | None = None) -> int:
+    return _STATUS_ORDER[_normalize_status(value, passed=passed)]
 
 
 def _format_generated_timestamp(value: object) -> str:
@@ -103,14 +126,20 @@ def _render_platform_outputs(platform_stats: dict[str, dict[str, Any]]) -> list[
 
 def _render_aggregate_table(aggregates: dict[str, Any]) -> list[str]:
     lines = [
-        "| Metric | Count | P95 | P99 | Max | Threshold | Passed |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
+        (
+            "| Metric | Count | P95 | P99 | Max | Threshold | Warning Threshold | "
+            "Status |"
+        ),
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for metric_name in sorted(aggregates):
         metric = aggregates[metric_name]
         if not isinstance(metric, dict):
             continue
-        passed = bool(metric.get("passed", False))
+        status = _normalize_status(
+            metric.get("status"),
+            passed=_optional_bool(metric.get("passed")),
+        )
         lines.append(
             "| "
             + " | ".join(
@@ -121,7 +150,8 @@ def _render_aggregate_table(aggregates: dict[str, Any]) -> list[str]:
                     _escape_cell(_format_value(metric.get("p99"))),
                     _escape_cell(_format_value(metric.get("max"))),
                     _escape_cell(_format_value(metric.get("threshold"))),
-                    "PASS" if passed else "FAIL",
+                    _escape_cell(_format_value(metric.get("warning_threshold"))),
+                    _status_label(status),
                 ]
             )
             + " |"
@@ -132,7 +162,7 @@ def _render_aggregate_table(aggregates: dict[str, Any]) -> list[str]:
 
 def _render_metric_rows(metrics: list[dict[str, Any]]) -> list[str]:
     lines = [
-        "| Metric | Value | Threshold | Direction | Passed | Count | Applicable | Note |",
+        "| Metric | Value | Threshold | Direction | Status | Count | Applicable | Note |",
         "| --- | ---: | ---: | --- | --- | ---: | --- | --- |",
     ]
     if not metrics:
@@ -143,6 +173,10 @@ def _render_metric_rows(metrics: list[dict[str, Any]]) -> list[str]:
     for metric in metrics:
         if not isinstance(metric, dict):
             continue
+        status = _normalize_status(
+            metric.get("status"),
+            passed=_optional_bool(metric.get("passed")),
+        )
         lines.append(
             "| "
             + " | ".join(
@@ -151,7 +185,7 @@ def _render_metric_rows(metrics: list[dict[str, Any]]) -> list[str]:
                     _escape_cell(_format_value(metric.get("value"))),
                     _escape_cell(_format_value(metric.get("threshold"))),
                     _escape_cell(_format_value(metric.get("direction"))),
-                    "PASS" if bool(metric.get("passed", False)) else "FAIL",
+                    _status_label(status),
                     _escape_cell(_format_value(metric.get("count"))),
                     "yes" if bool(metric.get("applicable", True)) else "no",
                     _escape_cell(metric.get("message", "")),
@@ -163,27 +197,32 @@ def _render_metric_rows(metrics: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
-def _render_failure_rows(failures: list[dict[str, Any]]) -> list[str]:
+def _render_finding_rows(findings: list[dict[str, Any]]) -> list[str]:
     lines = [
-        "| Metric | Value | Threshold | Message |",
-        "| --- | ---: | ---: | --- |",
+        "| Metric | Value | Threshold | Severity | Message |",
+        "| --- | ---: | ---: | --- | --- |",
     ]
-    if not failures:
-        lines.append("| - | - | - | None |")
+    if not findings:
+        lines.append("| - | - | - | - | None |")
         lines.append("")
         return lines
 
-    for failure in failures:
-        if not isinstance(failure, dict):
+    for finding in findings:
+        if not isinstance(finding, dict):
             continue
+        severity = _normalize_status(
+            finding.get("severity"),
+            passed=_optional_bool(finding.get("passed")),
+        )
         lines.append(
             "| "
             + " | ".join(
                 [
-                    _escape_cell(failure.get("metric", "-")),
-                    _escape_cell(_format_value(failure.get("value"))),
-                    _escape_cell(_format_value(failure.get("threshold"))),
-                    _escape_cell(failure.get("message", "")),
+                    _escape_cell(finding.get("metric", "-")),
+                    _escape_cell(_format_value(finding.get("value"))),
+                    _escape_cell(_format_value(finding.get("threshold"))),
+                    _status_label(severity),
+                    _escape_cell(finding.get("message", "")),
                 ]
             )
             + " |"
@@ -200,7 +239,10 @@ def _render_file_statuses(statuses: list[dict[str, Any]]) -> list[str]:
     statuses = sorted(
         statuses,
         key=lambda status: (
-            bool(status.get("passed", False)),
+            _status_rank(
+                status.get("status"),
+                passed=_optional_bool(status.get("passed")),
+            ),
             str(status.get("file_id", "")),
         ),
     )
@@ -209,20 +251,25 @@ def _render_file_statuses(statuses: list[dict[str, Any]]) -> list[str]:
         [
             "### File Status Index",
             "",
-            "| File | Status | Failure Count |",
-            "| --- | --- | ---: |",
+            "| File | Status | Failure Count | Warning Count |",
+            "| --- | --- | ---: | ---: |",
         ]
     )
     for status in statuses:
         if not isinstance(status, dict):
             continue
+        file_status = _normalize_status(
+            status.get("status"),
+            passed=_optional_bool(status.get("passed")),
+        )
         lines.append(
             "| "
             + " | ".join(
                 [
                     _escape_cell(status.get("file_id", "-")),
-                    "PASS" if bool(status.get("passed", False)) else "FAIL",
+                    _status_label(file_status),
                     _escape_cell(_format_value(status.get("failure_count"))),
+                    _escape_cell(_format_value(status.get("warning_count"))),
                 ]
             )
             + " |"
@@ -235,20 +282,28 @@ def _render_file_statuses(statuses: list[dict[str, Any]]) -> list[str]:
         if not isinstance(status, dict):
             continue
         file_id = str(status.get("file_id", "-"))
-        passed = bool(status.get("passed", False))
+        file_status = _normalize_status(
+            status.get("status"),
+            passed=_optional_bool(status.get("passed")),
+        )
         metrics = status.get("metrics", [])
         if not isinstance(metrics, list):
             metrics = []
         failures = status.get("failures", [])
         if not isinstance(failures, list):
             failures = []
+        warnings = status.get("warnings", [])
+        if not isinstance(warnings, list):
+            warnings = []
 
-        lines.append(f"#### `{file_id}` ({'PASS' if passed else 'FAIL'})")
+        lines.append(f"#### `{file_id}` ({_status_label(file_status)})")
         lines.append("")
         lines.append("Metrics:")
         lines.extend(_render_metric_rows(metrics))
         lines.append("Threshold failures:")
-        lines.extend(_render_failure_rows(failures))
+        lines.extend(_render_finding_rows(failures))
+        lines.append("Threshold warnings:")
+        lines.extend(_render_finding_rows(warnings))
 
     return lines
 
@@ -261,15 +316,24 @@ def _render_comparison(comparison: dict[str, Any]) -> list[str]:
         file_summary = {}
 
     pass_count = int(file_summary.get("pass_count", 0))
+    warning_count = int(file_summary.get("warning_count", 0))
     fail_count = int(file_summary.get("fail_count", 0))
     total_files = int(file_summary.get("total_reference_files", 0))
     checked_files = int(file_summary.get("checked_files", comparison.get("checked_files", 0)))
+    findings = comparison.get("findings", [])
+    warnings = comparison.get("warnings", [])
+    finding_count = len(findings) if isinstance(findings, list) else 0
+    warning_finding_count = len(warnings) if isinstance(warnings, list) else 0
 
     lines: list[str] = [
         f"## {candidate} vs {reference}",
         "",
-        f"- Summary: {pass_count} pass / {fail_count} fail / {total_files} total reference files",
+        (
+            f"- Summary: {pass_count} pass / {warning_count} warning / {fail_count} fail / "
+            f"{total_files} total reference files"
+        ),
         f"- Checked files: {checked_files}",
+        f"- Threshold findings: {finding_count} fail / {warning_finding_count} warning",
         "",
     ]
 
@@ -362,14 +426,12 @@ def render_report(
 
     platform_stats = _platform_stats(report_path.parent)
     generated_at = _format_generated_timestamp(payload.get("generated_at"))
-    overall_passed = bool(payload.get("passed", False))
 
     lines: list[str] = [
         "# ML Indexing Parity Report (LLM-Optimized Markdown)",
         "",
         f"- Generated (IST): {generated_at}",
         f"- Ground truth platform: {ground_truth_platform}",
-        f"- Overall report status: {'PASS' if overall_passed else 'FAIL'}",
         f"- Comparisons shown: {len(comparisons)}",
         "",
         "This report is structured for agent parsing and includes exhaustive file-level data.",

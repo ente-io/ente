@@ -84,12 +84,20 @@ def main() -> int:
         thresholds=thresholds,
     )
 
+    overall_status = (
+        "fail"
+        if any(report.status == "fail" for report in reports)
+        else "warning"
+        if any(report.status == "warning" for report in reports)
+        else "pass"
+    )
     all_files_passed = all(report.passed for report in reports)
     output_payload = {
         "generated_at": datetime.now(UTC).isoformat(),
         "ground_truth_platform": ground_truth_platform,
         "thresholds": thresholds.to_dict(),
         "all_files_passed": all_files_passed,
+        "status": overall_status,
         "passed": all_files_passed,
         "comparisons": _serialize_reports(reports),
     }
@@ -99,14 +107,18 @@ def main() -> int:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(json.dumps(output_payload, indent=2, sort_keys=True))
 
-    failed_reports = [report for report in reports if not report.passed]
+    failed_reports = [report for report in reports if report.status == "fail"]
+    warning_reports = [report for report in reports if report.status == "warning"]
     print(f"Comparisons executed: {len(reports)}")
     print("Comparison mode: file-level (no global pass/fail gate)")
+    print(f"Overall comparison status: {overall_status.upper()}")
     for report in reports:
         print(
             f"  {report.reference_platform} -> {report.candidate_platform}: "
-            f"{len(report.passing_files)}/{report.total_reference_files} files pass, "
-            f"{len(report.failing_files)} fail"
+            f"{len(report.passing_files)} pass, "
+            f"{len(report.warning_files)} warning, "
+            f"{len(report.failing_files)} fail "
+            f"(total: {report.total_reference_files})"
         )
     if failed_reports:
         print("Comparisons with failing files:")
@@ -114,6 +126,13 @@ def main() -> int:
             print(
                 f"  {report.reference_platform} -> {report.candidate_platform} "
                 f"({len(report.findings)} findings)"
+            )
+    if warning_reports:
+        print("Comparisons with warning files:")
+        for report in warning_reports:
+            print(
+                f"  {report.reference_platform} -> {report.candidate_platform} "
+                f"({len(report.warnings)} warnings)"
             )
 
     if args.fail_on_any_file_failure and failed_reports:

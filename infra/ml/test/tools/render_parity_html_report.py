@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 IST = timezone(timedelta(hours=5, minutes=30), name="IST")
+_STATUS_ORDER = {"fail": 0, "warning": 1, "pass": 2}
 
 
 def _format_value(value: object) -> str:
@@ -21,12 +22,30 @@ def _format_value(value: object) -> str:
     return str(value)
 
 
-def _status_class(passed: bool) -> str:
-    return "pass" if passed else "fail"
+def _optional_bool(value: object) -> bool | None:
+    return value if isinstance(value, bool) else None
 
 
-def _status_label(passed: bool) -> str:
-    return "PASS" if passed else "FAIL"
+def _normalize_status(value: object, *, passed: bool | None = None) -> str:
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in _STATUS_ORDER:
+            return normalized
+    if passed is not None:
+        return "pass" if passed else "fail"
+    return "fail"
+
+
+def _status_class(value: object, *, passed: bool | None = None) -> str:
+    return _normalize_status(value, passed=passed)
+
+
+def _status_label(value: object, *, passed: bool | None = None) -> str:
+    return _normalize_status(value, passed=passed).upper()
+
+
+def _status_rank(value: object, *, passed: bool | None = None) -> int:
+    return _STATUS_ORDER[_normalize_status(value, passed=passed)]
 
 
 def _format_generated_timestamp(value: object) -> str:
@@ -80,17 +99,27 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
     candidate = str(comparison.get("candidate_platform", "unknown"))
     file_summary = comparison.get("file_summary") or {}
     pass_count = int(file_summary.get("pass_count", 0))
+    warning_count = int(file_summary.get("warning_count", 0))
     fail_count = int(file_summary.get("fail_count", 0))
     total_files = int(file_summary.get("total_reference_files", 0))
+    findings = comparison.get("findings", [])
+    warnings = comparison.get("warnings", [])
+    finding_count = len(findings) if isinstance(findings, list) else 0
+    warning_finding_count = len(warnings) if isinstance(warnings, list) else 0
 
     html_parts: list[str] = []
     html_parts.append(f"<h2>{html.escape(candidate)} vs {html.escape(reference)}</h2>")
-    html_parts.append("<table><thead><tr><th>Pass</th><th>Fail</th><th>Total</th></tr></thead><tbody>")
+    html_parts.append(
+        "<table><thead><tr><th>Pass</th><th>Warning</th><th>Fail</th><th>Total</th>"
+        "<th>Findings</th></tr></thead><tbody>"
+    )
     html_parts.append(
         "<tr>"
         f"<td class='pass'>{pass_count}</td>"
+        f"<td class='warning'>{warning_count}</td>"
         f"<td class='fail'>{fail_count}</td>"
         f"<td>{total_files}</td>"
+        f"<td>{finding_count} fail / {warning_finding_count} warning</td>"
         "</tr>"
     )
     html_parts.append("</tbody></table>")
@@ -112,7 +141,15 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
             continue
         rows.append(status)
 
-    rows.sort(key=lambda row: (bool(row.get("passed", False)), str(row.get("file_id", ""))))
+    rows.sort(
+        key=lambda row: (
+            _status_rank(
+                row.get("status"),
+                passed=_optional_bool(row.get("passed")),
+            ),
+            str(row.get("file_id", "")),
+        )
+    )
 
     html_parts.append("<h3>Files</h3>")
     if not rows:
@@ -121,22 +158,31 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
 
     for status in rows:
         file_id = str(status.get("file_id", ""))
-        passed = bool(status.get("passed", False))
+        file_status = _normalize_status(
+            status.get("status"),
+            passed=_optional_bool(status.get("passed")),
+        )
         failures = status.get("failures", [])
         if not isinstance(failures, list):
             failures = []
+        warnings = status.get("warnings", [])
+        if not isinstance(warnings, list):
+            warnings = []
         metrics = status.get("metrics", [])
         if not isinstance(metrics, list):
             metrics = []
 
         html_parts.append(
             f"<details><summary>{html.escape(file_id)} "
-            f"<span class='{_status_class(passed)}'>{_status_label(passed)}</span></summary>"
+            f"<span class='{_status_class(file_status)}'>{_status_label(file_status)}</span> "
+            f"(fail: {len(failures)}, warning: {len(warnings)})"
+            "</summary>"
         )
 
         html_parts.append(
             "<table><thead><tr>"
-            "<th>Metric</th><th>Value</th><th>Threshold</th><th>Direction</th><th>Passed</th><th>Count</th><th>Applicable</th><th>Note</th>"
+            "<th>Metric</th><th>Value</th><th>Threshold</th><th>Direction</th>"
+            "<th>Status</th><th>Count</th><th>Applicable</th><th>Note</th>"
             "</tr></thead><tbody>"
         )
         if metrics:
@@ -147,7 +193,10 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
                 value = html.escape(_format_value(metric.get("value")))
                 threshold = html.escape(_format_value(metric.get("threshold")))
                 direction = html.escape(_format_value(metric.get("direction")))
-                metric_passed = bool(metric.get("passed", False))
+                metric_status = _normalize_status(
+                    metric.get("status"),
+                    passed=_optional_bool(metric.get("passed")),
+                )
                 count = html.escape(_format_value(metric.get("count")))
                 applicable = bool(metric.get("applicable", True))
                 message = html.escape(str(metric.get("message", "")))
@@ -157,7 +206,7 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
                     f"<td>{value}</td>"
                     f"<td>{threshold}</td>"
                     f"<td>{direction}</td>"
-                    f"<td class='{_status_class(metric_passed)}'>{_status_label(metric_passed)}</td>"
+                    f"<td class='{_status_class(metric_status)}'>{_status_label(metric_status)}</td>"
                     f"<td>{count}</td>"
                     f"<td>{'yes' if applicable else 'no'}</td>"
                     f"<td>{message}</td>"
@@ -170,21 +219,55 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
         html_parts.append("</tbody></table>")
 
         html_parts.append("<h4>Threshold Failures</h4>")
-        html_parts.append("<table><thead><tr><th>Metric</th><th>Value</th><th>Threshold</th><th>Message</th></tr></thead><tbody>")
+        html_parts.append(
+            "<table><thead><tr><th>Metric</th><th>Value</th><th>Threshold</th>"
+            "<th>Severity</th><th>Message</th></tr></thead><tbody>"
+        )
         if failures:
             for failure in failures:
                 if not isinstance(failure, dict):
                     continue
+                severity = _normalize_status(
+                    failure.get("severity"),
+                    passed=_optional_bool(failure.get("passed")),
+                )
                 html_parts.append(
                     "<tr>"
                     f"<td>{html.escape(str(failure.get('metric', '-')))}</td>"
                     f"<td>{html.escape(_format_value(failure.get('value')))}</td>"
                     f"<td>{html.escape(_format_value(failure.get('threshold')))}</td>"
+                    f"<td class='{_status_class(severity)}'>{_status_label(severity)}</td>"
                     f"<td>{html.escape(str(failure.get('message', '')))}</td>"
                     "</tr>"
                 )
         else:
-            html_parts.append("<tr><td colspan='4' class='muted'>None</td></tr>")
+            html_parts.append("<tr><td colspan='5' class='muted'>None</td></tr>")
+        html_parts.append("</tbody></table>")
+
+        html_parts.append("<h4>Threshold Warnings</h4>")
+        html_parts.append(
+            "<table><thead><tr><th>Metric</th><th>Value</th><th>Threshold</th>"
+            "<th>Severity</th><th>Message</th></tr></thead><tbody>"
+        )
+        if warnings:
+            for warning in warnings:
+                if not isinstance(warning, dict):
+                    continue
+                severity = _normalize_status(
+                    warning.get("severity"),
+                    passed=_optional_bool(warning.get("passed")),
+                )
+                html_parts.append(
+                    "<tr>"
+                    f"<td>{html.escape(str(warning.get('metric', '-')))}</td>"
+                    f"<td>{html.escape(_format_value(warning.get('value')))}</td>"
+                    f"<td>{html.escape(_format_value(warning.get('threshold')))}</td>"
+                    f"<td class='{_status_class(severity)}'>{_status_label(severity)}</td>"
+                    f"<td>{html.escape(str(warning.get('message', '')))}</td>"
+                    "</tr>"
+                )
+        else:
+            html_parts.append("<tr><td colspan='5' class='muted'>None</td></tr>")
         html_parts.append("</tbody></table>")
 
         html_parts.append("</details>")
@@ -229,6 +312,7 @@ def render_report(
         "details{margin:10px 0;border:1px solid #e4e7ec;border-radius:8px;padding:8px 10px;background:#fff;}"
         "summary{cursor:pointer;font-weight:600;}"
         ".pass{color:#067647;font-weight:600;}"
+        ".warning{color:#b54708;font-weight:600;}"
         ".fail{color:#b42318;font-weight:600;}"
         ".muted{color:#667085;}"
         ".chip{display:inline-block;padding:3px 8px;border-radius:999px;background:#f2f4f7;margin-right:6px;font-size:12px;}"

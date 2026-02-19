@@ -1563,6 +1563,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 LOWER_IS_WORSE_METRICS = {"face_box_iou"}
+STATUS_ORDER = {"FAIL": 0, "WARNING": 1, "PASS": 2}
 
 
 def _fmt_float(value: float) -> str:
@@ -1630,6 +1631,23 @@ def _summarize_file_failures(failures: list[dict[str, object]]) -> str:
     )
 
 
+def _summarize_file_warnings(warnings: list[dict[str, object]]) -> str:
+    if not warnings:
+        return "-"
+
+    by_metric: "OrderedDict[str, list[dict[str, object]]]" = OrderedDict()
+    for warning in warnings:
+        metric = str(warning.get("metric", "unknown_metric"))
+        by_metric.setdefault(metric, []).append(warning)
+
+    summaries: list[str] = []
+    for metric, metric_warnings in by_metric.items():
+        occurrence_count = len(metric_warnings)
+        message = str(metric_warnings[0].get("message", "threshold warning"))
+        summaries.append(f"{metric} x{occurrence_count}: {message}")
+    return "; ".join(summaries)
+
+
 def _escape_cell(value: str) -> str:
     return value.replace("|", "\\|")
 
@@ -1659,6 +1677,7 @@ for comparison in comparisons:
         file_summary = {}
     total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
     pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
+    warning_count = int(file_summary.get("warning_count", len(comparison.get("warning_files", []))))
     fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
 
     file_statuses = comparison.get("file_statuses", [])
@@ -1671,32 +1690,44 @@ for comparison in comparisons:
             if not isinstance(file_status, dict):
                 continue
             file_id = str(file_status.get("file_id", ""))
-            passed = bool(file_status.get("passed", False))
+            status_value = str(file_status.get("status", "")).strip().upper()
+            if status_value not in STATUS_ORDER:
+                status_value = "PASS" if bool(file_status.get("passed", False)) else "FAIL"
             failures = file_status.get("failures", [])
             if not isinstance(failures, list):
                 failures = []
-            status = "PASS" if passed else "FAIL"
-            details = _summarize_file_failures(failures)
-            rows.append((file_id, status, details))
+            warnings = file_status.get("warnings", [])
+            if not isinstance(warnings, list):
+                warnings = []
+            if status_value == "FAIL":
+                details = _summarize_file_failures(failures)
+            elif status_value == "WARNING":
+                details = _summarize_file_warnings(warnings)
+            else:
+                details = "-"
+            rows.append((file_id, status_value, details))
     else:
         passing_files = [str(file_id) for file_id in comparison.get("passing_files", [])]
+        warning_files = [str(file_id) for file_id in comparison.get("warning_files", [])]
         failing_files = [str(file_id) for file_id in comparison.get("failing_files", [])]
         for file_id in passing_files:
             rows.append((file_id, "PASS", "-"))
+        for file_id in warning_files:
+            rows.append((file_id, "WARNING", "No warning detail available in report"))
         for file_id in failing_files:
             rows.append((file_id, "FAIL", "No failure detail available in report"))
 
     if not rows:
         continue
 
-    rows.sort(key=lambda row: (row[1] == "PASS", row[0]))
+    rows.sort(key=lambda row: (STATUS_ORDER.get(row[1], 3), row[0]))
 
     print()
     print(
         f"### {candidate_platform} vs {ground_truth_platform} "
-        f"({pass_count} pass / {fail_count} fail / {total_files} total)"
+        f"({pass_count} pass / {warning_count} warning / {fail_count} fail / {total_files} total)"
     )
-    print("| File | Status | Failure Details |")
+    print("| File | Status | Details |")
     print("| --- | --- | --- |")
     for file_id, status, details in rows:
         print(
@@ -1821,17 +1852,26 @@ for comparison in comparisons:
     if not isinstance(file_summary, dict):
         file_summary = {}
     pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
+    warning_count = int(file_summary.get("warning_count", len(comparison.get("warning_files", []))))
     fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
     total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
-    summary_by_platform[candidate_platform] = (pass_count, fail_count, total_files)
+    summary_by_platform[candidate_platform] = (
+        pass_count,
+        warning_count,
+        fail_count,
+        total_files,
+    )
 
 print(f"File-level summary (vs {ground_truth_platform}):")
 for platform in selected_platforms:
     if platform == ground_truth_platform:
         continue
     if platform in summary_by_platform:
-        pass_count, fail_count, total_files = summary_by_platform[platform]
-        print(f"  {platform}: {pass_count} pass / {fail_count} fail / {total_files} total")
+        pass_count, warning_count, fail_count, total_files = summary_by_platform[platform]
+        print(
+            f"  {platform}: "
+            f"{pass_count} pass / {warning_count} warning / {fail_count} fail / {total_files} total"
+        )
     else:
         print(f"  {platform}: unavailable (no platform results)")
 PY

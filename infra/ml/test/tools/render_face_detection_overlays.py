@@ -138,6 +138,7 @@ def _render_detections(
     file_id: str,
     platform: str,
     faces: list[Mapping[str, Any]],
+    min_score: float,
 ) -> Image.Image:
     image = Image.fromarray(image_rgb, mode="RGB").convert("RGBA")
     draw = ImageDraw.Draw(image, mode="RGBA")
@@ -146,7 +147,9 @@ def _render_detections(
     point_radius = max(2, round(min(width, height) * 0.004))
     font = ImageFont.load_default()
 
-    header = f"{platform}  |  {file_id}  |  faces={len(faces)}"
+    header = (
+        f"{platform}  |  {file_id}  |  faces(score >= {min_score:.2f})={len(faces)}"
+    )
     _draw_label(
         image=image,
         draw=draw,
@@ -242,6 +245,7 @@ def _iter_file_results(
     results: list[Mapping[str, Any]],
     *,
     only_file_ids: set[str] | None,
+    min_score: float,
 ) -> list[tuple[str, list[Mapping[str, Any]]]]:
     selected: list[tuple[str, list[Mapping[str, Any]]]] = []
     for item in results:
@@ -253,7 +257,16 @@ def _iter_file_results(
             continue
         if not isinstance(faces, list):
             continue
-        typed_faces = [face for face in faces if isinstance(face, Mapping)]
+        typed_faces = []
+        for face in faces:
+            if not isinstance(face, Mapping):
+                continue
+            score_value = face.get("score")
+            if not isinstance(score_value, (int, float)):
+                continue
+            if float(score_value) < min_score:
+                continue
+            typed_faces.append(face)
         selected.append((file_id, typed_faces))
     return selected
 
@@ -294,6 +307,12 @@ def main() -> int:
         default=[],
         help="Only render specific file_id values (repeatable).",
     )
+    parser.add_argument(
+        "--min-score",
+        type=float,
+        default=0.8,
+        help="Minimum detection score required to draw a face overlay (default: 0.8).",
+    )
     args = parser.parse_args()
 
     repo_root = _repo_root(ML_DIR)
@@ -330,6 +349,7 @@ def main() -> int:
         file_results = _iter_file_results(
             platform_results,
             only_file_ids=only_file_ids,
+            min_score=args.min_score,
         )
         if not file_results:
             print(f"[skip] {platform}: no matching results")
@@ -363,6 +383,7 @@ def main() -> int:
                 file_id=file_id,
                 platform=platform,
                 faces=faces,
+                min_score=args.min_score,
             )
             output_path = platform_output_dir / f"{_safe_output_name(file_id)}.png"
             rendered.save(output_path)

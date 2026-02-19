@@ -314,6 +314,168 @@ def test_compare_result_sets_fails_on_face_count_mismatch() -> None:
     assert face_count_metric.passed is False
 
 
+def test_compare_result_sets_ignores_faces_below_min_score_threshold() -> None:
+    reference = _result(
+        file_id="score-filter.jpeg",
+        platform="python",
+        clip_seed=41,
+        faces=(
+            _face(510, x=0.18, y=0.14, score=0.95),
+            _face(511, x=0.62, y=0.50, score=0.79),
+        ),
+    )
+    candidate = _result(
+        file_id="score-filter.jpeg",
+        platform="android",
+        clip_seed=41,
+        faces=(
+            _face(510, x=0.18, y=0.14, score=0.95),
+        ),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="android",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.status == "pass"
+    assert report.passed is True
+    assert report.findings == ()
+    assert report.warning_files == ()
+    assert report.failing_files == ()
+    assert report.passing_files == ("score-filter.jpeg",)
+
+    file_status = report.file_statuses[0]
+    assert file_status.status == "pass"
+    assert file_status.passed is True
+    assert file_status.failures == ()
+    assert file_status.warnings == ()
+
+    reference_count = next(
+        metric for metric in file_status.metrics if metric.metric == "reference_face_count"
+    )
+    candidate_count = next(
+        metric for metric in file_status.metrics if metric.metric == "candidate_face_count"
+    )
+    assert reference_count.value == pytest.approx(1.0)
+    assert candidate_count.value == pytest.approx(1.0)
+    assert not any(finding.metric == "face_count" for finding in report.findings)
+
+
+def test_compare_result_sets_marks_face_embedding_warning_band() -> None:
+    reference_face = _face(620, x=0.24, y=0.20, score=0.93)
+    candidate_face = FaceResult(
+        box=reference_face.box,
+        landmarks=reference_face.landmarks,
+        score=reference_face.score,
+        embedding=_jittered_vector(reference_face.embedding, index=0, delta=0.2),
+    )
+    reference = _result(
+        file_id="embedding-warning.jpeg",
+        platform="python",
+        clip_seed=17,
+        faces=(reference_face,),
+    )
+    candidate = ParityResult(
+        file_id=reference.file_id,
+        clip=reference.clip,
+        faces=(candidate_face,),
+        runner_metadata=_metadata("ios"),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="ios",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.status == "warning"
+    assert report.passed is True
+    assert report.findings == ()
+    assert report.failing_files == ()
+    assert report.warning_files == ("embedding-warning.jpeg",)
+    assert report.passing_files == ()
+    assert any(
+        warning.metric == "face_embedding_cosine_distance"
+        and warning.file_id == "embedding-warning.jpeg"
+        for warning in report.warnings
+    )
+    assert any(warning.file_id == "*aggregate*" for warning in report.warnings)
+
+    file_status = report.file_statuses[0]
+    assert file_status.status == "warning"
+    assert file_status.passed is True
+    assert file_status.failures == ()
+    assert any(
+        warning.metric == "face_embedding_cosine_distance"
+        for warning in file_status.warnings
+    )
+
+    embedding_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "face_embedding_cosine_distance_max"
+    )
+    assert embedding_metric.status == "warning"
+    assert embedding_metric.passed is True
+    assert embedding_metric.value is not None
+    assert 0.015 < embedding_metric.value <= 0.035
+
+
+def test_compare_result_sets_fails_face_embedding_above_warning_band() -> None:
+    reference_face = _face(721, x=0.16, y=0.21, score=0.91)
+    candidate_face = FaceResult(
+        box=reference_face.box,
+        landmarks=reference_face.landmarks,
+        score=reference_face.score,
+        embedding=_jittered_vector(reference_face.embedding, index=0, delta=0.3),
+    )
+    reference = _result(
+        file_id="embedding-fail.jpeg",
+        platform="python",
+        clip_seed=29,
+        faces=(reference_face,),
+    )
+    candidate = ParityResult(
+        file_id=reference.file_id,
+        clip=reference.clip,
+        faces=(candidate_face,),
+        runner_metadata=_metadata("desktop"),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="desktop",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.status == "fail"
+    assert report.passed is False
+    assert report.failing_files == ("embedding-fail.jpeg",)
+    assert report.warning_files == ()
+    assert any(
+        finding.metric == "face_embedding_cosine_distance" for finding in report.findings
+    )
+
+    file_status = report.file_statuses[0]
+    assert file_status.status == "fail"
+    assert file_status.passed is False
+
+    embedding_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "face_embedding_cosine_distance_max"
+    )
+    assert embedding_metric.status == "fail"
+    assert embedding_metric.passed is False
+    assert embedding_metric.value is not None
+    assert embedding_metric.value > 0.035
+
+
 def test_compare_result_sets_reports_unmatched_faces_after_iou_gating() -> None:
     reference = _result(
         file_id="offset-face.jpeg",
@@ -486,4 +648,15 @@ def test_compare_platform_matrix_rejects_duplicate_file_ids() -> None:
                 "python": (reference,),
                 "android": (android_primary, android_duplicate),
             }
+        )
+
+
+def test_threshold_config_rejects_invalid_warning_threshold() -> None:
+    with pytest.raises(
+        ValueError,
+        match="face_embedding_warning_cosine_distance must be >=",
+    ):
+        ThresholdConfig(
+            face_embedding_cosine_distance=0.02,
+            face_embedding_warning_cosine_distance=0.01,
         )
