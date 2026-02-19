@@ -35,6 +35,7 @@ Common flags:
 - `--render-detection-overlays` (generate annotated detection images under `out/parity/detections/<platform>/`; includes selected platforms plus `python` ground truth)
 - `--reuse-mobile-application-binary` (reuse an existing built mobile binary when available; useful for repeated local parity runs without code changes)
 - `--no-parallel-mobile-runners` (force sequential android/ios runner execution)
+- `--include-pairwise` (also compare non-ground-truth platform pairs such as `android -> ios`)
 
 Outputs go to `infra/ml/test/out/parity/` by default, including:
 

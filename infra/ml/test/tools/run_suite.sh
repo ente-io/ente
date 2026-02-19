@@ -22,6 +22,7 @@ VERBOSE=false
 RENDER_DETECTION_OVERLAYS=false
 REUSE_MOBILE_APPLICATION_BINARY=false
 PARALLEL_MOBILE_RUNNERS=true
+INCLUDE_PAIRWISE=false
 
 LOCAL_MIRROR_PORT=""
 LOCAL_MIRROR_PID=""
@@ -44,6 +45,7 @@ Flags:
   --render-detection-overlays           (default: disabled; render annotated face detection images to out/parity/detections/<platform>/)
   --reuse-mobile-application-binary     (default: disabled; reuse an existing built mobile binary when available)
   --no-parallel-mobile-runners          (default: disabled; run android/ios runners sequentially)
+  --include-pairwise                    (default: disabled; include non-ground-truth pairwise platform comparisons)
 EOF
 }
 
@@ -91,6 +93,10 @@ while (($# > 0)); do
       ;;
     --no-parallel-mobile-runners)
       PARALLEL_MOBILE_RUNNERS=false
+      shift
+      ;;
+    --include-pairwise)
+      INCLUDE_PAIRWISE=true
       shift
       ;;
     -h|--help)
@@ -357,6 +363,7 @@ print_kv "render_detection_overlays:" "$RENDER_DETECTION_OVERLAYS"
 print_kv "android_build_mode:" "${ML_PARITY_ANDROID_BUILD_MODE:-profile}"
 print_kv "reuse_mobile_application_binary:" "$REUSE_MOBILE_APPLICATION_BINARY"
 print_kv "parallel_mobile_runners:" "$PARALLEL_MOBILE_RUNNERS"
+print_kv "include_pairwise:" "$INCLUDE_PAIRWISE"
 
 declare -a selected_platforms=()
 case "$PLATFORMS" in
@@ -2074,9 +2081,11 @@ compare_log="$LOG_DIR/comparison.log"
 compare_cmd=(
   uv run --project "$UV_PROJECT_DIR" --no-sync python "$ML_DIR/tools/compare_parity_outputs.py"
   --ground-truth "$PYTHON_OUTPUT_DIR/results.json"
-  --no-pairwise
   --output "$compare_output"
 )
+if ! $INCLUDE_PAIRWISE; then
+  compare_cmd+=(--no-pairwise)
+fi
 if ((${#compare_args[@]} > 0)); then
   compare_cmd+=("${compare_args[@]}")
 fi

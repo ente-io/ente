@@ -289,6 +289,7 @@ Flags:
 4. `--allow-empty-comparison` (optional override when intentionally running without any platform outputs)
 5. `--output-dir ...`
 6. `--verbose` (optional, streams full logs/tables to terminal)
+7. `--include-pairwise` (optional, includes non-ground-truth pairwise platform comparisons)
 
 Target runtime: 10-20 minutes for full local run (with caching).
 
