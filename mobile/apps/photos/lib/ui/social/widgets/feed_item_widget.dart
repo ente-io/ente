@@ -320,7 +320,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
         );
       case FeedItemType.sharedPhoto:
         return Icon(
-          Icons.add_box_outlined,
+          Icons.add_rounded,
           size: 18,
           color: getEnteColorScheme(context).textMuted,
         );
