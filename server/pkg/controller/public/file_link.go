@@ -19,7 +19,6 @@ type FileLinkController struct {
 	FileController *controller.FileController
 	FileLinkRepo   *public.FileLinkRepository
 	FileRepo       *repo.FileRepository
-	BillingCtrl    *controller.BillingController
 	JwtSecret      []byte
 }
 
@@ -36,7 +35,6 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	if actorUserID != file.OwnerID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	// No subscription gating for file links.
 	for attempt := 0; attempt < 5; attempt++ {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
@@ -107,7 +105,6 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	if fileLinkRow.OwnerID != userID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	// No subscription gating for file links.
 	if req.ValidTill != nil {
 		fileLinkRow.ValidTill = *req.ValidTill
 	}
