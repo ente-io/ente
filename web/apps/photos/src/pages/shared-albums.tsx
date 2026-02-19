@@ -727,9 +727,15 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 const GreenButton = styled(Button)(() => ({
     backgroundColor: "#08C225",
     borderRadius: "16px",
+    paddingBlock: "11px",
     paddingInline: "20px",
     "&:hover": { backgroundColor: "#07A820" },
 }));
+
+const navbarActionButtonSx = {
+    borderRadius: "16px",
+    paddingBlock: "11px",
+};
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
@@ -747,7 +753,7 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
                     />
                 )
             }
-            sx={{ borderRadius: "16px" }}
+            sx={navbarActionButtonSx}
             {...{ onClick, disabled }}
         >
             {t("add_photos")}
@@ -833,7 +839,7 @@ const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
         return (
             <FocusVisibleButton
                 color="secondary"
-                sx={{ borderRadius: "16px" }}
+                sx={navbarActionButtonSx}
                 onClick={handleJoinAlbum}
             >
                 {t("join_album")}
@@ -944,6 +950,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
             <SpacedRow
                 sx={{
+                    width: "100%",
                     "@media (width < 720px)": {
                         flexDirection: "column",
                         alignItems: "flex-start",
@@ -951,7 +958,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     },
                 }}
             >
-                <Box sx={{ minWidth: 0 }}>
+                <Box
+                    sx={{
+                        minWidth: 0,
+                        flex: 1,
+                        "@media (width < 720px)": { width: "100%" },
+                    }}
+                >
                     <GalleryItemsSummary
                         name={publicCollection.name}
                         fileCount={publicFiles.length}
@@ -970,7 +983,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                         }
                         nameProps={{
                             noWrap: true,
-                            sx: { maxWidth: "100%" },
+                            sx: { width: "100%", maxWidth: "100%" },
                         }}
                     />
                 </Box>
