@@ -44,7 +44,7 @@ class ClusterSuggestion {
 class ClusterFeedbackService<T> {
   final Logger _logger = Logger("ClusterFeedbackService");
   final _computer = Computer.shared();
-  static const int _allPeopleSuggestionNamedSampleLimit = 40;
+  static const int _allPeopleSuggestionNamedSampleLimit = 20;
   static const int _allPeopleSuggestionVectorResultCount = 120;
 
   ClusterFeedbackService._privateConstructor();
