@@ -228,6 +228,10 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         freeProductID == _currentSubscription!.productID;
   }
 
+  bool _shouldShowFreePlanCard() {
+    return widget.isOnboarding || _isFreePlanUser();
+  }
+
   Future<void> _fetchSubData() async {
     try {
       final userDetails =
@@ -249,7 +253,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             : Platform.isAndroid
                 ? plan.androidID
                 : plan.iosID;
-        return productID.isNotEmpty;
+        return plan.id != freeProductID && productID.isNotEmpty;
       }).toList();
       hasYearlyPlans = _plans.any((plan) => plan.period == 'year');
       if (showYearlyPlan && hasYearlyPlans) {
@@ -419,13 +423,14 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
 
   Future<void> _filterStorePlansForUi() async {
     final billingPlans = await _billingService.getBillingPlans();
+    _freePlan = billingPlans.freePlan;
     _plans = billingPlans.plans.where((plan) {
       final productID = _isActiveStripeSubscriber
           ? plan.stripeID
           : Platform.isAndroid
               ? plan.androidID
               : plan.iosID;
-      return productID.isNotEmpty;
+      return plan.id != freeProductID && productID.isNotEmpty;
     }).toList();
     hasYearlyPlans = _plans.any((plan) => plan.period == 'year');
     if (showYearlyPlan) {
@@ -483,8 +488,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
 
   List<Widget> _getMobilePlanWidgets() {
     final List<Widget> planWidgets = [];
-    if (_hasActiveSubscription &&
-        _currentSubscription!.productID == freeProductID) {
+    if (_shouldShowFreePlanCard()) {
       planWidgets.add(
         GestureDetector(
           onTap: () {
@@ -501,7 +505,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             period: AppLocalizations.of(context).freeTrial,
             isActive: widget.isOnboarding
                 ? _selectedProductID == freeProductID
-                : true,
+                : _isFreePlanUser(),
             isOnboarding: widget.isOnboarding,
           ),
         ),
@@ -609,12 +613,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     if (!widget.isOnboarding) {
       return;
     }
-    final visibleProductIDs = _plans
-        .map(_getPlanProductID)
-        .where((id) => id.isNotEmpty)
-        .toSet();
-    final hasFreeOptionVisible =
-        _hasActiveSubscription && _currentSubscription!.productID == freeProductID;
+    final visibleProductIDs =
+        _plans.map(_getPlanProductID).where((id) => id.isNotEmpty).toSet();
+    final hasFreeOptionVisible = _shouldShowFreePlanCard();
 
     if (_selectedProductID == freeProductID && hasFreeOptionVisible) {
       return;
@@ -658,8 +659,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       return;
     }
 
-    final BillingPlan? selectedPlan =
-        _plans.where((plan) => _getPlanProductID(plan) == selectedProductID).firstOrNull;
+    final BillingPlan? selectedPlan = _plans
+        .where((plan) => _getPlanProductID(plan) == selectedProductID)
+        .firstOrNull;
     if (selectedPlan == null) {
       return;
     }
@@ -700,7 +702,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     final ProductDetailsResponse response =
         await InAppPurchase.instance.queryProductDetails({selectedProductID});
     if (response.notFoundIDs.isNotEmpty) {
-      final errMsg = "Could not find products: " + response.notFoundIDs.toString();
+      final errMsg =
+          "Could not find products: " + response.notFoundIDs.toString();
       _logger.severe(errMsg);
       await _dialog.hide();
       await showGenericErrorDialog(

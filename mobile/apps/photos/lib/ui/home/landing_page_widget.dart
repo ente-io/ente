@@ -130,6 +130,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       backgroundColor: colorScheme.greenBase,
       body: SafeArea(
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: _handleDeveloperModeTap,
           child: Column(
             children: [

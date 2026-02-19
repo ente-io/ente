@@ -51,6 +51,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   // indicates if user's subscription plan is still active
   late bool _hasActiveSubscription;
   bool _hideCurrentPlanSelection = false;
+  late FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
   bool _isLoading = false;
@@ -89,8 +90,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   // _filterPlansForUI is used for initializing initState & plan toggle states
   Future<void> _filterStripeForUI() async {
     final billingPlans = await _billingService.getBillingPlans();
+    _freePlan = billingPlans.freePlan;
     _plans = billingPlans.plans.where((plan) {
-      if (plan.stripeID.isEmpty) {
+      if (plan.id == freeProductID || plan.stripeID.isEmpty) {
         return false;
       }
       final isYearlyPlan = plan.period == 'year';
@@ -445,6 +447,30 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
+    if (_shouldShowFreePlanCard()) {
+      planWidgets.add(
+        GestureDetector(
+          onTap: () {
+            if (!widget.isOnboarding) {
+              return;
+            }
+            setState(() {
+              _selectedPlanProductID = freeProductID;
+            });
+          },
+          child: SubscriptionPlanWidget(
+            storage: _freePlan.storage,
+            price: "",
+            period: AppLocalizations.of(context).freeTrial,
+            isActive: widget.isOnboarding
+                ? _selectedPlanProductID == freeProductID
+                : _isFreePlanUser(),
+            isOnboarding: widget.isOnboarding,
+          ),
+        ),
+      );
+    }
+
     for (final plan in _plans) {
       final productID = plan.stripeID;
       if (productID.isEmpty) {
@@ -543,6 +569,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     return popularProductIDs.contains(plan.id);
   }
 
+  bool _isFreePlanUser() {
+    return _currentSubscription != null &&
+        _currentSubscription!.productID == freeProductID;
+  }
+
+  bool _shouldShowFreePlanCard() {
+    return widget.isOnboarding || _isFreePlanUser();
+  }
+
   void _syncOnboardingSelection() {
     if (!widget.isOnboarding) {
       return;
@@ -551,6 +586,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         .map((plan) => plan.stripeID)
         .where((id) => id.isNotEmpty)
         .toSet();
+    final hasFreeOptionVisible = _shouldShowFreePlanCard();
+
+    if (_selectedPlanProductID == freeProductID && hasFreeOptionVisible) {
+      return;
+    }
     if (_selectedPlanProductID != null &&
         visibleProductIDs.contains(_selectedPlanProductID)) {
       return;
@@ -559,6 +599,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (currentProductID != null &&
         visibleProductIDs.contains(currentProductID)) {
       _selectedPlanProductID = currentProductID;
+      return;
+    }
+    if (hasFreeOptionVisible) {
+      _selectedPlanProductID = freeProductID;
       return;
     }
     _selectedPlanProductID =
