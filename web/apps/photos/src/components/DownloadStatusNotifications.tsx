@@ -199,16 +199,16 @@ export const DownloadStatusNotifications: React.FC<
                               total: group.total,
                           });
                 const caption = (
-                    <Typography
-                        variant="small"
+                    <Box
+                        component="span"
                         sx={{
                             color: hasErrors ? "white" : "text.muted",
                             fontVariantNumeric: "tabular-nums",
                         }}
                     >
                         {statusText}
-                        {!isComplete && <> &bull; {progress}</>}
-                    </Typography>
+                        {!isComplete && <> {"\u2022"} {progress}</>}
+                    </Box>
                 );
 
                 // Determine the start icon based on state
