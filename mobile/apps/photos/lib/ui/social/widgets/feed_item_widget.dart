@@ -667,9 +667,9 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
     }
 
     return Container(
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.strokeFainter),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: colorScheme.strokeFaint),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),

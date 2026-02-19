@@ -114,9 +114,9 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
-        foregroundDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colorScheme.strokeFainter),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorScheme.strokeFaint),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
