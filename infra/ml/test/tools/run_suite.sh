@@ -101,6 +101,7 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
+DETECTION_OVERLAYS_OUTPUT_DIR="$OUTPUT_DIR/detections"
 LOG_DIR="$OUTPUT_DIR/logs"
 rm -rf "$LOG_DIR"
 mkdir -p "$LOG_DIR"
@@ -121,16 +122,71 @@ PY
 )"
 CODE_REVISION="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo local)"
 
+print_kv() {
+  local key="$1"
+  local value="$2"
+  printf '  %-30s %s\n' "$key" "$value"
+}
+
+print_html_report_urls() {
+  local report_path="$1"
+  python3 - "$report_path" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+from urllib.parse import quote
+
+raw_path = sys.argv[1]
+resolved_path = Path(raw_path).resolve()
+posix_path = resolved_path.as_posix()
+
+def as_posix_file_url(path: str) -> str:
+    if not path.startswith("/"):
+        path = "/" + path
+    return "file://" + quote(path, safe="/:._-~")
+
+mac_linux_url = as_posix_file_url(posix_path)
+
+raw_path_normalized = raw_path.replace("\\", "/")
+windows_path = None
+
+drive_match = re.match(r"^([A-Za-z]):/(.*)$", raw_path_normalized)
+if drive_match:
+    windows_path = f"{drive_match.group(1).upper()}:/{drive_match.group(2)}"
+
+if windows_path is None:
+    wsl_match = re.match(r"^/mnt/([A-Za-z])/(.*)$", posix_path)
+    if wsl_match:
+        windows_path = f"{wsl_match.group(1).upper()}:/{wsl_match.group(2)}"
+
+if windows_path is None:
+    msys_match = re.match(r"^/([A-Za-z])/(.*)$", posix_path)
+    if msys_match:
+        windows_path = f"{msys_match.group(1).upper()}:/{msys_match.group(2)}"
+
+if windows_path is None:
+    windows_path = f"C:{posix_path}"
+
+windows_url = "file:///" + quote(windows_path, safe="/:._-~")
+
+print(f"    macOS:   {mac_linux_url}")
+print(f"    Linux:   {mac_linux_url}")
+print(f"    Windows: {windows_url}")
+PY
+}
+
 echo "Running ML parity suite"
-echo "  platforms: $PLATFORMS"
-echo "  output_dir: $OUTPUT_DIR"
-echo "  verbose: $VERBOSE"
-echo "  strict: $STRICT"
-echo "  continue_on_missing_devices: $CONTINUE_ON_MISSING_DEVICES"
-echo "  fail_on_missing_platform: $FAIL_ON_MISSING_PLATFORM"
-echo "  fail_on_platform_runner_error: $FAIL_ON_PLATFORM_RUNNER_ERROR"
-echo "  allow_empty_comparison: $ALLOW_EMPTY_COMPARISON"
-echo "  render_detection_overlays: $RENDER_DETECTION_OVERLAYS"
+print_kv "platforms:" "$PLATFORMS"
+print_kv "output_dir:" "$OUTPUT_DIR"
+print_kv "verbose:" "$VERBOSE"
+print_kv "strict:" "$STRICT"
+print_kv "continue_on_missing_devices:" "$CONTINUE_ON_MISSING_DEVICES"
+print_kv "fail_on_missing_platform:" "$FAIL_ON_MISSING_PLATFORM"
+print_kv "fail_on_platform_runner_error:" "$FAIL_ON_PLATFORM_RUNNER_ERROR"
+print_kv "allow_empty_comparison:" "$ALLOW_EMPTY_COMPARISON"
+print_kv "render_detection_overlays:" "$RENDER_DETECTION_OVERLAYS"
 
 declare -a selected_platforms=()
 case "$PLATFORMS" in
@@ -1508,7 +1564,7 @@ PY
 
 render_detection_overlays() {
   local overlays_log="$LOG_DIR/render_detection_overlays.log"
-  local overlays_output_dir="$OUTPUT_DIR/detections"
+  local overlays_output_dir="$DETECTION_OVERLAYS_OUTPUT_DIR"
   local -a overlay_platforms=("${selected_platforms[@]}" "python")
   local -a overlay_cmd=(
     uv run --project "$UV_PROJECT_DIR" --no-sync --with pillow-heif
@@ -1533,7 +1589,6 @@ render_detection_overlays() {
     fi
   fi
 
-  echo "Detection overlays: $overlays_output_dir"
   return 0
 }
 
@@ -1650,7 +1705,6 @@ else
 fi
 set -e
 
-echo "Comparison report: $compare_output"
 if [[ -f "$compare_output" ]]; then
   if $VERBOSE; then
     render_file_level_report_tables "$compare_output"
@@ -1661,15 +1715,8 @@ if [[ -f "$compare_output" ]]; then
   if ! render_markdown_report "$compare_output"; then
     echo "Continuing without Markdown report due to renderer failure."
   fi
+  echo
   render_compact_summary "$compare_output" "${selected_platforms[@]}"
-  if [[ -n "$LAST_HTML_REPORT" ]]; then
-    echo "HTML parity report: $LAST_HTML_REPORT"
-    echo "HTML parity report URL: file://$LAST_HTML_REPORT"
-  fi
-  if [[ -n "$LAST_MARKDOWN_REPORT" ]]; then
-    echo "Markdown parity report (LLM): $LAST_MARKDOWN_REPORT"
-    echo "Agent note: for extensive results beyond the printed summary, read $LAST_MARKDOWN_REPORT."
-  fi
 fi
 
 if $RENDER_DETECTION_OVERLAYS; then
@@ -1698,5 +1745,20 @@ if $REQUIRE_COMPARISON_PASS; then
   fi
 fi
 
-echo "Detailed logs: $LOG_DIR"
+echo
+echo "Report artifacts"
+print_kv "comparison report (JSON):" "$compare_output"
+if [[ -n "$LAST_HTML_REPORT" ]]; then
+  print_kv "html parity report:" "$LAST_HTML_REPORT"
+  echo "  html parity report URLs:"
+  print_html_report_urls "$LAST_HTML_REPORT"
+fi
+if [[ -n "$LAST_MARKDOWN_REPORT" ]]; then
+  print_kv "markdown parity report (LLM):" "$LAST_MARKDOWN_REPORT"
+  echo "  note: for extensive results beyond the printed summary, read the markdown report."
+fi
+if $RENDER_DETECTION_OVERLAYS; then
+  print_kv "detection overlays:" "$DETECTION_OVERLAYS_OUTPUT_DIR"
+fi
+print_kv "detailed logs:" "$LOG_DIR"
 echo "Parity comparison completed"
