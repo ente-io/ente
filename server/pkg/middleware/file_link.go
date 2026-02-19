@@ -60,13 +60,6 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "disabled token"})
 				return
 			}
-			// validate if user still has active paid subscription
-			if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(fileLinkRow.OwnerID, true); err != nil {
-				logrus.WithError(err).Info("failed to verify active paid subscription")
-				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
-				return
-			}
-
 			// validate device limit
 			reached, limitErr := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
 			if limitErr != nil {
