@@ -120,7 +120,7 @@ class FeedItemWidget extends StatelessWidget {
               height: 66,
               decoration: BoxDecoration(
                 color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(7.792),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
         ],
@@ -645,7 +645,7 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
         height: 66,
         decoration: BoxDecoration(
           color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(7.792),
+          borderRadius: BorderRadius.circular(8),
         ),
       );
     }
@@ -656,7 +656,7 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
         height: 66,
         decoration: BoxDecoration(
           color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(7.792),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           Icons.image_not_supported_outlined,
@@ -666,15 +666,21 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(7.792),
-      child: SizedBox(
-        width: 66,
-        height: 66,
-        child: ThumbnailWidget(
-          _file!,
-          fit: BoxFit.cover,
-          rawThumbnail: true,
+    return Container(
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.strokeFainter),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 66,
+          height: 66,
+          child: ThumbnailWidget(
+            _file!,
+            fit: BoxFit.cover,
+            rawThumbnail: true,
+          ),
         ),
       ),
     );
