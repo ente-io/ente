@@ -20,6 +20,13 @@ REQUIRE_COMPARISON_PASS=false
 OUTPUT_DIR="$ROOT_DIR/infra/ml/test/out/parity"
 VERBOSE=false
 RENDER_DETECTION_OVERLAYS=false
+REUSE_MOBILE_APPLICATION_BINARY=false
+PARALLEL_MOBILE_RUNNERS=true
+
+LOCAL_MIRROR_PORT=""
+LOCAL_MIRROR_PID=""
+LOCAL_MIRROR_LOG=""
+LOCAL_MODEL_MIRROR_DIR=""
 
 usage() {
   cat <<EOF
@@ -35,6 +42,8 @@ Flags:
   --output-dir <path>                   (default: infra/ml/test/out/parity)
   --verbose                             (default: disabled)
   --render-detection-overlays           (default: disabled; render annotated face detection images to out/parity/detections/<platform>/)
+  --reuse-mobile-application-binary     (default: disabled; reuse an existing built mobile binary when available)
+  --no-parallel-mobile-runners          (default: disabled; run android/ios runners sequentially)
 EOF
 }
 
@@ -76,6 +85,14 @@ while (($# > 0)); do
       RENDER_DETECTION_OVERLAYS=true
       shift
       ;;
+    --reuse-mobile-application-binary)
+      REUSE_MOBILE_APPLICATION_BINARY=true
+      shift
+      ;;
+    --no-parallel-mobile-runners)
+      PARALLEL_MOBILE_RUNNERS=false
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -107,6 +124,8 @@ rm -rf "$LOG_DIR"
 mkdir -p "$LOG_DIR"
 PLATFORM_LOG_DIR="$LOG_DIR/platforms"
 mkdir -p "$PLATFORM_LOG_DIR"
+LOCAL_MODEL_MIRROR_DIR="$ML_DIR/.cache/local_model_mirror"
+LOCAL_MIRROR_LOG="$LOG_DIR/local_parity_mirror.log"
 PYTHON_OUTPUT_DIR="$OUTPUT_DIR/python"
 rm -rf "$PYTHON_OUTPUT_DIR"
 mkdir -p "$PYTHON_OUTPUT_DIR"
@@ -225,6 +244,106 @@ print(f"    Windows: {windows_url}")
 PY
 }
 
+stop_local_mirror_server() {
+  if [[ -n "${LOCAL_MIRROR_PID:-}" ]]; then
+    kill "$LOCAL_MIRROR_PID" >/dev/null 2>&1 || true
+    wait "$LOCAL_MIRROR_PID" >/dev/null 2>&1 || true
+    LOCAL_MIRROR_PID=""
+  fi
+}
+
+cleanup_resources() {
+  stop_local_mirror_server
+}
+
+trap cleanup_resources EXIT
+
+reserve_localhost_port() {
+  python3 <<'PY'
+import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind(("127.0.0.1", 0))
+print(sock.getsockname()[1])
+sock.close()
+PY
+}
+
+prepare_local_model_mirror_cache() {
+  local model_dir="$1"
+  local downloaded=0
+  local reused=0
+  local failed=0
+  local -a model_files=(
+    "yolov5s_face_640_640_dynamic.onnx"
+    "mobilefacenet_opset15.onnx"
+    "mobileclip_s2_image.onnx"
+  )
+
+  mkdir -p "$model_dir"
+
+  for model_file in "${model_files[@]}"; do
+    local target_path="$model_dir/$model_file"
+    if [[ -f "$target_path" ]]; then
+      reused=$((reused + 1))
+      continue
+    fi
+
+    local tmp_path="$target_path.tmp"
+    if curl -fsSL --retry 3 --retry-delay 1 "https://models.ente.io/$model_file" -o "$tmp_path"; then
+      mv "$tmp_path" "$target_path"
+      downloaded=$((downloaded + 1))
+    else
+      rm -f "$tmp_path"
+      failed=$((failed + 1))
+      echo "Local model mirror: failed to download $model_file (runner will fall back to direct model download)."
+    fi
+  done
+
+  echo "Local model mirror cache: downloaded=$downloaded reused=$reused failed=$failed dir=$model_dir"
+}
+
+start_local_mirror_server() {
+  local mirror_root="$1"
+  local mirror_log="$2"
+  local port=""
+  local pid=""
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "Local parity mirror disabled: python3 is unavailable."
+    return 1
+  fi
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "Local parity mirror disabled: curl is unavailable."
+    return 1
+  fi
+
+  port="$(reserve_localhost_port)"
+  if [[ -z "$port" ]]; then
+    echo "Local parity mirror disabled: failed to reserve a localhost port."
+    return 1
+  fi
+
+  nohup python3 -m http.server "$port" --bind 127.0.0.1 --directory "$mirror_root" >"$mirror_log" 2>&1 &
+  pid=$!
+
+  for _ in {1..25}; do
+    if curl -fsS "http://127.0.0.1:$port/" >/dev/null 2>&1; then
+      LOCAL_MIRROR_PORT="$port"
+      LOCAL_MIRROR_PID="$pid"
+      LOCAL_MIRROR_LOG="$mirror_log"
+      echo "Local parity mirror ready: http://127.0.0.1:$port (root: $mirror_root)"
+      return 0
+    fi
+    sleep 0.2
+  done
+
+  kill "$pid" >/dev/null 2>&1 || true
+  wait "$pid" >/dev/null 2>&1 || true
+  echo "Local parity mirror disabled: failed to start http server. Log: $mirror_log"
+  return 1
+}
+
 echo "Running ML parity suite"
 print_kv "platforms:" "$PLATFORMS"
 print_kv "output_dir:" "$OUTPUT_DIR"
@@ -235,6 +354,9 @@ print_kv "fail_on_missing_platform:" "$FAIL_ON_MISSING_PLATFORM"
 print_kv "fail_on_platform_runner_error:" "$FAIL_ON_PLATFORM_RUNNER_ERROR"
 print_kv "allow_empty_comparison:" "$ALLOW_EMPTY_COMPARISON"
 print_kv "render_detection_overlays:" "$RENDER_DETECTION_OVERLAYS"
+print_kv "android_build_mode:" "${ML_PARITY_ANDROID_BUILD_MODE:-profile}"
+print_kv "reuse_mobile_application_binary:" "$REUSE_MOBILE_APPLICATION_BINARY"
+print_kv "parallel_mobile_runners:" "$PARALLEL_MOBILE_RUNNERS"
 
 declare -a selected_platforms=()
 case "$PLATFORMS" in
@@ -539,6 +661,35 @@ ensure_ios_simulator_running() {
   export ML_PARITY_IOS_DEVICE_ID="$selected_udid"
   echo "iOS simulator ready: $selected_udid"
   return 0
+}
+
+ios_device_id_is_simulator_udid() {
+  local device_id="$1"
+  python3 - "$device_id" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+device_id = sys.argv[1]
+
+try:
+    raw = subprocess.check_output(
+        ["xcrun", "simctl", "list", "devices", "--json"],
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    payload = json.loads(raw)
+except Exception:
+    sys.exit(1)
+
+for devices in payload.get("devices", {}).values():
+    for device in devices:
+        if str(device.get("udid", "")).strip() == device_id:
+            sys.exit(0)
+sys.exit(1)
+PY
 }
 
 pick_android_avd_name() {
@@ -1006,6 +1157,22 @@ PY
 )
 echo "Fixture sync summary: downloaded=$downloaded_count reused=$reused_count"
 
+has_mobile_platform=false
+for platform in "${selected_platforms[@]}"; do
+  case "$platform" in
+    android|ios)
+      has_mobile_platform=true
+      ;;
+  esac
+done
+
+if $has_mobile_platform; then
+  prepare_local_model_mirror_cache "$LOCAL_MODEL_MIRROR_DIR"
+  if ! start_local_mirror_server "$ML_DIR" "$LOCAL_MIRROR_LOG"; then
+    echo "Proceeding without local parity mirror."
+  fi
+fi
+
 echo "Generating Python goldens"
 goldens_log="$LOG_DIR/generate_goldens.log"
 if $VERBOSE; then
@@ -1175,6 +1342,8 @@ run_mobile_runner() {
   local target_path="$mobile_dir/$target"
   local platform_output_dir="$OUTPUT_DIR/$platform"
   local output_path="$platform_output_dir/results.json"
+  local resolved_device_id="$device_id"
+  local android_build_mode="${ML_PARITY_ANDROID_BUILD_MODE:-profile}"
 
   if [[ ! -f "$driver_path" ]]; then
     echo "Mobile parity driver not found at $driver_path; skipping $platform run."
@@ -1191,28 +1360,7 @@ run_mobile_runner() {
     return 2
   fi
 
-  if [[ -n "$device_id" ]]; then
-    local configured_device_exit=0
-    if preflight_platform_device_id_available "$platform" "$device_id"; then
-      configured_device_exit=0
-    else
-      configured_device_exit=$?
-    fi
-    case "$configured_device_exit" in
-      0)
-        ;;
-      1)
-        echo "Configured $platform device id '$device_id' is unavailable; skipping $platform run."
-        return 2
-        ;;
-      *)
-        echo "Could not verify configured $platform device id '$device_id'; skipping $platform run."
-        return 2
-        ;;
-    esac
-  fi
-
-  if [[ -z "$device_id" ]]; then
+  if [[ -z "$resolved_device_id" ]]; then
     local platform_available_exit=0
     if platform_device_available "$platform"; then
       platform_available_exit=0
@@ -1233,7 +1381,20 @@ run_mobile_runner() {
     esac
   fi
 
-  if [[ ! -f "$mobile_dir/.dart_tool/package_config.json" ]]; then
+  local package_config_path="$mobile_dir/.dart_tool/package_config.json"
+  local needs_pub_get=false
+  if [[ ! -f "$package_config_path" ]]; then
+    needs_pub_get=true
+  else
+    for dependency_file in "$mobile_dir/pubspec.yaml" "$mobile_dir/pubspec.lock" "$mobile_dir/pubspec_overrides.yaml"; do
+      if [[ -f "$dependency_file" && "$dependency_file" -nt "$package_config_path" ]]; then
+        needs_pub_get=true
+        break
+      fi
+    done
+  fi
+
+  if $needs_pub_get; then
     echo "Running flutter pub get for mobile app"
     if ! (cd "$mobile_dir" && flutter pub get); then
       echo "flutter pub get failed; $platform parity output not generated."
@@ -1245,6 +1406,14 @@ run_mobile_runner() {
   case "$platform" in
     android)
       flavor="${ML_PARITY_ANDROID_FLAVOR:-independent}"
+      case "$android_build_mode" in
+        debug|profile|release)
+          ;;
+        *)
+          echo "Invalid ML_PARITY_ANDROID_BUILD_MODE='$android_build_mode' (expected debug|profile|release)."
+          return 1
+          ;;
+      esac
       ;;
     ios)
       flavor="${ML_PARITY_IOS_FLAVOR:-}"
@@ -1255,7 +1424,11 @@ run_mobile_runner() {
     flutter drive
     --driver=test_driver/ml_parity_driver.dart
     --target="$target"
+    --no-pub
   )
+  if [[ "$platform" == "android" ]]; then
+    drive_cmd+=(--"$android_build_mode")
+  fi
   if [[ -n "$flavor" ]]; then
     drive_cmd+=(--flavor "$flavor")
   fi
@@ -1264,15 +1437,69 @@ run_mobile_runner() {
     --dart-define=ML_PARITY_MANIFEST_B64="$MANIFEST_B64"
     --dart-define=ML_PARITY_CODE_REVISION="$CODE_REVISION"
   )
-  if [[ -n "$device_id" ]]; then
-    drive_cmd+=(-d "$device_id")
-  else
-    local selected_device_id
-    if ! selected_device_id="$(platform_device_id "$platform")"; then
+
+  if [[ -z "$resolved_device_id" ]]; then
+    if ! resolved_device_id="$(platform_device_id "$platform")"; then
       echo "Could not resolve a connected $platform device; skipping $platform run."
       return 2
     fi
-    drive_cmd+=(-d "$selected_device_id")
+  fi
+
+  drive_cmd+=(-d "$resolved_device_id")
+
+  local local_mirror_base_url=""
+  if [[ -n "${LOCAL_MIRROR_PORT:-}" ]]; then
+    case "$platform" in
+      android)
+        if [[ "$resolved_device_id" == emulator-* ]]; then
+          local_mirror_base_url="http://10.0.2.2:$LOCAL_MIRROR_PORT"
+        fi
+        ;;
+      ios)
+        if ios_device_id_is_simulator_udid "$resolved_device_id"; then
+          local_mirror_base_url="http://127.0.0.1:$LOCAL_MIRROR_PORT"
+        fi
+        ;;
+    esac
+  fi
+  if [[ -n "$local_mirror_base_url" ]]; then
+    drive_cmd+=(
+      --dart-define=ML_PARITY_LOCAL_MIRROR_BASE_URL="$local_mirror_base_url"
+    )
+  fi
+
+  local existing_app_url=""
+  local application_binary=""
+  case "$platform" in
+    android)
+      existing_app_url="${ML_PARITY_ANDROID_EXISTING_APP_URL:-}"
+      if [[ -n "${ML_PARITY_ANDROID_APPLICATION_BINARY:-}" ]]; then
+        application_binary="${ML_PARITY_ANDROID_APPLICATION_BINARY}"
+      elif $REUSE_MOBILE_APPLICATION_BINARY; then
+        local default_apk_path="$mobile_dir/build/app/outputs/flutter-apk/app-${flavor}-${android_build_mode}.apk"
+        if [[ -f "$default_apk_path" ]]; then
+          application_binary="$default_apk_path"
+        fi
+      fi
+      ;;
+    ios)
+      existing_app_url="${ML_PARITY_IOS_EXISTING_APP_URL:-}"
+      if [[ -n "${ML_PARITY_IOS_APPLICATION_BINARY:-}" ]]; then
+        application_binary="${ML_PARITY_IOS_APPLICATION_BINARY}"
+      fi
+      ;;
+  esac
+
+  if [[ -n "$existing_app_url" ]]; then
+    drive_cmd+=(--use-existing-app="$existing_app_url" --no-build)
+    echo "Reusing existing $platform app via VM service URL."
+  elif [[ -n "$application_binary" ]]; then
+    if [[ -f "$application_binary" ]]; then
+      drive_cmd+=(--use-application-binary="$application_binary")
+      echo "Reusing prebuilt $platform binary: $application_binary"
+    else
+      echo "Configured $platform application binary does not exist at $application_binary; falling back to build."
+    fi
   fi
 
   echo "Running $platform parity runner"
@@ -1660,12 +1887,88 @@ LAST_HTML_REPORT=""
 LAST_MARKDOWN_REPORT=""
 declare -a failed_platform_runners=()
 
-for platform in "${selected_platforms[@]}"; do
-  platform_log="$PLATFORM_LOG_DIR/$platform.log"
+run_platform_runner_and_capture_exit() {
+  local platform="$1"
+  local platform_log="$PLATFORM_LOG_DIR/$platform.log"
+  local status_file="$LOG_DIR/.platform_runner_${platform}.status"
+
   set +e
   run_platform_runner_with_progress "$platform" "$platform_log"
-  platform_run_exit=$?
+  local platform_run_exit=$?
   set -e
+
+  printf '%s\n' "$platform_run_exit" >"$status_file"
+}
+
+has_selected_android=false
+has_selected_ios=false
+for platform in "${selected_platforms[@]}"; do
+  case "$platform" in
+    android)
+      has_selected_android=true
+      ;;
+    ios)
+      has_selected_ios=true
+      ;;
+  esac
+done
+
+run_mobile_in_parallel=false
+if $PARALLEL_MOBILE_RUNNERS && $has_selected_android && $has_selected_ios; then
+  run_mobile_in_parallel=true
+fi
+
+if $run_mobile_in_parallel; then
+  if [[ -z "${ML_PARITY_ANDROID_DEVICE_ID:-}" ]]; then
+    resolved_parallel_android_device="$(platform_device_id "android" || true)"
+    if [[ -n "$resolved_parallel_android_device" ]]; then
+      export ML_PARITY_ANDROID_DEVICE_ID="$resolved_parallel_android_device"
+    fi
+  fi
+  if [[ -z "${ML_PARITY_IOS_DEVICE_ID:-}" ]]; then
+    resolved_parallel_ios_device="$(platform_device_id "ios" || true)"
+    if [[ -n "$resolved_parallel_ios_device" ]]; then
+      export ML_PARITY_IOS_DEVICE_ID="$resolved_parallel_ios_device"
+    fi
+  fi
+fi
+
+if $run_mobile_in_parallel; then
+  echo "Running android and ios platform runners in parallel"
+
+  for platform in "${selected_platforms[@]}"; do
+    case "$platform" in
+      android|ios)
+        ;;
+      *)
+        run_platform_runner_and_capture_exit "$platform"
+        ;;
+    esac
+  done
+
+  declare -a mobile_runner_pids=()
+  run_platform_runner_and_capture_exit "android" &
+  mobile_runner_pids+=("$!")
+  run_platform_runner_and_capture_exit "ios" &
+  mobile_runner_pids+=("$!")
+
+  for pid in "${mobile_runner_pids[@]}"; do
+    wait "$pid" || true
+  done
+else
+  for platform in "${selected_platforms[@]}"; do
+    run_platform_runner_and_capture_exit "$platform"
+  done
+fi
+
+for platform in "${selected_platforms[@]}"; do
+  platform_log="$PLATFORM_LOG_DIR/$platform.log"
+  status_file="$LOG_DIR/.platform_runner_${platform}.status"
+  if [[ -f "$status_file" ]]; then
+    platform_run_exit="$(tr -d '\r\n' <"$status_file")"
+  else
+    platform_run_exit=1
+  fi
 
   case "$platform_run_exit" in
     0)

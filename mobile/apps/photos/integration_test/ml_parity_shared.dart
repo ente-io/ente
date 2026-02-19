@@ -19,18 +19,29 @@ import "package:photos/utils/isolate/isolate_operations.dart";
 const _manifestB64 = String.fromEnvironment("ML_PARITY_MANIFEST_B64");
 const _codeRevision =
     String.fromEnvironment("ML_PARITY_CODE_REVISION", defaultValue: "local");
+const _localMirrorBaseUrl =
+    String.fromEnvironment("ML_PARITY_LOCAL_MIRROR_BASE_URL");
+const _localModelMirrorRelativeDir = ".cache/local_model_mirror";
 
 const _parityReportDataKey = "ml_parity_results_json";
+const _modelBaseUrl = "https://models.ente.io/";
+const _modelFiles = <String>[
+  "yolov5s_face_640_640_dynamic.onnx",
+  "mobilefacenet_opset15.onnx",
+  "mobileclip_s2_image.onnx",
+];
 
 class _ManifestItem {
   final String fileID;
   final String sourceURL;
   final String? sourceSHA256;
+  final String? sourcePath;
 
   const _ManifestItem({
     required this.fileID,
     required this.sourceURL,
     required this.sourceSHA256,
+    required this.sourcePath,
   });
 }
 
@@ -62,6 +73,11 @@ void runMLParityIntegrationTest({required String expectedPlatform}) {
         final fixtureRoot =
             Directory("${appSupportDir.path}/ml_parity/fixtures");
         await fixtureRoot.create(recursive: true);
+        await _stageFixturesFromLocalMirror(
+          manifestItems: manifestItems,
+          fixtureRoot: fixtureRoot,
+        );
+        await _stageModelsFromLocalMirror(appSupportDir);
 
         final modelSpecs = _modelSpecs();
         final loadedModels = await _downloadAndLoadModels(
@@ -154,10 +170,12 @@ List<_ManifestItem> _loadManifestItems() {
       throw StateError("Manifest item ${item["file_id"]} missing source_url");
     }
     final sourceSHA = (item["source_sha256"] as String?)?.trim();
+    final sourcePath = (item["source"] as String?)?.trim();
     return _ManifestItem(
       fileID: item["file_id"] as String,
       sourceURL: sourceURL,
       sourceSHA256: sourceSHA?.isEmpty == true ? null : sourceSHA,
+      sourcePath: sourcePath?.isEmpty == true ? null : sourcePath,
     );
   }).toList(growable: false);
 }
@@ -261,6 +279,78 @@ Future<void> _releaseModels(_LoadedModels loadedModels) async {
       "modelAddresses": loadedModels.modelAddresses,
     },
   );
+}
+
+Future<void> _stageFixturesFromLocalMirror({
+  required List<_ManifestItem> manifestItems,
+  required Directory fixtureRoot,
+}) async {
+  if (_localMirrorBaseUrl.isEmpty) {
+    return;
+  }
+
+  for (final item in manifestItems) {
+    final sourcePath = item.sourcePath;
+    if (sourcePath == null || sourcePath.isEmpty) {
+      continue;
+    }
+
+    final mirrorURL = _joinLocalMirrorUrl(sourcePath);
+    final outputPath = "${fixtureRoot.path}/${_safeFileName(item.fileID)}";
+    try {
+      await _downloadURLToFile(url: mirrorURL, outputPath: outputPath);
+    } catch (_) {
+      // Local mirror is best-effort; fallback to source_url inside _downloadFixture.
+    }
+  }
+}
+
+Future<void> _stageModelsFromLocalMirror(Directory appSupportDir) async {
+  if (_localMirrorBaseUrl.isEmpty) {
+    return;
+  }
+
+  final assetsDir = Directory("${appSupportDir.path}/assets");
+  await assetsDir.create(recursive: true);
+
+  for (final modelFile in _modelFiles) {
+    final canonicalURL = "$_modelBaseUrl$modelFile";
+    final targetPath =
+        "${assetsDir.path}/${_remoteAssetPathToLocalFileName(canonicalURL)}";
+    final targetFile = File(targetPath);
+    if (targetFile.existsSync()) {
+      continue;
+    }
+
+    final mirrorURL = _joinLocalMirrorUrl(
+      "$_localModelMirrorRelativeDir/$modelFile",
+    );
+    try {
+      await _downloadURLToFile(url: mirrorURL, outputPath: targetPath);
+    } catch (_) {
+      // Local mirror is best-effort; model load falls back to default remote URL.
+    }
+  }
+}
+
+String _joinLocalMirrorUrl(String relativePath) {
+  final sanitizedBase = _localMirrorBaseUrl.endsWith("/")
+      ? _localMirrorBaseUrl
+      : "$_localMirrorBaseUrl/";
+  final encodedPath = relativePath
+      .split("/")
+      .where((segment) => segment.isNotEmpty)
+      .map(Uri.encodeComponent)
+      .join("/");
+  return "$sanitizedBase$encodedPath";
+}
+
+String _remoteAssetPathToLocalFileName(String url) {
+  var fileName = url
+      .replaceAll(RegExp(r"https?://"), "")
+      .replaceAll(RegExp(r"[^\w\.]"), "_");
+  fileName = fileName.replaceAll(".", "_");
+  return fileName;
 }
 
 Future<String> _downloadFixture({

@@ -33,6 +33,8 @@ Common flags:
 - `--output-dir <path>`
 - `--verbose` (stream full runner/comparator logs to terminal)
 - `--render-detection-overlays` (generate annotated detection images under `out/parity/detections/<platform>/`; includes selected platforms plus `python` ground truth)
+- `--reuse-mobile-application-binary` (reuse an existing built mobile binary when available; useful for repeated local parity runs without code changes)
+- `--no-parallel-mobile-runners` (force sequential android/ios runner execution)
 
 Outputs go to `infra/ml/test/out/parity/` by default, including:
 
@@ -40,6 +42,12 @@ Outputs go to `infra/ml/test/out/parity/` by default, including:
 - `parity_report.html` (readable HTML report with per-file metrics for both pass and fail files)
 
 `run_suite.sh` compares each available platform against Python ground truth (`python -> <platform>`); non-ground-truth pairwise comparisons are excluded by default.
+
+Optional mobile reuse env vars:
+
+- `ML_PARITY_ANDROID_BUILD_MODE` (`profile` by default; set `debug` or `release` explicitly if needed)
+- `ML_PARITY_ANDROID_EXISTING_APP_URL`, `ML_PARITY_IOS_EXISTING_APP_URL` (reuse a currently running app via VM service URL)
+- `ML_PARITY_ANDROID_APPLICATION_BINARY`, `ML_PARITY_IOS_APPLICATION_BINARY` (explicit prebuilt binary path for `flutter drive --use-application-binary`)
 
 ## Detection Overlay Visualizer
 
