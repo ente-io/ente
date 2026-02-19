@@ -129,9 +129,8 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
         if not isinstance(metrics, list):
             metrics = []
 
-        open_attr = " open" if not passed else ""
         html_parts.append(
-            f"<details{open_attr}><summary>{html.escape(file_id)} "
+            f"<details><summary>{html.escape(file_id)} "
             f"<span class='{_status_class(passed)}'>{_status_label(passed)}</span></summary>"
         )
 
