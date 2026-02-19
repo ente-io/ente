@@ -207,7 +207,12 @@ export const DownloadStatusNotifications: React.FC<
                         }}
                     >
                         {statusText}
-                        {!isComplete && <> {"\u2022"} {progress}</>}
+                        {!isComplete && (
+                            <>
+                                {" "}
+                                {"\u2022"} {progress}
+                            </>
+                        )}
                     </Box>
                 );
 

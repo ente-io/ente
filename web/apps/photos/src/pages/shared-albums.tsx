@@ -873,10 +873,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     >
         <IconButton
             onClick={clearSelection}
-            sx={{
-                flexShrink: 0,
-                "@media (width < 720px)": { ml: "-8px" },
-            }}
+            sx={{ flexShrink: 0, "@media (width < 720px)": { ml: "-8px" } }}
         >
             <CloseIcon />
         </IconButton>
@@ -894,10 +891,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         <Tooltip title={t("download")}>
             <IconButton
                 onClick={downloadFilesHelper}
-                sx={{
-                    flexShrink: 0,
-                    "@media (width < 720px)": { mr: "-8px" },
-                }}
+                sx={{ flexShrink: 0, "@media (width < 720px)": { mr: "-8px" } }}
             >
                 <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
@@ -1086,7 +1080,10 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                                 />
                             </IconButton>
                         )}
-                        <IconButton onClick={handleShare} disabled={hasSelection}>
+                        <IconButton
+                            onClick={handleShare}
+                            disabled={hasSelection}
+                        >
                             <HugeiconsIcon
                                 icon={Share08Icon}
                                 strokeWidth={1.6}
