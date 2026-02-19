@@ -38,7 +38,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
   bool _showEmailValidation = false;
-  bool _hasAgreedToTOS = false;
+  bool _hasAgreedToTOS = true;
   bool _passwordsMatch = false;
   bool _passwordIsValid = false;
   bool _showPasswordStrength = false;
