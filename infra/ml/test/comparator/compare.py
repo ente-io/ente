@@ -237,8 +237,12 @@ class ComparisonReport:
     passed: bool
 
     def to_dict(self) -> dict[str, Any]:
+        total_files = len(self.file_statuses)
+        non_reference_file_count = max(0, total_files - self.total_reference_files)
         file_summary = {
             "total_reference_files": self.total_reference_files,
+            "total_files": total_files,
+            "non_reference_file_count": non_reference_file_count,
             "checked_files": self.checked_files,
             "pass_count": len(self.passing_files),
             "warning_count": len(self.warning_files),
@@ -384,25 +388,30 @@ def compare_result_sets(
     extra_files = tuple(sorted(set(candidate_results) - set(reference_results)))
     findings: list[ComparisonFinding] = []
     warnings: list[ComparisonFinding] = []
-    file_failures: dict[str, list[ComparisonFinding]] = {
-        file_id: [] for file_id in reference_results
-    }
-    file_warnings: dict[str, list[ComparisonFinding]] = {
-        file_id: [] for file_id in reference_results
-    }
-    file_metrics: dict[str, list[FileMetricMeasurement]] = {
-        file_id: [] for file_id in reference_results
-    }
+    file_failures: dict[str, list[ComparisonFinding]] = {}
+    file_warnings: dict[str, list[ComparisonFinding]] = {}
+    file_metrics: dict[str, list[FileMetricMeasurement]] = {}
+
+    def ensure_file_entry(file_id: str) -> None:
+        if file_id not in file_failures:
+            file_failures[file_id] = []
+        if file_id not in file_warnings:
+            file_warnings[file_id] = []
+        if file_id not in file_metrics:
+            file_metrics[file_id] = []
+
+    for file_id in reference_results:
+        ensure_file_entry(file_id)
 
     def add_failure(finding: ComparisonFinding) -> None:
         findings.append(finding)
-        if finding.file_id in file_failures:
-            file_failures[finding.file_id].append(finding)
+        ensure_file_entry(finding.file_id)
+        file_failures[finding.file_id].append(finding)
 
     def add_warning(warning: ComparisonFinding) -> None:
         warnings.append(warning)
-        if warning.file_id in file_warnings:
-            file_warnings[warning.file_id].append(warning)
+        ensure_file_entry(warning.file_id)
+        file_warnings[warning.file_id].append(warning)
 
     def add_file_metric(
         *,
@@ -417,8 +426,7 @@ def compare_result_sets(
         applicable: bool = True,
         message: str | None = None,
     ) -> None:
-        if file_id not in file_metrics:
-            return
+        ensure_file_entry(file_id)
         file_metrics[file_id].append(
             FileMetricMeasurement(
                 metric=metric,
@@ -460,6 +468,16 @@ def compare_result_sets(
                 message=f"Unexpected file in {candidate_platform}",
                 severity=STATUS_FAIL,
             ),
+        )
+        add_file_metric(
+            file_id=extra_file,
+            metric="file_presence",
+            value=1.0,
+            threshold=0.0,
+            status=STATUS_FAIL,
+            passed=False,
+            direction="==",
+            message=f"Unexpected file in {candidate_platform}",
         )
 
     clip_distances: list[float] = []
@@ -932,6 +950,19 @@ def compare_result_sets(
     for metric_name, metric in aggregates.items():
         if metric.status == STATUS_PASS:
             continue
+        threshold = metric.warning_threshold if metric.status == STATUS_WARNING else metric.threshold
+        add_file_metric(
+            file_id="*aggregate*",
+            metric=metric_name,
+            value=metric.max,
+            threshold=threshold,
+            status=metric.status,
+            passed=metric.status != STATUS_FAIL,
+            direction="<=",
+            count=metric.count,
+            applicable=metric.count > 0,
+            message="Aggregate threshold gate",
+        )
         if metric.status == STATUS_WARNING:
             add_warning(
                 ComparisonFinding(
@@ -957,7 +988,12 @@ def compare_result_sets(
 
     report_findings = tuple(findings)
     report_warnings = tuple(warnings)
-    sorted_reference_files = sorted(reference_results)
+    sorted_file_ids = sorted(
+        set(reference_results)
+        | set(file_failures)
+        | set(file_warnings)
+        | set(file_metrics),
+    )
     file_statuses = tuple(
         FileComparisonStatus(
             file_id=file_id,
@@ -973,7 +1009,7 @@ def compare_result_sets(
             failures=tuple(file_failures[file_id]),
             warnings=tuple(file_warnings[file_id]),
         )
-        for file_id in sorted_reference_files
+        for file_id in sorted_file_ids
     )
     passing_files = tuple(
         file_status.file_id

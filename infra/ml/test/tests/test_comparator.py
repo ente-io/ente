@@ -91,6 +91,10 @@ def _result(
     )
 
 
+def _status_for_file(report: object, file_id: str):
+    return next(status for status in report.file_statuses if status.file_id == file_id)
+
+
 def test_compare_result_sets_passes_when_within_thresholds() -> None:
     reference_faces = (_face(100, x=0.22, y=0.10, score=0.95),)
     reference = _result(
@@ -134,13 +138,14 @@ def test_compare_result_sets_passes_when_within_thresholds() -> None:
     assert report.total_reference_files == 1
     assert report.passing_files == ("man.jpeg",)
     assert report.failing_files == ()
-    assert report.file_statuses[0].passed is True
-    metric_names = {metric.metric for metric in report.file_statuses[0].metrics}
+    file_status = _status_for_file(report, "man.jpeg")
+    assert file_status.passed is True
+    metric_names = {metric.metric for metric in file_status.metrics}
     assert "clip_cosine_distance" in metric_names
     assert "face_count_delta" in metric_names
     clip_metric = next(
         metric
-        for metric in report.file_statuses[0].metrics
+        for metric in file_status.metrics
         if metric.metric == "clip_cosine_distance"
     )
     assert clip_metric.passed is True
@@ -210,7 +215,7 @@ def test_compare_result_sets_passes_when_iou_above_single_loose_threshold() -> N
 
     assert report.passed is True
     assert not any(finding.metric == "face_box_iou" for finding in report.findings)
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, reference.file_id)
     iou_shortfall_metric = next(
         metric
         for metric in file_status.metrics
@@ -262,7 +267,7 @@ def test_compare_result_sets_fails_when_iou_below_single_loose_threshold() -> No
     assert iou_failures
     assert iou_failures[0].threshold == pytest.approx(0.80)
 
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, reference.file_id)
     iou_shortfall_metric = next(
         metric
         for metric in file_status.metrics
@@ -302,13 +307,13 @@ def test_compare_result_sets_fails_on_face_count_mismatch() -> None:
     assert report.total_reference_files == 1
     assert report.passing_files == ()
     assert report.failing_files == ("people.jpeg",)
-    assert report.file_statuses[0].file_id == "people.jpeg"
+    file_status = _status_for_file(report, "people.jpeg")
     assert any(
-        failure.metric == "face_count" for failure in report.file_statuses[0].failures
+        failure.metric == "face_count" for failure in file_status.failures
     )
     face_count_metric = next(
         metric
-        for metric in report.file_statuses[0].metrics
+        for metric in file_status.metrics
         if metric.metric == "face_count_delta"
     )
     assert face_count_metric.passed is False
@@ -347,7 +352,7 @@ def test_compare_result_sets_ignores_faces_below_min_score_threshold() -> None:
     assert report.failing_files == ()
     assert report.passing_files == ("score-filter.jpeg",)
 
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, "score-filter.jpeg")
     assert file_status.status == "pass"
     assert file_status.passed is True
     assert file_status.failures == ()
@@ -396,7 +401,7 @@ def test_compare_result_sets_marks_face_embedding_warning_band() -> None:
     assert report.passed is True
     assert report.findings == ()
     assert report.failing_files == ()
-    assert report.warning_files == ("embedding-warning.jpeg",)
+    assert report.warning_files == ("*aggregate*", "embedding-warning.jpeg")
     assert report.passing_files == ()
     assert any(
         warning.metric == "face_embedding_cosine_distance"
@@ -405,7 +410,7 @@ def test_compare_result_sets_marks_face_embedding_warning_band() -> None:
     )
     assert any(warning.file_id == "*aggregate*" for warning in report.warnings)
 
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, "embedding-warning.jpeg")
     assert file_status.status == "warning"
     assert file_status.passed is True
     assert file_status.failures == ()
@@ -455,13 +460,13 @@ def test_compare_result_sets_fails_face_embedding_above_warning_band() -> None:
 
     assert report.status == "fail"
     assert report.passed is False
-    assert report.failing_files == ("embedding-fail.jpeg",)
+    assert report.failing_files == ("*aggregate*", "embedding-fail.jpeg")
     assert report.warning_files == ()
     assert any(
         finding.metric == "face_embedding_cosine_distance" for finding in report.findings
     )
 
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, "embedding-fail.jpeg")
     assert file_status.status == "fail"
     assert file_status.passed is False
 
@@ -524,7 +529,7 @@ def test_compare_result_sets_reports_unmatched_faces_after_iou_gating() -> None:
     )
     assert not any(finding.metric == "face_box_iou" for finding in report.findings)
 
-    file_status = report.file_statuses[0]
+    file_status = _status_for_file(report, "offset-face.jpeg")
     matched_metric = next(
         metric for metric in file_status.metrics if metric.metric == "matched_face_count"
     )
@@ -581,6 +586,39 @@ def test_aggregate_gate_failure_is_reported() -> None:
 
     assert report.passed is False
     assert any(finding.file_id == "*aggregate*" for finding in report.findings)
+    assert "*aggregate*" in report.failing_files
+    aggregate_status = next(
+        status for status in report.file_statuses if status.file_id == "*aggregate*"
+    )
+    assert aggregate_status.status == "fail"
+    assert any(metric.metric == "clip_cosine_distance" for metric in aggregate_status.metrics)
+
+
+def test_extra_candidate_file_is_included_in_file_status_summary() -> None:
+    extra_candidate = _result(
+        file_id="unexpected.jpeg",
+        platform="desktop",
+        clip_seed=55,
+        faces=(),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="desktop",
+        reference_results={},
+        candidate_results={extra_candidate.file_id: extra_candidate},
+    )
+
+    assert report.status == "fail"
+    assert report.passed is False
+    assert report.failing_files == ("unexpected.jpeg",)
+    status = next(
+        file_status
+        for file_status in report.file_statuses
+        if file_status.file_id == "unexpected.jpeg"
+    )
+    assert status.status == "fail"
+    assert any(failure.metric == "file_presence" for failure in status.failures)
 
 
 def test_compare_platform_matrix_includes_pairwise_reports() -> None:

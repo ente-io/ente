@@ -1682,7 +1682,12 @@ for comparison in comparisons:
     file_summary = comparison.get("file_summary") or {}
     if not isinstance(file_summary, dict):
         file_summary = {}
-    total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
+    total_files = int(
+        file_summary.get(
+            "total_files",
+            file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)),
+        )
+    )
     pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
     warning_count = int(file_summary.get("warning_count", len(comparison.get("warning_files", []))))
     fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
@@ -1861,7 +1866,12 @@ for comparison in comparisons:
     pass_count = int(file_summary.get("pass_count", len(comparison.get("passing_files", []))))
     warning_count = int(file_summary.get("warning_count", len(comparison.get("warning_files", []))))
     fail_count = int(file_summary.get("fail_count", len(comparison.get("failing_files", []))))
-    total_files = int(file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)))
+    total_files = int(
+        file_summary.get(
+            "total_files",
+            file_summary.get("total_reference_files", comparison.get("total_reference_files", 0)),
+        )
+    )
     summary_by_platform[candidate_platform] = (
         pass_count,
         warning_count,

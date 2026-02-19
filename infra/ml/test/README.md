@@ -71,18 +71,6 @@ Useful optional filters:
 - `--file-id <fixture_name>` (repeatable)
 - `--output-dir <custom_dir>`
 
-## Manual CI Run
-
-Workflow: `.github/workflows/ml-indexing-parity.yml`
-
-Run via `workflow_dispatch` and choose:
-
-- `platforms`
-- strictness flags
-- optional explicit Android/iOS device IDs
-
-CI uploads artifacts from `infra/ml/test/out/parity/**`.
-
 ## Golden Update / Maintenance
 
 Goldens are runtime artifacts and are not committed.

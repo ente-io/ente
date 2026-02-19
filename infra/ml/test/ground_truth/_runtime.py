@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import os
 from pathlib import Path
+import sys
 import tempfile
 from typing import Final
+import warnings
 
 import cv2
 import numpy as np
@@ -23,6 +26,7 @@ except Exception:
 
 DEFAULT_MODEL_BASE_URL: Final[str] = "https://models.ente.io/"
 DEFAULT_PADDING_RGB: Final[tuple[int, int, int]] = (114, 114, 114)
+ALLOW_OPENCV_FALLBACK_ENV: Final[str] = "ML_PARITY_ALLOW_OPENCV_DECODE_FALLBACK"
 
 
 @dataclass(frozen=True)
@@ -120,6 +124,34 @@ def decode_image_rgb(source_path: Path) -> np.ndarray:
             pixels = np.array(image, dtype=np.uint8, copy=True)
             return np.ascontiguousarray(pixels)
     except Exception as pillow_error:
+        fallback_enabled = os.environ.get(ALLOW_OPENCV_FALLBACK_ENV, "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        if not fallback_enabled:
+            suffix = source_path.suffix.lower()
+            heif_note = (
+                " Install pillow-heif to decode HEIC/HEIF files."
+                if suffix in {".heic", ".heif"}
+                else ""
+            )
+            raise RuntimeError(
+                f"Failed to decode image '{source_path}' with Pillow ({pillow_error}). "
+                "OpenCV decode fallback is DISABLED by default because it may diverge from "
+                "Pillow EXIF-orientation behavior and can break parity trust."
+                f"{heif_note} To force fallback anyway, set {ALLOW_OPENCV_FALLBACK_ENV}=1."
+            ) from pillow_error
+
+        warning_message = (
+            f"FALLING BACK to OpenCV decode for '{source_path}' after Pillow failure "
+            f"({pillow_error}). This can diverge from Pillow EXIF-orientation semantics and "
+            "may produce unreliable parity results."
+        )
+        warnings.warn(warning_message, RuntimeWarning, stacklevel=2)
+        print(f"[ml_parity][WARNING] {warning_message}", file=sys.stderr)
+
         raw = np.fromfile(str(source_path), dtype=np.uint8)
         decoded = cv2.imdecode(raw, cv2.IMREAD_COLOR)
         if decoded is None:

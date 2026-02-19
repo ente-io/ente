@@ -101,7 +101,12 @@ def _render_comparison(comparison: dict[str, Any]) -> str:
     pass_count = int(file_summary.get("pass_count", 0))
     warning_count = int(file_summary.get("warning_count", 0))
     fail_count = int(file_summary.get("fail_count", 0))
-    total_files = int(file_summary.get("total_reference_files", 0))
+    total_files = int(
+        file_summary.get(
+            "total_files",
+            file_summary.get("total_reference_files", 0),
+        )
+    )
     findings = comparison.get("findings", [])
     warnings = comparison.get("warnings", [])
     finding_count = len(findings) if isinstance(findings, list) else 0

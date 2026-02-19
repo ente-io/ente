@@ -318,19 +318,32 @@ def _render_comparison(comparison: dict[str, Any]) -> list[str]:
     pass_count = int(file_summary.get("pass_count", 0))
     warning_count = int(file_summary.get("warning_count", 0))
     fail_count = int(file_summary.get("fail_count", 0))
-    total_files = int(file_summary.get("total_reference_files", 0))
+    total_files = int(
+        file_summary.get(
+            "total_files",
+            file_summary.get("total_reference_files", 0),
+        )
+    )
+    reference_total_files = int(
+        file_summary.get("total_reference_files", comparison.get("total_reference_files", 0))
+    )
     checked_files = int(file_summary.get("checked_files", comparison.get("checked_files", 0)))
     findings = comparison.get("findings", [])
     warnings = comparison.get("warnings", [])
     finding_count = len(findings) if isinstance(findings, list) else 0
     warning_finding_count = len(warnings) if isinstance(warnings, list) else 0
+    total_summary = (
+        f"{total_files} total files"
+        if total_files == reference_total_files
+        else f"{total_files} total files ({reference_total_files} reference)"
+    )
 
     lines: list[str] = [
         f"## {candidate} vs {reference}",
         "",
         (
             f"- Summary: {pass_count} pass / {warning_count} warning / {fail_count} fail / "
-            f"{total_files} total reference files"
+            f"{total_summary}"
         ),
         f"- Checked files: {checked_files}",
         f"- Threshold findings: {finding_count} fail / {warning_finding_count} warning",

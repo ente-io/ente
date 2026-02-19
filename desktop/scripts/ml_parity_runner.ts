@@ -47,6 +47,7 @@ interface HostResponse {
 interface PendingRequest {
     resolve: (value: unknown) => void;
     reject: (reason: unknown) => void;
+    timeoutHandle: ReturnType<typeof setTimeout>;
 }
 
 interface WebMLBindings {
@@ -104,6 +105,24 @@ const MODEL_FILE_NAMES: Record<string, string> = {
     face_embedding: "mobilefacenet_opset15.onnx",
 };
 const HOST_RESPONSE_PREFIX = "__ML_PARITY_JSON__";
+const DEFAULT_HOST_REQUEST_TIMEOUT_MS = 120_000;
+
+const parseHostRequestTimeoutMS = (value: string | undefined): number => {
+    const trimmed = value?.trim();
+    if (!trimmed) {
+        return DEFAULT_HOST_REQUEST_TIMEOUT_MS;
+    }
+    const parsed = Number.parseInt(trimmed, 10);
+    if (!Number.isFinite(parsed) || parsed < 1_000) {
+        throw new Error(
+            "ML_PARITY_HOST_REQUEST_TIMEOUT_MS must be an integer >= 1000",
+        );
+    }
+    return parsed;
+};
+const HOST_REQUEST_TIMEOUT_MS = parseHostRequestTimeoutMS(
+    process.env.ML_PARITY_HOST_REQUEST_TIMEOUT_MS,
+);
 
 const usage = () => {
     process.stderr.write(`Usage: desktop/scripts/ml_parity_runner.ts [flags]\n\n`);
@@ -255,6 +274,7 @@ class HostClient {
     private readonly rl: readline.Interface;
     private nextID = 1;
     private readonly pending = new Map<number, PendingRequest>();
+    private readonly requestTimeoutMS: number;
     private closed = false;
 
     constructor(
@@ -262,6 +282,7 @@ class HostClient {
         hostScriptPath: string,
         userDataPath: string,
     ) {
+        this.requestTimeoutMS = HOST_REQUEST_TIMEOUT_MS;
         this.process = spawn(electronBinPath, [hostScriptPath], {
             cwd: DESKTOP_ROOT,
             env: {
@@ -313,6 +334,7 @@ class HostClient {
             if (!pending) {
                 return;
             }
+            clearTimeout(pending.timeoutHandle);
             this.pending.delete(message.id);
 
             if (message.ok) {
@@ -341,6 +363,7 @@ class HostClient {
             return;
         }
         for (const pending of this.pending.values()) {
+            clearTimeout(pending.timeoutHandle);
             pending.reject(error);
         }
         this.pending.clear();
@@ -362,10 +385,31 @@ class HostClient {
         this.nextID += 1;
 
         const resultPromise = new Promise<unknown>((resolve, reject) => {
-            this.pending.set(id, { resolve, reject });
+            const timeoutHandle = setTimeout(() => {
+                const pending = this.pending.get(id);
+                if (!pending) {
+                    return;
+                }
+                this.pending.delete(id);
+                pending.reject(
+                    new Error(
+                        `Host request '${method}' timed out after ${this.requestTimeoutMS}ms`,
+                    ),
+                );
+            }, this.requestTimeoutMS);
+            this.pending.set(id, { resolve, reject, timeoutHandle });
         });
 
-        await this.writeRequest({ id, method, params });
+        try {
+            await this.writeRequest({ id, method, params });
+        } catch (error) {
+            const pending = this.pending.get(id);
+            if (pending) {
+                clearTimeout(pending.timeoutHandle);
+                this.pending.delete(id);
+            }
+            throw error;
+        }
         return resultPromise;
     }
 

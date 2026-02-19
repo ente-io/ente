@@ -37,6 +37,12 @@ The default corpus is sourced from:
 HEIC/HEIF decoding requires the `pillow-heif` plugin (declared in
 `infra/ml/pyproject.toml`).
 
+If Pillow decode fails, Python ground truth now fails by default instead of
+silently falling back to OpenCV decode (to avoid EXIF-orientation drift in
+parity outputs). Set `ML_PARITY_ALLOW_OPENCV_DECODE_FALLBACK=1` only for
+debugging; this emits explicit warnings and should not be used for trusted
+parity runs.
+
 ## Generate Goldens
 
 ```bash
