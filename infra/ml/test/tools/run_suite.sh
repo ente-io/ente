@@ -128,6 +128,54 @@ print_kv() {
   printf '  %-30s %s\n' "$key" "$value"
 }
 
+format_elapsed_time() {
+  local elapsed_seconds="$1"
+  local minutes=$((elapsed_seconds / 60))
+  local seconds=$((elapsed_seconds % 60))
+  printf '%02dm:%02ds' "$minutes" "$seconds"
+}
+
+start_platform_runner_timer() {
+  local platform="$1"
+  local start_epoch="$2"
+  local interval_seconds=15
+
+  while true; do
+    sleep "$interval_seconds"
+    local now_epoch elapsed
+    now_epoch=$(date +%s)
+    elapsed=$((now_epoch - start_epoch))
+    echo "  [$platform] still running... $(format_elapsed_time "$elapsed") elapsed"
+  done
+}
+
+run_platform_runner_with_progress() {
+  local platform="$1"
+  local platform_log="$2"
+
+  local start_epoch timer_pid runner_exit elapsed
+  start_epoch=$(date +%s)
+
+  echo "Starting $platform platform runner (updates every 15s)"
+  start_platform_runner_timer "$platform" "$start_epoch" &
+  timer_pid=$!
+
+  if $VERBOSE; then
+    run_platform_runner "$platform" 2>&1 | tee "$platform_log"
+    runner_exit=${PIPESTATUS[0]}
+  else
+    run_platform_runner "$platform" >"$platform_log" 2>&1
+    runner_exit=$?
+  fi
+
+  kill "$timer_pid" >/dev/null 2>&1 || true
+  wait "$timer_pid" >/dev/null 2>&1 || true
+
+  elapsed=$(( $(date +%s) - start_epoch ))
+  echo "  [$platform] runner finished in $(format_elapsed_time "$elapsed")"
+  return "$runner_exit"
+}
+
 print_html_report_urls() {
   local report_path="$1"
   python3 - "$report_path" <<'PY'
@@ -1615,13 +1663,8 @@ declare -a failed_platform_runners=()
 for platform in "${selected_platforms[@]}"; do
   platform_log="$PLATFORM_LOG_DIR/$platform.log"
   set +e
-  if $VERBOSE; then
-    run_platform_runner "$platform" 2>&1 | tee "$platform_log"
-    platform_run_exit=${PIPESTATUS[0]}
-  else
-    run_platform_runner "$platform" >"$platform_log" 2>&1
-    platform_run_exit=$?
-  fi
+  run_platform_runner_with_progress "$platform" "$platform_log"
+  platform_run_exit=$?
   set -e
 
   case "$platform_run_exit" in
