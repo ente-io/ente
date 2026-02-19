@@ -1,7 +1,12 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
+import {
+    Download01Icon,
+    ImageAdd02Icon,
+    Share08Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -90,6 +95,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { Notification } from "ente-new/photos/components/Notification";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
@@ -509,6 +515,7 @@ export default function PublicCollectionGallery() {
                                   publicFiles,
                                   downloadEnabled,
                                   onAddSaveGroup,
+                                  onAddPhotos,
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
@@ -526,6 +533,7 @@ export default function PublicCollectionGallery() {
             downloadEnabled,
             showPublicFeed,
             commentsEnabled,
+            onAddPhotos,
             hasSelection,
             fileListHeaderHeightForViewport,
         ],
@@ -890,6 +898,7 @@ interface FileListHeaderProps {
     publicFiles: EnteFile[];
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
+    onAddPhotos?: () => void;
     onShowFeed?: () => void;
     hasSelection: boolean;
 }
@@ -917,10 +926,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicFiles,
     downloadEnabled,
     onAddSaveGroup,
+    onAddPhotos,
     onShowFeed,
     hasSelection,
 }) => {
-    const showHeaderActions = !hasSelection && !!(onShowFeed || downloadEnabled);
+    const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+    const showHeaderActions = !hasSelection;
+    const addPhotosDisabled = uploadManager.isUploadInProgress();
 
     const memoriesDateRange = useMemo(() => {
         if (!publicFiles.length) return undefined;
@@ -946,84 +958,136 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
             onAddSaveGroup,
         );
 
+    const handleShare = async () => {
+        if (typeof window === "undefined") return;
+
+        const shareUrl = window.location.href;
+        const shareText = `${publicCollection.name}\n${shareUrl}`;
+        const isMobile = window.matchMedia("(width < 720px)").matches;
+
+        if (isMobile && typeof navigator.share === "function") {
+            try {
+                await navigator.share({ text: shareText });
+                return;
+            } catch (error) {
+                if (error instanceof Error && error.name === "AbortError") {
+                    return;
+                }
+            }
+        }
+
+        void navigator.clipboard.writeText(isMobile ? shareText : shareUrl);
+        setShowCopiedMessage(true);
+        setTimeout(() => setShowCopiedMessage(false), 2000);
+    };
+
     return (
-        <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
-            <SpacedRow
-                sx={{
-                    width: "100%",
-                    "@media (width < 720px)": {
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        gap: 1,
-                    },
-                }}
-            >
-                <Box
+        <>
+            <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
+                <SpacedRow
                     sx={{
-                        minWidth: 0,
-                        flex: 1,
-                        "@media (width < 720px)": { width: "100%" },
+                        width: "100%",
+                        "@media (width < 720px)": {
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            gap: 1,
+                        },
                     }}
                 >
-                    <GalleryItemsSummary
-                        name={publicCollection.name}
-                        fileCount={publicFiles.length}
-                        endIcon={
-                            memoriesDateRange ? (
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted", ml: "-6px" }}
-                                >
-                                    <Box component="span" sx={{ mr: "6px" }}>
-                                        {"\u00b7"}
-                                    </Box>
-                                    {memoriesDateRange}
-                                </Typography>
-                            ) : undefined
-                        }
-                        nameProps={{
-                            noWrap: true,
-                            sx: { width: "100%", maxWidth: "100%" },
-                        }}
-                    />
-                </Box>
-                {showHeaderActions && (
-                    <Stack
-                        direction="row"
-                        spacing={0}
+                    <Box
                         sx={{
-                            alignItems: "center",
-                            "@media (width > 720px)": { mr: -1.5 },
-                            "@media (width < 720px)": { ml: -1.5 },
+                            minWidth: 0,
+                            flex: 1,
+                            "@media (width < 720px)": { width: "100%" },
                         }}
                     >
-                        {onShowFeed && (
-                            <IconButton onClick={onShowFeed}>
-                                <Box
-                                    sx={{
-                                        width: 24,
-                                        height: 24,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
+                        <GalleryItemsSummary
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                            endIcon={
+                                memoriesDateRange ? (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted", ml: "-6px" }}
+                                    >
+                                        <Box component="span" sx={{ mr: "6px" }}>
+                                            {"\u00b7"}
+                                        </Box>
+                                        {memoriesDateRange}
+                                    </Typography>
+                                ) : undefined
+                            }
+                            nameProps={{
+                                noWrap: true,
+                                sx: { width: "100%", maxWidth: "100%" },
+                            }}
+                        />
+                    </Box>
+                    {showHeaderActions && (
+                        <Stack
+                            direction="row"
+                            spacing={0}
+                            sx={{
+                                alignItems: "center",
+                                "@media (width > 720px)": { mr: -1.5 },
+                                "@media (width < 720px)": { ml: -1.5 },
+                            }}
+                        >
+                            {onShowFeed && (
+                                <IconButton onClick={onShowFeed}>
+                                    <Box
+                                        sx={{
+                                            width: 24,
+                                            height: 24,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <FeedIcon />
+                                    </Box>
+                                </IconButton>
+                            )}
+                            {downloadEnabled && (
+                                <IconButton onClick={downloadAllFiles}>
+                                    <HugeiconsIcon
+                                        icon={Download01Icon}
+                                        strokeWidth={1.6}
+                                    />
+                                </IconButton>
+                            )}
+                            {onAddPhotos && (
+                                <IconButton
+                                    onClick={onAddPhotos}
+                                    disabled={addPhotosDisabled}
                                 >
-                                    <FeedIcon />
-                                </Box>
-                            </IconButton>
-                        )}
-                        {downloadEnabled && (
-                            <IconButton onClick={downloadAllFiles}>
+                                    <HugeiconsIcon
+                                        icon={ImageAdd02Icon}
+                                        strokeWidth={1.8}
+                                    />
+                                </IconButton>
+                            )}
+                            <IconButton onClick={handleShare}>
                                 <HugeiconsIcon
-                                    icon={Download01Icon}
+                                    icon={Share08Icon}
                                     strokeWidth={1.6}
                                 />
                             </IconButton>
-                        )}
-                    </Stack>
-                )}
-            </SpacedRow>
-        </GalleryItemsHeaderAdapter>
+                        </Stack>
+                    )}
+                </SpacedRow>
+            </GalleryItemsHeaderAdapter>
+            <Notification
+                open={showCopiedMessage}
+                onClose={() => setShowCopiedMessage(false)}
+                horizontal="left"
+                attributes={{
+                    color: "secondary",
+                    startIcon: <CheckIcon />,
+                    title: "Copied!",
+                }}
+            />
+        </>
     );
 };
 
