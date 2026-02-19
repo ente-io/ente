@@ -612,6 +612,7 @@ export default function PublicCollectionGallery() {
                             },
                             selected.count > 0 && {
                                 borderColor: "accent.main",
+                                overflowX: "hidden",
                             },
                         ]}
                     >
@@ -864,20 +865,40 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         direction="row"
         sx={{
             flex: 1,
+            minWidth: 0,
             gap: 1,
             alignItems: "center",
-            mx: -1.5,
-            "@media (width < 720px)": { mx: -1 },
+            width: "100%",
         }}
     >
-        <IconButton onClick={clearSelection}>
+        <IconButton
+            onClick={clearSelection}
+            sx={{
+                flexShrink: 0,
+                "@media (width < 720px)": { ml: "-8px" },
+            }}
+        >
             <CloseIcon />
         </IconButton>
-        <Typography sx={{ mr: "auto" }}>
+        <Typography
+            sx={{
+                mr: "auto",
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+            }}
+        >
             {t("selected_count", { selected: count })}
         </Typography>
         <Tooltip title={t("download")}>
-            <IconButton onClick={downloadFilesHelper}>
+            <IconButton
+                onClick={downloadFilesHelper}
+                sx={{
+                    flexShrink: 0,
+                    "@media (width < 720px)": { mr: "-8px" },
+                }}
+            >
                 <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
@@ -922,7 +943,6 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     hasSelection,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const showHeaderActions = !hasSelection;
     const addPhotosDisabled = uploadManager.isUploadInProgress();
 
     const memoriesDateRange = useMemo(() => {
@@ -1017,58 +1037,62 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             }}
                         />
                     </Box>
-                    {showHeaderActions && (
-                        <Stack
-                            direction="row"
-                            spacing={0}
-                            sx={{
-                                alignItems: "center",
-                                "@media (width > 720px)": { mr: -1.5 },
-                                "@media (width < 720px)": { ml: -1.5 },
-                            }}
-                        >
-                            {onShowFeed && (
-                                <IconButton onClick={onShowFeed}>
-                                    <Box
-                                        sx={{
-                                            width: 24,
-                                            height: 24,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                        }}
-                                    >
-                                        <FeedIcon />
-                                    </Box>
-                                </IconButton>
-                            )}
-                            {downloadEnabled && (
-                                <IconButton onClick={downloadAllFiles}>
-                                    <HugeiconsIcon
-                                        icon={Download01Icon}
-                                        strokeWidth={1.6}
-                                    />
-                                </IconButton>
-                            )}
-                            {onAddPhotos && (
-                                <IconButton
-                                    onClick={onAddPhotos}
-                                    disabled={addPhotosDisabled}
+                    <Stack
+                        direction="row"
+                        spacing={0}
+                        sx={{
+                            alignItems: "center",
+                            "@media (width > 720px)": { mr: -1.5 },
+                            "@media (width < 720px)": { ml: -1.5 },
+                        }}
+                    >
+                        {onShowFeed && (
+                            <IconButton
+                                onClick={onShowFeed}
+                                disabled={hasSelection}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
                                 >
-                                    <HugeiconsIcon
-                                        icon={ImageAdd02Icon}
-                                        strokeWidth={1.8}
-                                    />
-                                </IconButton>
-                            )}
-                            <IconButton onClick={handleShare}>
+                                    <FeedIcon />
+                                </Box>
+                            </IconButton>
+                        )}
+                        {downloadEnabled && (
+                            <IconButton
+                                onClick={downloadAllFiles}
+                                disabled={hasSelection}
+                            >
                                 <HugeiconsIcon
-                                    icon={Share08Icon}
+                                    icon={Download01Icon}
                                     strokeWidth={1.6}
                                 />
                             </IconButton>
-                        </Stack>
-                    )}
+                        )}
+                        {onAddPhotos && (
+                            <IconButton
+                                onClick={onAddPhotos}
+                                disabled={addPhotosDisabled || hasSelection}
+                            >
+                                <HugeiconsIcon
+                                    icon={ImageAdd02Icon}
+                                    strokeWidth={1.8}
+                                />
+                            </IconButton>
+                        )}
+                        <IconButton onClick={handleShare} disabled={hasSelection}>
+                            <HugeiconsIcon
+                                icon={Share08Icon}
+                                strokeWidth={1.6}
+                            />
+                        </IconButton>
+                    </Stack>
                 </SpacedRow>
             </GalleryItemsHeaderAdapter>
             <Notification
