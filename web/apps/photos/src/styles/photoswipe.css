@@ -349,6 +349,7 @@
   being attached to the video.
  */
 .pswp-ente .pswp__media-controls {
+    display: none;
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -395,9 +396,19 @@
     flex-direction: column;
 }
 
-/* Hide the controls if they're not associated to a media-controller. */
-media-control-bar:not([mediacontroller]) {
-    display: none;
+/* Controls are shown in a disabled state while video data is still loading. */
+.pswp-ente .pswp__media-controls.pswp__media-controls--visible {
+    display: block;
+}
+
+.pswp-ente
+    .pswp__media-controls.pswp__media-controls--disabled
+    media-control-bar:not(:first-child),
+.pswp-ente
+    .pswp__media-controls.pswp__media-controls--disabled
+    media-playback-rate-menu {
+    opacity: 0.45;
+    pointer-events: none;
 }
 
 media-control-bar {

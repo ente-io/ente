@@ -769,10 +769,11 @@ export class FileViewerPhotoSwipe {
         let shouldIgnoreNextVideoQualityChange = false;
 
         /**
-         * If a {@link mediaControllerID} is present in the given
-         * {@link itemData}, then make the media controls visible and link the
-         * media-control-bars (and other containers that house controls) to the
-         * given controller. Otherwise hide the media controls.
+         * Update the media controls for the given {@link itemData}.
+         *
+         * - Show controls only for videos.
+         * - Keep controls visible but disabled while video playback is loading.
+         * - Link controls to the media controller once available.
          */
         const updateVideoControlsAndPlayback = (itemData: ItemData) => {
             // For reasons possibly related to the 1 tick wait in the hls-video
@@ -855,6 +856,20 @@ export class FileViewerPhotoSwipe {
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
+            const showVideoControls =
+                itemData.fileType == FileType.video && !itemData.fetchFailed;
+            const areVideoControlsDisabled =
+                showVideoControls &&
+                (!!itemData.isContentLoading || !itemData.mediaControllerID);
+            container?.classList.toggle(
+                "pswp__media-controls--visible",
+                showVideoControls,
+            );
+            container?.classList.toggle(
+                "pswp__media-controls--disabled",
+                areVideoControlsDisabled,
+            );
+
             const controls =
                 container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
