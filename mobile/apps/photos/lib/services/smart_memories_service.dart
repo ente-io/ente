@@ -153,14 +153,18 @@ class SmartMemoriesService {
       _logger.info(
         'gotten all ${persons.length} persons after filtering $t',
       );
+      final bool unnamedPeopleFallbackEnabled =
+          localSettings.showOfflineModeOption;
       final amountOfNonIgnoredPersons =
           persons.where((person) => !person.data.isIgnored).length;
-      final canUseUnnamedFallback = isOfflineMode ||
-          amountOfNonIgnoredPersons <
-              _minimumNamedPeopleBeforeDisablingUnnamedFallback;
-      final shouldLoadUnnamedClusterData = canUseUnnamedFallback ||
-          debugSurfaceAll ||
-          _debugForceUnnamedClustersOnly;
+      final canUseUnnamedFallback = unnamedPeopleFallbackEnabled &&
+          (isOfflineMode ||
+              amountOfNonIgnoredPersons <
+                  _minimumNamedPeopleBeforeDisablingUnnamedFallback);
+      final shouldLoadUnnamedClusterData = unnamedPeopleFallbackEnabled &&
+          (canUseUnnamedFallback ||
+              debugSurfaceAll ||
+              _debugForceUnnamedClustersOnly);
       final unnamedClusterData = await _loadUnnamedClusterData(
         mlDataDB: mlDataDB,
         allPersons: allPersons,
