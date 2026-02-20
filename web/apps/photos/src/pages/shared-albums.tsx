@@ -22,6 +22,7 @@ import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
+import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
 import { TripLayout } from "components/TripLayout";
 import { Upload } from "components/Upload";
 import {
@@ -582,6 +583,32 @@ export default function PublicCollectionGallery() {
     }
 
     const layout = publicCollection?.pubMagicMetadata?.data.layout || "grouped";
+    const isSingleFileAlbum = publicFiles.length === 1;
+    const shouldShowSingleFileViewer =
+        isSingleFileAlbum && (layout === "grouped" || layout === "continuous");
+
+    if (shouldShowSingleFileViewer) {
+        return (
+            <>
+                <PublicAlbumSingleFileViewer
+                    file={publicFiles[0]!}
+                    publicAlbumsCredentials={credentials.current}
+                    collectionKey={collectionKey.current!}
+                    enableDownload={downloadEnabled}
+                    enableComment={commentsEnabled}
+                    enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                    onJoinAlbum={handleJoinAlbum}
+                    onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
+                />
+                {blockingLoad && <TranslucentLoadingOverlay />}
+                <DownloadStatusNotifications
+                    {...{ saveGroups, onRemoveSaveGroup }}
+                    fullWidthOnMobile
+                />
+            </>
+        );
+    }
 
     return (
         <FullScreenDropZone
@@ -954,6 +981,10 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         );
     }, [publicFiles]);
 
+    const isQuickLinkAlbum =
+        memoriesDateRange !== undefined &&
+        publicCollection.name === memoriesDateRange;
+
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
@@ -1010,7 +1041,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             name={publicCollection.name}
                             fileCount={publicFiles.length}
                             endIcon={
-                                memoriesDateRange ? (
+                                !isQuickLinkAlbum && memoriesDateRange ? (
                                     <Typography
                                         variant="small"
                                         sx={{ color: "text.muted", ml: "-6px" }}

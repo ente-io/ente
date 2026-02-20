@@ -121,7 +121,7 @@ export interface FileViewerPhotoSwipeDelegate {
 
 type FileViewerPhotoSwipeOptions = Pick<
     FileViewerProps,
-    "initialIndex" | "showFullscreenButton"
+    "initialIndex" | "showFullscreenButton" | "disableEscapeClose"
 > & {
     /**
      * `true` if we're running in the context of a logged in user, and so
@@ -255,6 +255,7 @@ export class FileViewerPhotoSwipe {
         showSocialButtons,
         enableComment,
         showFullscreenButton,
+        disableEscapeClose,
         delegate,
         onClose,
         onAnnotate,
@@ -288,6 +289,9 @@ export class FileViewerPhotoSwipe {
             // auto hide based on mouse activity, but that would not have any
             // effect on touch devices)
             bgClickAction: "toggle-controls",
+            // In single-file public viewer mode we keep Escape for nested UI
+            // interactions while preventing accidental viewer closure.
+            escKey: !disableEscapeClose,
             // At least on macOS, manual zooming with the trackpad is very
             // cumbersome (possibly because of the small multiplier in the
             // PhotoSwipe source, but I'm not sure). The other option to do a
