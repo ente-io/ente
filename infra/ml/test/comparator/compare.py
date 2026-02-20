@@ -94,6 +94,8 @@ def _percentile(values: Sequence[float], percentile: float) -> float:
 class ThresholdConfig:
     clip_cosine_distance: float = 0.015
     cross_platform_clip_cosine_distance: float = 0.015
+    clip_warning_cosine_distance: float = 0.035
+    cross_platform_clip_warning_cosine_distance: float = 0.035
     face_embedding_cosine_distance: float = 0.015
     face_embedding_warning_cosine_distance: float = 0.035
     box_iou_threshold: float = 0.80
@@ -103,6 +105,18 @@ class ThresholdConfig:
     min_face_score_for_comparison: float = 0.80
 
     def __post_init__(self) -> None:
+        if self.clip_warning_cosine_distance < self.clip_cosine_distance:
+            raise ValueError(
+                "clip_warning_cosine_distance must be >= clip_cosine_distance"
+            )
+        if (
+            self.cross_platform_clip_warning_cosine_distance
+            < self.cross_platform_clip_cosine_distance
+        ):
+            raise ValueError(
+                "cross_platform_clip_warning_cosine_distance must be >= "
+                "cross_platform_clip_cosine_distance"
+            )
         if self.face_embedding_warning_cosine_distance < self.face_embedding_cosine_distance:
             raise ValueError(
                 "face_embedding_warning_cosine_distance must be >= face_embedding_cosine_distance"
@@ -112,6 +126,10 @@ class ThresholdConfig:
         return {
             "clip_cosine_distance": self.clip_cosine_distance,
             "cross_platform_clip_cosine_distance": self.cross_platform_clip_cosine_distance,
+            "clip_warning_cosine_distance": self.clip_warning_cosine_distance,
+            "cross_platform_clip_warning_cosine_distance": (
+                self.cross_platform_clip_warning_cosine_distance
+            ),
             "face_embedding_cosine_distance": self.face_embedding_cosine_distance,
             "face_embedding_warning_cosine_distance": self.face_embedding_warning_cosine_distance,
             "box_iou_threshold": self.box_iou_threshold,
@@ -378,11 +396,19 @@ def compare_result_sets(
     candidate_results: Mapping[str, ParityResult],
     thresholds: ThresholdConfig | None = None,
     clip_threshold: float | None = None,
+    clip_warning_threshold: float | None = None,
 ) -> ComparisonReport:
     thresholds = thresholds or ThresholdConfig()
     clip_threshold = (
         thresholds.clip_cosine_distance if clip_threshold is None else clip_threshold
     )
+    clip_warning_threshold = (
+        thresholds.clip_warning_cosine_distance
+        if clip_warning_threshold is None
+        else clip_warning_threshold
+    )
+    if clip_warning_threshold < clip_threshold:
+        raise ValueError("clip_warning_threshold must be >= clip_threshold")
 
     missing_files = tuple(sorted(set(reference_results) - set(candidate_results)))
     extra_files = tuple(sorted(set(candidate_results) - set(reference_results)))
@@ -504,17 +530,37 @@ def compare_result_sets(
 
         clip_distance = cosine_distance(reference.clip.embedding, candidate.clip.embedding)
         clip_distances.append(clip_distance)
+        if clip_distance <= clip_threshold:
+            clip_status = STATUS_PASS
+        elif clip_distance <= clip_warning_threshold:
+            clip_status = STATUS_WARNING
+        else:
+            clip_status = STATUS_FAIL
         add_file_metric(
             file_id=file_id,
             metric="clip_cosine_distance",
             value=clip_distance,
             threshold=clip_threshold,
-            status=STATUS_PASS if clip_distance <= clip_threshold else STATUS_FAIL,
-            passed=clip_distance <= clip_threshold,
+            status=clip_status,
+            passed=clip_status != STATUS_FAIL,
             direction="<=",
             message="CLIP cosine distance",
         )
-        if clip_distance > clip_threshold:
+        if clip_status == STATUS_WARNING:
+            add_warning(
+                ComparisonFinding(
+                    file_id=file_id,
+                    metric="clip_cosine_distance",
+                    message=(
+                        "CLIP cosine distance in warning band "
+                        f"({clip_threshold:.3f} - {clip_warning_threshold:.3f})"
+                    ),
+                    value=clip_distance,
+                    threshold=clip_warning_threshold,
+                    severity=STATUS_WARNING,
+                ),
+            )
+        elif clip_status == STATUS_FAIL:
             add_failure(
                 ComparisonFinding(
                     file_id=file_id,
@@ -930,7 +976,11 @@ def compare_result_sets(
             )
 
     aggregates = {
-        "clip_cosine_distance": _make_aggregate(clip_distances, clip_threshold),
+        "clip_cosine_distance": _make_aggregate(
+            clip_distances,
+            clip_threshold,
+            warning_threshold=clip_warning_threshold,
+        ),
         "face_box_iou_error": _make_aggregate(
             iou_errors,
             0.0,
@@ -1085,6 +1135,7 @@ def compare_platform_matrix(
                 candidate_results=by_platform[platform],
                 thresholds=thresholds,
                 clip_threshold=thresholds.clip_cosine_distance,
+                clip_warning_threshold=thresholds.clip_warning_cosine_distance,
             ),
         )
 
@@ -1100,6 +1151,9 @@ def compare_platform_matrix(
                     candidate_results=by_platform[right_platform],
                     thresholds=thresholds,
                     clip_threshold=thresholds.cross_platform_clip_cosine_distance,
+                    clip_warning_threshold=(
+                        thresholds.cross_platform_clip_warning_cosine_distance
+                    ),
                 ),
             )
 

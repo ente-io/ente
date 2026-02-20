@@ -176,6 +176,63 @@ def test_compare_result_sets_fails_on_clip_drift() -> None:
     assert any(finding.metric == "clip_cosine_distance" for finding in report.findings)
 
 
+def test_compare_result_sets_marks_clip_warning_band() -> None:
+    reference = _result(
+        file_id="clip-warning.jpeg",
+        platform="python",
+        clip_seed=10,
+        faces=(_face(910, x=0.2, y=0.1, score=0.91),),
+    )
+    candidate = ParityResult(
+        file_id=reference.file_id,
+        clip=ClipResult(
+            embedding=_jittered_vector(reference.clip.embedding, index=0, delta=0.25)
+        ),
+        faces=reference.faces,
+        runner_metadata=_metadata("ios"),
+    )
+
+    report = compare_result_sets(
+        reference_platform="python",
+        candidate_platform="ios",
+        reference_results={reference.file_id: reference},
+        candidate_results={candidate.file_id: candidate},
+    )
+
+    assert report.status == "warning"
+    assert report.passed is True
+    assert report.findings == ()
+    assert report.warning_files == ("*aggregate*", "clip-warning.jpeg")
+    assert report.failing_files == ()
+    assert any(
+        warning.metric == "clip_cosine_distance"
+        and warning.file_id == "clip-warning.jpeg"
+        for warning in report.warnings
+    )
+    assert any(
+        warning.metric == "clip_cosine_distance" and warning.file_id == "*aggregate*"
+        for warning in report.warnings
+    )
+
+    file_status = _status_for_file(report, "clip-warning.jpeg")
+    assert file_status.status == "warning"
+    assert file_status.passed is True
+    assert file_status.failures == ()
+    assert any(
+        warning.metric == "clip_cosine_distance" for warning in file_status.warnings
+    )
+
+    clip_metric = next(
+        metric
+        for metric in file_status.metrics
+        if metric.metric == "clip_cosine_distance"
+    )
+    assert clip_metric.status == "warning"
+    assert clip_metric.passed is True
+    assert clip_metric.value is not None
+    assert 0.015 < clip_metric.value <= 0.035
+
+
 def test_compare_result_sets_passes_when_iou_above_single_loose_threshold() -> None:
     reference_face = _face_with_box(
         310,
@@ -697,4 +754,26 @@ def test_threshold_config_rejects_invalid_warning_threshold() -> None:
         ThresholdConfig(
             face_embedding_cosine_distance=0.02,
             face_embedding_warning_cosine_distance=0.01,
+        )
+
+
+def test_threshold_config_rejects_invalid_clip_warning_threshold() -> None:
+    with pytest.raises(
+        ValueError,
+        match="clip_warning_cosine_distance must be >=",
+    ):
+        ThresholdConfig(
+            clip_cosine_distance=0.02,
+            clip_warning_cosine_distance=0.01,
+        )
+
+
+def test_threshold_config_rejects_invalid_cross_platform_clip_warning_threshold() -> None:
+    with pytest.raises(
+        ValueError,
+        match="cross_platform_clip_warning_cosine_distance must be >=",
+    ):
+        ThresholdConfig(
+            cross_platform_clip_cosine_distance=0.02,
+            cross_platform_clip_warning_cosine_distance=0.01,
         )
