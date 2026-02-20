@@ -20,7 +20,7 @@ This directory contains the ML indexing parity framework for Android, iOS, deskt
 ## Local Run (One Command)
 
 ```bash
-bash infra/ml/test/tools/run_ml_parity_tests.sh
+bash infra/ml/test/run_ml_parity_tests.sh
 ```
 
 Common flags:
@@ -80,7 +80,7 @@ Use this process when corpus/threshold/model behavior changes intentionally:
 2. Regenerate and compare with a real run:
 
 ```bash
-bash infra/ml/test/tools/run_ml_parity_tests.sh --platforms all --output-dir infra/ml/test/out/parity
+bash infra/ml/test/run_ml_parity_tests.sh --platforms all --output-dir infra/ml/test/out/parity
 ```
 
 3. Review `infra/ml/test/out/parity/parity_report.html`, `comparison_report.json`, and per-platform `results.json` files.

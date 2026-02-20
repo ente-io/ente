@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(
   git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null \
-    || (cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)
+    || (cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 )"
 ML_DIR="$ROOT_DIR/infra/ml/test"
 UV_PROJECT_DIR="$ROOT_DIR/infra/ml"
@@ -31,7 +31,7 @@ LOCAL_MODEL_MIRROR_DIR=""
 
 usage() {
   cat <<EOF
-Usage: infra/ml/test/tools/run_ml_parity_tests.sh [flags]
+Usage: infra/ml/test/run_ml_parity_tests.sh [flags]
 
 Flags:
   --platforms all|desktop|android|ios   (default: all)
