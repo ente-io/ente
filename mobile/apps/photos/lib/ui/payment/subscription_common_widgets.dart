@@ -107,6 +107,7 @@ class SubFaqWidget extends StatelessWidget {
       child: MenuItemWidgetNew(
         title: AppLocalizations.of(context).faqs,
         menuItemColor: colorScheme.fillFaint,
+        pressedColor: colorScheme.fillFaintPressed,
         trailingWidget: Icon(
           Icons.chevron_right_outlined,
           color: colorScheme.strokeBase,
