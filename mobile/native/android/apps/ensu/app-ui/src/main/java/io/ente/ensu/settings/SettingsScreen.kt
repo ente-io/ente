@@ -1,5 +1,9 @@
 package io.ente.ensu.settings
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.background
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -24,10 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.clip
+import androidx.core.content.ContextCompat
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -45,13 +50,13 @@ fun SettingsScreen(
     onDeleteAccount: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    val allItems = remember(onOpenLogs, onSignOut, onSignIn, onDeleteAccount, isLoggedIn) {
+    val allItems = remember(context, onOpenLogs, onSignOut, onSignIn, onDeleteAccount, isLoggedIn) {
         buildList {
             add(
                 SettingsItem(
                     title = "Logs",
-                    subtitle = "View, export, and share logs",
                     onClick = onOpenLogs
                 )
             )
@@ -59,14 +64,12 @@ fun SettingsScreen(
                 add(
                     SettingsItem(
                         title = "Delete Account",
-                        subtitle = "Email support to delete your account",
                         onClick = onDeleteAccount
                     )
                 )
                 add(
                     SettingsItem(
                         title = "Sign Out",
-                        subtitle = "Stop syncing this device",
                         onClick = onSignOut
                     )
                 )
@@ -74,11 +77,23 @@ fun SettingsScreen(
                 add(
                     SettingsItem(
                         title = "Sign In to Backup",
-                        subtitle = "Sync your chats across devices",
                         onClick = onSignIn
                     )
                 )
             }
+
+            add(
+                SettingsItem(
+                    title = "Privacy Policy",
+                    onClick = { context.openExternalLink("https://ente.io/privacy") }
+                )
+            )
+            add(
+                SettingsItem(
+                    title = "Terms of Service",
+                    onClick = { context.openExternalLink("https://ente.io/terms") }
+                )
+            )
         }
     }
 
@@ -86,8 +101,7 @@ fun SettingsScreen(
         val q = query.trim().lowercase()
         if (q.isEmpty()) return@remember allItems
         allItems.filter { item ->
-            item.title.lowercase().contains(q) ||
-                (item.subtitle?.lowercase()?.contains(q) == true)
+            item.title.lowercase().contains(q)
         }
     }
 
@@ -161,7 +175,6 @@ fun SettingsScreen(
 
 private data class SettingsItem(
     val title: String,
-    val subtitle: String? = null,
     val onClick: () -> Unit
 )
 
@@ -177,9 +190,6 @@ private fun SettingsRow(item: SettingsItem) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = item.title, style = EnsuTypography.body, color = EnsuColor.textPrimary())
-            if (!item.subtitle.isNullOrBlank()) {
-                Text(text = item.subtitle, style = EnsuTypography.small, color = EnsuColor.textMuted())
-            }
         }
         Icon(
             painter = painterResource(HugeIcons.ArrowRight01Icon),
@@ -187,5 +197,14 @@ private fun SettingsRow(item: SettingsItem) {
             tint = EnsuColor.textMuted(),
             modifier = Modifier.size(18.dp)
         )
+    }
+}
+
+private fun Context.openExternalLink(url: String) {
+    runCatching {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        ContextCompat.startActivity(this, intent, null)
     }
 }
