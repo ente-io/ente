@@ -1223,7 +1223,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
             onTouchStart: () => setIsLongPressing(true),
+            onTouchMove: () => setIsLongPressing(false),
             onTouchEnd: () => setIsLongPressing(false),
+            onTouchCancel: () => setIsLongPressing(false),
         }),
         [],
     );
