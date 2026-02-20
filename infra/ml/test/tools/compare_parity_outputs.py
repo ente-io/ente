@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+from datetime import UTC, datetime
+import json
+from pathlib import Path
+import sys
+from typing import Any
+
+ML_DIR = Path(__file__).resolve().parents[1]
+if str(ML_DIR) not in sys.path:
+    sys.path.insert(0, str(ML_DIR))
+
+from comparator.compare import ThresholdConfig, compare_platform_matrix
+from ground_truth.schema import load_results_document
+
+
+def _load_results(path: Path) -> tuple[str | None, tuple[Any, ...]]:
+    payload = json.loads(path.read_text())
+    platform = payload.get("platform") if isinstance(payload, dict) else None
+    return platform, load_results_document(payload)
+
+
+def _serialize_reports(reports: tuple[Any, ...]) -> list[dict[str, Any]]:
+    return [report.to_dict() for report in reports]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Compare platform ML indexing results against Python ground truth.",
+    )
+    parser.add_argument(
+        "--ground-truth",
+        required=True,
+        help="Path to a JSON file containing Python ground truth results.",
+    )
+    parser.add_argument(
+        "--platform-result",
+        action="append",
+        default=[],
+        metavar="platform=path",
+        help="Platform result to compare, for example android=out/android/results.json.",
+    )
+    parser.add_argument(
+        "--output",
+        help="Optional path to write machine-readable comparison JSON.",
+    )
+    parser.add_argument(
+        "--no-pairwise",
+        action="store_true",
+        help="Skip non-ground-truth pairwise comparisons.",
+    )
+    parser.add_argument(
+        "--fail-on-any-file-failure",
+        action="store_true",
+        help=(
+            "Exit non-zero when any compared file fails thresholds. "
+            "By default, this command reports file-level failures but exits zero."
+        ),
+    )
+    args = parser.parse_args()
+
+    ground_truth_path = Path(args.ground_truth)
+    ground_truth_platform, ground_truth_results = _load_results(ground_truth_path)
+    if not ground_truth_platform:
+        ground_truth_platform = "python"
+
+    platform_results = {ground_truth_platform: ground_truth_results}
+    for platform_result in args.platform_result:
+        if "=" not in platform_result:
+            raise ValueError(
+                f"Invalid --platform-result value '{platform_result}'. Use platform=path."
+            )
+        platform, path = platform_result.split("=", 1)
+        _, results = _load_results(Path(path))
+        platform_results[platform] = results
+
+    thresholds = ThresholdConfig()
+    reports = compare_platform_matrix(
+        platform_results,
+        ground_truth_platform=ground_truth_platform,
+        include_pairwise=not args.no_pairwise,
+        thresholds=thresholds,
+    )
+
+    overall_status = (
+        "fail"
+        if any(report.status == "fail" for report in reports)
+        else "warning"
+        if any(report.status == "warning" for report in reports)
+        else "pass"
+    )
+    all_files_passed = all(report.passed for report in reports)
+    output_payload = {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "ground_truth_platform": ground_truth_platform,
+        "thresholds": thresholds.to_dict(),
+        "all_files_passed": all_files_passed,
+        "status": overall_status,
+        "passed": all_files_passed,
+        "comparisons": _serialize_reports(reports),
+    }
+
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(output_payload, indent=2, sort_keys=True))
+
+    failed_reports = [report for report in reports if report.status == "fail"]
+    warning_reports = [report for report in reports if report.status == "warning"]
+    print(f"Comparisons executed: {len(reports)}")
+    print("Comparison mode: file-level (no global pass/fail gate)")
+    print(f"Overall comparison status: {overall_status.upper()}")
+    for report in reports:
+        print(
+            f"  {report.reference_platform} -> {report.candidate_platform}: "
+            f"{len(report.passing_files)} pass, "
+            f"{len(report.warning_files)} warning, "
+            f"{len(report.failing_files)} fail "
+            f"(total: {report.total_reference_files})"
+        )
+    if failed_reports:
+        print("Comparisons with failing files:")
+        for report in failed_reports:
+            print(
+                f"  {report.reference_platform} -> {report.candidate_platform} "
+                f"({len(report.findings)} findings)"
+            )
+    if warning_reports:
+        print("Comparisons with warning files:")
+        for report in warning_reports:
+            print(
+                f"  {report.reference_platform} -> {report.candidate_platform} "
+                f"({len(report.warnings)} warnings)"
+            )
+
+    if args.fail_on_any_file_failure and failed_reports:
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
