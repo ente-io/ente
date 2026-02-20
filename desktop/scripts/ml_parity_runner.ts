@@ -2,12 +2,12 @@
 
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import crypto from "node:crypto";
+import { once } from "node:events";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
-import { once } from "node:events";
 import path from "node:path";
-import process from "node:process";
 import { performance } from "node:perf_hooks";
+import process from "node:process";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 
@@ -51,20 +51,19 @@ interface PendingRequest {
 }
 
 interface WebMLBindings {
-    indexCLIP: (image: unknown, electron: unknown) => Promise<{ embedding: number[] }>;
-    indexFaces: (file: unknown, image: unknown, electron: unknown) => Promise<{
+    indexCLIP: (
+        image: unknown,
+        electron: unknown,
+    ) => Promise<{ embedding: number[] }>;
+    indexFaces: (
+        file: unknown,
+        image: unknown,
+        electron: unknown,
+    ) => Promise<{
         faces: Array<{
             detection: {
-                box: {
-                    x: number;
-                    y: number;
-                    width: number;
-                    height: number;
-                };
-                landmarks: Array<{
-                    x: number;
-                    y: number;
-                }>;
+                box: { x: number; y: number; width: number; height: number };
+                landmarks: Array<{ x: number; y: number }>;
             };
             score: number;
             embedding: number[];
@@ -88,8 +87,21 @@ const DEFAULT_MANIFEST_PATH = path.join(
     "manifest.json",
 );
 
-const DEFAULT_OUTPUT_DIR = path.join(REPO_ROOT, "infra", "ml", "test", "out", "parity", "desktop");
-const DEFAULT_HOST_SCRIPT_PATH = path.join(REPO_ROOT, "desktop", "scripts", "ml_parity_host.js");
+const DEFAULT_OUTPUT_DIR = path.join(
+    REPO_ROOT,
+    "infra",
+    "ml",
+    "test",
+    "out",
+    "parity",
+    "desktop",
+);
+const DEFAULT_HOST_SCRIPT_PATH = path.join(
+    REPO_ROOT,
+    "desktop",
+    "scripts",
+    "ml_parity_host.js",
+);
 const DEFAULT_ELECTRON_BIN_PATH = path.join(
     REPO_ROOT,
     "desktop",
@@ -97,7 +109,14 @@ const DEFAULT_ELECTRON_BIN_PATH = path.join(
     ".bin",
     "electron",
 );
-const DEFAULT_USER_DATA_PATH = path.join(REPO_ROOT, "infra", "ml", "test", ".cache", "desktop-user-data");
+const DEFAULT_USER_DATA_PATH = path.join(
+    REPO_ROOT,
+    "infra",
+    "ml",
+    "test",
+    ".cache",
+    "desktop-user-data",
+);
 
 const MODEL_FILE_NAMES: Record<string, string> = {
     clip: "mobileclip_s2_image_opset18_rgba_opt.onnx",
@@ -125,13 +144,21 @@ const HOST_REQUEST_TIMEOUT_MS = parseHostRequestTimeoutMS(
 );
 
 const usage = () => {
-    process.stderr.write(`Usage: desktop/scripts/ml_parity_runner.ts [flags]\n\n`);
+    process.stderr.write(
+        `Usage: desktop/scripts/ml_parity_runner.ts [flags]\n\n`,
+    );
     process.stderr.write(`Flags:\n`);
-    process.stderr.write(`  --manifest <path>        Path to parity manifest (default: infra/ml/test/ground_truth/manifest.json)\n`);
-    process.stderr.write(`  --output-dir <path>      Output directory for desktop parity JSONs\n`);
+    process.stderr.write(
+        `  --manifest <path>        Path to parity manifest (default: infra/ml/test/ground_truth/manifest.json)\n`,
+    );
+    process.stderr.write(
+        `  --output-dir <path>      Output directory for desktop parity JSONs\n`,
+    );
     process.stderr.write(`  --electron-bin <path>    Electron binary path\n`);
     process.stderr.write(`  --host-script <path>     Host script path\n`);
-    process.stderr.write(`  --user-data-dir <path>   Desktop ML model cache/user-data path\n`);
+    process.stderr.write(
+        `  --user-data-dir <path>   Desktop ML model cache/user-data path\n`,
+    );
 };
 
 const resolveRepoPath = (inputPath: string) =>
@@ -143,9 +170,12 @@ const resolveMLPath = (inputPath: string) =>
 const parseArgs = (argv: string[]): RunnerArgs => {
     let manifestPath = DEFAULT_MANIFEST_PATH;
     let outputDir = DEFAULT_OUTPUT_DIR;
-    let hostScriptPath = process.env.ML_PARITY_HOST_SCRIPT?.trim() || DEFAULT_HOST_SCRIPT_PATH;
-    let electronBinPath = process.env.ML_PARITY_ELECTRON_BIN?.trim() || DEFAULT_ELECTRON_BIN_PATH;
-    let userDataPath = process.env.ML_PARITY_USER_DATA_DIR?.trim() || DEFAULT_USER_DATA_PATH;
+    let hostScriptPath =
+        process.env.ML_PARITY_HOST_SCRIPT?.trim() || DEFAULT_HOST_SCRIPT_PATH;
+    let electronBinPath =
+        process.env.ML_PARITY_ELECTRON_BIN?.trim() || DEFAULT_ELECTRON_BIN_PATH;
+    let userDataPath =
+        process.env.ML_PARITY_USER_DATA_DIR?.trim() || DEFAULT_USER_DATA_PATH;
 
     for (let i = 0; i < argv.length; i += 1) {
         const arg = argv[i];
@@ -214,8 +244,16 @@ const parseArgs = (argv: string[]): RunnerArgs => {
     };
 };
 
-const toBase64 = (array: ArrayLike<number> & { buffer: ArrayBufferLike; byteOffset: number; byteLength: number }) =>
-    Buffer.from(array.buffer, array.byteOffset, array.byteLength).toString("base64");
+const toBase64 = (
+    array: ArrayLike<number> & {
+        buffer: ArrayBufferLike;
+        byteOffset: number;
+        byteLength: number;
+    },
+) =>
+    Buffer.from(array.buffer, array.byteOffset, array.byteLength).toString(
+        "base64",
+    );
 
 const uint8ClampedArrayFromBase64 = (payload: string) => {
     const bytes = Buffer.from(payload, "base64");
@@ -285,10 +323,7 @@ class HostClient {
         this.requestTimeoutMS = HOST_REQUEST_TIMEOUT_MS;
         this.process = spawn(electronBinPath, [hostScriptPath], {
             cwd: DESKTOP_ROOT,
-            env: {
-                ...process.env,
-                ML_PARITY_USER_DATA_DIR: userDataPath,
-            },
+            env: { ...process.env, ML_PARITY_USER_DATA_DIR: userDataPath },
             stdio: ["pipe", "pipe", "pipe"],
         });
 
@@ -308,7 +343,9 @@ class HostClient {
                 return;
             }
             if (!trimmed.startsWith(HOST_RESPONSE_PREFIX)) {
-                process.stderr.write(`[ml_parity_runner] host stdout (non-protocol): ${trimmed}\n`);
+                process.stderr.write(
+                    `[ml_parity_runner] host stdout (non-protocol): ${trimmed}\n`,
+                );
                 return;
             }
 
@@ -317,7 +354,11 @@ class HostClient {
             try {
                 message = JSON.parse(payload) as HostResponse;
             } catch (error) {
-                this.rejectAll(new Error(`Failed to parse host JSON response: ${String(error)}`));
+                this.rejectAll(
+                    new Error(
+                        `Failed to parse host JSON response: ${String(error)}`,
+                    ),
+                );
                 return;
             }
 
@@ -340,7 +381,13 @@ class HostClient {
             if (message.ok) {
                 pending.resolve(message.result);
             } else {
-                pending.reject(new Error(normalizeHostErrorPayload(message.error ?? "Host request failed")));
+                pending.reject(
+                    new Error(
+                        normalizeHostErrorPayload(
+                            message.error ?? "Host request failed",
+                        ),
+                    ),
+                );
             }
         });
 
@@ -413,15 +460,14 @@ class HostClient {
         return resultPromise;
     }
 
-    async decodeImage(filePath: string, mimeType?: string): Promise<DecodedImage> {
+    async decodeImage(
+        filePath: string,
+        mimeType?: string,
+    ): Promise<DecodedImage> {
         const result = (await this.request("decodeImage", {
             file_path: filePath,
             mime_type: mimeType,
-        })) as {
-            width: number;
-            height: number;
-            rgba_base64: string;
-        };
+        })) as { width: number; height: number; rgba_base64: string };
 
         if (
             typeof result?.width !== "number" ||
@@ -464,7 +510,9 @@ class HostClient {
         })) as { output_base64: string };
 
         if (typeof result?.output_base64 !== "string") {
-            throw new Error("Invalid computeCLIPImageEmbedding response payload");
+            throw new Error(
+                "Invalid computeCLIPImageEmbedding response payload",
+            );
         }
 
         return float32ArrayFromBase64(result.output_base64);
@@ -499,7 +547,10 @@ class HostClient {
     }
 
     async modelMetadata(): Promise<Record<string, string>> {
-        const result = (await this.request("modelMetadata")) as Record<string, string>;
+        const result = (await this.request("modelMetadata")) as Record<
+            string,
+            string
+        >;
         if (!result || typeof result !== "object") {
             throw new Error("Invalid modelMetadata response payload");
         }
@@ -574,11 +625,15 @@ const ensureModelMetadata = (metadata: Record<string, string>) => {
     return normalized;
 };
 
-const normalizeUnknownError = (error: unknown): { message: string; stack?: string } => {
+const normalizeUnknownError = (
+    error: unknown,
+): { message: string; stack?: string } => {
     if (error instanceof Error) {
         return {
             message: error.message,
-            ...(typeof error.stack === "string" && error.stack.length > 0 ? { stack: error.stack } : {}),
+            ...(typeof error.stack === "string" && error.stack.length > 0
+                ? { stack: error.stack }
+                : {}),
         };
     }
 
@@ -592,20 +647,24 @@ const normalizeUnknownError = (error: unknown): { message: string; stack?: strin
             (typeof maybeError.message === "string" && maybeError.message) ||
             (typeof maybeError.error === "string" && maybeError.error) ||
             stringifyUnknown(error);
-        const stackCandidate = typeof maybeError.stack === "string" ? maybeError.stack : undefined;
+        const stackCandidate =
+            typeof maybeError.stack === "string" ? maybeError.stack : undefined;
         return {
             message: messageCandidate,
             ...(stackCandidate ? { stack: stackCandidate } : {}),
         };
     }
 
-    return {
-        message: String(error),
-    };
+    return { message: String(error) };
 };
 
 const ensureSimilarityTransformationNodeShim = async () => {
-    const dependencyDir = path.join(REPO_ROOT, "web", "node_modules", "similarity-transformation");
+    const dependencyDir = path.join(
+        REPO_ROOT,
+        "web",
+        "node_modules",
+        "similarity-transformation",
+    );
     const packageJSONPath = path.join(dependencyDir, "package.json");
 
     try {
@@ -614,10 +673,9 @@ const ensureSimilarityTransformationNodeShim = async () => {
         return;
     }
 
-    const packageJSON = JSON.parse(await fs.readFile(packageJSONPath, "utf8")) as {
-        main?: string;
-        module?: string;
-    };
+    const packageJSON = JSON.parse(
+        await fs.readFile(packageJSONPath, "utf8"),
+    ) as { main?: string; module?: string };
     if (typeof packageJSON.main === "string" && packageJSON.main.trim()) {
         return;
     }
@@ -642,32 +700,44 @@ const ensureSimilarityTransformationNodeShim = async () => {
         // Create a local shim only for parity runner compatibility under Node CJS resolution.
     }
 
-    const normalizedEntry = moduleEntry.startsWith("./") ? moduleEntry : `./${moduleEntry}`;
-    await fs.writeFile(indexJSPath, `module.exports = require("${normalizedEntry}");\n`);
+    const normalizedEntry = moduleEntry.startsWith("./")
+        ? moduleEntry
+        : `./${moduleEntry}`;
+    await fs.writeFile(
+        indexJSPath,
+        `module.exports = require("${normalizedEntry}");\n`,
+    );
 };
 
 const loadWebMLBindings = async (): Promise<WebMLBindings> => {
     await ensureSimilarityTransformationNodeShim();
 
-    const [clipModule, decodeModule, faceModule, convertModule] = await Promise.all([
-        import("../../web/packages/new/photos/services/ml/clip.ts"),
-        import("../../web/packages/new/photos/services/ml/decode.ts"),
-        import("../../web/packages/new/photos/services/ml/face.ts"),
-        import("../../web/packages/gallery/services/convert.ts"),
-    ]);
+    const [clipModule, decodeModule, faceModule, convertModule] =
+        await Promise.all([
+            import("../../web/packages/new/photos/services/ml/clip.ts"),
+            import("../../web/packages/new/photos/services/ml/decode.ts"),
+            import("../../web/packages/new/photos/services/ml/face.ts"),
+            import("../../web/packages/gallery/services/convert.ts"),
+        ]);
 
     return {
         indexCLIP: clipModule.indexCLIP as WebMLBindings["indexCLIP"],
         indexFaces: faceModule.indexFaces as WebMLBindings["indexFaces"],
         createImageBitmapAndData:
             decodeModule.createImageBitmapAndData as WebMLBindings["createImageBitmapAndData"],
-        renderableImageBlob: convertModule.renderableImageBlob as WebMLBindings["renderableImageBlob"],
+        renderableImageBlob:
+            convertModule.renderableImageBlob as WebMLBindings["renderableImageBlob"],
     };
 };
 
-const productionDecodeHelperSource = (createImageBitmapAndData: (...args: unknown[]) => Promise<unknown>) => {
+const productionDecodeHelperSource = (
+    createImageBitmapAndData: (...args: unknown[]) => Promise<unknown>,
+) => {
     const source = createImageBitmapAndData.toString();
-    if (!source.includes("createImageBitmap") || !source.includes("OffscreenCanvas")) {
+    if (
+        !source.includes("createImageBitmap") ||
+        !source.includes("OffscreenCanvas")
+    ) {
         throw new Error(
             "Unexpected createImageBitmapAndData source; refusing to run parity with non-production decode helper",
         );
@@ -684,27 +754,33 @@ const main = async () => {
     await fs.mkdir(args.outputDir, { recursive: true });
     await fs.mkdir(args.userDataPath, { recursive: true });
 
-    const manifestPayload = JSON.parse(await fs.readFile(args.manifestPath, "utf8")) as {
-        items?: ManifestItem[];
-    };
+    const manifestPayload = JSON.parse(
+        await fs.readFile(args.manifestPath, "utf8"),
+    ) as { items?: ManifestItem[] };
     const items = manifestPayload.items ?? [];
     if (!items.length) {
         throw new Error(`Manifest has no items: ${args.manifestPath}`);
     }
 
     const webBindings = await loadWebMLBindings();
-    const host = new HostClient(args.electronBinPath, args.hostScriptPath, args.userDataPath);
+    const host = new HostClient(
+        args.electronBinPath,
+        args.hostScriptPath,
+        args.userDataPath,
+    );
     await host.setDecodeHelperSource(
         productionDecodeHelperSource(webBindings.createImageBitmapAndData),
     );
 
     // `renderableImageBlob` and shared logging helpers check this shim.
-    (globalThis as {
-        electron?: {
-            convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
-            logToDisk: (message: string) => void;
-        };
-    }).electron = {
+    (
+        globalThis as {
+            electron?: {
+                convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
+                logToDisk: (message: string) => void;
+            };
+        }
+    ).electron = {
         convertToJPEG: (imageData: Uint8Array) => host.convertToJPEG(imageData),
         logToDisk: (message: string) => {
             process.stderr.write(`${message}\n`);
@@ -714,11 +790,14 @@ const main = async () => {
     const codeRevision = await gitRevision();
 
     const electronProxy = {
-        computeCLIPImageEmbedding: (input: Uint8ClampedArray, inputShape: number[]) =>
-            host.computeCLIPImageEmbedding(input, inputShape),
+        computeCLIPImageEmbedding: (
+            input: Uint8ClampedArray,
+            inputShape: number[],
+        ) => host.computeCLIPImageEmbedding(input, inputShape),
         detectFaces: (input: Uint8ClampedArray, inputShape: number[]) =>
             host.detectFaces(input, inputShape),
-        computeFaceEmbeddings: (input: Float32Array) => host.computeFaceEmbeddings(input),
+        computeFaceEmbeddings: (input: Float32Array) =>
+            host.computeFaceEmbeddings(input),
     };
 
     const partialResults: Array<{
@@ -749,14 +828,19 @@ const main = async () => {
 
                 if (item.source_sha256) {
                     const sourceHash = await sha256Hex(sourcePath);
-                    if (sourceHash.toLowerCase() !== item.source_sha256.toLowerCase()) {
+                    if (
+                        sourceHash.toLowerCase() !==
+                        item.source_sha256.toLowerCase()
+                    ) {
                         throw new Error(
                             `source hash mismatch for ${item.file_id}: expected ${item.source_sha256}, got ${sourceHash}`,
                         );
                     }
                 }
 
-                process.stdout.write(`Desktop parity indexing ${i + 1}/${items.length}: ${item.file_id}\n`);
+                process.stdout.write(
+                    `Desktop parity indexing ${i + 1}/${items.length}: ${item.file_id}\n`,
+                );
 
                 const decodeStart = performance.now();
                 const sourceBlob = new Blob([await fs.readFile(sourcePath)]);
@@ -765,7 +849,10 @@ const main = async () => {
                     path.basename(sourcePath),
                 );
 
-                const renderableDir = path.join(args.userDataPath, "renderable-cache");
+                const renderableDir = path.join(
+                    args.userDataPath,
+                    "renderable-cache",
+                );
                 await fs.mkdir(renderableDir, { recursive: true });
                 const renderablePath = path.join(
                     renderableDir,
@@ -792,12 +879,8 @@ const main = async () => {
                     height: decoded.height,
                     data: decoded.rgba,
                 };
-                const image = {
-                    data: imageData,
-                };
-                const fileStub = {
-                    id: i + 1,
-                };
+                const image = { data: imageData };
+                const fileStub = { id: i + 1 };
 
                 let faceMS = 0;
                 let clipMS = 0;
@@ -815,20 +898,24 @@ const main = async () => {
 
                 const clipPromise = (async () => {
                     const startedAt = performance.now();
-                    const value = await webBindings.indexCLIP(image as never, electronProxy as never);
+                    const value = await webBindings.indexCLIP(
+                        image as never,
+                        electronProxy as never,
+                    );
                     clipMS = performance.now() - startedAt;
                     return value;
                 })();
 
-                const [faceIndex, clipIndex] = await Promise.all([facePromise, clipPromise]);
+                const [faceIndex, clipIndex] = await Promise.all([
+                    facePromise,
+                    clipPromise,
+                ]);
 
                 const totalMS = performance.now() - totalStart;
 
                 partialResults.push({
                     file_id: item.file_id,
-                    clip: {
-                        embedding: clipIndex.embedding,
-                    },
+                    clip: { embedding: clipIndex.embedding },
                     faces: faceIndex.faces.map((face) => ({
                         box: [
                             face.detection.box.x,
@@ -859,7 +946,9 @@ const main = async () => {
                     file_id: item.file_id,
                     error: normalizedError.message,
                     timing_ms: elapsedMS,
-                    ...(normalizedError.stack ? { stack: normalizedError.stack } : {}),
+                    ...(normalizedError.stack
+                        ? { stack: normalizedError.stack }
+                        : {}),
                 });
             }
         }
@@ -880,8 +969,14 @@ const main = async () => {
         }));
 
         for (const result of finalResults) {
-            const targetPath = path.join(args.outputDir, `${safeFileName(result.file_id)}.json`);
-            await fs.writeFile(targetPath, `${JSON.stringify(result, null, 2)}\n`);
+            const targetPath = path.join(
+                args.outputDir,
+                `${safeFileName(result.file_id)}.json`,
+            );
+            await fs.writeFile(
+                targetPath,
+                `${JSON.stringify(result, null, 2)}\n`,
+            );
         }
 
         const combinedOutputPath = path.join(args.outputDir, "results.json");
@@ -902,7 +997,9 @@ const main = async () => {
             `Generated ${finalResults.length} desktop parity result(s) at ${args.outputDir}\n`,
         );
         if (errors.length > 0) {
-            process.stdout.write(`Desktop parity recorded ${errors.length} per-file error(s)\n`);
+            process.stdout.write(
+                `Desktop parity recorded ${errors.length} per-file error(s)\n`,
+            );
         }
         process.stdout.write(`Combined output: ${combinedOutputPath}\n`);
     } finally {
@@ -911,6 +1008,8 @@ const main = async () => {
 };
 
 main().catch((error: unknown) => {
-    process.stderr.write(`${error instanceof Error ? error.stack || error.message : String(error)}\n`);
+    process.stderr.write(
+        `${error instanceof Error ? error.stack || error.message : String(error)}\n`,
+    );
     process.exit(1);
 });

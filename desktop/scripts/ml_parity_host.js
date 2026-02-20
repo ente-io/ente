@@ -66,7 +66,9 @@ const messagePortMainEndpoint = (mp) => {
 };
 
 const toBase64FromTypedArray = (array) =>
-    Buffer.from(array.buffer, array.byteOffset, array.byteLength).toString("base64");
+    Buffer.from(array.buffer, array.byteOffset, array.byteLength).toString(
+        "base64",
+    );
 
 const uint8ClampedArrayFromBase64 = (payload) => {
     const bytes = Buffer.from(payload, "base64");
@@ -94,7 +96,9 @@ const getConvertToJPEG = () => {
     }
     const imageService = require(COMPILED_IMAGE_SERVICE_PATH);
     if (!imageService || typeof imageService.convertToJPEG !== "function") {
-        throw new Error(`convertToJPEG export not found in ${COMPILED_IMAGE_SERVICE_PATH}`);
+        throw new Error(
+            `convertToJPEG export not found in ${COMPILED_IMAGE_SERVICE_PATH}`,
+        );
     }
     _convertToJPEG = imageService.convertToJPEG;
     return _convertToJPEG;
@@ -248,7 +252,9 @@ const createWorkerState = async () => {
         ) {
             return;
         }
-        process.stderr.write(`[ml_parity_host] utility-process message: ${JSON.stringify(message)}\n`);
+        process.stderr.write(
+            `[ml_parity_host] utility-process message: ${JSON.stringify(message)}\n`,
+        );
     });
 
     child.on("exit", (code, signal) => {
@@ -300,7 +306,11 @@ const handleRequest = async (request) => {
             );
         }
         case "setDecodeHelperSource": {
-            if (!params || typeof params.source !== "string" || !params.source.trim()) {
+            if (
+                !params ||
+                typeof params.source !== "string" ||
+                !params.source.trim()
+            ) {
                 throw new Error("setDecodeHelperSource requires params.source");
             }
             state.decodeHelperSource = params.source;
@@ -314,16 +324,22 @@ const handleRequest = async (request) => {
             if (!params || typeof params.input_base64 !== "string") {
                 throw new Error("convertToJPEG requires params.input_base64");
             }
-            const input = new Uint8Array(Buffer.from(params.input_base64, "base64"));
+            const input = new Uint8Array(
+                Buffer.from(params.input_base64, "base64"),
+            );
             const output = await getConvertToJPEG()(input);
             return { output_base64: Buffer.from(output).toString("base64") };
         }
         case "computeCLIPImageEmbedding": {
             if (!params || typeof params.input_base64 !== "string") {
-                throw new Error("computeCLIPImageEmbedding requires params.input_base64");
+                throw new Error(
+                    "computeCLIPImageEmbedding requires params.input_base64",
+                );
             }
             if (!Array.isArray(params.input_shape)) {
-                throw new Error("computeCLIPImageEmbedding requires params.input_shape");
+                throw new Error(
+                    "computeCLIPImageEmbedding requires params.input_shape",
+                );
             }
             const input = uint8ClampedArrayFromBase64(params.input_base64);
             const output = await state.worker.computeCLIPImageEmbedding(
@@ -340,12 +356,17 @@ const handleRequest = async (request) => {
                 throw new Error("detectFaces requires params.input_shape");
             }
             const input = uint8ClampedArrayFromBase64(params.input_base64);
-            const output = await state.worker.detectFaces(input, params.input_shape);
+            const output = await state.worker.detectFaces(
+                input,
+                params.input_shape,
+            );
             return { output_base64: toBase64FromTypedArray(output) };
         }
         case "computeFaceEmbeddings": {
             if (!params || typeof params.input_base64 !== "string") {
-                throw new Error("computeFaceEmbeddings requires params.input_base64");
+                throw new Error(
+                    "computeFaceEmbeddings requires params.input_base64",
+                );
             }
             const input = float32ArrayFromBase64(params.input_base64);
             const output = await state.worker.computeFaceEmbeddings(input);
