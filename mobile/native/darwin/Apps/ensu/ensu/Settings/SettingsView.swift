@@ -27,28 +27,28 @@ struct SettingsView: View {
                         NavigationLink {
                             item.destination
                         } label: {
-                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: true)
+                            settingsCard(title: item.title, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
                     ForEach(filteredLinkItems) { item in
                         Button(action: item.action) {
-                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: false)
+                            settingsCard(title: item.title, showsChevron: false)
                         }
                         .buttonStyle(.plain)
                     }
 
                     ForEach(filteredAccountItems) { item in
                         Button(action: item.action) {
-                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: false)
+                            settingsCard(title: item.title, showsChevron: false)
                         }
                         .buttonStyle(.plain)
                     }
 
                     if shouldShowSignInRow {
                         Button(action: onSignIn) {
-                            settingsCard(title: signInTitle, subtitle: signInSubtitle, showsChevron: false)
+                            settingsCard(title: signInTitle, showsChevron: false)
                         }
                         .buttonStyle(.plain)
                     }
@@ -96,7 +96,7 @@ struct SettingsView: View {
         guard !trimmedQuery.isEmpty else { return allItems }
         let q = trimmedQuery.lowercased()
         return allItems.filter { item in
-            item.title.lowercased().contains(q) || (item.subtitle?.lowercased().contains(q) == true)
+            item.title.lowercased().contains(q)
         }
     }
 
@@ -104,12 +104,10 @@ struct SettingsView: View {
         [
             SettingsActionItem(
                 title: "Privacy Policy",
-                subtitle: "ente.io/privacy",
                 action: { openExternalLink("https://ente.io/privacy") }
             ),
             SettingsActionItem(
                 title: "Terms of Service",
-                subtitle: "ente.io/terms",
                 action: { openExternalLink("https://ente.io/terms") }
             )
         ]
@@ -120,12 +118,10 @@ struct SettingsView: View {
         return [
             SettingsActionItem(
                 title: "Delete Account",
-                subtitle: "Email support to delete your account",
                 action: { openDeleteAccountEmail() }
             ),
             SettingsActionItem(
                 title: "Sign Out",
-                subtitle: "Stop syncing this device",
                 action: { showSignOutConfirm = true }
             )
         ]
@@ -135,7 +131,7 @@ struct SettingsView: View {
         guard !trimmedQuery.isEmpty else { return accountItems }
         let q = trimmedQuery.lowercased()
         return accountItems.filter { item in
-            item.title.lowercased().contains(q) || (item.subtitle?.lowercased().contains(q) == true)
+            item.title.lowercased().contains(q)
         }
     }
 
@@ -143,7 +139,7 @@ struct SettingsView: View {
         guard !trimmedQuery.isEmpty else { return linkItems }
         let q = trimmedQuery.lowercased()
         return linkItems.filter { item in
-            item.title.lowercased().contains(q) || (item.subtitle?.lowercased().contains(q) == true)
+            item.title.lowercased().contains(q)
         }
     }
 
@@ -152,17 +148,15 @@ struct SettingsView: View {
         guard !isLoggedIn else { return false }
         guard !trimmedQuery.isEmpty else { return true }
         let q = trimmedQuery.lowercased()
-        return signInTitle.lowercased().contains(q) || signInSubtitle.lowercased().contains(q)
+        return signInTitle.lowercased().contains(q)
     }
 
     private var signInTitle: String { "Sign In to Backup" }
-    private var signInSubtitle: String { "Sync your chats across devices" }
 
     private var allItems: [SettingsItem] {
         [
             SettingsItem(
                 title: "Logs",
-                subtitle: "View, export, and share logs",
                 destination: AnyView(LogsView(embeddedInNavigation: true))
             )
         ]
@@ -212,18 +206,11 @@ struct SettingsView: View {
         .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
     }
 
-    private func settingsCard(title: String, subtitle: String?, showsChevron: Bool) -> some View {
+    private func settingsCard(title: String, showsChevron: Bool) -> some View {
         HStack(spacing: EnsuSpacing.md) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(EnsuTypography.body)
-                    .foregroundStyle(EnsuColor.textPrimary)
-                if let subtitle {
-                    Text(subtitle)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.textMuted)
-                }
-            }
+            Text(title)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textPrimary)
             Spacer()
             if showsChevron {
                 Image("ArrowRight01Icon")
@@ -243,14 +230,12 @@ struct SettingsView: View {
 private struct SettingsItem: Identifiable {
     let id = UUID()
     let title: String
-    let subtitle: String?
     let destination: AnyView
 }
 
 private struct SettingsActionItem: Identifiable {
     let id = UUID()
     let title: String
-    let subtitle: String?
     let action: () -> Void
 }
 #else
