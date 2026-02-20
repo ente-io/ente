@@ -1096,14 +1096,14 @@ while IFS=$'\t' read -r source_rel source_url source_sha; do
           reason="remote ETag changed"
         fi
       fi
-    elif [[ -f "$target_path" ]]; then
+    elif [[ -f "$target_path" && -z "$source_sha" ]]; then
       should_download=true
       if [[ -z "$reason" ]]; then
         reason="remote ETag unavailable"
       fi
     fi
   else
-    if [[ -f "$target_path" ]]; then
+    if [[ -f "$target_path" && -z "$source_sha" ]]; then
       should_download=true
       if [[ -z "$reason" ]]; then
         reason="failed to fetch remote metadata"
@@ -1767,11 +1767,14 @@ render_html_report() {
   local rendered_path=""
 
   if $VERBOSE; then
-    rendered_path="$(
+    if ! rendered_path="$(
       python3 "$ML_DIR/tools/render_parity_html_report.py" \
         --report "$report_path" \
         --output "$html_output_path"
-    )"
+    )"; then
+      echo "Failed to render HTML parity report at $html_output_path."
+      return 1
+    fi
   else
     if ! rendered_path="$(
       python3 "$ML_DIR/tools/render_parity_html_report.py" \
@@ -1787,6 +1790,14 @@ render_html_report() {
   LAST_HTML_REPORT="${rendered_path##*$'\n'}"
   if [[ -z "$LAST_HTML_REPORT" ]]; then
     LAST_HTML_REPORT="$html_output_path"
+  fi
+  if [[ ! -f "$LAST_HTML_REPORT" ]]; then
+    if $VERBOSE; then
+      echo "Failed to render HTML parity report at $html_output_path."
+    else
+      echo "Failed to render HTML parity report at $html_output_path. Log: $renderer_log"
+    fi
+    return 1
   fi
   return 0
 }
