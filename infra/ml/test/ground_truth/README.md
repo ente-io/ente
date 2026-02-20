@@ -22,7 +22,7 @@ The default corpus is sourced from:
 `manifest.json` in this directory uses:
 
 - `source`: local runtime path under `infra/ml/test/test_data/...`
-- `source_url`: remote raw fixture URL used by `run_suite.sh` for download
+- `source_url`: remote raw fixture URL used by `run_ml_parity_tests.sh` for download
 - `source_sha256`: integrity check value used during download and generation
 
 ## ONNX Models
@@ -52,7 +52,7 @@ uv run --project infra/ml --no-sync --with pillow-heif python infra/ml/test/tool
 ```
 
 `generate_goldens.py` expects fixture files to already be present locally.
-`run_suite.sh` is responsible for clearing `infra/ml/test/test_data/ml-indexing/v1`,
+`run_ml_parity_tests.sh` is responsible for clearing `infra/ml/test/test_data/ml-indexing/v1`,
 downloading fixtures, and then calling the generator.
 
 ## Compare Against Platforms

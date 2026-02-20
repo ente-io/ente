@@ -20,7 +20,7 @@ This directory contains the ML indexing parity framework for Android, iOS, deskt
 ## Local Run (One Command)
 
 ```bash
-bash infra/ml/test/tools/run_suite.sh
+bash infra/ml/test/tools/run_ml_parity_tests.sh
 ```
 
 Common flags:
@@ -41,7 +41,7 @@ Outputs go to `infra/ml/test/out/parity/` by default, including:
 - `comparison_report.json` (machine-readable comparison output)
 - `parity_report.html` (readable HTML report with per-file metrics for both pass and fail files)
 
-`run_suite.sh` compares each available platform against Python ground truth (`python -> <platform>`); non-ground-truth pairwise comparisons are excluded by default.
+`run_ml_parity_tests.sh` compares each available platform against Python ground truth (`python -> <platform>`); non-ground-truth pairwise comparisons are excluded by default.
 
 Optional mobile reuse env vars:
 
@@ -80,7 +80,7 @@ Use this process when corpus/threshold/model behavior changes intentionally:
 2. Regenerate and compare with a real run:
 
 ```bash
-bash infra/ml/test/tools/run_suite.sh --platforms all --output-dir infra/ml/test/out/parity
+bash infra/ml/test/tools/run_ml_parity_tests.sh --platforms all --output-dir infra/ml/test/out/parity
 ```
 
 3. Review `infra/ml/test/out/parity/parity_report.html`, `comparison_report.json`, and per-platform `results.json` files.

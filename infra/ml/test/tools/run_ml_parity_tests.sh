@@ -31,7 +31,7 @@ LOCAL_MODEL_MIRROR_DIR=""
 
 usage() {
   cat <<EOF
-Usage: infra/ml/test/tools/run_suite.sh [flags]
+Usage: infra/ml/test/tools/run_ml_parity_tests.sh [flags]
 
 Flags:
   --platforms all|desktop|android|ios   (default: all)
