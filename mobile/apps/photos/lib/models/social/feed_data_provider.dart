@@ -192,7 +192,6 @@ class FeedDataProvider {
   Future<FeedItem?> getLatestFeedItem() async {
     final items = await getFeedItems(
       limit: 1,
-      includeSharedPhotos: false,
       verifyFileExistence: false,
     );
     return items.isNotEmpty ? items.first : null;
