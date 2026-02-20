@@ -32,6 +32,13 @@ struct SettingsView: View {
                         .buttonStyle(.plain)
                     }
 
+                    ForEach(filteredLinkItems) { item in
+                        Button(action: item.action) {
+                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: false)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     ForEach(filteredAccountItems) { item in
                         Button(action: item.action) {
                             settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: false)
@@ -93,6 +100,21 @@ struct SettingsView: View {
         }
     }
 
+    private var linkItems: [SettingsActionItem] {
+        [
+            SettingsActionItem(
+                title: "Privacy Policy",
+                subtitle: "ente.io/privacy",
+                action: { openExternalLink("https://ente.io/privacy") }
+            ),
+            SettingsActionItem(
+                title: "Terms of Service",
+                subtitle: "ente.io/terms",
+                action: { openExternalLink("https://ente.io/terms") }
+            )
+        ]
+    }
+
     private var accountItems: [SettingsActionItem] {
         guard isLoggedIn else { return [] }
         return [
@@ -113,6 +135,14 @@ struct SettingsView: View {
         guard !trimmedQuery.isEmpty else { return accountItems }
         let q = trimmedQuery.lowercased()
         return accountItems.filter { item in
+            item.title.lowercased().contains(q) || (item.subtitle?.lowercased().contains(q) == true)
+        }
+    }
+
+    private var filteredLinkItems: [SettingsActionItem] {
+        guard !trimmedQuery.isEmpty else { return linkItems }
+        let q = trimmedQuery.lowercased()
+        return linkItems.filter { item in
             item.title.lowercased().contains(q) || (item.subtitle?.lowercased().contains(q) == true)
         }
     }
@@ -158,6 +188,11 @@ struct SettingsView: View {
         let subject = "Request Deletion for Ente Account"
         let encoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
         guard let url = URL(string: "mailto:support@ente.io?subject=\(encoded)") else { return }
+        openURL(url)
+    }
+
+    private func openExternalLink(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
         openURL(url)
     }
 
