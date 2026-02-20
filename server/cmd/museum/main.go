@@ -102,6 +102,7 @@ func main() {
 	viper.SetDefault("apps.embed-albums", "https://embed.ente.io")
 	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://share.ente.io")
+	viper.SetDefault("apps.public-paste", "https://paste.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
@@ -178,6 +179,7 @@ func main() {
 		ObjectRepo: objectRepo, ObjectCleanupRepo: objectCleanupRepo,
 		ObjectCopiesRepo: objectCopiesRepo, UsageRepo: usageRepo}
 	fileLinkRepo := public.NewFileLinkRepo(db)
+	pasteRepo := public.NewPasteRepository(db)
 	fileDataRepo := &fileDataRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo, FileLinkRepo: fileLinkRepo}
@@ -418,6 +420,11 @@ func main() {
 		FileRepo:       fileRepo,
 		JwtSecret:      jwtSecretBytes,
 	}
+	pasteCtrl := &publicCtrl.PasteController{
+		PasteRepo:   pasteRepo,
+		JwtSecret:   jwtSecretBytes,
+		PasteOrigin: viper.GetString("apps.public-paste"),
+	}
 
 	passkeyCtrl := &controller.PasskeyController{
 		Repo:     passkeysRepo,
@@ -522,6 +529,7 @@ func main() {
 		FileDataCtrl: fileDataCtrl,
 		FileUrlCtrl:  fileLinkCtrl,
 	}
+	pasteHandler := &api.PasteHandler{Controller: pasteCtrl}
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
 	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
@@ -557,6 +565,9 @@ func main() {
 	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
 	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
+	publicAPI.POST("/paste/create", pasteHandler.Create)
+	publicAPI.POST("/paste/guard", pasteHandler.Guard)
+	publicAPI.POST("/paste/consume", pasteHandler.Consume)
 
 	trashHandler := &api.TrashHandler{
 		Controller: trashController,
@@ -918,7 +929,7 @@ func main() {
 	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
-		userAuthRepo, collectionLinkRepo, fileLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
+		userAuthRepo, collectionLinkRepo, fileLinkRepo, pasteRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, castDb)
 
@@ -1057,6 +1068,7 @@ func setupAndStartBackgroundJobs(
 
 func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRepo *public.CollectionLinkRepo,
 	fileLinkRepo *public.FileLinkRepository,
+	pasteRepo *public.PasteRepository,
 	twoFactorRepo *repo.TwoFactorRepository, passkeysRepo *passkey.Repository, fileController *controller.FileController,
 	taskRepo *repo.TaskLockRepository, emailNotificationCtrl *email.EmailNotificationController,
 	trashController *controller.TrashController, pushController *controller.PushController,
@@ -1085,6 +1097,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
 		_ = collectionLinkRepo.CleanupAccessHistory(context.Background())
 		_ = fileLinkRepo.CleanupAccessHistory(context.Background())
+		_ = pasteRepo.CleanupExpired(context.Background())
 	})
 
 	schedule(c, "@every 1m", func() {
@@ -1183,7 +1196,7 @@ func cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package, X-Client-Version, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests, Range")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package, X-Client-Version, X-Paste-Consume, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests, Range")
 		c.Writer.Header().Set("Access-Control-Expose-Headers", "X-Request-Id")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")

@@ -52,3 +52,17 @@ func (c LinkPasswordClaim) Valid() error {
 	}
 	return nil
 }
+
+// PasteGuardClaim gates one-time paste consumption.
+type PasteGuardClaim struct {
+	AccessToken   string `json:"accessToken"`
+	UserAgentHash string `json:"userAgentHash"`
+	ExpiryTime    int64  `json:"expiryTime"`
+}
+
+func (c PasteGuardClaim) Valid() error {
+	if c.ExpiryTime < time.Microseconds() {
+		return errors.New("token expired")
+	}
+	return nil
+}

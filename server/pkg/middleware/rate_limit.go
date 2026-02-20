@@ -137,9 +137,13 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		reqPath == "/custom-domain" {
 		return r.limit200ReqPerMin
 	}
+	if reqPath == "/paste/guard" || reqPath == "/paste/consume" {
+		return r.limit200ReqPerMin
+	}
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
 		reqPath == "/user/change-email" ||
+		reqPath == "/paste/create" ||
 		reqPath == "/discount/claim" ||
 		reqPath == "/public-collection/verify-password" ||
 		reqPath == "/file-link/verify-password" ||
