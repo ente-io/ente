@@ -113,12 +113,18 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
 
     return GestureDetector(
       onTap: widget.onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: SizedBox(
-          width: widget.gridSize,
-          height: widget.gridSize,
-          child: _buildGrid(validFiles),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorScheme.strokeFaint),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: widget.gridSize,
+            height: widget.gridSize,
+            child: _buildGrid(validFiles),
+          ),
         ),
       ),
     );
@@ -146,7 +152,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildTwoPhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemHeight = (widget.gridSize - gap) / 2;
 
     return Column(
@@ -167,7 +173,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildThreePhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
@@ -201,7 +207,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildFourPlusPhotos(List<EnteFile> files, int extraCount) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
@@ -274,21 +280,23 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildExtraCountOverlay(int extraCount) {
-    return Positioned(
-      right: 4,
-      bottom: 4,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0x99000000),
-          borderRadius: BorderRadius.circular(100),
-        ),
-        child: Text(
-          '+$extraCount',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0x99000000),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            '+$extraCount',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

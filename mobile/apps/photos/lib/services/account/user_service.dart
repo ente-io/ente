@@ -211,14 +211,12 @@ class UserService {
           kIsEmailMFAEnabled,
           currentEmailMFAStatus,
         );
-        hasSecurityStatusChanged =
-            hasSecurityStatusChanged ||
+        hasSecurityStatusChanged = hasSecurityStatusChanged ||
             previousEmailMFAStatus != currentEmailMFAStatus;
         final bool currentTwoFactorStatus =
             userDetails.profileData!.isTwoFactorEnabled;
         await setTwoFactor(value: currentTwoFactorStatus);
-        hasSecurityStatusChanged =
-            hasSecurityStatusChanged ||
+        hasSecurityStatusChanged = hasSecurityStatusChanged ||
             previousTwoFactorStatus != currentTwoFactorStatus;
       }
       if (hasSecurityStatusChanged) {
