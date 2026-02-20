@@ -291,6 +291,7 @@
     "delete_photos": "Διαγραφή φωτογραφιών",
     "keep_photos": "Διατήρηση φωτογραφιών",
     "share_album": "Κοινοποίηση άλμπουμ",
+    "share_action": "",
     "feed": "",
     "sharing_with_self": "Δεν μπορείτε να κοινοποιήσετε στον εαυτό σας",
     "sharing_already_shared": "Το έχετε ήδη κοινοποιήσει στο {{email}}",
