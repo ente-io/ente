@@ -104,7 +104,7 @@ You can add descriptions (captions) to your photos in Ente:
 Yes! You can bulk-edit creation time of photos from the desktop app:
 
 1. Multi-select the photos you want to edit (Ctrl/Cmd+click or Shift+click)
-2. Select the "Fix time" option from the action bar
+2. Select the "Edit time" option from the action bar
 3. Choose the correct date/time
 4. Apply to all selected photos
 
@@ -310,7 +310,7 @@ When you edit metadata on one device:
 
 **Desktop only:**
 
-- Bulk editing dates ("Fix time" feature)
+- Bulk editing dates ("Edit time" feature)
 
 We're working on bringing all editing features to all platforms.
 
