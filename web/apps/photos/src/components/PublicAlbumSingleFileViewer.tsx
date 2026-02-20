@@ -338,6 +338,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
                 onClose={handleViewerClose}
                 files={[file]}
                 initialIndex={0}
+                disableEscapeClose
                 disableDownload={!enableDownload}
                 onDownload={enableDownload ? handleDownload : undefined}
                 onVisualFeedback={onVisualFeedback}

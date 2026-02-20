@@ -368,6 +368,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     shouldCloseOnBrowserBack?: boolean;
     /**
+     * If `true`, disables closing the viewer with the Escape key.
+     */
+    disableEscapeClose?: boolean;
+    /**
      * The decrypted collection key (base64 encoded) for encrypting reactions.
      * Required when viewing a public album (no logged in user).
      */
@@ -441,6 +445,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     activeCollectionID,
     publicAlbumsCredentials,
     shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
+    disableEscapeClose = false,
     collectionKey,
     onJoinAlbum,
     enableComment = true,
@@ -2497,6 +2502,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 showSocialButtons,
                 enableComment,
                 showFullscreenButton,
+                disableEscapeClose,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -2538,6 +2544,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         initialIndex,
         disableDownload,
         showFullscreenButton,
+        disableEscapeClose,
         haveUser,
         isPublicAlbum,
         handleClose,
