@@ -254,6 +254,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           child: MenuItemWidgetNew(
             title: AppLocalizations.of(context).manageFamily,
             menuItemColor: colorScheme.fillFaint,
+            pressedColor: colorScheme.fillFaintPressed,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
@@ -275,6 +276,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           child: MenuItemWidgetNew(
             title: "Manage payment method",
             menuItemColor: colorScheme.fillFaint,
+            pressedColor: colorScheme.fillFaintPressed,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
@@ -372,6 +374,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       alwaysShowSuccessState: false,
       surfaceExecutionStates: false,
       menuItemColor: colorScheme.fillFaint,
+      pressedColor: colorScheme.fillFaintPressed,
       trailingWidget: Icon(
         Icons.chevron_right_outlined,
         color: colorScheme.strokeBase,
