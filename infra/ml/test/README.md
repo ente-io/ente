@@ -4,7 +4,6 @@ This directory contains the ML indexing parity framework for Android, iOS, deskt
 
 ## Layout
 
-- `ml-indexing-parity-test-plan.md`: rollout plan and progress tracker.
 - `ground_truth/`: schema, manifest, and ONNX-backed Python pipeline.
 - `comparator/`: parity comparison engine and threshold checks.
 - `tools/`: suite orchestration and CLI entrypoints.
