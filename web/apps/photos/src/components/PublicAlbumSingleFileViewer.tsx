@@ -19,8 +19,8 @@ import {
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
 import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadManager } from "ente-gallery/services/download";
@@ -72,6 +72,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
     const [viewerKey, setViewerKey] = useState(0);
     const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+    const [isPhotoSwipeUIVisible, setIsPhotoSwipeUIVisible] = useState(true);
     const needsThumbnailPrime =
         file.metadata.fileType === FileType.image ||
         file.metadata.fileType === FileType.livePhoto;
@@ -95,6 +96,47 @@ export const PublicAlbumSingleFileViewer: React.FC<
 
         window.addEventListener("keydown", handleEscape, true);
         return () => window.removeEventListener("keydown", handleEscape, true);
+    }, []);
+
+    useEffect(() => {
+        let classObserver: MutationObserver | undefined;
+        let pswpElement: HTMLElement | null = null;
+
+        const updateVisibility = () => {
+            setIsPhotoSwipeUIVisible(
+                pswpElement?.classList.contains("pswp--ui-visible") ?? true,
+            );
+        };
+
+        const bindToPhotoSwipeElement = () => {
+            const next = document.querySelector<HTMLElement>(".pswp");
+            if (next === pswpElement) return;
+
+            classObserver?.disconnect();
+            classObserver = undefined;
+            pswpElement = next;
+
+            if (!pswpElement) {
+                setIsPhotoSwipeUIVisible(true);
+                return;
+            }
+
+            classObserver = new MutationObserver(updateVisibility);
+            classObserver.observe(pswpElement, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+            updateVisibility();
+        };
+
+        const treeObserver = new MutationObserver(bindToPhotoSwipeElement);
+        treeObserver.observe(document.body, { childList: true, subtree: true });
+        bindToPhotoSwipeElement();
+
+        return () => {
+            treeObserver.disconnect();
+            classObserver?.disconnect();
+        };
     }, []);
 
     useEffect(() => {
@@ -166,12 +208,11 @@ export const PublicAlbumSingleFileViewer: React.FC<
     const handleShare = useCallback(async () => {
         handleMenuClose();
         const shareUrl = window.location.href;
-        const shareText = `${albumName}\n${shareUrl}`;
         const isMobile = window.matchMedia("(width < 720px)").matches;
 
         if (isMobile && typeof navigator.share === "function") {
             try {
-                await navigator.share({ text: shareText });
+                await navigator.share({ text: shareUrl });
                 return;
             } catch (error) {
                 if (error instanceof Error && error.name === "AbortError") {
@@ -181,15 +222,13 @@ export const PublicAlbumSingleFileViewer: React.FC<
         }
 
         try {
-            await navigator.clipboard.writeText(
-                isMobile ? shareText : shareUrl,
-            );
+            await navigator.clipboard.writeText(shareUrl);
             setShowCopiedMessage(true);
             window.setTimeout(() => setShowCopiedMessage(false), 2000);
         } catch (error) {
             onGenericError(error);
         }
-    }, [albumName, handleMenuClose, onGenericError]);
+    }, [handleMenuClose, onGenericError]);
 
     const canCopyAsPNG = useMemo(
         () =>
@@ -243,6 +282,14 @@ export const PublicAlbumSingleFileViewer: React.FC<
         window.location.href = getEnteURL();
     }, []);
 
+    const topControlsVisible = isViewerPrimed && isPhotoSwipeUIVisible;
+
+    useEffect(() => {
+        if (!topControlsVisible) {
+            setMenuAnchorEl(null);
+        }
+    }, [topControlsVisible]);
+
     return (
         <>
             <GlobalStyles
@@ -291,15 +338,25 @@ export const PublicAlbumSingleFileViewer: React.FC<
                             right: 0,
                             pl: { xs: 1.5, sm: 5.5 },
                             pr: { xs: 0.5, sm: 4 },
-                            zIndex: (theme) => theme.zIndex.modal + 1,
+                            zIndex: (theme) => theme.zIndex.drawer,
                             pointerEvents: "none",
+                            opacity: topControlsVisible ? 1 : 0,
+                            transform: topControlsVisible
+                                ? "translateY(0)"
+                                : "translateY(-8px)",
+                            transition:
+                                "opacity 220ms ease, transform 220ms ease",
                         }}
                     >
                         <Stack
                             direction="row"
                             justifyContent="space-between"
                             alignItems="center"
-                            sx={{ pointerEvents: "auto" }}
+                            sx={{
+                                pointerEvents: topControlsVisible
+                                    ? "auto"
+                                    : "none",
+                            }}
                         >
                             <Box
                                 component="a"
@@ -319,7 +376,11 @@ export const PublicAlbumSingleFileViewer: React.FC<
                             >
                                 <EnteLogo height={15} />
                             </Box>
-                            <Stack direction="row" alignItems="center" spacing={1}>
+                            <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1}
+                            >
                                 <Button
                                     variant="contained"
                                     onClick={handleTryEnte}
@@ -372,7 +433,9 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                     void handleDownload(file);
                                 }}
                             >
-                                <MoreMenuItemTitle>{t("download")}</MoreMenuItemTitle>
+                                <MoreMenuItemTitle>
+                                    {t("download")}
+                                </MoreMenuItemTitle>
                                 <DownloadOutlinedIcon />
                             </MoreMenuItem>
                         )}
@@ -381,11 +444,15 @@ export const PublicAlbumSingleFileViewer: React.FC<
                             <InfoOutlinedIcon />
                         </MoreMenuItem>
                         <MoreMenuItem onClick={() => void handleShare()}>
-                            <MoreMenuItemTitle>{t("share_action")}</MoreMenuItemTitle>
+                            <MoreMenuItemTitle>
+                                {t("share_action")}
+                            </MoreMenuItemTitle>
                             <ShareOutlinedIcon />
                         </MoreMenuItem>
                         {canCopyAsPNG && (
-                            <MoreMenuItem onClick={() => void handleCopyAsPNG()}>
+                            <MoreMenuItem
+                                onClick={() => void handleCopyAsPNG()}
+                            >
                                 <MoreMenuItemTitle>
                                     {t("copy_as_png")}
                                 </MoreMenuItemTitle>
