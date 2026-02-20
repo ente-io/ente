@@ -408,6 +408,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       if (exifData != null) {
         cameraMake = _extractPrintableExifValue(exifData['Image Make']);
         cameraModel = _extractPrintableExifValue(exifData['Image Model']);
+        if (!file.hasLocation) {
+          final exifLocation = locationFromExif(exifData);
+          if (Location.isValidLocation(exifLocation)) {
+            file.location = exifLocation;
+          }
+        }
       }
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
@@ -419,6 +425,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
         quality: 10,
       );
       dimensions = await getImageHeightAndWith(imagePath: thumbnailFilePath);
+    }
+
+    if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
+      final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
+      if (props?.location != null) {
+        file.location = props!.location;
+      }
     }
     return MediaUploadData(
       sourceFile,
