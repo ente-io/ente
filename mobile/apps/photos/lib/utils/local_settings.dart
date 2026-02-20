@@ -73,6 +73,10 @@ class LocalSettings {
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kCFUploadProxyEnabled = "ls.cf_upload_proxy_enabled";
   static const _kSharedPhotoFeedCutoffTime = "ls.shared_photo_feed_cutoff_time";
+  static const _kFeedKnownIncomingSharedCollectionIDs =
+      "ls.feed_known_incoming_shared_collection_ids_v1";
+  static const _kSharedCollectionFirstFeedEventPrefix =
+      "ls.shared_collection_first_feed_event_";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _kAppLockEnabled = "ls.app_lock_enabled";
@@ -424,6 +428,45 @@ class LocalSettings {
     final cutoff = DateTime.now().microsecondsSinceEpoch;
     _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
     return cutoff;
+  }
+
+  bool hasInitializedFeedKnownIncomingSharedCollections() {
+    return _prefs.containsKey(_kFeedKnownIncomingSharedCollectionIDs);
+  }
+
+  Set<int> getFeedKnownIncomingSharedCollectionIDs() {
+    final storedValues =
+        _prefs.getStringList(_kFeedKnownIncomingSharedCollectionIDs);
+    if (storedValues == null || storedValues.isEmpty) {
+      return <int>{};
+    }
+    return storedValues.map(int.tryParse).whereType<int>().toSet();
+  }
+
+  Future<void> setFeedKnownIncomingSharedCollectionIDs(
+    Set<int> collectionIDs,
+  ) async {
+    final sorted = collectionIDs.toList()..sort();
+    await _prefs.setStringList(
+      _kFeedKnownIncomingSharedCollectionIDs,
+      sorted.map((id) => id.toString()).toList(),
+    );
+  }
+
+  int? getSharedCollectionFirstFeedEventTime(int collectionID) {
+    return _prefs.getInt(
+      "$_kSharedCollectionFirstFeedEventPrefix$collectionID",
+    );
+  }
+
+  Future<void> setSharedCollectionFirstFeedEventTime(
+    int collectionID,
+    int createdAt,
+  ) async {
+    await _prefs.setInt(
+      "$_kSharedCollectionFirstFeedEventPrefix$collectionID",
+      createdAt,
+    );
   }
 
   int wrapped2025ResumeIndex() {

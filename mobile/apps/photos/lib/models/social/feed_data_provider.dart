@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -441,8 +443,12 @@ class FeedDataProvider {
     final hiddenCollectionIds =
         CollectionsService.instance.getHiddenCollectionIds();
     final collectionNames = <int, String>{};
+    final incomingSharedCollectionIDs = <int>{};
     for (final c in allCollections) {
       collectionNames[c.id] = c.displayName;
+      if (!c.isOwner(userID)) {
+        incomingSharedCollectionIDs.add(c.id);
+      }
     }
 
     final groupingState = _SharedPhotoGroupingState(
@@ -491,7 +497,11 @@ class FeedDataProvider {
         final grouped = groupingState.buildSnapshotSorted();
         if (grouped.length < limit) {
           if (reachedEnd) {
-            return _toSharedPhotoFeedItems(grouped, collectionNames);
+            return _toSharedPhotoFeedItems(
+              grouped,
+              collectionNames,
+              incomingSharedCollectionIDs,
+            );
           }
           continue;
         }
@@ -508,7 +518,11 @@ class FeedDataProvider {
         final topGroupsAreClosed = oldestFetchedAddedTime <
             (minOldestAddedTime - _kSharedPhotoSessionGapMicros);
         if (topGroupsAreClosed || reachedEnd) {
-          return _toSharedPhotoFeedItems(grouped, collectionNames);
+          return _toSharedPhotoFeedItems(
+            grouped,
+            collectionNames,
+            incomingSharedCollectionIDs,
+          );
         }
       }
 
@@ -522,28 +536,97 @@ class FeedDataProvider {
     }
 
     final grouped = groupingState.buildSnapshotSorted();
-    return _toSharedPhotoFeedItems(grouped, collectionNames);
+    return _toSharedPhotoFeedItems(
+      grouped,
+      collectionNames,
+      incomingSharedCollectionIDs,
+    );
   }
 
   List<FeedItem> _toSharedPhotoFeedItems(
     List<_SharedPhotoGroup> groups,
     Map<int, String> collectionNames,
+    Set<int> incomingSharedCollectionIDs,
   ) {
-    return groups
-        .map(
-          (group) => FeedItem(
-            type: FeedItemType.sharedPhoto,
-            collectionID: group.collectionID,
-            fileID: group.sharedFileIDs.first,
-            actorUserIDs: [group.ownerID],
-            actorAnonIDs: [null],
-            createdAt: group.createdAt,
-            isOwnedByCurrentUser: false,
-            sharedFileIDs: group.sharedFileIDs,
-            collectionName: collectionNames[group.collectionID],
-          ),
-        )
-        .toList();
+    final hasInitializedKnownCollections =
+        localSettings.hasInitializedFeedKnownIncomingSharedCollections();
+    final knownIncomingCollectionIDs =
+        localSettings.getFeedKnownIncomingSharedCollectionIDs();
+    if (!hasInitializedKnownCollections) {
+      knownIncomingCollectionIDs
+        ..clear()
+        ..addAll(incomingSharedCollectionIDs);
+    }
+
+    final groupedCollectionIDs =
+        groups.map((group) => group.collectionID).toSet();
+    final collectionsWithoutFeedEvents = incomingSharedCollectionIDs
+        .difference(knownIncomingCollectionIDs)
+        .difference(groupedCollectionIDs);
+    if (collectionsWithoutFeedEvents.isNotEmpty) {
+      knownIncomingCollectionIDs.addAll(collectionsWithoutFeedEvents);
+    }
+
+    final cachedFirstEventTimes = <int, int?>{};
+    final newlyDetectedFirstEventTimes = <int, int>{};
+
+    final items = groups.map((group) {
+      final collectionID = group.collectionID;
+      final isUnknownIncomingCollection =
+          incomingSharedCollectionIDs.contains(collectionID) &&
+              !knownIncomingCollectionIDs.contains(collectionID);
+
+      var firstEventTime = cachedFirstEventTimes[collectionID];
+      if (!cachedFirstEventTimes.containsKey(collectionID)) {
+        firstEventTime =
+            localSettings.getSharedCollectionFirstFeedEventTime(collectionID);
+        cachedFirstEventTimes[collectionID] = firstEventTime;
+      }
+
+      var isNewlySharedCollection = false;
+      if (firstEventTime != null) {
+        isNewlySharedCollection = group.createdAt == firstEventTime;
+      } else if (isUnknownIncomingCollection) {
+        firstEventTime = group.createdAt;
+        cachedFirstEventTimes[collectionID] = firstEventTime;
+        knownIncomingCollectionIDs.add(collectionID);
+        newlyDetectedFirstEventTimes[collectionID] = firstEventTime;
+        isNewlySharedCollection = true;
+      }
+
+      return FeedItem(
+        type: FeedItemType.sharedPhoto,
+        collectionID: collectionID,
+        fileID: group.sharedFileIDs.first,
+        actorUserIDs: [group.ownerID],
+        actorAnonIDs: [null],
+        createdAt: group.createdAt,
+        isOwnedByCurrentUser: false,
+        sharedFileIDs: group.sharedFileIDs,
+        collectionName: collectionNames[collectionID],
+        isNewlySharedCollection: isNewlySharedCollection,
+      );
+    }).toList();
+
+    if (!hasInitializedKnownCollections ||
+        collectionsWithoutFeedEvents.isNotEmpty ||
+        newlyDetectedFirstEventTimes.isNotEmpty) {
+      unawaited(
+        localSettings.setFeedKnownIncomingSharedCollectionIDs(
+          knownIncomingCollectionIDs,
+        ),
+      );
+    }
+    for (final entry in newlyDetectedFirstEventTimes.entries) {
+      unawaited(
+        localSettings.setSharedCollectionFirstFeedEventTime(
+          entry.key,
+          entry.value,
+        ),
+      );
+    }
+
+    return items;
   }
 
   /// Filters out feed items that should not be displayed.

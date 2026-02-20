@@ -328,6 +328,9 @@ class _PreviewTextContent extends StatelessWidget {
       case FeedItemType.sharedPhoto:
         final count = feedItem.sharedFileCount;
         final albumName = feedItem.collectionName ?? l10n.albums;
+        if (feedItem.isNewlySharedCollection) {
+          return l10n.sharedAlbumWithYou(albumName: albumName);
+        }
         if (count == 1) {
           return l10n.addedAMemoryTo(albumName: albumName);
         } else {

@@ -561,6 +561,9 @@ class _FeedTextContent extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final count = feedItem.sharedFileCount;
     final albumName = feedItem.collectionName ?? l10n.albums;
+    if (feedItem.isNewlySharedCollection) {
+      return l10n.sharedAlbumWithYou(albumName: albumName);
+    }
 
     if (count == 1) {
       return l10n.addedAMemoryTo(albumName: albumName);
