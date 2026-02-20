@@ -291,6 +291,7 @@
     "delete_photos": "Foto's verwijderen",
     "keep_photos": "Foto's behouden",
     "share_album": "Album delen",
+    "share_action": "",
     "feed": "Kanaal",
     "sharing_with_self": "Je kunt niet met jezelf delen",
     "sharing_already_shared": "Je deelt dit al met {{email}}",

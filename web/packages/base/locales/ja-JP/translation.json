@@ -291,6 +291,7 @@
     "delete_photos": "写真を削除",
     "keep_photos": "写真を残す",
     "share_album": "アルバムを共有",
+    "share_action": "",
     "feed": "",
     "sharing_with_self": "自分自身と共有することはできません",
     "sharing_already_shared": "既に {{email}} と共有しています",
