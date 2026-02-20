@@ -981,6 +981,10 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         );
     }, [publicFiles]);
 
+    const isQuickLinkAlbum =
+        memoriesDateRange !== undefined &&
+        publicCollection.name === memoriesDateRange;
+
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
@@ -1037,7 +1041,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             name={publicCollection.name}
                             fileCount={publicFiles.length}
                             endIcon={
-                                memoriesDateRange ? (
+                                !isQuickLinkAlbum && memoriesDateRange ? (
                                     <Typography
                                         variant="small"
                                         sx={{ color: "text.muted", ml: "-6px" }}
