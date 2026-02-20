@@ -51,8 +51,7 @@ const bodyClassName = "ente-public-single-file-viewer";
 /**
  * A dedicated public-album single-file viewer mode with a bespoke header/menu.
  *
- * This wraps the regular FileViewer but overlays its own controls and blocks
- * close-by-Escape behavior.
+ * This wraps the regular FileViewer but overlays its own controls.
  */
 export const PublicAlbumSingleFileViewer: React.FC<
     PublicAlbumSingleFileViewerProps
@@ -85,17 +84,6 @@ export const PublicAlbumSingleFileViewer: React.FC<
     useEffect(() => {
         document.body.classList.add(bodyClassName);
         return () => document.body.classList.remove(bodyClassName);
-    }, []);
-
-    useEffect(() => {
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key !== "Escape") return;
-            event.preventDefault();
-            event.stopPropagation();
-        };
-
-        window.addEventListener("keydown", handleEscape, true);
-        return () => window.removeEventListener("keydown", handleEscape, true);
     }, []);
 
     useEffect(() => {
