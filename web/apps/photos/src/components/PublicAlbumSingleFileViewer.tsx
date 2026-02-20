@@ -8,6 +8,7 @@ import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import {
     Box,
     Button,
+    CircularProgress,
     GlobalStyles,
     IconButton,
     Menu,
@@ -35,7 +36,6 @@ import { getEnteURL } from "utils/public-album";
 
 interface PublicAlbumSingleFileViewerProps {
     file: EnteFile;
-    albumName: string;
     publicAlbumsCredentials: PublicAlbumsCredentials;
     collectionKey: string;
     enableDownload: boolean;
@@ -58,7 +58,6 @@ export const PublicAlbumSingleFileViewer: React.FC<
     PublicAlbumSingleFileViewerProps
 > = ({
     file,
-    albumName,
     publicAlbumsCredentials,
     collectionKey,
     enableDownload,
@@ -69,10 +68,11 @@ export const PublicAlbumSingleFileViewer: React.FC<
     onAddSaveGroup,
 }) => {
     const { onGenericError } = useBaseContext();
-    const [viewerKey, setViewerKey] = useState(0);
     const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
     const [isPhotoSwipeUIVisible, setIsPhotoSwipeUIVisible] = useState(true);
+    const [isPhotoSwipeContentLoading, setIsPhotoSwipeContentLoading] =
+        useState(false);
     const needsThumbnailPrime =
         file.metadata.fileType === FileType.image ||
         file.metadata.fileType === FileType.livePhoto;
@@ -100,7 +100,9 @@ export const PublicAlbumSingleFileViewer: React.FC<
 
     useEffect(() => {
         let classObserver: MutationObserver | undefined;
+        let preloaderObserver: MutationObserver | undefined;
         let pswpElement: HTMLElement | null = null;
+        let preloaderElement: HTMLElement | null = null;
 
         const updateVisibility = () => {
             setIsPhotoSwipeUIVisible(
@@ -108,25 +110,61 @@ export const PublicAlbumSingleFileViewer: React.FC<
             );
         };
 
-        const bindToPhotoSwipeElement = () => {
-            const next = document.querySelector<HTMLElement>(".pswp");
-            if (next === pswpElement) return;
+        const updateLoading = () => {
+            setIsPhotoSwipeContentLoading(
+                preloaderElement?.classList.contains(
+                    "pswp__preloader--active",
+                ) ?? false,
+            );
+        };
 
-            classObserver?.disconnect();
-            classObserver = undefined;
-            pswpElement = next;
+        const bindToPreloaderElement = () => {
+            const next =
+                pswpElement?.querySelector<HTMLElement>(".pswp__preloader");
+            if (next === preloaderElement) return;
 
-            if (!pswpElement) {
-                setIsPhotoSwipeUIVisible(true);
+            preloaderObserver?.disconnect();
+            preloaderObserver = undefined;
+            preloaderElement = next ?? null;
+
+            if (!preloaderElement) {
+                setIsPhotoSwipeContentLoading(false);
                 return;
             }
 
-            classObserver = new MutationObserver(updateVisibility);
-            classObserver.observe(pswpElement, {
+            preloaderObserver = new MutationObserver(updateLoading);
+            preloaderObserver.observe(preloaderElement, {
                 attributes: true,
                 attributeFilter: ["class"],
             });
-            updateVisibility();
+            updateLoading();
+        };
+
+        const bindToPhotoSwipeElement = () => {
+            const next = document.querySelector<HTMLElement>(".pswp");
+            if (next !== pswpElement) {
+                classObserver?.disconnect();
+                classObserver = undefined;
+                pswpElement = next;
+
+                if (!pswpElement) {
+                    preloaderObserver?.disconnect();
+                    preloaderObserver = undefined;
+                    preloaderElement = null;
+                    setIsPhotoSwipeUIVisible(true);
+                    setIsPhotoSwipeContentLoading(false);
+                    return;
+                }
+
+                classObserver = new MutationObserver(updateVisibility);
+                classObserver.observe(pswpElement, {
+                    attributes: true,
+                    attributeFilter: ["class"],
+                });
+                updateVisibility();
+            }
+
+            bindToPreloaderElement();
         };
 
         const treeObserver = new MutationObserver(bindToPhotoSwipeElement);
@@ -136,6 +174,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
         return () => {
             treeObserver.disconnect();
             classObserver?.disconnect();
+            preloaderObserver?.disconnect();
         };
     }, []);
 
@@ -183,14 +222,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
     }, [file, needsOriginalPrime]);
 
     const handleViewerClose = useCallback(() => {
-        window.close();
-        window.setTimeout(() => {
-            if (!window.closed) {
-                // Keep the tab where it is if the browser blocked window.close.
-                window.history.go(1);
-                setViewerKey((k) => k + 1);
-            }
-        }, 0);
+        window.history.back();
     }, []);
 
     const handleMenuClose = useCallback(() => setMenuAnchorEl(null), []);
@@ -232,9 +264,10 @@ export const PublicAlbumSingleFileViewer: React.FC<
 
     const canCopyAsPNG = useMemo(
         () =>
-            file.metadata.fileType === FileType.image ||
-            file.metadata.fileType === FileType.livePhoto,
-        [file.metadata.fileType],
+            enableDownload &&
+            (file.metadata.fileType === FileType.image ||
+                file.metadata.fileType === FileType.livePhoto),
+        [enableDownload, file.metadata.fileType],
     );
 
     const handleCopyAsPNG = useCallback(async () => {
@@ -308,10 +341,11 @@ export const PublicAlbumSingleFileViewer: React.FC<
                         { display: "none !important" },
                     [`body.${bodyClassName} .pswp-ente-public-album .pswp__button--download`]:
                         { display: "none !important" },
+                    [`body.${bodyClassName} .pswp-ente-public-album .pswp__preloader`]:
+                        { display: "none !important" },
                 }}
             />
             <FileViewer
-                key={viewerKey}
                 open
                 onClose={handleViewerClose}
                 files={[file]}
@@ -320,6 +354,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
                 onDownload={enableDownload ? handleDownload : undefined}
                 onVisualFeedback={onVisualFeedback}
                 publicAlbumsCredentials={publicAlbumsCredentials}
+                shouldCloseOnBrowserBack={false}
                 collectionKey={collectionKey}
                 onJoinAlbum={onJoinAlbum}
                 enableComment={enableComment}
@@ -358,24 +393,39 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                     : "none",
                             }}
                         >
-                            <Box
-                                component="a"
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                sx={{
-                                    color: "white",
-                                    opacity: 0.85,
-                                    lineHeight: 0,
-                                    "& svg": {
-                                        width: "auto",
-                                        height: { xs: 15, sm: 19 },
-                                    },
-                                    "&:hover": { opacity: 1 },
-                                }}
+                            <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1.5}
                             >
-                                <EnteLogo height={15} />
-                            </Box>
+                                <Box
+                                    component="a"
+                                    href="https://ente.io"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
+                                        color: "white",
+                                        opacity: 0.85,
+                                        lineHeight: 0,
+                                        "& svg": {
+                                            width: "auto",
+                                            height: { xs: 15, sm: 19 },
+                                        },
+                                        "&:hover": { opacity: 1 },
+                                    }}
+                                >
+                                    <EnteLogo height={15} />
+                                </Box>
+                                {isPhotoSwipeContentLoading && (
+                                    <CircularProgress
+                                        size={16}
+                                        thickness={5}
+                                        sx={{
+                                            color: "rgb(255 255 255 / 0.85)",
+                                        }}
+                                    />
+                                )}
+                            </Stack>
                             <Stack
                                 direction="row"
                                 alignItems="center"

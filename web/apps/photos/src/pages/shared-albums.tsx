@@ -592,7 +592,6 @@ export default function PublicCollectionGallery() {
             <>
                 <PublicAlbumSingleFileViewer
                     file={publicFiles[0]!}
-                    albumName={publicCollection?.name ?? ""}
                     publicAlbumsCredentials={credentials.current}
                     collectionKey={collectionKey.current!}
                     enableDownload={downloadEnabled}
