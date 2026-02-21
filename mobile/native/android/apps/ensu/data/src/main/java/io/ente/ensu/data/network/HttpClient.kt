@@ -3,12 +3,12 @@ package io.ente.ensu.data.network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 class HttpClient(
     private val client: OkHttpClient = OkHttpClient()
@@ -34,7 +34,7 @@ class HttpClient(
         }
 
         val body = if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
-            val payload = json.encodeToString(parameters ?: emptyMap())
+            val payload = JSONObject(parameters ?: emptyMap<String, Any>()).toString()
             payload.toRequestBody(jsonMediaType)
         } else {
             null
