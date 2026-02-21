@@ -193,15 +193,15 @@ class _TextDetectionOverlayButtonState
           final textPainter = TextPainter(
             text: TextSpan(
               text: caption.trim(),
-              style: getEnteTextTheme(context).small,
+              style: getEnteTextTheme(context).mini,
             ),
             textDirection: TextDirection.ltr,
             textScaler: MediaQuery.textScalerOf(context),
             maxLines: 3,
           );
 
-          // 2. Measure against the available screen width (assuming ~16px padding on each side)
-          final double maxWidth = MediaQuery.sizeOf(context).width - 32.0;
+          // 2. Measure against the available screen width
+          final double maxWidth = MediaQuery.sizeOf(context).width - 16.0;
           textPainter.layout(maxWidth: maxWidth);
 
           // 3. Add the exact calculated text height (capped at 3 lines) + 24px safe padding buffer
