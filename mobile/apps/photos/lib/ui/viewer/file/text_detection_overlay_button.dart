@@ -184,7 +184,30 @@ class _TextDetectionOverlayButtonState
         if (shouldHide) {
           return const SizedBox.shrink();
         }
-        final double bottomOffset = MediaQuery.paddingOf(context).bottom + 72.0;
+
+        double bottomOffset = MediaQuery.paddingOf(context).bottom + 72.0;
+
+        final caption = widget.file.caption;
+        if (caption != null && caption.trim().isNotEmpty) {
+          // 1. Configure the text engine with a 3-line maximum
+          final textPainter = TextPainter(
+            text: TextSpan(
+              text: caption.trim(),
+              style: getEnteTextTheme(context).small,
+            ),
+            textDirection: TextDirection.ltr,
+            textScaler: MediaQuery.textScalerOf(context),
+            maxLines: 3,
+          );
+
+          // 2. Measure against the available screen width (assuming ~16px padding on each side)
+          final double maxWidth = MediaQuery.sizeOf(context).width - 32.0;
+          textPainter.layout(maxWidth: maxWidth);
+
+          // 3. Add the exact calculated text height (capped at 3 lines) + 24px safe padding buffer
+          bottomOffset += textPainter.height + 24.0;
+        }
+
         return Positioned(
           bottom: bottomOffset,
           left: 0,
