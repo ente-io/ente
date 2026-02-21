@@ -39,8 +39,7 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
 
     override suspend fun setSessionSummary(sessionId: String, summary: String?) {
         dataStore.edit { preferences ->
-            val summaries =
-                decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES]).toMutableMap()
+            val summaries = decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES]).toMutableMap()
             if (summary.isNullOrBlank()) {
                 summaries.remove(sessionId)
             } else {
@@ -53,9 +52,7 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
     private fun decodeSessionSummaries(raw: String?): Map<String, String> {
         if (raw.isNullOrBlank()) return emptyMap()
         return runCatching {
-            json.decodeFromString<Map<String, String>>(raw).filterValues {
-                it.isNotBlank()
-            }
+            json.decodeFromString<Map<String, String>>(raw).filterValues { it.isNotBlank() }
         }.getOrDefault(emptyMap())
     }
 
