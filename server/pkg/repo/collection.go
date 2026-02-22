@@ -58,17 +58,20 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 			return ente.Collection{}, ente.ErrUncategorizeCollectionAlreadyExists
 		}
 	}
+	// Effective semantics are NULL=>true, TRUE=>true, FALSE=>false.
+	// New collections are created with NULL, so emit true for API responses.
+	c.EnableCommentAndReactions = true
 	return c, stacktrace.Propagate(err, "")
 }
 
 // Get returns a collection identified by the collectionID
 func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata, COALESCE(enable_comment_and_reactions, TRUE)
 		FROM collections
 		WHERE collection_id = $1`, collectionID)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata, &c.EnableCommentAndReactions); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -135,12 +138,12 @@ func (repo *CollectionRepository) GetWithSharingDetailsForUser(collectionID int6
 	return c, nil
 }
 func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string, app string) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, COALESCE(enable_comment_and_reactions, TRUE)
         FROM collections
         WHERE owner_id = $1 and type = $2 and app = $3`, userID, collectionType, app)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.EnableCommentAndReactions); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -156,6 +159,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 	query := `
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
+COALESCE(c.enable_comment_and_reactions, TRUE),
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
 pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_comment, pct.enable_join, pct.min_role 
     FROM collections c
@@ -189,7 +193,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata, &c.EnableCommentAndReactions,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
 			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableComment, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
@@ -258,7 +262,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, COALESCE(collections.enable_comment_and_reactions, TRUE), collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -283,7 +287,7 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
 		var roleType sql.NullString
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.EnableCommentAndReactions, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
 			return collections, stacktrace.Propagate(err, "")
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
@@ -488,6 +492,43 @@ func (repo *CollectionRepository) GetOwnerID(collectionID int64) (int64, error) 
 	var ownerID int64
 	err := row.Scan(&ownerID)
 	return ownerID, stacktrace.Propagate(err, "failed to get collection owner")
+}
+
+func (repo *CollectionRepository) IsCommentAndReactionsEnabled(ctx context.Context, collectionID int64) (bool, error) {
+	row := repo.DB.QueryRowContext(ctx, `SELECT COALESCE(enable_comment_and_reactions, TRUE) FROM collections WHERE collection_id = $1`, collectionID)
+	var enabled bool
+	if err := row.Scan(&enabled); err != nil {
+		return false, stacktrace.Propagate(err, "failed to read comment/reaction setting")
+	}
+	return enabled, nil
+}
+
+func (repo *CollectionRepository) UpdateCommentAndReactionsSetting(ctx context.Context, collectionID int64, enabled bool, updationTime int64) error {
+	tx, err := repo.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to begin transaction")
+	}
+	defer tx.Rollback()
+
+	if _, err = tx.ExecContext(ctx, `UPDATE collections
+		SET enable_comment_and_reactions = $1,
+			updation_time = $2
+		WHERE collection_id = $3`, enabled, updationTime, collectionID); err != nil {
+		return stacktrace.Propagate(err, "failed to update collection settings")
+	}
+
+	if !enabled {
+		if _, err = tx.ExecContext(ctx, `UPDATE public_collection_tokens
+			SET enable_comment = FALSE
+			WHERE collection_id = $1 AND is_disabled = FALSE AND enable_comment = TRUE`, collectionID); err != nil {
+			return stacktrace.Propagate(err, "failed to disable public comments on active links")
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return stacktrace.Propagate(err, "failed to commit transaction")
+	}
+	return nil
 }
 
 // Share shares a collection with a userID

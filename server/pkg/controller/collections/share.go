@@ -225,6 +225,12 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
+	if req.EnableComment && !collection.EnableCommentAndReactions {
+		return ente.PublicURL{}, stacktrace.Propagate(
+			ente.NewBadRequestWithMessage("comments and reactions are disabled for this album"),
+			"",
+		)
+	}
 	valTrue := true
 	if req.EnableJoin == nil {
 		req.EnableJoin = &valTrue
@@ -255,6 +261,18 @@ func (c *CollectionController) UpdateShareURL(
 	}
 	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
 		return nil, stacktrace.Propagate(err, "")
+	}
+	if req.EnableComment != nil && *req.EnableComment {
+		collection, err := c.CollectionRepo.Get(req.CollectionID)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		if !collection.EnableCommentAndReactions {
+			return nil, stacktrace.Propagate(
+				ente.NewBadRequestWithMessage("comments and reactions are disabled for this album"),
+				"",
+			)
+		}
 	}
 	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/repo"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -11,9 +12,10 @@ import (
 
 // ReactionsController orchestrates reactions operations.
 type ReactionsController struct {
-	Repo         *socialrepo.ReactionsRepository
-	CommentsRepo *socialrepo.CommentsRepository
-	AccessCtrl   access.Controller
+	Repo           *socialrepo.ReactionsRepository
+	CommentsRepo   *socialrepo.CommentsRepository
+	CollectionRepo *repo.CollectionRepository
+	AccessCtrl     access.Controller
 }
 
 // UpsertReactionRequest holds the payload for creating or updating a reaction.
@@ -74,6 +76,9 @@ func (c *ReactionsController) Upsert(ctx *gin.Context, req UpsertReactionRequest
 		}); err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
+	}
+	if err := c.ensureCommentAndReactionsEnabled(ctx, req.CollectionID); err != nil {
+		return "", err
 	}
 
 	var targetComment *socialentity.Comment
@@ -169,6 +174,20 @@ func (c *ReactionsController) Delete(ctx *gin.Context, req ReactionDeleteRequest
 		repoUserID = userID
 	}
 	return c.Repo.SoftDeleteByID(ctx, req.ReactionID, repoUserID, req.Actor.AnonUserID)
+}
+
+func (c *ReactionsController) ensureCommentAndReactionsEnabled(ctx *gin.Context, collectionID int64) error {
+	if c.CollectionRepo == nil {
+		return nil
+	}
+	enabled, err := c.CollectionRepo.IsCommentAndReactionsEnabled(ctx, collectionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if !enabled {
+		return ente.NewBadRequestWithMessage("comments and reactions are disabled for this collection")
+	}
+	return nil
 }
 
 func validateCommentReactionContext(comment *socialentity.Comment, requestedFileID *int64) error {

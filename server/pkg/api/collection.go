@@ -181,6 +181,19 @@ func (h *CollectionHandler) UpdateShareURL(c *gin.Context) {
 	})
 }
 
+func (h *CollectionHandler) UpdateCommentAndReactions(c *gin.Context) {
+	var req ente.UpdateCommentAndReactionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if err := h.Controller.UpdateCommentAndReactions(c, auth.GetUserID(c.Request.Header), req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 // UnShareURL disable all shared urls for the given collectionID
 func (h *CollectionHandler) UnShareURL(c *gin.Context) {
 	cID, err := strconv.ParseInt(c.Param("collectionID"), 10, 64)

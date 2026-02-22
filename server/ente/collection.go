@@ -29,7 +29,8 @@ type Collection struct {
 	PublicMagicMetadata *MagicMetadata       `json:"pubMagicMetadata,omitempty"`
 	// SharedMagicMetadata keeps the metadata of the sharees to store settings like
 	// if the collection should be shown on timeline or not
-	SharedMagicMetadata *MagicMetadata `json:"sharedMagicMetadata,omitempty"`
+	SharedMagicMetadata        *MagicMetadata `json:"sharedMagicMetadata,omitempty"`
+	EnableCommentAndReactions bool           `json:"enableCommentAndReactions"`
 }
 
 // AllowSharing indicates if this particular collection type can be shared
@@ -147,6 +148,11 @@ type RenameRequest struct {
 	CollectionID        int64  `json:"collectionID" binding:"required"`
 	EncryptedName       string `json:"encryptedName" binding:"required"`
 	NameDecryptionNonce string `json:"nameDecryptionNonce" binding:"required"`
+}
+
+type UpdateCommentAndReactionsRequest struct {
+	CollectionID               int64 `json:"collectionID" binding:"required"`
+	EnableCommentAndReactions bool  `json:"enableCommentAndReactions"`
 }
 
 // UpdateCollectionMagicMetadata payload for updating magic metadata for single file
