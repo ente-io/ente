@@ -95,7 +95,7 @@ you can store up to 1000 items. Learn more at
 <div align="center">
 
 [<img height="40" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/us/app/ente-locker/id6747611956)
-[<img height="40" src=".github/assets/play-store-badge.png">](https://apps.apple.com/us/app/ente-locker/id6747611956)
+[<img height="40" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.locker)
 
 </div>
 
