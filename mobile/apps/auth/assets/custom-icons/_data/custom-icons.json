@@ -34,6 +34,9 @@
       "slug": "addy_io"
     },
     {
+      "title": "Adobe"
+    },
+    {
       "title": "Airtable"
     },
     {
@@ -596,6 +599,7 @@
       "altNames": [
         "EA"
       ]
+      "title": "Electrum"
     },
     {
       "title": "emeritihealth",
@@ -698,6 +702,10 @@
     },
     {
       "title": "ForUsAll"
+    },
+    {
+      "title": "Forward Email",
+      "slug": "forwardemail"
     },
     {
       "title": "FreeTaxUSA",
@@ -1075,6 +1083,9 @@
       "altNames": [
         "mathworks"
       ]
+    },
+    {
+      "title": "Maxon"
     },
     {
       "title": "Mbin",
