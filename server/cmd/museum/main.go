@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/collections"
-	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
-	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +13,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/controller/collections"
+	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
+	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente/base"
 	"github.com/ente-io/museum/pkg/controller/emergency"
@@ -46,6 +47,7 @@ import (
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/museum/pkg/controller/lock"
+	memoryShareCtrl "github.com/ente-io/museum/pkg/controller/memory_share"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
 	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -182,6 +184,7 @@ func main() {
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo, FileLinkRepo: fileLinkRepo}
 	collectionLinkRepo := public.NewCollectionLinkRepository(db, viper.GetString("apps.public-albums"))
+	memoryShareRepo := repo.NewMemoryShareRepository(db)
 
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
@@ -419,6 +422,9 @@ func main() {
 		JwtSecret:      jwtSecretBytes,
 	}
 
+	memoryShareController := memoryShareCtrl.NewController(memoryShareRepo, fileRepo, accessCtrl)
+	memorySharePublicController := publicCtrl.NewMemoryShareController(memoryShareRepo, fileRepo, fileController)
+
 	passkeyCtrl := &controller.PasskeyController{
 		Repo:     passkeysRepo,
 		UserRepo: userRepo,
@@ -442,6 +448,9 @@ func main() {
 		Cache:             accessTokenCache,
 		BillingCtrl:       billingController,
 		DiscordController: discordController,
+	}
+	memoryShareMiddleware := &middleware.MemoryShareMiddleware{
+		Repo: memoryShareRepo,
 	}
 
 	if environment != "local" {
@@ -493,6 +502,13 @@ func main() {
 	)
 	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
+
+	publicMemoryAPI := server.Group("/public-memory")
+	publicMemoryAPI.Use(
+		rateLimiter.GlobalRateLimiter(),
+		memoryShareMiddleware.Authenticate(urlSanitizer),
+		rateLimiter.APIRateLimitMiddleware(urlSanitizer),
+	)
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
@@ -717,6 +733,26 @@ func main() {
 	publicCollectionAPI.GET("/participants/masked-emails", publicSocialHandler.Participants)
 	publicCollectionAPI.GET("/anon-profiles", publicSocialHandler.AnonProfiles)
 	publicCollectionAPI.POST("/anon-identity", publicSocialHandler.CreateAnonIdentity)
+
+	memoryShareHandler := &api.MemoryShareHandler{
+		Controller: memoryShareController,
+	}
+	publicMemoryShareHandler := &api.PublicMemoryShareHandler{
+		PublicCtrl:   memorySharePublicController,
+		FileDataCtrl: fileDataCtrl,
+	}
+
+	privateAPI.POST("/memory-share", memoryShareHandler.Create)
+	privateAPI.GET("/memory-share", memoryShareHandler.List)
+	privateAPI.GET("/memory-share/:shareID", memoryShareHandler.GetByID)
+	privateAPI.DELETE("/memory-share/:shareID", memoryShareHandler.Delete)
+
+	publicMemoryAPI.GET("/info", publicMemoryShareHandler.GetInfo)
+	publicMemoryAPI.GET("/files", publicMemoryShareHandler.GetFiles)
+	publicMemoryAPI.GET("/files/preview/:fileID", publicMemoryShareHandler.GetThumbnail)
+	publicMemoryAPI.GET("/files/:fileID", publicMemoryShareHandler.GetFile)
+	publicMemoryAPI.GET("/file-data", publicMemoryShareHandler.GetFileData)
+	publicMemoryAPI.GET("/files/data/preview", publicMemoryShareHandler.GetPreviewURL)
 
 	castAPI := server.Group("/cast")
 
@@ -1207,6 +1243,8 @@ func cacheHeaders() gin.HandlerFunc {
 				strings.HasPrefix(reqPath, "/files/download/") ||
 				strings.HasPrefix(reqPath, "/public-collection/files/preview/") ||
 				strings.HasPrefix(reqPath, "/public-collection/files/download/") ||
+				strings.HasPrefix(reqPath, "/public-memory/files/preview/") ||
+				strings.HasPrefix(reqPath, "/public-memory/files/") ||
 				strings.HasPrefix(reqPath, "/cast/files/preview/") ||
 				strings.HasPrefix(reqPath, "/cast/files/download/") {
 				// Exclude those that redirect to S3 for file downloads.

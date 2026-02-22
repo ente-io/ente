@@ -460,6 +460,12 @@ func (c *FileController) DoesFileExistInCollection(ctx *gin.Context, fileID int6
 	return nil
 }
 
+// GetSignedURLForPublicFile returns a presigned URL for a file without access checking.
+// The caller is responsible for verifying access before calling this method.
+func (c *FileController) GetSignedURLForPublicFile(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
+	return c.getSignedURLForType(ctx, fileID, objType)
+}
+
 func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
 	if isCliRequest(ctx) {
 		return c.getWasabiSignedUrlIfAvailable(fileID, objType)
