@@ -10,9 +10,11 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import io.ente.ensu.domain.preferences.SessionPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.json.JSONObject
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class SessionPreferencesDataStore(context: Context) : SessionPreferences {
+    private val json = Json
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create {
         context.preferencesDataStoreFile("ensu_session_prefs")
     }
@@ -43,33 +45,15 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
             } else {
                 summaries[sessionId] = summary
             }
-            preferences[Keys.SESSION_SUMMARIES] = encodeSessionSummaries(summaries)
+            preferences[Keys.SESSION_SUMMARIES] = json.encodeToString(summaries)
         }
     }
 
     private fun decodeSessionSummaries(raw: String?): Map<String, String> {
         if (raw.isNullOrBlank()) return emptyMap()
         return runCatching {
-            val json = JSONObject(raw)
-            val map = mutableMapOf<String, String>()
-            val keys = json.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                val value = json.optString(key)
-                if (value.isNotBlank()) {
-                    map[key] = value
-                }
-            }
-            map
+            json.decodeFromString<Map<String, String>>(raw).filterValues { it.isNotBlank() }
         }.getOrDefault(emptyMap())
-    }
-
-    private fun encodeSessionSummaries(summaries: Map<String, String>): String {
-        val json = JSONObject()
-        summaries.forEach { (key, value) ->
-            json.put(key, value)
-        }
-        return json.toString()
     }
 
     private object Keys {
