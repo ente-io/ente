@@ -3,6 +3,7 @@ package listmonk
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,7 +80,7 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 
 	// Checking if there are any subscribers found
 	if len(subscriberResp.Data.Results) == 0 {
-		return 0, stacktrace.Propagate(err, "")
+		return 0, stacktrace.Propagate(errors.New("subscriber not found"), "")
 	}
 
 	// Extracting the ID from the response
@@ -114,7 +115,14 @@ func SendRequest(method string, url string, data interface{}, username string, p
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return stacktrace.Propagate(err, "")
+		body, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return stacktrace.Propagate(readErr, "")
+		}
+		return stacktrace.Propagate(
+			fmt.Errorf("listmonk request failed with status %d: %s", resp.StatusCode, strings.TrimSpace(string(body))),
+			"",
+		)
 	}
 
 	return nil
