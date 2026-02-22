@@ -12,6 +12,7 @@ import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
 import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
+import { PickCoverPhotoDialog } from "components/Collections/PickCoverPhotoDialog";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import type { FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -50,7 +51,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
-import { type Collection } from "ente-media/collection";
+import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
 import {
@@ -106,6 +107,7 @@ import {
     createQuickLinkCollection,
     removeFromCollection,
     removeFromFavoritesCollection,
+    updateCollectionCover,
 } from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
@@ -304,6 +306,10 @@ const Page: React.FC = () => {
         useModalVisibility();
     const { show: showEditLocation, props: editLocationVisibilityProps } =
         useModalVisibility();
+    const {
+        show: showPickCoverPhotoDialog,
+        props: pickCoverPhotoDialogVisibilityProps,
+    } = useModalVisibility();
 
     // Progress UI state for single-file add-to-album from the FileViewer
     const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
@@ -389,6 +395,40 @@ const Page: React.FC = () => {
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+    const isOwnedAlbumEligibleForCover = useMemo(() => {
+        if (!activeCollection || !activeCollectionSummary || !user)
+            return false;
+
+        if (activeCollection.owner.id != user.id) return false;
+        if (
+            activeCollection.magicMetadata?.data.subType ==
+            CollectionSubType.quicklink
+        ) {
+            return false;
+        }
+
+        return (
+            activeCollectionSummary.attributes.has("album") ||
+            activeCollectionSummary.attributes.has("folder")
+        );
+    }, [activeCollection, activeCollectionSummary, user]);
+    const activeCollectionFiles = useMemo(
+        () =>
+            !activeCollection
+                ? []
+                : isInSearchMode
+                  ? state.collectionFiles.filter(
+                        ({ collectionID }) =>
+                            collectionID === activeCollection.id,
+                    )
+                  : filteredFiles,
+        [
+            activeCollection,
+            isInSearchMode,
+            state.collectionFiles,
+            filteredFiles,
+        ],
+    );
     const selectedFilesInView = useMemo(
         () => getSelectedFiles(selected, filteredFiles),
         [selected, filteredFiles],
@@ -1372,6 +1412,33 @@ const Page: React.FC = () => {
         return count;
     }, [favoriteFileIDs, selected]);
 
+    const handleUpdateCollectionCover = useCallback(
+        async (coverID: number) => {
+            if (!activeCollection || !isOwnedAlbumEligibleForCover)
+                return false;
+
+            showLoadingBar();
+            try {
+                await updateCollectionCover(activeCollection, coverID);
+                await remotePull({ silent: true });
+                return true;
+            } catch (e) {
+                onGenericError(e);
+                return false;
+            } finally {
+                hideLoadingBar();
+            }
+        },
+        [
+            activeCollection,
+            isOwnedAlbumEligibleForCover,
+            showLoadingBar,
+            remotePull,
+            onGenericError,
+            hideLoadingBar,
+        ],
+    );
+
     /**
      * Handle a context menu action on a file.
      *
@@ -1548,6 +1615,21 @@ const Page: React.FC = () => {
             selectedCount,
             selectedOwnCount,
         ],
+    );
+
+    const handleOpenPickCoverPhotoDialog = useCallback(() => {
+        if (!isOwnedAlbumEligibleForCover) return;
+        showPickCoverPhotoDialog();
+    }, [isOwnedAlbumEligibleForCover, showPickCoverPhotoDialog]);
+
+    const handleUseSelectedCoverPhoto = useCallback(
+        async (file: EnteFile) => handleUpdateCollectionCover(file.id),
+        [handleUpdateCollectionCover],
+    );
+
+    const handleResetCollectionCover = useCallback(
+        async () => handleUpdateCollectionCover(0),
+        [handleUpdateCollectionCover],
     );
 
     const handleCloseCollectionSelector = useCallback(
@@ -1761,6 +1843,8 @@ const Page: React.FC = () => {
                     fileNormalCollectionIDs,
                     collectionNameByID,
                     onSelectCollection: handleSelectCollection,
+                    canSetAlbumCover: isOwnedAlbumEligibleForCover,
+                    onSetAlbumCover: handleOpenPickCoverPhotoDialog,
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}
@@ -1894,6 +1978,20 @@ const Page: React.FC = () => {
                     onPendingNavigationConsumed={
                         handlePendingNavigationConsumed
                     }
+                />
+            )}
+            {activeCollection && (
+                <PickCoverPhotoDialog
+                    {...pickCoverPhotoDialogVisibilityProps}
+                    collection={activeCollection}
+                    files={activeCollectionFiles}
+                    user={user}
+                    canResetToDefault={
+                        (activeCollection.pubMagicMetadata?.data.coverID ?? 0) >
+                        0
+                    }
+                    onUseSelectedPhoto={handleUseSelectedCoverPhoto}
+                    onResetToDefault={handleResetCollectionCover}
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />

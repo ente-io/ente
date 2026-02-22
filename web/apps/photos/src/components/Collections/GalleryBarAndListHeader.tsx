@@ -67,6 +67,8 @@ type GalleryBarAndListHeaderProps = Omit<
         | "collectionNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
+        | "canSetAlbumCover"
+        | "onSetAlbumCover"
     > &
     Pick<
         CollectionShareProps,
@@ -109,6 +111,8 @@ export const GalleryBarAndListHeader: React.FC<
     emailByUserID,
     shareSuggestionEmails,
     onRemotePull,
+    canSetAlbumCover,
+    onSetAlbumCover,
     onAddSaveGroup,
     onMarkTempDeleted,
     onAddFileToCollection,
@@ -207,6 +211,8 @@ export const GalleryBarAndListHeader: React.FC<
                     onCollectionShare={openCollectionShare}
                     onCollectionManageLink={openCollectionManageLink}
                     onCollectionCast={showCollectionCast}
+                    canSetAlbumCover={canSetAlbumCover}
+                    onSetAlbumCover={onSetAlbumCover}
                 />
             ) : mode != "people" && collectionSummary ? (
                 <GalleryItemsHeaderAdapter>
