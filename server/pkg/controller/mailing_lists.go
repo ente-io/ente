@@ -212,8 +212,12 @@ func (c *MailingListsController) listmonkSubscribe(email string) error {
 		"email": email,
 		"lists": c.listmonkListIDs,
 	}
-	return listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
+	err := listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+	if err != nil {
+		log.Errorf("Listmonk - Could not subscribe '%s': %s", email, err)
+	}
+	return err
 }
 
 // Unsubscribes an email address to a particular listmonk campaign mailing list
@@ -226,9 +230,14 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
-		stacktrace.Propagate(err, "")
+		log.Errorf("Listmonk - Could not find subscriber '%s': %s", email, err)
+		return stacktrace.Propagate(err, "")
 	}
 
-	return listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
+	err = listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
 		map[string]interface{}{}, c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+	if err != nil {
+		log.Errorf("Listmonk - Could not unsubscribe '%s': %s", email, err)
+	}
+	return err
 }
