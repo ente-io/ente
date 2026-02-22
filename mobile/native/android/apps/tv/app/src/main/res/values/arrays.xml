@@ -1,0 +1,77 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string-array name="pref_source_entries" tools:ignore="InconsistentArrays">
+        <item>Ente public album</item>
+        <item>Device photos</item>
+    </string-array>
+
+    <string-array name="pref_source_values" tools:ignore="InconsistentArrays">
+        <item>ente_public_album</item>
+        <item>mediastore</item>
+    </string-array>
+
+    <string-array name="pref_interval_entries">
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+    </string-array>
+
+    <string-array name="pref_interval_values">
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+        <item>600000</item>
+    </string-array>
+
+    <string-array name="pref_fit_entries">
+        <item>Crop (fill)</item>
+        <item>Fit (letterbox)</item>
+    </string-array>
+
+    <string-array name="pref_fit_values">
+        <item>crop</item>
+        <item>fit</item>
+    </string-array>
+
+    <string-array name="pref_ente_cache_entries">
+        <item>15 photos</item>
+        <item>30 photos</item>
+        <item>50 photos</item>
+        <item>100 photos</item>
+    </string-array>
+
+    <string-array name="pref_ente_cache_values">
+        <item>15</item>
+        <item>30</item>
+        <item>50</item>
+        <item>100</item>
+    </string-array>
+
+    <string-array name="pref_ente_refresh_entries">
+        <item>Never</item>
+        <item>15 minutes</item>
+        <item>1 hour</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+    </string-array>
+
+    <string-array name="pref_ente_refresh_values">
+        <item>-1</item>
+        <item>900000</item>
+        <item>3600000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+    </string-array>
+
+    <string-array name="pref_overlay_entries">
+        <item>Normal</item>
+        <item>Alternate</item>
+        <item>Disable</item>
+    </string-array>
+
+    <string-array name="pref_overlay_values">
+        <item>normal</item>
+        <item>alternate</item>
+        <item>disable</item>
+    </string-array>
+</resources>

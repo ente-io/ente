@@ -1,0 +1,4 @@
+storeFile=keystore/ente-tv-release.jks
+storePassword=CHANGE_ME
+keyAlias=ente_tv_release
+keyPassword=CHANGE_ME

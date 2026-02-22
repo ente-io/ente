@@ -1,0 +1,113 @@
+name: "Photos TV Release"
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "tv-v*"
+
+env:
+  NDK_VERSION: "27.0.12077973"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/tv-v') }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/native/android/apps/tv
+    env:
+      SIGNING_KEY_B64: ${{ secrets.SIGNING_KEY_TV }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_TV }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_TV }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_TV }}
+      SIGNING_KEY_FILE: "tv-release.jks"
+      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_TV }}
+      PLAYSTORE_PACKAGE_NAME: "io.ente.photos.tv"
+      PLAYSTORE_TRACK: "internal"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: |
+          echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Setup signing keys
+        if: ${{ env.SIGNING_KEY_B64 != '' && env.SIGNING_KEY_ALIAS != '' && env.SIGNING_KEY_PASSWORD != '' && env.SIGNING_STORE_PASSWORD != '' }}
+        run: |
+          mkdir -p keystore
+          echo "$SIGNING_KEY_B64" | base64 -d > "keystore/$SIGNING_KEY_FILE"
+          cat > key.properties << EOF
+          storeFile=keystore/$SIGNING_KEY_FILE
+          storePassword=$SIGNING_STORE_PASSWORD
+          keyAlias=$SIGNING_KEY_ALIAS
+          keyPassword=$SIGNING_KEY_PASSWORD
+          EOF
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+
+      - name: Build release AAB (when Play Store + signing secrets are present)
+        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' && env.SIGNING_KEY_B64 != '' && env.SIGNING_KEY_ALIAS != '' && env.SIGNING_KEY_PASSWORD != '' && env.SIGNING_STORE_PASSWORD != '' }}
+        run: ./gradlew bundleRelease
+
+      - name: Prepare release artifacts
+        id: artifacts
+        run: |
+          mkdir -p artifacts
+          APK_NAME="ente-tv-${{ github.ref_name }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "artifacts/$APK_NAME"
+
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            AAB_NAME="ente-tv-${{ github.ref_name }}.aab"
+            cp app/build/outputs/bundle/release/app-release.aab "artifacts/$AAB_NAME"
+            echo "has_aab=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_aab=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          sha256sum artifacts/* > artifacts/sha256sum
+
+      - name: Create draft GitHub release
+        if: ${{ startsWith(github.ref, 'refs/tags/tv-v') }}
+        uses: ncipollo/release-action@v1
+        with:
+          name: "tv-android-${{ github.ref_name }}"
+          artifacts: "mobile/native/android/apps/tv/artifacts/*"
+          draft: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+
+      - name: Upload AAB to Play Store as draft
+        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' && steps.artifacts.outputs.has_aab == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PLAYSTORE_PACKAGE_NAME }}
+          releaseFiles: mobile/native/android/apps/tv/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ env.PLAYSTORE_TRACK }}
+          status: draft

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:paddingStart="48dp"
+    android:paddingTop="40dp"
+    android:paddingEnd="48dp"
+    android:paddingBottom="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_setup_card"
+        android:orientation="horizontal"
+        android:paddingStart="56dp"
+        android:paddingTop="0dp"
+        android:paddingEnd="44dp"
+        android:paddingBottom="0dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="40dp"
+            android:paddingEnd="20dp">
+
+            <ImageView
+                android:id="@+id/image_setup_logo"
+                android:layout_width="88dp"
+                android:layout_height="61dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:src="@drawable/ente_photos_logo_dark" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_setup_bullet" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:fontFamily="@font/opensans_bold"
+                        android:lineSpacingExtra="1dp"
+                        android:text="@string/setup_bullet_network"
+                        android:textColor="#111111"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_setup_bullet" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:fontFamily="@font/opensans_bold"
+                        android:lineSpacingExtra="1dp"
+                        android:text="@string/setup_bullet_scan"
+                        android:textColor="#111111"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_setup_bullet" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:fontFamily="@font/opensans_bold"
+                        android:lineSpacingExtra="1dp"
+                        android:text="@string/setup_bullet_album"
+                        android:textColor="#111111"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_setup_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/opensans_semibold"
+                android:textColor="#AA111111"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/image_setup_ducky"
+                android:layout_width="312dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:src="@drawable/setup_ducky" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="360dp"
+                android:layout_height="360dp"
+                android:layout_gravity="center"
+                android:padding="2dp">
+
+                <ImageView
+                    android:id="@+id/image_qr"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
