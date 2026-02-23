@@ -291,6 +291,7 @@
     "delete_photos": "Fotoğrafları sil",
     "keep_photos": "Fotoğrafları sakla",
     "share_album": "Albümü paylaş",
+    "share_action": "",
     "feed": "",
     "sharing_with_self": "Kendinizle paylaşamazsınız",
     "sharing_already_shared": "Bunu zaten {{email}} ile paylaşıyorsun",

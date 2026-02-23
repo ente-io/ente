@@ -341,6 +341,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             child: MenuItemWidgetNew(
               title: "Manage payment method",
               menuItemColor: colorScheme.fillFaint,
+              pressedColor: colorScheme.fillFaintPressed,
               trailingWidget: Icon(
                 Icons.chevron_right_outlined,
                 color: colorScheme.strokeBase,
@@ -367,6 +368,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                 ? AppLocalizations.of(context).familyPlans
                 : AppLocalizations.of(context).manageFamily,
             menuItemColor: colorScheme.fillFaint,
+            pressedColor: colorScheme.fillFaintPressed,
             trailingWidget: Icon(
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,

@@ -270,6 +270,7 @@ export interface FileListProps {
     onContextMenuAction?: (
         action: FileContextAction,
         targetFile?: EnteFile,
+        meta?: { isEphemeralSingleSelection: boolean },
     ) => void;
     /**
      * Whether to show the "Add Person" action in the context menu.
@@ -283,6 +284,10 @@ export interface FileListProps {
      * Called when the context menu opens or closes.
      */
     onContextMenuOpenChange?: (open: boolean) => void;
+    /**
+     * Hide selection visuals/interactions while keeping selection data.
+     */
+    suppressSelectionUI?: boolean;
 }
 
 /**
@@ -314,6 +319,7 @@ export const FileList: React.FC<FileListProps> = ({
     showAddPersonAction,
     showEditLocationAction,
     onContextMenuOpenChange,
+    suppressSelectionUI = false,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -775,15 +781,20 @@ export const FileList: React.FC<FileListProps> = ({
 
     const handleContextMenuActionWithTracking = useCallback(
         (action: FileContextAction) => {
+            const isEphemeralSingleSelection =
+                selected.count === 1 &&
+                previousSelectionRef.current?.count === 0;
             contextMenuActionTakenRef.current = true;
-            onContextMenuAction?.(action, contextMenu?.file);
+            onContextMenuAction?.(action, contextMenu?.file, {
+                isEphemeralSingleSelection,
+            });
         },
-        [onContextMenuAction, contextMenu],
+        [onContextMenuAction, contextMenu, selected.count],
     );
 
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
-            const haveSelection = selected.count > 0;
+            const haveSelection = !suppressSelectionUI && selected.count > 0;
             const showGroupCheckbox =
                 haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
@@ -824,10 +835,13 @@ export const FileList: React.FC<FileListProps> = ({
                                         {...{
                                             user,
                                             emailByUserID,
-                                            enableSelect,
+                                            enableSelect:
+                                                !!enableSelect &&
+                                                !suppressSelectionUI,
                                         }}
                                         file={file}
                                         selected={
+                                            !suppressSelectionUI &&
                                             (!mode
                                                 ? selected.collectionID ===
                                                   activeCollectionID
@@ -843,10 +857,9 @@ export const FileList: React.FC<FileListProps> = ({
                                                         activeCollectionID)) &&
                                             !!selected[file.id]
                                         }
-                                        selectOnClick={selected.count > 0}
+                                        selectOnClick={haveSelection}
                                         isRangeSelectActive={
-                                            isShiftKeyPressed &&
-                                            selected.count > 0
+                                            isShiftKeyPressed && haveSelection
                                         }
                                         isInSelectRange={
                                             rangeStartIndex !== undefined &&
@@ -904,6 +917,7 @@ export const FileList: React.FC<FileListProps> = ({
             onItemClick,
             rangeStartIndex,
             enableSelect,
+            suppressSelectionUI,
             selected,
             user,
         ],
@@ -1223,7 +1237,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
             onTouchStart: () => setIsLongPressing(true),
+            onTouchMove: () => setIsLongPressing(false),
             onTouchEnd: () => setIsLongPressing(false),
+            onTouchCancel: () => setIsLongPressing(false),
         }),
         [],
     );

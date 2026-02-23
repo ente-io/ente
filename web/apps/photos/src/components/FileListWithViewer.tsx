@@ -112,6 +112,7 @@ export type FileListWithViewerProps = {
     | "onContextMenuOpenChange"
     | "showAddPersonAction"
     | "showEditLocationAction"
+    | "suppressSelectionUI"
 > &
     Pick<
         FileViewerProps,
@@ -166,6 +167,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onContextMenuOpenChange,
     showAddPersonAction,
     showEditLocationAction,
+    suppressSelectionUI,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -365,6 +367,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             onContextMenuOpenChange,
                             showAddPersonAction,
                             showEditLocationAction,
+                            suppressSelectionUI,
                         }}
                         onItemClick={handleThumbnailClick}
                     />

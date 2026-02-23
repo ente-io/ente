@@ -291,6 +291,7 @@
     "delete_photos": "Видалити фото",
     "keep_photos": "Залишити фото",
     "share_album": "Поділитися альбомом",
+    "share_action": "",
     "feed": "",
     "sharing_with_self": "Ви не можете поділитися із собою",
     "sharing_already_shared": "Ви вже ділитеся цим з {{email}}",

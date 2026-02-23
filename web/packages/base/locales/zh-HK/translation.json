@@ -291,6 +291,7 @@
     "delete_photos": "刪除照片",
     "keep_photos": "保留照片",
     "share_album": "分享相簿",
+    "share_action": "",
     "feed": "",
     "sharing_with_self": "",
     "sharing_already_shared": "",

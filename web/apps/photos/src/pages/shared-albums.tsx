@@ -1,14 +1,28 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
+import {
+    Download01Icon,
+    ImageAdd02Icon,
+    Share08Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    Stack,
+    styled,
+    Tooltip,
+    useMediaQuery,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
+import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
 import { TripLayout } from "components/TripLayout";
 import { Upload } from "components/Upload";
 import {
@@ -62,7 +76,7 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
@@ -82,6 +96,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { Notification } from "ente-new/photos/components/Notification";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
@@ -92,6 +107,7 @@ import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
 import { getEnteURL } from "utils/public-album";
+import { quickLinkDateRangeForCreationTimes } from "utils/quick-link";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -478,6 +494,10 @@ export default function PublicCollectionGallery() {
     const addPhotosEnabled = !!onAddPhotos;
 
     const hasSelection = selected.count > 0;
+    const isMobileHeaderLayout = useMediaQuery("(width < 720px)");
+    const fileListHeaderHeightForViewport = isMobileHeaderLayout
+        ? fileListHeaderHeightMobile
+        : fileListHeaderHeight;
 
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
@@ -490,6 +510,7 @@ export default function PublicCollectionGallery() {
                                   publicFiles,
                                   downloadEnabled,
                                   onAddSaveGroup,
+                                  onAddPhotos,
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
@@ -497,7 +518,7 @@ export default function PublicCollectionGallery() {
                               }}
                           />
                       ),
-                      height: fileListHeaderHeight,
+                      height: fileListHeaderHeightForViewport,
                   }
                 : undefined,
         [
@@ -507,7 +528,9 @@ export default function PublicCollectionGallery() {
             downloadEnabled,
             showPublicFeed,
             commentsEnabled,
+            onAddPhotos,
             hasSelection,
+            fileListHeaderHeightForViewport,
         ],
     );
 
@@ -560,6 +583,32 @@ export default function PublicCollectionGallery() {
     }
 
     const layout = publicCollection?.pubMagicMetadata?.data.layout || "grouped";
+    const isSingleFileAlbum = publicFiles.length === 1;
+    const shouldShowSingleFileViewer =
+        isSingleFileAlbum && (layout === "grouped" || layout === "continuous");
+
+    if (shouldShowSingleFileViewer) {
+        return (
+            <>
+                <PublicAlbumSingleFileViewer
+                    file={publicFiles[0]!}
+                    publicAlbumsCredentials={credentials.current}
+                    collectionKey={collectionKey.current!}
+                    enableDownload={downloadEnabled}
+                    enableComment={commentsEnabled}
+                    enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                    onJoinAlbum={handleJoinAlbum}
+                    onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
+                />
+                {blockingLoad && <TranslucentLoadingOverlay />}
+                <DownloadStatusNotifications
+                    {...{ saveGroups, onRemoveSaveGroup }}
+                    fullWidthOnMobile
+                />
+            </>
+        );
+    }
 
     return (
         <FullScreenDropZone
@@ -584,11 +633,13 @@ export default function PublicCollectionGallery() {
                     <NavbarBase
                         sx={[
                             {
+                                flex: "0 0 60px",
                                 px: "24px",
                                 "@media (width < 720px)": { px: "4px" },
                             },
                             selected.count > 0 && {
                                 borderColor: "accent.main",
+                                overflowX: "hidden",
                             },
                         ]}
                     >
@@ -674,6 +725,7 @@ export default function PublicCollectionGallery() {
             />
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
+                fullWidthOnMobile
             />
             {publicCollection && collectionKey.current && (
                 <PublicFeedSidebar
@@ -705,9 +757,12 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 const GreenButton = styled(Button)(() => ({
     backgroundColor: "#08C225",
     borderRadius: "16px",
+    paddingBlock: "11px",
     paddingInline: "20px",
     "&:hover": { backgroundColor: "#07A820" },
 }));
+
+const navbarActionButtonSx = { borderRadius: "16px", paddingBlock: "11px" };
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
@@ -725,7 +780,7 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
                     />
                 )
             }
-            sx={{ borderRadius: "16px" }}
+            sx={navbarActionButtonSx}
             {...{ onClick, disabled }}
         >
             {t("add_photos")}
@@ -811,7 +866,7 @@ const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
         return (
             <FocusVisibleButton
                 color="secondary"
-                sx={{ borderRadius: "16px" }}
+                sx={navbarActionButtonSx}
                 onClick={handleJoinAlbum}
             >
                 {t("join_album")}
@@ -837,20 +892,34 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         direction="row"
         sx={{
             flex: 1,
+            minWidth: 0,
             gap: 1,
             alignItems: "center",
-            mx: -1.5,
-            "@media (width < 720px)": { mx: -1 },
+            width: "100%",
         }}
     >
-        <IconButton onClick={clearSelection}>
+        <IconButton
+            onClick={clearSelection}
+            sx={{ flexShrink: 0, ml: "-15px" }}
+        >
             <CloseIcon />
         </IconButton>
-        <Typography sx={{ mr: "auto" }}>
+        <Typography
+            sx={{
+                mr: "auto",
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+            }}
+        >
             {t("selected_count", { selected: count })}
         </Typography>
         <Tooltip title={t("download")}>
-            <IconButton onClick={downloadFilesHelper}>
+            <IconButton
+                onClick={downloadFilesHelper}
+                sx={{ flexShrink: 0, mr: "-15px" }}
+            >
                 <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
@@ -862,6 +931,7 @@ interface FileListHeaderProps {
     publicFiles: EnteFile[];
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
+    onAddPhotos?: () => void;
     onShowFeed?: () => void;
     hasSelection: boolean;
 }
@@ -870,6 +940,13 @@ interface FileListHeaderProps {
  * The fixed height (in px) of {@link FileListHeader}.
  */
 const fileListHeaderHeight = 84;
+
+/**
+ * The height (in px) of {@link FileListHeader} on mobile.
+ *
+ * Keep this fixed so the virtualized list has a stable header row height.
+ */
+const fileListHeaderHeightMobile = 132;
 
 /**
  * A header shown before the listing of files.
@@ -882,9 +959,32 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicFiles,
     downloadEnabled,
     onAddSaveGroup,
+    onAddPhotos,
     onShowFeed,
     hasSelection,
 }) => {
+    const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+    const addPhotosDisabled = uploadManager.isUploadInProgress();
+
+    const memoriesDateRange = useMemo(() => {
+        if (!publicFiles.length) return undefined;
+
+        // publicFiles is already creation-time sorted, so the ends hold min/max.
+        const firstCreationTime = fileCreationTime(publicFiles[0]!);
+        const lastCreationTime = fileCreationTime(
+            publicFiles[publicFiles.length - 1]!,
+        );
+
+        return quickLinkDateRangeForCreationTimes(
+            Math.min(firstCreationTime, lastCreationTime),
+            Math.max(firstCreationTime, lastCreationTime),
+        );
+    }, [publicFiles]);
+
+    const isQuickLinkAlbum =
+        memoriesDateRange !== undefined &&
+        publicCollection.name === memoriesDateRange;
+
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
@@ -894,50 +994,146 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
             onAddSaveGroup,
         );
 
+    const handleShare = async () => {
+        if (typeof window === "undefined") return;
+
+        const shareUrl = window.location.href;
+        const shareText = `${publicCollection.name}\n${shareUrl}`;
+        const isMobile = window.matchMedia("(width < 720px)").matches;
+
+        if (isMobile && typeof navigator.share === "function") {
+            try {
+                await navigator.share({ text: shareText });
+                return;
+            } catch (error) {
+                if (error instanceof Error && error.name === "AbortError") {
+                    return;
+                }
+            }
+        }
+
+        void navigator.clipboard.writeText(isMobile ? shareText : shareUrl);
+        setShowCopiedMessage(true);
+        setTimeout(() => setShowCopiedMessage(false), 2000);
+    };
+
     return (
-        <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
-            <SpacedRow>
-                <Box sx={{ minWidth: 0 }}>
-                    <GalleryItemsSummary
-                        name={publicCollection.name}
-                        fileCount={publicFiles.length}
-                        nameProps={{ noWrap: true }}
-                    />
-                </Box>
-                <Stack
-                    direction="row"
-                    spacing={1}
+        <>
+            <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
+                <SpacedRow
                     sx={{
-                        alignItems: "center",
-                        "@media (width > 720px)": { mr: -1.5 },
+                        width: "100%",
+                        "@media (width < 720px)": {
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            gap: 1,
+                        },
                     }}
                 >
-                    {onShowFeed && !hasSelection && (
-                        <IconButton onClick={onShowFeed}>
-                            <Box
-                                sx={{
-                                    width: 24,
-                                    height: 24,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
+                    <Box
+                        sx={{
+                            minWidth: 0,
+                            flex: 1,
+                            "@media (width < 720px)": { width: "100%" },
+                        }}
+                    >
+                        <GalleryItemsSummary
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                            endIcon={
+                                !isQuickLinkAlbum && memoriesDateRange ? (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted", ml: "-6px" }}
+                                    >
+                                        <Box
+                                            component="span"
+                                            sx={{ mr: "6px" }}
+                                        >
+                                            {"\u00b7"}
+                                        </Box>
+                                        {memoriesDateRange}
+                                    </Typography>
+                                ) : undefined
+                            }
+                            nameProps={{
+                                noWrap: true,
+                                sx: { width: "100%", maxWidth: "100%" },
+                            }}
+                        />
+                    </Box>
+                    <Stack
+                        direction="row"
+                        spacing={0}
+                        sx={{
+                            alignItems: "center",
+                            "@media (width > 720px)": { mr: -1.5 },
+                            "@media (width < 720px)": { ml: -1.5 },
+                        }}
+                    >
+                        {onShowFeed && (
+                            <IconButton
+                                onClick={onShowFeed}
+                                disabled={hasSelection}
                             >
-                                <FeedIcon />
-                            </Box>
-                        </IconButton>
-                    )}
-                    {downloadEnabled && !hasSelection && (
-                        <IconButton onClick={downloadAllFiles}>
+                                <Box
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <FeedIcon />
+                                </Box>
+                            </IconButton>
+                        )}
+                        {downloadEnabled && (
+                            <IconButton
+                                onClick={downloadAllFiles}
+                                disabled={hasSelection}
+                            >
+                                <HugeiconsIcon
+                                    icon={Download01Icon}
+                                    strokeWidth={1.6}
+                                />
+                            </IconButton>
+                        )}
+                        {onAddPhotos && (
+                            <IconButton
+                                onClick={onAddPhotos}
+                                disabled={addPhotosDisabled || hasSelection}
+                            >
+                                <HugeiconsIcon
+                                    icon={ImageAdd02Icon}
+                                    strokeWidth={1.8}
+                                />
+                            </IconButton>
+                        )}
+                        <IconButton
+                            onClick={handleShare}
+                            disabled={hasSelection}
+                        >
                             <HugeiconsIcon
-                                icon={Download01Icon}
+                                icon={Share08Icon}
                                 strokeWidth={1.6}
                             />
                         </IconButton>
-                    )}
-                </Stack>
-            </SpacedRow>
-        </GalleryItemsHeaderAdapter>
+                    </Stack>
+                </SpacedRow>
+            </GalleryItemsHeaderAdapter>
+            <Notification
+                open={showCopiedMessage}
+                onClose={() => setShowCopiedMessage(false)}
+                horizontal="left"
+                attributes={{
+                    color: "secondary",
+                    startIcon: <CheckIcon />,
+                    title: "Copied!",
+                }}
+            />
+        </>
     );
 };
 

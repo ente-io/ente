@@ -291,6 +291,7 @@
     "delete_photos": "Esborra les fotos",
     "keep_photos": "Mantingues les fotos",
     "share_album": "Comparteix l'àlbum",
+    "share_action": "",
     "feed": "Feed",
     "sharing_with_self": "No ho pots compartir amb tu mateix",
     "sharing_already_shared": "Ja estàs compartint això amb {{email}}",

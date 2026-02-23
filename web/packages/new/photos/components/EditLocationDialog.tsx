@@ -271,6 +271,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
     const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const searchRequestIdRef = useRef(0);
     const searchAbortRef = useRef<AbortController | null>(null);
@@ -415,6 +416,14 @@ const EditableMap: React.FC<EditableMapProps> = ({
     }, []);
 
     useEffect(() => {
+        if (!open) return;
+        const timeoutId = setTimeout(() => {
+            searchInputRef.current?.focus();
+        }, 0);
+        return () => clearTimeout(timeoutId);
+    }, [open]);
+
+    useEffect(() => {
         const mapContainer = mapContainerRef.current;
         if (!mapContainer || !leaflet) return;
 
@@ -545,6 +554,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
                                     searchResults.length > 0 &&
                                     setShowResults(true)
                                 }
+                                inputRef={searchInputRef}
                                 sx={{ ml: 1 }}
                                 inputProps={{ style: { padding: 0 } }}
                             />

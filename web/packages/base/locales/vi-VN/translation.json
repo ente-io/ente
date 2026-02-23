@@ -291,6 +291,7 @@
     "delete_photos": "Xóa ảnh",
     "keep_photos": "Giữ ảnh",
     "share_album": "Chia sẻ album",
+    "share_action": "Chia sẻ",
     "feed": "Bảng tin",
     "sharing_with_self": "Bạn không thể chia sẻ với chính mình",
     "sharing_already_shared": "Bạn đã chia sẻ với {{email}} rồi",

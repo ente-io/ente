@@ -416,7 +416,6 @@ func main() {
 		FileController: fileController,
 		FileLinkRepo:   fileLinkRepo,
 		FileRepo:       fileRepo,
-		BillingCtrl:    billingController,
 		JwtSecret:      jwtSecretBytes,
 	}
 

@@ -34,6 +34,9 @@
       "slug": "addy_io"
     },
     {
+      "title": "Adobe"
+    },
+    {
       "title": "Airtable"
     },
     {
@@ -591,6 +594,16 @@
       "slug": "ecobee"
     },
     {
+      "title": "Electronic Arts",
+      "slug": "electronic_arts",
+      "altNames": [
+        "EA"
+      ]
+    },
+    {
+      "title": "Electrum"
+    },
+    {
       "title": "emeritihealth",
       "altNames": [
         "Emeriti Health",
@@ -691,6 +704,10 @@
     },
     {
       "title": "ForUsAll"
+    },
+    {
+      "title": "Forward Email",
+      "slug": "forwardemail"
     },
     {
       "title": "FreeTaxUSA",
@@ -1068,6 +1085,9 @@
       "altNames": [
         "mathworks"
       ]
+    },
+    {
+      "title": "Maxon"
     },
     {
       "title": "Mbin",

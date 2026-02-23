@@ -19,9 +19,9 @@ const shortMonths = [
 ];
 
 /**
- * Mobile parity naming for quick-link collections.
+ * Date-range formatting used by quick-link naming (kept in mobile parity).
  */
-const getQuickLinkNameForDateRange = (
+export const quickLinkDateRangeForCreationTimes = (
     firstCreationTime: number,
     secondCreationTime: number,
 ) => {
@@ -51,7 +51,7 @@ export const quickLinkNameForFiles = (files: EnteFile[]) => {
         if (creationTime > maxCreationTime) maxCreationTime = creationTime;
     }
 
-    return getQuickLinkNameForDateRange(minCreationTime, maxCreationTime);
+    return quickLinkDateRangeForCreationTimes(minCreationTime, maxCreationTime);
 };
 
 const substituteCustomDomainIfNeeded = (

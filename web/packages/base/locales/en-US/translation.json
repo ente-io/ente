@@ -291,6 +291,7 @@
     "delete_photos": "Delete photos",
     "keep_photos": "Keep photos",
     "share_album": "Share album",
+    "share_action": "Share",
     "feed": "Feed",
     "sharing_with_self": "You cannot share with yourself",
     "sharing_already_shared": "You're already sharing this with {{email}}",
