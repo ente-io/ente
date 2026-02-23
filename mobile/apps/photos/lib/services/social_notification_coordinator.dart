@@ -311,8 +311,10 @@ class SocialNotificationCoordinator {
       case FeedItemType.comment:
       case FeedItemType.reply:
       case FeedItemType.photoLike:
-      case FeedItemType.sharedPhoto:
         return true;
+      case FeedItemType.sharedPhoto:
+        return NotificationService.instance
+            .shouldShowNotificationsForSharedPhotos();
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
         return false;
