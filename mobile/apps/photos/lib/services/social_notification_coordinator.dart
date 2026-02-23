@@ -132,8 +132,11 @@ class SocialNotificationCoordinator {
         return;
       }
       final group = _notificationGroupForType(candidate.type);
+      final sharedPhotoVariant = candidate.type == FeedItemType.sharedPhoto
+          ? (candidate.isNewlySharedCollection ? 'new' : 'add')
+          : 'na';
       final key =
-          '${candidate.collectionID}_${candidate.fileID}_${group.index}';
+          '${candidate.collectionID}_${candidate.fileID}_${group.index}_$sharedPhotoVariant';
       final existing = latestByKey[key];
       if (existing == null || candidate.createdAt > existing.createdAt) {
         latestByKey[key] = candidate;
@@ -282,6 +285,7 @@ class SocialNotificationCoordinator {
             candidate.collectionID,
             fileID,
             _notificationGroupForType(candidate.type),
+            isNewlySharedCollection: candidate.isNewlySharedCollection,
           ),
         );
         latestSentNotificationTime ??= candidate.createdAt;
@@ -332,8 +336,9 @@ class SocialNotificationCoordinator {
   int _buildSocialNotificationId(
     int collectionID,
     int fileID,
-    _SocialNotificationGroup group,
-  ) {
+    _SocialNotificationGroup group, {
+    bool isNewlySharedCollection = false,
+  }) {
     const int base = 0x10000000;
     int hash = collectionID & 0x7fffffff;
     hash = ((hash * 31) ^ fileID) & 0x7fffffff;
@@ -343,6 +348,10 @@ class SocialNotificationCoordinator {
       _SocialNotificationGroup.sharedPhoto => 2,
     };
     hash = ((hash * 31) ^ groupValue) & 0x7fffffff;
+    if (group == _SocialNotificationGroup.sharedPhoto) {
+      final sharedPhotoValue = isNewlySharedCollection ? 1 : 0;
+      hash = ((hash * 31) ^ sharedPhotoValue) & 0x7fffffff;
+    }
     return base | (hash & 0x0fffffff);
   }
 
