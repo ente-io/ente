@@ -55,6 +55,12 @@ func (c *UsageController) CanUploadFile(ctx context.Context, userID int64, size 
 
 func (c *UsageController) checkAndUpdateCache(ctx context.Context, userID int64, size *int64, app ente.App) error {
 	err := c.canUploadFile(ctx, userID, size, app)
+	// Do not cache Locker results in the shared UploadResultCache.
+	// CanUploadFile's fast path only excludes Locker on read, so writing Locker outcomes
+	// here can leak allow/deny decisions into Photos/Auth checks for the same user.
+	if app == ente.Locker {
+		return err
+	}
 	c.mu.Lock()
 	c.UploadResultCache[userID] = err == nil
 	c.mu.Unlock()
