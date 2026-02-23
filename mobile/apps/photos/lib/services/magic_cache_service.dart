@@ -66,8 +66,7 @@ class MagicCache {
     return {
       'title': title,
       'fileUploadedIDs': fileUploadedIDs.toList(),
-      if (fileLocalIntIDs != null)
-        'fileLocalIntIDs': fileLocalIntIDs!.toList(),
+      if (fileLocalIntIDs != null) 'fileLocalIntIDs': fileLocalIntIDs!.toList(),
     };
   }
 
@@ -129,19 +128,16 @@ GenericSearchResult? toGenericSearchResult(
   List<EnteFile> enteFilesInMagicCache,
   Map<int, int> fileIdToPositionMap, {
   Map<String, int>? localIdToIntId,
-}
-) {
+}) {
   if (enteFilesInMagicCache.isEmpty) {
     return null;
   }
   if (!prompt.recentFirst) {
     enteFilesInMagicCache.sort((a, b) {
-      final idA = localIdToIntId != null
-          ? localIdToIntId[a.localID]
-          : _magicFileId(a);
-      final idB = localIdToIntId != null
-          ? localIdToIntId[b.localID]
-          : _magicFileId(b);
+      final idA =
+          localIdToIntId != null ? localIdToIntId[a.localID] : _magicFileId(a);
+      final idB =
+          localIdToIntId != null ? localIdToIntId[b.localID] : _magicFileId(b);
       final posA = idA != null ? fileIdToPositionMap[idA] : null;
       final posB = idB != null ? fileIdToPositionMap[idB] : null;
       if (posA == null && posB == null) return 0;
@@ -429,7 +425,8 @@ class MagicCacheService {
           }
           for (final p in prompts) {
             final cache = cacheByTitle[p.title];
-            final localIntIdsForPrompt = cache?.fileLocalIntIDs ?? const <int>[];
+            final localIntIdsForPrompt =
+                cache?.fileLocalIntIDs ?? const <int>[];
             final filesForPrompt = <EnteFile>[];
             for (final localIntId in localIntIdsForPrompt) {
               final localId = localIdMap[localIntId];
@@ -513,5 +510,4 @@ class MagicCacheService {
     _logger.info('magic result count $matchCount $t');
     return results;
   }
-
 }

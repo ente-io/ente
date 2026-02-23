@@ -180,7 +180,10 @@ class FileActions {
       if (!context.mounted) {
         return;
       }
-      showToast(context, context.l10n.failedToUpdateFile(e.toString()));
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: e,
+      );
     }
   }
 
@@ -265,9 +268,9 @@ class FileActions {
         if (e is SharingNotPermittedForFreeAccountsError) {
           await showSubscriptionRequiredSheet(context);
         } else {
-          showToast(
-            context,
-            context.l10n.failedToCreateShareLink,
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
           );
         }
       }
@@ -321,9 +324,9 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToDeleteFile(e.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -450,9 +453,9 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToUpdateImportantStatus(e.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -513,9 +516,9 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToMarkFilesAsImportant(e.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/backup_status.dart';
+import 'package:photos/models/freeable_space_info.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/delete_file_util.dart';
 
 class FreeSpacePage extends StatefulWidget {
-  final BackupStatus status;
+  final FreeableSpaceInfo status;
   final bool clearSpaceForFolder;
 
   const FreeSpacePage(
@@ -47,7 +47,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     );
   }
 
-  Widget _getWidget(BackupStatus status) {
+  Widget _getWidget(FreeableSpaceInfo status) {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
@@ -172,7 +172,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     );
   }
 
-  Future<void> _freeStorage(BackupStatus status) async {
+  Future<void> _freeStorage(FreeableSpaceInfo status) async {
     bool isSuccess = await deleteLocalFiles(context, status.localIDs);
 
     if (isSuccess == false) {

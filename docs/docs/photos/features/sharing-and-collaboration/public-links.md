@@ -38,20 +38,25 @@ Create a shareable link without creating an album first:
 **On mobile:**
 
 1. Long press to select one or more photos
-2. Tap the share icon
-3. Select "Create quick link"
-4. Configure options
-5. Share the link
+2. Tap "Send link"
+3. The quick link is created
+4. Copy and share the link
 
-**How it works:** Ente creates a special hidden album behind the scenes and adds your selected photos to it. The link works exactly like a regular public link - recipients see an album with the photos you selected.
+**On web/desktop:**
+
+You can create a quick link in any of these ways:
+
+1. Right-click a file and select "Send link" from the context menu
+2. Select multiple files and use the "Send link" action in the top navbar
+3. Open a file in the viewer and use "Send link" from the viewer menu
+
+**How it works:** Ente creates a special album behind the scenes and adds your selected photos to it. The link works exactly like a regular public link - recipients see an album with the photos you selected.
 
 **Managing quick links:**
 
 - View all quick links in the Sharing tab under "Quick links"
 - Quick links can be converted to regular albums if needed
 - Removing a link doesn't delete the photos
-
-Quick link is not supported on web/desktop.
 
 ## Link features
 
@@ -231,7 +236,7 @@ Deleting a link makes it immediately inaccessible. The photos in the album remai
 
 ### Convert quick link to regular album
 
-Quick links create hidden albums. You can convert them to regular albums:
+Quick links create special albums. You can convert them to regular albums:
 
 1. Go to Sharing tab
 2. Find the quick link under "Quick links"

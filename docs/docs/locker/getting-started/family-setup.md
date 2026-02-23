@@ -149,8 +149,7 @@ All items in the collection will be shared with that person.
 ### Sharing individual items
 
 To share a single item (like a specific document), create a
-[public link](/locker/features/sharing/public-links) for that item. Public links
-can be password-protected and set to expire.
+[public link](/locker/features/sharing/public-links) for that item.
 
 ### Recommended sharing setup
 

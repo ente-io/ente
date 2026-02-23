@@ -195,7 +195,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (query.isEmpty) {
+      final normalizedQuery = query.trim();
+      if (normalizedQuery.isEmpty) {
         if (mounted) {
           onSearchResultsChanged(allCollections, allFiles);
         }
@@ -207,7 +208,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
 
       for (final collection in allCollections) {
         if (!mounted) return;
-        final searchResult = await _searchInCollection(collection, query);
+        final searchResult =
+            await _searchInCollection(collection, normalizedQuery);
         if (searchResult.matches) {
           filteredCollections.add(collection);
           if (searchResult.nameMatches) {
@@ -222,7 +224,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         if (addedFileIds.contains(file.uploadedFileID.toString())) {
           return false;
         }
-        return _searchInFile(file, query);
+        return _searchInFile(file, normalizedQuery);
       }).toList();
 
       final List<EnteFile> allFilteredFiles = [
@@ -290,7 +292,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
   bool _containsQuery(String text, String query) {
     if (text.isEmpty) return false;
     final lowerText = text.toLowerCase();
-    final lowerQuery = query.toLowerCase();
+    final lowerQuery = query.trim().toLowerCase();
+    if (lowerQuery.isEmpty) return false;
 
     if (lowerText.contains(lowerQuery)) {
       return true;

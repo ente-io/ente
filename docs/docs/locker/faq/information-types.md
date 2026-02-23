@@ -14,10 +14,10 @@ Ente Locker.
 
 Ente Locker supports four item types:
 
-1. **Documents**: Upload PDFs, images, and scans
-2. **Personal Notes**: Free-form text for any secure notes
-3. **Account Credentials**: Usernames and passwords
-4. **Physical Records**: Track where physical documents are stored
+1. **Document**: Upload PDFs, images, and scans
+2. **Note**: Free-form text for any secure notes
+3. **Secret**: Usernames and passwords
+4. **Thing**: Track where physical documents are stored
 
 Learn more about [Item Types](/locker/features/information-types/).
 
@@ -26,18 +26,18 @@ Learn more about [Item Types](/locker/features/information-types/).
 Currently, Locker supports only the four built-in item types. Custom types are
 not available.
 
-For information that doesn't fit the other types, use Personal Notes with a
-clear title and structured content.
+For information that doesn't fit the other types, use Note with a clear title
+and structured content.
 
 ### Can I edit an item after creating it? {#locker-edit-document}
 
-Yes. Tap on any item to open it, then tap the edit button to make changes. Tap
-Save when finished.
+Yes. Long press on any item, then tap the edit button to make changes. Tap Save
+when finished.
 
 ### Can I delete an item? {#locker-delete-document}
 
-Yes. Open the item, tap the menu icon, and select Delete. The item moves to
-Trash where it stays for 30 days before permanent deletion.
+Yes. Long press on the item, tap the menu icon, and select Delete. The item
+moves to Trash where it stays for 30 days before permanent deletion.
 
 Learn more about [Trash](/locker/features/organization/trash).
 
@@ -66,24 +66,23 @@ physical document, then upload it to Locker as a Document.
 Many phones have built-in document scanning in the camera app that
 automatically crops and enhances the image.
 
-## Personal Notes
+## Note
 
-### Can I format text in Personal Notes? {#locker-notes-formatting}
+### Can I format text in Notes? {#locker-notes-formatting}
 
-Personal Notes support plain text only. Rich text formatting like bold, italic,
-or lists is not currently available.
+Notes support plain text only. Rich text formatting like bold, italic, or lists
+is not currently available.
 
 ### Is there a character limit for notes? {#locker-notes-limit}
 
-There is no practical character limit for Personal Notes. Store as much text as
-you need.
+There is no practical character limit for Notes. Store as much text as you need.
 
 ### Can I attach files to notes? {#locker-notes-attachments}
 
-File attachments are not currently supported in Personal Notes. For file
-storage, use the Documents item type instead.
+File attachments are not currently supported in Notes. For file storage, use
+the Document item type instead.
 
-## Account Credentials
+## Secret
 
 ### Can I import passwords from other password managers? {#locker-import-passwords}
 
@@ -100,16 +99,15 @@ dedicated password manager.
 
 ### How do I copy a password? {#locker-copy-password}
 
-Open the credential, then tap the copy icon next to the password field. The
-password is copied to your clipboard.
+Tap on the secret to view it, then tap the copy icon next to the password field.
+The password is copied to your clipboard.
 
-## Physical Records
+## Thing
 
 ### Can I attach photos of physical documents? {#locker-attach-photos}
 
-For photos of physical documents, use the Documents item type to upload images
-of the document. Physical Records are designed for tracking locations, not
-storing images.
+For photos of physical documents, use the Document item type to upload images of
+the document. Things are designed for tracking locations, not storing images.
 
 ### How do I track multiple copies of a document? {#locker-multiple-copies}
 
@@ -120,7 +118,7 @@ You have two options:
 
 ## Related Features
 
-- [Documents](/locker/features/information-types/documents)
-- [Personal Notes](/locker/features/information-types/personal-notes)
-- [Account Credentials](/locker/features/information-types/account-credentials)
-- [Physical Records](/locker/features/information-types/physical-records)
+- [Document](/locker/features/information-types/documents)
+- [Note](/locker/features/information-types/personal-notes)
+- [Secret](/locker/features/information-types/account-credentials)
+- [Thing](/locker/features/information-types/physical-records)

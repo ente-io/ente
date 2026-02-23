@@ -69,6 +69,20 @@ export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
 
 /**
+ * Create a new quick link collection on remote, and return its local
+ * representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name to use for the new quick link collection.
+ */
+export const createQuickLinkCollection = (name: string) =>
+    createCollection(name, "album", {
+        subType: CollectionSubType.quicklink,
+        visibility: ItemVisibility.visible,
+    });
+
+/**
  * Create a new hidden album on remote, and return its local representation.
  *
  * Remote only, does not modify local state.

@@ -127,6 +127,7 @@ export type FileListWithViewerProps = {
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
+        | "onSendLink"
         | "onSelectCollection"
         | "onSelectPerson"
         | "publicAlbumsCredentials"
@@ -179,6 +180,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onAddSaveGroup,
     onToggleFavorite,
     onFileVisibilityUpdate,
+    onSendLink,
     onMarkTempDeleted,
     onSelectCollection,
     onSelectPerson,
@@ -393,6 +395,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
+                    onSendLink,
                     onSelectCollection,
                     onSelectPerson,
                     publicAlbumsCredentials,

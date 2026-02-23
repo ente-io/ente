@@ -13,7 +13,7 @@ your device to maintain the privacy of your encrypted data.
 1. Tap the search icon on the home screen
 2. Type your search query
 3. Results appear as you type
-4. Tap a result to open the item
+4. Tap a result to view the item
 
 ## What is searched
 
@@ -55,7 +55,6 @@ device.
 
 ## Limitations
 
-- Search works on items stored in Locker
 - Very recently created items may take a moment to become searchable
 - Search does not include items in Trash
 

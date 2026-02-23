@@ -486,8 +486,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ? <String, PersonEntity>{}
         : await PersonService.instance.getPersonsMap();
 
-    final mlDataDB =
-        isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
     final faces = await mlDataDB.getFacesForGivenFileID(fileKey);
 
     if (faces == null) {
@@ -507,8 +506,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
       faces.map((face) => face.faceID).toList(),
     );
-    final clusterIDToPerson =
-        isOffline ? <String, String>{} : await mlDataDB.getClusterIDToPersonID();
+    final clusterIDToPerson = isOffline
+        ? <String, String>{}
+        : await mlDataDB.getClusterIDToPersonID();
     final faceCrops =
         await getCachedFaceCrops(widget.file, faces, useTempCache: true);
     final defaultFaces = <Face>[];

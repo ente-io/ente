@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base64"
 	"errors"
@@ -365,13 +366,20 @@ func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
 	return nil
 }
 
-func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token string, ip string, userAgent string) error {
+func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, app ente.App, token string, ip string, userAgent string) error {
 	if err := c.ensureLockerAccess(userID, app); err != nil {
 		return err
 	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
+	}
+
+	isEmailMFAEnabled, emailMFAErr := c.UserAuthRepo.IsEmailMFAEnabled(ctx, userID)
+	if emailMFAErr != nil {
+		log.WithError(emailMFAErr).WithField("user_id", userID).Warn("Failed to fetch email MFA status")
+	} else if *isEmailMFAEnabled {
+		return nil
 	}
 
 	go func() {
@@ -507,7 +515,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
-	err = c.AddTokenAndNotify(userID, app, token,
+	err = c.AddTokenAndNotify(context, userID, app, token,
 		network.GetClientIP(context), context.Request.UserAgent())
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")

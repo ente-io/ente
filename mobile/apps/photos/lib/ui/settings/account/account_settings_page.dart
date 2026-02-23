@@ -228,7 +228,6 @@ class AccountSettingsPage extends StatelessWidget {
               return RecoveryKeyPage(
                 recoveryKey,
                 AppLocalizations.of(context).ok,
-                showAppBar: true,
                 onDone: () {},
               );
             },

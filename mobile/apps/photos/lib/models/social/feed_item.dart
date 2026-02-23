@@ -14,6 +14,9 @@ enum FeedItemType {
 
   /// Reaction (like) on user's reply
   replyLike,
+
+  /// Photos shared by others to user's albums
+  sharedPhoto,
 }
 
 /// Represents an activity item in the user's feed.
@@ -44,6 +47,14 @@ class FeedItem {
   /// For commentLike/replyLike: whether the user wrote the liked comment/reply.
   final bool isOwnedByCurrentUser;
 
+  /// File IDs for shared photo items (multiple photos can be grouped).
+  /// Only populated for [FeedItemType.sharedPhoto].
+  final List<int>? sharedFileIDs;
+
+  /// Collection name for display in shared photo items.
+  /// Only populated for [FeedItemType.sharedPhoto].
+  final String? collectionName;
+
   const FeedItem({
     required this.type,
     required this.collectionID,
@@ -53,6 +64,8 @@ class FeedItem {
     required this.actorAnonIDs,
     required this.createdAt,
     required this.isOwnedByCurrentUser,
+    this.sharedFileIDs,
+    this.collectionName,
   });
 
   /// Number of users who performed this action.
@@ -70,11 +83,16 @@ class FeedItem {
   /// Number of additional actors beyond the primary.
   int get additionalActorCount => actorCount - 1;
 
+  /// Number of shared files in this feed item.
+  /// Only meaningful for [FeedItemType.sharedPhoto].
+  int get sharedFileCount => sharedFileIDs?.length ?? 0;
+
   @override
   String toString() {
     return 'FeedItem(type: $type, collectionID: $collectionID, '
         'fileID: $fileID, commentID: $commentID, '
-        'actorCount: $actorCount, createdAt: $createdAt)';
+        'actorCount: $actorCount, createdAt: $createdAt, '
+        'sharedFileCount: $sharedFileCount)';
   }
 
   @override
@@ -91,5 +109,32 @@ class FeedItem {
   @override
   int get hashCode {
     return Object.hash(type, collectionID, fileID, commentID, createdAt);
+  }
+
+  /// Creates a copy of this FeedItem with the given fields replaced.
+  FeedItem copyWith({
+    FeedItemType? type,
+    int? collectionID,
+    int? fileID,
+    String? commentID,
+    List<int>? actorUserIDs,
+    List<String?>? actorAnonIDs,
+    int? createdAt,
+    bool? isOwnedByCurrentUser,
+    List<int>? sharedFileIDs,
+    String? collectionName,
+  }) {
+    return FeedItem(
+      type: type ?? this.type,
+      collectionID: collectionID ?? this.collectionID,
+      fileID: fileID ?? this.fileID,
+      commentID: commentID ?? this.commentID,
+      actorUserIDs: actorUserIDs ?? this.actorUserIDs,
+      actorAnonIDs: actorAnonIDs ?? this.actorAnonIDs,
+      createdAt: createdAt ?? this.createdAt,
+      isOwnedByCurrentUser: isOwnedByCurrentUser ?? this.isOwnedByCurrentUser,
+      sharedFileIDs: sharedFileIDs ?? this.sharedFileIDs,
+      collectionName: collectionName ?? this.collectionName,
+    );
   }
 }

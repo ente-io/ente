@@ -6,7 +6,7 @@ description: Set up digital inheritance so your family can access important info
 # Legacy
 
 Life is unpredictable. Legacy ensures your family can access important documents
-and information if something happens to you—while protecting against
+and information if something happens to you - while protecting against
 unauthorized access.
 
 Use Legacy to ensure your encrypted data can be passed on to loved ones, or as

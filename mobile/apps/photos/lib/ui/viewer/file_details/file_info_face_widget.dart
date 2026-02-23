@@ -174,8 +174,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       );
       return;
     }
-    final String? clusterID =
-        widget.clusterID ?? await mlDataDB.getClusterIDForFaceID(
+    final String? clusterID = widget.clusterID ??
+        await mlDataDB.getClusterIDForFaceID(
           widget.face.faceID,
         );
     if (clusterID != null) {
@@ -208,8 +208,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
             .where(
               (file) =>
                   fileIdsToClusterIds[file.uploadedFileID]?.contains(
-                        clusterID,
-                      ) ??
+                    clusterID,
+                  ) ??
                   false,
             )
             .toList();

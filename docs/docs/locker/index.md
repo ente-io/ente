@@ -6,7 +6,7 @@ description: Secure, encrypted storage for your family's important documents, pa
 # Ente Locker
 
 Ente Locker is a private space to store, share, and pass on your most important
-digital information. It's end-to-end encrypted, so we can't see your data—ever.
+digital information. It's end-to-end encrypted, so we can't see your data - ever.
 
 Locker is available for iOS and Android.
 
@@ -14,7 +14,7 @@ Locker is available for iOS and Android.
 
 Your family's critical documents and information deserve better protection than
 a filing cabinet or cloud drive. Locker gives you a secure, private space to
-store what matters most—and ensures your family can access it when they need to.
+store what matters most - and ensures your family can access it when they need to.
 
 ### What to store in Locker
 
@@ -30,7 +30,7 @@ store what matters most—and ensures your family can access it when they need t
 ### Legacy: Ensure your family has access
 
 Life is unpredictable. Legacy ensures your family can access important documents
-and information if something happens to you—while protecting against
+and information if something happens to you - while protecting against
 unauthorized access.
 
 Designate trusted contacts who can recover your account after a waiting period.
@@ -66,7 +66,7 @@ to verify our security claims. View our code on
 Locker works alongside your existing apps rather than replacing them:
 
 - Use your **password manager** for everyday accounts and daily logins. Use
-  Locker for your most important accounts—the ones you can't afford to lose
+  Locker for your most important accounts - the ones you can't afford to lose
   access to, like banking, primary email, and critical services.
 - Use **Ente Photos** for your photo memories. Use Locker for sensitive document
   scans like passports and tax returns.

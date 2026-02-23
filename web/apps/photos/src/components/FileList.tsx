@@ -267,7 +267,10 @@ export interface FileListProps {
      *
      * @param action The action that was triggered.
      */
-    onContextMenuAction?: (action: FileContextAction) => void;
+    onContextMenuAction?: (
+        action: FileContextAction,
+        targetFile?: EnteFile,
+    ) => void;
     /**
      * Whether to show the "Add Person" action in the context menu.
      */
@@ -334,7 +337,6 @@ export const FileList: React.FC<FileListProps> = ({
         file: EnteFile;
         fileIndex: number;
     } | null>(null);
-    const isContextMenuOpen = contextMenu !== null;
 
     // Track selection state before right-click modified it.
     // If there are already 3 files explicitly selected via checkmarks,
@@ -667,6 +669,7 @@ export const FileList: React.FC<FileListProps> = ({
             collectionSummary,
             showAddPerson: !!showAddPersonAction,
             showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
+            showSendLink: selected.ownCount > 0,
         });
         if (!actions.includes("favorite")) return actions;
         if (
@@ -773,15 +776,16 @@ export const FileList: React.FC<FileListProps> = ({
     const handleContextMenuActionWithTracking = useCallback(
         (action: FileContextAction) => {
             contextMenuActionTakenRef.current = true;
-            onContextMenuAction?.(action);
+            onContextMenuAction?.(action, contextMenu?.file);
         },
-        [onContextMenuAction],
+        [onContextMenuAction, contextMenu],
     );
 
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
-            const showGroupCheckbox = haveSelection && !isContextMenuOpen;
+            const showGroupCheckbox =
+                haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
@@ -886,13 +890,13 @@ export const FileList: React.FC<FileListProps> = ({
             activeCollectionID,
             activePersonID,
             checkedTimelineDateStrings,
+            contextMenu,
             emailByUserID,
             favoriteFileIDs,
             handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
-            isContextMenuOpen,
             isShiftKeyPressed,
             mode,
             onChangeSelectAllCheckBox,

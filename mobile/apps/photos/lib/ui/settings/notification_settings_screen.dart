@@ -14,6 +14,7 @@ class NotificationSettingsScreen extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final showOnlyOnThisDay = isOfflineMode;
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -46,73 +47,76 @@ class NotificationSettingsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context)
-                            .sharedPhotoNotifications,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              NotificationService.instance
-                                  .hasGrantedPermissions() &&
-                              NotificationService.instance
-                                  .shouldShowNotificationsForSharedPhotos(),
-                          onChanged: () async {
-                            await NotificationService.instance
-                                .requestPermissions();
-                            await NotificationService.instance
-                                .setShouldShowNotificationsForSharedPhotos(
-                              !NotificationService.instance
-                                  .shouldShowNotificationsForSharedPhotos(),
-                            );
-                          },
+                      if (!showOnlyOnThisDay) ...[
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context)
+                              .sharedPhotoNotifications,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                NotificationService.instance
+                                    .hasGrantedPermissions() &&
+                                NotificationService.instance
+                                    .shouldShowNotificationsForSharedPhotos(),
+                            onChanged: () async {
+                              await NotificationService.instance
+                                  .requestPermissions();
+                              await NotificationService.instance
+                                  .setShouldShowNotificationsForSharedPhotos(
+                                !NotificationService.instance
+                                    .shouldShowNotificationsForSharedPhotos(),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 8,
+                            bottom: 16,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .sharedPhotoNotificationsExplanation,
+                            style: textTheme.mini
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .sharedPhotoNotificationsExplanation,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
+                        MenuItemWidgetNew(
+                          title:
+                              AppLocalizations.of(context).socialNotifications,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                NotificationService.instance
+                                    .hasGrantedPermissions() &&
+                                NotificationService.instance
+                                    .shouldShowSocialNotifications(),
+                            onChanged: () async {
+                              await NotificationService.instance
+                                  .requestPermissions();
+                              await NotificationService.instance
+                                  .setShouldShowSocialNotifications(
+                                !NotificationService.instance
+                                    .shouldShowSocialNotifications(),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).socialNotifications,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              NotificationService.instance
-                                  .hasGrantedPermissions() &&
-                              NotificationService.instance
-                                  .shouldShowSocialNotifications(),
-                          onChanged: () async {
-                            await NotificationService.instance
-                                .requestPermissions();
-                            await NotificationService.instance
-                                .setShouldShowSocialNotifications(
-                              !NotificationService.instance
-                                  .shouldShowSocialNotifications(),
-                            );
-                          },
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 8,
+                            bottom: 16,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .socialNotificationsExplanation,
+                            style: textTheme.mini
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .socialNotificationsExplanation,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
-                      ),
+                      ],
                       MenuItemWidgetNew(
                         title: AppLocalizations.of(context).onThisDayMemories,
                         trailingWidget: ToggleSwitchWidget(
@@ -142,35 +146,37 @@ class NotificationSettingsScreen extends StatelessWidget {
                               .copyWith(color: colorScheme.textMuted),
                         ),
                       ),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).birthdays,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              NotificationService.instance
-                                  .hasGrantedPermissions() &&
-                              localSettings.birthdayNotificationsEnabled,
-                          onChanged: () async {
-                            await NotificationService.instance
-                                .requestPermissions();
-                            await memoriesCacheService
-                                .toggleBirthdayNotifications();
-                          },
+                      if (!showOnlyOnThisDay) ...[
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).birthdays,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () =>
+                                NotificationService.instance
+                                    .hasGrantedPermissions() &&
+                                localSettings.birthdayNotificationsEnabled,
+                            onChanged: () async {
+                              await NotificationService.instance
+                                  .requestPermissions();
+                              await memoriesCacheService
+                                  .toggleBirthdayNotifications();
+                            },
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 8,
+                            bottom: 16,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .receiveRemindersOnBirthdays,
+                            style: textTheme.mini
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .receiveRemindersOnBirthdays,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

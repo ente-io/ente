@@ -139,6 +139,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    hasLocationData.dispose();
     _videoMetadataNotifier.dispose();
     _peopleChangedEvent.cancel();
     super.dispose();

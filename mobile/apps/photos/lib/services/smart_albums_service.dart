@@ -5,7 +5,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/smart_album_syncing_event.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";

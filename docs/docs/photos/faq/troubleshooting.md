@@ -26,7 +26,7 @@ ML processing can cause crashes during large video uploads, especially on mobile
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning`, disable "Face recognition" and "Magic search", try uploading the videos again, then re-enable ML after upload completes.
+Open `Settings > Machine learning`, disable "Face recognition" and "Magic search", try uploading the videos again, then re-enable ML after upload completes.
 
 **On desktop:**
 
@@ -38,7 +38,7 @@ Video streaming can cause crashes when combined with ML on some devices:
 
 **On iOS:**
 
-Open `Settings > General > Advanced`, disable "Video streaming" or "Enable video playback", try uploading again, then re-enable after upload completes.
+Open `Settings`, disable "Video streaming" or "Enable video playback", try uploading again, then re-enable after upload completes.
 
 Learn more about [Video Streaming](/photos/features/utilities/video-streaming).
 
@@ -74,7 +74,7 @@ If the Ente app crashes when watching videos or when machine learning is enabled
 
 **On mobile:**
 
-Open `Settings > General > Advanced`, disable "Machine learning" and "Video streaming" (or "Enable video playback"), then restart the app.
+Open `Settings`, disable "Machine learning" and "Video streaming" (or "Enable video playback"), then restart the app.
 
 Learn more about [Video Streaming](/photos/features/utilities/video-streaming#troubleshooting).
 
@@ -254,6 +254,29 @@ If you see "system error number 13" errors in your logs during ML indexing, this
 Switch to a local profile, or exclude `%APPDATA%\ente\models\` from roaming sync. Contact your IT administrator if you're on a domain-joined computer.
 
 After making changes, quit the app completely, log out, and log back in to restart the ML pipeline.
+
+### Why is ML stuck on Windows (or models never download)? {#windows-ml-stuck}
+
+If ML does not progress, `%APPDATA%\\ente\\models\\` is never created, or logs show `ERR_DLOPEN_FAILED` for `onnxruntime_binding.node`, your Microsoft VC++ runtime is likely too old for the ONNX runtime bundled with Ente.
+
+**Root cause:**
+
+Recent ONNX Runtime builds on Windows require Microsoft VC++ runtime version `14.40+`. On some Windows 11 systems, an older VC++ runtime can still be installed.
+
+**Check your installed VC++ runtime version:**
+
+```powershell
+powershell -Command "(Get-Item 'C:\Windows\System32\vcruntime140.dll').VersionInfo.FileVersion"
+```
+
+**Fix:**
+
+Install/update the Microsoft Visual C++ Redistributable (x64):
+
+- Direct download: [vc_redist.x64.exe](https://aka.ms/vc14/vc_redist.x64.exe)
+- Reference: [Latest supported Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
+
+After updating, fully quit and reopen Ente, then re-enable ML. You should see model download entries in logs (for example, `Downloading ML model from ...`) and indexing should continue normally.
 
 ### Why aren't my watch folders syncing? {#watch-folders-troubleshooting}
 

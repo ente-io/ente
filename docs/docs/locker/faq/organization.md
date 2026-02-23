@@ -40,12 +40,12 @@ The collection itself is permanently deleted.
 ### Can an item be in multiple collections? {#locker-multiple-collections}
 
 Yes. Items can belong to multiple collections at the same time. This lets you
-organize the same item in different ways—for example, a passport scan could be
+organize the same item in different ways - for example, a passport scan could be
 in both "Travel Documents" and "Family Documents" collections.
 
 To add an item to additional collections:
 
-1. Open the item
+1. Long press on the item
 2. Tap the edit button
 3. Tap the collection field
 4. Select additional collections
@@ -61,7 +61,7 @@ To add an item to additional collections:
 
 ### How do I move an item to a different collection? {#locker-move-document}
 
-1. Open the item
+1. Long press on the item
 2. Tap the edit button
 3. Tap the collection field
 4. Select the new collection

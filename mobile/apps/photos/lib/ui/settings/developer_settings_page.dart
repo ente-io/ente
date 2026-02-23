@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:photos/app_mode.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
@@ -52,17 +51,17 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             const SizedBox(height: 40),
             GradientButton(
               onTap: () async {
-                final url = _urlController.text;
+                final url = _urlController.text.trim();
                 _logger.info("Entered endpoint: $url");
-                if (url == "localMode") {
-                  await localSettings.setAppMode(AppMode.offline);
+                if (url == "offline") {
+                  await localSettings.setShowOfflineModeOption(true);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to offline");
                   Navigator.of(context).pop();
                   return;
                 }
-                if (url == "onlineMode") {
-                  await localSettings.setAppMode(AppMode.online);
+                if (url == "online") {
+                  await localSettings.setShowOfflineModeOption(false);
                   Bus.instance.fire(AppModeChangedEvent());
                   showToast(context, "App mode set to online");
                   Navigator.of(context).pop();

@@ -18,6 +18,7 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/language_service.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/offline_import_metadata_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -199,7 +200,19 @@ class SyncService {
     await _localSyncService.sync();
     if (isOfflineMode) {
       await _localSyncService.syncAll();
-      _logger.info("[SYNC] Offline mode, skipping remote sync");
+      if (Platform.isAndroid) {
+        unawaited(
+          OfflineImportMetadataService.instance.processPendingFiles(
+            batchSize: isProcessBg
+                ? 10
+                : OfflineImportMetadataService.kDefaultBatchSize,
+            maxBatches: isProcessBg ? 1 : 4,
+          ),
+        );
+      }
+      _logger.info(
+        "[SYNC] Offline mode${Platform.isAndroid ? '' : ' (non-Android, no metadata processing)'}, skipping remote sync",
+      );
       return;
     }
 

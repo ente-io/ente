@@ -315,8 +315,7 @@ class PersonSearchExample extends StatelessWidget {
                           behavior: HitTestBehavior.translucent,
                           onTap: () async {
                             final clusterId =
-                                searchResult.params[kClusterParamId]
-                                    as String?;
+                                searchResult.params[kClusterParamId] as String?;
                             final result = await showAssignPersonAction(
                               context,
                               clusterID: clusterId ?? searchResult.name(),

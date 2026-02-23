@@ -1,3 +1,5 @@
+import { Navigation03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -91,6 +93,21 @@ import {
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 import { PublicLikeModal } from "./PublicLikeModal";
+
+const fileViewerBackStateKey = "__enteFileViewerBackState";
+
+const addFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    state && typeof state == "object"
+        ? {
+              ...(state as Record<string, unknown>),
+              [fileViewerBackStateKey]: marker,
+          }
+        : { [fileViewerBackStateKey]: marker };
+
+const hasFileViewerBackStateMarker = (state: unknown, marker: string) =>
+    !!state &&
+    typeof state == "object" &&
+    (state as Record<string, unknown>)[fileViewerBackStateKey] == marker;
 
 /**
  * Derived data for a file that is needed to display the file viewer controls
@@ -307,6 +324,12 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onDownload?: (file: EnteFile) => void;
     /**
+     * Called when the given {@link file} should be shared via quick link.
+     *
+     * If this is not provided then the send link action will not be shown.
+     */
+    onSendLink?: (file: EnteFile) => void;
+    /**
      * Called when the given {@link file} should be deleted.
      *
      * If this is not provided then the delete action will not be shown.
@@ -401,6 +424,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onToggleFavorite,
     onFileVisibilityUpdate,
     onDownload,
+    onSendLink,
     onDelete,
     onSelectCollection,
     onSelectPerson,
@@ -415,6 +439,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
+    const shouldCloseOnBrowserBack = !!publicAlbumsCredentials;
 
     // There are 3 things involved in this dance:
     //
@@ -436,6 +461,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // We also need to maintain a ref to the currently displayed dialog since we
     // might need to ask it to refresh its contents.
     const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+    const handleCloseRef = useRef<() => void>(() => undefined);
+    const browserBackStateRef = useRef<string | undefined>(undefined);
 
     // Whenever we get a callback from our custom PhotoSwipe instance, we also
     // get the active file on which that action was performed as an argument. We
@@ -621,6 +648,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setIsFullscreen(false);
         onClose();
     }, [onTriggerRemotePull, onClose]);
+
+    // Keep the latest close callback available to non-react event handlers
+    // without forcing effects that register handlers to re-run.
+    handleCloseRef.current = handleClose;
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -1341,6 +1372,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleDownloadMenuAction = () => {
         handleMoreMenuCloseIfNeeded();
         onDownload!(activeAnnotatedFile!.file);
+    };
+
+    // Callback invoked when the send link action is triggered by activating the
+    // send link menu item in the more menu.
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleSendLinkMenuAction = () => {
+        handleMoreMenuCloseIfNeeded();
+        onSendLink!(activeAnnotatedFile!.file);
     };
 
     const handleMore = useCallback(
@@ -2499,6 +2539,41 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
+    useEffect(() => {
+        if (!open || !shouldCloseOnBrowserBack) return;
+
+        // In public albums, consume one browser-back action to close the
+        // viewer overlay instead of navigating away from the shared link.
+        const stateMarker = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        browserBackStateRef.current = stateMarker;
+
+        const currentState: unknown = window.history.state;
+        const viewerState = addFileViewerBackStateMarker(
+            currentState,
+            stateMarker,
+        );
+        window.history.pushState(viewerState, "", window.location.href);
+
+        const handlePopState = () => {
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+            handleCloseRef.current();
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+            if (browserBackStateRef.current != stateMarker) return;
+            browserBackStateRef.current = undefined;
+
+            const latestHistoryState: unknown = window.history.state;
+            if (hasFileViewerBackStateMarker(latestHistoryState, stateMarker)) {
+                window.history.back();
+            }
+        };
+    }, [open, shouldCloseOnBrowserBack]);
+
     const handleFileMetadataUpdate = useMemo(() => {
         return onRemoteFilesPull
             ? async () => {
@@ -2606,6 +2681,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
+                disableAutoFocusItem
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
@@ -2614,6 +2690,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
+                {activeAnnotatedFile.annotation.isOwnFile &&
+                    !isInTrashSection &&
+                    onSendLink && (
+                        <MoreMenuItem onClick={handleSendLinkMenuAction}>
+                            <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
+                            <HugeiconsIcon icon={Navigation03Icon} size={20} />
+                        </MoreMenuItem>
+                    )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>

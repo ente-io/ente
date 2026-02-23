@@ -1288,6 +1288,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Français";
         case "de-DE":
             return "Deutsch";
+        case "ca-ES":
+            return "Català";
         case "zh-CN":
             return "中文";
         case "nl-NL":
