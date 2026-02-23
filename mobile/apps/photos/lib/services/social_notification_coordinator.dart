@@ -8,6 +8,7 @@ import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/social/comment.dart';
+import 'package:photos/models/social/feed_data_provider.dart';
 import 'package:photos/models/social/feed_item.dart';
 import 'package:photos/models/social/reaction.dart';
 import 'package:photos/models/social/social_data_provider.dart';
@@ -28,6 +29,7 @@ class SocialNotificationCoordinator {
       'last_social_activity_notification_time';
   static const String kLastSocialSeenTime = 'last_social_seen_time';
   static const String kIsFirstRemoteSyncDoneKey = 'isFirstRemoteSyncDone';
+  static const int _kSharedPhotoNotificationFetchLimit = 500;
 
   static final SocialNotificationCoordinator instance =
       SocialNotificationCoordinator._privateConstructor();
@@ -217,6 +219,34 @@ class SocialNotificationCoordinator {
       );
     }
 
+    try {
+      final sharedPhotoItems =
+          await FeedDataProvider.instance.getSharedPhotoFeedItems(
+        limit: _kSharedPhotoNotificationFetchLimit,
+      );
+      for (final item in sharedPhotoItems) {
+        considerCandidate(
+          _SocialActivityCandidate(
+            type: FeedItemType.sharedPhoto,
+            collectionID: item.collectionID,
+            fileID: item.fileID,
+            createdAt: item.createdAt,
+            actorUserID: item.primaryActorUserID,
+            actorAnonID: item.primaryActorAnonID,
+            isNewlySharedCollection: item.isNewlySharedCollection,
+            sharedFileCount: item.sharedFileCount,
+            collectionName: item.collectionName,
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      _logger.warning(
+        'Failed to fetch shared-photo feed items for notifications',
+        e,
+        stackTrace,
+      );
+    }
+
     if (latestByKey.isEmpty) {
       return;
     }
@@ -244,7 +274,7 @@ class SocialNotificationCoordinator {
         final title = await _getSocialNotificationTitle(candidate);
         await NotificationService.instance.showNotification(
           title,
-          _getSocialNotificationBody(candidate.type, s, fileType, isOwn),
+          _getSocialNotificationBody(candidate, s, fileType, isOwn),
           channelID: 'social_activity',
           channelName: 'Ente Feed',
           payload: _buildSocialNotificationPayload(candidate),
@@ -277,10 +307,10 @@ class SocialNotificationCoordinator {
       case FeedItemType.comment:
       case FeedItemType.reply:
       case FeedItemType.photoLike:
+      case FeedItemType.sharedPhoto:
         return true;
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
-      case FeedItemType.sharedPhoto:
         return false;
     }
   }
@@ -293,8 +323,9 @@ class SocialNotificationCoordinator {
       case FeedItemType.photoLike:
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
-      case FeedItemType.sharedPhoto:
         return _SocialNotificationGroup.like;
+      case FeedItemType.sharedPhoto:
+        return _SocialNotificationGroup.sharedPhoto;
     }
   }
 
@@ -306,8 +337,12 @@ class SocialNotificationCoordinator {
     const int base = 0x10000000;
     int hash = collectionID & 0x7fffffff;
     hash = ((hash * 31) ^ fileID) & 0x7fffffff;
-    hash = ((hash * 31) ^ (group == _SocialNotificationGroup.comment ? 1 : 0)) &
-        0x7fffffff;
+    final groupValue = switch (group) {
+      _SocialNotificationGroup.comment => 1,
+      _SocialNotificationGroup.like => 0,
+      _SocialNotificationGroup.sharedPhoto => 2,
+    };
+    hash = ((hash * 31) ^ groupValue) & 0x7fffffff;
     return base | (hash & 0x0fffffff);
   }
 
@@ -329,20 +364,21 @@ class SocialNotificationCoordinator {
   }
 
   String _getSocialNotificationBody(
-    FeedItemType type,
+    _SocialActivityCandidate candidate,
     AppLocalizations s,
     FileType? fileType,
     bool isOwn,
   ) {
-    return _getSocialNotificationDetail(type, s, fileType, isOwn);
+    return _getSocialNotificationDetail(candidate, s, fileType, isOwn);
   }
 
   String _getSocialNotificationDetail(
-    FeedItemType type,
+    _SocialActivityCandidate candidate,
     AppLocalizations s,
     FileType? fileType,
     bool isOwn,
   ) {
+    final type = candidate.type;
     final isVideo = fileType == FileType.video;
     switch (type) {
       case FeedItemType.photoLike:
@@ -359,8 +395,21 @@ class SocialNotificationCoordinator {
       case FeedItemType.replyLike:
         return s.likedYourReply;
       case FeedItemType.sharedPhoto:
-        // Shared photos don't trigger notifications
-        return '';
+        final albumName = candidate.collectionName ??
+            _collectionsService
+                .getCollectionByID(candidate.collectionID)
+                ?.displayName ??
+            s.albums;
+        if (candidate.isNewlySharedCollection) {
+          return s.sharedAlbumWithYou(albumName: albumName);
+        }
+        if (candidate.sharedFileCount <= 1) {
+          return s.addedAMemoryTo(albumName: albumName);
+        }
+        return s.addedNMemoriesTo(
+          count: candidate.sharedFileCount,
+          albumName: albumName,
+        );
     }
   }
 
@@ -392,6 +441,9 @@ class _SocialActivityCandidate {
   final int actorUserID;
   final String? actorAnonID;
   final int? parentCommentUserID;
+  final bool isNewlySharedCollection;
+  final int sharedFileCount;
+  final String? collectionName;
 
   _SocialActivityCandidate({
     required this.type,
@@ -402,10 +454,14 @@ class _SocialActivityCandidate {
     this.commentID,
     this.actorAnonID,
     this.parentCommentUserID,
+    this.isNewlySharedCollection = false,
+    this.sharedFileCount = 1,
+    this.collectionName,
   });
 }
 
 enum _SocialNotificationGroup {
   comment,
   like,
+  sharedPhoto,
 }

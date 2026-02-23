@@ -199,6 +199,36 @@ class FeedDataProvider {
     return items.isNotEmpty ? items.first : null;
   }
 
+  /// Gets feed items representing shared-photo activity only.
+  ///
+  /// These items cover both:
+  /// - Newly shared collections
+  /// - New memories added to existing shared collections
+  Future<List<FeedItem>> getSharedPhotoFeedItems({
+    int limit = 50,
+    bool verifyFileExistence = true,
+  }) async {
+    final userID = Configuration.instance.getUserID();
+    if (userID == null) {
+      _logger.warning('No user ID found, returning empty shared-photo feed');
+      return [];
+    }
+
+    final items = await _getSharedPhotoFeedItems(
+      userID: userID,
+      limit: limit,
+    );
+    final validItems = verifyFileExistence
+        ? await _filterFeedItems(items)
+        : _filterHiddenCollectionsOnly(items);
+    validItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (validItems.length > limit) {
+      return validItems.sublist(0, limit);
+    }
+    return validItems;
+  }
+
   /// Triggers background sync for all shared collections.
   Future<bool> syncAllSharedCollections() async {
     try {
