@@ -2597,6 +2597,14 @@
       }
     }
   },
+  "sharedAlbumWithYou": "Shared {albumName} with you",
+  "@sharedAlbumWithYou": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {

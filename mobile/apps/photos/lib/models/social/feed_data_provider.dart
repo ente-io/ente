@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -195,6 +197,36 @@ class FeedDataProvider {
       verifyFileExistence: false,
     );
     return items.isNotEmpty ? items.first : null;
+  }
+
+  /// Gets feed items representing shared-photo activity only.
+  ///
+  /// These items cover both:
+  /// - Newly shared collections
+  /// - New memories added to existing shared collections
+  Future<List<FeedItem>> getSharedPhotoFeedItems({
+    int limit = 50,
+    bool verifyFileExistence = true,
+  }) async {
+    final userID = Configuration.instance.getUserID();
+    if (userID == null) {
+      _logger.warning('No user ID found, returning empty shared-photo feed');
+      return [];
+    }
+
+    final items = await _getSharedPhotoFeedItems(
+      userID: userID,
+      limit: limit,
+    );
+    final validItems = verifyFileExistence
+        ? await _filterFeedItems(items)
+        : _filterHiddenCollectionsOnly(items);
+    validItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (validItems.length > limit) {
+      return validItems.sublist(0, limit);
+    }
+    return validItems;
   }
 
   /// Triggers background sync for all shared collections.
@@ -425,6 +457,10 @@ class FeedDataProvider {
   ///
   /// Groups files added by others into session-like buckets using
   /// (collectionID, ownerID) + a short addedTime gap.
+  ///
+  /// For collections where the first feed-event timestamp is known, grouping
+  /// is split at that timestamp so "shared album with you" remains a distinct
+  /// item from later "added memories" activity.
   /// Hidden collections are filtered downstream in _filterFeedItems.
   Future<List<FeedItem>> _getSharedPhotoFeedItems({
     required int userID,
@@ -441,12 +477,25 @@ class FeedDataProvider {
     final hiddenCollectionIds =
         CollectionsService.instance.getHiddenCollectionIds();
     final collectionNames = <int, String>{};
+    final incomingSharedCollectionIDs = <int>{};
     for (final c in allCollections) {
       collectionNames[c.id] = c.displayName;
+      if (!c.isOwner(userID)) {
+        incomingSharedCollectionIDs.add(c.id);
+      }
+    }
+    final firstEventTimesByCollection = <int, int>{};
+    for (final collectionID in incomingSharedCollectionIDs) {
+      final firstEventTime =
+          localSettings.getSharedCollectionFirstFeedEventTime(collectionID);
+      if (firstEventTime != null) {
+        firstEventTimesByCollection[collectionID] = firstEventTime;
+      }
     }
 
     final groupingState = _SharedPhotoGroupingState(
       sessionGapMicros: _kSharedPhotoSessionGapMicros,
+      firstEventTimesByCollection: firstEventTimesByCollection,
     );
     var retainedRows = 0;
     var oldestFetchedAddedTime = 0;
@@ -491,7 +540,11 @@ class FeedDataProvider {
         final grouped = groupingState.buildSnapshotSorted();
         if (grouped.length < limit) {
           if (reachedEnd) {
-            return _toSharedPhotoFeedItems(grouped, collectionNames);
+            return await _toSharedPhotoFeedItems(
+              grouped,
+              collectionNames,
+              incomingSharedCollectionIDs,
+            );
           }
           continue;
         }
@@ -508,7 +561,11 @@ class FeedDataProvider {
         final topGroupsAreClosed = oldestFetchedAddedTime <
             (minOldestAddedTime - _kSharedPhotoSessionGapMicros);
         if (topGroupsAreClosed || reachedEnd) {
-          return _toSharedPhotoFeedItems(grouped, collectionNames);
+          return await _toSharedPhotoFeedItems(
+            grouped,
+            collectionNames,
+            incomingSharedCollectionIDs,
+          );
         }
       }
 
@@ -522,28 +579,102 @@ class FeedDataProvider {
     }
 
     final grouped = groupingState.buildSnapshotSorted();
-    return _toSharedPhotoFeedItems(grouped, collectionNames);
+    return _toSharedPhotoFeedItems(
+      grouped,
+      collectionNames,
+      incomingSharedCollectionIDs,
+    );
   }
 
-  List<FeedItem> _toSharedPhotoFeedItems(
+  Future<List<FeedItem>> _toSharedPhotoFeedItems(
     List<_SharedPhotoGroup> groups,
     Map<int, String> collectionNames,
-  ) {
-    return groups
-        .map(
-          (group) => FeedItem(
-            type: FeedItemType.sharedPhoto,
-            collectionID: group.collectionID,
-            fileID: group.sharedFileIDs.first,
-            actorUserIDs: [group.ownerID],
-            actorAnonIDs: [null],
-            createdAt: group.createdAt,
-            isOwnedByCurrentUser: false,
-            sharedFileIDs: group.sharedFileIDs,
-            collectionName: collectionNames[group.collectionID],
-          ),
-        )
-        .toList();
+    Set<int> incomingSharedCollectionIDs,
+  ) async {
+    final hasInitializedKnownCollections =
+        localSettings.hasInitializedFeedKnownIncomingSharedCollections();
+    final knownIncomingCollectionIDs =
+        localSettings.getFeedKnownIncomingSharedCollectionIDs();
+    if (!hasInitializedKnownCollections) {
+      knownIncomingCollectionIDs
+        ..clear()
+        ..addAll(incomingSharedCollectionIDs);
+    }
+
+    final groupedCollectionIDs =
+        groups.map((group) => group.collectionID).toSet();
+    final collectionsWithoutFeedEvents = incomingSharedCollectionIDs
+        .difference(knownIncomingCollectionIDs)
+        .difference(groupedCollectionIDs);
+    if (collectionsWithoutFeedEvents.isNotEmpty) {
+      knownIncomingCollectionIDs.addAll(collectionsWithoutFeedEvents);
+    }
+
+    final cachedFirstEventTimes = <int, int?>{};
+    final newlyDetectedFirstEventTimes = <int, int>{};
+    final pendingPersistenceFutures = <Future<void>>[];
+
+    final items = groups.map((group) {
+      final collectionID = group.collectionID;
+      final isUnknownIncomingCollection =
+          incomingSharedCollectionIDs.contains(collectionID) &&
+              !knownIncomingCollectionIDs.contains(collectionID);
+
+      var firstEventTime = cachedFirstEventTimes[collectionID];
+      if (!cachedFirstEventTimes.containsKey(collectionID)) {
+        firstEventTime =
+            localSettings.getSharedCollectionFirstFeedEventTime(collectionID);
+        cachedFirstEventTimes[collectionID] = firstEventTime;
+      }
+
+      var isNewlySharedCollection = false;
+      if (firstEventTime != null) {
+        isNewlySharedCollection = group.createdAt == firstEventTime;
+      } else if (isUnknownIncomingCollection) {
+        firstEventTime = group.createdAt;
+        cachedFirstEventTimes[collectionID] = firstEventTime;
+        knownIncomingCollectionIDs.add(collectionID);
+        newlyDetectedFirstEventTimes[collectionID] = firstEventTime;
+        isNewlySharedCollection = true;
+      }
+
+      return FeedItem(
+        type: FeedItemType.sharedPhoto,
+        collectionID: collectionID,
+        fileID: group.sharedFileIDs.first,
+        actorUserIDs: [group.ownerID],
+        actorAnonIDs: [null],
+        createdAt: group.createdAt,
+        isOwnedByCurrentUser: false,
+        sharedFileIDs: group.sharedFileIDs,
+        collectionName: collectionNames[collectionID],
+        isNewlySharedCollection: isNewlySharedCollection,
+      );
+    }).toList();
+
+    if (!hasInitializedKnownCollections ||
+        collectionsWithoutFeedEvents.isNotEmpty ||
+        newlyDetectedFirstEventTimes.isNotEmpty) {
+      pendingPersistenceFutures.add(
+        localSettings.setFeedKnownIncomingSharedCollectionIDs(
+          knownIncomingCollectionIDs,
+        ),
+      );
+    }
+    for (final entry in newlyDetectedFirstEventTimes.entries) {
+      pendingPersistenceFutures.add(
+        localSettings.setSharedCollectionFirstFeedEventTime(
+          entry.key,
+          entry.value,
+        ),
+      );
+    }
+
+    if (pendingPersistenceFutures.isNotEmpty) {
+      await Future.wait(pendingPersistenceFutures);
+    }
+
+    return items;
   }
 
   /// Filters out feed items that should not be displayed.
@@ -656,14 +787,29 @@ class _SharedPhotoGroupBuilder {
 
 class _SharedPhotoGroupingState {
   final int sessionGapMicros;
+  final Map<int, int> firstEventTimesByCollection;
   final Map<String, _SharedPhotoGroupBuilder> _activeGroups = {};
   final List<_SharedPhotoGroup> _closedGroups = [];
 
   _SharedPhotoGroupingState({
     required this.sessionGapMicros,
+    required this.firstEventTimesByCollection,
   });
 
   int get roughGroupCount => _closedGroups.length + _activeGroups.length;
+
+  bool _crossesFirstEventBoundary(
+    int collectionID,
+    _SharedPhotoGroupBuilder currentGroup,
+    int candidateAddedTime,
+  ) {
+    final firstEventTime = firstEventTimesByCollection[collectionID];
+    if (firstEventTime == null) {
+      return false;
+    }
+    return currentGroup.createdAt > firstEventTime &&
+        candidateAddedTime <= firstEventTime;
+  }
 
   void addFile(EnteFile file) {
     final addedTime = file.addedTime;
@@ -690,7 +836,12 @@ class _SharedPhotoGroupingState {
     }
 
     final gapFromCurrentGroup = currentGroup.oldestAddedTime - addedTime;
-    if (gapFromCurrentGroup <= sessionGapMicros) {
+    final crossesFirstEventBoundary = _crossesFirstEventBoundary(
+      collectionID,
+      currentGroup,
+      addedTime,
+    );
+    if (!crossesFirstEventBoundary && gapFromCurrentGroup <= sessionGapMicros) {
       currentGroup.add(uploadedFileID, addedTime);
       return;
     }

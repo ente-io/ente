@@ -55,6 +55,10 @@ class FeedItem {
   /// Only populated for [FeedItemType.sharedPhoto].
   final String? collectionName;
 
+  /// Whether this shared-photo item represents an album newly shared with user.
+  /// Only meaningful for [FeedItemType.sharedPhoto].
+  final bool isNewlySharedCollection;
+
   const FeedItem({
     required this.type,
     required this.collectionID,
@@ -66,6 +70,7 @@ class FeedItem {
     required this.isOwnedByCurrentUser,
     this.sharedFileIDs,
     this.collectionName,
+    this.isNewlySharedCollection = false,
   });
 
   /// Number of users who performed this action.
@@ -92,7 +97,8 @@ class FeedItem {
     return 'FeedItem(type: $type, collectionID: $collectionID, '
         'fileID: $fileID, commentID: $commentID, '
         'actorCount: $actorCount, createdAt: $createdAt, '
-        'sharedFileCount: $sharedFileCount)';
+        'sharedFileCount: $sharedFileCount, '
+        'isNewlySharedCollection: $isNewlySharedCollection)';
   }
 
   @override
@@ -103,12 +109,20 @@ class FeedItem {
         other.collectionID == collectionID &&
         other.fileID == fileID &&
         other.commentID == commentID &&
-        other.createdAt == createdAt;
+        other.createdAt == createdAt &&
+        other.isNewlySharedCollection == isNewlySharedCollection;
   }
 
   @override
   int get hashCode {
-    return Object.hash(type, collectionID, fileID, commentID, createdAt);
+    return Object.hash(
+      type,
+      collectionID,
+      fileID,
+      commentID,
+      createdAt,
+      isNewlySharedCollection,
+    );
   }
 
   /// Creates a copy of this FeedItem with the given fields replaced.
@@ -123,6 +137,7 @@ class FeedItem {
     bool? isOwnedByCurrentUser,
     List<int>? sharedFileIDs,
     String? collectionName,
+    bool? isNewlySharedCollection,
   }) {
     return FeedItem(
       type: type ?? this.type,
@@ -135,6 +150,8 @@ class FeedItem {
       isOwnedByCurrentUser: isOwnedByCurrentUser ?? this.isOwnedByCurrentUser,
       sharedFileIDs: sharedFileIDs ?? this.sharedFileIDs,
       collectionName: collectionName ?? this.collectionName,
+      isNewlySharedCollection:
+          isNewlySharedCollection ?? this.isNewlySharedCollection,
     );
   }
 }

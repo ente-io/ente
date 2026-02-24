@@ -325,6 +325,51 @@ class _FeedScreenState extends State<FeedScreen> {
       return true;
     }
 
+    if (target.type == FeedItemType.sharedPhoto) {
+      var collection = CollectionsService.instance.getCollectionByID(
+        target.collectionID,
+      );
+      if (collection == null) {
+        try {
+          collection = await CollectionsService.instance.fetchCollectionByID(
+            target.collectionID,
+          );
+        } catch (e, s) {
+          _logger.warning(
+            "Failed to fetch collection ${target.collectionID} for feed notification target",
+            e,
+            s,
+          );
+        }
+      }
+
+      if (collection == null || !mounted) {
+        return false;
+      }
+
+      EnteFile? fileToJumpTo;
+      final jumpFileID = target.fileID;
+      if (jumpFileID != null) {
+        fileToJumpTo = await FilesDB.instance.getUploadedFile(
+          jumpFileID,
+          target.collectionID,
+        );
+      }
+
+      if (!mounted) return false;
+      unawaited(
+        routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(collection, null),
+            fileToJumpTo: fileToJumpTo,
+          ),
+          forceCustomPageRoute: true,
+        ),
+      );
+      return true;
+    }
+
     var fileID = target.fileID;
     if (fileID == null && target.commentID != null) {
       final comment =
