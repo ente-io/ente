@@ -73,7 +73,7 @@ fn derive_key_bytes(
         )));
     }
 
-    if !mem_limit.is_multiple_of(1024) {
+    if mem_limit % 1024 != 0 {
         return Err(CryptoError::InvalidKeyDerivationParams(format!(
             "Memory limit {} must be a multiple of 1024 bytes",
             mem_limit
@@ -203,7 +203,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
         });
     }
 
-    if !MEMLIMIT_SENSITIVE.is_multiple_of(MEMLIMIT_MODERATE) {
+    if MEMLIMIT_SENSITIVE % MEMLIMIT_MODERATE != 0 {
         return Err(CryptoError::InvalidKeyDerivationParams(format!(
             "Memory limit {} must be divisible by {}",
             MEMLIMIT_SENSITIVE, MEMLIMIT_MODERATE
