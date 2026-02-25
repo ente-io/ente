@@ -142,7 +142,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
+                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore --target-platform android-arm,android-arm64
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
