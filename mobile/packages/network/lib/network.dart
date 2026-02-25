@@ -78,8 +78,18 @@ class Network {
       ),
     );
 
-    _dio.httpClientAdapter = NativeAdapter();
-    _enteDio.httpClientAdapter = NativeAdapter();
+    // Skip NativeAdapter for Locker app.
+    // On Android, NativeAdapter uses Cronet (via cronet_http + jni), which can
+    // trigger GrapheneOS "DCL via memory" restrictions and fail app startup.
+    // Keep Locker on Dio's default adapter to avoid that path.
+    final bool isLockerPackage = packageName == 'io.ente.locker' ||
+        packageName.startsWith('io.ente.locker.');
+    final bool shouldUseNativeAdapter = !isLockerPackage;
+
+    if (shouldUseNativeAdapter) {
+      _dio.httpClientAdapter = NativeAdapter();
+      _enteDio.httpClientAdapter = NativeAdapter();
+    }
 
     _setupInterceptors(configuration);
 
