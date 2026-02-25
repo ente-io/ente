@@ -292,6 +292,8 @@ export class FileViewerPhotoSwipe {
             // In single-file public viewer mode we keep Escape for nested UI
             // interactions while preventing accidental viewer closure.
             escKey: !disableEscapeClose,
+            // [Note: Wheel to zoom]
+            //
             // At least on macOS, manual zooming with the trackpad is very
             // cumbersome (possibly because of the small multiplier in the
             // PhotoSwipe source, but I'm not sure). The other option to do a
@@ -301,7 +303,17 @@ export class FileViewerPhotoSwipe {
             //
             // Taking a step back though, the PhotoSwipe viewport is fixed, so
             // we can just directly map wheel / trackpad scrolls to zooming.
-            wheelToZoom: true,
+            //
+            // However, this has an unintended side effect on devices with
+            // trackpads (e.g. iPad with Magic Keyboard): horizontal two-finger
+            // swipes on the trackpad generate wheel events that get consumed
+            // for zoom (but ignored since only deltaY is used), preventing the
+            // user from navigating between slides.
+            //
+            // To fix this, we use a custom wheel handler instead (see
+            // [Note: Custom wheel handler]) that differentiates horizontal
+            // scrolls (navigate slides) from vertical scrolls (zoom).
+            wheelToZoom: false,
             // Chrome yells about incorrectly mixing focus and aria-hidden if we
             // leave this at the default (true) and then swipe between slides
             // fast, or show MUI drawers etc.
@@ -326,6 +338,71 @@ export class FileViewerPhotoSwipe {
         });
 
         this.pswp = pswp;
+
+        // [Note: Custom wheel handler]
+        //
+        // Instead of using PhotoSwipe's built-in `wheelToZoom` (which
+        // consumes all wheel events for zoom, breaking trackpad horizontal
+        // swipe navigation on iPad), we handle wheel events ourselves.
+        //
+        // - Horizontal scroll (|deltaX| > |deltaY|): navigate between
+        //   slides. This is what a two-finger horizontal swipe on a trackpad
+        //   generates, and is the natural gesture for "next/previous photo".
+        //
+        // - Vertical scroll or ctrl+wheel (pinch-to-zoom on trackpads):
+        //   zoom the current image. This preserves the behavior described in
+        //   [Note: Wheel to zoom].
+        //
+        // Navigation is debounced to prevent rapid-fire slide changes from
+        // continuous scroll events that trackpads generate.
+
+        let lastWheelNavTime = 0;
+        const wheelNavCooldownMs = 350;
+
+        pswp.on("wheel", (pswpEvent) => {
+            const e = pswpEvent.originalEvent as WheelEvent;
+
+            const absX = Math.abs(e.deltaX);
+            const absY = Math.abs(e.deltaY);
+
+            if (absX > absY && absX > 5) {
+                // Horizontal scroll: navigate between slides.
+                pswpEvent.preventDefault();
+                e.preventDefault();
+
+                const now = Date.now();
+                if (now - lastWheelNavTime < wheelNavCooldownMs) return;
+                lastWheelNavTime = now;
+
+                if (e.deltaX > 0) {
+                    pswp.next();
+                } else {
+                    pswp.prev();
+                }
+            } else if (absY > 0) {
+                // Vertical scroll (or pinch-to-zoom which sets ctrlKey):
+                // zoom the current image, mirroring PhotoSwipe's built-in
+                // wheelToZoom behavior.
+                const slide = pswp.currSlide;
+                if (slide?.isZoomable()) {
+                    pswpEvent.preventDefault();
+                    e.preventDefault();
+
+                    let zoomFactor = -e.deltaY;
+                    if (e.deltaMode === 1 /* DOM_DELTA_LINE */) {
+                        zoomFactor *= 0.05;
+                    } else {
+                        zoomFactor *= e.deltaMode ? 1 : 0.002;
+                    }
+                    zoomFactor = 2 ** zoomFactor;
+
+                    slide.zoomTo(slide.currZoomLevel * zoomFactor, {
+                        x: e.clientX,
+                        y: e.clientY,
+                    });
+                }
+            }
+        });
 
         // Various helper routines to obtain the file at `currIndex`.
 
