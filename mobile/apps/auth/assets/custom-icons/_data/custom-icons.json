@@ -389,6 +389,10 @@
       "slug": "cinemaz"
     },
     {
+      "title": "Clickdoc",
+      "slug": "clickdoc"
+    },
+    {
       "title": "Clipper",
       "slug": "clippercard",
       "altNames": [
@@ -675,6 +679,10 @@
       ]
     },
     {
+      "title": "FetLife",
+      "slug": "fetlife"
+    },
+    {
       "title": "Fidelity",
       "slug": "fidelity",
       "altNames": [
@@ -807,6 +815,9 @@
       "title": "Hivelocity"
     },
     {
+      "title": "Hornbach"
+    },
+    {
       "title": "HRDocumentBox",
       "slug": "hrdocumentbox",
       "altNames": [
@@ -920,6 +931,13 @@
       "title": "jianguoyun",
       "altNames": [
         "坚果云"
+      ]
+    },
+    {
+      "title": "JOYclub",
+      "slug": "joyclub",
+      "altNames": [
+        "JOYCE"
       ]
     },
     {
@@ -1114,6 +1132,10 @@
       ]
     },
     {
+      "title": "Mein Grundeinkommen",
+      "slug": "mein_grundeinkommen"
+    },
+    {
       "title": "MEXC"
     },
     {
@@ -1267,6 +1289,10 @@
       ]
     },
     {
+      "title": "NorthC",
+      "slug": "northc"
+    },
+    {
       "title": "Notesnook"
     },
     {
@@ -1307,10 +1333,21 @@
       ]
     },
     {
+      "title": "OpenRouter",
+      "slug": "openrouter"
+    },
+    {
       "title": "okx",
       "hex": "000000",
       "altNames": [
         "欧易"
+      ]
+    },
+    {
+      "title": "Online Payment Platform",
+      "slug": "online_payment_platform",
+      "altNames": [
+        "OPP"
       ]
     },
     {
@@ -1943,6 +1980,13 @@
         "USCIS",
         "myuscis",
         "uscis.gov"
+      ]
+    },
+    {
+      "title": "VGN",
+      "slug": "vgn",
+      "altNames": [
+        "Ver­kehrs­ver­bund Groß­raum Nürn­berg"
       ]
     },
     {
