@@ -1,6 +1,8 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
@@ -12,17 +14,18 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/video_preview_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final Function({required int memoryDuration})? onFinalFileLoad;
   final bool isFromMemories;
 
@@ -30,6 +33,7 @@ class VideoWidget extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.onFinalFileLoad,
     this.isFromMemories = false,
     super.key,
@@ -54,12 +58,19 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
+    // Automatic error fallback: switch to MediaKit when native player fails
     useMediaKitForVideoSubscription =
         Bus.instance.on<UseMediaKitForVideo>().listen((event) {
-      _logger.info("Switching to MediaKit for video playback");
+      _logger.info(
+        "Automatically switching to MediaKit due to native player error",
+      );
       setState(() {
         useNativeVideoPlayer = false;
       });
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _maybeShowTransformToast();
     });
     if (widget.file.isUploaded) {
       isPreviewLoadable =
@@ -91,7 +102,10 @@ class _VideoWidgetState extends State<VideoWidget> {
     if (!isPreviewLoadable) {
       return;
     }
-    widget.playbackCallback?.call(false);
+    widget.playbackCallback?.call(
+      false,
+      FullScreenRequestReason.playbackStateChange,
+    );
     final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
@@ -145,13 +159,16 @@ class _VideoWidgetState extends State<VideoWidget> {
       );
     }
 
-    if (useNativeVideoPlayer && !playPreview ||
-        playPreview && Platform.isAndroid) {
+    final shouldUseNativeVideoPlayer =
+        useNativeVideoPlayer && (!playPreview || Platform.isAndroid);
+
+    if (shouldUseNativeVideoPlayer) {
       return VideoWidgetNative(
         widget.file,
         key: nativePlayerKey,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        shouldDisableScroll: widget.shouldDisableScroll,
         playlistData: playlistData,
         selectedPreview: playPreview,
         isFromMemories: widget.isFromMemories,
@@ -176,6 +193,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,
+      shouldDisableScroll: widget.shouldDisableScroll,
       preview: playlistData?.preview,
       selectedPreview: playPreview,
       isFromMemories: widget.isFromMemories,
@@ -193,6 +211,41 @@ class _VideoWidgetState extends State<VideoWidget> {
         });
       },
       onFinalFileLoad: widget.onFinalFileLoad,
+    );
+  }
+
+  void _maybeShowTransformToast() {
+    if (!kDebugMode) return;
+    final name = widget.file.title ?? widget.file.displayName;
+    final editedIndex = name.indexOf('_edited');
+    if (editedIndex == -1) return;
+    final prefix = name.substring(0, editedIndex);
+
+    final hasTrim = prefix.contains('_t');
+    final cropMatch = RegExp(r'_c_([0-9]+(?:[:_-][0-9]+)?)').firstMatch(prefix);
+    final rotateMatch = RegExp(r'_r_([^_]+)').firstMatch(prefix);
+
+    if (!hasTrim && cropMatch == null && rotateMatch == null) return;
+
+    final parts = <String>[];
+    if (hasTrim) {
+      parts.add('Trim applied');
+    }
+    if (cropMatch != null) {
+      final raw = cropMatch.group(1) ?? '';
+      final formatted = raw.replaceAll(RegExp('[:_-]'), ':');
+      parts.add('Crop: $formatted');
+    }
+    if (rotateMatch != null) {
+      parts.add('Rotate: ${rotateMatch.group(1)}°');
+    }
+
+    if (parts.isEmpty) return;
+    showToast(
+      context,
+      parts.join(' • '),
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
     );
   }
 }

@@ -23,6 +23,7 @@ import (
 	storagebonusCtrl "github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/user"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
@@ -32,7 +33,6 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo"
-	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/gin-gonic/gin"
 )
@@ -197,8 +197,7 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) deleting account for %d", adminID, user.ID))
+	h.notifyAdminAction(adminID, "deleting account for %d", user.ID)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -229,11 +228,11 @@ func (h *AdminHandler) DisableTwoFactor(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) disabling 2FA for account %d", auth.GetUserID(c.Request.Header), request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "disabling 2FA for account %d", request.UserID)
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "disable_2fa",
 	})
@@ -254,8 +253,8 @@ func (h *AdminHandler) UpdateReferral(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request %s", err.Error()))
 		return
 	}
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating referral code for %d to %s", auth.GetUserID(c.Request.Header), request.UserID, request.Code))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "updating referral code for %d to %s", request.UserID, request.Code)
 	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code, true)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to disable 2FA")
@@ -275,11 +274,11 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) removing passkeys for account %d", auth.GetUserID(c.Request.Header), request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "removing passkeys for account %d", request.UserID)
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "remove_passkeys",
 	})
@@ -305,11 +304,11 @@ func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), *request.EmailMFA, request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "updating email mfa (%v) for account %d", *request.EmailMFA, request.UserID)
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "disable_email_mfa",
 	})
@@ -335,12 +334,12 @@ func (h *AdminHandler) AddOtt(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) adding custom ott", auth.GetUserID(c.Request.Header)))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "adding custom ott")
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.Email,
 		"code":     request.Code,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "custom_ott",
 	})
@@ -361,8 +360,8 @@ func (h *AdminHandler) TerminateSession(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
 		return
 	}
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) terminating session for user %d", auth.GetUserID(c.Request.Header), request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "terminating session for user %d", request.UserID)
 	err := h.UserController.TerminateSession(request.UserID, request.Token)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -377,12 +376,12 @@ func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
 		return
 	}
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating flag:%s to val:%v for %d", auth.GetUserID(c.Request.Header), request.Key, request.Value, request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "updating flag:%s to val:%v for %d", request.Key, request.Value, request.UserID)
 
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "update_feature_flag",
 	})
@@ -405,11 +404,11 @@ func (h *AdminHandler) CloseFamily(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) closing family for account %d", auth.GetUserID(c.Request.Header), request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "closing family for account %d", request.UserID)
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,
-		"admin_id": auth.GetUserID(c.Request.Header),
+		"admin_id": adminID,
 		"req_id":   requestid.Get(c),
 		"req_ctx":  "close_family",
 	})
@@ -431,8 +430,7 @@ func (h *AdminHandler) UpdateSubscription(c *gin.Context) {
 		return
 	}
 	r.AdminID = auth.GetUserID(c.Request.Header)
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating subscription for user: %d", r.AdminID, r.UserID))
+	h.notifyAdminAction(r.AdminID, "updating subscription for user: %d", r.UserID)
 	err := h.BillingController.UpdateSubscription(r)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to update subscription")
@@ -450,8 +448,7 @@ func (h *AdminHandler) ChangeEmail(c *gin.Context) {
 		return
 	}
 	adminID := auth.GetUserID(c.Request.Header)
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating email for user: %d", adminID, r.UserID))
+	h.notifyAdminAction(adminID, "updating email for user: %d", r.UserID)
 	err := h.UserController.UpdateEmail(c, r.UserID, r.Email)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to update email")
@@ -469,8 +466,7 @@ func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 		return
 	}
 	adminID := auth.GetUserID(c.Request.Header)
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) requeueing item %d for queue: %s", adminID, r.ID, r.QueueName))
+	h.notifyAdminAction(adminID, "requeueing item %d for queue: %s", r.ID, r.QueueName)
 	err := h.QueueRepo.RequeueItem(c, r.QueueName, r.ID)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to re-queue item")
@@ -513,8 +509,7 @@ func (h *AdminHandler) UpdateBonus(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) : User %d %s", adminID, r.UserID, r.UpdateLog()))
+	h.notifyAdminAction(adminID, ": User %d %s", r.UserID, r.UpdateLog())
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -530,11 +525,11 @@ func (h *AdminHandler) RecoverAccount(c *gin.Context) {
 		return
 	}
 
-	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) recovering account for %d", auth.GetUserID(c.Request.Header), request.UserID))
+	adminID := auth.GetUserID(c.Request.Header)
+	h.notifyAdminAction(adminID, "recovering account for %d", request.UserID)
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":    request.UserID,
-		"admin_id":   auth.GetUserID(c.Request.Header),
+		"admin_id":   adminID,
 		"user_email": request.EmailID,
 		"req_id":     requestid.Get(c),
 		"req_ctx":    "account_recovery",
@@ -572,6 +567,73 @@ func (h *AdminHandler) GetEmailsFromHashes(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"emails": emails})
+}
+
+type adminAlertContext struct {
+	ID          int64
+	Email       string
+	MaskedEmail string
+	HasTOTP     bool
+}
+
+func (h *AdminHandler) notifyAdminAction(adminID int64, format string, args ...interface{}) {
+	adminCtx, err := h.getAdminAlertContext(adminID)
+	adminIdentifier := fmt.Sprintf("%d", adminID)
+	if err != nil {
+		logrus.WithError(err).WithField("admin_id", adminID).Warn("failed to fetch admin details for admin action alert")
+	} else if adminCtx.MaskedEmail != "" {
+		adminIdentifier = adminCtx.MaskedEmail
+	} else if adminCtx.Email != "" {
+		adminIdentifier = adminCtx.Email
+	}
+	action := fmt.Sprintf(format, args...)
+	go h.DiscordController.NotifyAdminAction(fmt.Sprintf("Admin (%s) %s", adminIdentifier, action))
+	if err == nil {
+		go h.alertIfAdminMissing2FA(adminCtx)
+	}
+}
+
+func (h *AdminHandler) getAdminAlertContext(adminID int64) (adminAlertContext, error) {
+	user, err := h.UserRepo.Get(adminID)
+	if err != nil {
+		return adminAlertContext{}, stacktrace.Propagate(err, "failed to fetch admin details")
+	}
+	hasTOTP := user.IsTwoFactorEnabled != nil && *user.IsTwoFactorEnabled
+	return adminAlertContext{
+		ID:          adminID,
+		Email:       user.Email,
+		MaskedEmail: emailUtil.GetMaskedEmailWithHint(user.Email),
+		HasTOTP:     hasTOTP,
+	}, nil
+}
+
+func (h *AdminHandler) alertIfAdminMissing2FA(ctx adminAlertContext) {
+	if h.PasskeyController == nil {
+		return
+	}
+	passkeys, err := h.PasskeyController.GetPasskeys(ctx.ID)
+	if err != nil {
+		logrus.WithError(err).WithField("admin_id", ctx.ID).Warn("failed to fetch admin passkeys for alert")
+		return
+	}
+	if len(passkeys) > 0 {
+		return
+	}
+	identifier := ctx.MaskedEmail
+	if identifier == "" {
+		identifier = ctx.Email
+	}
+	if identifier == "" {
+		identifier = fmt.Sprintf("%d", ctx.ID)
+	}
+	icon := "⚠️"
+	message := "is missing passkey 2FA even though TOTP is enabled. Please register a passkey."
+	if !ctx.HasTOTP {
+		icon = "🚨"
+		message = "does not have TOTP or passkey 2FA enabled. Please protect your account with a passkey"
+	}
+	h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("%s Admin (%s) %s", icon, identifier, message))
 }
 
 func (h *AdminHandler) attachSubscription(ctx *gin.Context, userID int64, response gin.H) {

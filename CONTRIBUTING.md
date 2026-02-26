@@ -9,7 +9,7 @@
 
 **This is the most impactful contribution you can make**.
 
-[Spread the word](https://help.ente.io/photos/features/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
+[Spread the word](https://ente.io/help/photos/features/account/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
 
 ## Engage with the community
 
@@ -48,7 +48,9 @@ See [docs/](docs/README.md) for how to edit these documents.
 
 ## Code contributions
 
-If you'd like to contribute code, it is best to start small. Consider some well-scoped changes, say like adding more [custom icons to auth](mobile/apps/auth/docs/adding-icons.md), or fixing a specific bug.
+If you'd like to contribute code, it is best to start small. Consider some well-scoped changes, say like adding more [custom icons to auth](mobile/apps/auth/docs/adding-icons.md), or fixing a specific bug. There is a (possibly outdated) list of tasks with the ["help wanted" or "good first issue"](<https://github.com/ente-io/ente/issues?q=state%3Aopen%20(label%3A%22good%20first%20issue%22%20OR%20label%3A%22help%20wanted%22%20)>) label too.
+
+In your PR, please include before / after screenshots, and clearly indicate the tests that you performed.
 
 Code that changes the behaviour of the product might not get merged, at least not initially. The PR can serve as a discussion bed, but you might find it easier to just start a discussion instead, or post your perspective in the (likely) existing thread about the behaviour change or new feature you wish for.
 

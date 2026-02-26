@@ -1,7 +1,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -12,7 +12,12 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import {
+    FileContextMenu,
+    type ContextMenuPosition,
+} from "ente-new/photos/components/FileContextMenu";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -23,7 +28,14 @@ import {
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
+import {
+    getAvailableFileActions,
+    type FileContextAction,
+} from "ente-new/photos/utils/file-actions";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
@@ -155,11 +167,36 @@ export type EnteTrashFile = EnteFile & {
     deleteBy?: number;
 };
 
+interface MasonryLayoutItem {
+    file: EnteFile;
+    fileIndex: number;
+    left: number;
+    top: number;
+    bottom: number;
+    width: number;
+    height: number;
+}
+
+interface MasonryLayout {
+    items: MasonryLayoutItem[];
+    columns: MasonryLayoutItem[][];
+    totalHeight: number;
+}
+
+interface Dimensions {
+    width: number;
+    height: number;
+}
+
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
     height: number;
     /** The width we should occupy.*/
     width: number;
+    /**
+     * Optional border radius to apply to the scrollable list container.
+     */
+    listBorderRadius?: string;
     /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
@@ -172,6 +209,10 @@ export interface FileListProps {
      * another mode in which the gallery operates.
      */
     modePlus?: GalleryBarMode | "search";
+    /**
+     * The visual layout used to render the file listing.
+     */
+    layout?: "grid" | "masonry";
     /**
      * An optional component shown before all the items in the list.
      *
@@ -232,6 +273,46 @@ export interface FileListProps {
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
+    /**
+     * Called when the list scrolls, providing the current scroll offset.
+     */
+    onScroll?: (scrollOffset: number) => void;
+    /**
+     * Called when the visible date at the top of the viewport changes.
+     */
+    onVisibleDateChange?: (date: string | undefined) => void;
+    /**
+     * The collection summary for the current view.
+     *
+     * Used to determine available context menu actions.
+     */
+    collectionSummary?: CollectionSummary;
+    /**
+     * Called when a context menu action is triggered on a file.
+     *
+     * @param action The action that was triggered.
+     */
+    onContextMenuAction?: (
+        action: FileContextAction,
+        targetFile?: EnteFile,
+        meta?: { isEphemeralSingleSelection: boolean },
+    ) => void;
+    /**
+     * Whether to show the "Add Person" action in the context menu.
+     */
+    showAddPersonAction?: boolean;
+    /**
+     * Whether to show the "Edit Location" action in the context menu.
+     */
+    showEditLocationAction?: boolean;
+    /**
+     * Called when the context menu opens or closes.
+     */
+    onContextMenuOpenChange?: (open: boolean) => void;
+    /**
+     * Hide selection visuals/interactions while keeping selection data.
+     */
+    suppressSelectionUI?: boolean;
 }
 
 /**
@@ -240,8 +321,10 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
+    listBorderRadius,
     mode,
     modePlus,
+    layout = "grid",
     header,
     footer,
     user,
@@ -255,6 +338,14 @@ export const FileList: React.FC<FileListProps> = ({
     favoriteFileIDs,
     emailByUserID,
     onItemClick,
+    onScroll,
+    onVisibleDateChange,
+    collectionSummary,
+    onContextMenuAction,
+    showAddPersonAction,
+    showEditLocationAction,
+    onContextMenuOpenChange,
+    suppressSelectionUI = false,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -264,20 +355,56 @@ export const FileList: React.FC<FileListProps> = ({
     );
     const [hoverIndex, setHoverIndex] = useState<number | undefined>(undefined);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+    const [masonryScrollTop, setMasonryScrollTop] = useState(0);
+    const [masonryIsScrolling, setMasonryIsScrolling] = useState(false);
+    const [masonryDimensionsByFileID, setMasonryDimensionsByFileID] = useState<
+        Map<number, Dimensions>
+    >(new Map());
+    const masonryScrollIdleTimeoutRef = useRef<
+        ReturnType<typeof setTimeout> | undefined
+    >(undefined);
     // Timeline date strings for which all photos have been selected.
     //
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set<string>());
+    // Show back-to-top button when scrolled past threshold
+    const [showBackToTop, setShowBackToTop] = useState(false);
+
+    // Context menu state
+    const [contextMenu, setContextMenu] = useState<{
+        position: ContextMenuPosition;
+        file: EnteFile;
+        fileIndex: number;
+    } | null>(null);
+
+    // Track selection state before right-click modified it.
+    // If there are already 3 files explicitly selected via checkmarks,
+    // right-clicking an unselected item will store the previous selections
+    // in this ref and temporarily select only the right-clicked file.
+    // If no action is taken from the context menu, the previous selection
+    // is restored when the menu closes.
+    const previousSelectionRef = useRef<SelectedState | null>(null);
+    // Track whether an action was taken from the context menu.
+    // This ref works in conjunction with previousSelectionRef: if an action
+    // is taken, the previous selection is not reverted when the context menu closes.
+    const contextMenuActionTakenRef = useRef(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
+    const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
         [width],
     );
+    const shouldUseMasonry = layout === "masonry";
 
     useEffect(() => {
+        if (shouldUseMasonry) {
+            setItems([]);
+            return;
+        }
+
         // Since width and height are dependencies, there might be too many
         // updates to the list during a resize. The list computation too, while
         // fast, is non-trivial.
@@ -425,6 +552,7 @@ export const FileList: React.FC<FileListProps> = ({
         footer,
         annotatedFiles,
         disableGrouping,
+        shouldUseMasonry,
         layoutParams,
     ]);
 
@@ -513,6 +641,25 @@ export const FileList: React.FC<FileListProps> = ({
         [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
+    const isSelectionContextMatching = useMemo(() => {
+        if (!mode) return selected.collectionID === activeCollectionID;
+        if (mode !== selected.context?.mode) return false;
+        if (selected.context.mode === "people") {
+            return selected.context.personID === activePersonID;
+        }
+        return selected.context.collectionID === activeCollectionID;
+    }, [activeCollectionID, activePersonID, mode, selected]);
+
+    const isFileSelected = useCallback(
+        (file: EnteFile) => {
+            if (suppressSelectionUI) return false;
+            return isSelectionContextMatching && !!selected[file.id];
+        },
+        [isSelectionContextMatching, selected, suppressSelectionUI],
+    );
+
+    const haveSelection = !suppressSelectionUI && selected.count > 0;
+
     const handleRangeSelect = useCallback(
         (index: number) => {
             if (rangeStartIndex === undefined || rangeStartIndex == index)
@@ -565,16 +712,157 @@ export const FileList: React.FC<FileListProps> = ({
         if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
+    const selectedFavoriteCount = useMemo(() => {
+        if (!favoriteFileIDs || selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
+
+    // Compute available context menu actions based on stable context and
+    // the favorite status of the current selection (for toggling).
+    const contextMenuActions = useMemo(() => {
+        if (!onContextMenuAction) return [];
+        const actions = getAvailableFileActions({
+            barMode: mode,
+            isInSearchMode: modePlus === "search",
+            collectionSummary,
+            showAddPerson: !!showAddPersonAction,
+            showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
+            showSendLink: selected.ownCount > 0,
+        });
+        if (!actions.includes("favorite")) return actions;
+        if (
+            selectedFavoriteCount > 0 &&
+            selectedFavoriteCount < selected.count
+        ) {
+            return actions.filter(
+                (action) => action !== "favorite" && action !== "unfavorite",
+            );
+        }
+        if (selectedFavoriteCount === selected.count && selected.count > 0) {
+            return actions.map((action) =>
+                action === "favorite" ? "unfavorite" : action,
+            );
+        }
+        return actions;
+    }, [
+        onContextMenuAction,
+        mode,
+        modePlus,
+        collectionSummary,
+        showAddPersonAction,
+        showEditLocationAction,
+        selected.ownCount,
+        selectedFavoriteCount,
+        selected.count,
+    ]);
+
+    // Handle context menu open
+    const handleContextMenu = useCallback(
+        (event: React.MouseEvent, file: EnteFile, fileIndex: number) => {
+            if (!onContextMenuAction) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Reset tracking for this menu open.
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+
+            // Handle selection behavior on right-click
+            if (!selected[file.id]) {
+                // Store current selection before replacing it
+                previousSelectionRef.current = { ...selected };
+
+                // File not selected: clear selection and select only this file
+                const isOwnFile = file.ownerID === user?.id;
+                const context =
+                    mode === "people" && activePersonID
+                        ? { mode: "people" as const, personID: activePersonID }
+                        : {
+                              mode: (mode ?? "albums") as
+                                  | "albums"
+                                  | "hidden-albums",
+                              collectionID: activeCollectionID,
+                          };
+                setSelected({
+                    [file.id]: true,
+                    ownCount: isOwnFile ? 1 : 0,
+                    count: 1,
+                    collectionID: activeCollectionID,
+                    context,
+                });
+            }
+            // If file is already selected, keep current multi-selection
+
+            setContextMenu({
+                position: { top: event.clientY, left: event.clientX },
+                file,
+                fileIndex,
+            });
+            onContextMenuOpenChange?.(true);
+        },
+        [
+            onContextMenuAction,
+            onContextMenuOpenChange,
+            selected,
+            setSelected,
+            user,
+            activeCollectionID,
+            activePersonID,
+            mode,
+        ],
+    );
+
+    // Handle context menu close
+    const handleContextMenuClose = useCallback(() => {
+        // Defer restore so a menu-item click can mark the close as action-driven.
+        void Promise.resolve().then(() => {
+            if (
+                !contextMenuActionTakenRef.current &&
+                previousSelectionRef.current
+            ) {
+                setSelected(previousSelectionRef.current);
+            }
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+        });
+
+        setContextMenu(null);
+        onContextMenuOpenChange?.(false);
+    }, [onContextMenuOpenChange, setSelected]);
+
+    const handleContextMenuActionWithTracking = useCallback(
+        (action: FileContextAction) => {
+            const isEphemeralSingleSelection =
+                selected.count === 1 &&
+                previousSelectionRef.current?.count === 0;
+            contextMenuActionTakenRef.current = true;
+            onContextMenuAction?.(action, contextMenu?.file, {
+                isEphemeralSingleSelection,
+            });
+        },
+        [onContextMenuAction, contextMenu, selected.count],
+    );
+
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
-            const haveSelection = selected.count > 0;
+            const showGroupCheckbox =
+                haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
-                                {haveSelection && (
+                                {showGroupCheckbox && (
                                     <Checkbox
                                         key={date}
                                         name={date}
@@ -606,29 +894,15 @@ export const FileList: React.FC<FileListProps> = ({
                                         {...{
                                             user,
                                             emailByUserID,
-                                            enableSelect,
+                                            enableSelect:
+                                                !!enableSelect &&
+                                                !suppressSelectionUI,
                                         }}
                                         file={file}
-                                        selected={
-                                            (!mode
-                                                ? selected.collectionID ===
-                                                  activeCollectionID
-                                                : mode ==
-                                                      selected.context?.mode &&
-                                                  (selected.context.mode ==
-                                                  "people"
-                                                      ? selected.context
-                                                            .personID ==
-                                                        activePersonID
-                                                      : selected.context
-                                                            .collectionID ==
-                                                        activeCollectionID)) &&
-                                            !!selected[file.id]
-                                        }
-                                        selectOnClick={selected.count > 0}
+                                        selected={isFileSelected(file)}
+                                        selectOnClick={haveSelection}
                                         isRangeSelectActive={
-                                            isShiftKeyPressed &&
-                                            selected.count > 0
+                                            isShiftKeyPressed && haveSelection
                                         }
                                         isInSelectRange={
                                             rangeStartIndex !== undefined &&
@@ -647,6 +921,16 @@ export const FileList: React.FC<FileListProps> = ({
                                         onRangeSelect={() =>
                                             handleRangeSelect(index)
                                         }
+                                        onContextMenu={
+                                            onContextMenuAction
+                                                ? (e) =>
+                                                      handleContextMenu(
+                                                          e,
+                                                          file,
+                                                          index,
+                                                      )
+                                                : undefined
+                                        }
                                     />
                                 );
                             }),
@@ -660,20 +944,24 @@ export const FileList: React.FC<FileListProps> = ({
         },
         [
             activeCollectionID,
-            activePersonID,
             checkedTimelineDateStrings,
+            contextMenu,
             emailByUserID,
             favoriteFileIDs,
+            haveSelection,
+            handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
             isShiftKeyPressed,
-            mode,
+            isFileSelected,
             onChangeSelectAllCheckBox,
+            onContextMenuAction,
             onItemClick,
             rangeStartIndex,
             enableSelect,
             selected,
+            suppressSelectionUI,
             user,
         ],
     );
@@ -700,6 +988,415 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
+    // Track the last reported date to avoid unnecessary callbacks
+    const lastVisibleDateRef = useRef<string | undefined>(undefined);
+
+    const handleScroll = useCallback(
+        ({ scrollOffset }: { scrollOffset: number }) => {
+            onScroll?.(scrollOffset);
+
+            // Show back-to-top button when scrolled past threshold
+            setShowBackToTop(scrollOffset > 500);
+
+            // Calculate which date is visible at the current scroll position
+            if (onVisibleDateChange && items.length > 0) {
+                let cumulativeHeight = 0;
+                let currentDate: string | undefined;
+
+                for (const item of items) {
+                    if (item.type === "date") {
+                        currentDate = item.groups[0]?.date;
+                    }
+                    cumulativeHeight += item.height;
+                    // Found the item that contains the scroll position
+                    if (cumulativeHeight > scrollOffset) {
+                        break;
+                    }
+                }
+
+                // Only call callback if date changed
+                if (currentDate !== lastVisibleDateRef.current) {
+                    lastVisibleDateRef.current = currentDate;
+                    onVisibleDateChange(currentDate);
+                }
+            }
+        },
+        [onScroll, onVisibleDateChange, items],
+    );
+
+    useEffect(() => {
+        if (!shouldUseMasonry) {
+            setMasonryDimensionsByFileID(new Map());
+            return;
+        }
+
+        const validFileIDs = new Set(annotatedFiles.map(({ file }) => file.id));
+        setMasonryDimensionsByFileID((prev) => {
+            if (prev.size === 0) return prev;
+            const next = new Map(prev);
+            for (const fileID of next.keys()) {
+                if (!validFileIDs.has(fileID)) next.delete(fileID);
+            }
+            return next.size === prev.size ? prev : next;
+        });
+    }, [annotatedFiles, shouldUseMasonry]);
+
+    const updateMasonryDimensions = useCallback(
+        (fileID: number, dimensions: Dimensions) => {
+            if (dimensions.width <= 0 || dimensions.height <= 0) return;
+            setMasonryDimensionsByFileID((prev) => {
+                const existing = prev.get(fileID);
+                if (
+                    existing &&
+                    existing.width === dimensions.width &&
+                    existing.height === dimensions.height
+                ) {
+                    return prev;
+                }
+                const next = new Map(prev);
+                next.set(fileID, dimensions);
+                return next;
+            });
+        },
+        [],
+    );
+
+    const masonryColumns = useMemo(
+        () => preferredMasonryColumns(layoutParams.containerWidth),
+        [layoutParams.containerWidth],
+    );
+    const masonryInnerWidth = useMemo(
+        () => Math.max(0, width - 2 * layoutParams.paddingInline),
+        [layoutParams.paddingInline, width],
+    );
+    const masonryItemWidth = useMemo(() => {
+        if (masonryColumns < 1) return 0;
+        return (
+            (masonryInnerWidth - (masonryColumns - 1) * layoutParams.gap) /
+            masonryColumns
+        );
+    }, [layoutParams.gap, masonryColumns, masonryInnerWidth]);
+    const masonryLayout = useMemo<MasonryLayout>(() => {
+        if (
+            !shouldUseMasonry ||
+            masonryItemWidth <= 0 ||
+            !annotatedFiles.length
+        ) {
+            return { items: [], columns: [], totalHeight: 0 };
+        }
+
+        const columnHeights = Array.from({ length: masonryColumns }, () => 0);
+        const columns = Array.from(
+            { length: masonryColumns },
+            () => new Array<MasonryLayoutItem>(),
+        );
+        const items: MasonryLayoutItem[] = [];
+
+        for (const [fileIndex, { file }] of annotatedFiles.entries()) {
+            const dimensions = fileMasonryDimensions(
+                file,
+                masonryDimensionsByFileID.get(file.id),
+            );
+            const itemHeight = Math.max(
+                1,
+                (masonryItemWidth * dimensions.height) / dimensions.width,
+            );
+            const targetColumn = shortestColumnIndex(columnHeights);
+            const top = columnHeights[targetColumn]!;
+            const bottom = top + itemHeight;
+            const left = targetColumn * (masonryItemWidth + layoutParams.gap);
+
+            const item = {
+                file,
+                fileIndex,
+                top,
+                bottom,
+                left,
+                width: masonryItemWidth,
+                height: itemHeight,
+            } satisfies MasonryLayoutItem;
+            items.push(item);
+            columns[targetColumn]!.push(item);
+
+            columnHeights[targetColumn] = top + itemHeight + layoutParams.gap;
+        }
+
+        const totalHeight = Math.max(
+            0,
+            Math.max(...columnHeights) - layoutParams.gap,
+        );
+        return { items, columns, totalHeight };
+    }, [
+        annotatedFiles,
+        layoutParams.gap,
+        masonryColumns,
+        masonryDimensionsByFileID,
+        masonryItemWidth,
+        shouldUseMasonry,
+    ]);
+    const masonryHeaderHeight = header?.height ?? 0;
+    const masonryViewportTop = Math.max(
+        0,
+        masonryScrollTop - masonryHeaderHeight,
+    );
+    const masonryViewportBottom = masonryViewportTop + height;
+    const masonryOverscan = Math.max(height, 800);
+    const masonryVisibleItems = useMemo(() => {
+        const minTop = masonryViewportTop - masonryOverscan;
+        const maxTop = masonryViewportBottom + masonryOverscan;
+        const visible = new Array<MasonryLayoutItem>();
+
+        for (const column of masonryLayout.columns) {
+            const startIndex = firstVisibleIndexForColumn(column, minTop);
+            for (let i = startIndex; i < column.length; i += 1) {
+                const item = column[i]!;
+                if (item.top > maxTop) break;
+                visible.push(item);
+            }
+        }
+
+        return visible;
+    }, [
+        masonryLayout.columns,
+        masonryOverscan,
+        masonryViewportBottom,
+        masonryViewportTop,
+    ]);
+
+    const handleMasonryScroll: React.UIEventHandler<HTMLDivElement> =
+        useCallback(
+            (event) => {
+                const scrollOffset = event.currentTarget.scrollTop;
+                onScroll?.(scrollOffset);
+                setShowBackToTop(scrollOffset > 500);
+                setMasonryScrollTop(scrollOffset);
+                setMasonryIsScrolling(true);
+                if (masonryScrollIdleTimeoutRef.current) {
+                    clearTimeout(masonryScrollIdleTimeoutRef.current);
+                }
+                masonryScrollIdleTimeoutRef.current = setTimeout(() => {
+                    setMasonryIsScrolling(false);
+                    masonryScrollIdleTimeoutRef.current = undefined;
+                }, masonryScrollIdleMs);
+            },
+            [onScroll],
+        );
+
+    useEffect(
+        () => () => {
+            if (masonryScrollIdleTimeoutRef.current) {
+                clearTimeout(masonryScrollIdleTimeoutRef.current);
+            }
+        },
+        [],
+    );
+
+    useEffect(() => {
+        if (!shouldUseMasonry) {
+            setMasonryScrollTop(0);
+            setMasonryIsScrolling(false);
+            if (masonryScrollIdleTimeoutRef.current) {
+                clearTimeout(masonryScrollIdleTimeoutRef.current);
+                masonryScrollIdleTimeoutRef.current = undefined;
+            }
+        }
+    }, [shouldUseMasonry]);
+
+    useEffect(() => {
+        if (!shouldUseMasonry || !onVisibleDateChange) return;
+        const topVisibleItem = masonryVisibleItems.reduce<
+            MasonryLayoutItem | undefined
+        >(
+            (best, item) =>
+                item.bottom > masonryViewportTop &&
+                (!best || item.top < best.top)
+                    ? item
+                    : best,
+            undefined,
+        );
+        const visibleDate =
+            topVisibleItem &&
+            annotatedFiles[topVisibleItem.fileIndex]?.timelineDateString;
+        const currentDate =
+            visibleDate ?? annotatedFiles[0]?.timelineDateString;
+        if (currentDate !== lastVisibleDateRef.current) {
+            lastVisibleDateRef.current = currentDate;
+            onVisibleDateChange(currentDate);
+        }
+    }, [
+        annotatedFiles,
+        masonryVisibleItems,
+        masonryViewportTop,
+        onVisibleDateChange,
+        shouldUseMasonry,
+    ]);
+
+    const renderMasonryItem = useCallback(
+        ({
+            file,
+            fileIndex,
+            top,
+            left,
+            width,
+            height,
+            bottom,
+        }: MasonryLayoutItem) => {
+            const isInViewport =
+                bottom > masonryViewportTop && top < masonryViewportBottom;
+            return (
+                <Box
+                    key={`masonry-photo-${file.id}-${fileIndex}`}
+                    sx={{ position: "absolute", top, left, width, height }}
+                >
+                    <FileThumbnail
+                        key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                        {...{
+                            user,
+                            emailByUserID,
+                            enableSelect:
+                                !!enableSelect && !suppressSelectionUI,
+                        }}
+                        file={file}
+                        selected={isFileSelected(file)}
+                        selectOnClick={haveSelection}
+                        isRangeSelectActive={isShiftKeyPressed && haveSelection}
+                        isInSelectRange={
+                            rangeStartIndex !== undefined &&
+                            hoverIndex !== undefined &&
+                            ((fileIndex >= rangeStartIndex &&
+                                fileIndex <= hoverIndex) ||
+                                (fileIndex >= hoverIndex &&
+                                    fileIndex <= rangeStartIndex))
+                        }
+                        activeCollectionID={activeCollectionID}
+                        showPlaceholder={masonryIsScrolling && !isInViewport}
+                        isFav={!!favoriteFileIDs?.has(file.id)}
+                        onClick={() => onItemClick(fileIndex)}
+                        onSelect={handleSelect(file, fileIndex)}
+                        onHover={() => setHoverIndex(fileIndex)}
+                        onRangeSelect={() => handleRangeSelect(fileIndex)}
+                        onContextMenu={
+                            onContextMenuAction
+                                ? (e) => handleContextMenu(e, file, fileIndex)
+                                : undefined
+                        }
+                        onImageDimensions={(dimensions) =>
+                            updateMasonryDimensions(file.id, dimensions)
+                        }
+                        isMasonry
+                        style={{ width: "100%", height: "100%" }}
+                    />
+                </Box>
+            );
+        },
+        [
+            activeCollectionID,
+            emailByUserID,
+            enableSelect,
+            favoriteFileIDs,
+            handleContextMenu,
+            handleRangeSelect,
+            handleSelect,
+            haveSelection,
+            hoverIndex,
+            isFileSelected,
+            isShiftKeyPressed,
+            masonryIsScrolling,
+            masonryViewportBottom,
+            masonryViewportTop,
+            onContextMenuAction,
+            onItemClick,
+            rangeStartIndex,
+            selected,
+            suppressSelectionUI,
+            updateMasonryDimensions,
+            user,
+        ],
+    );
+
+    const handleScrollToTop = useCallback(() => {
+        outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
+    if (shouldUseMasonry) {
+        return (
+            <Box sx={{ position: "relative", width, height }}>
+                <Box
+                    ref={outerRef}
+                    sx={{
+                        width: "100%",
+                        height: "100%",
+                        overflowY: "auto",
+                        ...(listBorderRadius && {
+                            borderRadius: listBorderRadius,
+                        }),
+                    }}
+                    onScroll={handleMasonryScroll}
+                >
+                    {header && (
+                        <Box
+                            sx={{
+                                px: header.extendToInlineEdges
+                                    ? 0
+                                    : `${layoutParams.paddingInline}px`,
+                            }}
+                        >
+                            {header.component}
+                        </Box>
+                    )}
+                    {masonryLayout.items.length > 0 ? (
+                        <Box sx={{ px: `${layoutParams.paddingInline}px` }}>
+                            <Box
+                                sx={{
+                                    width: masonryInnerWidth,
+                                    position: "relative",
+                                    height: masonryLayout.totalHeight,
+                                }}
+                            >
+                                {masonryVisibleItems.map(renderMasonryItem)}
+                            </Box>
+                        </Box>
+                    ) : (
+                        <NoFilesListItem sx={{ minHeight: "100%" }}>
+                            <Typography sx={{ color: "text.faint" }}>
+                                {t("nothing_here")}
+                            </Typography>
+                        </NoFilesListItem>
+                    )}
+                    {footer && (
+                        <Box
+                            sx={{
+                                px: footer.extendToInlineEdges
+                                    ? 0
+                                    : `${layoutParams.paddingInline}px`,
+                            }}
+                        >
+                            {footer.component}
+                        </Box>
+                    )}
+                </Box>
+                {showBackToTop && (
+                    <BackToTopButton
+                        size="small"
+                        aria-label="scroll to top"
+                        onClick={handleScrollToTop}
+                    >
+                        <KeyboardArrowUpIcon />
+                    </BackToTopButton>
+                )}
+                {onContextMenuAction && (
+                    <FileContextMenu
+                        open={contextMenu !== null}
+                        anchorPosition={contextMenu?.position}
+                        onClose={handleContextMenuClose}
+                        actions={contextMenuActions}
+                        onAction={handleContextMenuActionWithTracking}
+                    />
+                )}
+            </Box>
+        );
+    }
+
     if (!items.length) {
         return <></>;
     }
@@ -721,16 +1418,43 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <VariableSizeList
-            key={key}
-            ref={listRef}
-            {...{ width, height, itemData, itemSize, itemKey }}
-            itemCount={items.length}
-            overscanCount={3}
-            useIsScrolling
-        >
-            {FileListRow}
-        </VariableSizeList>
+        <Box sx={{ position: "relative", width, height }}>
+            <VariableSizeList
+                key={key}
+                ref={listRef}
+                outerRef={outerRef}
+                {...{ width, height, itemData, itemSize, itemKey }}
+                itemCount={items.length}
+                overscanCount={3}
+                useIsScrolling
+                onScroll={handleScroll}
+                style={
+                    listBorderRadius
+                        ? { borderRadius: listBorderRadius }
+                        : undefined
+                }
+            >
+                {FileListRow}
+            </VariableSizeList>
+            {showBackToTop && (
+                <BackToTopButton
+                    size="small"
+                    aria-label="scroll to top"
+                    onClick={handleScrollToTop}
+                >
+                    <KeyboardArrowUpIcon />
+                </BackToTopButton>
+            )}
+            {onContextMenuAction && (
+                <FileContextMenu
+                    open={contextMenu !== null}
+                    anchorPosition={contextMenu?.position}
+                    onClose={handleContextMenuClose}
+                    actions={contextMenuActions}
+                    onAction={handleContextMenuActionWithTracking}
+                />
+            )}
+        </Box>
     );
 };
 
@@ -749,6 +1473,59 @@ const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
         ),
         new Array<FileListAnnotatedFile[]>(),
     );
+
+const shortestColumnIndex = (columnHeights: number[]) =>
+    columnHeights.reduce(
+        (minColumn, height, index) =>
+            height < columnHeights[minColumn]! ? index : minColumn,
+        0,
+    );
+
+const firstVisibleIndexForColumn = (
+    column: MasonryLayoutItem[],
+    minTop: number,
+) => {
+    let low = 0;
+    let high = column.length;
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        if (column[mid]!.bottom < minTop) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    return low;
+};
+
+const fileMasonryDimensions = (
+    file: EnteFile,
+    inferredDimensions?: Dimensions,
+) => {
+    if (inferredDimensions) return inferredDimensions;
+
+    const width = file.pubMagicMetadata?.data.w;
+    const height = file.pubMagicMetadata?.data.h;
+    if (width && height && width > 0 && height > 0) {
+        return { width, height };
+    }
+
+    if (file.metadata.fileType === FileType.video) {
+        return { width: 16, height: 9 };
+    }
+
+    return { width: 4, height: 3 };
+};
+
+const masonryScrollIdleMs = 120;
+
+const preferredMasonryColumns = (containerWidth: number) => {
+    if (containerWidth < 560) return 2;
+    if (containerWidth < 900) return 3;
+    if (containerWidth < 1280) return 4;
+    if (containerWidth < 1800) return 5;
+    return 6;
+};
 
 /**
  * For each element of {@link xs}, obtain an array by applying {@link f},
@@ -776,6 +1553,20 @@ const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
     justify-content: center;
 `;
+
+/**
+ * Floating button to scroll back to the top of the file list.
+ */
+const BackToTopButton = styled(Fab)(({ theme }) => ({
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: theme.vars.palette.fill.faint,
+    color: theme.vars.palette.text.base,
+    boxShadow: "none",
+    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
+    [theme.breakpoints.down("sm")]: { display: "none" },
+}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
@@ -881,6 +1672,10 @@ type FileThumbnailProps = {
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
+    onContextMenu?: (event: React.MouseEvent) => void;
+    onImageDimensions?: (dimensions: Dimensions) => void;
+    isMasonry?: boolean;
+    style?: React.CSSProperties;
 } & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
@@ -899,6 +1694,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     onSelect,
     onHover,
     onRangeSelect,
+    onContextMenu,
+    onImageDimensions,
+    isMasonry,
+    style,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
@@ -909,7 +1708,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
             onTouchStart: () => setIsLongPressing(true),
+            onTouchMove: () => setIsLongPressing(false),
             onTouchEnd: () => setIsLongPressing(false),
+            onTouchCancel: () => setIsLongPressing(false),
         }),
         [],
     );
@@ -973,8 +1774,11 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
+            onContextMenu={onContextMenu}
             onMouseEnter={handleHover}
             disabled={!imageURL}
+            $disableBottomMargin={!!isMasonry}
+            style={style}
             {...(enableSelect && longPressHandlers)}
         >
             {enableSelect && (
@@ -989,7 +1793,17 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             {file.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={file.metadata.fileType} />
             ) : imageURL ? (
-                <img src={imageURL} />
+                <img
+                    src={imageURL}
+                    onLoad={(event) => {
+                        const { naturalWidth, naturalHeight } =
+                            event.currentTarget;
+                        onImageDimensions?.({
+                            width: naturalWidth,
+                            height: naturalHeight,
+                        });
+                    }}
+                />
             ) : (
                 <LoadingThumbnail />
             )}
@@ -1010,7 +1824,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             )}
             {isFav && (
                 <FavoriteOverlay>
-                    <FavoriteRoundedIcon />
+                    <StarIcon fontSize="small" />
                 </FavoriteOverlay>
             )}
 
@@ -1031,10 +1845,14 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     );
 };
 
-const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
+const FileThumbnail_ = styled("div")<{
+    disabled: boolean;
+    $disableBottomMargin: boolean;
+}>`
     display: flex;
     width: fit-content;
-    margin-bottom: ${thumbnailGap}px;
+    margin-bottom: ${({ $disableBottomMargin }) =>
+        $disableBottomMargin ? "0px" : `${thumbnailGap}px`};
     min-width: 100%;
     overflow: hidden;
     position: relative;
@@ -1049,14 +1867,16 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
         pointer-events: none;
     }
 
-    &:hover {
-        input[type="checkbox"] {
-            visibility: visible;
-            opacity: 0.5;
-        }
+    @media (pointer: fine) {
+        &:hover {
+            input[type="checkbox"] {
+                visibility: visible;
+                opacity: 0.5;
+            }
 
-        .preview-card-hover-overlay {
-            opacity: 1;
+            .preview-card-hover-overlay {
+                opacity: 1;
+            }
         }
     }
 
@@ -1066,59 +1886,78 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
 const Check = styled("input")<{ $active: boolean }>(
     ({ theme, $active }) => `
     appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     position: absolute;
-    /* Increase z-index in stacking order to capture clicks */
     z-index: 1;
     left: 0;
     outline: none;
     cursor: pointer;
+    width: 31px;
+    height: 31px;
+    box-sizing: border-box;
+    
     @media (pointer: coarse) {
         pointer-events: none;
     }
 
     &::before {
         content: "";
+        display: block; /* Critical for Safari */
         width: 19px;
         height: 19px;
         background-color: #ddd;
-        display: inline-block;
         border-radius: 50%;
-        vertical-align: bottom;
-        margin: 6px 6px;
-        transition: background-color 0.3s ease;
-        pointer-events: inherit;
-
+        margin: 6px;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        position: relative; /* Important for Safari */
     }
+    
     &::after {
         content: "";
+        display: block; /* Critical for Safari */
         position: absolute;
+        top: 50%;
+        left: 50%;
         width: 5px;
         height: 11px;
-        border-right: 2px solid #333;
-        border-bottom: 2px solid #333;
-        transition: transform 0.3s ease;
-        pointer-events: inherit;
-        transform: translate(-18px, 9px) rotate(45deg);
+        border: solid #333;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -60%) rotate(45deg);
+        transition: border-color 0.3s ease, opacity 0.3s ease;
+        transform-origin: center;
     }
 
-    /* checkmark background (filled circle) */
-    &:checked::before {
-        content: "";
-        background-color: ${theme.vars.palette.accent.main};
-        border-color: ${theme.vars.palette.accent.main};
-        color: white;
-    }
-    /* checkmark foreground (tick) */
-    &:checked::after {
-        content: "";
-        border-right: 2px solid #ddd;
-        border-bottom: 2px solid #ddd;
-    }
+    /* Default state - hide both */
     visibility: hidden;
-    ${$active && "visibility: visible; opacity: 0.5;"};
+    
+    /* When $active - show both with reduced opacity */
+    ${
+        $active &&
+        `
+        visibility: visible;
+        opacity: 0.5;
+    `
+    };
+    
+    /* Hover state - show both */
+    &:hover {
+        visibility: visible;
+        opacity: 0.7;
+    }
+    
+    /* Checked state - show both with full opacity and colored */
     &:checked {
         visibility: visible;
         opacity: 1 !important;
+    }
+    
+    &:checked::before {
+        background-color: ${theme.vars.palette.accent.main};
+    }
+    
+    &:checked::after {
+        border-color: #ddd;
     }
 `,
 );

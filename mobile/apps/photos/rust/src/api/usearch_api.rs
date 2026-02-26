@@ -1,7 +1,10 @@
 use flutter_rust_bridge::frb;
 use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
 
+use std::collections::HashSet;
 use std::path::PathBuf;
+
+const FAST_SEARCH_STEP_COUNTS: [usize; 5] = [200, 500, 2000, 5000, 10000];
 
 #[frb(opaque)]
 pub struct VectorDB {
@@ -32,6 +35,10 @@ impl VectorDB {
 
         if file_exists {
             println!("Loading index from disk.");
+            // Must use load() instead of view() because:
+            // - view() creates a read-only memory-mapped view (immutable)
+            // - load() loads the index into RAM for read/write operations (mutable)
+            // Using view() causes "Can't add to an immutable index" error
             db.index.load(file_path).expect("Failed to load index");
         } else {
             println!("Creating new index.");
@@ -45,9 +52,37 @@ impl VectorDB {
         if let Some(parent) = self.path.parent() {
             std::fs::create_dir_all(parent).expect("Failed to create directory");
         }
-        self.index
-            .save(self.path.to_str().expect("Invalid path"))
-            .expect("Failed to save index");
+
+        // Use atomic write: save to temp file first, then rename
+        let temp_path = self.path.with_extension("tmp");
+        let temp_path_str = temp_path.to_str().expect("Invalid temp path");
+
+        // Save to temporary file
+        match self.index.save(temp_path_str) {
+            Ok(_) => {
+                // Atomic rename - guaranteed atomic on iOS/Android
+                // This will atomically replace the existing file
+                // The rename ensures we never have a partially written file,
+                // even if the app is suspended or crashes
+                match std::fs::rename(&temp_path, &self.path) {
+                    Ok(_) => {
+                        println!("Successfully saved index atomically");
+                    }
+                    Err(e) => {
+                        println!("Failed to rename temp index file: {:?}", e);
+                        // Try to clean up temp file
+                        let _ = std::fs::remove_file(&temp_path);
+                        panic!("Failed to atomically save index: {:?}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Failed to save index to temp file: {:?}", e);
+                // Try to clean up temp file if it exists
+                let _ = std::fs::remove_file(&temp_path);
+                panic!("Failed to save index: {:?}", e);
+            }
+        }
     }
 
     fn ensure_capacity(&self, margin: usize) {
@@ -70,7 +105,7 @@ impl VectorDB {
         self.save_index();
     }
 
-    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &Vec<Vec<f32>>) {
+    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &[Vec<f32>]) {
         self.ensure_capacity(keys.len());
         for (key, vector) in keys.iter().zip(vectors.iter()) {
             if self.contains_vector(*key) {
@@ -94,6 +129,177 @@ impl VectorDB {
                 .expect("Failed to search vectors")
         };
         (matches.keys, matches.distances)
+    }
+
+    pub fn approx_search_vectors_within_similarity(
+        &self,
+        query: &[f32],
+        minimum_similarity: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let index_size = self.index.size();
+        if index_size == 0 || !minimum_similarity.is_finite() {
+            return (Vec::new(), Vec::new());
+        }
+
+        let max_distance = 1.0_f32 - minimum_similarity;
+        if !max_distance.is_finite() || max_distance < 0.0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        self.fast_search_vectors_within_distance(query, max_distance)
+    }
+
+    pub fn approx_filtered_search_vectors_within_distance(
+        &self,
+        query: &[f32],
+        allowed_keys: &[u64],
+        count: usize,
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let index_size = self.index.size();
+        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
+            return (Vec::new(), Vec::new());
+        }
+        if !max_distance.is_finite() || max_distance < 0.0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
+        let search_count = count.min(allowed.len()).min(index_size);
+        if search_count == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let matches = self
+            .index
+            .filtered_search(query, search_count, |key| allowed.contains(&key))
+            .expect("Failed to run filtered vector search");
+
+        Self::truncate_sorted_matches_within_distance(matches.keys, matches.distances, max_distance)
+    }
+
+    pub fn bulk_approx_filtered_search_vectors_within_distance(
+        &self,
+        queries: &Vec<Vec<f32>>,
+        allowed_keys: &[u64],
+        count: usize,
+        max_distance: f32,
+    ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
+        let query_count = queries.len();
+        if query_count == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let empty_aligned_results = || {
+            (
+                vec![Vec::<u64>::new(); query_count],
+                vec![Vec::<f32>::new(); query_count],
+            )
+        };
+
+        let index_size = self.index.size();
+        if index_size == 0 || count == 0 || allowed_keys.is_empty() {
+            return empty_aligned_results();
+        }
+        if !max_distance.is_finite() || max_distance < 0.0 {
+            return empty_aligned_results();
+        }
+
+        let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
+        let search_count = count.min(allowed.len()).min(index_size);
+        if search_count == 0 {
+            return empty_aligned_results();
+        }
+
+        let mut all_keys = Vec::with_capacity(query_count);
+        let mut all_distances = Vec::with_capacity(query_count);
+
+        for query in queries {
+            let matches = self
+                .index
+                .filtered_search(query, search_count, |key| allowed.contains(&key))
+                .expect("Failed to run filtered vector search");
+
+            let (keys, distances) = Self::truncate_sorted_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+            all_keys.push(keys);
+            all_distances.push(distances);
+        }
+
+        (all_keys, all_distances)
+    }
+
+    fn fast_search_vectors_within_distance(
+        &self,
+        query: &[f32],
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let index_size = self.index.size();
+        if index_size == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let mut previous_count = 0_usize;
+        for step_count in FAST_SEARCH_STEP_COUNTS {
+            let count = step_count.min(index_size);
+            if count <= previous_count {
+                continue;
+            }
+            previous_count = count;
+
+            let matches = self
+                .index
+                .search(query, count)
+                .expect("Failed to search vectors");
+
+            let should_expand = count < index_size
+                && matches
+                    .distances
+                    .last()
+                    .map(|d| *d <= max_distance)
+                    .unwrap_or(false);
+            if should_expand {
+                continue;
+            }
+
+            return Self::truncate_sorted_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+        }
+
+        if previous_count < index_size {
+            let matches = self
+                .index
+                .search(query, index_size)
+                .expect("Failed to search vectors");
+            return Self::truncate_sorted_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+        }
+
+        (Vec::new(), Vec::new())
+    }
+
+    fn truncate_sorted_matches_within_distance(
+        mut keys: Vec<u64>,
+        mut distances: Vec<f32>,
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let aligned_len = keys.len().min(distances.len());
+        keys.truncate(aligned_len);
+        distances.truncate(aligned_len);
+
+        let keep_len = distances.partition_point(|distance| *distance <= max_distance);
+        keys.truncate(keep_len);
+        distances.truncate(keep_len);
+        (keys, distances)
     }
 
     pub fn bulk_search_vectors(

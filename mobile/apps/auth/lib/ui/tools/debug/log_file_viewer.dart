@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Today's logs"),
+        title: Text(context.l10n.todaysLogs),
       ),
       body: _getBody(),
     );

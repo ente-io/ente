@@ -10,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -18,6 +19,7 @@ import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -31,7 +33,8 @@ import "package:photos/utils/file_util.dart";
 class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final File? preview;
@@ -42,6 +45,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.isFromMemories = false,
     required this.onStreamChange,
     this.preview,
@@ -62,6 +66,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   final _progressNotifier = ValueNotifier<double?>(null);
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  late StreamSubscription<ResumeVideoEvent> resumeVideoSubscription;
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
@@ -69,6 +74,8 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
+  final _transformationController = TransformationController();
+  bool _isZooming = false;
 
   @override
   void initState() {
@@ -86,6 +93,10 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
+    });
+    resumeVideoSubscription =
+        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+      player.play();
     });
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -175,6 +186,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
+    resumeVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -184,6 +196,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     }
     player.dispose();
     _captionUpdatedSubscription.cancel();
+    _transformationController.dispose();
     if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
       EnteWakeLockService.instance.updateWakeLock(
         enable: true,
@@ -198,27 +211,37 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     super.dispose();
   }
 
+  void _onInteractionLockChanged(bool shouldLock) {
+    if (_isZooming != shouldLock) {
+      setState(() {
+        _isZooming = shouldLock;
+      });
+    }
+    widget.shouldDisableScroll?.call(shouldLock);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onVerticalDragUpdate: _isGuestView
+      // Keep recognizer out of the arena during multi-touch/zoom to avoid
+      // it stealing pinch gestures with predominantly vertical movement.
+      onVerticalDragUpdate: _isGuestView || _isZooming
           ? null
-          : (d) => {
-                if (d.delta.dy > dragSensitivity)
-                  {
-                    Navigator.of(context).pop(),
-                  }
-                else if (d.delta.dy < (dragSensitivity * -1))
-                  {
-                    showDetailsSheet(context, widget.file),
-                  },
-              },
+          : (d) {
+              if (d.delta.dy > dragSensitivity) {
+                Navigator.of(context).pop();
+              } else if (d.delta.dy < (dragSensitivity * -1)) {
+                showDetailsSheet(context, widget.file);
+              }
+            },
       child: Center(
         child: controller != null
             ? common.VideoWidget(
                 widget.file,
                 controller!,
                 widget.playbackCallback,
+                transformationController: _transformationController,
+                onInteractionLockChanged: _onInteractionLockChanged,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,
@@ -272,7 +295,10 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
+            showShortToast(
+              context,
+              AppLocalizations.of(context).decryptingVideo,
+            );
           }
         }
       },
@@ -283,8 +309,8 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     }).onError((error, stackTrace) {
       showErrorDialog(
         context,
-        S.of(context).error,
-        S.of(context).failedToDownloadVideo,
+        AppLocalizations.of(context).error,
+        AppLocalizations.of(context).failedToDownloadVideo,
       );
     });
   }

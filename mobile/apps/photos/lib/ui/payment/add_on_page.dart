@@ -1,12 +1,12 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/gateways/storage_bonus/models/bonus.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/storage_bonus/bonus.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class AddOnPage extends StatelessWidget {
   final BonusData bonusData;
@@ -21,9 +21,10 @@ class AddOnPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).addOns,
+              title: AppLocalizations.of(context).addOns,
             ),
-            flexibleSpaceCaption: S.of(context).addOnPageSubtitle,
+            flexibleSpaceCaption:
+                AppLocalizations.of(context).addOnPageSubtitle,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -88,17 +89,17 @@ class AddOnViewSection extends StatelessWidget {
             ),
             if (bonus.validTill != 0)
               Text(
-                S.of(context).validTill(
-                      DateFormat.yMMMd(
-                        Localizations.localeOf(context).languageCode,
+                AppLocalizations.of(context).validTill(
+                  endDate: DateFormat.yMMMd(
+                    Localizations.localeOf(context).languageCode,
+                  )
+                      .format(
+                        DateTime.fromMicrosecondsSinceEpoch(
+                          bonus.validTill,
+                        ),
                       )
-                          .format(
-                            DateTime.fromMicrosecondsSinceEpoch(
-                              bonus.validTill,
-                            ),
-                          )
-                          .toString(),
-                    ),
+                      .toString(),
+                ),
                 style: textStyle.body.copyWith(
                   color: colorScheme.textMuted,
                 ),

@@ -73,6 +73,14 @@ export interface CGroupUserEntityData {
      */
     rejectedFaceIDs: string[];
     /**
+     * An unordered set of file IDs that the user has manually tagged as
+     * belonging to this group.
+     *
+     * For ease of transportation and persistence this is an array, but it
+     * should conceptually be thought of as a set.
+     */
+    manuallyAssigned: number[];
+    /**
      * True if this cluster group should be hidden.
      *
      * The user can hide both named cluster groups and single unnamed clusters.
@@ -96,6 +104,17 @@ export interface CGroupUserEntityData {
      * Also, see: [Note: Mark optional for Zod/exactOptionalPropertyTypes]
      */
     avatarFaceID?: string | undefined;
+    /**
+     * True if this cluster group has been pinned by the user.
+     */
+    isPinned?: boolean | undefined;
+    /**
+     * True if this cluster group should not be surfaced in memories.
+     *
+     * Desktop does not currently surface memories, but we still need to
+     * preserve this flag so that it continues to sync correctly with mobile.
+     */
+    hideFromMemories?: boolean | undefined;
 }
 
 /**
@@ -135,6 +154,14 @@ export type Person = (
      * IDs of the (unique) files in which this face occurs.
      */
     fileIDs: number[];
+    /**
+     * True if the person has been pinned by the user.
+     */
+    isPinned: boolean;
+    /**
+     * True if the person should be hidden from memories.
+     */
+    hideFromMemories: boolean;
     /**
      * The face that should be used as the "cover" face to represent this
      * {@link Person} in the UI.
@@ -285,8 +312,14 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
         const mostRecentFace = faces[0];
         if (!mostRecentFace) return undefined;
 
-        // IDs of the files containing this face.
-        const fileIDs = [...new Set(faces.map((f) => f.file.id))];
+        // IDs of the files containing this face, plus any files manually
+        // associated with this person.
+        const fileIDsSet = new Set(faces.map((f) => f.file.id));
+        for (const fileID of data.manuallyAssigned) {
+            // Only include normal (non-hidden, non-deleted) files.
+            if (fileByID.has(fileID)) fileIDsSet.add(fileID);
+        }
+        const fileIDs = [...fileIDsSet];
 
         // Avatar face ID, or the highest scoring face.
         let avatarFile: EnteFile | undefined;
@@ -306,6 +339,9 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             displayFaceFile = mostRecentFace.file;
         }
 
+        const isPinned = data.isPinned ?? false;
+        const hideFromMemories = data.hideFromMemories ?? false;
+
         return {
             type: "cgroup",
             cgroup,
@@ -315,6 +351,8 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             displayFaceID,
             displayFaceFile,
             isHidden,
+            isPinned,
+            hideFromMemories,
         };
     });
 
@@ -335,13 +373,21 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
             displayFaceID: mostRecentFace.faceID,
             displayFaceFile: mostRecentFace.file,
+            isPinned: false,
+            hideFromMemories: false,
         };
     });
 
     const sorted = (ps: Interim) =>
         ps
-            .filter((c) => !!c)
-            .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+            .filter((c): c is Person => !!c)
+            .sort((a, b) =>
+                a.isPinned == b.isPinned
+                    ? b.fileIDs.length - a.fileIDs.length
+                    : a.isPinned
+                      ? -1
+                      : 1,
+            );
 
     const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
 
@@ -441,6 +487,7 @@ export interface PersonSuggestionsAndChoices {
  */
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
+    currentUserID: number,
 ): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
@@ -475,7 +522,11 @@ export const _suggestionsAndChoicesForPerson = async (
     // Randomly sample faces to limit the O(n^2) cost.
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
-    const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
+    const strictMedianSimilarityThreshold = 0.48;
+    const relaxedMedianSimilarityThreshold = 0.46;
+
+    const multiFaceClusters: FaceCluster[] = [];
+    const singletonClusters: FaceCluster[] = [];
     const rejectedClusters: FaceCluster[] = [];
     for (const cluster of localClusters) {
         const { id, faces } = cluster;
@@ -489,37 +540,85 @@ export const _suggestionsAndChoicesForPerson = async (
             continue;
         }
 
-        // Ignore singleton clusters.
-        if (faces.length < 2) continue;
-
-        const sampledOtherEmbeddings = randomSample(faces, 50)
-            .map((id) => embeddingByFaceID.get(id))
-            .filter((e) => !!e);
-
-        // Sort all cosine similarities pairs, and consider their median.
-        const csims: number[] = [];
-        for (const other of sampledOtherEmbeddings) {
-            for (const embedding of sampledPersonEmbeddings) {
-                csims.push(dotProduct(embedding, other));
-            }
+        if (faces.length < 2) {
+            singletonClusters.push(cluster);
+            continue;
         }
-        csims.sort();
-
-        if (csims.length == 0) continue;
-
-        const medianSim = csims[Math.floor(csims.length / 2)]!;
-        if (medianSim > 0.48) {
-            candidateClustersAndSimilarity.push([cluster, medianSim]);
-        }
+        multiFaceClusters.push(cluster);
     }
 
-    // Sort suggestions by the (median) cosine similarity.
-    candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
-    const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
+    const scoreClustersByMedianSimilarity = (clusters: FaceCluster[]) => {
+        const clustersAndSimilarity: [FaceCluster, number][] = [];
+        for (const cluster of clusters) {
+            const { faces } = cluster;
+
+            const sampledOtherEmbeddings = randomSample(faces, 50)
+                .map((id) => embeddingByFaceID.get(id))
+                .filter((e) => !!e);
+
+            // Sort all cosine similarities pairs, and consider their median.
+            const csims: number[] = [];
+            for (const other of sampledOtherEmbeddings) {
+                for (const embedding of sampledPersonEmbeddings) {
+                    csims.push(dotProduct(embedding, other));
+                }
+            }
+            csims.sort();
+
+            if (csims.length == 0) continue;
+
+            const medianSim = csims[Math.floor(csims.length / 2)]!;
+            clustersAndSimilarity.push([cluster, medianSim]);
+        }
+        // Sort suggestions by the (median) cosine similarity.
+        clustersAndSimilarity.sort(([, a], [, b]) => b - a);
+        return clustersAndSimilarity;
+    };
+
+    const selectCandidateClusters = ({
+        candidates,
+        minMedianSimilarity,
+    }: {
+        candidates: [FaceCluster, number][];
+        minMedianSimilarity: number;
+    }) =>
+        candidates
+            .filter(
+                ([, medianSimilarity]) =>
+                    medianSimilarity > minMedianSimilarity,
+            )
+            .map(([cluster]) => cluster);
+
+    // Keep singleton suggestions as a last resort to minimize regressions while
+    // still reducing "no suggestions" outcomes.
+    const multiFaceCandidateClustersAndSimilarity =
+        scoreClustersByMedianSimilarity(multiFaceClusters);
+    let suggestionMode = "strict_non_singleton";
+    let suggestedClusters = selectCandidateClusters({
+        candidates: multiFaceCandidateClustersAndSimilarity,
+        minMedianSimilarity: strictMedianSimilarityThreshold,
+    });
+    if (suggestedClusters.length == 0) {
+        suggestionMode = "relaxed_non_singleton";
+        suggestedClusters = selectCandidateClusters({
+            candidates: multiFaceCandidateClustersAndSimilarity,
+            minMedianSimilarity: relaxedMedianSimilarityThreshold,
+        });
+    }
+    if (suggestedClusters.length == 0) {
+        suggestionMode = "strict_with_singletons";
+        const singletonCandidateClustersAndSimilarity =
+            scoreClustersByMedianSimilarity(singletonClusters);
+        suggestedClusters = selectCandidateClusters({
+            candidates: singletonCandidateClustersAndSimilarity,
+            minMedianSimilarity: strictMedianSimilarityThreshold,
+        });
+    }
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
-    const normalCollectionFiles = await computeNormalCollectionFilesFromSaved();
+    const normalCollectionFiles =
+        await computeNormalCollectionFilesFromSaved(currentUserID);
     const fileByID = new Map(normalCollectionFiles.map((f) => [f.id, f]));
 
     const toPreviewable = (cluster: FaceCluster) => {
@@ -579,7 +678,7 @@ export const _suggestionsAndChoicesForPerson = async (
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
     log.info(
-        `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
+        `Generated ${suggestions.length} suggestions for ${person.id} using ${suggestionMode} (${Date.now() - startTime} ms)`,
     );
 
     return { choices, suggestions };

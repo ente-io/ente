@@ -4,6 +4,8 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +25,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
@@ -35,9 +36,11 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/services/social_notification_coordinator.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
@@ -49,6 +52,7 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
+import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -66,8 +70,10 @@ bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await RustLib.init();
+  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
+  FFmpegKitConfig.init().ignore();
+  await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
@@ -75,16 +81,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -134,63 +134,100 @@ Future<void> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
+  // Check if foreground is recently active to avoid conflicts
+  final isRunningInFG = await _isRunningInForeground();
+
+  // If FG was active in last 30 seconds, skip BG work
+  if (isRunningInFG) {
+    _logger.info(
+      "[BG TASK] Foreground recently active, skipping background work",
+    );
+    return;
+  }
+
+  _logger.info(
+    "[BG TASK] No recent foreground activity, proceeding with background work",
+  );
+
+  // Mark BG as active
+
   await _runMinimally(taskId, tlog);
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _scheduleHeartBeat(prefs, true);
 
-  await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration done $tlog");
 
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
 
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
 
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
-  await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init $tlog");
+    await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init done $tlog");
 
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
 
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
+    SocialNotificationCoordinator.instance.init(prefs);
+    await NotificationService.instance.initializeForBackground();
 
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+    // Begin Execution
+    // only runs for android
+    _logger.info("[BG TASK] update notification");
+    updateService.showUpdateNotification().ignore();
+    _logger.info("[BG TASK] sync starting");
+    await _sync('bgTaskActiveProcess');
+    _logger.info("[BG TASK] sync completed");
 
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
+    _logger.info("[BG TASK] locale fetch");
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    _logger.info("[BG TASK] home widget sync");
+    await _homeWidgetSync(true);
 
-  final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
-  if (isDeviceHealthy) {
-    await MLService.instance.init();
-    await PersonService.init(entityService, MLDataDB.instance, prefs);
-    await MLService.instance.runAllML(force: true);
+    final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
+    if (isDeviceHealthy) {
+      await MLService.instance.init();
+      await PersonService.init(entityService, MLDataDB.instance, prefs);
+      await MLService.instance.runAllML(force: true);
+    }
+    _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
+  } catch (e, s) {
+    _logger.severe("[BG TASK] $taskId error", e, s);
   }
 }
 
@@ -216,6 +253,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
+    await NotificationService.instance.initializeForBackground();
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -251,6 +289,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done $tlog");
+    SocialNotificationCoordinator.instance.init(preferences);
 
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);
@@ -271,6 +310,16 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
+    if (!isBackground && flagService.internalUser) {
+      _logger.info("GalleryDownloadQueueService init $tlog");
+      await galleryDownloadQueueService.init();
+      _logger.info("GalleryDownloadQueueService init done $tlog");
+    }
+
+    _logger.info("RitualsService init $tlog");
+    await ritualsService.init();
+    _logger.info("RitualsService init done $tlog");
+
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
     }
@@ -283,15 +332,19 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    VideoPreviewService.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -409,18 +462,28 @@ Future<bool> _isRunningInForeground() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (await _isRunningInForeground()) {
+  if (isRunningInFG) {
     _logger.info(
-      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
+      "Background push received when app is alive and runningInFG: $isRunningInFG inForeground: $isInForeground",
     );
     if (PushService.shouldSync(message)) {
-      await _sync('firebaseBgSyncActiveProcess');
+      // FG is active, let it handle the sync
+      _logger.info("Foreground is active, skipping background sync from push");
+      // Could optionally trigger a sync event that FG can handle
     }
   } else {
-    // App is dead
+    // App is dead or FG is not active
     runWithLogs(
       () async {
-        _logger.info("Background push received");
+        _logger.info("Background push received, no active foreground");
+
+        // Mark BG as active before starting
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(
+          kLastBGTaskHeartBeatTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
+
         await _init(true, via: 'firebasePush');
         if (PushService.shouldSync(message)) {
           await _sync('firebaseBgSyncNoActiveProcess');

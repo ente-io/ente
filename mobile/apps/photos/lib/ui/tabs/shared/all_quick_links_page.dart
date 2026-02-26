@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -13,7 +14,6 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AllQuickLinksPage extends StatefulWidget {
   final List<Collection> quickLinks;
@@ -62,8 +62,8 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     if (selectedQuickLinks.isEmpty) {
       await showErrorDialog(
         context,
-        S.of(context).noQuickLinksSelected,
-        S.of(context).pleaseSelectQuickLinksToRemove,
+        AppLocalizations.of(context).noQuickLinksSelected,
+        AppLocalizations.of(context).pleaseSelectQuickLinksToRemove,
       );
       return true;
     }
@@ -76,7 +76,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).yesRemove,
+          labelText: AppLocalizations.of(context).yesRemove,
           onTap: () async {
             for (var selectedQuickLink in selectedQuickLinks) {
               await CollectionActions(CollectionsService.instance)
@@ -94,11 +94,12 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
         ),
       ],
-      title: S.of(context).removePublicLinks,
-      body: S.of(context).thisWillRemovePublicLinksOfAllSelectedQuickLinks,
+      title: AppLocalizations.of(context).removePublicLinks,
+      body: AppLocalizations.of(context)
+          .thisWillRemovePublicLinksOfAllSelectedQuickLinks,
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -149,7 +150,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TitleBarTitleWidget(
-                  title: S.of(context).quickLinks,
+                  title: AppLocalizations.of(context).quickLinks,
                   heroTag: widget.titleHeroTag,
                 ),
                 Text(widget.quickLinks.length.toString()),

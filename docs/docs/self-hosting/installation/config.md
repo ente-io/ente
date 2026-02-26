@@ -62,7 +62,8 @@ above and `ENTE_S3_B2_EU_CEN_ENDPOINT` overrides `s3.b2-eu-cen.endpoint`.
 
 ### App Endpoints
 
-The web apps for Ente (Auth, Cast, Albums) use different endpoints.
+The web apps for Ente (Accounts, Cast, Albums, Share, Paste, Embed) use
+different endpoints.
 
 These endpoints are configurable in `museum.yaml` under the apps.\* section.
 
@@ -73,7 +74,10 @@ used for Compose and quickstart for ease of use.)
 | Variable             | Description                                             | Default                    |
 | -------------------- | ------------------------------------------------------- | -------------------------- |
 | `apps.public-albums` | Albums app base endpoint for public sharing             | `https://albums.ente.io`   |
+| `apps.public-locker` | Public Locker (share) app base endpoint                 | `https://share.ente.io`    |
+| `apps.public-paste`  | Ente Paste app base endpoint                            | `https://paste.ente.io`    |
 | `apps.cast`          | Cast app base endpoint                                  | `https://cast.ente.io`     |
+| `apps.embed-albums`  | Embed app base endpoint for embedded sharing            | `https://embed.ente.io`    |
 | `apps.accounts`      | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.io` |
 
 ### Database
@@ -171,6 +175,8 @@ smtp:
     email:
     # Optional name for sender
     sender-name:
+    # Optional encryption
+    encryption:
 ```
 
 | Variable           | Description                  | Default |
@@ -181,6 +187,7 @@ smtp:
 | `smtp.password`    | SMTP auth password           |         |
 | `smtp.email`       | Sender email address         |         |
 | `smtp.sender-name` | Custom name for email sender |         |
+| `smtp.encryption`  | Encryption method (tls, ssl) |         |
 | `transmail.key`    | Zeptomail API key            |         |
 
 ### WebAuthn Passkey Support
@@ -192,17 +199,18 @@ smtp:
 
 ### Internal
 
-| Variable                                     | Description                                   | Default |
-| -------------------------------------------- | --------------------------------------------- | ------- |
-| `internal.silent`                            | Suppress external effects (e.g. email alerts) | `false` |
-| `internal.health-check-url`                  | External healthcheck URL                      |         |
-| `internal.hardcoded-ott`                     | Predefined OTPs for testing                   |         |
-| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs          | `[]`    |
-| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used  |         |
-| `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix      |         |
-| `internal.admins`                            | List of admin user IDs                        | `[]`    |
-| `internal.admin`                             | Single admin user ID                          |         |
-| `internal.disable-registration`              | Disable user registration                     | `false` |
+| Variable                                     | Description                                                                                                                                                             | Default |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `internal.silent`                            | Suppress external effects (e.g. email alerts)                                                                                                                           | `false` |
+| `internal.trusted-client-ip-header`          | Request header trusted by gin’s `TrustedPlatform` when the server runs behind a proxy (leave empty to use gin’s default order: X-Forwarded-For, X-Real-IP, remote addr) |         |
+| `internal.health-check-url`                  | External healthcheck URL                                                                                                                                                |         |
+| `internal.hardcoded-ott`                     | Predefined OTPs for testing                                                                                                                                             |         |
+| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs                                                                                                                                    | `[]`    |
+| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used                                                                                                                            |         |
+| `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix                                                                                                                                |         |
+| `internal.admins`                            | List of admin user IDs                                                                                                                                                  | `[]`    |
+| `internal.admin`                             | Single admin user ID                                                                                                                                                    |         |
+| `internal.disable-registration`              | Disable user registration                                                                                                                                               | `false` |
 
 ### Replication
 

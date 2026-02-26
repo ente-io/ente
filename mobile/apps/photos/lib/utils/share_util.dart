@@ -1,25 +1,20 @@
 import 'dart:async';
 import "dart:io";
-import "dart:typed_data";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import "package:photos/db/files_db.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/standalone/date_time.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import "package:screenshot/screenshot.dart";
 import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";
 
@@ -45,17 +40,41 @@ Future<void> share(
       // This will eat up storage, which will be reset only when the app restarts.
       // We could have cleared the cache had there been a callback to the share API.
       pathFutures.add(
-        getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
+        getFile(file, isOrigin: true).then((fetchedFile) {
+          final path = fetchedFile?.path;
+          if (path == null && file.localID != null && file.isUploaded) {
+            _logger.warning(
+              "path was null for $file with localID: ${file.localID}. Getting file from server now",
+            );
+            return getFileFromServer(file)
+                .then((remoteFile) => remoteFile?.path);
+          }
+          return path;
+        }),
       );
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
-    paths.removeWhere((element) => element == null);
-    final xFiles = <XFile>[];
-    for (String? path in paths) {
-      if (path == null) continue;
-      xFiles.add(XFile(path));
+    final resolvedPaths = <String>[];
+    for (var i = 0; i < paths.length; i++) {
+      final path = paths[i];
+      if (path == null) {
+        _logger.warning(
+          "share missing local path for file $i/${files.length} "
+          "(remote: ${files[i].isRemoteFile})",
+        );
+        continue;
+      }
+      resolvedPaths.add(path);
     }
+    if (resolvedPaths.isEmpty) {
+      _logger.severe(
+        "share aborted: unable to resolve any files "
+        "(requested: ${files.length}, remote: $remoteFileCount)",
+      );
+      throw ArgumentError("No files resolved for system share");
+    }
+    final xFiles = resolvedPaths.map((path) => XFile(path)).toList();
     await SharePlus.instance.share(
       ShareParams(
         files: xFiles,
@@ -64,7 +83,8 @@ Future<void> share(
     );
   } catch (e, s) {
     _logger.severe(
-      "failed to fetch files for system share ${files.length}",
+      "failed to complete system share ${files.length} "
+      "(remote: $remoteFileCount)",
       e,
       s,
     );
@@ -112,6 +132,17 @@ Future<ShareResult> shareText(
     _logger.severe("failed to share text", e, s);
     return ShareResult.unavailable;
   }
+}
+
+/// Shares URL first with description below
+Future<ShareResult> shareLinkWithDescription(
+  String url, {
+  String? description,
+  BuildContext? context,
+  GlobalKey? key,
+}) async {
+  final text = description != null ? '$url\n$description' : url;
+  return shareText(text, context: context, key: key);
 }
 
 Future<List<EnteFile>> convertIncomingSharedMediaToFile(
@@ -179,7 +210,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       }
     }
     enteFile.modificationTime = enteFile.creationTime;
-    enteFile.metadataVersion = EnteFile.kCurrentMetadataVersion;
+    enteFile.metadataVersion = -1;
     localFiles.add(enteFile);
   }
   return localFiles;
@@ -230,69 +261,21 @@ void shareSelected(
   );
 }
 
-Future<void> shareImageAndUrl(
-  Uint8List imageBytes,
-  String url, {
-  BuildContext? context,
-  GlobalKey? key,
-}) async {
-  final sharePosOrigin = _sharePosOrigin(context, key);
-  await SharePlus.instance.share(
-    ShareParams(
-      files: [
-        XFile.fromData(
-          imageBytes,
-          name: 'placeholder_image.png',
-          mimeType: 'image/png',
-        ),
-      ],
-      text: url,
-      sharePositionOrigin: sharePosOrigin,
-    ),
-  );
-}
-
-Future<void> shareAlbumLinkWithPlaceholder(
+Future<void> shareAlbumLink(
   BuildContext context,
   Collection collection,
   String url,
   GlobalKey key,
 ) async {
-  final ScreenshotController screenshotController = ScreenshotController();
-  final List<EnteFile> filesInCollection =
-      (await FilesDB.instance.getFilesInCollection(
-    collection.id,
-    galleryLoadStartTime,
-    galleryLoadEndTime,
-  ))
-          .files;
+  final description =
+      'Check out, comment and react on photos from "${collection.displayName}" privately with Ente\'s end to end encryption';
 
-  final dialog = createProgressDialog(
-    context,
-    S.of(context).creatingLink,
-    isDismissible: true,
+  await shareLinkWithDescription(
+    url,
+    description: description,
+    context: context,
+    key: key,
   );
-  await dialog.show();
-
-  if (filesInCollection.isEmpty) {
-    await dialog.hide();
-    await shareText(url);
-    return;
-  } else {
-    final placeholderBytes = await _createAlbumPlaceholder(
-      filesInCollection,
-      screenshotController,
-      context,
-    );
-    await dialog.hide();
-
-    await shareImageAndUrl(
-      placeholderBytes,
-      url,
-      context: context,
-      key: key,
-    );
-  }
 }
 
 /// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
@@ -307,22 +290,4 @@ Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
     rect = const Offset(20.0, 20.0) & const Size(10, 10);
   }
   return rect;
-}
-
-Future<Uint8List> _createAlbumPlaceholder(
-  List<EnteFile> files,
-  ScreenshotController screenshotController,
-  BuildContext context,
-) async {
-  final Widget imageWidget = LinkPlaceholder(
-    files: files,
-  );
-  final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-  final bytesOfImageToWidget = await screenshotController.captureFromWidget(
-    imageWidget,
-    pixelRatio: pixelRatio,
-    targetSize: MediaQuery.sizeOf(context),
-    delay: const Duration(milliseconds: 300),
-  );
-  return bytesOfImageToWidget;
 }

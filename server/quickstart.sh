@@ -80,11 +80,11 @@ services:
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/ping"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/ping"]
       interval: 60s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 120s
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
@@ -102,10 +102,13 @@ services:
       - 3002:3002 # Public albums
       # - 3003:3003 # Auth
       # - 3004:3004 # Cast
+      # - 3005:3005 # Share
+      # - 3006:3006 # Embed
     # Modify these values to your custom subdomains, if using any
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
       ENTE_ALBUMS_ORIGIN: https://localhost:3002
+      ENTE_PHOTOS_ORIGIN: http://localhost:3000
 
   postgres:
     image: postgres:15
@@ -205,6 +208,12 @@ apps:
     # set this to the URL where your albums web app is running.
     public-albums: http://localhost:3002
     cast: http://localhost:3004
+    # Public locker (share) app
+    public-locker: http://localhost:3005
+    # Public paste app
+    public-paste: http://localhost:3008
+    # Embed app for embedded album sharing
+    embed-albums: http://localhost:3006
     # Set this to the URL where your accounts web app is running, primarily used for
     # passkey based 2FA.
     accounts: http://localhost:3001

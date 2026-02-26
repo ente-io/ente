@@ -37,7 +37,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int invalidAttemptCount = 0;
   int remainingTimeInSeconds = 0;
   final _lockscreenSetting = LockScreenSettings.instance;
-  late Brightness _platformBrightness;
+  // Suppress auto-auth only for the initial manual presentation.
+  bool _suppressAutoPrompt = false;
 
   @override
   void initState() {
@@ -46,10 +47,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _showLockScreen(source: "postFrameInit");
+      final Map<String, dynamic>? args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final bool isManualPresentation = args?['manual'] as bool? ?? false;
+      _suppressAutoPrompt = isManualPresentation;
+      if (!isManualPresentation) {
+        _showLockScreen(source: "postFrameInit");
+      }
     });
-    _platformBrightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
   }
 
   @override
@@ -71,123 +76,111 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       ),
       body: GestureDetector(
         onTap: () {
-          isTimerRunning ? null : _showLockScreen(source: "tap");
+          if (isTimerRunning) return;
+          _showLockScreen(source: "tap");
         },
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              opacity: _platformBrightness == Brightness.light ? 0.08 : 0.12,
-              image: const ExactAssetImage(
-                'assets/loading_photos_background.png',
+        child: Center(
+          child: Column(
+            children: [
+              const Spacer(),
+              SizedBox(
+                height: 120,
+                width: 120,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade500.withValues(alpha: 0.2),
+                            Colors.grey.shade50.withValues(alpha: 0.1),
+                            Colors.grey.shade400.withValues(alpha: 0.2),
+                            Colors.grey.shade300.withValues(alpha: 0.4),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorTheme.backgroundBase,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 75,
+                      width: 75,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: isTimerRunning ? 0 : 1,
+                          end: isTimerRunning ? _getFractionOfTimeElapsed() : 1,
+                        ),
+                        duration: const Duration(seconds: 1),
+                        builder: (context, value, _) =>
+                            CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillFaintPressed,
+                          value: value,
+                          color: colorTheme.primary400,
+                          strokeWidth: 1.5,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.lock,
+                      size: 30,
+                      color: colorTheme.textBase,
+                    ),
+                  ],
+                ),
               ),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                SizedBox(
-                  height: 120,
-                  width: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 82,
-                        height: 82,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.grey.shade500.withValues(alpha: 0.2),
-                              Colors.grey.shade50.withValues(alpha: 0.1),
-                              Colors.grey.shade400.withValues(alpha: 0.2),
-                              Colors.grey.shade300.withValues(alpha: 0.4),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorTheme.backgroundBase,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 75,
-                        width: 75,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: isTimerRunning ? 0 : 1,
-                            end: isTimerRunning
-                                ? _getFractionOfTimeElapsed()
-                                : 1,
-                          ),
-                          duration: const Duration(seconds: 1),
-                          builder: (context, value, _) =>
-                              CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillFaintPressed,
-                            value: value,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.lock,
-                        size: 30,
-                        color: colorTheme.textBase,
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                isTimerRunning
-                    ? Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Text(
-                            context.strings.tooManyIncorrectAttempts,
-                            style: textTheme.small,
-                          )
-                              .animate(
-                                delay: const Duration(milliseconds: 2000),
-                              )
-                              .fadeOut(
-                                duration: 400.ms,
-                                curve: Curves.easeInOutCirc,
-                              ),
-                          Text(
-                            _formatTime(remainingTimeInSeconds),
-                            style: textTheme.small,
-                          )
-                              .animate(
-                                delay: const Duration(milliseconds: 2250),
-                              )
-                              .fadeIn(
-                                duration: 400.ms,
-                                curve: Curves.easeInOutCirc,
-                              ),
-                        ],
-                      )
-                    : GestureDetector(
-                        onTap: () => _showLockScreen(source: "tap"),
-                        child: Text(
-                          context.strings.tapToUnlock,
+              const Spacer(),
+              isTimerRunning
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          context.strings.tooManyIncorrectAttempts,
                           style: textTheme.small,
-                        ),
+                        )
+                            .animate(
+                              delay: const Duration(milliseconds: 2000),
+                            )
+                            .fadeOut(
+                              duration: 400.ms,
+                              curve: Curves.easeInOutCirc,
+                            ),
+                        Text(
+                          _formatTime(remainingTimeInSeconds),
+                          style: textTheme.small,
+                        )
+                            .animate(
+                              delay: const Duration(milliseconds: 2250),
+                            )
+                            .fadeIn(
+                              duration: 400.ms,
+                              curve: Curves.easeInOutCirc,
+                            ),
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () => _showLockScreen(source: "tap"),
+                      child: Text(
+                        context.strings.tapToUnlock,
+                        style: textTheme.small,
                       ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 24),
-                ),
-              ],
-            ),
+                    ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24),
+              ),
+            ],
           ),
         ),
       ),
@@ -219,8 +212,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           DateTime.now().millisecondsSinceEpoch - lastAuthenticatingTime! <
               5000;
       if (!_hasAuthenticationFailed && !didAuthInLast5Seconds) {
-        // Show the lock screen again only if the app is resuming from the
-        // background, and not when the lock screen was explicitly dismissed
+        // If there is a cooldown timer (after multiple failures), respect it
         if (_lockscreenSetting.getlastInvalidAttemptTime() >
                 DateTime.now().millisecondsSinceEpoch &&
             !_isShowingLockScreen) {
@@ -231,6 +223,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
             startLockTimer(time);
             _showLockScreen(source: "lifeCycle");
           });
+        } else if (!_suppressAutoPrompt) {
+          // No cooldown: auto-prompt when app becomes active again
+          _showLockScreen(source: "lifeCycle");
         }
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
@@ -242,6 +237,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (!_isShowingLockScreen) {
         _hasPlacedAppInBackground = true;
         _hasAuthenticationFailed = false; // reset failure state
+        // If we suppressed the initial auto-prompt due to manual lock,
+        // enable auto-prompt for the next resume after focus loss.
+        _suppressAutoPrompt = false;
       }
     }
   }
@@ -347,7 +345,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                   _lockscreenSetting.getInvalidAttemptCount()) {
             invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
 
-            if (invalidAttemptCount > 9) {
+            // For logged-in users, auto-logout after 10 failed attempts
+            if (invalidAttemptCount > 9 && widget.config.isLoggedIn()) {
               await _autoLogoutOnMaxInvalidAttempts();
               return;
             }

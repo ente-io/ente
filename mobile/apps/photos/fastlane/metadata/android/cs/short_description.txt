@@ -1,1 +1,1 @@
-ente is an end-to-end encrypted photo storage app
+ente je aplikace pro ukládání fotografií a videí s koncovým šifrováním

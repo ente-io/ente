@@ -34,7 +34,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
-      title: S.of(context).videoInfo,
+      title: AppLocalizations.of(context).videoInfo,
       subtitleSection: _exifButton(context, widget.file, widget.props),
       onTap: _onTap,
     );
@@ -48,7 +48,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
     late final String label;
     late final VoidCallback? onTap;
     if (props?.propData == null) {
-      label = S.of(context).loadingExifData;
+      label = AppLocalizations.of(context).loadingExifData;
       onTap = null;
     } else if (props!.propData!.isNotEmpty) {
       label = "${widget.props?.videoInfo ?? ''} ..";
@@ -71,9 +71,11 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
             enableDrag: true,
           );
     } else {
-      label = S.of(context).noExifData;
-      onTap =
-          () => showShortToast(context, S.of(context).thisImageHasNoExifData);
+      label = AppLocalizations.of(context).noExifData;
+      onTap = () => showShortToast(
+            context,
+            AppLocalizations.of(context).thisImageHasNoExifData,
+          );
     }
     setState(() {
       _onTap = onTap;

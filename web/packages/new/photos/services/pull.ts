@@ -1,3 +1,4 @@
+import log from "ente-base/log";
 import { resetFileViewerDataSourceOnClose } from "ente-gallery/components/viewer/data-source";
 import {
     videoProcessingSyncIfNeeded,
@@ -5,7 +6,11 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollectionFiles, pullCollections } from "./collection";
+import {
+    movePendingRemovalActionsToUncategorized,
+    pullCollectionFiles,
+    pullCollections,
+} from "./collection";
 import { isMLSupported, mlSync, pullMLStatus } from "./ml";
 import { searchDataSync } from "./search";
 import { pullSettings } from "./settings";
@@ -108,6 +113,14 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
         opts?.onSetTrashedItems,
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
     );
+    // After trash sync, fetch pending removal actions and move affected files
+    // to the uncategorized collection.
+    // Wrapped in try-catch since self-hosted servers may not have this endpoint.
+    try {
+        await movePendingRemovalActionsToUncategorized(collections);
+    } catch (e) {
+        log.warn("Failed to process pending removal actions", e);
+    }
     if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this by providing onDidUpdateCollectionFiles), but still needs

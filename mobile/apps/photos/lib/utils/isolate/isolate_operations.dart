@@ -12,15 +12,24 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
-import "package:photos/src/rust/frb_generated.dart" show RustLib;
+import "package:photos/src/rust/api/ml_indexing_api.dart" as rust_ml;
+import "package:photos/src/rust/frb_generated.dart" show EntePhotosRust;
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 final Map<String, dynamic> _isolateCache = {};
+const _rustLibLoadedCacheKey = "rustLibLoaded";
+const _rustMlRuntimeConfigCacheKey = "rustMlRuntimeConfig";
 
 enum IsolateOperation {
   /// [MLIndexingIsolate]
   analyzeImage,
+
+  /// [MLIndexingIsolate]
+  prepareRustMlRuntime,
+
+  /// [MLIndexingIsolate]
+  releaseRustMlRuntime,
 
   /// [MLIndexingIsolate]
   loadIndexingModels,
@@ -92,8 +101,25 @@ Future<dynamic> isolateFunction(
 
     /// MLIndexingIsolate
     case IsolateOperation.analyzeImage:
-      final MLResult result = await analyzeImageStatic(args);
+      final bool useRustMl = args["useRustMl"] as bool? ?? false;
+      if (useRustMl) {
+        await _ensureRustLoaded();
+      }
+      final MLResult result = useRustMl
+          ? await analyzeImageRust(args)
+          : await analyzeImageStatic(args);
       return result.toJsonString();
+
+    /// MLIndexingIsolate
+    case IsolateOperation.prepareRustMlRuntime:
+      await _ensureRustLoaded();
+      await _ensureRustRuntimePrepared(args);
+      return true;
+
+    /// MLIndexingIsolate
+    case IsolateOperation.releaseRustMlRuntime:
+      await _releaseRustRuntime();
+      return true;
 
     /// MLIndexingIsolate
     case IsolateOperation.loadIndexingModels:
@@ -213,7 +239,7 @@ Future<dynamic> isolateFunction(
 
     /// Caching
     case IsolateOperation.clearAllIsolateCache:
-      _ensureRustDisposed();
+      await _ensureRustDisposed();
       _isolateCache.clear();
       return true;
 
@@ -222,17 +248,90 @@ Future<dynamic> isolateFunction(
 }
 
 Future<void> _ensureRustLoaded() async {
-  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
   if (!loaded) {
-    await RustLib.init();
-    _isolateCache["rustLibLoaded"] = true;
+    await EntePhotosRust.init();
+    _isolateCache[_rustLibLoadedCacheKey] = true;
   }
 }
 
-void _ensureRustDisposed() {
-  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+Future<void> _ensureRustDisposed() async {
+  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
   if (loaded) {
-    RustLib.dispose();
-    _isolateCache.remove("rustLibLoaded");
+    await _releaseRustRuntime();
+    EntePhotosRust.dispose();
+    _isolateCache.remove(_rustLibLoadedCacheKey);
   }
+}
+
+Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
+  final modelPaths = rust_ml.RustModelPaths(
+    faceDetection: (args["faceDetectionModelPath"] as String?) ?? "",
+    faceEmbedding: (args["faceEmbeddingModelPath"] as String?) ?? "",
+    clipImage: (args["clipImageModelPath"] as String?) ?? "",
+  );
+  final providerPolicy = rust_ml.RustExecutionProviderPolicy(
+    preferCoreml: args["preferCoreml"] as bool? ?? true,
+    preferNnapi: args["preferNnapi"] as bool? ?? true,
+    preferXnnpack: args["preferXnnpack"] as bool? ?? false,
+    allowCpuFallback: args["allowCpuFallback"] as bool? ?? true,
+  );
+  final runtimeConfigKey = _runtimeConfigCacheKey(modelPaths, providerPolicy);
+  final currentConfigKey =
+      _isolateCache[_rustMlRuntimeConfigCacheKey] as String?;
+  if (currentConfigKey == runtimeConfigKey) {
+    return;
+  }
+
+  final missingModelPaths = <String>[];
+  if (modelPaths.faceDetection.trim().isEmpty) {
+    missingModelPaths.add("faceDetectionModelPath");
+  }
+  if (modelPaths.faceEmbedding.trim().isEmpty) {
+    missingModelPaths.add("faceEmbeddingModelPath");
+  }
+  if (modelPaths.clipImage.trim().isEmpty) {
+    missingModelPaths.add("clipImageModelPath");
+  }
+  if (missingModelPaths.isNotEmpty) {
+    throw Exception(
+      "RustMLMissingModelPath: Missing required model paths: ${missingModelPaths.join(', ')}",
+    );
+  }
+
+  await rust_ml.initMlRuntime(
+    config: rust_ml.RustMlRuntimeConfig(
+      modelPaths: modelPaths,
+      providerPolicy: providerPolicy,
+    ),
+  );
+  _isolateCache[_rustMlRuntimeConfigCacheKey] = runtimeConfigKey;
+}
+
+Future<void> _releaseRustRuntime() async {
+  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
+  if (!loaded) {
+    return;
+  }
+  try {
+    await rust_ml.releaseMlRuntime();
+  } catch (_) {
+    // no-op: runtime release is best-effort before process-wide bridge dispose.
+  }
+  _isolateCache.remove(_rustMlRuntimeConfigCacheKey);
+}
+
+String _runtimeConfigCacheKey(
+  rust_ml.RustModelPaths modelPaths,
+  rust_ml.RustExecutionProviderPolicy providerPolicy,
+) {
+  return [
+    modelPaths.faceDetection,
+    modelPaths.faceEmbedding,
+    modelPaths.clipImage,
+    providerPolicy.preferCoreml,
+    providerPolicy.preferNnapi,
+    providerPolicy.preferXnnpack,
+    providerPolicy.allowCpuFallback,
+  ].join("|");
 }

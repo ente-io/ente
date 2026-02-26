@@ -60,13 +60,6 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "disabled token"})
 				return
 			}
-			// validate if user still has active paid subscription
-			if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(fileLinkRow.OwnerID, true); err != nil {
-				logrus.WithError(err).Info("failed to verify active paid subscription")
-				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
-				return
-			}
-
 			// validate device limit
 			reached, limitErr := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
 			if limitErr != nil {
@@ -139,10 +132,10 @@ func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 		deviceLimit = publicCtrl.DeviceLimitThresholdMultiplier * publicCtrl.DeviceLimitThreshold
 	}
 
-	if count >= publicCtrl.DeviceLimitWarningThreshold {
+	if count >= publicCtrl.DeviceLimitWarningThreshold && count%200 == 0 {
 		m.DiscordController.NotifyPotentialAbuse(
-			fmt.Sprintf("FileLink exceeds warning threshold: {FileID: %d, ShareID: %s}",
-				collectionSummary.FileID, collectionSummary.LinkID))
+			fmt.Sprintf("FileLink exceeds warning threshold: {FileID: %d, ShareID: %s, DeviceCount: %d}",
+				collectionSummary.FileID, collectionSummary.LinkID, count))
 	}
 
 	if deviceLimit > 0 && count >= deviceLimit {

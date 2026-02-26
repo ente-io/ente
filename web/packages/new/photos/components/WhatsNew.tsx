@@ -78,10 +78,14 @@ const ChangelogContent: React.FC = () => {
 
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
-            <Typography variant="h6">{ut("Light mode ✨")}</Typography>
+            <Typography variant="h6">
+                {ut(
+                    "Watch folders updations, File context menu, Edit location, and more",
+                )}
+            </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "The much requested light mode is here. The app will automatically switch between the light and dark theme based on your OS settings. You can manually override this is Preferences.",
+                    "Hide shared albums. Watch folders now support hidden albums, and are marked as inaccessible instead of being removed when they can't be accessed. Right-click context menu for files. New 'Clean uncategorized' and 'Clean large files' options. Edit location. Improved album selector with sort options. Upload to hidden albums. Public album improvements. Redesigned login and sign-up pages.",
                 )}
             </Typography>
         </Stack>

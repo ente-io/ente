@@ -107,7 +107,7 @@ const nextConfig = {
     devIndicators: false,
     compiler: { emotion: true },
     // Use Next.js to transpile our internal packages before bundling them.
-    transpilePackages: ["ente-base", "ente-utils", "ente-new"],
+    transpilePackages: ["ente-base", "ente-utils", "ente-new", "ente-wasm"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.varName` to our code.
@@ -133,6 +133,19 @@ const nextConfig = {
         // Upstream issue, which currently doesn't have a workaround.
         // https://github.com/catdad-experiments/libheif-js/issues/23
         config.ignoreWarnings = [{ module: /libheif-js/ }];
+
+        // Webpack 5 doesn't enable WebAssembly by default.
+        config.experiments = { ...config.experiments, asyncWebAssembly: true };
+
+        // Webpack emits a warning about async/await not being supported when
+        // importing wasm. The canonical way to do this would be to provide a
+        // browserlist to Next.js, but to avoid changing behaviour we tell
+        // Webpack just that async/await is supported.
+        config.output = config.output || {};
+        config.output.environment = {
+            ...(config.output.environment || {}),
+            asyncFunction: true,
+        };
 
         return config;
     },

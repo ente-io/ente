@@ -7,7 +7,6 @@ class SearchResultView extends StatelessWidget {
   final List<Collection> collections;
   final List<EnteFile> files;
   final String searchQuery;
-  final bool enableSorting;
   final VoidCallback? onCollectionTap;
   final bool isHomePage;
   final VoidCallback? onSearchEverywhere;
@@ -18,7 +17,6 @@ class SearchResultView extends StatelessWidget {
     required this.collections,
     required this.files,
     this.searchQuery = '',
-    this.enableSorting = false,
     this.onCollectionTap,
     this.isHomePage = false,
     this.onSearchEverywhere,
@@ -38,9 +36,9 @@ class SearchResultView extends StatelessWidget {
           ItemListView(
             files: files,
             collections: displayCollections,
-            enableSorting: enableSorting,
             emptyStateWidget: searchQuery.isNotEmpty
                 ? FileListViewHelpers.createSearchEmptyState(
+                    context: context,
                     searchQuery: searchQuery,
                   )
                 : null,
@@ -49,9 +47,9 @@ class SearchResultView extends StatelessWidget {
               onSearchEverywhere != null &&
               searchQuery.isNotEmpty)
             FileListViewHelpers.createSearchEverywhereFooter(
+              context: context,
               searchQuery: searchQuery,
               onTap: onSearchEverywhere!,
-              context: context,
             ),
         ],
       ),

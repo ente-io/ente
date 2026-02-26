@@ -32,13 +32,17 @@ class ManageIndividualParticipant extends StatefulWidget {
 
 class _ManageIndividualParticipantState
     extends State<ManageIndividualParticipant> {
-  final CollectionActions collectionActions =
-      CollectionActions(CollectionsService.instance);
+  final CollectionActions collectionActions = CollectionActions(
+    CollectionsService.instance,
+  );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isAdmin = widget.user.isAdmin;
+    final isCollaborator = widget.user.isCollaborator;
+    final isViewer = widget.user.isViewer;
     bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
@@ -52,31 +56,59 @@ class _ManageIndividualParticipantState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
                   TitleBarTitleWidget(
-                    title: S.of(context).manage,
+                    title: AppLocalizations.of(context).manage,
                   ),
                   Text(
                     widget.user.displayName ?? widget.user.email,
                     textAlign: TextAlign.left,
-                    style:
-                        textTheme.small.copyWith(color: colorScheme.textMuted),
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-            MenuSectionTitle(title: S.of(context).addedAs),
+            MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).collaborator,
+                title: AppLocalizations.of(context).admin,
+              ),
+              leadingIcon: Icons.admin_panel_settings_outlined,
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isAdmin ? Icons.check : null,
+              onTap: isAdmin
+                  ? null
+                  : () async {
+                      final result =
+                          await collectionActions.addEmailToCollection(
+                        context,
+                        widget.collection,
+                        widget.user.email,
+                        CollectionParticipantRole.admin,
+                      );
+                      if (result && mounted) {
+                        widget.user.role =
+                            CollectionParticipantRole.admin.toStringVal();
+                        setState(() => {});
+                      }
+                    },
+              isBottomBorderRadiusRemoved: true,
+            ),
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: colorScheme.fillFaint,
+            ),
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: AppLocalizations.of(context).collaborator,
               ),
               leadingIcon: Icons.edit_outlined,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              trailingIcon: widget.user.isCollaborator ? Icons.check : null,
-              onTap: widget.user.isCollaborator
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isCollaborator ? Icons.check : null,
+              onTap: isCollaborator
                   ? null
                   : () async {
                       final result =
@@ -93,33 +125,35 @@ class _ManageIndividualParticipantState
                         setState(() => {});
                       }
                     },
+              isTopBorderRadiusRemoved: true,
               isBottomBorderRadiusRemoved: true,
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
+              bgColor: colorScheme.fillFaint,
             ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).viewer,
+                title: AppLocalizations.of(context).viewer,
               ),
               leadingIcon: Icons.photo_outlined,
-              leadingIconColor: getEnteColorScheme(context).strokeBase,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              trailingIcon: widget.user.isViewer ? Icons.check : null,
+              leadingIconColor: colorScheme.strokeBase,
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isViewer ? Icons.check : null,
               showOnlyLoadingState: true,
-              onTap: widget.user.isViewer
+              onTap: isViewer
                   ? null
                   : () async {
                       final actionResult = await showChoiceActionSheet(
                         context,
-                        title: S.of(context).changePermissions,
-                        firstButtonLabel: S.of(context).yesConvertToViewer,
-                        body: S
-                            .of(context)
+                        title: AppLocalizations.of(context).changePermissions,
+                        firstButtonLabel: AppLocalizations.of(
+                          context,
+                        ).yesConvertToViewer,
+                        body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                              widget.user.displayName ?? widget.user.email,
-                            ),
+                          user: widget.user.displayName ?? widget.user.email,
+                        ),
                         isCritical: true,
                       );
                       if (actionResult?.action != null) {
@@ -151,22 +185,22 @@ class _ManageIndividualParticipantState
               isTopBorderRadiusRemoved: true,
             ),
             MenuSectionDescriptionWidget(
-              content: S
-                  .of(context)
-                  .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
+              content: AppLocalizations.of(context)
+                  .adminsAndCollaboratorsCanAddPhotosDescription,
             ),
             const SizedBox(height: 24),
-            MenuSectionTitle(title: S.of(context).removeParticipant),
+            MenuSectionTitle(
+              title: AppLocalizations.of(context).removeParticipant,
+            ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).remove,
+                title: AppLocalizations.of(context).remove,
                 textColor: warning500,
                 makeTextBold: true,
               ),
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              surfaceExecutionStates: false,
+              menuItemColor: colorScheme.fillFaint,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,

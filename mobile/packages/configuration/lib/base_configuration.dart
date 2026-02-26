@@ -4,12 +4,12 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:ente_configuration/constants.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_configuration/constants.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/endpoint_updated_event.dart';
 import 'package:ente_events/models/signed_in_event.dart';
@@ -17,6 +17,7 @@ import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
@@ -45,30 +46,33 @@ class BaseConfiguration {
   String? _key;
   String? _secretKey;
   late FlutterSecureStorage _secureStorage;
-  late String _documentsDirectory;
   late String _cacheDirectory;
   late String _tempDocumentsDirPath;
   late List<EnteBaseDatabase> _databases;
 
   String? _volatilePassword;
 
+  // Descendants can override to append keys that must be cleared.
+  List<String> get secureStorageKeys => [];
+
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
-    _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDocumentsDirPath = "$_documentsDirectory/temp/";
+    _tempDocumentsDirPath =
+        "${p.join((await getTemporaryDirectory()).path, "temp")}${p.separator}";
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage(
       iOptions: IOSOptions(
         accessibility: KeychainAccessibility.first_unlock_this_device,
       ),
     );
-    _setupKeys();
-    _setupFolders();
+    await _setupKeys();
+    await _setupFolders();
+    _logger.info("User ID: ${getUserID()}");
   }
 
   Future<void> logout({bool autoLogout = false}) async {
     await _preferences.clear();
-    _secureStorage.deleteAll();
+    await resetSecureStorage();
     for (final db in _databases) {
       await db.clearTable();
     }
@@ -76,6 +80,16 @@ class BaseConfiguration {
     _cachedToken = null;
     _secretKey = null;
     Bus.instance.fire(SignedOutEvent());
+  }
+
+  Future<void> resetSecureStorage() async {
+    assert(
+      secureStorageKeys.isNotEmpty,
+      'secureStorageKeys must not be empty. Apps must explicitly define which keys to clear.',
+    );
+    for (final key in secureStorageKeys.toSet()) {
+      await _secureStorage.delete(key: key);
+    }
   }
 
   Future<KeyGenResult> generateKey(String password) async {
@@ -105,7 +119,7 @@ class BaseConfiguration {
     // Generate a public-private keypair and encrypt the latter
     final keyPair = CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.secretKey.extractBytes(), masterKey);
+        CryptoUtil.encryptSync(keyPair.secretKey, masterKey);
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -124,7 +138,7 @@ class BaseConfiguration {
     final privateAttributes = PrivateKeyAttributes(
       CryptoUtil.bin2base64(masterKey),
       CryptoUtil.bin2hex(recoveryKey),
-      CryptoUtil.bin2base64(keyPair.secretKey.extractBytes()),
+      CryptoUtil.bin2base64(keyPair.secretKey),
     );
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
@@ -217,7 +231,7 @@ class BaseConfiguration {
       if (split.length != mnemonicKeyWordCount) {
         String wordThatIsFollowedByEmptySpaceInSplit = '';
         for (int i = 0; i < split.length; i++) {
-          String word = split[i];
+          final String word = split[i];
           if (word.isEmpty) {
             wordThatIsFollowedByEmptySpaceInSplit =
                 '\n\nExtra space after word at position $i';
@@ -262,6 +276,13 @@ class BaseConfiguration {
 
   String getHttpEndpoint() {
     return _preferences.getString(endPointKey) ?? endpoint;
+  }
+
+  // isEnteProduction checks if the current endpoint is the default production
+  // endpoint. This is used to determine if the app is in production mode or
+  // not. The default production endpoint is set in the environment variable
+  bool isEnteProduction() {
+    return getHttpEndpoint() == kDefaultProductionEndpoint;
   }
 
   Future<void> setHttpEndpoint(String endpoint) async {
@@ -382,7 +403,7 @@ class BaseConfiguration {
   Future<void> _setupKeys() async {
     try {
       if (!_preferences.containsKey(tokenKey)) {
-        await _secureStorage.deleteAll();
+        await resetSecureStorage();
         return;
       }
       _key = await _secureStorage.read(key: keyKey);
@@ -430,7 +451,8 @@ class BaseConfiguration {
     }
     tempDirectory.createSync(recursive: true);
 
-    _cacheDirectory = "$_documentsDirectory/cache/";
+    _cacheDirectory =
+        "${p.join(p.dirname(_tempDocumentsDirPath), "cache")}${p.separator}";
     if (!io.Directory(_cacheDirectory).existsSync()) {
       io.Directory(_cacheDirectory).createSync(recursive: true);
     }

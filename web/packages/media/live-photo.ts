@@ -103,9 +103,7 @@ export const decodeLivePhoto = async (
         );
 
     if (!videoFileName || !videoData)
-        throw new Error(
-            `Decoded live photo ${fileName} does not have an image`,
-        );
+        throw new Error(`Decoded live photo ${fileName} does not have a video`);
 
     return { imageFileName, imageData, videoFileName, videoData };
 };

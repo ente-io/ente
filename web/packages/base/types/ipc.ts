@@ -727,6 +727,14 @@ export interface FolderWatch {
      * Files (paths) that should be ignored when uploading.
      */
     ignoredFiles: string[];
+    /**
+     * Whether the folder is currently accessible on disk.
+     *
+     * Folders on ejected external drives will have this set to false. This
+     * property is not persisted and is computed each time the watch list is
+     * fetched.
+     */
+    isAccessible?: boolean;
 }
 
 /**

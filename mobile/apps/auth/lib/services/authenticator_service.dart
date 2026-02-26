@@ -14,7 +14,7 @@ import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:flutter/foundation.dart';

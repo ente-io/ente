@@ -1,6 +1,9 @@
-- (prtk) Fix widget initial launch on iOS
-- (prtk) Upgrade Flutter version to 3.32.8
-- (prtk) Run FFMpeg in an isolate
-- Neeraj: Handle custom domain links
-- Aman: Fixed bottom nav bar color in light theme, resolved paint editor's initial color, and added tap-to-reset with haptics for tune adjustments (brightness/exposure)
-- Gracefully handle heic rendering on Android
+- Laurens: (I) Use rust indexing ML pipeline for internal users
+- Neeraj: Improve public album link 429/device-limit error handling
+- Neeraj: File details: hide timezone in creation time and prefer editedTime over public metadata dateTime, falling back to creationTime
+- Neeraj: Fix video playback for Motion photo with two videos
+- Ashil: Enable sentence capitalization for comment input field
+- Ashil: Fix files uploaded by sharing from outside of Ente missing in map
+- Laurens: (I) Use vectorDB for more accurate suggestions in the people overview
+- Laurens: (I) Use cloudflare worker for upload for internal users
+- Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates

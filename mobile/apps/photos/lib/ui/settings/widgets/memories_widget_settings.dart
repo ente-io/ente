@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
@@ -11,7 +12,6 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
@@ -48,7 +48,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
 
   Future<void> initVariables() async {
     _changeMemoriesSettings = Debouncer(const Duration(milliseconds: 2500));
-    isMLEnabled = flagService.hasGrantedMLConsent;
+    isMLEnabled = hasGrantedMLConsent;
     isYearlyMemoriesEnabled =
         MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
     isSmartMemoriesEnabled =
@@ -102,11 +102,11 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).memories,
+              title: AppLocalizations.of(context).memories,
             ),
-            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
+            expandedHeight: MediaQuery.textScalerOf(context).scale(136),
             flexibleSpaceCaption: hasInstalledAny
-                ? S.of(context).memoriesWidgetDesc
+                ? AppLocalizations.of(context).memoriesWidgetDesc
                 : context.l10n.addMemoriesWidgetPrompt,
             actionIcons: [
               IconButtonWidget(
@@ -152,7 +152,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                         const SizedBox(height: 18),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).pastYearsMemories,
+                            title:
+                                AppLocalizations.of(context).pastYearsMemories,
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/past-year-memory-icon.svg",
@@ -178,7 +179,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                         const SizedBox(height: 4),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).onThisDayMemories,
+                            title:
+                                AppLocalizations.of(context).onThisDayMemories,
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/memories-widget-icon.svg",
@@ -205,7 +207,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                           const SizedBox(height: 4),
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
-                              title: S.of(context).smartMemories,
+                              title: AppLocalizations.of(context).smartMemories,
                             ),
                             leadingIconWidget: SvgPicture.asset(
                               "assets/icons/smart-memory-icon.svg",

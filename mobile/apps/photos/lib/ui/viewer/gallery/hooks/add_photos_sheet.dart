@@ -1,5 +1,3 @@
-import "dart:math";
-
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
@@ -24,6 +22,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -71,49 +70,48 @@ class AddPhotosPhotoWidget extends StatelessWidget {
     hiddenCollectionIDs.add(collection.id);
 
     return Padding(
-      padding: const EdgeInsets.all(0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: min(428, MediaQuery.of(context).size.width),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        BottomOfTitleBarWidget(
-                          title: TitleBarTitleWidget(
-                            title: S.of(context).addMore,
-                          ),
-                          caption: S.of(context).selectItemsToAdd,
-                          showCloseButton: true,
-                        ),
-                        Expanded(
-                          child: DelayedGallery(
-                            hiddenCollectionIDs: hiddenCollectionIDs,
-                            selectedFiles: selectedFiles,
-                          ),
-                        ),
-                      ],
+                  _AppBarWithBoundary(
+                    child: BottomOfTitleBarWidget(
+                      title: TitleBarTitleWidget(
+                        title: AppLocalizations.of(context).addMore,
+                      ),
+                      caption: AppLocalizations.of(context).selectItemsToAdd,
+                      showCloseButton: true,
                     ),
                   ),
-                  SafeArea(
-                    child: Container(
+                  Expanded(
+                    child: DelayedGallery(
+                      hiddenCollectionIDs: hiddenCollectionIDs,
+                      selectedFiles: selectedFiles,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: getEnteColorScheme(context).strokeFaint,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 428),
+                    child: Padding(
                       //inner stroke of 1pt + 15 pts of top padding = 16 pts
                       padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
-                          ),
-                        ),
-                      ),
                       child: Column(
                         children: [
                           ValueListenableBuilder(
@@ -127,7 +125,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                   key: ValueKey(value),
                                   // isDisabled: !value,
                                   buttonType: ButtonType.primary,
-                                  labelText: S.of(context).addSelected,
+                                  labelText:
+                                      AppLocalizations.of(context).addSelected,
                                   onTap: () async {
                                     final selectedFile = selectedFiles.files;
                                     final ca = CollectionActions(
@@ -149,7 +148,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.second,
-                            labelText: S.of(context).addFromDevice,
+                            labelText:
+                                AppLocalizations.of(context).addFromDevice,
                             onTap: () async {
                               await _onPickFromDeviceClicked(context);
                             },
@@ -158,11 +158,11 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -321,5 +321,25 @@ class _DelayedGalleryState extends State<DelayedGallery> {
     } else {
       return const EnteLoadingWidget();
     }
+  }
+}
+
+class _AppBarWithBoundary extends StatefulWidget {
+  final Widget child;
+
+  const _AppBarWithBoundary({required this.child});
+
+  @override
+  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
+}
+
+class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
+    with BoundaryReporter {
+  @override
+  Widget build(BuildContext context) {
+    return boundaryWidget(
+      position: BoundaryPosition.top,
+      child: widget.child,
+    );
   }
 }

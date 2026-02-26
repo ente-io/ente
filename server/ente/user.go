@@ -1,7 +1,8 @@
 package ente
 
 const (
-	OTTTemplate = "ott.html"
+	OTTTemplate       = "ott.html"
+	OTTMobileTemplate = "ott_mobile.html"
 
 	ChangeEmailOTTTemplate = "ott_change_email.html"
 	EmailChangedTemplate   = "email_changed.html"
@@ -31,6 +32,8 @@ type SendOTTRequest struct {
 	Email   string `json:"email"`
 	Client  string `json:"client"`
 	Purpose string `json:"purpose"`
+	// Mobile indicates whether the request is coming from a mobile client`
+	Mobile bool `json:"mobile"`
 }
 
 // EmailVerificationRequest represents an email verification request
@@ -95,6 +98,9 @@ func (sk *SetUserAttributesRequest) Validate() error {
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
 	}
+	if sk.KeyAttributes.MemLimit < 128*1024*1024 {
+		return NewBadRequestWithMessage("memory limit must be at least 128MB")
+	}
 	return nil
 }
 
@@ -116,6 +122,9 @@ func (u *UpdateKeysRequest) Validate() error {
 	strength := u.MemLimit * u.OpsLimit
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
+	}
+	if u.MemLimit < 128*1024*1024 {
+		return NewBadRequestWithMessage("memory limit must be at least 128MB")
 	}
 	return nil
 }

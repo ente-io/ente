@@ -38,7 +38,7 @@ import {
 } from "ente-base/token";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { clearInflightPasskeySessionID } from "./passkey";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 

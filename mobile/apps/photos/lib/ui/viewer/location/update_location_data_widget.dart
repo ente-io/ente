@@ -78,8 +78,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             },
           ),
           children: const [
-            OSMFranceTileLayer(),
-            OSMFranceTileAttributes(),
+            OSMTileLayer(),
+            OSMTileAttributes(),
           ],
         ),
         Positioned(
@@ -162,7 +162,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   if (selectedLocation.value == null) {
                     showShortToast(
                       context,
-                      S.of(context).selectALocationFirst,
+                      AppLocalizations.of(context).selectALocationFirst,
                     );
                     return;
                   }
@@ -241,6 +241,9 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
   initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         showSelectLocationText = true;
       });
@@ -258,11 +261,11 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: Text(
-        S.of(context).selectALocation,
+        AppLocalizations.of(context).selectALocation,
         style: getEnteTextTheme(context).mini,
       ),
       secondChild: Text(
-        S.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
+        AppLocalizations.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
         style: getEnteTextTheme(context).mini,
       ),
       layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {

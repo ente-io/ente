@@ -7,11 +7,13 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:web.ente.io</string>
+		<string>webcredentials:auth.ente.io</string>
 		<string>applinks:albums.ente.io</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.io.ente.frame.EnteMemoryWidget</string>
+		<string>group.io.ente.frame.ShareExtension</string>
 	</array>
 </dict>
 </plist>

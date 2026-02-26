@@ -267,7 +267,12 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 	email := user.Email
 	// See also: Do not block on mailing list errors
 	go func() {
-		_ = c.MailingListsController.Unsubscribe(email)
+		if err := c.MailingListsController.Unsubscribe(email); err != nil {
+			logger.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list unsubscribe failed")
+		}
 	}()
 
 	logger.Info("mark user as deleted")
@@ -426,7 +431,12 @@ func (c *UserController) createUser(email string, source *string) (int64, ente.S
 	// perform these actions async, and ignore errors that happen with them (a
 	// notification will be sent to Discord for those).
 	go func() {
-		_ = c.MailingListsController.Subscribe(email)
+		if err := c.MailingListsController.Subscribe(email); err != nil {
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list subscribe failed")
+		}
 	}()
 	return userID, subscription, nil
 }

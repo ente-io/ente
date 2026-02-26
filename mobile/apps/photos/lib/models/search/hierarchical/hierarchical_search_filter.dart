@@ -14,6 +14,7 @@ enum FilterTypeNames {
   topLevelGenericFilter,
   uploaderFilter,
   onlyThemFilter,
+  cameraFilter,
 }
 
 abstract class HierarchicalSearchFilter {

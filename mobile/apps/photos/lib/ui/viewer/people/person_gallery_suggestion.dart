@@ -3,14 +3,16 @@ import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -194,7 +196,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     return faceCrops;
   }
 
-  void _navigateToCluster() {
+  Future<void> _navigateToCluster() async {
     if (allSuggestions.isEmpty ||
         currentSuggestionIndex >= allSuggestions.length) {
       return;
@@ -207,7 +209,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     sortedFiles.sort(
       (a, b) => b.creationTime!.compareTo(a.creationTime!),
     );
-    Navigator.of(context).push(
+    final result = await Navigator.of(context).push<ClusterPageResult>(
       MaterialPageRoute(
         builder: (context) => ClusterPage(
           sortedFiles,
@@ -217,6 +219,46 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         ),
       ),
     );
+
+    if (!mounted || result != ClusterPageResult.ignoredPerson) {
+      return;
+    }
+
+    await _consumeCurrentSuggestionAfterExternalAction();
+  }
+
+  Future<void> _consumeCurrentSuggestionAfterExternalAction() async {
+    if (isProcessing ||
+        allSuggestions.isEmpty ||
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
+
+    setState(() {
+      isProcessing = true;
+    });
+
+    try {
+      await _animateOut();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        hasCurrentSuggestion = false;
+      });
+      await _prepareNextSuggestion();
+    } catch (e, s) {
+      _logger.severe(
+        "Error consuming suggestion after external action",
+        e,
+        s,
+      );
+      if (mounted) {
+        setState(() {
+          isProcessing = false;
+        });
+      }
+    }
   }
 
   Future<void> _handleUserChoice(bool accepted) async {
@@ -229,28 +271,20 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     setState(() {
       isProcessing = true;
     });
-    unawaited(_animateOut());
 
     try {
       final currentSuggestion = allSuggestions[currentSuggestionIndex];
+      final feedbackFuture = accepted
+          ? ClusterFeedbackService.instance.addClusterToExistingPerson(
+              person: relevantPerson,
+              clusterID: currentSuggestion.clusterIDToMerge,
+            )
+          : _captureNotPersonFeedback(currentSuggestion);
 
-      if (accepted) {
-        unawaited(
-          ClusterFeedbackService.instance.addClusterToExistingPerson(
-            person: relevantPerson,
-            clusterID: currentSuggestion.clusterIDToMerge,
-          ),
-        );
-      } else {
-        unawaited(
-          MLDataDB.instance.captureNotPersonFeedback(
-            personID: relevantPerson.remoteID,
-            clusterID: currentSuggestion.clusterIDToMerge,
-          ),
-        );
-      }
-      // Wait for animation to complete before hiding widget
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.wait([
+        _animateOut(),
+        feedbackFuture,
+      ]);
       if (mounted) {
         setState(() {
           hasCurrentSuggestion = false;
@@ -265,6 +299,21 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         });
       }
     }
+  }
+
+  Future<void> _captureNotPersonFeedback(
+    ClusterSuggestion suggestion,
+  ) async {
+    await MLDataDB.instance.captureNotPersonFeedback(
+      personID: relevantPerson.remoteID,
+      clusterID: suggestion.clusterIDToMerge,
+    );
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        person: relevantPerson,
+        source: suggestion.clusterIDToMerge,
+      ),
+    );
   }
 
   Future<void> _saveAsAnotherPerson() async {
@@ -414,6 +463,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    const primaryActionColor = Color(0xFF08C225);
+    final cardRadius = BorderRadius.circular(20);
+    final actionButtonRadius = BorderRadius.circular(14);
+    const closeButtonSize = 24.0;
 
     return SlideTransition(
       position: _slideAnimation!,
@@ -429,12 +482,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: colorScheme.fillFaint,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colorScheme.strokeFainter,
-                    width: 1,
-                  ),
+                  color: colorScheme.backgroundElevated2,
+                  borderRadius: cardRadius,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -445,17 +494,22 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                             text: TextSpan(
                               style: textTheme.body,
                               children: [
-                                TextSpan(text: S.of(context).areThey),
+                                TextSpan(
+                                  text: AppLocalizations.of(context).areThey,
+                                ),
                                 TextSpan(
                                   text: relevantPerson.data.name,
                                   style: textTheme.bodyBold,
                                 ),
-                                TextSpan(text: S.of(context).questionmark),
+                                TextSpan(
+                                  text:
+                                      AppLocalizations.of(context).questionmark,
+                                ),
                               ],
                             ),
                           )
                         : Text(
-                            S.of(context).sameperson,
+                            AppLocalizations.of(context).sameperson,
                             style: textTheme.body,
                             textAlign: TextAlign.center,
                           ),
@@ -481,29 +535,25 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: colorScheme.warning700,
-                                  width: 1,
-                                ),
+                                color: colorScheme.fillFaint,
+                                borderRadius: actionButtonRadius,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons.close,
-                                    color: colorScheme.warning500,
+                                    color: colorScheme.textBase,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    S.of(context).no,
+                                    AppLocalizations.of(context).no,
                                     style: (personPage
                                             ? textTheme.bodyBold
                                             : textTheme.body)
                                         .copyWith(
-                                      color: colorScheme.warning500,
+                                      color: colorScheme.textBase,
                                     ),
                                   ),
                                 ],
@@ -523,25 +573,25 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: colorScheme.primary500,
-                                borderRadius: BorderRadius.circular(8),
+                                color: primaryActionColor,
+                                borderRadius: actionButtonRadius,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Icon(
                                     Icons.check,
-                                    color: textBaseDark,
+                                    color: Colors.white,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    S.of(context).yes,
+                                    AppLocalizations.of(context).yes,
                                     style: (personPage
                                             ? textTheme.bodyBold
                                             : textTheme.body)
                                         .copyWith(
-                                      color: textBaseDark,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ],
@@ -563,7 +613,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                             horizontal: 32,
                           ),
                           child: Text(
-                            S.of(context).saveAsAnotherPerson,
+                            AppLocalizations.of(context).saveAsAnotherPerson,
                             style: textTheme.mini.copyWith(
                               color: colorScheme.textMuted,
                               decoration: TextDecoration.underline,
@@ -576,17 +626,24 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
               ),
               if (widget.onClose != null)
                 Positioned(
-                  top: 4,
-                  right: 12,
+                  top: 16,
+                  right: 24,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: widget.onClose,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Icon(
+                      width: closeButtonSize,
+                      height: closeButtonSize,
+                      decoration: BoxDecoration(
+                        color: colorScheme.fillFaint,
+                        borderRadius: BorderRadius.circular(
+                          closeButtonSize / 2,
+                        ),
+                      ),
+                      child: const Icon(
                         Icons.close,
-                        size: 16,
-                        color: colorScheme.textBase,
+                        size: 14,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -625,36 +682,28 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: getEnteColorScheme(context).strokeFainter,
-                  width: 1,
+              decoration: ShapeDecoration(
+                shape: faceThumbnailSquircleBorder(
+                  side: 72,
                 ),
+                color: getEnteColorScheme(context).fillFaint,
               ),
-              child: ClipRRect(
-                child: ClipPath(
-                  clipper: ShapeBorderClipper(
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(52),
-                    ),
-                  ),
-                  child: (i == -1)
-                      ? PersonFaceWidget(
-                          personId: suggestPerson.remoteID,
-                          key: ValueKey('person_${suggestPerson.remoteID}'),
-                        )
-                      : FileFaceWidget(
-                          key: ValueKey(
-                            'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
-                          ),
-                          file,
-                          faceCrop: faceCrop,
-                          clusterID: currentSuggestion.clusterIDToMerge,
-                          useFullFile: true,
-                          thumbnailFallback: true,
+              child: FaceThumbnailSquircleClip(
+                child: (i == -1)
+                    ? PersonFaceWidget(
+                        personId: suggestPerson.remoteID,
+                        key: ValueKey('person_${suggestPerson.remoteID}'),
+                      )
+                    : FileFaceWidget(
+                        key: ValueKey(
+                          'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
                         ),
-                ),
+                        file,
+                        faceCrop: faceCrop,
+                        clusterID: currentSuggestion.clusterIDToMerge,
+                        useFullFile: true,
+                        thumbnailFallback: true,
+                      ),
               ),
             ),
             if (i == -1) const SizedBox(height: 8),

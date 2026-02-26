@@ -1,15 +1,25 @@
+import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+    Box,
     Dialog,
     DialogContent,
     DialogTitle,
+    Divider,
+    InputAdornment,
+    Stack,
     styled,
+    TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { SpacedRow } from "ente-base/components/containers";
-import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
     LargeTileButton,
@@ -19,11 +29,15 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
+    collectionsSortBy,
+    sortCollectionSummaries,
+    type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -47,6 +61,19 @@ export interface CollectionSelectorAttributes {
      * {@link sourceCollectionID} to omit showing it in the list again.
      */
     sourceCollectionSummaryID?: number;
+    /**
+     * If set, this collection will be shown first in the list.
+     *
+     * This is useful for the "upload" action, where the user is viewing a
+     * specific collection and might want to upload to it.
+     */
+    activeCollectionID?: number;
+    /**
+     * If true, only show hidden albums in the collection selector.
+     *
+     * This is used when uploading from the hidden albums section.
+     */
+    showHiddenCollections?: boolean;
     /**
      * Callback invoked when the user selects the option to create a new
      * collection.
@@ -114,35 +141,59 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] =
+        useCollectionSelectorSortByLocalState("name-asc");
+
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
     >([]);
+
+    const handleExited = () => {
+        setSearchTerm("");
+    };
 
     useEffect(() => {
         if (!attributes || !open) {
             return;
         }
 
-        const collections = [...collectionSummaries.values()]
-            .filter((cs) => {
+        const activeCollectionID = attributes.activeCollectionID;
+        const filteredCollections = [...collectionSummaries.values()].filter(
+            (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(cs);
+                    return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else {
-                    return canMoveToCollection(cs);
+                    // "move" and "unhide"
+                    return (
+                        canMoveToCollection(cs) && cs.type != "userFavorites"
+                    );
                 }
-            })
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .sort((a, b) => b.sortPriority - a.sortPriority);
+            },
+        );
+
+        const collections = sortCollectionSummaries(filteredCollections, sortBy)
+            .sort((a, b) => b.sortPriority - a.sortPriority)
+            .sort((a, b) => {
+                // Prioritize the active collection (if any) to appear first.
+                if (a.id === activeCollectionID) return -1;
+                if (b.id === activeCollectionID) return 1;
+                return 0;
+            });
 
         if (collections.length === 0) {
             onClose();
@@ -150,7 +201,26 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-    }, [collectionSummaries, attributes, open, onClose]);
+    }, [collectionSummaries, attributes, open, onClose, sortBy]);
+
+    const searchFilteredCollections = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return filteredCollections;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        return filteredCollections.filter((cs) =>
+            cs.name.toLowerCase().includes(searchLower),
+        );
+    }, [filteredCollections, searchTerm]);
+
+    const showCreateButton = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return true;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        const createText = t("create_albums").toLowerCase();
+        return createText.includes(searchLower);
+    }, [searchTerm]);
 
     if (!filteredCollections.length) {
         return <></>;
@@ -174,38 +244,104 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <Dialog
+        <StyledDialog
             open={open}
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
+            slotProps={{
+                paper: {
+                    sx: {
+                        maxWidth: "500px",
+                        "@media (min-width: 491px)": { height: "100%" },
+                    },
+                },
+                transition: { onExited: handleExited },
+            }}
         >
-            <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
-                <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>
-                <DialogCloseIconButton onClose={handleClose} />
-            </SpacedRow>
-
-            <DialogContent_>
-                <LargeTileCreateNewButton onClick={onCreateCollection}>
-                    {t("create_albums")}
-                </LargeTileCreateNewButton>
-                {filteredCollections.map((collectionSummary) => (
-                    <CollectionSummaryButton
-                        key={collectionSummary.id}
-                        collectionSummary={collectionSummary}
-                        onClick={handleCollectionSummaryClick}
-                    />
-                ))}
-            </DialogContent_>
-        </Dialog>
+            <DialogTitle>
+                <Stack sx={{ gap: 1.5 }}>
+                    <Stack direction="row" sx={{ gap: 1.5 }}>
+                        <Stack sx={{ flex: 1 }}>
+                            <Box>
+                                <Typography variant="h5">
+                                    {titleForAction(action)}
+                                </Typography>
+                                <Typography
+                                    variant="small"
+                                    sx={{
+                                        color: "text.muted",
+                                        fontWeight: "regular",
+                                    }}
+                                >
+                                    {searchTerm
+                                        ? `${searchFilteredCollections.length} / ${filteredCollections.length} ${t("albums")}`
+                                        : t("albums_count", {
+                                              count: filteredCollections.length,
+                                          })}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                        <CollectionsSortOptions
+                            activeSortBy={sortBy}
+                            onChangeSortBy={setSortBy}
+                            nestedInDialog
+                        />
+                        <FilledIconButton onClick={handleClose}>
+                            <CloseIcon />
+                        </FilledIconButton>
+                    </Stack>
+                    <SearchField value={searchTerm} onChange={setSearchTerm} />
+                </Stack>
+            </DialogTitle>
+            <Divider />
+            {searchFilteredCollections.length === 0 && !showCreateButton ? (
+                <NoResultsContent>
+                    <Typography color="text.muted">
+                        {t("no_results")}
+                    </Typography>
+                </NoResultsContent>
+            ) : (
+                <DialogContent_>
+                    {showCreateButton && (
+                        <LargeTileCreateNewButton onClick={onCreateCollection}>
+                            {t("create_albums")}
+                        </LargeTileCreateNewButton>
+                    )}
+                    {searchFilteredCollections.map((collectionSummary) => (
+                        <CollectionSummaryButton
+                            key={collectionSummary.id}
+                            collectionSummary={collectionSummary}
+                            onClick={handleCollectionSummaryClick}
+                        />
+                    ))}
+                </DialogContent_>
+            )}
+        </StyledDialog>
     );
 };
 
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialogTitle-root": { padding: theme.spacing(2) },
+    "& .MuiDialogContent-root": { padding: theme.spacing(2) },
+}));
+
 const DialogContent_ = styled(DialogContent)`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 150px);
     gap: 4px;
+    align-content: start;
+
+    @media (min-width: 491px) {
+        justify-content: center;
+    }
+`;
+
+const NoResultsContent = styled(DialogContent)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 154px;
 `;
 
 const titleForAction = (action: CollectionSelectorAction) => {
@@ -231,14 +367,153 @@ interface CollectionSummaryButtonProps {
 const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
     onClick,
-}) => (
-    <ItemCard
-        TileComponent={LargeTileButton}
-        coverFile={collectionSummary.coverFile}
-        onClick={() => onClick(collectionSummary.id)}
-    >
-        <LargeTileTextOverlay>
-            <Typography>{collectionSummary.name}</Typography>
-        </LargeTileTextOverlay>
-    </ItemCard>
-);
+}) => {
+    const isFavorite = collectionSummary.type === "userFavorites";
+    const isPinned = collectionSummary.attributes.has("pinned");
+
+    return (
+        <ItemCard
+            TileComponent={LargeTileButton}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onClick(collectionSummary.id)}
+        >
+            <LargeTileTextOverlay>
+                <Tooltip title={collectionSummary.name} arrow>
+                    <Typography
+                        sx={{
+                            maxWidth: "240px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                        }}
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                </Tooltip>
+            </LargeTileTextOverlay>
+            {(isFavorite || isPinned) && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        right: 8,
+                        display: "flex",
+                        gap: 0.5,
+                    }}
+                >
+                    {isFavorite && (
+                        <FavoriteIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                    {isPinned && (
+                        <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                </Box>
+            )}
+        </ItemCard>
+    );
+};
+
+interface SearchFieldProps {
+    value: string;
+    onChange: (value: string) => void;
+}
+
+const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleClear = () => {
+        onChange("");
+        inputRef.current?.focus();
+    };
+
+    return (
+        <TextField
+            inputRef={inputRef}
+            fullWidth
+            size="small"
+            placeholder={t("albums_search_hint")}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            autoFocus
+            slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon />
+                        </InputAdornment>
+                    ),
+                    endAdornment: value && (
+                        <InputAdornment
+                            position="end"
+                            sx={{ marginRight: "0 !important" }}
+                        >
+                            <CloseIcon
+                                fontSize="small"
+                                onClick={handleClear}
+                                sx={{
+                                    color: "stroke.muted",
+                                    cursor: "pointer",
+                                    "&:hover": { color: "text.base" },
+                                }}
+                            />
+                        </InputAdornment>
+                    ),
+                },
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    backgroundColor: "background.searchInput",
+                    borderColor: "transparent",
+                    "&:hover": { borderColor: "accent.light" },
+                    "&.Mui-focused": {
+                        borderColor: "accent.main",
+                        boxShadow: "none",
+                    },
+                },
+                "& .MuiInputBase-input": {
+                    color: "text.base",
+                    paddingTop: "8.5px !important",
+                    paddingBottom: "8.5px !important",
+                },
+                "& .MuiInputAdornment-root": {
+                    color: "stroke.muted",
+                    marginTop: "0 !important",
+                    marginRight: "8px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                    color: "text.muted",
+                    opacity: 1,
+                },
+            }}
+        />
+    );
+};
+
+/**
+ * A hook that maintains the collection selector sort order both as in-memory
+ * and local storage state.
+ */
+const useCollectionSelectorSortByLocalState = (
+    initialValue: CollectionsSortBy,
+) => {
+    const key = "collectionSelectorSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value && includes(collectionsSortBy, value)) setValue(value);
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
+};

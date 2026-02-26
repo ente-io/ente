@@ -1,13 +1,21 @@
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/tile/attribution/map_attribution.dart";
 import "package:photos/ui/map/tile/cache.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
-const String _userAgent = "io.ente.photos";
+String get _userAgent {
+  try {
+    final version = ServiceLocator.instance.packageInfo.version;
+    return "Ente Photos/$version (+https://ente.io; contact: team@ente.io)";
+  } catch (_) {
+    return "Ente Photos/unknown (+https://ente.io; contact: team@ente.io)";
+  }
+}
 
 class MapAttributionOptions {
   final double permanentHeight;
@@ -27,8 +35,7 @@ class OSMTileLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TileLayer(
-      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      subdomains: const ['a', 'b', 'c'],
+      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       userAgentPackageName: _userAgent,
       tileProvider: CachedNetworkTileProvider(),
     );
@@ -42,11 +49,44 @@ class OSMFranceTileLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return TileLayer(
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-      fallbackUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       tileProvider: CachedNetworkTileProvider(),
       userAgentPackageName: _userAgent,
       panBuffer: 1,
+    );
+  }
+}
+
+class OSMTileAttributes extends StatelessWidget {
+  final MapAttributionOptions options;
+  const OSMTileAttributes({
+    this.options = const MapAttributionOptions(),
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context).tinyBold;
+    return MapAttributionWidget(
+      alignment: AttributionAlignment.bottomLeft,
+      showFlutterMapAttribution: false,
+      permanentHeight: options.permanentHeight,
+      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
+      popupBorderRadius: options.popupBorderRadius,
+      iconSize: options.iconSize,
+      attributions: [
+        TextSourceAttribution(
+          AppLocalizations.of(context).openstreetmapContributors,
+          textStyle: textTheme,
+          onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
+        ),
+        TextSourceAttribution(
+          'HOT Tiles',
+          textStyle: textTheme,
+          onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
+        ),
+      ],
     );
   }
 }
@@ -70,7 +110,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
       iconSize: options.iconSize,
       attributions: [
         TextSourceAttribution(
-          S.of(context).openstreetmapContributors,
+          AppLocalizations.of(context).openstreetmapContributors,
           textStyle: textTheme,
           onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
         ),
@@ -80,7 +120,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
           onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
         ),
         TextSourceAttribution(
-          S.of(context).hostedAtOsmFrance,
+          AppLocalizations.of(context).hostedAtOsmFrance,
           textStyle: textTheme,
           onTap: () => launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
         ),

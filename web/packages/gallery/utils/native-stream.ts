@@ -7,7 +7,7 @@
  */
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { FileSystemUploadItem } from "../services/upload";
 
 /**

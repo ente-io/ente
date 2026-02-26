@@ -1,9 +1,9 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/widgets.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/utils/standalone/date_time.dart";
 
 enum GroupType {
   day,
@@ -27,6 +27,23 @@ extension GroupTypeExtension on GroupType {
         return "Size";
       case GroupType.year:
         return "Year";
+      case GroupType.none:
+        return "None";
+    }
+  }
+
+  String getLocalizedName(BuildContext context) {
+    switch (this) {
+      case GroupType.day:
+        return AppLocalizations.of(context).groupByDay;
+      case GroupType.week:
+        return AppLocalizations.of(context).groupByWeek;
+      case GroupType.month:
+        return AppLocalizations.of(context).groupByMonth;
+      case GroupType.size:
+        return "Size";
+      case GroupType.year:
+        return AppLocalizations.of(context).groupByYear;
       case GroupType.none:
         return "None";
     }
@@ -174,9 +191,9 @@ extension GroupTypeExtension on GroupType {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month) {
       if (date.day == now.day) {
-        return S.of(context).dayToday;
+        return AppLocalizations.of(context).dayToday;
       } else if (date.day == now.day - 1) {
-        return S.of(context).dayYesterday;
+        return AppLocalizations.of(context).dayYesterday;
       }
     }
     if (date.year != DateTime.now().year) {
@@ -199,7 +216,7 @@ extension GroupTypeExtension on GroupType {
     if (startOfWeek.year == nowStartOfWeek.year &&
         startOfWeek.month == nowStartOfWeek.month &&
         startOfWeek.day == nowStartOfWeek.day) {
-      return S.of(context).thisWeek;
+      return AppLocalizations.of(context).thisWeek;
     }
 
     // Check if it's the previous week
@@ -207,7 +224,7 @@ extension GroupTypeExtension on GroupType {
     if (startOfWeek.year == lastWeekStart.year &&
         startOfWeek.month == lastWeekStart.month &&
         startOfWeek.day == lastWeekStart.day) {
-      return S.of(context).lastWeek;
+      return AppLocalizations.of(context).lastWeek;
     }
 
     // Return formatted week range
@@ -220,7 +237,7 @@ extension GroupTypeExtension on GroupType {
     final now = DateTime.now();
 
     if (date.year == now.year && date.month == now.month) {
-      return S.of(context).thisMonth;
+      return AppLocalizations.of(context).thisMonth;
     }
 
     return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
@@ -232,7 +249,7 @@ extension GroupTypeExtension on GroupType {
     final now = DateTime.now();
 
     if (date.year == now.year) {
-      return S.of(context).thisYear;
+      return AppLocalizations.of(context).thisYear;
     }
 
     return DateFormat.y(Localizations.localeOf(context).languageCode)

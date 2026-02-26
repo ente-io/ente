@@ -3,17 +3,21 @@ import "dart:io";
 import "dart:math";
 import "dart:ui";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
@@ -21,6 +25,7 @@ import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -328,7 +333,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     onTap: () => Navigator.pop(context),
                     child: const Padding(
                       padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-                      child: Icon(Icons.close, color: Colors.white),
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                   builder: (context, value, child) {
@@ -361,19 +370,64 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         Row(
                           children: [
                             child!,
-                            Text(
-                              SmartMemoriesService.getDateFormatted(
-                                creationTime: inheritedData
-                                    .memories[value].file.creationTime!,
-                                context: context,
-                              ),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .copyWith(
-                                    fontSize: 14,
-                                    color: Colors.white,
+                            GestureDetector(
+                              onTap: () async {
+                                final fullScreenState =
+                                    context.findAncestorStateOfType<
+                                        _FullScreenMemoryState>();
+                                fullScreenState?._toggleAnimation(
+                                  pause: true,
+                                );
+                                Bus.instance.fire(PauseVideoEvent());
+                                await routeToPage(
+                                  context,
+                                  JumpToDateGallery(
+                                    fileToJumpTo:
+                                        inheritedData.memories[value].file,
                                   ),
+                                );
+                                Bus.instance.fire(ResumeVideoEvent());
+                                fullScreenState?._toggleAnimation(
+                                  pause: false,
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  // color: fillFaintDark,
+                                  color: blurStrokeFaintDark,
+                                  border: Border.all(
+                                    color: strokeFaintDark,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Text(
+                                        SmartMemoriesService.getDateFormatted(
+                                          creationTime: inheritedData
+                                              .memories[value]
+                                              .file
+                                              .creationTime!,
+                                          context: context,
+                                        ),
+                                        style: getEnteTextTheme(context)
+                                            .miniMuted
+                                            .copyWith(color: textBaseDark),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.keyboard_arrow_right_outlined,
+                                      size: 14,
+                                      color: blurStrokeBaseDark,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -444,8 +498,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             backgroundDecoration:
                                 const BoxDecoration(color: Colors.transparent),
                             isFromMemories: true,
-                            playbackCallback: (isPlaying) {
-                              _toggleAnimation(pause: !isPlaying);
+                            playbackCallback: (shouldEnable, _) {
+                              _toggleAnimation(pause: !shouldEnable);
                             },
                             onFinalFileLoad: ({required int memoryDuration}) {
                               onFinalFileLoad(memoryDuration);
@@ -534,8 +588,9 @@ class BottomIcons extends StatelessWidget {
           ),
         ];
 
-        if (currentFile.ownerID == null ||
-            (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
+        final isOwner = currentFile.ownerID == null ||
+            (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID;
+        if (isOwner) {
           rowChildren.addAll([
             IconButton(
               icon: Icon(
@@ -561,11 +616,15 @@ class BottomIcons extends StatelessWidget {
                 fullScreenState?._toggleAnimation(pause: false);
               },
             ),
-            SizedBox(
-              height: 32,
-              child: FavoriteWidget(currentFile),
-            ),
           ]);
+          if (!isOfflineMode) {
+            rowChildren.add(
+              SizedBox(
+                height: 32,
+                child: FavoriteWidget(currentFile),
+              ),
+            );
+          }
         }
         rowChildren.add(
           IconButton(

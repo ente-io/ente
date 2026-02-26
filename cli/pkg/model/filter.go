@@ -16,6 +16,8 @@ type Filter struct {
 	Albums []string
 	// when email is provided, only files shared with that email are exported
 	Emails []string
+	// for the listed album names, files in these albums are excluded
+	ExcludeAlbums []string
 }
 
 func (f Filter) SkipAccount(email string) bool {
@@ -52,8 +54,17 @@ func (f Filter) SkipAlbum(album RemoteAlbum, shouldLog bool) bool {
 	return false
 }
 
-// excludeByName returns true if albums list is not empty and album name is not in the list
+// excludeByName returns true if Albums list is not empty and album name is not in the list,
+// or if album name is in the ExcludeAlbums list
 func (f Filter) excludeByName(album RemoteAlbum) bool {
+	// Check if album is in the ExcludeAlbums list
+	for _, a := range f.ExcludeAlbums {
+		if strings.ToLower(a) == strings.ToLower(strings.TrimSpace(album.AlbumName)) {
+			return true
+		}
+	}
+
+	// Check if Albums filter is set and album is not in the list
 	if len(f.Albums) > 0 {
 		for _, a := range f.Albums {
 			if strings.ToLower(a) == strings.ToLower(strings.TrimSpace(album.AlbumName)) {

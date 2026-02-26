@@ -1,6 +1,6 @@
 import { lowercaseExtension } from "ente-base/file-name";
 import { KnownFileTypeInfos } from "ente-media/file-type";
-import FileTypeDetect from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 
 /**
  * Try to deduce the MIME type for the given {@link file}. Return the MIME type
@@ -17,7 +17,7 @@ export const detectMediaMIMEType = async (file: File) => {
     const chunkSizeForTypeDetection = 4100;
     const fileChunk = file.slice(0, chunkSizeForTypeDetection);
     const chunk = new Uint8Array(await fileChunk.arrayBuffer());
-    const result = await FileTypeDetect.fromBuffer(chunk);
+    const result = await fileTypeFromBuffer(chunk);
 
     const mime = result?.mime;
     if (mime) {

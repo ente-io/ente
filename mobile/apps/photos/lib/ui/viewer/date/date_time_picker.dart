@@ -90,8 +90,8 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
               alignment: Alignment.centerLeft,
               child: Text(
                 _showTimePicker
-                    ? S.of(context).selectTime
-                    : S.of(context).selectDate,
+                    ? AppLocalizations.of(context).selectTime
+                    : AppLocalizations.of(context).selectDate,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
@@ -126,7 +126,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 minimumDate: widget.minDateTime ?? DateTime(1800),
                 maximumDate: widget.maxDateTime ?? DateTime(2200),
                 use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
-                showDayOfWeek: true,
+                showDayOfWeek: !_showTimePicker,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() {
                     if (_showTimePicker) {
@@ -175,8 +175,8 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                   padding: EdgeInsets.zero,
                   child: Text(
                     _showTimePicker
-                        ? S.of(context).previous
-                        : S.of(context).cancel,
+                        ? AppLocalizations.of(context).previous
+                        : AppLocalizations.of(context).cancel,
                     style: TextStyle(
                       color: colorScheme.textBase,
                       fontSize: 14,
@@ -198,7 +198,9 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Text(
-                    _showTimePicker ? S.of(context).done : S.of(context).next,
+                    _showTimePicker
+                        ? AppLocalizations.of(context).done
+                        : AppLocalizations.of(context).next,
                     style: TextStyle(
                       color: colorScheme.primary700,
                       fontSize: 14,

@@ -1,30 +1,201 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
+import "package:app_links/app_links.dart";
+import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
-import 'package:ente_utils/email_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
+import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
-import 'package:locker/ui/components/information_addition_dialog.dart';
+import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
+import "package:locker/ui/components/gradient_button.dart";
+import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
+import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
-import 'package:locker/ui/pages/all_collections_page.dart';
-import 'package:locker/ui/pages/collection_page.dart';
+import 'package:locker/ui/pages/save_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
-import 'package:locker/utils/collection_actions.dart';
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
-import "package:locker/utils/snack_bar_utils.dart";
 import 'package:logging/logging.dart';
+
+class CustomLockerAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final bool isSearchActive;
+  final bool isSyncing;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final VoidCallback onSearchFocused;
+  final VoidCallback onClearSearch;
+  final ValueChanged<String>? onSearchChanged;
+
+  const CustomLockerAppBar({
+    super.key,
+    required this.scaffoldKey,
+    required this.isSearchActive,
+    this.isSyncing = false,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.onSearchFocused,
+    required this.onClearSearch,
+    this.onSearchChanged,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(156);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final hasQuery = searchController.text.isNotEmpty;
+    final showClearIcon = isSearchActive || hasQuery;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.primary700,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMenu01,
+                          color: Colors.white,
+                          strokeWidth: 2.25,
+                        ),
+                      ),
+                    ),
+                  ),
+                  isSyncing
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              context.l10n.syncing,
+                              style: textTheme.body.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        )
+                      : SvgPicture.asset('assets/svg/app-logo.svg'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: TextField(
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: searchController,
+                  focusNode: searchFocusNode,
+                  onTap: onSearchFocused,
+                  cursorColor: colorScheme.primary700,
+                  onChanged: onSearchChanged,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: context.l10n.searchHint,
+                    hintStyle: textTheme.smallBold.copyWith(
+                      color: colorScheme.iconColor,
+                    ),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: colorScheme.primary700,
+                        size: 20,
+                        strokeWidth: 1.75,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 24,
+                    ),
+                    suffixIcon: showClearIcon
+                        ? IconButton(
+                            onPressed: onClearSearch,
+                            splashRadius: 20,
+                            padding: const EdgeInsets.only(right: 16, left: 8),
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: colorScheme.iconColor,
+                              size: 20,
+                            ),
+                          )
+                        : null,
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: colorScheme.iconColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class HomePage extends UploaderPage {
   final String? initialSearchQuery;
@@ -37,15 +208,31 @@ class HomePage extends UploaderPage {
 
 class _HomePageState extends UploaderPageState<HomePage>
     with TickerProviderStateMixin, SearchMixin {
+  late final _settingsPage = DrawerPage(
+    emailNotifier: UserService.instance.emailValueNotifier,
+    scaffoldKey: scaffoldKey,
+  );
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  final _searchFocusNode = FocusNode();
+  final _selectedFiles = SelectedFiles();
+  final _scrollController = ScrollController();
+  bool _isLoading = true;
+  bool _hasCompletedInitialLoad = false;
+  bool _isSettingsOpen = false;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
+
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  Map<int, int> _collectionFileCounts = {};
-  bool _isLoading = true;
+  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier =
+      ValueNotifier([]);
+
   String? _error;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
+  StreamSubscription<Uri>? _deepLinkSubscription;
+  StreamSubscription<TriggerLogoutEvent>? _triggerLogoutSubscription;
 
   @override
   void onFileUploadComplete() {
@@ -63,19 +250,19 @@ class _HomePageState extends UploaderPageState<HomePage>
     List<Collection> collections,
     List<EnteFile> files,
   ) {
-    setState(() {
-      _filteredCollections =
-          CollectionSortUtil.filterAndSortCollections(collections);
-      _filteredFiles = files;
-    });
+    if (mounted) {
+      setState(() {
+        _filteredCollections = _filterOutUncategorized(collections);
+        _filteredFiles = files;
+      });
+    }
   }
 
   @override
   void onSearchStateChanged(bool isActive) {
-    if (!isActive) {
+    if (!isActive && mounted) {
       setState(() {
-        _filteredCollections =
-            CollectionSortUtil.filterAndSortCollections(_collections);
+        _filteredCollections = _filterOutUncategorized(_collections);
         _filteredFiles = _recentFiles;
       });
     }
@@ -83,33 +270,18 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   List<Collection> get _displayedCollections {
     final collections = isSearchActive ? _filteredCollections : _collections;
-    return CollectionSortUtil.filterAndSortCollections(collections);
+    return _filterOutUncategorized(collections);
   }
 
-  final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+  List<Collection> _filterOutUncategorized(List<Collection> collections) {
+    return CollectionSortUtil.filterAndSortCollections(collections);
+  }
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
 
-    if (CollectionService.instance.hasCompletedFirstSync()) {
-      _loadCollections();
-    }
+    _loadCollections();
 
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -122,6 +294,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         });
       }
     });
+
+    _initDeepLinks();
 
     // Activate search if initial query is provided (after collections are loaded)
     if (widget.initialSearchQuery != null &&
@@ -139,14 +313,57 @@ class _HomePageState extends UploaderPageState<HomePage>
     Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       await _loadCollections();
     });
+
+    _triggerLogoutSubscription =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      await _autoLogoutAlert();
+    });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _isFabOpen.dispose();
+    _searchFocusNode.dispose();
+    _scrollController.dispose();
+    _displayedFilesNotifier.dispose();
+    _deepLinkSubscription?.cancel();
+    _triggerLogoutSubscription?.cancel();
     disposeSharing();
     super.dispose();
+  }
+
+  Future<void> _autoLogoutAlert() async {
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+    final l10n = context.l10n;
+
+    await showAlertBottomSheet(
+      context,
+      title: l10n.sessionExpired,
+      message: l10n.pleaseLoginAgain,
+      assetPath: "assets/warning-grey.png",
+      isDismissible: false,
+      showCloseButton: false,
+      buttons: [
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: context.l10n.ok,
+            onTap: () async {
+              navigator.pop();
+              final dialog = createProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
+              await dialog.show();
+              await Configuration.instance.logout();
+              await dialog.hide();
+              navigator.popUntil((route) => route.isFirst);
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   void initializeSharing() {
@@ -159,7 +376,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _logger
               .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
-            _logger.info('Shared file: ${file.path}, type: ${file.type}');
+            _logger.info('Shared file received, type: ${file.type}');
           }
           if (value.isNotEmpty) {
             _handleSharedFiles(value);
@@ -190,7 +407,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _logger
             .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
-          _logger.info('Initial shared file: ${file.path}, type: ${file.type}');
+          _logger.info('Initial shared file, type: ${file.type}');
         }
         await _handleSharedFiles(initialMedia);
       } else {
@@ -211,14 +428,14 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     try {
       for (final sharedFile in sharedFiles) {
-        _logger.info('Processing shared file: ${sharedFile.path}');
+        _logger.info('Processing shared file');
         if (sharedFile.path.isNotEmpty) {
           final file = File(sharedFile.path);
           if (await file.exists()) {
-            _logger.info('File exists, uploading: ${sharedFile.path}');
-            await uploadFile(file);
+            _logger.info('File exists, uploading');
+            await uploadFiles([file]);
           } else {
-            _logger.warning('Shared file does not exist: ${sharedFile.path}');
+            _logger.warning('Shared file does not exist');
           }
         } else {
           _logger.warning('Shared file has empty path');
@@ -230,10 +447,23 @@ class _HomePageState extends UploaderPageState<HomePage>
     } catch (e) {
       _logger.severe('Error handling shared files: $e');
       if (mounted) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          'Upload Error',
-          'Failed to process shared files: $e',
+          title: context.l10n.uploadError,
+          message: context.l10n.somethingWentWrong,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.contactSupport,
+              onTap: () async {
+                await sendLogs(
+                  context,
+                  "support@ente.io",
+                  postShare: () {},
+                );
+              },
+            ),
+          ],
         );
       }
     }
@@ -245,49 +475,113 @@ class _HomePageState extends UploaderPageState<HomePage>
     _logger.info('Sharing functionality disposed');
   }
 
-  Future<void> _loadCollections() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+  Future<void> _initDeepLinks() async {
+    final appLinks = AppLinks();
 
-      final collections = await CollectionService.instance.getCollections();
+    try {
+      final initialLink = await appLinks.getInitialLink();
+      if (initialLink != null) {
+        _logger.info('Initial deep link received');
+      }
+    } catch (e) {
+      _logger.severe('Error getting initial deep link: $e');
+    }
+
+    _deepLinkSubscription = appLinks.uriLinkStream.listen(
+      (Uri uri) {
+        _logger.info('Deep link received via stream');
+      },
+      onError: (err) {
+        _logger.severe('Error receiving deep link: $err');
+      },
+    );
+  }
+
+  Future<void> _loadCollections() async {
+    final shouldShowLoading =
+        _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
+
+    try {
+      if (mounted && (shouldShowLoading || _error != null)) {
+        setState(() {
+          if (shouldShowLoading) {
+            _isLoading = true;
+          }
+          _error = null;
+        });
+      }
+
+      var collections = await CollectionService.instance.getCollections();
       await _loadRecentFiles(collections);
+
+      // If collections are empty and first sync is complete, ensure default
+      // collections are created. This handles the case where default collections
+      // setup was skipped during initialization due to the master key not being
+      // available yet.
+      final hasCompletedFirstSync =
+          CollectionService.instance.hasCompletedFirstSync();
+      if (collections.isEmpty && hasCompletedFirstSync) {
+        _logger.info("No collections found after sync, setting up defaults");
+        await CollectionService.instance.setupDefaultCollections();
+        // Reload collections after setup
+        collections = await CollectionService.instance.getCollections();
+        await _loadRecentFiles(collections);
+      }
 
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
-      setState(() {
-        _collections = sortedCollections;
-        _filteredCollections =
-            CollectionSortUtil.filterAndSortCollections(sortedCollections);
-        _filteredFiles = _recentFiles;
-        _isLoading = false;
-      });
-
-      await _loadCollectionFileCounts();
+      if (mounted) {
+        setState(() {
+          _collections = sortedCollections;
+          _filteredCollections = _filterOutUncategorized(sortedCollections);
+          _filteredFiles = _recentFiles;
+          _isLoading = false;
+          _hasCompletedInitialLoad = hasCompletedFirstSync;
+        });
+      }
     } catch (error) {
-      setState(() {
-        _error = 'Error fetching collections: $error';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Error fetching collections: $error';
+          _isLoading = false;
+          _hasCompletedInitialLoad =
+              CollectionService.instance.hasCompletedFirstSync();
+        });
+      }
     }
   }
 
   Future<void> _loadRecentFiles(List<Collection> collections) async {
-    final allFiles = await CollectionService.instance.getAllFiles();
+    final allFiles = <EnteFile>[];
 
-    final uniqueFilesMap = <String, EnteFile>{};
+    for (final collection in collections) {
+      allFiles.addAll(
+        await CollectionService.instance.getFilesInCollection(collection),
+      );
+    }
+
+    final uniqueFiles = <EnteFile>[];
+    final seenHashes = <String>{};
+    final seenIds = <int>{};
 
     for (final file in allFiles) {
-      final key = file.uploadedFileID?.toString() ?? file.toString();
-      if (!uniqueFilesMap.containsKey(key)) {
-        uniqueFilesMap[key] = file;
+      bool isDuplicate = false;
+
+      if (file.hash != null && seenHashes.contains(file.hash)) {
+        isDuplicate = true;
+      } else if (file.uploadedFileID != null &&
+          seenIds.contains(file.uploadedFileID)) {
+        isDuplicate = true;
+      }
+
+      if (!isDuplicate) {
+        uniqueFiles.add(file);
+        if (file.hash != null) seenHashes.add(file.hash!);
+        if (file.uploadedFileID != null) seenIds.add(file.uploadedFileID!);
       }
     }
 
-    final uniqueFiles = uniqueFilesMap.values.toList();
     uniqueFiles.sort((a, b) {
       final timeA = a.updationTime ?? a.modificationTime ?? 0;
       final timeB = b.updationTime ?? b.modificationTime ?? 0;
@@ -297,382 +591,116 @@ class _HomePageState extends UploaderPageState<HomePage>
     _recentFiles = uniqueFiles;
   }
 
-  void _navigateToCollection(Collection collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
-      ),
-    );
+  void _handleSearchChange(String query) {
+    // Trigger search by activating search with the current query
+    activateSearchWithQuery(query);
+  }
+
+  void _handleSearchFocused() {
+    // Activate search when TextField is tapped/focused
+    if (!isSearchActive) {
+      activateSearchWithQuery('');
+    }
+  }
+
+  void _handleClearSearch() {
+    // Clear text and unfocus before dismissing search
+    searchController.clear();
+    _searchFocusNode.unfocus();
+
+    dismissSearch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: FocusNode(),
-      onKeyEvent: handleKeyEvent,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          leading: buildSearchLeading(),
-          title: GestureDetector(
-            onLongPress: () {
-              sendLogs(
-                context,
-                'vishnu@ente.io',
-                subject: 'Locker logs',
-                body: 'Debug logs for Locker app.\n\n',
-              );
+    final colorScheme = getEnteColorScheme(context);
+    return UserDetailsStateWidget(
+      child: ListenableBuilder(
+        listenable: _selectedFiles,
+        builder: (context, _) {
+          final hasSelection = _selectedFiles.files.isNotEmpty;
+          return PopScope(
+            canPop: !isSearchActive && !_isSettingsOpen && !hasSelection,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) {
+                return;
+              }
+
+              if (hasSelection) {
+                _selectedFiles.clearAll();
+                return;
+              }
+
+              if (isSearchActive) {
+                _handleClearSearch();
+                return;
+              }
+
+              if (_isSettingsOpen) {
+                scaffoldKey.currentState!.closeDrawer();
+                return;
+              }
             },
-            child: const Text(
-              'Locker',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-          actions: [
-            buildSearchAction(),
-            ...buildSearchActions(),
-          ],
-        ),
-        body: _buildBody(),
-        floatingActionButton:
-            isSearchActive ? const SizedBox.shrink() : _buildMultiOptionFab(),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_error != null) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 64,
+            child: KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: handleKeyEvent,
+              child: Scaffold(
+                key: scaffoldKey,
+                backgroundColor: colorScheme.backgroundBase,
+                drawer: Drawer(
+                  width: 428,
+                  backgroundColor: colorScheme.backgroundBase,
+                  child: _settingsPage,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+                drawerEnableOpenDragGesture: true,
+                onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+                appBar: CustomLockerAppBar(
+                  scaffoldKey: scaffoldKey,
+                  isSearchActive: isSearchActive,
+                  isSyncing: _isSyncing,
+                  searchController: searchController,
+                  searchFocusNode: _searchFocusNode,
+                  onSearchFocused: _handleSearchFocused,
+                  onClearSearch: _handleClearSearch,
+                  onSearchChanged: _handleSearchChange,
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _loadCollections(),
-                  child: Text(context.l10n.retry),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (isSearchActive) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SearchResultView(
-          collections: _filteredCollections,
-          files: _filteredFiles,
-          searchQuery: searchQuery,
-          enableSorting: true,
-          isHomePage: true,
-        ),
-      );
-    }
-
-    if (_displayedCollections.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: _buildEmptyState(
-            icon: Icons.folder_outlined,
-            title: context.l10n.noCollectionsFound,
-            subtitle: context.l10n.createYourFirstCollection,
-            action: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: GradientButton(
-                onTap: _createCollection,
-                text: context.l10n.createCollection,
-                iconData: Icons.add,
-                paddingValue: 8.0,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight - 32, // Account for padding
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCollectionsHeader(),
-                const SizedBox(height: 24),
-                _buildCollectionsGrid(),
-                const SizedBox(height: 24),
-                _buildRecentsSection(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecentsSection() {
-    if (_recentFiles.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: _buildEmptyState(
-          icon: Icons.description_outlined,
-          title: context.l10n.nothingYet,
-          subtitle: context.l10n.uploadYourFirstDocument,
-          action: GradientButton(
-            onTap: addFile,
-            text: context.l10n.uploadDocument,
-            iconData: Icons.file_upload,
-            paddingValue: 8.0,
-          ),
-        ),
-      );
-    }
-    return RecentsSectionWidget(
-      collections: CollectionSortUtil.filterAndSortCollections(_collections),
-      recentFiles: _recentFiles,
-    );
-  }
-
-  Future<void> _createCollection() async {
-    final createdCollection = await CollectionActions.createCollection(context);
-
-    if (createdCollection != null) {
-      await _loadCollections();
-      _navigateToCollection(createdCollection);
-    }
-  }
-
-  Future<void> _addInformation() async {
-    final result = await showInformationAdditionDialog(context);
-
-    if (result != null && mounted) {
-      switch (result.type) {
-        case InformationType.physicalDocument:
-          await _addPhysicalDocument();
-          break;
-        case InformationType.emergencyContact:
-          await _addEmergencyContact();
-          break;
-        case InformationType.accountCredential:
-          await _addAccountCredential();
-          break;
-      }
-    }
-  }
-
-  Future<void> _addPhysicalDocument() async {
-    SnackBarUtils.showInfoSnackBar(
-      context,
-      "Soon",
-    );
-  }
-
-  Future<void> _addEmergencyContact() async {
-    SnackBarUtils.showInfoSnackBar(
-      context,
-      "Soon",
-    );
-  }
-
-  Future<void> _addAccountCredential() async {
-    SnackBarUtils.showInfoSnackBar(
-      context,
-      "Soon",
-    );
-  }
-
-  Widget _buildEmptyState({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    Widget? action,
-  }) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: getEnteTextTheme(context).large.copyWith(color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: getEnteTextTheme(context).body.copyWith(color: Colors.grey),
-          ),
-          if (action != null) ...[
-            const SizedBox(height: 24),
-            action,
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFabLabel(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: getEnteColorScheme(context).fillBase,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        text,
-        style: getEnteTextTheme(context).small.copyWith(
-              color: getEnteColorScheme(context).backgroundBase,
-            ),
-      ),
-    );
-  }
-
-  Widget _buildFabOption({
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-    required String heroTag,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildFabLabel(label),
-        const SizedBox(width: 8),
-        FloatingActionButton(
-          heroTag: heroTag,
-          mini: true,
-          onPressed: onPressed,
-          backgroundColor: getEnteColorScheme(context).fillBase,
-          child: Icon(icon),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCollectionsHeader() {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        SnackBarUtils.showWarningSnackBar(context, "Hello");
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AllCollectionsPage(),
-          ),
-        );
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            context.l10n.collections,
-            style: getEnteTextTheme(context).h3Bold,
-          ),
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCollectionsGrid() {
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      removeTop: true,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
-        ),
-        itemCount: min(_displayedCollections.length, 4),
-        itemBuilder: (context, index) {
-          final collection = _displayedCollections[index];
-          final collectionName = collection.name ?? 'Unnamed Collection';
-
-          return GestureDetector(
-            onTap: () => _navigateToCollection(collection),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n
-                            .items(_collectionFileCounts[collection.id] ?? 0),
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
+                body: Stack(
+                  children: [
+                    _buildBody(),
+                    ValueListenableBuilder<List<EnteFile>>(
+                      valueListenable: _displayedFilesNotifier,
+                      builder: (context, displayedFiles, _) {
+                        return FileSelectionOverlayBar(
+                          selectedFiles: _selectedFiles,
+                          files: displayedFiles.isNotEmpty
+                              ? displayedFiles
+                              : _recentFiles,
+                          scrollController: _scrollController,
+                        );
+                      },
                     ),
-                ],
+                  ],
+                ),
+                floatingActionButton: isSearchActive
+                    ? null
+                    : ListenableBuilder(
+                        listenable: _selectedFiles,
+                        builder: (context, _) {
+                          if (_selectedFiles.files.isNotEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return FloatingActionButton(
+                            onPressed: _openSavePage,
+                            shape: const CircleBorder(),
+                            backgroundColor: colorScheme.primary700,
+                            elevation: 0,
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedPlusSign,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                      ),
               ),
             ),
           );
@@ -681,105 +709,92 @@ class _HomePageState extends UploaderPageState<HomePage>
     );
   }
 
-  Widget _buildMultiOptionFab() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _isFabOpen,
-      builder: (context, isFabOpen, child) {
-        return Stack(
-          children: [
-            if (isFabOpen)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _toggleFab,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+  Widget _buildBody() {
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateWidget(
+                assetPath: 'assets/empty_state.png',
+                title: context.l10n.somethingWentWrong,
+                subtitle: _error!,
+                showBorder: false,
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                onTap: _loadCollections,
+                text: context.l10n.retry,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (isSearchActive) {
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
+        child: SearchResultView(
+          collections: _filteredCollections,
+          files: _filteredFiles,
+          searchQuery: searchQuery,
+          isHomePage: true,
+        ),
+      );
+    }
+    if (_displayedCollections.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isLoading: _isSyncing),
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
+
+        return _recentFiles.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isLoading: _isSyncing),
                 ),
-              ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (isFabOpen) ...[
-                    ScaleTransition(
-                      scale: _animation,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: _buildFabOption(
-                          label: context.l10n.addInformation,
-                          icon: Icons.post_add,
-                          onPressed: () {
-                            _toggleFab();
-                            _addInformation();
-                          },
-                          heroTag: "addInformation",
-                        ),
-                      ),
+              )
+            : SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 32.0,
+                  bottom: scrollBottomPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RecentsSectionWidget(
+                      collections: _filterOutUncategorized(_collections),
+                      recentFiles: _recentFiles,
+                      selectedFiles: _selectedFiles,
+                      displayedFilesNotifier: _displayedFilesNotifier,
                     ),
-                    if (_collections.isNotEmpty)
-                      ScaleTransition(
-                        scale: _animation,
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: _buildFabOption(
-                            label: context.l10n.uploadDocumentTooltip,
-                            icon: Icons.file_upload,
-                            onPressed: () {
-                              _toggleFab();
-                              addFile();
-                            },
-                            heroTag: "addFile",
-                          ),
-                        ),
-                      ),
                   ],
-                  FloatingActionButton(
-                    onPressed: _toggleFab,
-                    child: AnimatedRotation(
-                      turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
-                      duration: const Duration(milliseconds: 300),
-                      child: const Icon(Icons.add),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
+                ),
+              );
       },
     );
   }
 
-  void _toggleFab() {
-    _isFabOpen.value = !_isFabOpen.value;
-
-    if (_isFabOpen.value) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
-  }
-
-  Future<void> _loadCollectionFileCounts() async {
-    final counts = <int, int>{};
-
-    for (final collection in _displayedCollections.take(4)) {
-      try {
-        final files =
-            await CollectionService.instance.getFilesInCollection(collection);
-        counts[collection.id] = files.length;
-      } catch (e) {
-        counts[collection.id] = 0;
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        _collectionFileCounts = counts;
-      });
-    }
+  void _openSavePage() {
+    showSaveBottomSheet(
+      context,
+      onUploadDocument: addFile,
+    );
   }
 }

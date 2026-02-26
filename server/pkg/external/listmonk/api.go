@@ -3,10 +3,12 @@ package listmonk
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -37,8 +39,10 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	}
 
 	// Constructing query parameters
+	// Escape single quotes to prevent SQL-like injection in Listmonk's query syntax
+	sanitizedEmail := strings.ReplaceAll(subscriberEmail, "'", "''")
 	queryParams := url.Values{}
-	queryParams.Set("query", fmt.Sprintf("subscribers.email = '%s'", subscriberEmail))
+	queryParams.Set("query", fmt.Sprintf("subscribers.email = '%s'", sanitizedEmail))
 
 	// Constructing the URL with query parameters
 	endpointURL, err := url.Parse(endpoint)
@@ -76,7 +80,7 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 
 	// Checking if there are any subscribers found
 	if len(subscriberResp.Data.Results) == 0 {
-		return 0, stacktrace.Propagate(err, "")
+		return 0, stacktrace.Propagate(errors.New("subscriber not found"), "")
 	}
 
 	// Extracting the ID from the response
@@ -111,7 +115,14 @@ func SendRequest(method string, url string, data interface{}, username string, p
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return stacktrace.Propagate(err, "")
+		body, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return stacktrace.Propagate(readErr, "")
+		}
+		return stacktrace.Propagate(
+			fmt.Errorf("listmonk request failed with status %d: %s", resp.StatusCode, strings.TrimSpace(string(body))),
+			"",
+		)
 	}
 
 	return nil

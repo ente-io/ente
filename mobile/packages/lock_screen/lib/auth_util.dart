@@ -30,7 +30,8 @@ Future<bool> requestAuthentication(
       isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
     );
   }
-  if (Platform.isMacOS || Platform.isLinux) {
+  if (Platform.isLinux) {
+    // Linux uses flutter_local_authentication
     return await FlutterLocalAuthentication().authenticate();
   } else {
     await LocalAuthentication().stopAuthentication();

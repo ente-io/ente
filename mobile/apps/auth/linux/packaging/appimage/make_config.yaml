@@ -1,10 +1,10 @@
 display_name: Ente Auth
-package_name: enteauth
+package_name: ente_auth
 license: GPLv3
 
 metainfo: linux/packaging/enteauth.appdata.xml
 
-icon: assets/icons/auth-icon.png
+icon: assets/generation-icons/icon-windows-linux.png
 
 keywords:
   - Authentication
@@ -16,6 +16,7 @@ categories:
   - Utility
 
 startup_notify: false
+startup_wm_class: io.ente.auth
 
 # You can specify the shared libraries that you want to bundle with your app
 #
@@ -28,4 +29,5 @@ startup_notify: false
 #   - libcurl.so.4
 
 supported_mime_type:
-  - x-scheme-handler/enteauth
+  - x-scheme-handler/ente_auth
+

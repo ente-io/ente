@@ -21,6 +21,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -31,12 +32,14 @@ class CollectionPage extends StatelessWidget {
   final String tagPrefix;
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
+  final EnteFile? fileToJumpTo;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
     this.isFromCollectPhotos = false,
+    this.fileToJumpTo,
     super.key,
   });
 
@@ -95,7 +98,7 @@ class CollectionPage extends StatelessWidget {
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       addHeaderOrFooterEmptyState: false,
-      showSelectAll: galleryType != GalleryType.sharedCollection,
+      showSelectAll: true,
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
               c.collection,
@@ -113,6 +116,7 @@ class CollectionPage extends StatelessWidget {
       footer: isFromCollectPhotos
           ? const SizedBox(height: 20)
           : const SizedBox(height: 212),
+      fileToJumpTo: fileToJumpTo,
     );
 
     return GalleryFilesState(
@@ -124,54 +128,56 @@ class CollectionPage extends StatelessWidget {
             occurrence: kMostRelevantFilter,
           ),
         ),
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
-            child: GalleryAppBarWidget(
-              galleryType,
-              c.collection.displayName,
-              _selectedFiles,
-              collection: c.collection,
-              isFromCollectPhotos: isFromCollectPhotos,
+        child: GalleryBoundariesProvider(
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(90.0),
+              child: GalleryAppBarWidget(
+                galleryType,
+                c.collection.displayName,
+                _selectedFiles,
+                collection: c.collection,
+                isFromCollectPhotos: isFromCollectPhotos,
+              ),
             ),
-          ),
-          bottomNavigationBar: isFromCollectPhotos
-              ? CollectPhotosBottomButtons(
-                  c.collection,
-                  selectedFiles: _selectedFiles,
-                )
-              : null,
-          body: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Builder(
-                  builder: (context) {
-                    return ValueListenableBuilder(
-                      valueListenable: InheritedSearchFilterData.of(context)
-                          .searchFilterDataProvider!
-                          .isSearchingNotifier,
-                      builder: (context, value, _) {
-                        return value
-                            ? HierarchicalSearchGallery(
-                                tagPrefix: tagPrefix,
-                                selectedFiles: _selectedFiles,
-                              )
-                            : gallery;
-                      },
-                    );
-                  },
-                ),
-                SmartAlbumsStatusWidget(
-                  collection: c.collection,
-                ),
-                FileSelectionOverlayBar(
-                  galleryType,
-                  _selectedFiles,
-                  collection: c.collection,
-                ),
-              ],
+            bottomNavigationBar: isFromCollectPhotos
+                ? CollectPhotosBottomButtons(
+                    c.collection,
+                    selectedFiles: _selectedFiles,
+                  )
+                : null,
+            body: SelectionState(
+              selectedFiles: _selectedFiles,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Builder(
+                    builder: (context) {
+                      return ValueListenableBuilder(
+                        valueListenable: InheritedSearchFilterData.of(context)
+                            .searchFilterDataProvider!
+                            .isSearchingNotifier,
+                        builder: (context, value, _) {
+                          return value
+                              ? HierarchicalSearchGallery(
+                                  tagPrefix: tagPrefix,
+                                  selectedFiles: _selectedFiles,
+                                )
+                              : gallery;
+                        },
+                      );
+                    },
+                  ),
+                  SmartAlbumsStatusWidget(
+                    collection: c.collection,
+                  ),
+                  FileSelectionOverlayBar(
+                    galleryType,
+                    _selectedFiles,
+                    collection: c.collection,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

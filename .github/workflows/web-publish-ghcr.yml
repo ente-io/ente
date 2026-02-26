@@ -22,7 +22,7 @@ jobs:
               uses: mr-smithers-excellent/docker-build-push@v6
               with:
                   dockerfile: web/Dockerfile
-                  directory: web
+                  directory: . # repo root
                   # Resultant package name will be ghcr.io/ente-io/web
                   image: web
                   registry: ghcr.io

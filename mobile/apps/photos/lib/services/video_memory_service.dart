@@ -8,6 +8,7 @@ import "package:flutter/cupertino.dart";
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -128,13 +129,15 @@ Future<void> _executeFFmpegProcess({
           _completeOperation(completer, onComplete);
           showToast(
             context,
-            "Video successfully create at ${_generateOutputPath()}",
+            AppLocalizations.of(
+              context,
+            ).videoExportSuccess(path: _generateOutputPath()),
           );
         } else {
           _logger.warning(
             "FFmpeg process failed with return code $returnCode in $executionTime seconds",
           );
-          showToast(context, "Video creation failed. Please try again.");
+          showToast(context, AppLocalizations.of(context).videoExportFailed);
           _completeOperation(completer, onComplete);
           await FFmpegKit.cancel();
         }

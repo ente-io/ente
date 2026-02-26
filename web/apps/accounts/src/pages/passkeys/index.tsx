@@ -2,6 +2,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
 import {
     Box,
@@ -11,6 +12,7 @@ import {
     Typography,
     styled,
 } from "@mui/material";
+import { CenteredFill } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
@@ -39,6 +41,18 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
+
+const AccountsPagePaper = styled(Paper)(({ theme }) => ({
+    marginBlock: theme.spacing(2),
+    padding: theme.spacing(5, 3),
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
+    width: "min(420px, 85vw)",
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(4),
+    boxShadow: "none",
+    borderRadius: "20px",
+}));
 
 const Page: React.FC = () => {
     const { showMiniDialog } = useBaseContext();
@@ -102,25 +116,66 @@ const Page: React.FC = () => {
     };
 
     return (
-        <Stack sx={{ minHeight: "100svh" }}>
-            <NavbarBase>
+        <Stack
+            sx={[
+                { minHeight: "100svh", bgcolor: "#f5f5f5" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
+            <NavbarBase
+                sx={{
+                    boxShadow: "none",
+                    borderBottom: "none",
+                    bgcolor: "transparent",
+                }}
+            >
                 <EnteLogo />
             </NavbarBase>
-            <Stack
-                sx={{ alignSelf: "center", m: 3, maxWidth: "375px", gap: 3 }}
+            <CenteredFill
+                sx={[
+                    { bgcolor: "#f5f5f5" },
+                    (theme) =>
+                        theme.applyStyles("dark", {
+                            bgcolor: "background.default",
+                        }),
+                ]}
             >
-                <Typography>{t("passkeys_description")}</Typography>
-                <Paper sx={{ p: 2, pb: "29px" }}>
+                <AccountsPagePaper>
+                    <Stack sx={{ gap: 2, alignItems: "flex-start" }}>
+                        <InfoIcon
+                            sx={[
+                                { color: "text.secondary", fontSize: 40 },
+                                (theme) =>
+                                    theme.applyStyles("dark", {
+                                        color: "text.muted",
+                                    }),
+                            ]}
+                        />
+                        <Typography
+                            sx={[
+                                { color: "text.secondary" },
+                                (theme) =>
+                                    theme.applyStyles("dark", {
+                                        color: "text.muted",
+                                    }),
+                            ]}
+                        >
+                            {t("passkeys_description")}
+                        </Typography>
+                    </Stack>
                     <AddPasskeyForm
                         token={token!}
                         onRefreshPasskeys={refreshPasskeys}
                     />
-                </Paper>
-                <PasskeysList
-                    passkeys={passkeys}
-                    onSelectPasskey={handleSelectPasskey}
-                />
-            </Stack>
+                    <PasskeysList
+                        passkeys={passkeys}
+                        onSelectPasskey={handleSelectPasskey}
+                    />
+                </AccountsPagePaper>
+            </CenteredFill>
 
             <ManagePasskeyDrawer
                 open={showPasskeyDrawer}

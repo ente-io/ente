@@ -1,16 +1,16 @@
+import { Link05Icon, PinIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
-import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { Overlay } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { Ellipsized2LineTypography } from "ente-base/components/Typography";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     BarItemTile,
     ItemCard,
@@ -538,14 +538,14 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
-        {attributes.has("pinned") && (
+        {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
+        {(attributes.has("pinned") || attributes.has("shareePinned")) && (
             // Need && to override the 20px set in the container.
-            <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
+            <HugeiconsIcon icon={PinIcon} size={18} />
         )}
         {attributes.has("shared") &&
             (attributes.has("sharedOnlyViaLink") ? (
-                <LinkIcon />
+                <HugeiconsIcon icon={Link05Icon} size={20} />
             ) : (
                 <PeopleIcon />
             ))}
@@ -559,6 +559,18 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     justify-content: flex-start;
     align-items: flex-end;
     gap: 4px;
+    & > .MuiSvgIcon-root {
+        font-size: 20px;
+    }
+`;
+
+const PersonPinnedIcon = styled(Overlay)`
+    padding: 4px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    color: white;
+    z-index: 1;
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
@@ -592,6 +604,11 @@ const PersonCard: React.FC<PersonCardProps> = ({
             onClick={() => onSelectPerson(person.id)}
         >
             {person.name && <CardText>{person.name}</CardText>}
+            {person.isPinned && (
+                <PersonPinnedIcon>
+                    <HugeiconsIcon icon={PinIcon} size={18} color="white" />
+                </PersonPinnedIcon>
+            )}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
     </div>

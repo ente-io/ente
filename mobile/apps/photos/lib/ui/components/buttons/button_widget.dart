@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import "package:photos/models/button_result.dart";
@@ -10,7 +11,6 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/models/custom_button_style.dart';
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/standalone/debouncer.dart';
 
 enum ButtonSize {
   small,
@@ -218,6 +218,12 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   @override
+  void dispose() {
+    _debouncer.cancelDebounceTimer();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
@@ -412,6 +418,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     if (widget.onTap != null) {
       _debouncer.run(
         () => Future(() {
+          if (!mounted) return;
           setState(() {
             executionState = ExecutionState.inProgress;
           });
@@ -432,6 +439,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           : null;
       _debouncer.cancelDebounceTimer();
       if (executionState == ExecutionState.successful) {
+        if (!mounted) return;
         setState(() {});
       }
 
@@ -470,6 +478,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         }
       }
       if (executionState == ExecutionState.error) {
+        if (!mounted) return;
         setState(() {
           executionState = ExecutionState.idle;
           widget.isInAlert
@@ -502,7 +511,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }) {
     if (mounted) {
       if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
+        Navigator.of(context).pop(ButtonResult(buttonAction, exception));
       } else if (exception != null) {
         //This is to show the execution was unsuccessful if the dialog is manually
         //closed before the execution completes.
@@ -512,6 +521,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   void _onTapDown(details) {
+    if (!mounted) return;
     setState(() {
       buttonColor = widget.buttonStyle.pressedButtonColor ??
           widget.buttonStyle.defaultButtonColor;
@@ -527,13 +537,17 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   void _onTapUp(details) {
     Future.delayed(
       const Duration(milliseconds: 84),
-      () => setState(() {
-        setAllStylesToDefault();
-      }),
+      () {
+        if (!mounted) return;
+        setState(() {
+          setAllStylesToDefault();
+        });
+      },
     );
   }
 
   void _onTapCancel() {
+    if (!mounted) return;
     setState(() {
       setAllStylesToDefault();
     });

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:ente_icons/ente_icons.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -10,7 +12,6 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/utils/standalone/data.dart";
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({super.key});
@@ -68,7 +69,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _BottomLeftOverlayIcon(
-      Icons.favorite_rounded,
+      EnteIcons.favoriteFilled,
       baseSize: 22,
     );
   }
@@ -209,7 +210,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
         padding: const EdgeInsets.only(right: 4, top: 4),
         child: UserAvatarWidget(
           user,
-          type: AvatarType.tiny,
+          type: AvatarType.sm,
           thumbnailView: true,
         ),
       ),
@@ -226,7 +227,7 @@ class TrashedFileOverlayText extends StatelessWidget {
         ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
                 Duration.microsecondsPerDay)
             .ceil();
-    final text = S.of(context).trashDaysLeft(daysLeft);
+    final text = AppLocalizations.of(context).trashDaysLeft(count: daysLeft);
     return FileOverlayText(text);
   }
 }

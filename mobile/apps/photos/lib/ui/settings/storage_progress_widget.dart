@@ -18,7 +18,7 @@ class StorageProgressWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             color: color,
           ),
-          width: constrains.maxWidth * fractionOfStorage,
+          width: constrains.maxWidth * fractionOfStorage.clamp(0.0, 1.0),
           height: 4,
         );
       },

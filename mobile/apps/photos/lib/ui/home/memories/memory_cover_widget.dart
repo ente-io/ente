@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
@@ -6,7 +7,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 // TODO: Use a single instance variable for `allMemories` and `allTitles`
 class MemoryCoverWidget extends StatefulWidget {
@@ -92,121 +92,68 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child: isSeen
-                ? ColorFiltered(
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFFBFBFBF),
-                      BlendMode.hue,
+            child: Container(
+              foregroundDecoration: isSeen
+                  ? const BoxDecoration(
+                      color: Color(0xFFBFBFBF),
+                      backgroundBlendMode: BlendMode.saturation,
+                    )
+                  : null,
+              child: Stack(
+                fit: StackFit.expand,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Hero(
+                    tag: "memories" + memory.file.tag,
+                    child: ThumbnailWidget(
+                      memory.file,
+                      shouldShowArchiveStatus: false,
+                      shouldShowSyncStatus: false,
+                      key: Key("memories" + memory.file.tag),
                     ),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        Hero(
-                          tag: "memories" + memory.file.tag,
-                          child: ThumbnailWidget(
-                            memory.file,
-                            shouldShowArchiveStatus: false,
-                            shouldShowSyncStatus: false,
-                            key: Key("memories" + memory.file.tag),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.black.withValues(alpha: 0.5),
-                                Colors.transparent,
-                              ],
-                              stops: const [0, 1],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 8,
-                          child: SizedBox(
-                            width: widget.width,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: Hero(
-                                tag: title,
-                                child: Center(
-                                  child: Text(
-                                    title,
-                                    style: getEnteTextTheme(context)
-                                        .miniBold
-                                        .copyWith(
-                                          color: isSeen
-                                              ? textFaintDark
-                                              : Colors.white,
-                                        ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Stack(
-                    fit: StackFit.expand,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Hero(
-                        tag: "memories" + memory.file.tag,
-                        child: ThumbnailWidget(
-                          memory.file,
-                          shouldShowArchiveStatus: false,
-                          shouldShowSyncStatus: false,
-                          key: Key("memories" + memory.file.tag),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.black.withValues(alpha: 0.5),
-                              Colors.transparent,
-                            ],
-                            stops: const [0, 1],
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 8,
-                        child: SizedBox(
-                          width: widget.width,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
-                            child: Hero(
-                              tag: title,
-                              child: Center(
-                                child: Text(
-                                  title,
-                                  style: getEnteTextTheme(context)
-                                      .miniBold
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withValues(alpha: 0.5),
+                          Colors.transparent,
+                        ],
+                        stops: const [0, 1],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    child: SizedBox(
+                      width: widget.width,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        child: Hero(
+                          tag: title,
+                          child: Center(
+                            child: Text(
+                              title,
+                              style: getEnteTextTheme(context)
+                                  .miniBold
+                                  .copyWith(
+                                    color:
+                                        isSeen ? textFaintDark : Colors.white,
+                                  ),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

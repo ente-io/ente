@@ -14,6 +14,7 @@ class UserDetails {
   final FamilyData? familyData;
   final ProfileData? profileData;
   final BonusData? bonusData;
+  final LockerFamilyUsage? lockerFamilyUsage;
 
   const UserDetails(
     this.email,
@@ -25,7 +26,46 @@ class UserDetails {
     this.familyData,
     this.profileData,
     this.bonusData,
+    this.lockerFamilyUsage,
   );
+
+  // Locker-specific limits computed client-side based on subscription
+  // Free tier: 100 files, 1GB storage
+  // Paid tier: 1000 files, 10GB storage
+  static const int _lockerFileLimitFree = 100;
+  static const int _lockerFileLimitPaid = 1000;
+  static const int _lockerStorageLimitFree = 1 * 1024 * 1024 * 1024; // 1GB
+  static const int _lockerStorageLimitPaid = 10 * 1024 * 1024 * 1024; // 10GB
+
+  /// Returns true if user has paid access (direct subscription, family plan,
+  /// or paid add-ons)
+  bool hasPaidSubscription() {
+    // Direct paid subscription
+    if (!subscription.isFreePlan() && subscription.isValid()) {
+      return true;
+    }
+    // Family plan member
+    if (isPartOfFamily()) {
+      return true;
+    }
+    // Has paid add-ons
+    if (hasPaidAddon()) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Returns the locker file limit based on subscription status
+  int getLockerFileLimit() {
+    return hasPaidSubscription() ? _lockerFileLimitPaid : _lockerFileLimitFree;
+  }
+
+  /// Returns the locker storage limit based on subscription status
+  int getLockerStorageLimit() {
+    return hasPaidSubscription()
+        ? _lockerStorageLimitPaid
+        : _lockerStorageLimitFree;
+  }
 
   bool isPartOfFamily() {
     return familyData?.members?.isNotEmpty ?? false;
@@ -96,6 +136,7 @@ class UserDetails {
       FamilyData.fromMap(map['familyData']),
       ProfileData.fromJson(map['profileData']),
       BonusData.fromJson(map['bonusData']),
+      LockerFamilyUsage.fromJson(map['lockerFamilyUsage']),
     );
   }
 
@@ -110,6 +151,7 @@ class UserDetails {
       'familyData': familyData?.toMap(),
       'profileData': profileData?.toJson(),
       'bonusData': bonusData?.toJson(),
+      'lockerFamilyUsage': lockerFamilyUsage?.toJson(),
     };
   }
 
@@ -246,4 +288,22 @@ class FamilyData {
 
   factory FamilyData.fromJson(String source) =>
       FamilyData.fromMap(json.decode(source));
+}
+
+class LockerFamilyUsage {
+  final int familyFileCount;
+
+  const LockerFamilyUsage(this.familyFileCount);
+
+  factory LockerFamilyUsage.fromJson(Map<String, dynamic>? json) {
+    return LockerFamilyUsage(
+      (json?['familyFileCount'] ?? 0) as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'familyFileCount': familyFileCount,
+    };
+  }
 }

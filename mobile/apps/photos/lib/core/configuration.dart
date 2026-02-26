@@ -8,11 +8,16 @@ import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/app_mode.dart";
+import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
+import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
@@ -20,16 +25,20 @@ import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/api/user/key_attributes.dart';
-import 'package:photos/models/api/user/key_gen_result.dart';
-import 'package:photos/models/api/user/private_key_attributes.dart';
+import 'package:photos/gateways/users/models/key_attributes.dart';
+import 'package:photos/gateways/users/models/key_gen_result.dart';
+import 'package:photos/gateways/users/models/private_key_attributes.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
@@ -53,16 +62,12 @@ class Configuration {
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldBackupVideos = "should_backup_videos";
   static const keyShowSystemLockScreen = "should_show_lock_screen";
-  static const keyHasSelectedAnyBackupFolder =
-      "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
-  static const hasSelectedAllFoldersForBackupKey =
-      "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
   static final _logger = Logger("Configuration");
@@ -103,13 +108,25 @@ class Configuration {
           _documentsDirectory + "/ente-shared-media";
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
+        _logger.info(
+          "(for debugging) Token not found, deleting all secure storage data",
+        );
         await _secureStorage.deleteAll();
       } else {
+        _logger.info(
+          "(for debugging) Token found, loading secure storage data",
+        );
         _key = await _secureStorage.read(
           key: keyKey,
         );
+        _logger.info(
+          "(for debugging) Key loaded from secure storage, is null: ${_key == null}",
+        );
         _secretKey = await _secureStorage.read(
           key: secretKeyKey,
+        );
+        _logger.info(
+          "(for debugging) Secret Key loaded from secure storage, is null: ${_secretKey == null}",
         );
         if (_key == null) {
           await logout(autoLogout: true);
@@ -117,6 +134,7 @@ class Configuration {
         await _migrateSecurityStorageToFirstUnlock();
       }
       SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+      _logger.info('User ID: ${getUserID()}');
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
       /*
@@ -175,7 +193,11 @@ class Configuration {
   }
 
   Future<void> logout({bool autoLogout = false}) async {
+    _logger.info("Logging out, autoLogout: $autoLogout");
     if (!autoLogout) {
+      if (flagService.stopStreamProcess) {
+        VideoPreviewService.instance.stop('logout');
+      }
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
         try {
@@ -187,20 +209,73 @@ class Configuration {
         }
       }
     }
+
+    // Clear preferences and secure storage
     await _preferences.clear();
     await _secureStorage.deleteAll();
     _key = null;
     _cachedToken = null;
     _secretKey = null;
+    _volatilePassword = null;
+
+    // Clear all scheduled notifications (ritual reminders, memories, etc.)
+    await NotificationService.instance.clearAllScheduledNotifications(
+      logLines: false,
+    );
+
+    // Clear all database tables
     await FilesDB.instance.clearTable();
+    await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
-
     await UploadLocksDB.instance.clearTable();
-    await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+
+    // Clear all in-memory caches
+    ThumbnailInMemoryLruCache.clearAll();
+    FileLruCache.clearAll();
+
+    // Clear video cache
+    try {
+      await VideoCacheManager.instance.emptyCache();
+    } catch (e) {
+      _logger.warning("Failed to clear video cache", e);
+    }
+
+    // Clear all service caches
+    await SimilarImagesService.instance.clearCache();
+    await IgnoredFilesService.instance.reset();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+
+    // Clear additional caches (safe to call even if not initialized)
+    try {
+      await magicCacheService.clearMagicCache();
+    } catch (e) {
+      _logger.info("MagicCacheService not initialized or failed to clear", e);
+    }
+
+    try {
+      await memoriesCacheService.clearMemoriesCache();
+    } catch (e) {
+      _logger.info(
+        "MemoriesCacheService not initialized or failed to clear",
+        e,
+      );
+    }
+
+    // Reset Ente Rewind caches and services
+    try {
+      wrappedService.resetForLogout();
+    } catch (e) {
+      _logger.info("WrappedService not initialized or failed to reset", e);
+    }
+    try {
+      await wrappedCacheService.clearAll();
+    } catch (e) {
+      _logger.info("WrappedCacheService not initialized or failed to clear", e);
+    }
+
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();
@@ -208,6 +283,16 @@ class Configuration {
       FavoritesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
+      try {
+        smartAlbumsService.clearCache();
+      } catch (e) {
+        _logger.info("SmartAlbumsService not initialized", e);
+      }
+      try {
+        billingService.clearCache();
+      } catch (e) {
+        _logger.info("BillingService not initialized", e);
+      }
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);
@@ -243,13 +328,17 @@ class Configuration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey,
+      derivedKeyResult.key,
+    );
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.sk, masterKey);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(
+      keyPair.sk,
+      masterKey,
+    );
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -289,8 +378,10 @@ class Configuration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey!, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey!,
+      derivedKeyResult.key,
+    );
 
     final existingAttributes = getKeyAttributes();
 
@@ -351,9 +442,7 @@ class Configuration {
       CryptoUtil.base642bin(attributes.publicKey),
       secretKey,
     );
-    await setToken(
-      CryptoUtil.bin2base64(token, urlSafe: true),
-    );
+    await setToken(CryptoUtil.bin2base64(token, urlSafe: true));
     return keyEncryptionKey;
   }
 
@@ -369,14 +458,18 @@ class Configuration {
     final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
 
     return existingAttributes!.copyWith(
-      masterKeyEncryptedWithRecoveryKey:
-          CryptoUtil.bin2base64(encryptedMasterKey.encryptedData!),
-      masterKeyDecryptionNonce:
-          CryptoUtil.bin2base64(encryptedMasterKey.nonce!),
-      recoveryKeyEncryptedWithMasterKey:
-          CryptoUtil.bin2base64(encryptedRecoveryKey.encryptedData!),
-      recoveryKeyDecryptionNonce:
-          CryptoUtil.bin2base64(encryptedRecoveryKey.nonce!),
+      masterKeyEncryptedWithRecoveryKey: CryptoUtil.bin2base64(
+        encryptedMasterKey.encryptedData!,
+      ),
+      masterKeyDecryptionNonce: CryptoUtil.bin2base64(
+        encryptedMasterKey.nonce!,
+      ),
+      recoveryKeyEncryptedWithMasterKey: CryptoUtil.bin2base64(
+        encryptedRecoveryKey.encryptedData!,
+      ),
+      recoveryKeyDecryptionNonce: CryptoUtil.bin2base64(
+        encryptedRecoveryKey.nonce!,
+      ),
     );
   }
 
@@ -449,6 +542,7 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+    await localSettings.setAppMode(AppMode.online);
     Bus.instance.fire(SignedInEvent());
   }
 
@@ -501,14 +595,9 @@ class Configuration {
     _key = key;
     if (key == null) {
       // Used to clear key from secure storage
-      await _secureStorage.delete(
-        key: keyKey,
-      );
+      await _secureStorage.delete(key: keyKey);
     } else {
-      await _secureStorage.write(
-        key: keyKey,
-        value: key,
-      );
+      await _secureStorage.write(key: keyKey, value: key);
     }
   }
 
@@ -516,14 +605,9 @@ class Configuration {
     _secretKey = secretKey;
     if (secretKey == null) {
       // Used to clear secret key from secure storage
-      await _secureStorage.delete(
-        key: secretKeyKey,
-      );
+      await _secureStorage.delete(key: secretKeyKey);
     } else {
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: secretKey,
-      );
+      await _secureStorage.write(key: secretKeyKey, value: secretKey);
     }
   }
 
@@ -627,39 +711,19 @@ class Configuration {
     return _volatilePassword;
   }
 
-  Future<void> setHasSelectedAnyBackupFolder(bool val) async {
-    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
-  }
-
-  bool hasSelectedAnyBackupFolder() {
-    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
-  }
-
-  bool hasSelectedAllFoldersForBackup() {
-    return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
-  }
-
-  Future<void> setSelectAllFoldersForBackup(bool value) async {
-    await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
-  }
-
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
+    _logger.info(
+      "(for debugging) Migrating secure storage to first unlock if needed",
+    );
     final hasMigratedSecureStorage =
         _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {
-      await _secureStorage.write(
-        key: keyKey,
-        value: _key,
-      );
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: _secretKey,
-      );
-      await _preferences.setBool(
-        hasMigratedSecureStorageKey,
-        true,
-      );
+      _logger.info("(for debugging) Migrating secure storage to first unlock");
+      await _secureStorage.write(key: keyKey, value: _key);
+      await _secureStorage.write(key: secretKeyKey, value: _secretKey);
+      await _preferences.setBool(hasMigratedSecureStorageKey, true);
     }
+    _logger.info("(for debugging) Migration check complete");
   }
 
   Future<String> _getOrCreateAnonymousUserID() async {

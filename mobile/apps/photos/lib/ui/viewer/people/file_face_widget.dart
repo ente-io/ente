@@ -3,8 +3,10 @@ import "dart:typed_data";
 import 'package:flutter/widgets.dart';
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -23,6 +25,16 @@ class FileFaceWidget extends StatefulWidget {
   final bool useFullFile;
   final bool thumbnailFallback;
 
+  /// Physical pixel width for image decoding optimization.
+  ///
+  /// When provided and > 0, the image will be decoded at this width, with height
+  /// computed to preserve aspect ratio. This reduces memory usage for small displays.
+  ///
+  /// Typically calculated as: `(logicalWidth * MediaQuery.devicePixelRatioOf(context)).toInt()`
+  ///
+  /// If null or <= 0, the image is decoded at full resolution.
+  final int? cachedPixelWidth;
+
   const FileFaceWidget(
     this.file, {
     this.face,
@@ -30,6 +42,7 @@ class FileFaceWidget extends StatefulWidget {
     this.clusterID,
     this.useFullFile = true,
     this.thumbnailFallback = false,
+    this.cachedPixelWidth,
     super.key,
   });
 
@@ -50,10 +63,13 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
   void dispose() {
     super.dispose();
     if (widget.faceCrop == null) {
-      checkStopTryingToGenerateFaceThumbnails(
-        widget.file.uploadedFileID!,
-        useFullFile: widget.useFullFile,
-      );
+      final fileId = widget.file.uploadedFileID;
+      if (fileId != null) {
+        checkStopTryingToGenerateFaceThumbnails(
+          fileId,
+          useFullFile: widget.useFullFile,
+        );
+      }
     }
   }
 
@@ -63,7 +79,17 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
       future: faceCropFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+          // Only cacheWidth (not cacheHeight) to preserve aspect ratio.
+          // Face crops are typically portrait, so constraining width ensures
+          // sufficient height for BoxFit.cover without upscaling.
+          final shouldOptimize =
+              widget.cachedPixelWidth != null && widget.cachedPixelWidth! > 0;
+          final ImageProvider imageProvider = shouldOptimize
+              ? Image.memory(
+                  snapshot.data!,
+                  cacheWidth: widget.cachedPixelWidth,
+                ).image
+              : MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -96,9 +122,27 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
       return widget.faceCrop;
     }
     try {
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      int? recentFileID;
+      if (isOfflineMode) {
+        final localId = widget.file.localID;
+        if (localId == null || localId.isEmpty) {
+          _logger.severe("Missing local ID for face crop generation");
+          return null;
+        }
+        recentFileID =
+            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+      } else {
+        recentFileID = widget.file.uploadedFileID;
+      }
+      if (recentFileID == null) {
+        _logger.severe("Missing file ID for face crop generation");
+        return null;
+      }
       final Face? faceToUse = widget.face ??
-          await MLDataDB.instance.getCoverFaceForPerson(
-            recentFileID: widget.file.uploadedFileID!,
+          await mlDataDB.getCoverFaceForPerson(
+            recentFileID: recentFileID,
             clusterID: widget.clusterID,
           );
       if (faceToUse == null) {
@@ -116,7 +160,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
         return cropMap[faceToUse.faceID];
       } else {
         _logger.severe(
-          "No face crop found for face ${faceToUse.faceID} in file ${widget.file.uploadedFileID}",
+          "No face crop found for face ${faceToUse.faceID} in file $recentFileID",
         );
         return null;
       }

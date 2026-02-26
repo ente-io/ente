@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"database/sql"
+	"errors"
 	"fmt"
+	"golang.org/x/net/idna"
 	"net/http"
 	"net/url"
 	"strings"
@@ -15,6 +18,7 @@ import (
 
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -30,18 +34,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
-var whitelistedCollectionShareIDs = []int64{111}
+var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/verify-password"}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {
 	CollectionLinkRepo   *public.CollectionLinkRepo
 	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
+	AnonUsersRepo        *socialrepo.AnonUsersRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
 	RemoteStoreRepo      *remotestore.Repository
+	AnonIdentitySecret   []byte
 }
 
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
@@ -72,10 +77,15 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID); err != nil {
+			isFreeUser, err := m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID)
+			if err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
+			}
+			// Override device limit to 5 for free users
+			if isFreeUser {
+				publicCollectionSummary.DeviceLimit = public2.FreeUserDeviceLimit
 			}
 
 			// validate device limit
@@ -113,26 +123,55 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 			m.Cache.Set(cacheKey, publicCollectionSummary, cache.DefaultExpiration)
 		}
 
-		c.Set(auth.PublicAccessKey, ente.PublicAccessContext{
-			ID:           publicCollectionSummary.ID,
-			IP:           clientIP,
-			UserAgent:    userAgent,
-			CollectionID: publicCollectionSummary.CollectionID,
-		})
+		publicCtx := ente.PublicAccessContext{
+			ID:            publicCollectionSummary.ID,
+			IP:            clientIP,
+			UserAgent:     userAgent,
+			CollectionID:  publicCollectionSummary.CollectionID,
+			EnableComment: publicCollectionSummary.EnableComment,
+		}
+		c.Set(auth.PublicAccessKey, publicCtx)
+
+		if err := m.attachAnonIdentity(c, publicCtx.CollectionID); err != nil {
+			status := http.StatusInternalServerError
+			switch {
+			case errors.Is(err, ente.ErrAuthenticationRequired):
+				status = http.StatusUnauthorized
+			case errors.Is(err, ente.ErrPermissionDenied):
+				status = http.StatusForbidden
+			case errors.Is(err, ente.ErrBadRequest):
+				status = http.StatusBadRequest
+			}
+			c.AbortWithStatusJSON(status, gin.H{"error": err.Error()})
+			return
+		}
+
 		c.Next()
 	}
 }
-func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) error {
+
+// validateOwnersSubscription checks if the owner has an active subscription.
+// Returns (isFreeUser, error) where isFreeUser is true if user is on free plan but has active subscription.
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) (bool, error) {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
+		return false, stacktrace.Propagate(err, "")
 	}
-	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+
+	isFreeUser := false
+	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to validate owners subscription")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return false, stacktrace.Propagate(err, "failed to validate owners subscription")
+		}
+		isFreeUser = true
+		// Free user - check if they have active subscription (not expired)
+		if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false); err != nil {
+			return false, stacktrace.Propagate(err, "failed to validate owners subscription")
+		}
 	}
-	m.validateOrigin(c, userID)
-	return nil
+
+	return isFreeUser, m.validateOrigin(c, userID)
 }
 
 func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
@@ -161,12 +200,10 @@ func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 		deviceLimit = public2.DeviceLimitThresholdMultiplier * public2.DeviceLimitThreshold
 	}
 
-	if count >= public2.DeviceLimitWarningThreshold {
-		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
-			m.DiscordController.NotifyPotentialAbuse(
-				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",
-					collectionSummary.CollectionID, collectionSummary.ID))
-		}
+	if count >= public2.DeviceLimitWarningThreshold && count%200 == 0 {
+		m.DiscordController.NotifyPotentialAbuse(
+			fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d, DeviceCount: %d}",
+				collectionSummary.CollectionID, collectionSummary.ID, count))
 	}
 
 	if deviceLimit > 0 && count >= deviceLimit {
@@ -189,11 +226,14 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 	return m.PublicCollectionCtrl.ValidateJWTToken(c, accessTokenJWT, *collectionSummary.PassHash)
 }
 
-func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) {
+func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
 
-	if origin == "" || origin == viper.GetString("apps.public-albums") {
-		return
+	if origin == "" ||
+		origin == viper.GetString("apps.public-albums") ||
+		origin == viper.GetString("apps.embed-albums") ||
+		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
+		return nil
 	}
 	reqId := requestid.Get(c)
 	logger := logrus.WithFields(logrus.Fields{
@@ -201,28 +241,76 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		"req_id":  reqId,
 		"origin":  origin,
 	})
-	alertMessage := fmt.Sprintf("custom domain check failed %s", reqId)
-	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	alertMessage := fmt.Sprintf("custom domain %s", reqId)
+	domain, err := m.RemoteStoreRepo.GetEffectiveDomain(c, ownerID)
 	if err != nil {
-		logger.WithError(err).Error("failed to fetch custom domain for owner")
-		m.DiscordController.NotifyPotentialAbuse(alertMessage)
-		return
+		logger.WithError(err).Error("domainFetchFailed")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainFetchFailed")
+		return nil
 	}
 	if domain == nil || *domain == "" {
-		logger.Warn("custom domain is nil or empty")
-		m.DiscordController.NotifyPotentialAbuse(alertMessage)
-		return
+		logger.Warn("domainNotConfigured")
+		return ente.NewPermissionDeniedError("no custom domain configured")
 	}
 	parse, err := url.Parse(origin)
 	if err != nil {
-		logger.WithError(err).Error("failed to parse origin URL")
-		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - failed to parse origin URL")
-		return
+		logger.WithError(err).Error("originParseFailedL")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - originParseFailed")
+		return nil
 	}
-	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
-		logger.Warnf("custom domain check failed for owner %d, origin %s, domain %s", ownerID, origin, *domain)
-		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+	unicodeDomain, err := idna.ToUnicode(*domain)
+	if err != nil {
+		logger.WithError(err).Error("domainToUnicodeFailed")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainToUnicodeFailed")
+		return nil
 	}
+
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) && !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(unicodeDomain)) {
+		logger.Warnf("domainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")
+		return ente.NewPermissionDeniedError("unknown custom domain")
+	}
+	// Additional exact match check. In the future, remove the contains check above and only keep this exact match check.
+	if !strings.EqualFold(parse.Host, *domain) && !strings.EqualFold(parse.Host, unicodeDomain) {
+		logger.Warnf("exactDomainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - exactDomainMismatch")
+		// Do not return error here till we are fully sure that this won't cause any issues for existing
+		// custom domains.
+		// return ente.NewPermissionDeniedError("unknown custom domain")
+	}
+	return nil
+}
+
+func (m *CollectionLinkMiddleware) attachAnonIdentity(c *gin.Context, collectionID int64) error {
+	if len(m.AnonIdentitySecret) == 0 {
+		return nil
+	}
+	token := strings.TrimSpace(c.GetHeader("X-Anon-User-Token"))
+	if token == "" {
+		return nil
+	}
+	claim, err := ente.ParseAnonymousIdentityToken(m.AnonIdentitySecret, token)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	anonID := claim.Subject
+	if anonID == "" {
+		return ente.ErrAuthenticationRequired
+	}
+	if m.AnonUsersRepo != nil {
+		anonUser, err := m.AnonUsersRepo.GetByID(c, anonID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return ente.ErrAuthenticationRequired
+			}
+			return stacktrace.Propagate(err, "")
+		}
+		if anonUser.CollectionID != collectionID {
+			return ente.ErrPermissionDenied
+		}
+	}
+	auth.SetPublicAnonUserID(c, anonID)
+	return nil
 }
 
 func computeHashKeyForList(list []string, delim string) string {

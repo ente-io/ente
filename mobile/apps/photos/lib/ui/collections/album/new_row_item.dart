@@ -1,4 +1,5 @@
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -8,7 +9,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class NewAlbumRowItemWidget extends StatelessWidget {
   final Color? color;
@@ -28,9 +28,9 @@ class NewAlbumRowItemWidget extends StatelessWidget {
       onTap: () async {
         final result = await showTextInputDialog(
           context,
-          title: S.of(context).newAlbum,
-          submitButtonLabel: S.of(context).create,
-          hintText: S.of(context).enterAlbumName,
+          title: AppLocalizations.of(context).newAlbum,
+          submitButtonLabel: AppLocalizations.of(context).create,
+          hintText: AppLocalizations.of(context).enterAlbumName,
           alwaysShowSuccessState: false,
           initialValue: "",
           textCapitalization: TextCapitalization.words,
@@ -94,7 +94,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            S.of(context).addNew,
+            AppLocalizations.of(context).addNew,
             style: getEnteTextTheme(context).smallFaint,
           ),
         ],

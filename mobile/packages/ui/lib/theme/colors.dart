@@ -31,21 +31,21 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   }) {
     final appColors = switch (app) {
       EnteApp.auth => (
-          primary700: const Color.fromARGB(255, 164, 0, 182),
-          primary500: const Color.fromARGB(255, 204, 10, 101),
-          primary400: const Color.fromARGB(255, 122, 41, 193),
-          primary300: const Color.fromARGB(255, 152, 77, 244),
-          gradientButtonBgColor: const Color(0xFF531DAB),
+          primary700: const Color(0xFF722ED1),
+          primary500: const Color(0xFF8F33D6),
+          primary400: const Color(0xFF7A29C1),
+          primary300: const Color(0xFF984DF4),
+          gradientButtonBgColor: const Color(0xFF722ED1),
           gradientButtonBgColors: const [
-            Color.fromARGB(255, 122, 41, 193),
-            Color.fromARGB(255, 122, 41, 193),
+            Color(0xFF722ED1),
+            Color(0xFF8F33D6),
           ],
         ),
       EnteApp.locker => (
-          primary700: const Color.fromARGB(255, 0, 122, 255),
-          primary400: const Color.fromARGB(255, 52, 152, 255),
+          primary700: const Color.fromRGBO(16, 113, 255, 1),
           primary500: const Color.fromARGB(255, 102, 178, 255),
-          primary300: const Color.fromARGB(255, 153, 204, 255),
+          primary400: const Color.fromARGB(255, 52, 152, 255),
+          primary300: const Color.fromARGB(255, 236, 242, 250),
           gradientButtonBgColor: const Color.fromRGBO(0, 122, 255, 1),
           gradientButtonBgColors: const [
             Color.fromRGBO(0, 122, 255, 1),
@@ -158,6 +158,13 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   final Color primaryColor;
   final Color surface;
 
+  //other colors
+  final List<Color> avatarColors;
+
+  //golden colors
+  final Color golden700;
+  final Color golden500;
+
   bool get isLightTheme => backgroundBase == backgroundBaseLight;
 
   const EnteColorScheme(
@@ -188,7 +195,8 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     this.primary700,
     this.primary500,
     this.primary400,
-    this.primary300, {
+    this.primary300,
+    this.avatarColors, {
     this.warning700 = _warning700,
     this.warning800 = _warning800,
     this.warning500 = _warning500,
@@ -227,6 +235,8 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     this.codeCardBackgroundColor = _defaultCodeCardBackgroundColor,
     this.primaryColor = _defaultPrimaryColor,
     this.surface = _defaultPrimaryColor,
+    this.golden700 = _golden700,
+    this.golden500 = _golden500,
   });
 
   /// Factory constructor for light theme with customizable primary colors
@@ -273,6 +283,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       primary500 ?? _defaultPrimary500,
       primary400 ?? _defaultPrimary400,
       primary300 ?? _defaultPrimary300,
+      avatarLight,
       alternativeColor: primary400 ?? _defaultAlternativeColor,
       warning700: warning700 ?? _warning700,
       warning800: warning800 ?? _warning800,
@@ -326,6 +337,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       primary500 ?? _defaultPrimary500,
       primary400 ?? _defaultPrimary400,
       primary300 ?? _defaultPrimary300,
+      avatarDark,
       alternativeColor: primary400 ?? _defaultAlternativeColor,
       warning700: warning700 ?? _warning700,
       warning800: warning800 ?? _warning800,
@@ -404,6 +416,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     Color? searchResultsBackgroundColor,
     Color? codeCardBackgroundColor,
     Color? primaryColor,
+    List<Color>? avatarColors,
   }) {
     return EnteColorScheme(
       backgroundBase ?? this.backgroundBase,
@@ -434,6 +447,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       primary500 ?? this.primary500,
       primary400 ?? this.primary400,
       primary300 ?? this.primary300,
+      avatarColors ?? this.avatarColors,
       warning700: warning700 ?? this.warning700,
       warning800: warning800 ?? this.warning800,
       warning500: warning500 ?? this.warning500,
@@ -520,6 +534,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
       Color.lerp(primary500, other.primary500, t)!,
       Color.lerp(primary400, other.primary400, t)!,
       Color.lerp(primary300, other.primary300, t)!,
+      _lerpColorList(avatarColors, other.avatarColors, t),
       warning700: Color.lerp(warning700, other.warning700, t)!,
       warning800: Color.lerp(warning800, other.warning800, t)!,
       warning500: Color.lerp(warning500, other.warning500, t)!,
@@ -569,6 +584,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   _defaultPrimary500,
   _defaultPrimary400,
   _defaultPrimary300,
+  avatarLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -600,23 +616,24 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   _defaultPrimary500,
   _defaultPrimary400,
   _defaultPrimary300,
+  avatarDark,
 );
 
 // Background Colors
-const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
-const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
-const Color backgroundElevated2Light = Color.fromRGBO(251, 251, 251, 1);
+const Color backgroundBaseLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundElevatedLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color backgroundElevated2Light = Color.fromRGBO(250, 250, 250, 1);
 
 const Color backgroundBaseDark = Color.fromRGBO(0, 0, 0, 1);
-const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
-const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
+const Color backgroundElevatedDark = Color.fromRGBO(255, 255, 255, 0.04);
+const Color backgroundElevated2Dark = Color.fromRGBO(26, 26, 26, 1);
 
 // Backdrop Colors
 const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
 const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
 const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color backdropBaseDark = Color.fromRGBO(33, 33, 33, 1);
 const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
 const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 
@@ -765,6 +782,9 @@ const Color _defaultSearchResultsBackgroundColor =
 // Default Code Card Background Color
 const Color _defaultCodeCardBackgroundColor = Color.fromRGBO(246, 246, 246, 1);
 
+const Color _golden700 = Color(0xFFFDB816);
+const Color _golden500 = Color(0xFFFFC336);
+
 /// Utility class to help apps create custom color schemes with their brand colors.
 ///
 /// This class provides convenient methods to generate complete color schemes
@@ -877,3 +897,55 @@ class ColorSchemeBuilder {
     return (light: lightScheme, dark: darkScheme);
   }
 }
+
+const List<Color> avatarLight = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(147, 125, 194, 1), // Fixed duplicate
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(225, 160, 89, 1), // Fixed duplicate
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(107, 119, 178, 1), // Fixed duplicate
+  Color.fromRGBO(149, 127, 239, 1), // Fixed duplicate
+  Color.fromRGBO(221, 157, 226, 1),
+  Color.fromRGBO(130, 171, 139, 1),
+  Color.fromRGBO(155, 187, 232, 1),
+  Color.fromRGBO(143, 190, 190, 1),
+  Color.fromRGBO(138, 195, 161, 1),
+  Color.fromRGBO(168, 176, 242, 1),
+  Color.fromRGBO(176, 198, 149, 1),
+  Color.fromRGBO(233, 154, 173, 1),
+  Color.fromRGBO(209, 132, 132, 1),
+  Color.fromRGBO(120, 181, 167, 1),
+];
+
+const List<Color> avatarDark = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(147, 125, 194, 1),
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(225, 160, 89, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(107, 119, 178, 1),
+  Color.fromRGBO(149, 127, 239, 1),
+  Color.fromRGBO(221, 157, 226, 1),
+  Color.fromRGBO(130, 171, 139, 1),
+  Color.fromRGBO(155, 187, 232, 1),
+  Color.fromRGBO(143, 190, 190, 1),
+  Color.fromRGBO(138, 195, 161, 1),
+  Color.fromRGBO(168, 176, 242, 1),
+  Color.fromRGBO(176, 198, 149, 1),
+  Color.fromRGBO(233, 154, 173, 1),
+  Color.fromRGBO(209, 132, 132, 1),
+  Color.fromRGBO(120, 181, 167, 1),
+];

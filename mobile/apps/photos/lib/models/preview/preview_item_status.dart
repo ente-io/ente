@@ -9,4 +9,6 @@ enum PreviewItemStatus {
   retry,
   // done
   uploaded,
+  // paused (e.g., due to uploads in progress)
+  paused,
 }

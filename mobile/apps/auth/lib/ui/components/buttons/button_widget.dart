@@ -1,4 +1,4 @@
-import 'package:ente_auth/models/execution_states.dart'; 
+import 'package:ente_auth/models/execution_states.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';

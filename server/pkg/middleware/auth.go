@@ -55,10 +55,16 @@ func (m *AuthMiddleware) TokenAuthMiddleware(jwtClaimScope *jwt.ClaimScope) gin.
 					userID = claim.UserID
 				}
 			} else {
-				userID, err = m.UserAuthRepo.GetUserIDWithToken(token, app)
+				var isExpired bool
+				userID, isExpired, err = m.UserAuthRepo.GetUserIDWithToken(token, app)
 				if err != nil && !errors.Is(err, sql.ErrNoRows) {
 					logrus.Errorf("Failed to validate token: %s", err)
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to validate token"})
+					return
+				}
+				if isExpired {
+					logrus.Warningf("User token expired: %d", userID)
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
 					return
 				}
 			}

@@ -2,10 +2,10 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import "package:flutter_localizations/flutter_localizations.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
@@ -25,7 +25,6 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/bg_task_utils.dart";
 import "package:photos/utils/intent_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;
@@ -52,6 +51,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   late Debouncer _changeCallbackDebouncer;
+  StreamSubscription<Uri?>? _widgetClickedSubscription;
+  bool _didInitWidgetLaunchHandling = false;
 
   @override
   void initState() {
@@ -86,6 +87,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_didInitWidgetLaunchHandling) {
+      return;
+    }
+    _didInitWidgetLaunchHandling = true;
     _checkForWidgetLaunch();
   }
 
@@ -94,7 +99,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     await hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
       (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
     );
-    hw.HomeWidget.widgetClicked.listen(
+    _widgetClickedSubscription = hw.HomeWidget.widgetClicked.listen(
       (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
     );
   }
@@ -146,10 +151,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             supportedLocales: appSupportedLocales,
             localeListResolutionCallback: localResolutionCallBack,
             localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
+              ...AppLocalizations.localizationsDelegates,
             ],
           ),
         ),
@@ -171,10 +173,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
+            ...AppLocalizations.localizationsDelegates,
           ],
         ),
       );
@@ -186,6 +185,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _memoriesChangedSubscription.cancel();
     _peopleChangedSubscription.cancel();
+    _changeCallbackDebouncer.cancelDebounceTimer();
+    _widgetClickedSubscription?.cancel();
     super.dispose();
   }
 

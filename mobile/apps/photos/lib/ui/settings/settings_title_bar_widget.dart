@@ -33,10 +33,11 @@ class SettingsTitleBarWidget extends StatelessWidget {
             ),
             userDetails is UserDetails && !isCached
                 ? Text(
-                    S.of(context).memoryCount(
-                          userDetails.fileCount,
+                    AppLocalizations.of(context).memoryCount(
+                      count: userDetails.fileCount,
+                      formattedCount:
                           NumberFormat().format(userDetails.fileCount),
-                        ),
+                    ),
                     // "${NumberFormat().format(userDetails.fileCount)} memories",
                     style: getEnteTextTheme(context).largeBold,
                   )

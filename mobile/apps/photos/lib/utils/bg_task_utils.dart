@@ -1,12 +1,11 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
@@ -82,7 +81,6 @@ class BgTaskUtils {
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: Platform.isIOS && flagService.internalUser,
       );
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,
@@ -97,11 +95,22 @@ class BgTaskUtils {
           requiresStorageNotLow: false,
           requiresDeviceIdle: false,
         ),
-        existingWorkPolicy: workmanager.ExistingWorkPolicy.append,
+        existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
         backoffPolicy: workmanager.BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
       $.info("WorkManager configured");
+
+      // Check if task is scheduled (Android only)
+      if (Platform.isAndroid) {
+        final isScheduled = await workmanager.Workmanager()
+            .isScheduledByUniqueName(backgroundTaskIdentifier);
+        if (!isScheduled) {
+          $.warning(
+            "Background task is not scheduled: $backgroundTaskIdentifier",
+          );
+        }
+      }
     } catch (e) {
       $.warning("Failed to configure WorkManager: $e");
     }

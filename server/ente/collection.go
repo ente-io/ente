@@ -23,6 +23,7 @@ type Collection struct {
 	Sharees             []CollectionUser     `json:"sharees"`
 	PublicURLs          []PublicURL          `json:"publicURLs"`
 	UpdationTime        int64                `json:"updationTime"`
+	SharedAt            *int64               `json:"sharedAt,omitempty"`
 	IsDeleted           bool                 `json:"isDeleted,omitempty"`
 	MagicMetadata       *MagicMetadata       `json:"magicMetadata,omitempty"`
 	App                 string               `json:"app"`
@@ -131,9 +132,16 @@ type RemoveFilesRequest struct {
 // If collection owner wants to remove files owned by them, the client should move those files to other collections
 // owned by the collection user. Also, See [Collection Delete Versions] for additional context.
 type RemoveFilesV3Request struct {
-	CollectionID int64 `json:"collectionID" binding:"required"`
-	// OtherFileIDs represents the files which don't belong the user trying to remove files
-	FileIDs []int64 `json:"fileIDs"  binding:"required"`
+    CollectionID int64 `json:"collectionID" binding:"required"`
+    // OtherFileIDs represents the files which don't belong the user trying to remove files
+    FileIDs []int64 `json:"fileIDs"  binding:"required"`
+}
+
+// SuggestDeleteRequest represents a request to suggest deletion of files in a shared collection.
+// Only collection owner or admins can suggest deletion for files owned by others (not the acting user).
+type SuggestDeleteRequest struct {
+    CollectionID int64   `json:"collectionID" binding:"required"`
+    FileIDs      []int64 `json:"fileIDs" binding:"required"`
 }
 
 type RenameRequest struct {

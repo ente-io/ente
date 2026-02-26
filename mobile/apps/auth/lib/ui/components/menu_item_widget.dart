@@ -1,4 +1,4 @@
-import 'package:ente_auth/models/execution_states.dart';  
+import 'package:ente_auth/models/execution_states.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/menu_item_child_widgets.dart';
 import 'package:ente_auth/utils/debouncer.dart';
@@ -210,7 +210,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   Future<void> _onTap() async {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
-        executionStateNotifier.value == ExecutionState.successful) {return;}
+        executionStateNotifier.value == ExecutionState.successful) {
+      return;
+    }
     _debouncer.run(
       () => Future(
         () {
@@ -247,7 +249,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapDown(details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
-        executionStateNotifier.value == ExecutionState.successful) {return;}
+        executionStateNotifier.value == ExecutionState.successful) {
+      return;
+    }
     setState(() {
       if (widget.pressedColor == null) {
         hasPassedGestureCallbacks()
@@ -265,7 +269,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapUp(details) {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
-        executionStateNotifier.value == ExecutionState.successful) {return;}
+        executionStateNotifier.value == ExecutionState.successful) {
+      return;
+    }
     Future.delayed(
       const Duration(milliseconds: 100),
       () => setState(() {
@@ -276,7 +282,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onCancel() {
     if (executionStateNotifier.value == ExecutionState.inProgress ||
-        executionStateNotifier.value == ExecutionState.successful) {return;}
+        executionStateNotifier.value == ExecutionState.successful) {
+      return;
+    }
     setState(() {
       menuItemColor = widget.menuItemColor;
     });

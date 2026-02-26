@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:collection/collection.dart";
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +14,6 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -179,11 +179,10 @@ class PeopleHomeWidgetService {
       forceCustomPageRoute: true,
     ).ignore();
 
-    final clusterFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
+    final files = await SearchService.instance.getFilesForPersonID(
       personId,
+      sortOnTime: false,
     );
-    final files = clusterFiles.entries.expand((e) => e.value).toList();
 
     routeToPage(
       context,
@@ -226,13 +225,13 @@ class PeopleHomeWidgetService {
 
     // Check if first import is completed
     final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
     if (!hasCompletedFirstImport) {
       return true;
     }
 
     // Check ML consent
-    if (!flagService.hasGrantedMLConsent) {
+    if (isOfflineMode || !hasGrantedMLConsent) {
       return true;
     }
 
@@ -276,9 +275,10 @@ class PeopleHomeWidgetService {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
     final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
-      final clusterFiles = await SearchService.instance
-          .getClusterFilesForPersonID(person.remoteID);
-      final files = clusterFiles.entries.expand((e) => e.value).toList();
+      final files = await SearchService.instance.getFilesForPersonID(
+        person.remoteID,
+        sortOnTime: false,
+      );
       if (files.isEmpty) {
         _logger.warning("No files found for person: ${person.data.name}");
         continue;
@@ -324,8 +324,11 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    const limit = MAX_PEOPLE_LIMIT;
-    const maxAttempts = limit * 10;
+    final bool isWidgetPresent = await countHomeWidgets() > 0;
+    final limit = isWidgetPresent
+        ? HomeWidgetService.instance.getWidgetImageLimit()
+        : HomeWidgetService.WIDGET_IMAGE_LIMIT_MINIMAL;
+    final maxAttempts = limit * 10;
 
     int renderedCount = 0;
     int attemptsCount = 0;

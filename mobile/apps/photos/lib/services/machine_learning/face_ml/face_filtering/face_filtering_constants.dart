@@ -21,4 +21,4 @@ const kHighQualityFaceScore = 0.90;
 const kMinimumClusterSizeSearchResult = 10;
 
 /// The minimum cluster size for displaying a cluster when the user wants to see all faces
-const kMinimumClusterSizeAllFaces = 2;
+const kMinimumClusterSizeAllFaces = 1;

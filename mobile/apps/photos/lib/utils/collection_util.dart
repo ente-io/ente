@@ -1,4 +1,5 @@
 import "package:android_intent_plus/android_intent.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
@@ -10,15 +11,14 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 Future<void> onTapCollectEventPhotos(BuildContext context) async {
   final String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
   final result = await showTextInputDialog(
     context,
-    title: S.of(context).nameTheAlbum,
-    submitButtonLabel: S.of(context).create,
-    hintText: S.of(context).enterAlbumName,
+    title: AppLocalizations.of(context).nameTheAlbum,
+    submitButtonLabel: AppLocalizations.of(context).create,
+    hintText: AppLocalizations.of(context).enterAlbumName,
     alwaysShowSuccessState: false,
     initialValue: currentDate,
     textCapitalization: TextCapitalization.words,
@@ -62,9 +62,9 @@ Future<void> requestPermissionToOpenLinksInApp(
     final choice = await showChoiceActionSheet(
       isDismissible: false,
       context,
-      title: S.of(context).seePublicAlbumLinksInApp,
-      body: S.of(context).allowAppToOpenSharedAlbumLinks,
-      firstButtonLabel: S.of(context).allow,
+      title: AppLocalizations.of(context).seePublicAlbumLinksInApp,
+      body: AppLocalizations.of(context).allowAppToOpenSharedAlbumLinks,
+      firstButtonLabel: AppLocalizations.of(context).allow,
     );
     if (choice!.action == ButtonAction.first) {
       final AndroidIntent intent;

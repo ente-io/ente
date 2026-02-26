@@ -4,6 +4,8 @@ import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import RestoreIcon from "@mui/icons-material/Restore";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
@@ -46,8 +48,10 @@ import {
     applyPersonSuggestionUpdates,
     deleteCGroup,
     ignoreCluster,
+    pinCGroup,
     renameCGroup,
     suggestionsAndChoicesForPerson,
+    unpinCGroup,
 } from "ente-new/photos/services/ml";
 import {
     type CGroupPerson,
@@ -116,6 +120,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
         useModalVisibility();
 
     const handleRename = (name: string) => renameCGroup(cgroup, name);
+    const handlePin = useWrapAsyncOperation(() => pinCGroup(cgroup));
+    const handleUnpin = useWrapAsyncOperation(() => unpinCGroup(cgroup));
 
     const handleReset = () =>
         showMiniDialog({
@@ -152,6 +158,21 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 >
                     {t("rename")}
                 </OverflowMenuOption>
+                {person.isPinned ? (
+                    <OverflowMenuOption
+                        startIcon={<PushPinOutlinedIcon />}
+                        onClick={handleUnpin}
+                    >
+                        {t("unpin_person")}
+                    </OverflowMenuOption>
+                ) : (
+                    <OverflowMenuOption
+                        startIcon={<PushPinIcon />}
+                        onClick={handlePin}
+                    >
+                        {t("pin_person")}
+                    </OverflowMenuOption>
+                )}
                 <OverflowMenuOption
                     startIcon={<ClearIcon />}
                     onClick={handleReset}

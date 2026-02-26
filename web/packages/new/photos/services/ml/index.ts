@@ -3,6 +3,7 @@
  */
 
 import { proxy, transfer } from "comlink";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
@@ -20,6 +21,7 @@ import { setSearchPeople } from "../search";
 import {
     addUserEntity,
     pullUserEntities,
+    savedCGroups,
     updateOrCreateUserEntities,
     type CGroup,
 } from "../user-entity";
@@ -32,6 +34,7 @@ import {
     savedFaceIndex,
     savedIndexCounts,
 } from "./db";
+import { fileIDFromFaceID } from "./face";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
@@ -125,6 +128,15 @@ class MLState {
 
 /** State shared by the functions in this module. See {@link MLState}. */
 let _state = new MLState();
+/**
+ * Tracks if {@link initML} has already run for the current session.
+ *
+ * Some callers (notably the Next.js app shell) can end up invoking
+ * {@link initML} multiple times because of re-renders or hot reloads. Without
+ * this guard we'd reset {@link peopleStateSnapshot} on every invocation and
+ * discard the list of people until the next sync repopulates it.
+ */
+let _didInitML = false;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = () =>
@@ -177,8 +189,10 @@ export const isMLSupported = isDesktop;
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
+    if (_didInitML) return;
     _state.isMLEnabled = isMLEnabledLocal();
     resetPeopleStateSnapshot();
+    _didInitML = true;
 };
 
 export const logoutML = async () => {
@@ -191,6 +205,7 @@ export const logoutML = async () => {
         URL.revokeObjectURL(url),
     );
     _state = new MLState();
+    _didInitML = false;
     await clearMLDB();
 };
 
@@ -765,7 +780,13 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const id = await addUserEntity(
         "cgroup",
-        { name, assigned: [cluster], isHidden: false },
+        {
+            name,
+            assigned: [cluster],
+            isHidden: false,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     await mlSync();
@@ -830,12 +851,118 @@ export const deleteCGroup = async ({ id }: CGroup) => {
 };
 
 /**
+ * Change the pinned state of a person.
+ */
+export const setCGroupPinned = async (cgroup: CGroup, isPinned: boolean) => {
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, isPinned } }],
+        await ensureMasterKeyFromSession(),
+    );
+    return mlSync();
+};
+
+export const pinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, true);
+
+export const unpinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, false);
+
+export interface ManualPersonAssignmentResult {
+    /**
+     * File IDs that were added to the person's manual assignment list.
+     */
+    addedFileIDs: number[];
+    /**
+     * File IDs that were already associated with the person (either via a
+     * detected face or via an existing manual assignment).
+     */
+    alreadyAssignedFileIDs: number[];
+}
+
+/**
+ * Manually associate the given {@link fileIDs} with a remote cgroup ("person").
+ *
+ * The manual assignment is stored in the cgroup user entity data as an
+ * unordered set of file IDs ({@link CGroupUserEntityData.manuallyAssigned}).
+ */
+export const addManualFileAssignmentsToPerson = async (
+    personID: string,
+    fileIDs: Iterable<number>,
+): Promise<ManualPersonAssignmentResult> => {
+    if (!isMLEnabled()) return { addedFileIDs: [], alreadyAssignedFileIDs: [] };
+
+    const uniqueFileIDs = [...new Set(fileIDs)].filter(
+        (id) => typeof id == "number" && !isNaN(id),
+    );
+    if (!uniqueFileIDs.length)
+        return { addedFileIDs: [], alreadyAssignedFileIDs: [] };
+
+    const cgroup = (await savedCGroups()).find((c) => c.id == personID);
+    if (!cgroup)
+        throw new Error(
+            `addManualFileAssignmentsToPerson: missing cgroup ${personID}`,
+        );
+
+    // File IDs already associated with the person via detected faces.
+    const existingClusterFileIDs = new Set<number>();
+    for (const cluster of cgroup.data.assigned) {
+        for (const faceID of cluster.faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (fileID) existingClusterFileIDs.add(fileID);
+        }
+    }
+
+    const manualFileIDs = new Set(cgroup.data.manuallyAssigned);
+
+    const addedFileIDs: number[] = [];
+    const alreadyAssignedFileIDs: number[] = [];
+    for (const id of uniqueFileIDs) {
+        if (existingClusterFileIDs.has(id) || manualFileIDs.has(id)) {
+            alreadyAssignedFileIDs.push(id);
+        } else {
+            addedFileIDs.push(id);
+        }
+    }
+
+    if (!addedFileIDs.length) return { addedFileIDs, alreadyAssignedFileIDs };
+
+    const masterKey = await ensureMasterKeyFromSession();
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [
+            {
+                ...cgroup,
+                data: {
+                    ...cgroup.data,
+                    manuallyAssigned: [...manualFileIDs, ...addedFileIDs],
+                },
+            },
+        ],
+        masterKey,
+    );
+
+    // Pull the updated entity to keep local updatedAt state in sync, and
+    // reconstruct people state to reflect the new manual associations.
+    await pullUserEntities("cgroup", masterKey);
+    await updatePeopleState();
+
+    return { addedFileIDs, alreadyAssignedFileIDs };
+};
+
+/**
  * Return suggestions for the given {@link person}.
  *
  * The suggestion computation happens in a web worker.
- */
+ *
+ * Since the computation is happening in a web worker, and it doesn't
+ * have access to any localStorage, we need to pass the currentUserID explicitly.
+ * for the isHiddenCollection checks in the process.
+ *  */
 export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
-    worker().then((w) => w.suggestionsAndChoicesForPerson(person));
+    worker().then((w) =>
+        w.suggestionsAndChoicesForPerson(person, ensureLocalUser().id),
+    );
 
 /**
  * Implementation for the "save" action on the SuggestionsDialog.
@@ -865,7 +992,13 @@ export const applyPersonSuggestionUpdates = async (
 export const ignoreCluster = async (cluster: FaceCluster) => {
     await addUserEntity(
         "cgroup",
-        { name: "", assigned: [cluster], isHidden: true },
+        {
+            name: "",
+            assigned: [cluster],
+            isHidden: true,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     return mlSync();

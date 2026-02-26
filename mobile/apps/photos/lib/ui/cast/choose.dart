@@ -31,12 +31,12 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
         children: [
           const SizedBox(height: 8),
           Text(
-            S.of(context).autoPairDesc,
+            AppLocalizations.of(context).autoPairDesc,
             style: textStyle.bodyMuted,
           ),
           const SizedBox(height: 12),
           ButtonWidget(
-            labelText: S.of(context).autoPair,
+            labelText: AppLocalizations.of(context).autoPair,
             icon: Icons.cast_outlined,
             buttonType: ButtonType.neutral,
             buttonSize: ButtonSize.large,
@@ -47,12 +47,12 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
           ),
           const SizedBox(height: 36),
           Text(
-            S.of(context).manualPairDesc,
+            AppLocalizations.of(context).manualPairDesc,
             style: textStyle.bodyMuted,
           ),
           const SizedBox(height: 12),
           ButtonWidget(
-            labelText: S.of(context).pairWithPin,
+            labelText: AppLocalizations.of(context).pairWithPin,
             buttonType: ButtonType.neutral,
             // icon for pairing with TV manually
             icon: Icons.tv_outlined,

@@ -2,9 +2,14 @@ package collections
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -12,7 +17,6 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareRequest) ([]ente.CollectionUser, error) {
@@ -40,14 +44,20 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	if !collection.AllowSharing() {
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("sharing %s is not allowed", collection.Type))
 	}
+	shareActorID := collection.Owner.ID
 	if fromUserID != collection.Owner.ID {
-		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		shareeRole, err := c.CollectionRepo.GetCollectionShareeRole(cID, fromUserID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+			}
+			return nil, stacktrace.Propagate(err, "")
+		}
+		if shareeRole == nil || *shareeRole != ente.ADMIN {
+			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		}
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(fromUserID, true)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	err = c.CollectionRepo.Share(cID, fromUserID, toUserID, encryptedKey, role, time.Microseconds())
+	err = c.CollectionRepo.Share(cID, shareActorID, toUserID, encryptedKey, role, time.Microseconds())
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -90,7 +100,9 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(collection.Owner.ID, true)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return stacktrace.Propagate(err, "")
+		}
 	}
 	role := ente.VIEWER
 	if collectionLinkToken.EnableCollect {
@@ -114,13 +126,30 @@ func (c *CollectionController) UnShare(ctx *gin.Context, cID int64, fromUserID i
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	isLeavingCollection := toUserID == fromUserID
-	if fromUserID != collection.Owner.ID || isLeavingCollection {
+	if toUserID == fromUserID {
+		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+	}
+	if fromUserID != collection.Owner.ID {
+		shareeRole, err := c.CollectionRepo.GetCollectionShareeRole(cID, fromUserID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+			}
+			return nil, stacktrace.Propagate(err, "")
+		}
+		if shareeRole == nil || *shareeRole != ente.ADMIN {
+			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		}
+	}
+	if toUserID == collection.Owner.ID {
 		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	err = c.CollectionRepo.UnShare(cID, toUserID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
+	}
+	if err := c.removeUserSocialActivity(ctx, cID, toUserID); err != nil {
+		return nil, err
 	}
 	err = c.CastRepo.RevokeForGivenUserAndCollection(ctx, cID, toUserID)
 	if err != nil {
@@ -158,6 +187,9 @@ func (c *CollectionController) Leave(ctx *gin.Context, cID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	if err := c.removeUserSocialActivity(ctx, cID, userID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -181,7 +213,7 @@ func (c *CollectionController) UpdateShareeMagicMetadata(ctx *gin.Context, req e
 }
 
 // ShareURL generates a public auth-token for the given collectionID
-func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req ente.CreatePublicAccessTokenRequest) (
+func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente.CreatePublicAccessTokenRequest) (
 	ente.PublicURL, error) {
 	collection, err := c.CollectionRepo.Get(req.CollectionID)
 	if err != nil {
@@ -193,9 +225,17 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
+	valTrue := true
+	if req.EnableJoin == nil {
+		req.EnableJoin = &valTrue
+	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		}
+		// Override device limit for free users
+		req.DeviceLimit = public.FreeUserDeviceLimit
 	}
 	response, err := c.CollectionLinkCtrl.CreateLink(ctx, req)
 	if err != nil {
@@ -206,7 +246,7 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 
 // UpdateShareURL updates the shared url configuration
 func (c *CollectionController) UpdateShareURL(
-	ctx context.Context,
+	ctx *gin.Context,
 	userID int64,
 	req ente.UpdatePublicAccessTokenRequest,
 ) (*ente.PublicURL, error) {
@@ -218,7 +258,15 @@ func (c *CollectionController) UpdateShareURL(
 	}
 	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
+		if errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			// Only throw error if free user tries to change device limit to non-default value
+			if req.DeviceLimit != nil && *req.DeviceLimit != public.FreeUserDeviceLimit {
+				return nil, stacktrace.Propagate(&ente.ErrLinkEditNotAllowed, "")
+			}
+			// Allow other settings changes for free users
+		} else {
+			return nil, stacktrace.Propagate(err, "")
+		}
 	}
 	response, err := c.CollectionLinkCtrl.UpdateSharedUrl(ctx, req)
 	if err != nil {
@@ -269,6 +317,22 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 	for idx := range diff {
 		if diff[idx].MagicMetadata != nil {
 			diff[idx].MagicMetadata = nil
+		}
+		// For public diffs, treat action markers as deleted and strip action details
+		if diff[idx].Action != nil && !diff[idx].IsDeleted {
+			if *diff[idx].Action == ente.ActionRemove || *diff[idx].Action == ente.ActionDeleteSuggested {
+				diff[idx].IsDeleted = true
+			}
+		}
+		diff[idx].Action = nil
+		diff[idx].ActionUserID = nil
+		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
+			// This indicates that the file is deleted, but we still have a stale entry in the collection
+			reqContextLogger.WithFields(log.Fields{
+				"file_id":    diff[idx].ID,
+				"updated_at": diff[idx].UpdationTime,
+			}).Warning("stale collection_file found")
+			diff[idx].IsDeleted = true
 		}
 	}
 	return diff, hasMore, nil

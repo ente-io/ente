@@ -13,6 +13,7 @@ type File struct {
 	OwnerID            int64          `json:"ownerID"`
 	CollectionID       int64          `json:"collectionID"`
 	CollectionOwnerID  *int64         `json:"collectionOwnerID"`
+	CollectionAddedAt  *int64         `json:"collectionAddedAt,omitempty"`
 	EncryptedKey       string         `json:"encryptedKey"`
 	KeyDecryptionNonce string         `json:"keyDecryptionNonce"`
 	File               FileAttributes `json:"file" binding:"required"`
@@ -24,6 +25,23 @@ type File struct {
 	MagicMetadata      *MagicMetadata `json:"magicMetadata,omitempty"`
 	PubicMagicMetadata *MagicMetadata `json:"pubMagicMetadata,omitempty"`
 	Info               *FileInfo      `json:"info,omitempty"`
+	// Action and ActionUser are optionally set to drive client-side behavior during diffs
+	Action       *string `json:"action,omitempty"`
+	ActionUserID *int64  `json:"actionUser,omitempty"`
+}
+
+type MetaFile struct {
+	ID                 int64          `json:"id"`
+	OwnerID            int64          `json:"ownerID"`
+	CollectionID       int64          `json:"collectionID"`
+	EncryptedKey       string         `json:"encryptedKey"`
+	KeyDecryptionNonce string         `json:"keyDecryptionNonce"`
+	Metadata           FileAttributes `json:"metadata" binding:"required"`
+	// IsDeleted is True when the file ID is removed from the  CollectionID
+	IsDeleted          bool           `json:"isDeleted"`
+	UpdationTime       int64          `json:"updationTime"`
+	MagicMetadata      *MagicMetadata `json:"magicMetadata,omitempty"`
+	PubicMagicMetadata *MagicMetadata `json:"pubMagicMetadata,omitempty"`
 }
 
 // FileInfo has information about storage used by the file & it's metadata(future)
@@ -143,11 +161,24 @@ type UploadURL struct {
 	URL       string `json:"url"`
 }
 
+// UploadURLRequest represents the inputs necessary to mint a single upload URL
+type UploadURLRequest struct {
+	ContentLength int64  `json:"contentLength" binding:"required"`
+	ContentMD5    string `json:"contentMD5" binding:"required"`
+}
+
 // MultipartUploadURLs represents the part upload url for a specific object
 type MultipartUploadURLs struct {
 	ObjectKey   string   `json:"objectKey"`
 	PartURLs    []string `json:"partURLs"`
 	CompleteURL string   `json:"completeURL"`
+}
+
+// MultipartUploadURLRequest encapsulates the metadata needed to mint a multipart upload URL set
+type MultipartUploadURLRequest struct {
+	ContentLength int64    `json:"contentLength" binding:"required"`
+	PartLength    int64    `json:"partLength" binding:"required"`
+	PartMD5s      []string `json:"partMd5s" binding:"required"`
 }
 
 type ObjectType string

@@ -24,6 +24,7 @@ Here's the list of environment variables that is used by the cluster:
 | ---------- | --------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- |
 | `web`      | `ENTE_API_ORIGIN`     | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum).                    | http://localhost:8080           |
 | `web`      | `ENTE_ALBUMS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for Ente Album, used for public sharing. | http://localhost:3002           |
+| `web`      | `ENTE_PHOTOS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT`. Base URL for Ente Photos web app.                 | http://localhost:3000           |
 | `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                                                                | `pguser`                        |
 | `postgres` | `POSTGRES_DB`         | Name of database for use with Ente                                                              | `ente_db`                       |
 | `postgres` | `POSTGRES_PASSWORD`   | Password for PostgreSQL database's user                                                         | Randomly generated (quickstart) |
@@ -48,6 +49,9 @@ in `ports` in compose file.
 | Ente Accounts                                           | Web      | 3001      | 3001           |
 | Ente Albums                                             | Web      | 3002      | 3002           |
 | [Ente Auth](https://ente.io/auth/)                      | Web      | 3003      | 3003           |
-| [Ente Cast](https://help.ente.io/photos/features/cast/) | Web      | 3004      | 3004           |
+| [Ente Cast](https://ente.io/help/photos/features/cast/) | Web      | 3004      | 3004           |
+| Ente Public Locker                                      | Web      | 3005      | 3005           |
+| Ente Embed                                              | Web      | 3006      | 3006           |
+| Ente Paste (if deployed separately)                     | Web      | 3008      | 3008           |
 | MinIO                                                   | S3       | 3200      | 3200           |
 | PostgreSQL                                              | Database |           | 5432           |

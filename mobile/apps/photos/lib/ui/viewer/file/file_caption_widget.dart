@@ -68,7 +68,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
-  late String defaultHintText = S.of(context).fileInfoAddDescHint;
+  late String defaultHintText =
+      AppLocalizations.of(context).fileInfoAddDescHint;
   String hintText = '';
   Widget? keyboardTopButtons;
 
@@ -197,7 +198,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.generatedID!));
       return true;
     } else {
-      showShortToast(context, S.of(context).somethingWentWrong);
+      showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
       return false;
     }
   }

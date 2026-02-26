@@ -7,23 +7,32 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
-import 'package:ente_ui/theme/colors.dart';
-import 'package:ente_ui/theme/ente_theme_data.dart';
+import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/update_service.dart";
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/onboarding_page.dart';
+import "package:locker/ui/settings/widgets/app_update_dialog.dart";
+import "package:locker/ui/settings/widgets/change_log_sheet.dart";
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
-  const App({super.key, this.locale = const Locale("en")});
+  final AdaptiveThemeMode? savedThemeMode;
+
+  const App({
+    super.key,
+    this.locale = const Locale("en"),
+    this.savedThemeMode,
+  });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     final _AppState state = context.findAncestorStateOfType<_AppState>()!;
@@ -69,9 +78,55 @@ class _AppState extends State<App>
       if (mounted) {
         setState(() {});
       }
+      unawaited(_showChangeLogIfNeeded());
     });
     locale = widget.locale;
+    unawaited(_runStartupPrompts());
     super.initState();
+  }
+
+  Future<void> _runStartupPrompts() async {
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) {
+      return;
+    }
+    final didShowUpdatePrompt = await _checkForAppUpdates();
+    if (!mounted || didShowUpdatePrompt) {
+      return;
+    }
+    await _showChangeLogIfNeeded();
+  }
+
+  Future<bool> _checkForAppUpdates() async {
+    final shouldShow =
+        await UpdateService.instance.shouldShowUpdateNotification();
+    if (!shouldShow || !mounted) {
+      return false;
+    }
+
+    final latestVersion = UpdateService.instance.getLatestVersionInfo();
+    if (latestVersion == null) {
+      return false;
+    }
+
+    await showAppUpdateBottomSheet(
+      context,
+      latestVersionInfo: latestVersion,
+    );
+    await UpdateService.instance.markUpdateNotificationShown();
+    return true;
+  }
+
+  Future<void> _showChangeLogIfNeeded() async {
+    if (!mounted || !Configuration.instance.hasConfiguredAccount()) {
+      return;
+    }
+    final shouldShow = await UpdateService.instance.shouldShowChangeLog();
+    if (!shouldShow || !mounted) {
+      return;
+    }
+    await showChangeLogSheet(context);
+    await UpdateService.instance.markChangeLogShown();
   }
 
   @override
@@ -86,39 +141,25 @@ class _AppState extends State<App>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (Configuration.instance.hasConfiguredAccount()) {
+        CollectionService.instance.sync();
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final schemes = ColorSchemeBuilder.fromCustomColors(
-      primary700: const Color(0xFF1565C0), // Dark blue
-      primary500: const Color(0xFF2196F3), // Material blue
-      primary400: const Color(0xFF42A5F5), // Light blue
-      primary300: const Color(0xFF90CAF9), // Very light blue
-      iconButtonColor: const Color(0xFF1976D2), // Custom icon color
-      gradientButtonBgColors: const [
-        Color(0xFF1565C0),
-        Color(0xFF2196F3),
-        Color(0xFF42A5F5),
-      ],
-    );
-
-    final lightTheme = createAppThemeData(
-      brightness: Brightness.light,
-      colorScheme: schemes.light,
-    );
-
-    final darkTheme = createAppThemeData(
-      brightness: Brightness.dark,
-      colorScheme: schemes.dark,
-    );
-
     Widget buildApp() {
       if (Platform.isAndroid ||
           Platform.isWindows ||
           Platform.isLinux ||
           kDebugMode) {
         return AdaptiveTheme(
-          light: lightTheme,
-          dark: darkTheme,
-          initial: AdaptiveThemeMode.system,
+          light: lightThemeData,
+          dark: darkThemeData,
+          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
             title: "ente",
             themeMode: ThemeMode.system,
@@ -142,8 +183,8 @@ class _AppState extends State<App>
         return MaterialApp(
           title: "ente",
           themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: darkTheme,
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
           debugShowCheckedModeBanner: false,
           locale: locale,
           supportedLocales: appSupportedLocales,

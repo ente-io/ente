@@ -14,12 +14,12 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
 class PersonClustersPage extends StatefulWidget {
   final PersonEntity person;
-
   const PersonClustersPage(
     this.person, {
     super.key,
@@ -73,12 +73,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         SizedBox(
                           width: 100,
                           height: 100,
-                          child: ClipPath(
-                            clipper: ShapeBorderClipper(
-                              shape: ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.circular(75),
-                              ),
-                            ),
+                          child: FaceThumbnailSquircleClip(
                             child: files.isNotEmpty
                                 ? PersonFaceWidget(
                                     clusterID: clusterID,
@@ -99,7 +94,8 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  S.of(context).photosCount(files.length),
+                                  AppLocalizations.of(context)
+                                      .photosCount(count: files.length),
                                   style: getEnteTextTheme(context).body,
                                 ),
                                 (index != 0)
@@ -142,7 +138,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
             );
           } else if (snapshot.hasError) {
             _logger.warning("Failed to get cluster", snapshot.error);
-            return Center(child: Text(S.of(context).error));
+            return Center(child: Text(AppLocalizations.of(context).error));
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -209,6 +205,11 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
                     files,
                     clusterID,
                     widget.person,
+                    onClusterRemoved: () {
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
                   );
                 },
               );
@@ -216,7 +217,7 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
           );
         } else if (snapshot.hasError) {
           _logger.warning("Failed to get cluster", snapshot.error);
-          return Center(child: Text(S.of(context).error));
+          return Center(child: Text(AppLocalizations.of(context).error));
         } else {
           return const Center(child: CircularProgressIndicator());
         }
@@ -229,22 +230,62 @@ class _ClusterWrapperForGird extends StatefulWidget {
   final List<EnteFile> files;
   final String clusterID;
   final PersonEntity person;
+  final VoidCallback onClusterRemoved;
 
   const _ClusterWrapperForGird(
     this.files,
     this.clusterID,
-    this.person,
-  );
+    this.person, {
+    required this.onClusterRemoved,
+  });
 
   @override
   State<_ClusterWrapperForGird> createState() => __ClusterWrapperForGirdState();
 }
 
 class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
+  final Logger _logger = Logger("__ClusterWrapperForGirdState");
   bool _isVisible = false;
+  bool _isRemoving = false;
+
+  Future<void> _removeClusterFromPerson() async {
+    if (_isRemoving) {
+      return;
+    }
+    setState(() {
+      _isRemoving = true;
+    });
+    try {
+      await PersonService.instance.removeClusterToPerson(
+        personID: widget.person.remoteID,
+        clusterID: widget.clusterID,
+      );
+      _logger.info(
+        "Removed cluster ${widget.clusterID} from person ${widget.person.remoteID}",
+      );
+      Bus.instance.fire(PeopleChangedEvent());
+      if (mounted) {
+        widget.onClusterRemoved();
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "removing cluster from person",
+        e,
+        s,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRemoving = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loadingColor = getEnteColorScheme(context).strokeMuted;
+    final colorScheme = getEnteColorScheme(context);
+    final loadingColor = colorScheme.strokeMuted;
     return VisibilityDetector(
       key: ValueKey(widget.clusterID),
       onVisibilityChanged: (info) {
@@ -274,26 +315,60 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: ClipPath(
-                      clipper: ShapeBorderClipper(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(75),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      fit: StackFit.expand,
+                      children: [
+                        FaceThumbnailSquircleClip(
+                          child: widget.files.isNotEmpty
+                              ? PersonFaceWidget(
+                                  clusterID: widget.clusterID,
+                                )
+                              : const NoThumbnailWidget(
+                                  addBorder: false,
+                                ),
                         ),
-                      ),
-                      child: widget.files.isNotEmpty
-                          ? PersonFaceWidget(
-                              clusterID: widget.clusterID,
-                            )
-                          : const NoThumbnailWidget(
-                              addBorder: false,
+                        Positioned(
+                          top: -5,
+                          right: -5,
+                          child: AbsorbPointer(
+                            absorbing: _isRemoving,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _removeClusterFromPerson,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 150),
+                                opacity: _isRemoving ? 0.5 : 1,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.warning500,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: colorScheme.backgroundBase,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.remove,
+                                    size: 12,
+                                    color: colorScheme.backgroundBase,
+                                  ),
+                                ),
+                              ),
                             ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     context.l10n.memoryCount(
-                      widget.files.length,
-                      NumberFormat().format(widget.files.length),
+                      count: widget.files.length,
+                      formattedCount:
+                          NumberFormat().format(widget.files.length),
                     ),
                     style: getEnteTextTheme(context).small,
                     textAlign: TextAlign.center,

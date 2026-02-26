@@ -8,6 +8,12 @@ description: Guide to configuring Ente CLI for Self Hosted Instance
 If you are self-hosting, you can configure Ente CLI to export data & perform
 basic administrative actions.
 
+::: tip Installing Ente CLI
+
+For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente-io/ente/tree/main/cli/README.md).
+
+:::
+
 ## Step 1: Configure endpoint
 
 To do this, first configure the CLI to use your server's endpoint.

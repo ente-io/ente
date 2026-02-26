@@ -15,7 +15,7 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
 

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:ente_base/models/database.dart';
 import 'package:ente_configuration/base_configuration.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -15,6 +15,7 @@ class Configuration extends BaseConfiguration {
   static const authSecretKeyKey = "auth_secret_key";
   static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
+  static const autoBackupPasswordKey = "autoBackupPassword";
 
   late SharedPreferences _preferences;
   String? _authSecretKey;
@@ -32,6 +33,7 @@ class Configuration extends BaseConfiguration {
     );
     sqfliteFfiInit();
     await _initOfflineAccount();
+    await _initOnlineAccount();
   }
 
   Future<void> _initOfflineAccount() async {
@@ -39,6 +41,24 @@ class Configuration extends BaseConfiguration {
       key: offlineAuthSecretKey,
     );
   }
+
+  Future<void> _initOnlineAccount() async {
+    if (hasConfiguredAccount()) {
+      _authSecretKey = await _secureStorage.read(
+        key: authSecretKeyKey,
+      );
+    }
+  }
+
+  @override
+  // This includes both base keys (key, secretKey) and auth-specific keys.
+  List<String> get secureStorageKeys => [
+        BaseConfiguration.keyKey,
+        BaseConfiguration.secretKeyKey,
+        authSecretKeyKey,
+        // Note: offlineAuthSecretKey is intentionally not included here
+        // as it persists across logouts for offline mode
+      ];
 
   @override
   Future<void> logout({bool autoLogout = false}) async {
@@ -85,5 +105,18 @@ class Configuration extends BaseConfiguration {
       );
     }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
+  }
+
+  // Backup password methods
+  Future<String?> getBackupPassword() async {
+    return _secureStorage.read(key: autoBackupPasswordKey);
+  }
+
+  Future<void> setBackupPassword(String password) async {
+    await _secureStorage.write(key: autoBackupPasswordKey, value: password);
+  }
+
+  Future<void> clearBackupPassword() async {
+    await _secureStorage.delete(key: autoBackupPasswordKey);
   }
 }

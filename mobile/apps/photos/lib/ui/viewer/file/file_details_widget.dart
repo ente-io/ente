@@ -8,6 +8,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/core/user_config.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -38,9 +39,11 @@ import "package:photos/utils/file_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
+  final ScrollController? scrollController;
 
   const FileDetailsWidget(
     this.file, {
+    this.scrollController,
     super.key,
   });
 
@@ -77,7 +80,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
-    _currentUserID = Configuration.instance.getUserID()!;
+    _currentUserID = Configuration.instance.getUserIDV2();
     hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
@@ -136,6 +139,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    hasLocationData.dispose();
     _videoMetadataNotifier.dispose();
     _peopleChangedEvent.cancel();
     super.dispose();
@@ -150,13 +154,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     //Make sure the bottom most tile is always the same one, that is it should
     //not be rendered only if a condition is met.
     final fileDetailsTiles = <Widget>[];
+    final bool canEditCaption = isFileOwner && !file.isTrash;
     fileDetailsTiles.add(
       !widget.file.isUploaded ||
-              (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
+              (!canEditCaption && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox(height: 16)
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 24),
-              child: isFileOwner
+              child: canEditCaption
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
@@ -295,7 +300,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (flagService.hasGrantedMLConsent) {
+    if (hasGrantedMLConsent) {
       fileDetailsTiles.addAll([
         FacesItemWidget(file),
         const FileDetailsDivider(),
@@ -310,7 +315,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ],
       );
     }
-    fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    if (!file.isTrash) {
+      fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    }
 
     return SafeArea(
       top: false,
@@ -321,12 +328,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CustomScrollView(
+            controller: widget.scrollController,
             physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             slivers: <Widget>[
               TitleBarWidget(
                 isFlexibleSpaceDisabled: true,
-                title: S.of(context).details,
+                title: AppLocalizations.of(context).details,
                 isOnTopOfScreen: false,
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(
@@ -357,7 +365,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Future<void> _updateLocationFromExif(Location? locationDataFromExif) async {
     // If the file is not uploaded or the file is not owned by the current user
     // then we don't need to update the location.
-    if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
+    if (!widget.file.isUploaded || widget.file.ownerID == null) {
+      return;
+    }
+    if (widget.file.ownerID != _currentUserID) {
       return;
     }
     try {
@@ -410,10 +421,49 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
 
     if (exif["EXIF ExposureTime"] != null) {
-      _exifData["exposureTime"] = exif["EXIF ExposureTime"].toString();
+      _exifData["exposureTime"] =
+          _formatExposureTime(exif["EXIF ExposureTime"]!);
     }
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
+    }
+  }
+
+  /// Formats exposure time from EXIF data into a human-readable string.
+  ///
+  /// For shutter speeds >= 1 second, displays as decimal with 's' suffix (e.g., "1.3s")
+  /// For shutter speeds < 1 second, displays as a fraction (e.g., "1/100")
+  String _formatExposureTime(IfdTag exposureTimeTag) {
+    final values = exposureTimeTag.values.toList();
+    if (values.isEmpty) {
+      return exposureTimeTag.toString();
+    }
+
+    final value = values[0];
+    if (value is! Ratio) {
+      return exposureTimeTag.toString();
+    }
+
+    final numerator = value.numerator;
+    final denominator = value.denominator;
+
+    if (denominator == 0) {
+      return exposureTimeTag.toString();
+    }
+
+    final double seconds = numerator / denominator;
+
+    if (seconds >= 1) {
+      // For exposures >= 1 second, show as decimal seconds
+      if (seconds == seconds.roundToDouble()) {
+        return "${seconds.toInt()}s";
+      }
+      return "${seconds.toStringAsFixed(1)}s";
+    } else {
+      // For exposures < 1 second, always convert to 1/x format
+      // e.g., 529/200000 → 1/378
+      final reciprocal = (1 / seconds).round();
+      return "1/$reciprocal";
     }
   }
 }

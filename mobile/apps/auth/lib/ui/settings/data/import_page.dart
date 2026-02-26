@@ -6,6 +6,7 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_widget.dart';
 import 'package:ente_auth/ui/settings/data/import/import_service.dart';
+import 'package:ente_ui/components/constrained_custom_scroll_view.dart';
 import 'package:flutter/material.dart';
 
 enum ImportType {
@@ -17,6 +18,8 @@ enum ImportType {
   twoFas,
   bitwarden,
   lastpass,
+  proton,
+  andOTP,
 }
 
 class ImportCodePage extends StatelessWidget {
@@ -27,8 +30,10 @@ class ImportCodePage extends StatelessWidget {
     ImportType.encrypted,
     ImportType.twoFas,
     ImportType.aegis,
+    ImportType.andOTP,
     ImportType.bitwarden,
     ImportType.googleAuthenticator,
+    ImportType.proton,
     ImportType.ravio,
     ImportType.lastpass,
   ];
@@ -51,6 +56,10 @@ class ImportCodePage extends StatelessWidget {
         return 'Bitwarden';
       case ImportType.lastpass:
         return 'LastPass Authenticator';
+      case ImportType.proton:
+        return 'Proton Authenticator';
+      case ImportType.andOTP:
+        return 'andOTP';
     }
   }
 
@@ -59,8 +68,7 @@ class ImportCodePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Scaffold(
-        body: CustomScrollView(
-          primary: false,
+        body: ConstrainedCustomScrollView(
           slivers: <Widget>[
             TitleBarWidget(
               flexibleSpaceTitle: TitleBarTitleWidget(

@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -11,23 +12,24 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/people/person_face_widget.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
-enum AvatarType { small, mini, tiny, extra }
+enum AvatarType { xl, lg, md, sm, xs }
 
 class UserAvatarWidget extends StatefulWidget {
   final User user;
   final AvatarType type;
   final int currentUserID;
   final bool thumbnailView;
+  final bool addStroke;
 
   const UserAvatarWidget(
     this.user, {
     super.key,
     this.currentUserID = -1,
-    this.type = AvatarType.mini,
+    this.type = AvatarType.md,
     this.thumbnailView = false,
+    this.addStroke = true,
   });
 
   @override
@@ -61,6 +63,14 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant UserAvatarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.email != widget.user.email) {
+      _reload();
+    }
+  }
+
+  @override
   void dispose() {
     _peopleChangedSubscription.cancel();
     _debouncer.cancelDebounceTimer();
@@ -88,19 +98,24 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
+    final int cachedPixelWidth =
+        (size * MediaQuery.devicePixelRatioOf(context)).toInt();
     return _personID != null
         ? Container(
-            padding: const EdgeInsets.all(0.5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: widget.thumbnailView
-                    ? strokeMutedDark
-                    : getEnteColorScheme(context).strokeMuted,
-                width: UserAvatarWidget.strokeWidth,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-            ),
+            padding:
+                widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+            decoration: widget.addStroke
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.thumbnailView
+                          ? strokeMutedDark
+                          : getEnteColorScheme(context).strokeMuted,
+                      width: UserAvatarWidget.strokeWidth,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
+                  )
+                : null,
             child: SizedBox(
               height: size,
               width: size,
@@ -114,6 +129,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                           ? PersonFaceWidget(
                               key: ValueKey('$personID-$lastSyncTimeForKey'),
                               personId: personID,
+                              cachedPixelWidth: cachedPixelWidth,
                               onErrorCallback: () {
                                 if (mounted) {
                                   setState(() {
@@ -128,6 +144,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                               currentUserID: widget.currentUserID,
                               thumbnailView: widget.thumbnailView,
                               type: widget.type,
+                              addStroke: widget.addStroke,
                             ),
                     );
                   } else if (snapshot.hasError) {
@@ -137,6 +154,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
@@ -145,6 +163,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   }
                   return const SizedBox.shrink();
@@ -157,6 +176,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             currentUserID: widget.currentUserID,
             thumbnailView: widget.thumbnailView,
             type: widget.type,
+            addStroke: widget.addStroke,
           );
   }
 }
@@ -166,11 +186,13 @@ class _FirstLetterCircularAvatar extends StatefulWidget {
   final int currentUserID;
   final bool thumbnailView;
   final AvatarType type;
+  final bool addStroke;
   const _FirstLetterCircularAvatar({
     required this.user,
     required this.currentUserID,
     required this.thumbnailView,
     required this.type,
+    required this.addStroke,
   });
 
   @override
@@ -190,29 +212,33 @@ class _FirstLetterCircularAvatarState
                 : widget.user.email.substring(0, 1))
             : widget.user.displayName!.substring(0, 1);
     Color decorationColor;
-    if ((widget.user.id != null && widget.user.id! < 0) ||
-        widget.user.email == Configuration.instance.getEmail()) {
+    if (widget.user.email == Configuration.instance.getEmail()) {
       decorationColor = Colors.black;
     } else {
-      decorationColor = colorScheme.avatarColors[(widget.user.email.length)
-          .remainder(colorScheme.avatarColors.length)];
+      final colorIndex = widget.user.email.contains("unknown.com")
+          ? (widget.user.displayName?.length ?? 0)
+          : widget.user.email.length;
+      decorationColor = colorScheme
+          .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];
     }
 
     final avatarStyle = getAvatarStyle(context, widget.type);
     final double size = avatarStyle.item1;
     final TextStyle textStyle = avatarStyle.item2;
     return Container(
-      padding: const EdgeInsets.all(0.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: UserAvatarWidget.strokeWidth,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
+      padding: widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+      decoration: widget.addStroke
+          ? BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: widget.thumbnailView
+                    ? strokeMutedDark
+                    : getEnteColorScheme(context).strokeMuted,
+                width: UserAvatarWidget.strokeWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            )
+          : null,
       child: SizedBox(
         height: size,
         width: size,
@@ -234,13 +260,15 @@ class _FirstLetterCircularAvatarState
   ) {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
-      case AvatarType.small:
+      case AvatarType.xl:
         return Tuple2(32.0, enteTextTheme.small);
-      case AvatarType.mini:
+      case AvatarType.lg:
+        return Tuple2(28.0, enteTextTheme.mini);
+      case AvatarType.md:
         return Tuple2(24.0, enteTextTheme.mini);
-      case AvatarType.tiny:
+      case AvatarType.sm:
         return Tuple2(18.0, enteTextTheme.tiny);
-      case AvatarType.extra:
+      case AvatarType.xs:
         return Tuple2(18.0, enteTextTheme.tiny);
     }
   }
@@ -250,13 +278,15 @@ double getAvatarSize(
   AvatarType type,
 ) {
   switch (type) {
-    case AvatarType.small:
+    case AvatarType.xl:
       return 32.0;
-    case AvatarType.mini:
+    case AvatarType.lg:
+      return 28.0;
+    case AvatarType.md:
       return 24.0;
-    case AvatarType.tiny:
+    case AvatarType.sm:
       return 18.0;
-    case AvatarType.extra:
+    case AvatarType.xs:
       return 18.0;
   }
 }
@@ -296,12 +326,14 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
         : user.displayName!.substring(0, 1);
     Color decorationColor;
-    if ((widget.user.id != null && widget.user.id! < 0) ||
-        user.email == currentUserEmail) {
+    if (user.email == currentUserEmail) {
       decorationColor = Colors.black;
     } else {
-      decorationColor = colorScheme.avatarColors[
-          (user.email.length).remainder(colorScheme.avatarColors.length)];
+      final colorIndex = user.email.contains("unknown.com")
+          ? (user.displayName?.length ?? 0)
+          : user.email.length;
+      decorationColor = colorScheme
+          .avatarColors[colorIndex.remainder(colorScheme.avatarColors.length)];
     }
     return Container(
       color: decorationColor,

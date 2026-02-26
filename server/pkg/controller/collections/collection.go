@@ -3,11 +3,13 @@ package collections
 import (
 	"context"
 	"fmt"
+
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/cast"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/gin-gonic/gin"
@@ -25,16 +27,20 @@ const (
 
 // CollectionController encapsulates logic that deals with collections
 type CollectionController struct {
-	CollectionLinkCtrl *public.CollectionLinkController
-	EmailCtrl          *email.EmailNotificationController
-	AccessCtrl         access.Controller
-	BillingCtrl        *controller.BillingController
-	CollectionRepo     *repo.CollectionRepository
-	UserRepo           *repo.UserRepository
-	FileRepo           *repo.FileRepository
-	QueueRepo          *repo.QueueRepository
-	CastRepo           *cast.Repository
-	TaskRepo           *repo.TaskLockRepository
+	CollectionLinkCtrl    *public.CollectionLinkController
+	EmailCtrl             *email.EmailNotificationController
+	AccessCtrl            access.Controller
+	BillingCtrl           *controller.BillingController
+	CollectionRepo        *repo.CollectionRepository
+	UserRepo              *repo.UserRepository
+	FileRepo              *repo.FileRepository
+	QueueRepo             *repo.QueueRepository
+	TrashRepo             *repo.TrashRepository
+	CastRepo              *cast.Repository
+	TaskRepo              *repo.TaskLockRepository
+	CollectionActionsRepo *repo.CollectionActionsRepository
+	CommentsRepo          *socialrepo.CommentsRepository
+	ReactionsRepo         *socialrepo.ReactionsRepository
 }
 
 // Create creates a collection
@@ -44,6 +50,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 		return ente.Collection{}, stacktrace.Propagate(keyErr, "Unable to get keyAttributes")
 	}
 	collectionType := collection.Type
+	app := collection.App
 	collection.Owner.ID = ownerID
 	collection.UpdationTime = time.Microseconds()
 	// [20th Dec 2022] Patch on server side untill majority of the existing mobile clients upgrade to a version higher > 0.7.0
@@ -57,7 +64,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	collection, err := c.CollectionRepo.Create(collection)
 	if err != nil {
 		if err == ente.ErrUncategorizeCollectionAlreadyExists || err == ente.ErrFavoriteCollectionAlreadyExist {
-			dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType)
+			dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType, app)
 			if err != nil {
 				return ente.Collection{}, stacktrace.Propagate(err, "")
 			}
@@ -81,7 +88,14 @@ func (c *CollectionController) GetCollection(ctx *gin.Context, userID int64, cID
 	if err != nil {
 		return ente.Collection{}, stacktrace.Propagate(err, "")
 	}
-	return resp.Collection, nil
+	collection, err := c.CollectionRepo.GetWithSharingDetailsForUser(cID, userID)
+	if err != nil {
+		return ente.Collection{}, stacktrace.Propagate(err, "")
+	}
+	if resp.Role != nil && *resp.Role != ente.OWNER {
+		collection.PublicURLs = ente.FilterPublicURLsForRole(collection.PublicURLs, *resp.Role)
+	}
+	return collection, nil
 }
 
 func (c *CollectionController) GetFile(ctx *gin.Context, collectionID int64, fileID int64) (*ente.File, error) {
@@ -205,6 +219,9 @@ func (c *CollectionController) HandleAccountDeletion(ctx context.Context, userID
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
+		if cleanupErr := c.removeUserSocialActivity(ctx, shareCollection.CollectionID, shareCollection.ToUserID); cleanupErr != nil {
+			return cleanupErr
+		}
 	}
 	err = c.CastRepo.RevokeTokenForUser(ctx, userID)
 	if err != nil {
@@ -222,6 +239,20 @@ func (c *CollectionController) verifyOwnership(cID int64, userID int64) error {
 	}
 	if userID != collection.Owner.ID {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
+	}
+	return nil
+}
+
+func (c *CollectionController) removeUserSocialActivity(ctx context.Context, collectionID int64, userID int64) error {
+	if c.CommentsRepo != nil {
+		if err := c.CommentsRepo.SoftDeleteByCollectionAndUser(ctx, collectionID, userID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+	}
+	if c.ReactionsRepo != nil {
+		if err := c.ReactionsRepo.SoftDeleteByCollectionAndUser(ctx, collectionID, userID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
 	return nil
 }

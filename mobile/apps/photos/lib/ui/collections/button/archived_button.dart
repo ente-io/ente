@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
@@ -5,7 +6,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class ArchivedCollectionsButton extends StatelessWidget {
   final TextStyle textStyle;
@@ -59,7 +59,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).archive,
+                                text: AppLocalizations.of(context).archive,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -76,7 +76,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).archive,
+                                text: AppLocalizations.of(context).archive,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value

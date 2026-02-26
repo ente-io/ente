@@ -22,8 +22,7 @@ can achieve this the following steps:
     # Change the DB name and DB user name if you use different
     # values.
     # If using Docker
-
-    docker exec -it <postgres-ente-container-name>
+    docker exec -it <postgres-ente-container-name> sh
     psql -U pguser -d ente_db
 
     # Or when using psql directly
@@ -38,7 +37,6 @@ can achieve this the following steps:
 
 3.  Edit `internal.admins` or `internal.admin` (if you wish to whitelist only
     single user) in `museum.yaml` to add the user ID you wish to whitelist.
-
     - For multiple admins:
 
     ```yaml
@@ -79,9 +77,15 @@ on your instance. Check this guide for more
 
 Ente currently relies on verification codes for completion of registration.
 
-These are accessible in server logs. If using Docker Compose, they can be
-accessed by running `sudo docker compose logs` in the cluster folder where
-Compose file resides.
+When SMTP is not configured, these verification codes are accessible in server logs.
+Look for log entries with the following pattern:
+
+```
+Skipping sending email to user@example.com: Verification code: 123456
+```
+
+If using Docker Compose, you can access logs by running `sudo docker compose logs`
+in the cluster folder where the Compose file resides.
 
 However, you may wish to streamline this workflow. You can follow one of the 2
 methods if you wish to have many users in the system.

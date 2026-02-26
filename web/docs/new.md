@@ -33,4 +33,6 @@ development, here is a recommended workflow:
     1.22.22
     ```
 
+6. Install [Rust](https://www.rust-lang.org/tools/install).
+
 That's it. Enjoy coding!

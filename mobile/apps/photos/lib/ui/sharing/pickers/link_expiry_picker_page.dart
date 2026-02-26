@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import "package:photos/ui/viewer/date/date_time_picker.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/separators_util.dart';
@@ -25,7 +30,7 @@ class LinkExpiryPickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).linkExpiry,
+              title: AppLocalizations.of(context).linkExpiry,
             ),
           ),
           SliverList(
@@ -69,14 +74,29 @@ class ItemsWidget extends StatefulWidget {
 class _ItemsWidgetState extends State<ItemsWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   late final List<Tuple2<String, int>> _expiryOptions = [
-    Tuple2(S.of(context).never, 0),
-    Tuple2(S.of(context).after1Hour, const Duration(hours: 1).inMicroseconds),
-    Tuple2(S.of(context).after1Day, const Duration(days: 1).inMicroseconds),
-    Tuple2(S.of(context).after1Week, const Duration(days: 7).inMicroseconds),
+    Tuple2(AppLocalizations.of(context).never, 0),
+    Tuple2(
+      AppLocalizations.of(context).after1Hour,
+      const Duration(hours: 1).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Day,
+      const Duration(days: 1).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Week,
+      const Duration(days: 7).inMicroseconds,
+    ),
     // todo: make this time calculation perfect
-    Tuple2(S.of(context).after1Month, const Duration(days: 30).inMicroseconds),
-    Tuple2(S.of(context).after1Year, const Duration(days: 365).inMicroseconds),
-    Tuple2(S.of(context).custom, -1),
+    Tuple2(
+      AppLocalizations.of(context).after1Month,
+      const Duration(days: 30).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Year,
+      const Duration(days: 365).inMicroseconds,
+    ),
+    Tuple2(AppLocalizations.of(context).custom, -1),
   ];
 
   @override
@@ -160,8 +180,45 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
     } catch (e) {
-      await showGenericErrorDialog(context: context, error: e);
+      if (e is LinkEditNotAllowedError) {
+        await _showLinkEditNotAllowedDialog(context);
+      } else {
+        await showGenericErrorDialog(context: context, error: e);
+      }
       rethrow;
+    }
+  }
+
+  Future<void> _showLinkEditNotAllowedDialog(BuildContext context) async {
+    final buttonResult = await showDialogWidget(
+      context: context,
+      title: AppLocalizations.of(context).sorry,
+      body: AppLocalizations.of(context).subscribeToChangeLinkSetting,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          labelText: AppLocalizations.of(context).subscribe,
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: AppLocalizations.of(context).ok,
+        ),
+      ],
+    );
+    if (buttonResult?.action == ButtonAction.first) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return getSubscriptionPage();
+          },
+        ),
+      );
     }
   }
 }

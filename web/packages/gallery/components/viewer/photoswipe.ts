@@ -22,7 +22,13 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
+import {
+    commentSVGPath,
+    createPSRegisterElementIconHTML,
+    heartFillSVGPath,
+    heartSVGPath,
+    settingsSVGPath,
+} from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -65,6 +71,29 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
     /**
+     * Return `true` if the provided file has a green_heart reaction from the
+     * current user.
+     */
+    isLiked: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    /**
+     * Return the number of comments on the provided file.
+     *
+     * If the file is viewed from within a collection context, this should
+     * return the count of comments in that collection. Otherwise (gallery
+     * view), it should return the count from the collection with most comments.
+     */
+    getCommentCount: (annotatedFile: FileViewerAnnotatedFile) => number;
+    /**
+     * Return `true` if social buttons (like, comment) should be shown for the
+     * given file.
+     *
+     * This is used for gallery view where the file might belong to a shared
+     * collection even though we're not directly viewing that collection.
+     */
+    shouldShowSocialButtons: (
+        annotatedFile: FileViewerAnnotatedFile,
+    ) => boolean;
+    /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
      *
@@ -90,7 +119,10 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
+type FileViewerPhotoSwipeOptions = Pick<
+    FileViewerProps,
+    "initialIndex" | "showFullscreenButton" | "disableEscapeClose"
+> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -104,6 +136,24 @@ type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
      * {@link showFavorite} file annotation are true.
      */
     haveUser: boolean;
+    /**
+     * `true` when viewing a public album.
+     */
+    isPublicAlbum: boolean;
+    /**
+     * `true` if the like and comment action buttons should be shown.
+     *
+     * These buttons are shown only when viewing files in a shared album
+     * (incoming or outgoing) or in a public album.
+     */
+    showSocialButtons: boolean;
+    /**
+     * `true` if comments are enabled on the public link.
+     *
+     * When `false`, the comment button will be hidden even if
+     * {@link showSocialButtons} is `true`.
+     */
+    enableComment: boolean;
     /**
      * Dynamic callbacks.
      *
@@ -131,6 +181,18 @@ type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
      * Called when the user activates the info action on a file.
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
+     * Called when the user activates the comments action on a file.
+     */
+    onViewComments: () => void;
+    /**
+     * Called when the user activates the likes action on a file (right-click on heart).
+     */
+    onViewLikes: () => void;
+    /**
+     * Called when the user clicks the like button (left-click on heart).
+     */
+    onLikeClick: () => void;
     /**
      * Called when the user activates the download action on a file.
      */
@@ -189,10 +251,18 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         haveUser,
+        isPublicAlbum,
+        showSocialButtons,
+        enableComment,
+        showFullscreenButton,
+        disableEscapeClose,
         delegate,
         onClose,
         onAnnotate,
         onViewInfo,
+        onViewComments,
+        onViewLikes,
+        onLikeClick,
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
@@ -219,6 +289,9 @@ export class FileViewerPhotoSwipe {
             // auto hide based on mouse activity, but that would not have any
             // effect on touch devices)
             bgClickAction: "toggle-controls",
+            // In single-file public viewer mode we keep Escape for nested UI
+            // interactions while preventing accidental viewer closure.
+            escKey: !disableEscapeClose,
             // At least on macOS, manual zooming with the trackpad is very
             // cumbersome (possibly because of the small multiplier in the
             // PhotoSwipe source, but I'm not sure). The other option to do a
@@ -242,7 +315,9 @@ export class FileViewerPhotoSwipe {
             // Use "pswp-ente" as the main class name. Note that this is not
             // necessary, we could've target the "pswp" class too in our CSS
             // since we only have a single PhotoSwipe instance.
-            mainClass: "pswp-ente",
+            mainClass: isPublicAlbum
+                ? "pswp-ente pswp-ente-public-album"
+                : "pswp-ente",
             closeTitle: t("close"),
             zoomTitle: t("zoom"),
             arrowPrevTitle: t("previous"),
@@ -283,7 +358,7 @@ export class FileViewerPhotoSwipe {
 
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
-        const currentAnnotatedFile = () => {
+        const currentAnnotatedFile = (): FileViewerAnnotatedFile => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
             if (
@@ -291,10 +366,17 @@ export class FileViewerPhotoSwipe {
                 annotatedFile.file.id != file.id ||
                 annotatedFile.file.updationTime != file.updationTime
             ) {
-                annotatedFile = onAnnotate(file, currSlideData());
-                _currentAnnotatedFile = annotatedFile;
+                // Guard: slide data can be unavailable during state transitions.
+                // If unavailable, we keep using the cached annotatedFile.
+                const slideData = pswp.currSlide?.data as ItemData | undefined;
+                if (slideData) {
+                    annotatedFile = onAnnotate(file, slideData);
+                    _currentAnnotatedFile = annotatedFile;
+                }
             }
-            return annotatedFile;
+            // By design, this should never be undefined after the initial slide
+            // is shown. Use non-null assertion to maintain API contract.
+            return annotatedFile!;
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
@@ -691,10 +773,11 @@ export class FileViewerPhotoSwipe {
         let shouldIgnoreNextVideoQualityChange = false;
 
         /**
-         * If a {@link mediaControllerID} is present in the given
-         * {@link itemData}, then make the media controls visible and link the
-         * media-control-bars (and other containers that house controls) to the
-         * given controller. Otherwise hide the media controls.
+         * Update the media controls for the given {@link itemData}.
+         *
+         * - Show controls only for videos.
+         * - Keep controls visible but disabled while video playback is loading.
+         * - Link controls to the media controller once available.
          */
         const updateVideoControlsAndPlayback = (itemData: ItemData) => {
             // For reasons possibly related to the 1 tick wait in the hls-video
@@ -708,8 +791,89 @@ export class FileViewerPhotoSwipe {
             setTimeout(() => _updateVideoControlsAndPlayback(itemData), 0);
         };
 
+        /**
+         * Handle click on the media-fullscreen-button by intercepting it and
+         * using document-level fullscreen instead.
+         *
+         * The default behavior of media-fullscreen-button puts only the
+         * media-controller element into fullscreen, which hides the PhotoSwipe
+         * UI controls (close, info, navigation, etc.). By using document-level
+         * fullscreen on document.body, all controls remain accessible.
+         *
+         * In fullscreen mode, we hide the top navigation bar and only show the
+         * video timeline controls at the bottom (with auto-hide behavior).
+         */
+        const handleFullscreenButtonClick = (e: Event) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (document.fullscreenElement) {
+                void document.exitFullscreen();
+            } else {
+                void document.body.requestFullscreen();
+                // Hide top navigation bar in fullscreen, show only video controls
+                pswp.element?.classList.add("pswp--video-fullscreen");
+                // Track mouse movement to show controls when near bottom
+                document.addEventListener(
+                    "mousemove",
+                    handleMouseMoveInFullscreen,
+                );
+            }
+        };
+
+        /**
+         * Update UI state when fullscreen mode changes (e.g., user presses Esc).
+         */
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement) {
+                // Exiting fullscreen - restore the top navigation bar
+                pswp.element?.classList.remove("pswp--video-fullscreen");
+                pswp.element?.classList.remove("pswp--controls-visible");
+                document.removeEventListener(
+                    "mousemove",
+                    handleMouseMoveInFullscreen,
+                );
+            }
+        };
+
+        /**
+         * Timer ID for hiding controls after mouse inactivity in fullscreen.
+         */
+        let hideControlsTimer: ReturnType<typeof setTimeout> | undefined;
+
+        /**
+         * Show video controls on mouse movement, hide after inactivity.
+         */
+        const handleMouseMoveInFullscreen = () => {
+            pswp.element?.classList.add("pswp--controls-visible");
+
+            // Clear any pending hide timer
+            if (hideControlsTimer) {
+                clearTimeout(hideControlsTimer);
+            }
+
+            // Hide controls after inactivity
+            hideControlsTimer = setTimeout(() => {
+                pswp.element?.classList.remove("pswp--controls-visible");
+                hideControlsTimer = undefined;
+            }, 2000);
+        };
+
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
+            const showVideoControls =
+                itemData.fileType == FileType.video && !itemData.fetchFailed;
+            const areVideoControlsDisabled =
+                showVideoControls &&
+                (!!itemData.isContentLoading || !itemData.mediaControllerID);
+            container?.classList.toggle(
+                "pswp__media-controls--visible",
+                showVideoControls,
+            );
+            container?.classList.toggle(
+                "pswp__media-controls--disabled",
+                areVideoControlsDisabled,
+            );
+
             const controls =
                 container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
@@ -1041,6 +1205,47 @@ export class FileViewerPhotoSwipe {
         this.refreshCurrentSlideFavoriteButtonIfNeeded =
             updateFavoriteButtonIfNeeded;
 
+        const updateLikeButtonIfNeeded = () => {
+            const heartIconFill = document.getElementById(
+                "pswp__icn-heart-fill",
+            );
+            const heartIconOutline = document.getElementById("pswp__icn-heart");
+            if (!heartIconFill || !heartIconOutline) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
+            const isLiked = delegate.isLiked(af);
+
+            // Show fill (green) if liked, show outline (white) if not liked
+            showIf(heartIconFill, isLiked);
+            showIf(heartIconOutline, !isLiked);
+        };
+
+        this.refreshCurrentSlideLikeButtonIfNeeded = updateLikeButtonIfNeeded;
+
+        const updateCommentCountIfNeeded = () => {
+            const commentCountElement = document.querySelector<HTMLElement>(
+                ".pswp__comment-count",
+            );
+            if (!commentCountElement) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
+            const count = delegate.getCommentCount(af);
+            commentCountElement.textContent = String(count);
+        };
+
+        this.refreshCurrentSlideCommentCountIfNeeded =
+            updateCommentCountIfNeeded;
+
         const handleToggleFavorite = () => void toggleFavorite();
 
         const handleToggleFavoriteIfEnabled = () => {
@@ -1118,6 +1323,23 @@ export class FileViewerPhotoSwipe {
             ui.uiElementsData.find((e) => e.name == "preloader")!.order = 10;
 
             // Register our custom elements...
+
+            if (isPublicAlbum) {
+                ui.registerElement({
+                    name: "ente-logo",
+                    order: 5,
+                    isButton: true,
+                    title: "Ente",
+                    html: publicAlbumEnteLogoHTML(),
+                    onClick: () => {
+                        window.open(
+                            "https://ente.io",
+                            "_blank",
+                            "noopener,noreferrer",
+                        );
+                    },
+                });
+            }
 
             ui.registerElement({
                 name: "live",
@@ -1225,23 +1447,76 @@ export class FileViewerPhotoSwipe {
                 onClick: handleViewInfo,
             });
 
-            ui.registerElement({
-                name: "more",
-                title: t("more"),
-                order: 16,
-                isButton: true,
-                html: createPSRegisterElementIconHTML("more"),
-                onInit: (buttonElement) => {
-                    buttonElement.setAttribute("id", moreButtonID);
-                    buttonElement.setAttribute("aria-haspopup", "true");
-                },
-                onClick: (_, buttonElement) => {
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    buttonElement.setAttribute("aria-controls", moreMenuID);
-                    buttonElement.setAttribute("aria-expanded", "true");
-                    onMore(buttonElement);
-                },
-            });
+            // Only show the more button if there are meaningful items to display.
+            // When fullscreen is shown in the toolbar (showFullscreenButton=true)
+            // and we're in a context without user actions (no delete, archive, etc),
+            // hide the more menu since it would only contain fullscreen and shortcuts.
+            const shouldShowMoreButton = !showFullscreenButton || haveUser;
+
+            if (shouldShowMoreButton) {
+                ui.registerElement({
+                    name: "more",
+                    title: t("more"),
+                    order: 16,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("more"),
+                    onInit: (buttonElement) => {
+                        buttonElement.setAttribute("id", moreButtonID);
+                        buttonElement.setAttribute("aria-haspopup", "true");
+                    },
+                    onClick: (_, buttonElement) => {
+                        // See also: `resetMoreMenuButtonOnMenuClose`.
+                        buttonElement.setAttribute("aria-controls", moreMenuID);
+                        buttonElement.setAttribute("aria-expanded", "true");
+                        onMore(buttonElement);
+                    },
+                });
+            }
+
+            // Add fullscreen button as a primary action for embed app
+            if (showFullscreenButton) {
+                ui.registerElement({
+                    name: "fullscreen",
+                    title: t("toggle_fullscreen"),
+                    order: 18,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("fullscreen"),
+                    onInit: (buttonElement, pswp) => {
+                        const updateIcon = () => {
+                            const isFullscreen = !!document.fullscreenElement;
+                            const fullscreenIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen",
+                            );
+                            const exitIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen-exit",
+                            );
+                            if (fullscreenIcon && exitIcon) {
+                                showIf(
+                                    fullscreenIcon as HTMLElement,
+                                    !isFullscreen,
+                                );
+                                showIf(exitIcon as HTMLElement, isFullscreen);
+                            }
+                        };
+
+                        // Update icon on fullscreen changes
+                        document.addEventListener(
+                            "fullscreenchange",
+                            updateIcon,
+                        );
+                        pswp.on("destroy", () => {
+                            document.removeEventListener(
+                                "fullscreenchange",
+                                updateIcon,
+                            );
+                        });
+
+                        // Initialize icon state
+                        updateIcon();
+                    },
+                    onClick: handleToggleFullscreen,
+                });
+            }
 
             ui.registerElement({
                 name: "media-controls",
@@ -1255,6 +1530,17 @@ export class FileViewerPhotoSwipe {
                     if (menu instanceof MediaChromeMenu) {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
+                    // Override the media-fullscreen-button to use document-level
+                    // fullscreen instead of element-level fullscreen. This
+                    // ensures the PhotoSwipe UI controls remain accessible.
+                    const fullscreenButton = element.querySelector(
+                        "media-fullscreen-button",
+                    );
+                    fullscreenButton?.addEventListener(
+                        "click",
+                        handleFullscreenButtonClick,
+                        { capture: true },
+                    );
                     pswp.on("change", () =>
                         updateVideoControlsAndPlayback(currSlideData()),
                     );
@@ -1262,29 +1548,89 @@ export class FileViewerPhotoSwipe {
             });
 
             ui.registerElement({
-                name: "caption",
+                name: "bottom-right-controls",
                 // After the video controls so that we don't get occluded by
                 // them (nb: the caption will hide when the video is playing).
                 order: 31,
                 appendTo: "root",
-                // The caption uses the line-clamp CSS property, which behaves
-                // unexpectedly when we also assign padding to the "p" element
-                // on which we're setting the line clamp: the "clipped" lines
-                // show through in the padding area.
-                //
-                // As a workaround, wrap the p in a div. Set the line-clamp on
-                // the p, and the padding on the div.
-                html: "<div><p></p></div>",
+                html: bottomRightControlsHTML(),
                 onInit: (element, pswp) => {
+                    const captionEl =
+                        element.querySelector<HTMLElement>(".pswp__caption")!;
+                    // Get the action buttons container.
+                    const actionButtonsEl = element.querySelector<HTMLElement>(
+                        ".pswp__action-buttons",
+                    );
+
+                    const updateSocialButtonsVisibility = () => {
+                        if (!actionButtonsEl) return;
+                        // Guard: _currentAnnotatedFile can be undefined during
+                        // initialization before the first slide is shown.
+                        if (!_currentAnnotatedFile) return;
+                        // Show buttons if: static showSocialButtons is true
+                        // (public album) OR delegate says this file should
+                        // show buttons (file in shared collection).
+                        // For public albums (no logged-in user), also check
+                        // if comments are enabled on the public link.
+                        const af = currentAnnotatedFile();
+                        const baseShow =
+                            showSocialButtons ||
+                            delegate.shouldShowSocialButtons(af);
+                        // For public albums (!haveUser), also require enableComment
+                        const shouldShow =
+                            baseShow && (haveUser || enableComment);
+                        actionButtonsEl.style.display = shouldShow
+                            ? "flex"
+                            : "none";
+                    };
+
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        element.querySelector("p")!.innerText = alt ?? "";
-                        element.style.visibility = alt ? "visible" : "hidden";
-                        element.classList.toggle(
+                        const { text: captionText, wasTruncated } =
+                            truncateCaptionIfNeeded(alt);
+                        const captionP = captionEl.querySelector("p")!;
+                        captionP.innerText = captionText ?? "";
+                        if (wasTruncated) {
+                            const moreLink = document.createElement("span");
+                            moreLink.className = "pswp__caption-more";
+                            moreLink.textContent = "More";
+                            moreLink.addEventListener("click", handleViewInfo);
+                            captionP.appendChild(moreLink);
+                        }
+                        captionEl.style.display = captionText
+                            ? "block"
+                            : "none";
+                        captionEl.classList.toggle(
                             "ente-video",
                             fileType == FileType.video,
                         );
+                        // Update social buttons visibility on each slide change.
+                        updateSocialButtonsVisibility();
                     });
+                    // Wire up click handler for the comment button.
+                    const commentButton = element.querySelector<HTMLElement>(
+                        '.pswp__action-button[aria-label="Comment"]',
+                    );
+                    commentButton?.addEventListener("click", onViewComments);
+                    // Wire up click handlers for the like button.
+                    const likeButton = element.querySelector<HTMLElement>(
+                        '.pswp__action-button[aria-label="Like"]',
+                    );
+                    // Left-click: trigger like action (may open album selector)
+                    likeButton?.addEventListener("click", onLikeClick);
+                    // Right-click: open likes sidebar
+                    likeButton?.addEventListener("contextmenu", (e) => {
+                        e.preventDefault();
+                        onViewLikes();
+                    });
+                    // Update like button state on slide change and initially.
+                    pswp.on("change", updateLikeButtonIfNeeded);
+                    updateLikeButtonIfNeeded();
+                    // Update comment count on slide change and initially.
+                    pswp.on("change", updateCommentCountIfNeeded);
+                    updateCommentCountIfNeeded();
+                    // Initial visibility check.
+                    updateSocialButtonsVisibility();
                 },
             });
         });
@@ -1581,6 +1927,10 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
+            document.addEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
         });
 
         // The PhotoSwipe dialog has being closed and the animations have
@@ -1590,6 +1940,17 @@ export class FileViewerPhotoSwipe {
                 "mousedown",
                 blurMediaChromeFocus,
             );
+            document.removeEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
+            document.removeEventListener(
+                "mousemove",
+                handleMouseMoveInFullscreen,
+            );
+            if (hideControlsTimer) {
+                clearTimeout(hideControlsTimer);
+            }
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
@@ -1642,6 +2003,18 @@ export class FileViewerPhotoSwipe {
      * refresh would cause, e.g., the pan and zoom to be reset.
      */
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the like button (heart) on the current slide, asking the
+     * delegate for the latest like state.
+     */
+    refreshCurrentSlideLikeButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the comment count on the current slide, asking the delegate
+     * for the latest comment count.
+     */
+    refreshCurrentSlideCommentCountIfNeeded: () => void;
 }
 
 // Requires the following imports to register the Web components we use:
@@ -1738,6 +2111,50 @@ const livePhotoVideoHTML = (videoURL: string) => `
   <source src="${videoURL}" />
 </video>
 `;
+
+/**
+ * HTML for the bottom controls (caption on left, action buttons on right).
+ *
+ * The caption uses the line-clamp CSS property, which behaves unexpectedly
+ * when we also assign padding to the "p" element on which we're setting the
+ * line clamp: the "clipped" lines show through in the padding area.
+ *
+ * As a workaround, wrap the p in a div. Set the line-clamp on the p, and the
+ * padding on the div.
+ */
+const bottomRightControlsHTML = () => `
+<div class="pswp__caption"><p></p></div>
+<div class="pswp__action-buttons">
+  <button class="pswp__action-button" aria-label="Like">
+    <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} id="pswp__icn-heart" />${heartFillSVGPath} id="pswp__icn-heart-fill" /></svg>
+  </button>
+  <button class="pswp__action-button pswp__action-button--comment" aria-label="Comment">
+    <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
+    <span class="pswp__comment-count"></span>
+  </button>
+</div>
+`;
+
+const publicAlbumEnteLogoHTML = () => `
+<svg class="pswp__ente-logo-svg" viewBox="0 0 43 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6.102 12.144C4.998 12.144 4.026 11.928 3.186 11.496C2.358 11.064 1.716 10.476 1.26 9.732C0.804 8.976 0.576 8.118 0.576 7.158C0.576 6.186 0.798 5.328 1.242 4.584C1.698 3.828 2.316 3.24 3.096 2.82C3.876 2.388 4.758 2.172 5.742 2.172C6.69 2.172 7.542 2.376 8.298 2.784C9.066 3.18 9.672 3.756 10.116 4.512C10.56 5.256 10.782 6.15 10.782 7.194C10.782 7.302 10.776 7.428 10.764 7.572C10.752 7.704 10.74 7.83 10.728 7.95H2.862V6.312H9.252L8.172 6.798C8.172 6.294 8.07 5.856 7.866 5.484C7.662 5.112 7.38 4.824 7.02 4.62C6.66 4.404 6.24 4.296 5.76 4.296C5.28 4.296 4.854 4.404 4.482 4.62C4.122 4.824 3.84 5.118 3.636 5.502C3.432 5.874 3.33 6.318 3.33 6.834V7.266C3.33 7.794 3.444 8.262 3.672 8.67C3.912 9.066 4.242 9.372 4.662 9.588C5.094 9.792 5.598 9.894 6.174 9.894C6.69 9.894 7.14 9.816 7.524 9.66C7.92 9.504 8.28 9.27 8.604 8.958L10.098 10.578C9.654 11.082 9.096 11.472 8.424 11.748C7.752 12.012 6.978 12.144 6.102 12.144ZM18.5375 2.172C19.3055 2.172 19.9895 2.328 20.5895 2.64C21.2015 2.94 21.6815 3.408 22.0295 4.044C22.3775 4.668 22.5515 5.472 22.5515 6.456V12H19.7435V6.888C19.7435 6.108 19.5695 5.532 19.2215 5.16C18.8855 4.788 18.4055 4.602 17.7815 4.602C17.3375 4.602 16.9355 4.698 16.5755 4.89C16.2275 5.07 15.9515 5.352 15.7475 5.736C15.5555 6.12 15.4595 6.612 15.4595 7.212V12H12.6515V2.316H15.3335V4.998L14.8295 4.188C15.1775 3.54 15.6755 3.042 16.3235 2.694C16.9715 2.346 17.7095 2.172 18.5375 2.172ZM29.0568 12.144C27.9168 12.144 27.0288 11.856 26.3928 11.28C25.7568 10.692 25.4388 9.822 25.4388 8.67V0.174H28.2468V8.634C28.2468 9.042 28.3548 9.36 28.5708 9.588C28.7868 9.804 29.0808 9.912 29.4528 9.912C29.8968 9.912 30.2748 9.792 30.5868 9.552L31.3428 11.532C31.0548 11.736 30.7068 11.892 30.2988 12C29.9028 12.096 29.4888 12.144 29.0568 12.144ZM23.9448 4.692V2.532H30.6588V4.692H23.9448ZM37.4262 12.144C36.3222 12.144 35.3502 11.928 34.5102 11.496C33.6822 11.064 33.0402 10.476 32.5842 9.732C32.1282 8.976 31.9002 8.118 31.9002 7.158C31.9002 6.186 32.1222 5.328 32.5662 4.584C33.0222 3.828 33.6402 3.24 34.4202 2.82C35.2002 2.388 36.0822 2.172 37.0662 2.172C38.0142 2.172 38.8662 2.376 39.6222 2.784C40.3902 3.18 40.9962 3.756 41.4402 4.512C41.8842 5.256 42.1062 6.15 42.1062 7.194C42.1062 7.302 42.1002 7.428 42.0882 7.572C42.0762 7.704 42.0642 7.83 42.0522 7.95H34.1862V6.312H40.5762L39.4962 6.798C39.4962 6.294 39.3942 5.856 39.1902 5.484C38.9862 5.112 38.7042 4.824 38.3442 4.62C37.9842 4.404 37.5642 4.296 37.0842 4.296C36.6042 4.296 36.1782 4.404 35.8062 4.62C35.4462 4.824 35.1642 5.118 34.9602 5.502C34.7562 5.874 34.6542 6.318 34.6542 6.834V7.266C34.6542 7.794 34.7682 8.262 34.9962 8.67C35.2362 9.066 35.5662 9.372 35.9862 9.588C36.4182 9.792 36.9222 9.894 37.4982 9.894C38.0142 9.894 38.4642 9.816 38.8482 9.66C39.2442 9.504 39.6042 9.27 39.9282 8.958L41.4222 10.578C40.9782 11.082 40.4202 11.472 39.7482 11.748C39.0762 12.012 38.3022 12.144 37.4262 12.144Z" />
+</svg>
+`;
+
+/**
+ * Truncate caption text to 154 characters.
+ *
+ * @returns An object with the (possibly truncated) text and a flag indicating
+ * whether or not the text was truncated.
+ */
+const truncateCaptionIfNeeded = (
+    text: string | undefined,
+): { text: string | undefined; wasTruncated: boolean } => {
+    if (!text) return { text, wasTruncated: false };
+    const maxLength = 154;
+    if (text.length <= maxLength) return { text, wasTruncated: false };
+    return { text: text.slice(0, maxLength) + "… ", wasTruncated: true };
+};
 
 const createElementFromHTMLString = (htmlString: string) => {
     const template = document.createElement("template");

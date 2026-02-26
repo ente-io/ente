@@ -7,10 +7,11 @@ import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/l10n/l10n.dart'; 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
@@ -20,15 +21,16 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
-import 'package:ente_auth/utils/directory_utils.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/directory_utils.dart' as auth_dir_utils;
 import 'package:ente_auth/utils/window_protocol_handler.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
+import 'package:ente_crypto_dart_adapter/ente_crypto_dart_adapter.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
@@ -41,12 +43,12 @@ import 'package:window_manager/window_manager.dart';
 final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
-  if (PlatformUtil.isMobile()) return;
+  if (PlatformDetector.isMobile()) return;
   String path = Platform.isWindows
-      ? 'assets/icons/auth-icon.ico'
+      ? 'assets/icons/auth-icon-monochrome.ico'
       : Platform.isMacOS
-          ? 'assets/icons/auth-icon-monochrome.png'
-          : 'assets/icons/auth-icon.png';
+          ? 'assets/icons/auth-icon-monochrome-padded.png'
+          : 'assets/icons/auth-icon-monochrome.png';
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
@@ -70,16 +72,18 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerCryptoApi(const EnteCryptoDartAdapter());
 
-  if (PlatformUtil.isDesktop()) {
+  if (PlatformDetector.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
+    await windowManager.setPreventClose(true);
     WindowOptions windowOptions = WindowOptions(
       size: WindowListenerService.instance.getWindowSize(),
       maximumSize: const Size(8192, 8192),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await DirectoryUtils.migrateNamingChanges();
+      await auth_dir_utils.DirectoryUtils.migrateNamingChanges();
       await windowManager.show();
       await windowManager.focus();
       initSystemTray().ignore();
@@ -116,7 +120,7 @@ Future<void> _runInForeground() async {
         darkTheme: darkThemeData,
         savedThemeMode: savedThemeMode,
         localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates:  const [
+        localizationsDelegates: const [
           ...StringsLocalizations.localizationsDelegates,
           ...AppLocalizations.localizationsDelegates,
         ],
@@ -169,11 +173,22 @@ Future<void> _init(bool bool, {String? via}) async {
   await CodeDisplayStore.instance.init();
   await Configuration.instance.init([AuthenticatorDB.instance]);
   await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(Configuration.instance, const HomePage());
+  await UserService.instance.init(
+    Configuration.instance,
+    const HomePage(),
+    clientPackageName: 'io.ente.auth',
+    passkeyRedirectUrl: 'enteauth://passkey',
+  );
   await AuthenticatorService.instance.init();
   await BillingService.instance.init();
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
-  await LockScreenSettings.instance.init(Configuration.instance);
+  await LockScreenSettings.instance.init(
+    Configuration.instance,
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
+  await LocalBackupService.instance.init(
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
 }

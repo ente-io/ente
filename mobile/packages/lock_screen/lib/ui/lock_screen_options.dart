@@ -7,10 +7,12 @@ import "package:ente_lock_screen/ui/app_lock.dart";
 import "package:ente_lock_screen/ui/lock_screen_auto_lock.dart";
 import "package:ente_lock_screen/ui/lock_screen_password.dart";
 import "package:ente_lock_screen/ui/lock_screen_pin.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/constrained_custom_scroll_view.dart";
 import "package:ente_ui/components/dialog_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -18,7 +20,6 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 
 class LockScreenOptions extends StatefulWidget {
@@ -131,12 +132,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await _lockScreenSettings.setAppLockEnabled(false);
     }
     await _lockScreenSettings.removePinAndPassword();
-    if (PlatformUtil.isMobile()) {
-      await _lockScreenSettings.setHideAppContent(!appLock);
-      setState(() {
-        hideAppContent = _lockScreenSettings.getShouldHideAppContent();
-      });
-    }
     await _initializeSettings();
     setState(() {
       appLock = !appLock;
@@ -180,8 +175,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
+      body: ConstrainedCustomScrollView(
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
@@ -300,7 +294,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     const SizedBox(
                                       height: 24,
                                     ),
-                                    PlatformUtil.isMobile()
+                                    PlatformDetector.isMobile()
                                         ? MenuItemWidget(
                                             captionedTextWidget:
                                                 CaptionedTextWidget(
@@ -321,7 +315,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                             onTap: () => _onAutoLock(),
                                           )
                                         : const SizedBox.shrink(),
-                                    PlatformUtil.isMobile()
+                                    PlatformDetector.isMobile()
                                         ? Padding(
                                             padding: const EdgeInsets.only(
                                               top: 14,
@@ -336,52 +330,46 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                             ),
                                           )
                                         : const SizedBox.shrink(),
-                                    PlatformUtil.isMobile()
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const SizedBox(height: 24),
-                                              MenuItemWidget(
-                                                captionedTextWidget:
-                                                    CaptionedTextWidget(
-                                                  title: context
-                                                      .strings.hideContent,
-                                                ),
-                                                alignCaptionedTextToLeft: true,
-                                                singleBorderRadius: 8,
-                                                menuItemColor:
-                                                    colorTheme.fillFaint,
-                                                trailingWidget:
-                                                    ToggleSwitchWidget(
-                                                  value: () => hideAppContent,
-                                                  onChanged: () =>
-                                                      _onHideContent(),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 14,
-                                                  left: 14,
-                                                  right: 12,
-                                                ),
-                                                child: Text(
-                                                  Platform.isAndroid
-                                                      ? context.strings
-                                                          .hideContentDescriptionAndroid
-                                                      : context.strings
-                                                          .hideContentDescriptioniOS,
-                                                  style: textTheme.miniFaint,
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : const SizedBox.shrink(),
                                   ],
                                 )
                               : const SizedBox.shrink(),
                         ),
+                        PlatformDetector.isMobile()
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: appLock ? 24 : 8),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: context.strings.hideContent,
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    singleBorderRadius: 8,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingWidget: ToggleSwitchWidget(
+                                      value: () => hideAppContent,
+                                      onChanged: () => _onHideContent(),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      Platform.isAndroid
+                                          ? context.strings
+                                              .hideContentDescriptionAndroid
+                                          : context.strings
+                                              .hideContentDescriptioniOS,
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -394,6 +382,4 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
   }
-
-  routeToPage(BuildContext context, LockScreenAutoLock lockScreenAutoLock) {}
 }

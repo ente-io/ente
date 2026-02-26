@@ -30,7 +30,11 @@ var ErrCollectionDeleted = &ApiError{
 	HttpStatusCode: http.StatusNotFound,
 }
 
-var ErrFileLimitReached = errors.New("file limit reached")
+var ErrFileLimitReached = ApiError{
+	Code:           FileLimitReached,
+	Message:        "Maximum file limit reached",
+	HttpStatusCode: http.StatusForbidden,
+}
 
 // ErrBadRequest is returned when a bad request is encountered
 var ErrBadRequest = errors.New("bad request")
@@ -100,6 +104,9 @@ var ErrLockUnavailable = errors.New("could not acquire lock")
 // ErrActiveLinkAlreadyExists is thrown when an active link already exists for entity
 var ErrActiveLinkAlreadyExists = errors.New("link already exists for this entity")
 
+// ErrAccessTokenInUse is thrown when an access token is already active
+var ErrAccessTokenInUse = errors.New("access token already in use")
+
 // ErrNotImplemented indicates that the action that we tried to perform is not
 // available at this museum instance. e.g. this could be something that is not
 // enabled on this particular instance of museum.
@@ -153,6 +160,24 @@ var ErrPublicCollectDisabled = ApiError{
 	HttpStatusCode: http.StatusMethodNotAllowed,
 }
 
+var ErrPublicCommentDisabled = ApiError{
+	Code:           PublicCommentDisabled,
+	Message:        "User has not enabled public comments for this url",
+	HttpStatusCode: http.StatusMethodNotAllowed,
+}
+
+var ErrPublicCommentTooLong = ApiError{
+	Code:           PublicCommentTooLong,
+	Message:        "Comments are limited to 280 characters",
+	HttpStatusCode: http.StatusBadRequest,
+}
+
+var ErrAnonNameTooLong = ApiError{
+	Code:           AnonNameTooLong,
+	Message:        "Anonymous names are limited to 50 characters",
+	HttpStatusCode: http.StatusBadRequest,
+}
+
 var ErrNotFoundError = ApiError{
 	Code:           NotFoundError,
 	Message:        "",
@@ -194,6 +219,30 @@ var ErrCastIPMismatch = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLinkEditNotAllowed = ApiError{
+	Code:           LinkEditNotAllowed,
+	Message:        "Editing link settings is not allowed for free accounts",
+	HttpStatusCode: http.StatusForbidden,
+}
+
+var ErrFileInTrash = ApiError{
+	Code:           FileInTrash,
+	Message:        "One or more files are in trash or have been deleted, please restore them first",
+	HttpStatusCode: http.StatusConflict,
+}
+
+var ErrLockerRegistrationDisabled = &ApiError{
+	Code:           LockerRegistrationDisabled,
+	Message:        "Locker is restricted to paid users currently",
+	HttpStatusCode: http.StatusForbidden,
+}
+
+var ErrLockerRollOutLimit = &ApiError{
+	Code:           LockerRolloutLimit,
+	Message:        "Sorry, locker registration is paused temporarily, please try again later",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 type ErrorCode string
 
 const (
@@ -218,6 +267,15 @@ const (
 	// PublicCollectDisabled error code indicates that the user has not enabled public collect
 	PublicCollectDisabled ErrorCode = "PUBLIC_COLLECT_DISABLED"
 
+	// PublicCommentDisabled error code indicates that the user has not enabled public comments
+	PublicCommentDisabled ErrorCode = "PUBLIC_COMMENT_DISABLED"
+
+	// PublicCommentTooLong indicates that comment text exceeded allowed limit
+	PublicCommentTooLong ErrorCode = "PUBLIC_COMMENT_TOO_LONG"
+
+	// AnonNameTooLong indicates that anonymous display name exceeded allowed limit
+	AnonNameTooLong ErrorCode = "ANON_NAME_TOO_LONG"
+
 	// CollectionNotEmpty is thrown when user attempts to delete a collection but keep files but all files from that
 	// collections have been moved yet.
 	CollectionNotEmpty ErrorCode = "COLLECTION_NOT_EMPTY"
@@ -225,7 +283,21 @@ const (
 	// MaxPasskeysReached is thrown when user attempts to create more than max allowed passkeys
 	MaxPasskeysReached ErrorCode = "MAX_PASSKEYS_REACHED"
 
+	// LockerRegistrationDisabled indicates that locker registration is currently disabled
+	LockerRegistrationDisabled ErrorCode = "LOCKER_REGISTRATION_DISABLED"
+
+	LockerRolloutLimit ErrorCode = "LOCKER_ROLLOUT_LIMIT"
+
+	// FileLimitReached indicates the user hit the maximum number of files allowed
+	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
+
+	// FileInTrash indicates files are present in trash and cannot be added to collection
+	FileInTrash ErrorCode = "FILE_IN_TRASH"
+
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
+
+	// LinkEditNotAllowed indicates that the user cannot change link settings
+	LinkEditNotAllowed ErrorCode = "LINK_EDIT_NOT_ALLOWED"
 )
 
 type ApiError struct {

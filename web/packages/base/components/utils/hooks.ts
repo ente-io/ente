@@ -1,5 +1,5 @@
 import { useMediaQuery, useTheme } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Return true if the screen width is classified as a small size. This is often
@@ -49,4 +49,31 @@ export const useClipboardCopy = (
     }, [text]);
 
     return [copied, handleCopyLink];
+};
+
+/**
+ * A hook that runs a callback at a specified interval.
+ *
+ * @param callback The function to call on each interval tick.
+ * @param delay The interval in milliseconds, or null to pause the interval.
+ */
+export const useInterval = (
+    callback: () => void,
+    delay: number | null,
+): void => {
+    const savedCallback = useRef(callback);
+
+    // Remember the latest callback
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    // Set up the interval
+    useEffect(() => {
+        if (delay === null) return;
+
+        const tick = () => savedCallback.current();
+        const id = setInterval(tick, delay);
+        return () => clearInterval(id);
+    }, [delay]);
 };

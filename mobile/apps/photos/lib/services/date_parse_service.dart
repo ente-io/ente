@@ -110,7 +110,7 @@ class DateParseService {
 
     result = _parseStructuredFormats(lowerInput);
     if (!result.isEmpty) return result;
- 
+
     final normalized = _normalizeDateString(lowerInput);
     result = _parseTokenizedDate(normalized);
 
@@ -203,7 +203,7 @@ class DateParseService {
       }
       return PartialDate.empty;
     }
- 
+
     match = _standardFormatRegex.firstMatch(cleanInput);
     if (match != null) {
       final p1 = int.parse(match.group(1)!);

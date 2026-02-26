@@ -1,9 +1,9 @@
 import 'dart:core';
 
+import "package:ente_sharing/models/user.dart";
 import 'package:flutter/foundation.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/public_url.dart';
-import 'package:locker/services/collections/models/user.dart';
 import 'package:locker/services/files/sync/models/common_keys.dart';
 
 class Collection {
@@ -156,6 +156,13 @@ class Collection {
     return CollectionParticipantRole.unknown;
   }
 
+  bool canAdd(int userID) {
+    final participantRole = getRole(userID);
+    return (isOwner(userID) ||
+            participantRole == CollectionParticipantRole.collaborator) &&
+        !isDeleted;
+  }
+
   void updateSharees(List<User> newSharees) {
     sharees.clear();
     sharees.addAll(newSharees);
@@ -289,6 +296,12 @@ String typeToString(CollectionType type) {
 
 extension CollectionTypeExtn on CollectionType {
   bool get canDelete =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canEdit =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canShare =>
       this != CollectionType.favorites && this != CollectionType.uncategorized;
 }
 

@@ -77,14 +77,14 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
             return ButtonWidget(
               buttonType: ButtonType.primary,
               buttonSize: ButtonSize.large,
-              labelText: S.of(context).save,
+              labelText: AppLocalizations.of(context).save,
               shouldSurfaceExecutionStates: false,
               isDisabled: !areIdsChanged,
               onTap: areIdsChanged
                   ? () async {
                       final dialog = createProgressDialog(
                         context,
-                        S.of(context).pleaseWait,
+                        AppLocalizations.of(context).pleaseWait,
                         isDismissible: true,
                       );
 
@@ -194,10 +194,11 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).people,
+              title: AppLocalizations.of(context).people,
             ),
             expandedHeight: MediaQuery.textScalerOf(context).scale(120),
-            flexibleSpaceCaption: S.of(context).peopleAutoAddDesc,
+            flexibleSpaceCaption:
+                AppLocalizations.of(context).peopleAutoAddDesc,
             actionIcons: const [],
           ),
           SliverFillRemaining(
@@ -218,10 +219,10 @@ Future<bool> removeFilesDialog(
   final completer = Completer<bool>();
   await showActionSheet(
     context: context,
-    body: S.of(context).shouldRemoveFilesSmartAlbumsDesc,
+    body: AppLocalizations.of(context).shouldRemoveFilesSmartAlbumsDesc,
     buttons: [
       ButtonWidget(
-        labelText: S.of(context).yes,
+        labelText: AppLocalizations.of(context).yes,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -233,7 +234,7 @@ Future<bool> removeFilesDialog(
         },
       ),
       ButtonWidget(
-        labelText: S.of(context).no,
+        labelText: AppLocalizations.of(context).no,
         buttonType: ButtonType.secondary,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,

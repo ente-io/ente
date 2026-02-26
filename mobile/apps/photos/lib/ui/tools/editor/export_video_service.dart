@@ -1,49 +1,216 @@
-import 'dart:developer';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
+import 'package:ffmpeg_kit_flutter/session_state.dart';
 import 'package:ffmpeg_kit_flutter/statistics.dart';
+import 'package:logging/logging.dart';
 import 'package:video_editor/video_editor.dart';
 
 class ExportService {
+  static final _logger = Logger('ExportService');
+
   static Future<void> dispose() async {
     final executions = await FFmpegKit.listSessions();
-    if (executions.isNotEmpty) await FFmpegKit.cancel();
+    if (executions.isNotEmpty) {
+      await FFmpegKit.cancel();
+    }
   }
 
-  static Future<FFmpegSession> runFFmpegCommand(
+  static Future<void> runFFmpegCommand(
     FFmpegVideoEditorExecute execute, {
     required void Function(File file) onCompleted,
     void Function(Object, StackTrace)? onError,
     void Function(Statistics)? onProgress,
-  }) {
-    log('FFmpeg start process with command = ${execute.command}');
-    return FFmpegKit.executeAsync(
-      execute.command,
-      (session) async {
-        final state =
-            FFmpegKitConfig.sessionStateToString(await session.getState());
-        final code = await session.getReturnCode();
+  }) async {
+    final completer = Completer<void>();
+    FFmpegSession? activeSession;
 
-        if (ReturnCode.isSuccess(code)) {
-          onCompleted(File(execute.outputPath));
-        } else {
-          if (onError != null) {
-            onError(
-              Exception(
-                'FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}',
-              ),
-              StackTrace.current,
+    try {
+      // Run FFmpeg with async callbacks
+      activeSession = await FFmpegKit.executeAsync(
+        execute.command,
+        (session) async {
+          // Session complete callback
+          final returnCode = await session.getReturnCode();
+          final output = await session.getOutput();
+
+          if (returnCode != null && ReturnCode.isSuccess(returnCode)) {
+            final outputFile = File(execute.outputPath);
+
+            if (!outputFile.existsSync()) {
+              _logger.warning(
+                'Output file does not exist at ${execute.outputPath}',
+              );
+            }
+
+            onCompleted(outputFile);
+          } else {
+            final errorCode = returnCode?.getValue() ?? -1;
+            _logger.severe('FFmpeg process failed with return code $errorCode');
+
+            final error = Exception(
+              'FFmpeg process exited with return code $errorCode.\n$output',
             );
+
+            if (onError != null) {
+              onError(error, StackTrace.current);
+            }
           }
-          return;
+
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        },
+        (log) {
+          final message = log.getMessage();
+          if (message.isEmpty) {
+            return;
+          }
+
+          final level = log.getLevel();
+          _logger.info('FFmpeg[$level] $message');
+        },
+        (statistics) {
+          // Statistics callback for progress
+          if (onProgress != null) {
+            onProgress(statistics);
+          }
+        },
+      );
+
+      // Poll session state to ensure we wait for completion
+      bool callbackTriggered = false;
+      Timer.periodic(const Duration(milliseconds: 500), (timer) async {
+        if (activeSession != null) {
+          final state = await activeSession.getState();
+          final statisticsList = await activeSession.getStatistics();
+
+          if (statisticsList.isNotEmpty && onProgress != null) {
+            final statistics = statisticsList.last;
+            onProgress(statistics);
+          }
+
+          if (state == SessionState.completed) {
+            timer.cancel();
+
+            // If callback hasn't been triggered yet, do it manually
+            if (!callbackTriggered && !completer.isCompleted) {
+              callbackTriggered = true;
+
+              // Get the return code and handle completion
+              final returnCode = await activeSession.getReturnCode();
+
+              if (returnCode != null && ReturnCode.isSuccess(returnCode)) {
+                final outputFile = File(execute.outputPath);
+
+                if (!outputFile.existsSync()) {
+                  _logger.warning(
+                    'Output file does not exist at ${execute.outputPath}',
+                  );
+                }
+
+                onCompleted(outputFile);
+              } else {
+                final errorCode = returnCode?.getValue() ?? -1;
+                _logger.severe(
+                  'FFmpeg process failed with return code $errorCode',
+                );
+
+                final error = Exception(
+                  'FFmpeg process exited with return code $errorCode',
+                );
+
+                if (onError != null) {
+                  onError(error, StackTrace.current);
+                }
+              }
+
+              completer.complete();
+            }
+          } else if (state == SessionState.failed) {
+            timer.cancel();
+            if (!completer.isCompleted) {
+              final error = Exception('FFmpeg process failed');
+              if (onError != null) {
+                onError(error, StackTrace.current);
+              }
+              completer.complete();
+            }
+          }
+        }
+      });
+
+      // Wait for the session to complete
+      await completer.future;
+    } catch (e, stackTrace) {
+      _logger.severe('FFmpeg execution error: $e');
+      if (activeSession != null) {
+        await FFmpegKit.cancel(activeSession.getSessionId());
+      }
+      if (onError != null) {
+        onError(e, stackTrace);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  /// Export video using FFmpeg
+  static Future<File> exportVideo({
+    required VideoEditorController controller,
+    required String outputPath,
+    void Function(double)? onProgress,
+    void Function(Object, StackTrace)? onError,
+  }) async {
+    final config = VideoFFmpegVideoEditorConfig(
+      controller,
+      format: VideoExportFormat.mp4,
+      commandBuilder: (config, videoPath, outputPath) {
+        final List<String> filters = config.getExportFilters();
+
+        final String startTrimCmd = "-ss ${controller.startTrim}";
+        final String toTrimCmd = "-t ${controller.trimmedDuration}";
+
+        // Use hardware acceleration if available
+        String hwAccel = "";
+        if (Platform.isIOS) {
+          hwAccel = "-hwaccel videotoolbox";
+        } else if (Platform.isAndroid) {
+          hwAccel = "-hwaccel mediacodec";
+        }
+
+        return '$hwAccel $startTrimCmd -i $videoPath $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -preset ultrafast -c:a aac $outputPath';
+      },
+    );
+
+    final completer = Completer<File>();
+
+    await runFFmpegCommand(
+      await config.getExecuteConfig(),
+      onProgress: (Statistics stats) {
+        if (onProgress != null) {
+          final progress = config.getFFmpegProgress(stats.getTime().toInt());
+          onProgress(progress);
         }
       },
-      null,
-      onProgress,
+      onError: (error, stackTrace) {
+        if (onError != null) {
+          onError(error, stackTrace);
+        }
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+      onCompleted: (File file) {
+        if (!completer.isCompleted) {
+          completer.complete(file);
+        }
+      },
     );
+
+    return completer.future;
   }
 }

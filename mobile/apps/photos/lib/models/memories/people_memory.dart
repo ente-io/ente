@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
@@ -68,28 +70,32 @@ String activityQuery(PeopleActivity activity) {
   }
 }
 
-String activityTitle(S s, PeopleActivity activity, String personName) {
+String activityTitle(
+  AppLocalizations locals,
+  PeopleActivity activity,
+  String personName,
+) {
   switch (activity) {
     case PeopleActivity.admiring:
-      return s.admiringThem(personName);
+      return locals.admiringThem(name: personName);
     case PeopleActivity.embracing:
-      return s.embracingThem(personName);
+      return locals.embracingThem(name: personName);
     case PeopleActivity.party:
-      return s.partyWithThem(personName);
+      return locals.partyWithThem(name: personName);
     case PeopleActivity.hiking:
-      return s.hikingWithThem(personName);
+      return locals.hikingWithThem(name: personName);
     case PeopleActivity.feast:
-      return s.feastingWithThem(personName);
+      return locals.feastingWithThem(name: personName);
     case PeopleActivity.selfies:
-      return s.selfiesWithThem(personName);
+      return locals.selfiesWithThem(name: personName);
     case PeopleActivity.posing:
-      return s.posingWithThem(personName);
+      return locals.posingWithThem(name: personName);
     case PeopleActivity.background:
-      return s.backgroundWithThem(personName);
+      return locals.backgroundWithThem(name: personName);
     case PeopleActivity.sports:
-      return s.sportsWithThem(personName);
+      return locals.sportsWithThem(name: personName);
     case PeopleActivity.roadtrip:
-      return s.roadtripWithThem(personName);
+      return locals.roadtripWithThem(name: personName);
   }
 }
 
@@ -98,6 +104,7 @@ class PeopleMemory extends SmartMemory {
   final PeopleMemoryType peopleMemoryType;
   final PeopleActivity? activity;
   final String? personName;
+  final bool isUnnamedCluster;
   final bool? isBirthday;
   final int? newAge;
 
@@ -113,6 +120,7 @@ class PeopleMemory extends SmartMemory {
     super.firstCreationTime,
     super.lastCreationTime,
     this.activity,
+    this.isUnnamedCluster = false,
     this.isBirthday,
     this.newAge,
   }) : super(
@@ -127,6 +135,7 @@ class PeopleMemory extends SmartMemory {
   PeopleMemory copyWith({
     int? firstDateToShow,
     int? lastDateToShow,
+    bool? isUnnamedCluster,
     bool? isBirthday,
     int? newAge,
   }) {
@@ -140,35 +149,112 @@ class PeopleMemory extends SmartMemory {
       firstCreationTime: firstCreationTime,
       lastCreationTime: lastCreationTime,
       activity: activity,
+      isUnnamedCluster: isUnnamedCluster ?? this.isUnnamedCluster,
       isBirthday: isBirthday ?? this.isBirthday,
       newAge: newAge ?? this.newAge,
     );
   }
 
   @override
-  String createTitle(S s, String languageCode) {
+  String createTitle(AppLocalizations locals, String languageCode) {
+    if (isUnnamedCluster) {
+      switch (peopleMemoryType) {
+        case PeopleMemoryType.youAndThem:
+          return locals.unnamedPeopleYouAndThem;
+        case PeopleMemoryType.doingSomethingTogether:
+          return locals.unnamedPeopleDoingSomethingTogether;
+        case PeopleMemoryType.spotlight:
+          return locals.unnamedPeopleSpotlight;
+        case PeopleMemoryType.lastTimeYouSawThem:
+          return locals.unnamedPeopleLastTimeYouSawThem;
+      }
+    }
     switch (peopleMemoryType) {
       case PeopleMemoryType.youAndThem:
         assert(personName != null);
-        return s.youAndThem(personName!);
+        return locals.youAndThem(name: personName!);
       case PeopleMemoryType.doingSomethingTogether:
         assert(activity != null);
         assert(personName != null);
-        return activityTitle(s, activity!, personName!);
+        return activityTitle(locals, activity!, personName!);
       case PeopleMemoryType.spotlight:
         if (personName == null) {
-          return s.spotlightOnYourself;
+          return locals.spotlightOnYourself;
         } else if (newAge == null) {
-          return s.spotlightOnThem(personName!);
+          return locals.spotlightOnThem(name: personName!);
         } else {
           if (isBirthday!) {
-            return s.personIsAge(personName!, newAge!);
+            return locals.personIsAge(name: personName!, age: newAge!);
           } else {
-            return s.personTurningAge(personName!, newAge!);
+            return locals.personTurningAge(name: personName!, age: newAge!);
           }
         }
       case PeopleMemoryType.lastTimeYouSawThem:
-        return s.lastTimeWithThem(personName!);
+        return locals.lastTimeWithThem(name: personName!);
     }
+  }
+}
+
+typedef PeopleSelectionBuilder = Future<List<Memory>> Function(
+  List<Memory> memories,
+);
+
+class PeopleMemoryCandidate {
+  PeopleMemoryCandidate({
+    required this.personID,
+    required this.personName,
+    required this.type,
+    required this.rawMemories,
+    required this.firstDateToShow,
+    required this.lastDateToShow,
+    this.activity,
+    this.isUnnamedCluster = false,
+    this.lastCreationTime,
+    this.selectionBuilder,
+    this.requiresSelection = true,
+  }) : assert(!requiresSelection || selectionBuilder != null);
+
+  final String personID;
+  final String? personName;
+  final PeopleMemoryType type;
+  final PeopleActivity? activity;
+  final bool isUnnamedCluster;
+  final List<Memory> rawMemories;
+  final int firstDateToShow;
+  final int lastDateToShow;
+  final int? lastCreationTime;
+  final bool requiresSelection;
+  final PeopleSelectionBuilder? selectionBuilder;
+
+  PeopleMemory? _resolvedMemory;
+  Future<PeopleMemory?>? _pendingBuild;
+
+  Future<PeopleMemory?> realize() {
+    if (_resolvedMemory != null) return Future.value(_resolvedMemory);
+    _pendingBuild ??= _build();
+    return _pendingBuild!;
+  }
+
+  Future<PeopleMemory?> _build() async {
+    List<Memory> memories = rawMemories;
+    if (requiresSelection) {
+      final builder = selectionBuilder;
+      if (builder == null) return null;
+      final selection = await builder(rawMemories);
+      if (selection.isEmpty) return null;
+      memories = selection;
+    }
+    _resolvedMemory = PeopleMemory(
+      memories,
+      firstDateToShow,
+      lastDateToShow,
+      type,
+      personID,
+      personName,
+      lastCreationTime: lastCreationTime,
+      activity: activity,
+      isUnnamedCluster: isUnnamedCluster,
+    );
+    return _resolvedMemory;
   }
 }

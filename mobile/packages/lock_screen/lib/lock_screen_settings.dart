@@ -3,12 +3,13 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
-import "package:ente_utils/platform_util.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:local_auth/local_auth.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -44,7 +45,10 @@ class LockScreenSettings {
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
 
-  Future<void> init(BaseConfiguration config) async {
+  Future<void> init(
+    BaseConfiguration config, {
+    bool hasOptedForOfflineMode = false,
+  }) async {
     _config = config;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
@@ -56,7 +60,7 @@ class LockScreenSettings {
     /// already been done by checking a stored boolean value.
     await runLockScreenChangesMigration();
 
-    await _clearLsDataInKeychainIfFreshInstall();
+    await _clearLsDataInKeychainIfFreshInstall(hasOptedForOfflineMode);
 
     Bus.instance.on<SignedOutEvent>().listen((event) {
       removePinAndPassword();
@@ -94,7 +98,7 @@ class LockScreenSettings {
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
-    if (PlatformUtil.isDesktop()) return;
+    if (PlatformDetector.isDesktop()) return;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
@@ -147,19 +151,18 @@ class LockScreenSettings {
   }
 
   static Uint8List _generateSalt() {
-    return sodium.randombytes.buf(sodium.crypto.pwhash.saltBytes);
+    return CryptoUtil.getSaltToDeriveKey();
   }
 
   Future<void> setPin(String userPin) async {
     await _secureStorage.delete(key: saltKey);
     final salt = _generateSalt();
 
-    final hash = cryptoPwHash(
+    final hash = CryptoUtil.cryptoPwHash(
       utf8.encode(userPin),
       salt,
-      sodium.crypto.pwhash.memLimitInteractive,
-      sodium.crypto.pwhash.opsLimitSensitive,
-      sodium,
+      CryptoUtil.pwhashMemLimitInteractive,
+      CryptoUtil.pwhashOpsLimitSensitive,
     );
     final String saltPin = base64Encode(salt);
     final String hashedPin = base64Encode(hash);
@@ -185,12 +188,11 @@ class LockScreenSettings {
     await _secureStorage.delete(key: saltKey);
     final salt = _generateSalt();
 
-    final hash = cryptoPwHash(
+    final hash = CryptoUtil.cryptoPwHash(
       utf8.encode(pass),
       salt,
-      sodium.crypto.pwhash.memLimitInteractive,
-      sodium.crypto.pwhash.opsLimitSensitive,
-      sodium,
+      CryptoUtil.pwhashMemLimitInteractive,
+      CryptoUtil.pwhashOpsLimitSensitive,
     );
 
     await _secureStorage.write(key: saltKey, value: base64Encode(salt));
@@ -239,11 +241,19 @@ class LockScreenSettings {
   // If the app was uninstalled (without logging out if it was used with
   // backups), keychain items of the app persist in the keychain. To avoid using
   // old keychain items, we delete them on reinstall.
-  Future<void> _clearLsDataInKeychainIfFreshInstall() async {
-    if ((Platform.isIOS || Platform.isMacOS) && !_config.isLoggedIn()) {
+  Future<void> _clearLsDataInKeychainIfFreshInstall(
+    bool hasOptedForOfflineMode,
+  ) async {
+    if ((Platform.isIOS || Platform.isMacOS) &&
+        !_config.isLoggedIn() &&
+        !hasOptedForOfflineMode) {
       await _secureStorage.delete(key: password);
       await _secureStorage.delete(key: pin);
       await _secureStorage.delete(key: saltKey);
     }
+  }
+
+  Future<bool> isDeviceSupported() async {
+    return await LocalAuthentication().isDeviceSupported();
   }
 }

@@ -1,10 +1,11 @@
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:step_progress_indicator/step_progress_indicator.dart';
-import 'package:styled_text/styled_text.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pinput/pinput.dart';
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
@@ -25,19 +26,19 @@ class OTTVerificationPage extends StatefulWidget {
 }
 
 class _OTTVerificationPageState extends State<OTTVerificationPage> {
-  final _verificationCodeController = TextEditingController();
+  final _pinController = TextEditingController();
 
   Future<void> onPressed() async {
     if (widget.isChangeEmail) {
       await UserService.instance.changeEmail(
         context,
         widget.email,
-        _verificationCodeController.text,
+        _pinController.text,
       );
     } else {
       await UserService.instance.verifyEmail(
         context,
-        _verificationCodeController.text,
+        _pinController.text,
         isResettingPasswordScreen: widget.isResetPasswordScreen,
       );
     }
@@ -45,8 +46,15 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -58,35 +66,59 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.primary700,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        title: widget.isCreateAccountScreen
-            ? Material(
-                type: MaterialType.transparency,
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 2,
-                  selectedColor: getEnteColorScheme(context).alternativeColor,
-                  roundedEdges: const Radius.circular(10),
-                  unselectedColor:
-                      getEnteColorScheme(context).stepProgressUnselectedColor,
-                ),
-              )
-            : null,
       ),
       body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _verificationCodeController.text.isNotEmpty,
-        buttonText: context.strings.verify,
-        onPressedFunction: onPressed,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.isCreateAccountScreen && !isKeypadOpen)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: DotsIndicator(
+                dotsCount: 3,
+                position: 1,
+                decorator: DotsDecorator(
+                  activeColor: colorScheme.primary700,
+                  color: colorScheme.primary700.withValues(alpha: 0.32),
+                  activeShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  size: const Size(10, 10),
+                  activeSize: const Size(20, 10),
+                  spacing: const EdgeInsets.all(6),
+                ),
+              ),
+            ),
+          DynamicFAB(
+            isKeypadOpen: isKeypadOpen,
+            isFormValid: _pinController.text.length == 6,
+            buttonText: context.strings.verify,
+            onPressedFunction: onPressed,
+          ),
+        ],
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -94,128 +126,118 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   Widget _getBody() {
-    return ListView(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
-              child: Text(
-                context.strings.verifyEmail,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                          child: StyledText(
-                            text:
-                                context.strings.weHaveSendEmailTo(widget.email),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontSize: 14),
-                            tags: {
-                              'green': StyledTextTag(
-                                style: TextStyle(
-                                  color: getEnteColorScheme(context)
-                                      .alternativeColor,
-                                ),
-                              ),
-                            },
-                          ),
-                        ),
-                        widget.isResetPasswordScreen
-                            ? Text(
-                                context.strings.toResetVerifyEmail,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(fontSize: 14),
-                              )
-                            : Text(
-                                context.strings.checkInboxAndSpamFolder,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(fontSize: 14),
-                              ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    height: 1,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: TextFormField(
-                style: Theme.of(context).textTheme.titleMedium,
-                onFieldSubmitted: _verificationCodeController.text.isNotEmpty
-                    ? (_) => onPressed()
-                    : null,
-                decoration: InputDecoration(
-                  filled: true,
-                  hintText: context.strings.tapToEnterCode,
-                  contentPadding: const EdgeInsets.all(15),
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    final defaultPinTheme = PinTheme(
+      height: 48,
+      width: 48,
+      decoration: BoxDecoration(
+        color: colorScheme.backdropBase,
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1.75,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: BoxDecoration(
+        color: colorScheme.backdropBase,
+        border: Border.all(
+          color: colorScheme.primary700,
+          width: 1.75,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+
+    final submittedPinTheme = defaultPinTheme.copyWith(
+      textStyle: textTheme.h3Bold.copyWith(
+        color: colorScheme.primary700,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.backdropBase,
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1.75,
+        ),
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 24),
+              Image.asset('assets/upload_file.png'),
+              const SizedBox(height: 24),
+              Text(
+                context.strings.weHaveSentCode(widget.email),
+                style: textTheme.body.copyWith(
+                  color: colorScheme.textBase,
                 ),
-                controller: _verificationCodeController,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.strings.checkInboxAndSpamFolder,
+                style: textTheme.small.copyWith(
+                  color: colorScheme.textMuted,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Pinput(
+                length: 6,
+                controller: _pinController,
                 autofocus: true,
-                autocorrect: false,
+                defaultPinTheme: defaultPinTheme,
+                focusedPinTheme: focusedPinTheme,
+                submittedPinTheme: submittedPinTheme,
+                showCursor: false,
                 keyboardType: TextInputType.number,
+                onCompleted: (value) {
+                  if (value.length == 6) {
+                    onPressed();
+                  }
+                },
                 onChanged: (_) {
                   setState(() {});
                 },
               ),
-            ),
-            const Divider(
-              thickness: 1,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      UserService.instance.sendOtt(
-                        context,
-                        widget.email,
-                        isCreateAccountScreen: widget.isCreateAccountScreen,
-                        isChangeEmail: widget.isChangeEmail,
-                        isResetPasswordScreen: widget.isResetPasswordScreen,
-                      );
-                    },
-                    child: Text(
-                      context.strings.resendEmail,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                          ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    UserService.instance.sendOtt(
+                      context,
+                      widget.email,
+                      isCreateAccountScreen: widget.isCreateAccountScreen,
+                      isChangeEmail: widget.isChangeEmail,
+                      isResetPasswordScreen: widget.isResetPasswordScreen,
+                    );
+                  },
+                  child: Text(
+                    context.strings.resendCode,
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.primary700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: colorScheme.primary700,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ],
+      ),
     );
-    // );
   }
 }

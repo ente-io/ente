@@ -19,6 +19,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -55,7 +56,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
-  late StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  StreamSubscription<PeopleChangedEvent>? _peopleChangedEvent;
 
   @override
   void initState() {
@@ -66,7 +67,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   @override
   void dispose() {
-    _peopleChangedEvent.cancel();
+    _peopleChangedEvent?.cancel();
     super.dispose();
   }
 
@@ -101,9 +102,13 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data!.isEmpty) {
+              _peopleChangedEvent?.cancel();
+              _peopleChangedEvent = null;
               return Center(
                 child: Text(
-                  S.of(context).noSuggestionsForPerson(widget.person.data.name),
+                  AppLocalizations.of(context).noSuggestionsForPerson(
+                    personName: widget.person.data.name,
+                  ),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
@@ -123,6 +128,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               clusterID,
             );
 
+            _peopleChangedEvent?.cancel();
             _peopleChangedEvent =
                 Bus.instance.on<PeopleChangedEvent>().listen((event) {
               if (event.source == clusterID.toString()) {
@@ -230,16 +236,14 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                         const SizedBox(height: 4),
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
-                          onTap: canGiveFeedback
-                              ? () => _saveAsAnotherPerson()
-                              : null,
+                          onTap: () => _saveAsAnotherPerson(),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 12,
                               horizontal: 32,
                             ),
                             child: Text(
-                              S.of(context).saveAsAnotherPerson,
+                              AppLocalizations.of(context).saveAsAnotherPerson,
                               style: getEnteTextTheme(context).mini.copyWith(
                                     color:
                                         getEnteColorScheme(context).textMuted,
@@ -457,7 +461,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           );
         } else if (snapshot.hasError) {
           // log the error
-          return Center(child: Text(S.of(context).error));
+          return Center(child: Text(AppLocalizations.of(context).error));
         } else {
           canGiveFeedback = false;
           return const Center(child: CircularProgressIndicator());
@@ -481,12 +485,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           height: 100,
           child: Stack(
             children: [
-              ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(75),
-                  ),
-                ),
+              FaceThumbnailSquircleClip(
                 child: FileFaceWidget(
                   files[start + index],
                   clusterID: cluserId,
@@ -495,12 +494,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
               ),
               if (start + index == 5 && files.length > 6)
-                ClipPath(
-                  clipper: ShapeBorderClipper(
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(72),
-                    ),
-                  ),
+                FaceThumbnailSquircleClip(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),

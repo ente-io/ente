@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/export/ente.dart'; 
+import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/html_export.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
-import 'package:ente_auth/utils/share_utils.dart';
+import 'package:ente_auth/utils/share_utils.dart' as auth_share;
 import 'package:ente_auth/utils/toast_util.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_utils/ente_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -105,7 +106,7 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          await _exportCodes(context, jsonEncode(data.toJson()), "txt");
+          await _exportCodes(context, jsonEncode(data.toJson()), "encrypted", "json");
         } catch (e) {
           showToast(context, "Error while exporting codes.");
         }
@@ -115,46 +116,47 @@ Future<void> _requestForEncryptionPassword(
 }
 
 Future<void> _showExportWarningDialog(BuildContext context, String type) async {
-  await showChoiceActionSheet(
+  final result = await showChoiceActionSheet(
     context,
     title: context.l10n.warning,
     body: context.l10n.exportWarningDesc,
     isCritical: true,
-    firstButtonOnTap: () async {
-      if (type == "html") {
-        final data = await generateHtml(context);
-        await _exportCodes(context, data, type);
-      } else {
-        final data = await _getAuthDataForExport();
-        await _exportCodes(context, data, type);
-      }
-    },
     secondButtonLabel: context.l10n.cancel,
     firstButtonLabel: context.l10n.iUnderStand,
   );
+
+  if (result?.action == ButtonAction.first) {
+    if (type == "html") {
+      final data = await generateHtml(context);
+      await _exportCodes(context, data, "plainhtml", type);
+    } else {
+      final data = await _getAuthDataForExport();
+      await _exportCodes(context, data, "plaintext", type);
+    }
+  }
 }
 
 Future<void> _exportCodes(
   BuildContext context,
   String fileContent,
+  String exportType,
   String extension,
 ) async {
   DateTime now = DateTime.now().toUtc();
-  String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-  String exportFileName = 'ente-auth-codes-$formattedDate';
+  String formattedDate = DateFormat('yyyyMMdd-HHmmss').format(now);
+  String exportFileName = 'ente-auth-codes-$exportType-$formattedDate';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
-  await PlatformUtil.refocusWindows();
   if (!hasAuthenticated) {
     return;
   }
   Future.delayed(
     const Duration(milliseconds: 1200),
-    () async => await shareDialog(
+    () async => await auth_share.shareDialog(
       context,
       context.l10n.exportCodes,
       saveAction: () async {
-        await PlatformUtil.shareFile(
+        await FileSaverUtil.saveFile(
           exportFileName,
           extension,
           CryptoUtil.strToBin(fileContent),

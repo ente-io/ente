@@ -29,10 +29,10 @@ packages:
     dependency: transitive
     description:
       name: analyzer
-      sha256: "01949bf52ad33f0e0f74f881fbaac4f348c556531951d92c8d16f1262aa19ff8"
+      sha256: "974859dc0ff5f37bc4313244b3218c791810d03ab3470a579580279ba971a48d"
       url: "https://pub.dev"
     source: hosted
-    version: "7.5.4"
+    version: "7.7.1"
   android_intent_plus:
     dependency: "direct main"
     description:
@@ -129,6 +129,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  audio_session:
+    dependency: "direct main"
+    description:
+      name: audio_session
+      sha256: "8f96a7fecbb718cb093070f868b4cdcb8a9b1053dce342ff8ab2fde10eb9afb7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   battery_info:
     dependency: "direct main"
     description:
@@ -166,10 +174,10 @@ packages:
     dependency: transitive
     description:
       name: build
-      sha256: "51dc711996cbf609b90cbe5b335bbce83143875a9d58e4b5c6d3c4f684d3dda7"
+      sha256: "7d95cbbb1526ab5ae977df9b4cc660963b9b27f6d1075c0b34653868911385e4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "3.0.0"
   build_cli_annotations:
     dependency: transitive
     description:
@@ -198,26 +206,26 @@ packages:
     dependency: transitive
     description:
       name: build_resolvers
-      sha256: ee4257b3f20c0c90e72ed2b57ad637f694ccba48839a821e87db762548c22a62
+      sha256: "38c9c339333a09b090a638849a4c56e70a404c6bdd3b511493addfbc113b60c2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "3.0.0"
   build_runner:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "382a4d649addbfb7ba71a3631df0ec6a45d5ab9b098638144faf27f02778eb53"
+      sha256: b971d4a1c789eba7be3e6fe6ce5e5b50fd3719e3cb485b3fad6d04358304351d
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "2.6.0"
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
-      sha256: "85fbbb1036d576d966332a3f5ce83f2ce66a40bea1a94ad2d5fc29a19a0d3792"
+      sha256: c04e612ca801cd0928ccdb891c263a2b1391cb27940a5ea5afcf9ba894de5d62
       url: "https://pub.dev"
     source: hosted
-    version: "9.1.2"
+    version: "9.2.0"
   built_collection:
     dependency: transitive
     description:
@@ -258,6 +266,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  camera:
+    dependency: "direct main"
+    description:
+      name: camera
+      sha256: "87a27e0553e3432119c1c2f6e4b9a1bbf7d2c660552b910bfa59185a9facd632"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.2+1"
+  camera_android_camerax:
+    dependency: transitive
+    description:
+      name: camera_android_camerax
+      sha256: "58b8fe843a3c83fd1273c00cb35f5a8ae507f6cc9b2029bcf7e2abba499e28d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.19+1"
+  camera_avfoundation:
+    dependency: transitive
+    description:
+      name: camera_avfoundation
+      sha256: "951ef122d01ebba68b7a54bfe294e8b25585635a90465c311b2f875ae72c412f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.21+2"
+  camera_platform_interface:
+    dependency: transitive
+    description:
+      name: camera_platform_interface
+      sha256: "98cfc9357e04bad617671b4c1f78a597f25f08003089dd94050709ae54effc63"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.12.0"
+  camera_web:
+    dependency: transitive
+    description:
+      name: camera_web
+      sha256: "77e53acb64d9de8917424eeb32b5c7c73572d1e00954bbf54a1e609d79a751a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.5+1"
   cast:
     dependency: transitive
     description:
@@ -286,12 +334,11 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "."
-      ref: mybranched
-      resolved-ref: "539079ac2758086ef4dfb602a5f8785bf5295fb3"
-      url: "https://github.com/ente-io/chewie.git"
-    source: git
-    version: "1.10.0"
+      name: chewie
+      sha256: "44bcfc5f0dfd1de290c87c9d86a61308b3282a70b63435d5557cfd60f54a69ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.13.0"
   cli_config:
     dependency: transitive
     description:
@@ -358,7 +405,7 @@ packages:
     source: hosted
     version: "2.0.1"
   convert:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: convert
       sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
@@ -517,14 +564,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
-  el_tooltip:
-    dependency: "direct main"
-    description:
-      name: el_tooltip
-      sha256: "0860b00e9390a31dd98369dc16d3b6fa2668fc52df712bd00e86d8931787fc17"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.1"
   email_validator:
     dependency: "direct main"
     description:
@@ -533,14 +572,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  emoji_picker_flutter:
-    dependency: transitive
-    description:
-      name: emoji_picker_flutter
-      sha256: "08567e6f914d36c32091a96cf2f51d2558c47aa2bd47a590dc4f50e42e0965f6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   encrypt:
     dependency: "direct main"
     description:
@@ -574,6 +605,41 @@ packages:
     dependency: "direct main"
     description:
       path: "plugins/ente_feature_flag"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_icons:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_icons"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_photos_rust:
+    dependency: "direct main"
+    description:
+      path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_pure_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_rust:
+    dependency: "direct main"
+    description:
+      path: "../../packages/rust"
       relative: true
     source: path
     version: "0.0.1"
@@ -670,8 +736,8 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: remove-event-sub
-      resolved-ref: "2c0f34797df830ef61e6ed479583b368c342cb37"
+      ref: "16kb-fix"
+      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -679,8 +745,8 @@ packages:
     dependency: transitive
     description:
       path: "flutter/flutter_platform_interface"
-      ref: remove-event-sub
-      resolved-ref: "2c0f34797df830ef61e6ed479583b368c342cb37"
+      ref: "16kb-fix"
+      resolved-ref: "9c7cf4b98289598b67422f3c31e6ef8bb06a4198"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "0.2.1"
@@ -1047,10 +1113,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_secure_storage
-      sha256: "9cad52d75ebc511adfae3d447d5d13da15a55a92c9410e50f67335b6d21d16ea"
+      sha256: ffdbb60130e4665d2af814a0267c481bcf522c41ae2e43caf69fa0146876d685
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.4"
+    version: "9.0.0"
   flutter_secure_storage_linux:
     dependency: transitive
     description:
@@ -1103,8 +1169,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-embeddings-only
-      resolved-ref: "342ed3a42febd2dcc8b532c0ff07bd327a472d82"
+      ref: "16kb-fix"
+      resolved-ref: "1eb375e639dc86df69b544642b177a710ae43db0"
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
@@ -1170,10 +1236,10 @@ packages:
     dependency: "direct dev"
     description:
       name: freezed
-      sha256: "2d399f823b8849663744d2a9ddcce01c49268fb4170d0442a655bf6a2f47be22"
+      sha256: da32f8ba8cfcd4ec71d9decc8cbf28bd2c31b5283d9887eb51eb4a0659d8110c
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.2.0"
   freezed_annotation:
     dependency: "direct main"
     description:
@@ -1291,6 +1357,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  hugeicons:
+    dependency: "direct main"
+    description:
+      name: hugeicons
+      sha256: "7118b52d96466cdc3394e549ff18e7ff1a92938982777f8feb09e20dca6f6521"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   image:
     dependency: "direct main"
     description:
@@ -1303,10 +1377,10 @@ packages:
     dependency: "direct main"
     description:
       name: in_app_purchase
-      sha256: "5cddd7f463f3bddb1d37a72b95066e840d5822d66291331d7f8f05ce32c24b6c"
+      sha256: "11a40f148eeb4f681a0572003e2b33432e110c90c1bbb4f9ef83b81ec0c4f737"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.3"
+    version: "3.2.1"
   in_app_purchase_android:
     dependency: transitive
     description:
@@ -1327,10 +1401,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_storekit
-      sha256: ceddd5a70d268f762d29993ed470054bc2baf8793e41800bc82cde05110260d0
+      sha256: "6ce1361278cacc0481508989ba419b2c9f46a2b0dc54b3fe54f5ee63c2718fef"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.2"
+    version: "0.3.22+1"
   integration_test:
     dependency: "direct dev"
     description: flutter
@@ -1396,10 +1470,34 @@ packages:
     dependency: "direct dev"
     description:
       name: json_serializable
-      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
+      sha256: ce2cf974ccdee13be2a510832d7fba0b94b364e0b0395dee42abaa51b855be27
       url: "https://pub.dev"
     source: hosted
-    version: "6.9.5"
+    version: "6.10.0"
+  just_audio:
+    dependency: "direct main"
+    description:
+      name: just_audio
+      sha256: "9694e4734f515f2a052493d1d7e0d6de219ee0427c7c29492e246ff32a219908"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.5"
+  just_audio_platform_interface:
+    dependency: transitive
+    description:
+      name: just_audio_platform_interface
+      sha256: "2532c8d6702528824445921c5ff10548b518b13f808c2e34c2fd54793b999a6a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.6.0"
+  just_audio_web:
+    dependency: transitive
+    description:
+      name: just_audio_web
+      sha256: "6ba8a2a7e87d57d32f0f7b42856ade3d6a9fbe0f1a11fabae0a4f00bb73f0663"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.16"
   latlong2:
     dependency: "direct main"
     description:
@@ -1512,6 +1610,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.11"
+  log_viewer:
+    dependency: "direct main"
+    description:
+      path: "../../packages/log_viewer"
+      relative: true
+    source: path
+    version: "1.0.0"
   logger:
     dependency: transitive
     description:
@@ -1565,7 +1670,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "23a38887fa6b61330452555f8e686c3a3a1c91a2"
+      resolved-ref: "324f8fbdbc7ae6d326a6d541751b7a895a249089"
       url: "https://github.com/ente-io/media_extension.git"
     source: git
     version: "1.0.2"
@@ -1582,10 +1687,10 @@ packages:
     dependency: transitive
     description:
       name: media_kit_libs_android_video
-      sha256: adff9b571b8ead0867f9f91070f8df39562078c0eb3371d88b9029a2d547d7b7
+      sha256: "3f6274e5ab2de512c286a25c327288601ee445ed8ac319e0ef0b66148bd8f76c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.7"
+    version: "1.3.8"
   media_kit_libs_ios_video:
     dependency: "direct main"
     description:
@@ -1637,6 +1742,14 @@ packages:
       url: "https://github.com/media-kit/media-kit"
     source: git
     version: "1.3.0"
+  mesh_gradient:
+    dependency: "direct main"
+    description:
+      name: mesh_gradient
+      sha256: "3dc7a7195d90f164e69aa805f4dea876eee54aed6b271ee22ae792d7b9c1fedb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.8"
   meta:
     dependency: transitive
     description:
@@ -1669,6 +1782,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.12.6"
+  mobile_ocr:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
+      resolved-ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
+      url: "https://github.com/ente-io/mobile_ocr"
+    source: git
+    version: "1.0.0"
+  mockito:
+    dependency: "direct dev"
+    description:
+      name: mockito
+      sha256: "2314cbe9165bcd16106513df9cf3c3224713087f09723b128928dc11a4379f99"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.5.0"
   modal_bottom_sheet:
     dependency: "direct main"
     description:
@@ -1677,15 +1807,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  motion_photos:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: ddf5eba70103c2add7c20010430d9db654ddf95c
-      url: "https://github.com/ente-io/motion_photo.git"
-    source: git
-    version: "1.0.0"
   motion_sensors:
     dependency: transitive
     description:
@@ -1745,6 +1866,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  native_video_editor:
+    dependency: "direct main"
+    description:
+      path: "../../packages/native_video_editor"
+      relative: true
+    source: path
+    version: "1.0.0"
   native_video_player:
     dependency: "direct main"
     description:
@@ -2067,6 +2195,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  pretty_qr_code:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "912bf168492c90ee2a20b2997926372eb18adb0f"
+      url: "https://github.com/ente-io/flutter_pretty_qr_fork"
+    source: git
+    version: "3.5.0"
   privacy_screen:
     dependency: "direct main"
     description:
@@ -2080,10 +2217,10 @@ packages:
     dependency: "direct main"
     description:
       name: pro_image_editor
-      sha256: "27190b0333af71e9949f366ac303496511ef6d67607f6f9797c9f136371a321f"
+      sha256: df25475c7df5fb90c36f7ede774c7c14b83d862148ed5ab77f09a0dd120ec159
       url: "https://pub.dev"
     source: hosted
-    version: "6.2.3"
+    version: "11.3.0"
   process:
     dependency: transitive
     description:
@@ -2112,10 +2249,10 @@ packages:
     dependency: transitive
     description:
       name: provider
-      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.5"
+    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:
@@ -2132,6 +2269,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  qr:
+    dependency: transitive
+    description:
+      name: qr
+      sha256: "5a1d2586170e172b8a8c8470bbbffd5eb0cd38a66c0d77155ea138d3af3a4445"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   quiver:
     dependency: transitive
     description:
@@ -2157,13 +2302,22 @@ packages:
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
     version: "1.8.1"
-  rust_lib_photos:
+  rive:
     dependency: "direct main"
     description:
-      path: rust_builder
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: rive
+      sha256: "20d91e17b1bae5f4030d252336227f990782c942cb44e41685a13ae5f885e641"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.14.0-dev.13"
+  rive_native:
+    dependency: transitive
+    description:
+      name: rive_native
+      sha256: "1b65b473939b008feb30c1f43785996063cefaf4ceddfa1a2ffe6051201e8d3a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.16"
   rxdart:
     dependency: transitive
     description:
@@ -2341,18 +2495,18 @@ packages:
     dependency: transitive
     description:
       name: source_gen
-      sha256: "35c8150ece9e8c8d263337a265153c3329667640850b9304861faea59fc98f6b"
+      sha256: "7b19d6ba131c6eb98bfcbf8d56c1a7002eba438af2e7ae6f8398b2b0f4f381e3"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "3.1.0"
   source_helper:
     dependency: transitive
     description:
       name: source_helper
-      sha256: "86d247119aedce8e63f4751bd9626fc9613255935558447569ad42f9f5b48b3c"
+      sha256: a447acb083d3a5ef17f983dd36201aeea33fedadb3228fa831f2f0c92f0f3aca
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.5"
+    version: "1.3.7"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -2445,10 +2599,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: e07232b998755fe795655c56d1f5426e0190c9c435e1752d39e7b1cd33699c71
+      sha256: "1e800ebe7f85a80a66adacaa6febe4d5f4d8b75f244e9838a27cb2ffc7aec08d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.34"
+    version: "0.5.41"
   sqlite3_web:
     dependency: transitive
     description:
@@ -2777,27 +2931,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  vibration:
-    dependency: transitive
-    description:
-      name: vibration
-      sha256: "3b08a0579c2f9c18d5d78cb5c74f1005f731e02eeca6d72561a2e8059bf98ec3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
-  vibration_platform_interface:
-    dependency: transitive
-    description:
-      name: vibration_platform_interface
-      sha256: "6ffeee63547562a6fef53c05a41d4fdcae2c0595b83ef59a4813b0612cd2bc36"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
   video_editor:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: master
       resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
       url: "https://github.com/ente-io/video_editor_fork.git"
     source: git
@@ -2805,12 +2943,11 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      path: "packages/video_player/video_player"
-      ref: android_video_roation_fix
-      resolved-ref: "0acef25ca43206e02a0758b51d5fd176e3d8c6b8"
-      url: "https://github.com/ente-io/packages.git"
-    source: git
-    version: "2.7.0"
+      name: video_player
+      sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
   video_player_android:
     dependency: transitive
     description:
@@ -2991,10 +3128,34 @@ packages:
     dependency: "direct main"
     description:
       name: workmanager
-      sha256: "746a50c535af15b6dc225abbd9b52ab272bcd292c535a104c54b5bc02609c38a"
+      sha256: "065673b2a465865183093806925419d311a9a5e0995aa74ccf8920fd695e2d10"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.0"
+    version: "0.9.0+3"
+  workmanager_android:
+    dependency: transitive
+    description:
+      name: workmanager_android
+      sha256: "9ae744db4ef891f5fcd2fb8671fccc712f4f96489a487a1411e0c8675e5e8cb7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0+2"
+  workmanager_apple:
+    dependency: transitive
+    description:
+      name: workmanager_apple
+      sha256: "1cc12ae3cbf5535e72f7ba4fde0c12dd11b757caf493a28e22d684052701f2ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.1+2"
+  workmanager_platform_interface:
+    dependency: transitive
+    description:
+      name: workmanager_platform_interface
+      sha256: f40422f10b970c67abb84230b44da22b075147637532ac501729256fcea10a47
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.1+1"
   xdg_directories:
     dependency: transitive
     description:
@@ -3028,5 +3189,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.2 <4.0.0"
-  flutter: ">=3.29.0"
+  dart: ">=3.8.1 <4.0.0"
+  flutter: ">=3.32.0"

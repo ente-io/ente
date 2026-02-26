@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/christmas_banner_event.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -15,11 +17,12 @@ import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
+import 'package:photos/ui/home/christmas/christmas_lights_banner.dart';
+import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
-import 'package:photos/utils/navigation_util.dart';
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 
 const double kContainerHeight = 36;
 
@@ -35,11 +38,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<ChristmasBannerEvent> _christmasBannerSubscription;
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !flagService.hasGrantedMLConsent &&
-      flagService.hasSyncedAccountFlags() &&
+  bool _showMlBanner = !hasGrantedMLConsent &&
+      (isOfflineMode || flagService.hasSyncedAccountFlags()) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
 
@@ -77,8 +81,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !flagService.hasGrantedMLConsent &&
-            !localSettings.hasSeenMLEnablingBanner;
+        _showMlBanner =
+            !hasGrantedMLConsent && !localSettings.hasSeenMLEnablingBanner;
+        setState(() {});
+      }
+    });
+    _christmasBannerSubscription =
+        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
+      if (mounted) {
         setState(() {});
       }
     });
@@ -90,6 +100,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void dispose() {
     _subscription.cancel();
     _notificationSubscription.cancel();
+    _christmasBannerSubscription.cancel();
     super.dispose();
   }
 
@@ -97,6 +108,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (isChristmasPeriod()) const ChristmasLightsBanner(),
         HomeHeaderWidget(
           centerWidget: _showStatus && !_showErrorBanner
               ? GestureDetector(
@@ -129,13 +141,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 child: NotificationWidget(
                   startIcon: Icons.offline_bolt,
                   actionIcon: Icons.arrow_forward,
-                  text: S.of(context).enableMachineLearningBanner,
+                  text:
+                      AppLocalizations.of(context).enableMachineLearningBanner,
                   type: NotificationType.greenBanner,
                   mainTextStyle: darkTextTheme.smallMuted,
                   onTap: () async => {
                     await routeToPage(
                       context,
-                      const EnableMachineLearningConsent(),
+                      const MachineLearningSettingsPage(),
                       forceCustomPageRoute: true,
                     ),
                   },
@@ -149,7 +162,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 child: NotificationWidget(
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
-                  text: S.of(context).confirmYourRecoveryKey,
+                  text: AppLocalizations.of(context).confirmYourRecoveryKey,
                   type: NotificationType.banner,
                   onTap: () async => {
                     await routeToPage(
@@ -228,32 +241,32 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   String _getRefreshingText(BuildContext context) {
     if (_event == null) {
-      return S.of(context).loadingGallery;
+      return AppLocalizations.of(context).loadingGallery;
     }
     if (_event!.status == SyncStatus.startedFirstGalleryImport ||
         _event!.status == SyncStatus.completedFirstGalleryImport) {
-      return S.of(context).loadingGallery;
+      return AppLocalizations.of(context).loadingGallery;
     }
     if (_event!.status == SyncStatus.applyingRemoteDiff) {
-      return S.of(context).syncing;
+      return AppLocalizations.of(context).syncing;
     }
     if (_event!.status == SyncStatus.preparingForUpload) {
       if (_event!.total == null || _event!.total! <= 0) {
-        return S.of(context).encryptingBackup;
+        return AppLocalizations.of(context).encryptingBackup;
       } else if (_event!.total == 1) {
-        return S.of(context).uploadingSingleMemory;
+        return AppLocalizations.of(context).uploadingSingleMemory;
       } else {
-        return S
-            .of(context)
-            .uploadingMultipleMemories(NumberFormat().format(_event!.total!));
+        return AppLocalizations.of(context).uploadingMultipleMemories(
+          count: NumberFormat().format(_event!.total!),
+        );
       }
     }
     if (_event!.status == SyncStatus.inProgress) {
       final format = NumberFormat();
-      return S.of(context).syncProgress(
-            format.format(_event!.completed!),
-            format.format(_event!.total!),
-          );
+      return AppLocalizations.of(context).syncProgress(
+        completed: format.format(_event!.completed!),
+        total: format.format(_event!.total!),
+      );
     }
     if (_event!.status == SyncStatus.paused) {
       return _event!.reason;
@@ -263,10 +276,10 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     }
     if (_event!.status == SyncStatus.completedBackup) {
       if (_event!.wasStopped) {
-        return S.of(context).syncStopped;
+        return AppLocalizations.of(context).syncStopped;
       }
     }
-    return S.of(context).allMemoriesPreserved;
+    return AppLocalizations.of(context).allMemoriesPreserved;
   }
 }
 
@@ -339,7 +352,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text(S.of(context).allMemoriesPreserved),
+                  child:
+                      Text(AppLocalizations.of(context).allMemoriesPreserved),
                 ),
               ],
             ),

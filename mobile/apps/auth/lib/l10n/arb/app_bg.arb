@@ -8,9 +8,7 @@
   },
   "onBoardingBody": "Архивирайте сигурно своите 2FA кодове",
   "onBoardingGetStarted": "Първи стъпки",
-  "setupFirstAccount": "Настройте първия си акаунт",
   "importScanQrCode": "Сканирайте QR код",
-  "qrCode": "QR код",
   "importEnterSetupKey": "Въведете първия си код",
   "importAccountPageTitle": "Въведете подробности за акаунта",
   "secretCanNotBeEmpty": "Кодът не може да бъде празен",
@@ -367,7 +365,6 @@
   "useOffline": "Използвайте без резервни копия",
   "signInToBackup": "Влезте, за да архивирате Вашите кодове",
   "singIn": "Вход",
-  "sigInBackupReminder": "Моля, експортирайте Вашите кодове, за да сте сигурни, че имате резервно копие, от което можете да ги възстановите.",
   "offlineModeWarning": "Избрахте да продължите без резервни копия. Моля, направете ръчни резервни копия, за да сте сигурни, че Вашите кодове са в безопасност.",
   "showLargeIcons": "Показване на големи икони",
   "compactMode": "Компактен изглед",
@@ -508,7 +505,6 @@
   "tellUsWhatYouThink": "Кажете ни какво мислите",
   "supportEnte": "Подкрепете <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Дайте ни звезда в GitHub",
-  "free5GB": "5GB безплатни в <bold-green>ente</bold-green> Photos",
   "freeStorageOffer": "10% отстъпка в <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Използвайте промокод „AUTH“, за да получите 10% отстъпка през първата година"
 }

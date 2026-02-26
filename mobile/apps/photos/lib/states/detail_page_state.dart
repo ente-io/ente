@@ -1,11 +1,31 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+enum FullScreenRequestReason {
+  userInteraction,
+  playbackStateChange,
+}
+
+typedef FullScreenRequestCallback = void Function(
+  bool shouldEnable,
+  FullScreenRequestReason reason,
+);
+
 class InheritedDetailPageState extends InheritedWidget {
-  final enableFullScreenNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> enableFullScreenNotifier;
+  final ValueNotifier<bool> isInSharedCollectionNotifier;
+
+  /// Holds the generatedID of the file currently showing thumbnail fallback.
+  /// Only the file with matching ID should display the fallback indicator.
+  final ValueNotifier<int?> showingThumbnailFallbackNotifier;
+  // Cannot be const because we accept a ValueNotifier instance at runtime
+  // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
     super.key,
     required super.child,
+    required this.enableFullScreenNotifier,
+    required this.isInSharedCollectionNotifier,
+    required this.showingThumbnailFallbackNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
@@ -14,12 +34,29 @@ class InheritedDetailPageState extends InheritedWidget {
   static InheritedDetailPageState? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedDetailPageState>();
 
-  void toggleFullScreen({bool? shouldEnable}) {
-    if (shouldEnable != null) {
-      if (enableFullScreenNotifier.value == shouldEnable) return;
+  void toggleFullScreenByUser() {
+    _applyFullScreenState(!enableFullScreenNotifier.value);
+  }
+
+  void requestFullScreen({
+    required bool shouldEnable,
+    required FullScreenRequestReason reason,
+  }) {
+    if (!shouldEnable && reason != FullScreenRequestReason.userInteraction) {
+      return;
     }
-    enableFullScreenNotifier.value = !enableFullScreenNotifier.value;
-    if (enableFullScreenNotifier.value) {
+    if (enableFullScreenNotifier.value == shouldEnable) {
+      return;
+    }
+    _applyFullScreenState(shouldEnable);
+  }
+
+  void _applyFullScreenState(bool shouldEnable) {
+    if (enableFullScreenNotifier.value == shouldEnable) {
+      return;
+    }
+    enableFullScreenNotifier.value = shouldEnable;
+    if (shouldEnable) {
       Future.delayed(const Duration(milliseconds: 200), () {
         SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.manual,
@@ -36,5 +73,8 @@ class InheritedDetailPageState extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedDetailPageState oldWidget) =>
-      oldWidget.enableFullScreenNotifier != enableFullScreenNotifier;
+      oldWidget.enableFullScreenNotifier != enableFullScreenNotifier ||
+      oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier ||
+      oldWidget.showingThumbnailFallbackNotifier !=
+          showingThumbnailFallbackNotifier;
 }

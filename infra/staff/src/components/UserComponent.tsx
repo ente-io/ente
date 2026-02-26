@@ -14,6 +14,7 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import type { UserComponentProps } from "../types";
+import AddOtt from "./AddOtt";
 import ChangeEmail from "./ChangeEmail";
 import DeleteAccount from "./DeleteAccont";
 import Disable2FA from "./Disable2FA";
@@ -32,6 +33,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
         React.useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = React.useState(false);
     const [disablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
+    const [addOttOpen, setAddOttOpen] = React.useState(false);
 
     React.useEffect(() => {
         setTwoFactorEnabled(userData?.security["Two factor 2FA"] === "Enabled");
@@ -60,6 +62,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                         onDeleteAccount={handleDeleteAccountClick}
                         onEditSubscription={handleEditSubscription}
                         onDisablePasskeys={handleDisablePasskeys}
+                        onAddOtt={() => setAddOttOpen(true)}
                         canDisableEmailMFA={canDisableEmailMFA}
                         twoFactorEnabled={twoFactorEnabled}
                         setTwoFactorEnabled={setTwoFactorEnabled}
@@ -97,6 +100,11 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 handleClose={() => setDisablePasskeysOpen(false)}
                 handleDisablePasskeys={() => setDisablePasskeysOpen(false)}
             />
+            <AddOtt
+                open={addOttOpen}
+                onClose={() => setAddOttOpen(false)}
+                userEmail={userData.user.Email ?? ""}
+            />
         </Grid>
     );
 };
@@ -108,6 +116,7 @@ interface DataTableProps {
     onDeleteAccount: () => void;
     onEditSubscription: () => void;
     onDisablePasskeys: () => void;
+    onAddOtt: () => void;
     canDisableEmailMFA: boolean;
     twoFactorEnabled: boolean;
     setTwoFactorEnabled: (enabled: boolean) => void;
@@ -123,6 +132,7 @@ const DataTable: React.FC<DataTableProps> = ({
     onDeleteAccount,
     onEditSubscription,
     onDisablePasskeys,
+    onAddOtt,
     canDisableEmailMFA,
     twoFactorEnabled,
     setTwoFactorEnabled,
@@ -237,6 +247,35 @@ const DataTable: React.FC<DataTableProps> = ({
                             </TableCell>
                         </TableRow>
                     ))}
+                {title === "security" && (
+                    <TableRow>
+                        <TableCell
+                            component="th"
+                            scope="row"
+                            style={{
+                                padding: "16px",
+                                borderBottom: "none",
+                            }}
+                        >
+                            Add OTT
+                        </TableCell>
+                        <TableCell
+                            align="right"
+                            style={{
+                                padding: "10px",
+                                borderBottom: "none",
+                            }}
+                        >
+                            <Button
+                                variant="contained"
+                                onClick={onAddOtt}
+                                sx={{ textTransform: "none" }}
+                            >
+                                Add OTT
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                )}
             </TableBody>
         </Table>
     </TableContainer>

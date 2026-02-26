@@ -4,6 +4,7 @@ import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
+import "package:logging/logging.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -33,11 +34,16 @@ class LockScreenSettings {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
 
-    /// Workaround to check if "lateinit property activity has not been
-    ///  initialized" PlatformException goes away.
     await Future.delayed(const Duration(milliseconds: 500), () {
-      ///Workaround for privacyScreen not working when app is killed and opened.
-      setHideAppContent(getShouldHideAppContent());
+      // Note: PrivacyScreen status isn't persisted across app restarts
+      // So we need to re-enable it if the user had it enabled
+      if (getShouldHideAppContent()) {
+        setHideAppContent(true).onError((error, stackTrace) {
+          Logger("LockScreenSettings")
+              .severe("Error enabling PrivacyScreen", error, stackTrace);
+          return null;
+        });
+      }
     });
   }
 

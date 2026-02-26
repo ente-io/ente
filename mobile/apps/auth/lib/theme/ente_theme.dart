@@ -45,8 +45,6 @@ EnteColorScheme getEnteColorScheme(
       : Theme.of(context).colorScheme.enteTheme.colorScheme;
 }
 
-
-
 EnteTextTheme getEnteTextTheme(
   BuildContext context, {
   bool inverse = false,

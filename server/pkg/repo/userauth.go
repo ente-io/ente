@@ -16,6 +16,8 @@ type UserAuthRepository struct {
 	DB *sql.DB
 }
 
+const lockerRolloutLimit = 11150
+
 // AddOTT saves the provided one time token for the specified user
 func (repo *UserAuthRepository) AddOTT(emailHash string, app ente.App, ott string, expirationTime int64) error {
 	_, err := repo.DB.Exec(`INSERT INTO otts(email_hash, ott, creation_time, expiration_time, app)
@@ -133,15 +135,25 @@ func (repo *UserAuthRepository) AddToken(userID int64, app ente.App, token strin
 	return stacktrace.Propagate(err, "")
 }
 
-// GetUserIDWithToken returns the userID associated with a given token
-func (repo *UserAuthRepository) GetUserIDWithToken(token string, app ente.App) (int64, error) {
-	row := repo.DB.QueryRow(`SELECT user_id FROM tokens WHERE token = $1 AND app = $2 AND is_deleted = false`, token, app)
+// GetUserIDWithToken returns the userID associated with a given token and whether the token is expired
+func (repo *UserAuthRepository) GetUserIDWithToken(token string, app ente.App) (int64, bool, error) {
+	row := repo.DB.QueryRow(`
+		SELECT 
+			user_id,
+			CASE 
+				WHEN last_used_at IS NOT NULL AND last_used_at < (now_utc_micro_seconds() - (365::BIGINT * 24 * 60 * 60 * 1000 * 1000)) 
+				THEN true 
+				ELSE false 
+			END as is_expired
+		FROM tokens 
+		WHERE token = $1 AND app = $2 AND is_deleted = false`, token, app)
 	var id int64
-	err := row.Scan(&id)
+	var isExpired bool
+	err := row.Scan(&id, &isExpired)
 	if err != nil {
-		return -1, stacktrace.Propagate(err, "")
+		return -1, false, stacktrace.Propagate(err, "")
 	}
-	return id, nil
+	return id, isExpired, nil
 }
 
 // RemoveToken marks the specified token (to be used when a user logs out) as deleted
@@ -174,6 +186,49 @@ func (repo *UserAuthRepository) RemoveDeletedTokens(expiryTime int64) error {
 func (repo *UserAuthRepository) RemoveAllTokens(userID int64) error {
 	_, err := repo.DB.Exec(`UPDATE tokens SET is_deleted = true WHERE user_id = $1`, userID)
 	return stacktrace.Propagate(err, "")
+}
+
+// EnsureLockerRolloutAccess allows registration for locker users if they already own a locker collection
+// or if the rollout is still under the configured limit.
+func (repo *UserAuthRepository) EnsureLockerRolloutAccess(userID int64) error {
+	var hasLockerCollection bool
+	if err := repo.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM collections
+			WHERE owner_id = $1 AND app = $2
+		)
+	`, userID, ente.Locker).Scan(&hasLockerCollection); err != nil {
+		return stacktrace.Propagate(err, "failed to check locker collections")
+	}
+	if hasLockerCollection {
+		return nil
+	}
+
+	var alreadyLockerUser bool
+	if err := repo.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM tokens
+			WHERE user_id = $1 AND app = $2
+		)
+	`, userID, ente.Locker).Scan(&alreadyLockerUser); err != nil {
+		return stacktrace.Propagate(err, "failed to check locker tokens for user")
+	}
+	if alreadyLockerUser {
+		return nil
+	}
+
+	var currentLockerUsers int
+	if err := repo.DB.QueryRow(`
+		SELECT COUNT(DISTINCT user_id)
+		FROM tokens
+		WHERE app = $1
+	`, ente.Locker).Scan(&currentLockerUsers); err != nil {
+		return stacktrace.Propagate(err, "failed to count locker users")
+	}
+	if currentLockerUsers >= lockerRolloutLimit {
+		return stacktrace.Propagate(ente.ErrLockerRollOutLimit, "locker rollout cap reached")
+	}
+	return nil
 }
 
 // GetActiveSessions returns the list of tokens that are valid for a given user

@@ -28,50 +28,42 @@ from Crowdin, but these two should be no-ops.
 
 ## Adding a new string
 
-While it is technically possible to perform the following actions using command lines, it is recommended to use Visual Studio Code with the [Flutter](https://marketplace.visualstudio.com/items?itemName=localizely.flutter-intl) extension, for ease of use.
+1. Add the key-value pair to `lib/l10n/intl_en.arb`
 
-1. Open Visual Studio Code, with the Flutter Intl extension installed, in 
-the `mobile` directory
-1. Select the string you want to extract, including the quotation marks
-1. Press '`Ctrl + .`' (or '`command + .`' on Mac) to open quick actions, and press "Extract to ARB" (if it is 
-not showing, check that you have not opened the full `ente` repository instead of the `mobile` folder).
-    <div align="center">
+   Example:
+   ```json
+   {
+     "existingKey": "Existing translation",
+     "newStringKey": "Your new string text"
+   }
+   ```
 
-    ![Free up space screen](assets/translations_1.png)
+1. (optional) Add context or description to help translators:
 
-    </div>
+   ```json
+   {
+     "newStringKey": "Your new string text",
+     "@newStringKey": {
+       "description": "Context about where/how this string is used"
+     }
+   }
+   ```
 
-    That should replace the string..
+1. Run `flutter gen-l10n` to regenerate the localization files (or run `flutter pub get` which triggers this automatically)
 
-    <div align="center">
+1. Import the localization in your Dart file:
 
-    ![Free up space screen](assets/translations_2.png)
+   ```dart
+   import "package:photos/generated/l10n.dart";
+   ```
 
-    </div>
+1. Use the string in your code:
 
-    .. and generate/modify the arb files.
+   ```dart
+   AppLocalizations.of(context).newStringKey
+   ```
 
-    <div align="center">
-
-    ![Free up space screen](assets/translations_3.png)
-
-    </div>
-
-1. (optional) You might want to add more context to the extracted string in the
-source `intl_en.arb` file
-
-    <div align="center">
-
-    ![Free up space screen](assets/translations_4.png)
-
-    </div>
-
-1. Make sure the file in which you have extracted the string has the following 
-import:
-
-    `import "package:photos/generated/l10n.dart"`
-
-1. Commit the changes and create a PR in which it is advised to tag at least one 
+1. Commit the changes and create a PR in which it is advised to tag at least one
 of the developers (i.e. [laurenspriem](https://github.com/laurenspriem))
 
 1. During the next sync, the workflow will upload new source strings to Crowdin's 

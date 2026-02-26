@@ -47,17 +47,17 @@ class TripMemory extends SmartMemory {
   }
 
   @override
-  String createTitle(S s, String languageCode) {
+  String createTitle(AppLocalizations locals, String languageCode) {
     assert(locationName != null || tripYear != null);
     if (locationName != null) {
       if (locationName!.toLowerCase().contains("base")) return locationName!;
-      return s.tripToLocation(locationName!);
+      return locals.tripToLocation(location: locationName!);
     }
     if (tripYear != null) {
       if (tripYear == DateTime.now().year - 1) {
-        return s.lastYearsTrip;
+        return locals.lastYearsTrip;
       } else {
-        return s.tripInYear(tripYear!);
+        return locals.tripInYear(year: tripYear!);
       }
     }
     throw ArgumentError("TripMemory must have a location name or trip year");

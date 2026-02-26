@@ -11,6 +11,7 @@ enum GalleryType {
   hiddenOwnedCollection,
   favorite,
   trash,
+  deleteSuggestions,
   localFolder,
   // indicator for gallery view of collections shared with the user
   sharedCollection,
@@ -22,6 +23,7 @@ enum GalleryType {
   cluster,
   sharedPublicCollection,
   magic,
+  cleanupHiddenFromDevice,
 }
 
 extension GalleyTypeExtension on GalleryType {
@@ -46,6 +48,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -71,6 +75,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -97,6 +103,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -121,6 +129,8 @@ extension GalleyTypeExtension on GalleryType {
         return true;
       case GalleryType.trash:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -145,6 +155,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -169,6 +181,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -194,6 +208,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -223,6 +239,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
@@ -253,12 +271,41 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
     }
   }
 
   bool showUnFavoriteOption() {
     return this == GalleryType.favorite;
+  }
+
+  bool showAddToPersonOption() {
+    switch (this) {
+      case GalleryType.homepage:
+      case GalleryType.archive:
+      case GalleryType.uncategorized:
+      case GalleryType.favorite:
+      case GalleryType.ownedCollection:
+      case GalleryType.searchResults:
+      case GalleryType.locationTag:
+      case GalleryType.peopleTag:
+      case GalleryType.cluster:
+      case GalleryType.magic:
+        return true;
+
+      case GalleryType.trash:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicCollection:
+      case GalleryType.quickLink:
+      case GalleryType.localFolder:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
+      case GalleryType.cleanupHiddenFromDevice:
+        return false;
+    }
   }
 
   bool showRestoreOption() {
@@ -284,11 +331,15 @@ extension GalleyTypeExtension on GalleryType {
   }
 
   bool showEditLocation() {
-    return this != GalleryType.sharedCollection && this != GalleryType.cluster;
+    return this != GalleryType.sharedCollection &&
+        this != GalleryType.cluster &&
+        this != GalleryType.cleanupHiddenFromDevice;
   }
 
   bool showBulkEditTime() {
-    return this != GalleryType.sharedCollection && this != GalleryType.cluster;
+    return this != GalleryType.sharedCollection &&
+        this != GalleryType.cluster &&
+        this != GalleryType.cleanupHiddenFromDevice;
   }
 }
 
@@ -304,7 +355,9 @@ extension GalleryAppBarExtn on GalleryType {
       return true;
     }
     if (this == GalleryType.sharedCollection) {
-      return c?.getRole(userID) == CollectionParticipantRole.collaborator;
+      final role = c?.getRole(userID);
+      return role == CollectionParticipantRole.collaborator ||
+          role == CollectionParticipantRole.admin;
     }
     return false;
   }
@@ -384,6 +437,8 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.magic:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.cleanupHiddenFromDevice:
         return false;
       case GalleryType.uncategorized:
       case GalleryType.cluster:

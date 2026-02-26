@@ -10,7 +10,9 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/utils/email_util.dart";
@@ -34,7 +36,7 @@ Future<ButtonResult?> showInfoDialog(
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).ok,
+        labelText: AppLocalizations.of(context).ok,
         isInAlert: true,
         buttonAction: ButtonAction.first,
       ),
@@ -59,7 +61,7 @@ Future<ButtonResult?> showErrorDialog(
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).ok,
+        labelText: AppLocalizations.of(context).ok,
         isInAlert: true,
         buttonAction: ButtonAction.first,
       ),
@@ -75,7 +77,7 @@ Future<ButtonResult?> showErrorDialogForException({
   String? message,
 }) async {
   String errorMessage =
-      message ?? S.of(context).tempErrorContactSupportIfPersists;
+      message ?? AppLocalizations.of(context).tempErrorContactSupportIfPersists;
   if (exception is DioException &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
@@ -84,14 +86,14 @@ Future<ButtonResult?> showErrorDialogForException({
   }
   return showDialogWidget(
     context: context,
-    title: S.of(context).error,
+    title: AppLocalizations.of(context).error,
     icon: Icons.error_outline_outlined,
     body: errorMessage,
     isDismissible: isDismissible,
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).ok,
+        labelText: AppLocalizations.of(context).ok,
         isInAlert: true,
       ),
     ],
@@ -114,9 +116,9 @@ String parseErrorForUI(
         dioError.type == DioExceptionType.sendTimeout ||
         dioError.type == DioExceptionType.cancel) {
       if (dioError.error.toString().contains('Failed host lookup')) {
-        return S.of(context).networkHostLookUpErr;
+        return AppLocalizations.of(context).networkHostLookUpErr;
       } else if (dioError.error.toString().contains('SocketException')) {
-        return S.of(context).networkConnectionRefusedErr;
+        return AppLocalizations.of(context).networkConnectionRefusedErr;
       }
     }
   }
@@ -159,31 +161,32 @@ Future<ButtonResult?> showGenericErrorDialog({
 }) async {
   final errorBody = parseErrorForUI(
     context,
-    S.of(context).itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    AppLocalizations.of(context)
+        .itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
     error: error,
   );
 
   final ButtonResult? result = await showDialogWidget(
     context: context,
-    title: S.of(context).error,
+    title: AppLocalizations.of(context).error,
     icon: Icons.error_outline_outlined,
     body: errorBody,
     isDismissible: isDismissible,
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.primary,
-        labelText: S.of(context).ok,
+        labelText: AppLocalizations.of(context).ok,
         buttonAction: ButtonAction.first,
         isInAlert: true,
       ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).contactSupport,
+        labelText: AppLocalizations.of(context).contactSupport,
         buttonAction: ButtonAction.second,
         onTap: () async {
           await sendLogs(
             context,
-            S.of(context).contactSupport,
+            AppLocalizations.of(context).contactSupport,
             "support@ente.io",
             postShare: () {},
           );
@@ -192,6 +195,38 @@ Future<ButtonResult?> showGenericErrorDialog({
     ],
   );
   return result;
+}
+
+Future<void> showGenericErrorBottomSheet({
+  required BuildContext context,
+  required Object? error,
+}) async {
+  final errorBody = parseErrorForUI(
+    context,
+    AppLocalizations.of(context)
+        .itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    error: error,
+  );
+  await showAlertBottomSheet(
+    context,
+    title: AppLocalizations.of(context).error,
+    message: errorBody,
+    assetPath: 'assets/warning-green.png',
+    buttons: [
+      ButtonWidgetV2(
+        buttonType: ButtonTypeV2.secondary,
+        labelText: AppLocalizations.of(context).contactSupport,
+        onTap: () async {
+          await sendLogs(
+            context,
+            AppLocalizations.of(context).contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        },
+      ),
+    ],
+  );
 }
 
 DialogWidget choiceDialog({

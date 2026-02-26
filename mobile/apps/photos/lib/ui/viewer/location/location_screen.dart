@@ -23,6 +23,7 @@ import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -46,35 +47,37 @@ class _LocationScreenState extends State<LocationScreen> {
     final locationTag =
         InheritedLocationScreenState.of(context).locationTagEntity.item;
 
-    return GalleryFilesState(
-      child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: SearchFilterDataProvider(
-          initialGalleryFilter: LocationFilter(
-            locationTag: locationTag,
-            occurrence: kMostRelevantFilter,
-          ),
-        ),
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size(double.infinity, heightOfAppBar),
-            child: GalleryAppBarWidget(
-              GalleryType.locationTag,
-              locationTag.name,
-              selectedFiles,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: InheritedSearchFilterDataWrapper(
+          searchFilterDataProvider: SearchFilterDataProvider(
+            initialGalleryFilter: LocationFilter(
+              locationTag: locationTag,
+              occurrence: kMostRelevantFilter,
             ),
           ),
-          body: Column(
-            children: <Widget>[
-              SizedBox(
-                height: MediaQuery.of(context).size.height -
-                    (heightOfAppBar + heightOfStatusBar),
-                width: double.infinity,
-                child: LocationGalleryWidget(
-                  tagPrefix: widget.tagPrefix,
-                  selectedFiles: selectedFiles,
-                ),
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size(double.infinity, heightOfAppBar),
+              child: GalleryAppBarWidget(
+                GalleryType.locationTag,
+                locationTag.name,
+                selectedFiles,
               ),
-            ],
+            ),
+            body: Column(
+              children: <Widget>[
+                SizedBox(
+                  height: MediaQuery.of(context).size.height -
+                      (heightOfAppBar + heightOfStatusBar),
+                  width: double.infinity,
+                  child: LocationGalleryWidget(
+                    tagPrefix: widget.tagPrefix,
+                    selectedFiles: selectedFiles,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

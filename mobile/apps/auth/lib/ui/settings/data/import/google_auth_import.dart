@@ -12,7 +12,7 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/scanner_gauth_page.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -26,7 +26,7 @@ Future<void> showGoogleAuthInstruction(BuildContext context) async {
     title: l10n.importFromApp("Google Authenticator"),
     body: l10n.importGoogleAuthGuide,
     buttons: [
-      if (PlatformUtil.isMobile())
+      if (PlatformDetector.isMobile())
         ButtonWidget(
           buttonType: ButtonType.primary,
           labelText: l10n.scanAQrCode,

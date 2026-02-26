@@ -19,20 +19,25 @@ import { NavbarBase } from "ente-base/components/Navbar";
 export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Stack sx={{ minHeight: "100svh" }}>
+    <Stack
+        sx={[
+            { minHeight: "100svh", bgcolor: "secondary.main" },
+            (theme) =>
+                theme.applyStyles("dark", { bgcolor: "background.default" }),
+        ]}
+    >
         <NavbarBase
-            sx={[
-                (theme) =>
-                    theme.applyStyles("light", {
-                        borderBottomColor: "stroke.base",
-                    }),
-            ]}
+            sx={{
+                boxShadow: "none",
+                borderBottom: "none",
+                bgcolor: "transparent",
+            }}
         >
             <EnteLogo />
         </NavbarBase>
         <CenteredFill
             sx={[
-                { bgcolor: "accent.main" },
+                { bgcolor: "secondary.main" },
                 (theme) =>
                     theme.applyStyles("dark", {
                         bgcolor: "background.default",
@@ -46,12 +51,15 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
 
 const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
-    padding: theme.spacing(4, 2),
-    width: "min(375px, 80vw)",
+    padding: theme.spacing(5, 3),
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
+    width: "min(420px, 85vw)",
     minHeight: "375px",
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(4),
+    boxShadow: "none",
+    borderRadius: "20px",
 }));
 
 export const AccountsPageTitle: React.FC<React.PropsWithChildren> = ({

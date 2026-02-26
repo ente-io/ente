@@ -1,7 +1,7 @@
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
-import 'package:ente_auth/utils/dialog_util.dart'; 
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 

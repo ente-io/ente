@@ -17,6 +17,7 @@ const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
 const dateTimeKey = 'dateTime';
 const offsetTimeKey = 'offsetTime';
+const infoKey = 'info';
 
 class MagicMetadata {
   // 0 -> visible
@@ -74,6 +75,11 @@ class PubMagicMetadata {
   // 1 -> panorama
   int? mediaType;
 
+  // JSON containing information data for info files
+  // Contains type (note, physical-record, account-credential, emergency-contact)
+  // and data (the actual information content)
+  Map<String, dynamic>? info;
+
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
@@ -89,6 +95,7 @@ class PubMagicMetadata {
     this.dateTime,
     this.offsetTime,
     this.sv,
+    this.info,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -114,6 +121,7 @@ class PubMagicMetadata {
       dateTime: map[dateTimeKey],
       offsetTime: map[offsetTimeKey],
       sv: safeParseInt(map[streamVersionKey], streamVersionKey),
+      info: map[infoKey],
     );
   }
 

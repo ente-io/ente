@@ -1,4 +1,6 @@
+import "package:dio/dio.dart";
 import "package:ente_network/network.dart";
+import "package:locker/core/errors.dart";
 import "package:locker/services/files/links/models/shareable_link.dart";
 import "package:logging/logging.dart";
 
@@ -12,16 +14,26 @@ class LinksClient {
 
   Future<void> init() async {}
 
-  Future<ShareableLink> getOrCreateLink(int fileID) async {
+  Future<ShareableLink> getOrCreateLink(
+    int fileID, {
+    Map<String, dynamic>? metadata,
+  }) async {
     try {
       final response = await _enteDio.post(
         '/files/share-url',
         data: {
           'fileID': fileID,
           'app': 'locker',
+          if (metadata != null) ...metadata,
         },
       );
       return ShareableLink.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      _logger.severe('Failed to get or create link for file ID: $fileID', e);
+      rethrow;
     } catch (e, s) {
       _logger.severe('Failed to get or create link for file ID: $fileID', e, s);
       rethrow;

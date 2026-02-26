@@ -29,11 +29,21 @@
   "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
-  "createAccount": "Account aanmaken",
-  "createNewAccount": "Nieuw account aanmaken",
+  "createAccount": "Maak account",
+  "createNewAccount": "Maak nieuw account",
   "password": "Wachtwoord",
   "confirmPassword": "Wachtwoord bevestigen",
   "activeSessions": "Actieve sessies",
+  "ocrProcessingOverlayMessage": "Tekst aan het detecteren...",
+  "ocrLoadingIndicatorLabel": "Tekst aan het detecteren",
+  "ocrSelectionHint": "Veeg of dubbeltik om precies te selecteren wat je nodig hebt",
+  "ocrNoTextDetected": "Geen tekst gevonden",
+  "ocrRetryButtonLabel": "Probeer opnieuw",
+  "ocrModelsNetworkRequiredError": "Netwerkverbinding vereist om OCR-modellen voor het eerst te gebruiken",
+  "ocrModelsPrepareFailed": "Kan OCR-modellen niet voorbereiden",
+  "ocrImageNotFoundError": "Afbeeldingsbestand niet gevonden",
+  "ocrImageDecodeFailedError": "Kan afbeeldingsbestand niet lezen",
+  "ocrGenericDetectError": "Kan geen tekst in de afbeelding vinden",
   "oops": "Oeps",
   "somethingWentWrongPleaseTryAgain": "Er is iets fout gegaan, probeer het opnieuw",
   "thisWillLogYouOutOfThisDevice": "Dit zal je uitloggen van dit apparaat!",
@@ -48,7 +58,6 @@
   "incorrectRecoveryKeyBody": "De ingevoerde herstelsleutel is onjuist",
   "forgotPassword": "Wachtwoord vergeten",
   "enterYourRecoveryKey": "Voer je herstelcode in",
-  "noRecoveryKey": "Geen herstelcode?",
   "sorry": "Sorry",
   "noRecoveryKeyNoDecryption": "Door de aard van ons end-to-end encryptieprotocol kunnen je gegevens niet worden ontsleuteld zonder je wachtwoord of herstelsleutel",
   "verifyEmail": "Bevestig e-mail",
@@ -115,7 +124,6 @@
   "verifyPassword": "Bevestig wachtwoord",
   "recoveryKey": "Herstelsleutel",
   "recoveryKeyOnForgotPassword": "Als je je wachtwoord vergeet, kun je alleen met deze sleutel je gegevens herstellen.",
-  "recoveryKeySaveDescription": "We slaan deze sleutel niet op, bewaar deze 24 woorden sleutel op een veilige plaats.",
   "doThisLater": "Doe dit later",
   "saveKey": "Bewaar sleutel",
   "recoveryKeyCopiedToClipboard": "Herstelsleutel gekopieerd naar klembord",
@@ -186,6 +194,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Samenvoegen van album toestaan",
   "allowAddPhotosDescription": "Sta toe dat mensen met de link ook foto's kunnen toevoegen aan het gedeelde album.",
   "passwordLock": "Wachtwoord slot",
   "canNotOpenTitle": "Kan dit album niet openen",
@@ -198,6 +207,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albumweergave",
+  "layoutGrouped": "Gegroepeerd",
+  "layoutContinuous": "Doorlopend",
+  "layoutTrip": "Reis",
+  "preview": "Voorbeeld",
   "linkExpiry": "Vervaldatum",
   "linkExpired": "Verlopen",
   "linkEnabled": "Ingeschakeld",
@@ -237,7 +251,9 @@
   "shareWithNonenteUsers": "Delen met niet-Ente gebruikers",
   "createPublicLink": "Maak publieke link",
   "sendLink": "Stuur link",
+  "sendQrCode": "Stuur QR code",
   "copyLink": "Kopieer link",
+  "copyEmbedHtml": "Kopieer embed HTML",
   "linkHasExpired": "Link is vervallen",
   "publicLinkEnabled": "Publieke link ingeschakeld",
   "shareALink": "Deel een link",
@@ -278,7 +294,6 @@
   "failedToApplyCode": "Code toepassen mislukt",
   "enterReferralCode": "Voer verwijzingscode in",
   "codeAppliedPageTitle": "Code toegepast",
-  "changeYourReferralCode": "Wijzig uw verwijzingscode",
   "change": "Wijzigen",
   "unavailableReferralCode": "Deze code is helaas niet beschikbaar.",
   "codeChangeLimitReached": "Sorry, u heeft de limiet van het aantal codewijzigingen bereikt.",
@@ -292,15 +307,10 @@
   "claimMore": "Claim meer!",
   "theyAlsoGetXGb": "Zij krijgen ook {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB telkens als iemand zich aanmeldt voor een betaald abonnement en je code toepast",
-  "shareTextReferralCode": "Ente verwijzingscode: {referralCode} \n\nPas het toe bij Instellingen → Algemeen → Verwijzingen om {referralStorageInGB} GB gratis te krijgen nadat je je hebt aangemeld voor een betaald abonnement\n\nhttps://ente.io",
   "claimFreeStorage": "Claim gratis opslag",
   "inviteYourFriends": "Vrienden uitnodigen",
   "failedToFetchReferralDetails": "Kan geen verwijzingsgegevens ophalen. Probeer het later nog eens.",
-  "referralStep1": "1. Geef deze code aan je vrienden",
-  "referralStep2": "2. Ze registreren voor een betaald plan",
-  "referralStep3": "Jullie krijgen allebei {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Verwijzingen zijn momenteel gepauzeerd",
-  "youCanAtMaxDoubleYourStorage": "* Je kunt maximaal je opslag verdubbelen",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jouw familie heeft {storageAmountInGb} GB geclaimd tot nu toe} false {Je hebt {storageAmountInGb} GB geclaimd tot nu toe} other {Je hebt {storageAmountInGb} GB geclaimd tot nu toe!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -327,7 +337,6 @@
   "removeFromAlbumTitle": "Uit album verwijderen?",
   "removeFromAlbum": "Verwijder uit album",
   "itemsWillBeRemovedFromAlbum": "Geselecteerde items zullen worden verwijderd uit dit album",
-  "removeShareItemsWarning": "Sommige van de items die je verwijdert zijn door andere mensen toegevoegd, en je verliest de toegang daartoe",
   "addingToFavorites": "Toevoegen aan favorieten...",
   "removingFromFavorites": "Verwijderen uit favorieten...",
   "sorryCouldNotAddToFavorites": "Sorry, kon niet aan favorieten worden toegevoegd!",
@@ -436,12 +445,12 @@
   "discover_receipts": "Bonnen",
   "discover_notes": "Notities",
   "discover_memes": "Memes",
-  "discover_visiting_cards": "Visite kaartjes",
+  "discover_visiting_cards": "Visitekaartjes",
   "discover_babies": "Baby's",
   "discover_pets": "Huisdieren",
   "discover_selfies": "Selfies",
   "discover_wallpapers": "Achtergronden",
-  "discover_food": "Voedsel",
+  "discover_food": "Eten",
   "discover_celebrations": "Vieringen",
   "discover_sunset": "Zonsondergang",
   "discover_hills": "Heuvels",
@@ -518,7 +527,6 @@
   "backedUpFolders": "Back-up mappen",
   "backup": "Back-up",
   "freeUpDeviceSpace": "Apparaatruimte vrijmaken",
-  "freeUpDeviceSpaceDesc": "Bespaar ruimte op je apparaat door bestanden die al geback-upt zijn te wissen.",
   "allClear": "✨ Alles in orde",
   "noDeviceThatCanBeDeleted": "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden",
   "removeDuplicates": "Duplicaten verwijderen",
@@ -700,16 +708,6 @@
   "openSettings": "Instellingen openen",
   "selectMorePhotos": "Selecteer meer foto's",
   "existingUser": "Bestaande gebruiker",
-  "privateBackups": "Privé back-ups",
-  "forYourMemories": "voor uw herinneringen",
-  "endtoendEncryptedByDefault": "Standaard end-to-end versleuteld",
-  "safelyStored": "Veilig opgeslagen",
-  "atAFalloutShelter": "in een kernbunker",
-  "designedToOutlive": "Ontworpen om levenslang mee te gaan",
-  "available": "Beschikbaar",
-  "everywhere": "overal",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobiel, Web, Desktop",
   "newToEnte": "Nieuw bij Ente",
   "pleaseLoginAgain": "Log opnieuw in",
   "autoLogoutMessage": "Door een technische storing bent u uitgelogd. Onze excuses voor het ongemak.",
@@ -726,7 +724,6 @@
   "couldNotBackUpTryLater": "We konden uw gegevens niet back-uppen.\nWe zullen het later opnieuw proberen.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kan bestanden alleen versleutelen en bewaren als u toegang tot ze geeft",
   "pleaseGrantPermissions": "Geef alstublieft toestemming",
-  "grantPermission": "Toestemming verlenen",
   "privateSharing": "Privé delen",
   "shareOnlyWithThePeopleYouWant": "Deel alleen met de mensen die u wilt",
   "usePublicLinksForPeopleNotOnEnte": "Gebruik publieke links voor mensen die geen Ente account hebben",
@@ -1099,7 +1096,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} vrij",
-  "appVersion": "Versie: {versionValue}",
   "verifyIDLabel": "Verifiëren",
   "fileInfoAddDescHint": "Voeg een beschrijving toe...",
   "editLocationTagTitle": "Locatie bewerken",
@@ -1169,8 +1165,8 @@
     "description": "Label for the map view"
   },
   "maps": "Kaarten",
+  "mapsPrivacyNotice": "Benaderende coördinaten worden naar privacybewuste derden zoals OpenStreetMap gestuurd om de kaart en locatie weer te geven.",
   "enableMaps": "Kaarten inschakelen",
-  "enableMapsDesc": "Dit toont jouw foto's op een wereldkaart.\n\nDeze kaart wordt gehost door Open Street Map, en de exacte locaties van jouw foto's worden nooit gedeeld.\n\nJe kunt deze functie op elk gewenst moment uitschakelen via de instellingen.",
   "quickLinks": "Snelle links",
   "selectItemsToAdd": "Selecteer items om toe te voegen",
   "addSelected": "Voeg geselecteerde toe",
@@ -1199,7 +1195,6 @@
   "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
   "fileTypes": "Bestandstype",
   "deleteConfirmDialogBody": "Dit account is gekoppeld aan andere Ente apps, als je er gebruik van maakt. Je geüploade gegevens worden in alle Ente apps gepland voor verwijdering, en je account wordt permanent verwijderd voor alle Ente diensten.",
-  "hearUsWhereTitle": "Hoe hoorde je over Ente? (optioneel)",
   "hearUsExplanation": "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!",
   "viewAddOnButton": "Add-ons bekijken",
   "addOns": "Add-ons",
@@ -1366,8 +1361,6 @@
   "appLockDescriptions": "Kies tussen het standaard vergrendelscherm van uw apparaat en een aangepast vergrendelscherm met een pincode of wachtwoord.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken",
-  "loopVideoOn": "Video in lus afspelen aan",
-  "loopVideoOff": "Video in lus afspelen uit",
   "localSyncErrorMessage": "Het lijkt erop dat er iets mis is gegaan omdat het synchroniseren van lokale foto's meer tijd kost dan verwacht. Neem contact op met ons supportteam",
   "showPerson": "Toon persoon",
   "sort": "Sorteren",
@@ -1537,7 +1530,6 @@
   "legacyPageDesc2": "Vertrouwde contacten kunnen accountherstel starten, en indien deze niet binnen 30 dagen wordt geblokkeerd, je wachtwoord resetten en toegang krijgen tot je account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Vertrouwde contacten",
-  "addTrustedContact": "Vertrouwd contact toevoegen",
   "removeInvite": "Verwijder uitnodiging",
   "recoveryWarning": "Een vertrouwd contact probeert toegang te krijgen tot je account",
   "rejectRecovery": "Herstel weigeren",
@@ -1588,7 +1580,6 @@
   },
   "legacyInvite": "{email} heeft je uitgenodigd om een vertrouwd contact te zijn",
   "authToManageLegacy": "Verifieer om je vertrouwde contacten te beheren",
-  "useDifferentPlayerInfo": "Problemen met het afspelen van deze video? Hier ingedrukt houden om een andere speler te proberen.",
   "hideSharedItemsFromHomeGallery": "Verberg gedeelde bestanden uit de galerij",
   "gallery": "Galerij",
   "joinAlbum": "Deelnemen aan album",
@@ -1761,7 +1752,6 @@
   "areThey": "Is dit ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Opslaan als ander persoon",
-  "showLessFaces": "Minder gezichten weergeven",
   "showMoreFaces": "Minder gezichten weergeven",
   "ignore": "Negeren",
   "merge": "Samenvoegen",
@@ -1772,5 +1762,177 @@
   "thePersonWillNotBeDisplayed": "De persoon wordt niet meer getoond in de personen sectie. Foto's blijven ongemoeid.",
   "areYouSureYouWantToMergeThem": "Weet je zeker dat je ze wilt samenvoegen?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Alle naamloze groepen worden samengevoegd met de geselecteerde persoon. Dit kan nog steeds ongedaan worden gemaakt vanuit het geschiedenisoverzicht van de persoon.",
-  "yesIgnore": "Ja, negeer"
+  "yesIgnore": "Ja, negeer",
+  "same": "Zelfde",
+  "different": "Andere",
+  "sameperson": "Zelfde persoon?",
+  "indexingPausedStatusDescription": "Indexeren is gepauzeerd. Het zal automatisch verdergaan wanneer het apparaat er klaar voor is. Het apparaat is er klaar voor wanneer batterijniveau, batterijgezondheid, en thermische status binnen het gezonde bereik liggen.",
+  "thisWeek": "Deze week",
+  "lastWeek": "Afgelopen week",
+  "thisMonth": "Deze maand",
+  "thisYear": "Dit jaar",
+  "groupBy": "Groepeer op",
+  "faceThumbnailGenerationFailed": "Kan thumbnails niet genereren",
+  "fileAnalysisFailed": "Kan bestand niet analyseren",
+  "editAutoAddPeople": "Bewerk automatisch personen toevoegen",
+  "autoAddPeople": "Automatisch personen toevoegen",
+  "autoAddToAlbum": "Automatisch toevoegen aan album",
+  "shouldRemoveFilesSmartAlbumsDesc": "Moeten de bestanden met betrekking tot de persoon die eerder was geselecteerd in slimme albums worden verwijderd?",
+  "addingPhotos": "Foto's aan het toevoegen",
+  "gettingReady": "Bezig met voorbereiden",
+  "addSomePhotosDesc1": "Voeg foto's toe of kies ",
+  "addSomePhotosDesc2": "bekende gezichten",
+  "addSomePhotosDesc3": "\nom mee te beginnen",
+  "ignorePerson": "Negeer persoon",
+  "mixedGrouping": "Gemixte groep?",
+  "analysis": "Analyse",
+  "doesGroupContainMultiplePeople": "Bevat deze groepering meerdere personen?",
+  "automaticallyAnalyzeAndSplitGrouping": "We zullen automatisch de groepering analyseren om te bepalen of er meerdere mensen aanwezig zijn en ze opnieuw scheiden. Dit kan een paar seconden duren.",
+  "layout": "Layout",
+  "day": "Dag",
+  "undo": "Ongedaan maken",
+  "redo": "Herstel ongedaan maken",
+  "filter": "Filter",
+  "adjust": "Aanpassen",
+  "draw": "Teken",
+  "sticker": "Sticker",
+  "brushColor": "Kwast kleur",
+  "font": "Lettertype",
+  "background": "Achtergrond",
+  "align": "Uitlijnen",
+  "addedToAlbums": "{count, plural, one {}=1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosProcessed": "Video's verwerkt",
+  "totalVideos": "Totaal aantal video's",
+  "skippedVideos": "Overgeslagen video's",
+  "videoStreamingDescriptionLine1": "Video's direct afspelen op elk apparaat.",
+  "videoStreamingDescriptionLine2": "Schakel in om videostreams te verwerken op dit apparaat.",
+  "videoStreamingNote": "Alleen video's van de afgelopen 60 dagen en korter dan 1 minuut worden op dit apparaat verwerkt. Voor oudere video's, schakel streaming in via de desktop app.",
+  "createStream": "Creëer stream",
+  "recreateStream": "Hercreëer stream",
+  "addedToStreamCreationQueue": "Toegevoegd aan stream creatie wachtrij",
+  "addedToStreamRecreationQueue": "Toegevoegd aan stream recreatie wachtrij",
+  "videoPreviewAlreadyExists": "Videovoorbeeld bestaat al",
+  "videoAlreadyInQueue": "Videobestand is al aanwezig in de wachtrij",
+  "addedToQueue": "Toegevoegd aan de wachtrij",
+  "creatingStream": "Stream aan het maken",
+  "similarImages": "Soortgelijke afbeeldingen",
+  "findSimilarImages": "Vind soortgelijke afbeeldingen",
+  "noSimilarImagesFound": "Geen soortgelijke afbeeldingen gevonden",
+  "similarGroupsFound": "{count, plural, =1{{count} groep gevonden} other{{count} groepen gevonden}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Controleer en verwijder soortgelijke afbeeldingen",
+  "deletePhotosWithSize": "Verwijder {count} foto's ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Selectieopties",
+  "selectExactWithCount": "Exact hetzelfde ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarWithCount": "Grotendeels hetzelfde ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Selecteer soortgelijke afbeeldingen",
+  "chooseSimilarImagesToSelect": "Selecteer afbeeldingen op basis van hun visuele overeenkomstigheid",
+  "clearSelection": "Selectie ongedaan maken",
+  "similarImagesCount": "{count} soortgelijke afbeeldingen",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Verwijder ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Verwijder bestanden",
+  "areYouSureDeleteFiles": "Weet je zeker dat je deze bestanden wilt verwijderen?",
+  "greatJob": "Goed gedaan!",
+  "cleanedUpSimilarImages": "Je hebt {size} vrijgemaakt",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Formaat",
+  "analyzingPhotosLocally": "Bezig met je foto's lokaal analyseren...",
+  "lookingForVisualSimilarities": "Zoeken naar visuele overeenkomsten...",
+  "findingSimilarImages": "Soortgelijke afbeeldingen aan het zoeken...",
+  "almostDone": "Bijna klaar...",
+  "processingLocally": "Lokaal aan het verwerken",
+  "useMLToFindSimilarImages": "Controleer en verwijder afbeeldingen die op elkaar lijken.",
+  "similar": "Vergelijkbaar",
+  "identical": "Identiek",
+  "nothingHereTryAnotherFilter": "Niets hier, probeer een ander filter! 👀",
+  "related": "Gerelateerd",
+  "hoorayyyy": "Hoeraaaa!",
+  "nothingToTidyUpHere": "Niks op te schonen hier",
+  "deletingDash": "Verwijderen - ",
+  "closeBy": "Nauw verwant",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "festivities": "Feestelijkheden",
+  "snowAdventures": "Winterse avonturen",
+  "waterfalls": "Watervallen",
+  "wildlife": "In het wild",
+  "flowers": "Bloeiende bloemen",
+  "nightLights": "Neonnachten",
+  "architecture": "Architectuur",
+  "autumnColors": "Heerlijke herfst",
+  "stargazing": "Sterrenhemel",
+  "fireworks": "Vuurwerk",
+  "historicSites": "Historische plaatsen",
+  "tropicalParadise": "Tropische paradijzen",
+  "forestTrails": "Boswandelingen",
+  "citySunsets": "De stad in gouden gloed",
+  "colorfulMarkets": "Levendige markten",
+  "cozyCafes": "Knusse cafés",
+  "vintageVibes": "Vintage vibes",
+  "aerialViews": "De lucht in",
+  "artisticPortraits": "Kunstige portretten",
+  "streetFood": "Street food bites",
+  "riverCruises": "Uitzichten vanaf de cruise",
+  "playfulKids": "Spelende kinderen",
+  "coastalCliffs": "Kliffen bij de zee",
+  "grantPermission": "Toestemming verlenen"
 }

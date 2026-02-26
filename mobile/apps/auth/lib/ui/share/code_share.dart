@@ -10,7 +10,7 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/totp_util.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -56,7 +56,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
           const SizedBox(height: 10),
           DropdownButtonHideUnderline(
             child: DropdownButton2(
-              hint: const Text('Select an option'),
+              hint: Text(context.l10n.selectAnOption),
               items: _durationInMins
                   .map(
                     (item) => DropdownMenuItem<int>(

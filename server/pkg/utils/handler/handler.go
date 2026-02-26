@@ -31,6 +31,7 @@ func Error(c *gin.Context, err error) {
 	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
 		errors.Is(err, ente.ErrNoActiveSubscription) ||
 		errors.Is(err, ente.ErrInvalidPassword) ||
+		errors.Is(err, ente.ErrUserDeleted) ||
 		errors.Is(err, io.ErrUnexpectedEOF) ||
 		errors.Is(err, syscall.EPIPE) ||
 		errors.Is(err, syscall.ECONNRESET) {
@@ -52,14 +53,14 @@ func Error(c *gin.Context, err error) {
 	if isEnteApiErr {
 		c.AbortWithStatusJSON(enteApiErr.HttpStatusCode, enteApiErr)
 	} else if httpStatus := httpStatusCode(err); httpStatus != 0 {
-		c.AbortWithStatus(httpStatus)
+		c.AbortWithStatusJSON(httpStatus, gin.H{})
 	} else {
 		if _, ok := stacktrace.RootCause(err).(validator.ValidationErrors); ok {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		} else if isClientError {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		} else {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		}
 	}
 }
@@ -84,7 +85,8 @@ func httpStatusCode(err error) int {
 		errors.Is(err, ente.ErrInvalidPassword) ||
 		errors.Is(err, ente.ErrAuthenticationRequired):
 		return http.StatusUnauthorized
-	case errors.Is(err, ente.ErrExpiredOTT):
+	case errors.Is(err, ente.ErrExpiredOTT) ||
+		errors.Is(err, ente.ErrUserDeleted):
 		return http.StatusGone
 	case errors.Is(err, ente.ErrNoActiveSubscription) ||
 		errors.Is(err, ente.ErrSharingDisabledForFreeAccounts):

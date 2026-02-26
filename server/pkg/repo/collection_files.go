@@ -3,6 +3,8 @@ package repo
 import (
 	"context"
 	"fmt"
+
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 )
@@ -79,18 +81,25 @@ func (repo *CollectionRepository) DoAllFilesExistInGivenCollections(fileIDs []in
 
 // VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection
 func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context.Context, cID int64, fileIDs []int64) error {
+	if len(fileIDs) == 0 {
+		return nil
+	}
 	fileIdMap := make(map[int64]bool)
 	rows, err := repo.DB.QueryContext(ctx, `SELECT file_id FROM collection_files WHERE collection_id = $1 AND is_deleted = $2 AND file_id = ANY ($3)`,
 		cID, false, pq.Array(fileIDs))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var fileID int64
 		if err := rows.Scan(&fileID); err != nil {
 			return stacktrace.Propagate(err, "")
 		}
 		fileIdMap[fileID] = true
+	}
+	if err := rows.Err(); err != nil {
+		return stacktrace.Propagate(err, "")
 	}
 	// find fileIds that are not present in the collection
 	for _, fileID := range fileIDs {
@@ -99,6 +108,57 @@ func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context
 		}
 	}
 	return nil
+}
+
+// FilterActiveFileIDsInCollection returns the fileIDs still active in the collection
+// (not deleted and not marked for owner removal).
+// If any fileID was never in the collection, it returns an error.
+func (repo *CollectionRepository) FilterActiveFileIDsInCollection(ctx context.Context, cID int64, fileIDs []int64) ([]int64, error) {
+	if len(fileIDs) == 0 {
+		return []int64{}, nil
+	}
+	type fileState struct {
+		isDeleted bool
+		action    string
+	}
+	fileStates := make(map[int64]fileState)
+	rows, err := repo.DB.QueryContext(ctx, `SELECT file_id, is_deleted, COALESCE(action, '') FROM collection_files WHERE collection_id = $1 AND file_id = ANY ($2)`,
+		cID, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var fileID int64
+		var isDeleted bool
+		var action string
+		if err := rows.Scan(&fileID, &isDeleted, &action); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		fileStates[fileID] = fileState{
+			isDeleted: isDeleted,
+			action:    action,
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	missing := make([]int64, 0)
+	active := make([]int64, 0, len(fileIDs))
+	for _, fileID := range fileIDs {
+		state, ok := fileStates[fileID]
+		if !ok {
+			missing = append(missing, fileID)
+			continue
+		}
+		if !state.isDeleted && state.action != ente.ActionRemove {
+			active = append(active, fileID)
+		}
+	}
+	if len(missing) > 0 {
+		return nil, stacktrace.Propagate(fmt.Errorf("fileIDs %v not found in collection %d", missing, cID), "")
+	}
+	return active, nil
 }
 
 // GetCollectionsFilesCount returns the number of non-deleted files which are present in the given collection

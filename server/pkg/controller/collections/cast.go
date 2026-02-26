@@ -39,6 +39,22 @@ func (c *CollectionController) GetCastDiff(ctx *gin.Context, sinceTime int64) ([
 		if diff[idx].MagicMetadata != nil {
 			diff[idx].MagicMetadata = nil
 		}
+		// For cast diffs, treat action markers as deleted and strip action details
+		if diff[idx].Action != nil && !diff[idx].IsDeleted {
+			if *diff[idx].Action == ente.ActionRemove || *diff[idx].Action == ente.ActionDeleteSuggested {
+				diff[idx].IsDeleted = true
+			}
+		}
+		diff[idx].Action = nil
+		diff[idx].ActionUserID = nil
+		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
+			// This indicates that the file is deleted, but we still have a stale entry in the collection
+			reqContextLogger.WithFields(log.Fields{
+				"file_id":    diff[idx].ID,
+				"updated_at": diff[idx].UpdationTime,
+			}).Warning("stale collection_file found")
+			diff[idx].IsDeleted = true
+		}
 	}
 	return diff, hasMore, nil
 }

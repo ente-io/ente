@@ -17,7 +17,7 @@ class AlbumSharesIcons extends StatelessWidget {
   const AlbumSharesIcons({
     super.key,
     required this.sharees,
-    this.type = AvatarType.tiny,
+    this.type = AvatarType.sm,
     this.limitCountTo = 2,
     this.removeBorder = true,
     this.trailingWidget,
@@ -77,26 +77,30 @@ class AlbumSharesIcons extends StatelessWidget {
 
 double getOverlapPadding(AvatarType type) {
   switch (type) {
-    case AvatarType.extra:
+    case AvatarType.xs:
       return 14.0;
-    case AvatarType.tiny:
+    case AvatarType.sm:
       return 14.0;
-    case AvatarType.mini:
+    case AvatarType.md:
       return 20.0;
-    case AvatarType.small:
+    case AvatarType.lg:
+      return 24.0;
+    case AvatarType.xl:
       return 28.0;
   }
 }
 
 MoreCountType moreCountTypeFromAvatarType(AvatarType type) {
   switch (type) {
-    case AvatarType.extra:
-      return MoreCountType.extra;
-    case AvatarType.tiny:
-      return MoreCountType.tiny;
-    case AvatarType.mini:
-      return MoreCountType.mini;
-    case AvatarType.small:
-      return MoreCountType.small;
+    case AvatarType.xs:
+      return MoreCountType.xs;
+    case AvatarType.sm:
+      return MoreCountType.sm;
+    case AvatarType.md:
+      return MoreCountType.md;
+    case AvatarType.lg:
+      return MoreCountType.lg;
+    case AvatarType.xl:
+      return MoreCountType.xl;
   }
 }

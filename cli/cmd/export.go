@@ -16,10 +16,12 @@ var exportCmd = &cobra.Command{
 		hidden, _ := cmd.Flags().GetBool("hidden")
 		albums, _ := cmd.Flags().GetStringSlice("albums")
 		emails, _ := cmd.Flags().GetStringSlice("emails")
+		excludeAlbums, _ := cmd.Flags().GetStringSlice("exclude-albums")
 		// Create Filters struct with flag values
 		filters := model.Filter{
 			ExcludeShared: !shared,
 			ExcludeHidden: !hidden,
+			ExcludeAlbums: excludeAlbums,
 			Albums:        albums,
 			Emails:        emails,
 		}
@@ -36,4 +38,5 @@ func init() {
 	exportCmd.Flags().Bool("hidden", true, "to exclude hidden albums, pass --hidden=false")
 	exportCmd.Flags().StringSlice("albums", []string{}, "Comma-separated list of album names to export")
 	exportCmd.Flags().StringSlice("emails", []string{}, "Comma-separated list of emails to export files shared with")
+	exportCmd.Flags().StringSlice("exclude-albums", []string{}, "Comma-separated list of album names to exclude")
 }

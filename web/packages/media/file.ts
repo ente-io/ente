@@ -1,7 +1,7 @@
 import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { ignore } from "./collection";
 import {
     fileFileName,
@@ -208,17 +208,21 @@ export const RemoteFileObjectAttributes = z.looseObject({
 export interface FileInfo {
     /**
      * The size of the file (in bytes).
+     *
+     * This will not be present for files with zero length.
      */
-    fileSize: number;
+    fileSize?: number;
     /**
      * The size of the thumbnail associated with the file (in bytes).
+     *
+     * This will not be present for files that don't have thumbnails (an old Locker issue)
      */
-    thumbSize: number;
+    thumbSize?: number;
 }
 
 export const RemoteFileInfo = z.looseObject({
-    fileSize: z.number(),
-    thumbSize: z.number(),
+    fileSize: z.number().nullish().transform(nullToUndefined),
+    thumbSize: z.number().nullish().transform(nullToUndefined),
 });
 
 const RemoteFileMetadata = z.object({

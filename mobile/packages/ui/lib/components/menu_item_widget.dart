@@ -1,8 +1,8 @@
 import 'package:ente_base/typedefs.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/components/menu_item_child_widgets.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_utils/debouncer.dart';
 import "package:expandable/expandable.dart";
 import 'package:flutter/material.dart';
 

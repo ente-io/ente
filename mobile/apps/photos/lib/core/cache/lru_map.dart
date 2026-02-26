@@ -32,4 +32,8 @@ class LRUMap<K, V> {
   void remove(K key) {
     _map.remove(key);
   }
+
+  void clear() {
+    _map.clear();
+  }
 }

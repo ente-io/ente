@@ -12,4 +12,8 @@ class FileLruCache {
   static void put(String key, File value) {
     _map.put(key, value);
   }
+
+  static void clearAll() {
+    _map.clear();
+  }
 }

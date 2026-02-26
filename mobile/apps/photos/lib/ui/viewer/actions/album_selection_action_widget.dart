@@ -1,11 +1,14 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/selected_albums.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
@@ -17,7 +20,6 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/add_participant_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
@@ -59,23 +61,25 @@ class _AlbumSelectionActionWidgetState
       return const SizedBox.shrink();
     }
     final List<SelectionActionButton> items = [];
-    final hasPinnedAlbum =
-        widget.selectedAlbums.albums.any((album) => album.isPinned);
-    final hasUnpinnedAlbum =
-        widget.selectedAlbums.albums.any((album) => !album.isPinned);
+    final hasPinnedAlbum = widget.selectedAlbums.albums.any(
+      (album) => album.isPinned,
+    );
+    final hasUnpinnedAlbum = widget.selectedAlbums.albums.any(
+      (album) => !album.isPinned,
+    );
 
     if (widget.sectionType == UISectionType.homeCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).share,
+          labelText: AppLocalizations.of(context).share,
           icon: Icons.adaptive.share,
           onTap: _shareCollection,
         ),
       );
       items.add(
         SelectionActionButton(
-          labelText: "Pin",
+          labelText: AppLocalizations.of(context).pinAlbum,
           icon: Icons.push_pin_rounded,
           onTap: _onPinClick,
           shouldShow: hasUnpinnedAlbum,
@@ -84,7 +88,7 @@ class _AlbumSelectionActionWidgetState
 
       items.add(
         SelectionActionButton(
-          labelText: "Unpin",
+          labelText: AppLocalizations.of(context).unpinAlbum,
           icon: CupertinoIcons.pin_slash,
           onTap: _onUnpinClick,
           shouldShow: hasPinnedAlbum,
@@ -93,32 +97,104 @@ class _AlbumSelectionActionWidgetState
 
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).delete,
+          labelText: AppLocalizations.of(context).delete,
           icon: Icons.delete_outline,
           onTap: _trashCollection,
         ),
       );
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).hide,
+          labelText: AppLocalizations.of(context).hide,
           icon: Icons.visibility_off_outlined,
-          onTap: _onHideClick,
+          onTap: _onHideOrUnHideClick,
         ),
       );
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
-
-    if (widget.sectionType == UISectionType.incomingCollections) {
+    if (widget.sectionType == UISectionType.archivedCollections) {
+      // For archived albums: show unarchive and delete
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).leaveAlbum,
+          labelText: AppLocalizations.of(context).unarchive,
+          icon: Icons.unarchive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      // For hidden albums: show unhide and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unhide,
+          icon: Icons.visibility_outlined,
+          onTap: _onHideOrUnHideClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else {
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).archive,
+          icon: Icons.archive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+    }
+
+    if (widget.sectionType == UISectionType.incomingCollections) {
+      // Pin/Unpin options for incoming collections (uses sharee metadata)
+      // Behind feature flag
+      if (flagService.enableShareePin) {
+        final hasShareePinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => album.hasShareePinned(),
+        );
+        final hasShareeUnpinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => !album.hasShareePinned(),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).pinAlbum,
+            icon: Icons.push_pin_rounded,
+            onTap: _onPinClickForSharee,
+            shouldShow: hasShareeUnpinnedAlbum,
+          ),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).unpinAlbum,
+            icon: CupertinoIcons.pin_slash,
+            onTap: _onUnpinClickForSharee,
+            shouldShow: hasShareePinnedAlbum,
+          ),
+        );
+      }
+
+      // Hide option for incoming collections (uses sharee metadata)
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).hide,
+          icon: Icons.visibility_off_outlined,
+          onTap: _onHideOrUnHideClick,
+        ),
+      );
+
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).leaveAlbum,
           icon: Icons.logout,
           onTap: _leaveAlbum,
         ),
@@ -158,12 +234,14 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _shareCollection() async {
+    final actions = <ActionTypesToShow>[
+      ActionTypesToShow.addViewer,
+      ActionTypesToShow.addCollaborator,
+      ActionTypesToShow.addAdmin,
+    ];
     await routeToPage(
       context,
-      AddParticipantPage(
-        widget.selectedAlbums.albums.toList(),
-        const [ActionTypesToShow.addViewer, ActionTypesToShow.addCollaborator],
-      ),
+      AddParticipantPage(widget.selectedAlbums.albums.toList(), actions),
     );
     widget.selectedAlbums.clearAll();
   }
@@ -173,7 +251,10 @@ class _AlbumSelectionActionWidgetState
     final List<Collection> nonEmptyCollection = [];
 
     final List errors = [];
-    for (final collection in widget.selectedAlbums.albums) {
+    final List<Collection> selectedAlbums = widget.selectedAlbums.albums.toList(
+      growable: false,
+    );
+    for (final collection in selectedAlbums) {
       if (collection.type == CollectionType.favorites) {
         continue;
       }
@@ -191,10 +272,7 @@ class _AlbumSelectionActionWidgetState
       }
     }
     if (errors.isNotEmpty) {
-      await showGenericErrorDialog(
-        context: context,
-        error: errors.first,
-      );
+      await showGenericErrorDialog(context: context, error: errors.first);
     }
 
     if (nonEmptyCollection.isNotEmpty) {
@@ -218,11 +296,7 @@ class _AlbumSelectionActionWidgetState
         continue;
       }
 
-      await updateOrder(
-        context,
-        collection,
-        collection.isPinned ? 1 : 1,
-      );
+      await updateOrder(context, collection, collection.isPinned ? 1 : 1);
     }
     if (hasFavorites) {
       _showFavToast();
@@ -236,11 +310,7 @@ class _AlbumSelectionActionWidgetState
         continue;
       }
 
-      await updateOrder(
-        context,
-        collection,
-        collection.isPinned ? 0 : 0,
-      );
+      await updateOrder(context, collection, collection.isPinned ? 0 : 0);
     }
     if (hasFavorites) {
       _showFavToast();
@@ -248,22 +318,83 @@ class _AlbumSelectionActionWidgetState
     widget.selectedAlbums.clearAll();
   }
 
-  Future<void> _onHideClick() async {
+  Future<void> _onPinClickForSharee() async {
     for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites) {
+      if (collection.hasShareePinned()) {
         continue;
       }
-      final isHidden = collection.isHidden();
-      final int prevVisiblity = isHidden ? hiddenVisibility : visibleVisibility;
-      final int newVisiblity = isHidden ? visibleVisibility : hiddenVisibility;
 
-      await changeCollectionVisibility(
-        context,
-        collection: collection,
-        newVisibility: newVisiblity,
-        prevVisibility: prevVisiblity,
-      );
+      await updateShareeOrder(context, collection, 1);
     }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onUnpinClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (!collection.hasShareePinned()) {
+        continue;
+      }
+
+      await updateShareeOrder(context, collection, 0);
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onHideOrUnHideClick() async {
+    final userID = Configuration.instance.getUserID()!;
+    final collections = widget.selectedAlbums.albums
+        .where((c) => c.type != CollectionType.favorites)
+        .toList();
+
+    if (collections.isEmpty) {
+      if (hasFavorites) {
+        _showFavToast();
+      }
+      widget.selectedAlbums.clearAll();
+      return;
+    }
+
+    // Determine if we're hiding or unhiding based on first collection
+    final isUnhiding = collections.first.isHidden();
+    final dialog = createProgressDialog(
+      context,
+      isUnhiding
+          ? AppLocalizations.of(context).unhiding
+          : AppLocalizations.of(context).hiding,
+    );
+    await dialog.show();
+
+    try {
+      for (final collection in collections) {
+        final isOwner = collection.isOwner(userID);
+        final isHidden = collection.isHidden();
+        final int prevVisiblity =
+            isHidden ? hiddenVisibility : visibleVisibility;
+        final int newVisiblity =
+            isHidden ? visibleVisibility : hiddenVisibility;
+
+        await changeCollectionVisibility(
+          context,
+          collection: collection,
+          newVisibility: newVisiblity,
+          prevVisibility: prevVisiblity,
+          isOwner: isOwner,
+          showProgressDialog: false,
+        );
+      }
+      showShortToast(
+        context,
+        isUnhiding
+            ? AppLocalizations.of(context).successfullyUnhid
+            : AppLocalizations.of(context).successfullyHid,
+      );
+    } catch (e, s) {
+      _logger.warning("failed to change visibility", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    } finally {
+      await dialog.hide();
+    }
+
     if (hasFavorites) {
       _showFavToast();
     }
@@ -271,44 +402,82 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _archiveClick() async {
-    for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites) {
-        continue;
-      }
-      if (widget.sectionType == UISectionType.incomingCollections) {
-        final hasShareeArchived = collection.hasShareeArchived();
-        final int prevVisiblity =
-            hasShareeArchived ? archiveVisibility : visibleVisibility;
-        final int newVisiblity =
-            hasShareeArchived ? visibleVisibility : archiveVisibility;
+    final collections = widget.selectedAlbums.albums
+        .where((c) => c.type != CollectionType.favorites)
+        .toList();
 
-        await changeCollectionVisibility(
-          context,
-          collection: collection,
-          newVisibility: newVisiblity,
-          prevVisibility: prevVisiblity,
-          isOwner: false,
-        );
-      } else {
-        final isArchived = collection.isArchived();
-        final int prevVisiblity =
-            isArchived ? archiveVisibility : visibleVisibility;
-        final int newVisiblity =
-            isArchived ? visibleVisibility : archiveVisibility;
-
-        await changeCollectionVisibility(
-          context,
-          collection: collection,
-          newVisibility: newVisiblity,
-          prevVisibility: prevVisiblity,
-        );
-      }
+    if (collections.isEmpty) {
       if (hasFavorites) {
         _showFavToast();
       }
-      if (mounted) {
-        setState(() {});
+      widget.selectedAlbums.clearAll();
+      return;
+    }
+
+    // Determine if we're archiving or unarchiving based on first collection
+    final isUnarchiving =
+        widget.sectionType == UISectionType.incomingCollections
+            ? collections.first.hasShareeArchived()
+            : collections.first.isArchived();
+    final dialog = createProgressDialog(
+      context,
+      isUnarchiving
+          ? AppLocalizations.of(context).unarchiving
+          : AppLocalizations.of(context).archiving,
+    );
+    await dialog.show();
+
+    try {
+      for (final collection in collections) {
+        if (widget.sectionType == UISectionType.incomingCollections) {
+          final hasShareeArchived = collection.hasShareeArchived();
+          final int prevVisiblity =
+              hasShareeArchived ? archiveVisibility : visibleVisibility;
+          final int newVisiblity =
+              hasShareeArchived ? visibleVisibility : archiveVisibility;
+
+          await changeCollectionVisibility(
+            context,
+            collection: collection,
+            newVisibility: newVisiblity,
+            prevVisibility: prevVisiblity,
+            isOwner: false,
+            showProgressDialog: false,
+          );
+        } else {
+          final isArchived = collection.isArchived();
+          final int prevVisiblity =
+              isArchived ? archiveVisibility : visibleVisibility;
+          final int newVisiblity =
+              isArchived ? visibleVisibility : archiveVisibility;
+
+          await changeCollectionVisibility(
+            context,
+            collection: collection,
+            newVisibility: newVisiblity,
+            prevVisibility: prevVisiblity,
+            showProgressDialog: false,
+          );
+        }
       }
+      showShortToast(
+        context,
+        isUnarchiving
+            ? AppLocalizations.of(context).successfullyUnarchived
+            : AppLocalizations.of(context).successfullyArchived,
+      );
+    } catch (e, s) {
+      _logger.warning("failed to change archive state", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    } finally {
+      await dialog.hide();
+    }
+
+    if (hasFavorites) {
+      _showFavToast();
+    }
+    if (mounted) {
+      setState(() {});
     }
     widget.selectedAlbums.clearAll();
   }
@@ -323,7 +492,7 @@ class _AlbumSelectionActionWidgetState
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).leaveAlbum,
+          labelText: AppLocalizations.of(context).leaveAlbum,
           onTap: () async {
             for (final collection in widget.selectedAlbums.albums) {
               await CollectionsService.instance.leaveAlbum(collection);
@@ -336,11 +505,13 @@ class _AlbumSelectionActionWidgetState
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
         ),
       ],
-      title: S.of(context).leaveSharedAlbum,
-      body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
+      title: AppLocalizations.of(context).leaveSharedAlbum,
+      body: AppLocalizations.of(
+        context,
+      ).photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -356,8 +527,9 @@ class _AlbumSelectionActionWidgetState
 
   void _selectionChangedListener() {
     if (mounted) {
-      hasFavorites = widget.selectedAlbums.albums
-          .any((album) => album.type == CollectionType.favorites);
+      hasFavorites = widget.selectedAlbums.albums.any(
+        (album) => album.type == CollectionType.favorites,
+      );
       setState(() {});
     }
   }
@@ -365,7 +537,7 @@ class _AlbumSelectionActionWidgetState
   void _showFavToast() {
     showShortToast(
       context,
-      S.of(context).actionNotSupportedOnFavouritesAlbum,
+      AppLocalizations.of(context).actionNotSupportedOnFavouritesAlbum,
     );
   }
 }

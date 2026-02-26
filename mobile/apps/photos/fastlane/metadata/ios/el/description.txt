@@ -1,33 +1,33 @@
-Ente is a simple app to automatically backup and organize your photos and videos.
+Το ente είναι μια απλή εφαρμογή για να δημιουργείτε αυτόματα αντίγραφα ασφαλείας και να οργανώνετε τις φωτογραφίες και τα βίντεό σας.
 
-If you've been looking for a privacy-friendly alternative to preserve your memories, you've come to the right place. With Ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+Αν ψάχνετε για μια φιλική προς την ιδιωτικότητα εναλλακτική λύση για τη διατήρηση των αναμνήσεών σας, ήρθατε στο σωστό μέρος. Στο Ente, αποθηκεύονται με κρυπτογράφηση από άκρο σε άκρο (e2ee). Αυτό σημαίνει ότι μόνο εσείς μπορείτε να τις δείτε.
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+Έχουμε εφαρμογές για όλες τις πλατφόρμες και οι φωτογραφίες σας θα συγχρονίζονται απρόσκοπτα μεταξύ όλων των συσκευών σας με κρυπτογράφηση από άκρο σε άκρο.
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+Χρησιμοποιώντας το ente, ο διαμοιρασμός άλμπουμ με τα αγαπημένα σας πρόσωπα είναι απλός. Μπορείτε να τα μοιράζεστε είτε απευθείας με άλλους χρήστες του Ente, κρυπτογραφημένα από άκρο σε άκρο, είτε με δημόσια ορατούς συνδέσμους.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Αντίγραφα των κρυπτογραφημένων δεδομένων σας αποθηκεύονται σε διαφορετικές τοποθεσίες, συμπεριλαμβανομένου ενός καταφυγίου στο Παρίσι. Παίρνουμε στα σοβαρά τη διατήρηση των αναμνήσεών σας και διασφαλίζουμε ότι θα συνεχίσουν να υπάρχουν και μετά από εσάς.
 
-We are here to make the safest photos app ever, come join our journey!
+Ήρθαμε για να δημιουργήσουμε την πιο ασφαλή εφαρμογή φωτογραφιών, γίνετε κι εσείς μέρος του ταξιδιού μας!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ
+- Αντίγραφα ασφαλείας με την πρωτότυπη ποιότητα των αρχείων σας, επειδή κάθε pixel είναι σημαντικό
+- Οικογενειακές συνδρομές, ώστε να μπορείτε να μοιραστείτε το χώρο αποθήκευσης με την οικογένειά σας
+- Κοινόχρηστοι φάκελοι, σε περίπτωση που θέλετε το αγαπημένο σας πρόσωπο να απολαύσει τα κλικ σας
+- Σύνδεσμοι άλμπουμ, που μπορούν να προστατευτούν με κωδικό πρόσβασης και ημερομηνία λήξης
+- Δυνατότητα να ελευθερώσετε χώρο στη συσκευή σας, αφαιρώντας αρχεία που έχουν αποθηκευτεί με ασφάλεια
+- Επεξεργασία εικόνων, για να προσθέσετε τελικές πινελιές
+- Βάλτε τις αναμνήσεις σας στα αγαπημένα σας, αποκρύψτες τις και να ξαναζήστε τις, επειδή είναι πολύτιμες
+- Εισαγωγή με ένα κλικ από όλους τους κύριους παρόχους αποθήκευσης
+- Σκοτεινό θέμα, επειδή οι φωτογραφίες σας φαίνονται ωραίες με αυτό
+- 2FA, 3FA, βιομετρική αυθεντικοποίηση
+- και ΠΟΛΛΑ περισσότερα!
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+ΚΟΣΤΟΣ
+Δεν προσφέρουμε δωρεάν εφ' όρου ζωής συνδρομές, επειδή είναι σημαντικό για εμάς να παραμείνουμε βιώσιμοι και να αντέξουμε στο χρόνο. Αντ 'αυτού προσφέρουμε προσιτές συνδρομές που μπορείτε να μοιραστείτε ελεύθερα με την οικογένειά σας. Μπορείτε να βρείτε περισσότερες πληροφορίες στο ente.io.
 
-SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+ΥΠΟΣΤΗΡΙΞΗ
+Είμαστε υπερήφανοι που προσφέρουμε ανθρώπινη υποστήριξη. Εάν έχετε ενεργή συνδρομή επί πληρωμή, μπορείτε να επικοινωνήσετε με το team@ente.io και να περιμένετε μια απάντηση από την ομάδα μας εντός 24 ωρών.
 
-TERMS
+ΟΡΟΙ
 https://ente.io/terms

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<svg width="320" height="280" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1">
+
+ <g class="layer">
+  <title>Layer 1</title>
+  <g id="Layer1000">
+   <g id="Layer1002">
+    <g id="Layer1003">
+     <path d="m123.08,34.29c-66.43,0 -120.27,53.85 -120.27,120.27c0,66.43 53.85,120.27 120.27,120.27c66.47,0 120.32,-53.85 120.32,-120.27c0,-66.43 -53.85,-120.27 -120.32,-120.27zm0,215.67c-52.67,0 -95.36,-42.73 -95.36,-95.4c0,-52.67 42.68,-95.4 95.36,-95.4c52.72,0 95.4,42.73 95.4,95.4c0,52.67 -42.68,95.4 -95.4,95.4z" fill="#2a5e00" fill-rule="evenodd" id="path7"/>
+     <g id="Layer1004">
+      <g id="Layer1005">
+       <path d="m138.72,146.29l59.61,-41.47l7.78,33.7l-67.39,7.78z" fill="#2a5e00" fill-rule="evenodd" id="path8"/>
+       <path d="m110.88,146.29l-59.61,-41.47l-7.78,33.7l67.39,7.78z" fill="#2a5e00" fill-rule="evenodd" id="path9"/>
+      </g>
+      <path d="m43.95,192.02l74.62,49.75l87.12,-78.8l-161.75,29.05z" fill="#2a5e00" fill-rule="evenodd" id="path10"/>
+     </g>
+     <path d="m94.24,59.29l-30.48,-55.1l54.26,33.24l-23.79,21.86z" fill="#2a5e00" fill-rule="evenodd" id="path11"/>
+     <path d="m202.64,78.1l30.43,-55.1l-54.22,33.24l23.79,21.86z" fill="#2a5e00" fill-rule="evenodd" id="path12"/>
+    </g>
+    <path d="m275.63,274.67l29.35,0l0,-240.76l-29.35,0l0,240.76z" fill="#2a5e00" fill-rule="evenodd" id="path13"/>
+    <path d="m317.94,125.93c0,15.3 -12.33,27.63 -27.63,27.63c-15.26,0 -27.63,-12.33 -27.63,-27.63c0,-15.26 12.37,-27.63 27.63,-27.63c15.3,0 27.63,12.37 27.63,27.63z" fill="#2a5e00" fill-rule="evenodd" id="path14"/>
+    <path d="m288.84,33.91l-41.76,0l16.76,45.99l23.58,0l1.42,-45.99z" fill="#2a5e00" fill-rule="evenodd" id="path15"/>
+   </g>
+  </g>
+ </g>
+</svg>

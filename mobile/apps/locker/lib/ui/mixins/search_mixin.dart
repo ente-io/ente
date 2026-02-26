@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:locker/extensions/collection_extension.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -67,7 +68,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                     .textTheme
                     .bodyMedium
                     ?.color
-                    ?.withOpacity(0.6),
+                    ?.withValues(alpha: 0.6),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20.0),
@@ -91,7 +92,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                                   .textTheme
                                   .bodyMedium
                                   ?.color
-                                  ?.withOpacity(0.6) ??
+                                  ?.withValues(alpha: 0.6) ??
                               Colors.grey,
                         ),
                       ),
@@ -103,7 +104,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.6),
+                          ?.withValues(alpha: 0.6),
                     ),
             ),
             style: TextStyle(
@@ -194,7 +195,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (query.isEmpty) {
+      final normalizedQuery = query.trim();
+      if (normalizedQuery.isEmpty) {
         if (mounted) {
           onSearchResultsChanged(allCollections, allFiles);
         }
@@ -206,7 +208,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
 
       for (final collection in allCollections) {
         if (!mounted) return;
-        final searchResult = await _searchInCollection(collection, query);
+        final searchResult =
+            await _searchInCollection(collection, normalizedQuery);
         if (searchResult.matches) {
           filteredCollections.add(collection);
           if (searchResult.nameMatches) {
@@ -221,7 +224,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         if (addedFileIds.contains(file.uploadedFileID.toString())) {
           return false;
         }
-        return _searchInFile(file, query);
+        return _searchInFile(file, normalizedQuery);
       }).toList();
 
       final List<EnteFile> allFilteredFiles = [
@@ -254,7 +257,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
       final files =
           await CollectionService.instance.getFilesInCollection(collection);
       final collectionNameMatches = _containsQuery(
-        collection.name ?? '',
+        collection.displayName ?? '',
         query,
       );
       final fileMatches = files.any((file) => _searchInFile(file, query));
@@ -265,9 +268,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         files: collectionNameMatches ? files : [],
       );
     } catch (e) {
-      debugPrint('Error searching in collection ${collection.name}: $e');
+      debugPrint('Error searching in collection (ID: ${collection.id}): $e');
       final collectionNameMatches = _containsQuery(
-        collection.name ?? '',
+        collection.displayName ?? '',
         query,
       );
       return CollectionSearchResult(
@@ -289,7 +292,8 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
   bool _containsQuery(String text, String query) {
     if (text.isEmpty) return false;
     final lowerText = text.toLowerCase();
-    final lowerQuery = query.toLowerCase();
+    final lowerQuery = query.trim().toLowerCase();
+    if (lowerQuery.isEmpty) return false;
 
     if (lowerText.contains(lowerQuery)) {
       return true;
@@ -344,5 +348,12 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
+  }
+
+  /// Programmatically dismiss the search UI and reset state
+  void dismissSearch() {
+    if (_isSearchActive) {
+      _deactivateSearch();
+    }
   }
 }

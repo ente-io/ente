@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/controller/filedata"
 	"github.com/ente-io/museum/pkg/controller/public"
-	"net/http"
-	"strconv"
 
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
 
@@ -136,6 +137,27 @@ func (h *PublicCollectionHandler) GetUploadUrls(c *gin.Context) {
 	})
 }
 
+// GetUploadURLV2 returns a single upload URL that enforces checksum + content-length headers
+func (h *PublicCollectionHandler) GetUploadURLV2(c *gin.Context) {
+	enteApp := auth.GetApp(c)
+	var req ente.UploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	collection, err := h.Controller.GetPublicCollection(c, true)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	url, err := h.FileCtrl.GetUploadURLWithMetadata(c, collection.Owner.ID, req, enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, url)
+}
+
 // GetMultipartUploadURLs returns upload Urls where files can be uploaded
 func (h *PublicCollectionHandler) GetMultipartUploadURLs(c *gin.Context) {
 	enteApp := auth.GetApp(c)
@@ -157,6 +179,27 @@ func (h *PublicCollectionHandler) GetMultipartUploadURLs(c *gin.Context) {
 	})
 }
 
+// GetMultipartUploadURLV2 returns multipart upload URLs for a single object with enforced metadata
+func (h *PublicCollectionHandler) GetMultipartUploadURLV2(c *gin.Context) {
+	enteApp := auth.GetApp(c)
+	var req ente.MultipartUploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	collection, err := h.Controller.GetPublicCollection(c, true)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	upload, err := h.FileCtrl.GetMultipartUploadURLWithMetadata(c, collection.Owner.ID, req, enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, upload)
+}
+
 // CreateFile create a new file inside the collection corresponding to the public accessToken
 func (h *PublicCollectionHandler) CreateFile(c *gin.Context) {
 	var file ente.File
@@ -166,6 +209,11 @@ func (h *PublicCollectionHandler) CreateFile(c *gin.Context) {
 	}
 
 	enteApp := auth.GetApp(c)
+	accessContext := auth.MustGetPublicAccessContext(c)
+	if file.CollectionID != accessContext.CollectionID {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("can only update to associated collection"), ""))
+		return
+	}
 
 	fileRes, err := h.Controller.CreateFile(c, file, enteApp)
 	if err != nil {
@@ -190,20 +238,7 @@ func (h *PublicCollectionHandler) VerifyPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// ReportAbuse captures abuse report for a public collection
-func (h *PublicCollectionHandler) ReportAbuse(c *gin.Context) {
-	var req ente.AbuseReportRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	err := h.Controller.ReportAbuse(c, req)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
+// ReportAbuse endpoint removed
 
 // GetDiff returns the diff within a collection since a timestamp
 func (h *PublicCollectionHandler) GetDiff(c *gin.Context) {

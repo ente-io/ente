@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
@@ -34,6 +36,8 @@ class UploadLocksDB {
     columnPartSize: "part_size",
     columnLastAttemptedAt: "last_attempted_at",
     columnCreatedAt: "created_at",
+    columnFileMd5: "file_md5",
+    columnPartMd5s: "part_md5s",
   );
 
   static const _partsTable = (
@@ -53,13 +57,33 @@ class UploadLocksDB {
     columnCreatedAt: "created_at",
   );
 
+  static const _streamQueueTable = (
+    table: "stream_queue",
+    columnUploadedFileID: "uploaded_file_id",
+    columnQueueType: "queue_type", // 'create' or 'recreate'
+    columnCreatedAt: "created_at",
+  );
+
   static final initializationScript = [
     ..._createUploadLocksTable(),
   ];
 
   static final migrationScripts = [
     ..._createTrackUploadsTable(),
+    ..._addMD5Columns(),
   ];
+  static List<String> _addMD5Columns() {
+    return [
+      '''
+               ALTER TABLE ${_trackUploadTable.table}
+               ADD COLUMN  ${_trackUploadTable.columnFileMd5} TEXT;
+               ''',
+      '''
+               ALTER TABLE ${_trackUploadTable.table}
+               ADD COLUMN ${_trackUploadTable.columnPartMd5s} TEXT;
+               ''',
+    ];
+  }
 
   final dbConfig = MigrationConfig(
     initializationScript: initializationScript,
@@ -134,18 +158,26 @@ class UploadLocksDB {
                   ${_streamUploadErrorTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
                 )
                 ''',
+      '''
+                CREATE TABLE IF NOT EXISTS ${_streamQueueTable.table} (
+                  ${_streamQueueTable.columnUploadedFileID} INTEGER PRIMARY KEY,
+                  ${_streamQueueTable.columnQueueType} TEXT NOT NULL,
+                  ${_streamQueueTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
+                )
+                ''',
     ];
   }
 
   Future<void> clearTable() async {
-    final db = await instance.database;
+    final db = await database;
     await db.delete(_uploadLocksTable.table);
     await db.delete(_trackUploadTable.table);
     await db.delete(_partsTable.table);
+    await db.delete(_streamQueueTable.table);
   }
 
   Future<void> acquireLock(String id, String owner, int time) async {
-    final db = await instance.database;
+    final db = await database;
     final row = <String, dynamic>{};
     row[_uploadLocksTable.columnID] = id;
     row[_uploadLocksTable.columnOwner] = owner;
@@ -158,7 +190,7 @@ class UploadLocksDB {
   }
 
   Future<String> getLockData(String id) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _uploadLocksTable.table,
       where: '${_uploadLocksTable.columnID} = ?',
@@ -168,14 +200,15 @@ class UploadLocksDB {
       return "No lock found for $id";
     }
     final row = rows.first;
-    final time = row[_uploadLocksTable.columnTime] as int;
+    final time =
+        int.tryParse(row[_uploadLocksTable.columnTime].toString()) ?? 0;
     final owner = row[_uploadLocksTable.columnOwner] as String;
-    final duration = DateTime.now().millisecondsSinceEpoch - time;
-    return "Lock for $id acquired by $owner since ${Duration(milliseconds: duration)}";
+    final duration = DateTime.now().microsecondsSinceEpoch - time;
+    return "Lock for $id acquired by $owner since ${Duration(microseconds: duration)}";
   }
 
   Future<bool> isLocked(String id, String owner) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _uploadLocksTable.table,
       where:
@@ -186,7 +219,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseLock(String id, String owner) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where:
@@ -196,7 +229,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseLocksAcquiredByOwnerBefore(String owner, int time) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where:
@@ -206,7 +239,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseAllLocksAcquiredBefore(int time) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where: '${_uploadLocksTable.columnTime} < ?',
@@ -219,8 +252,9 @@ class UploadLocksDB {
     String localId,
     String fileHash,
     int collectionID,
+    String encryptedFileName,
   ) async {
-    final db = await instance.database;
+    final db = await database;
 
     final rows = await db.query(
       _trackUploadTable.table,
@@ -230,9 +264,7 @@ class UploadLocksDB {
       whereArgs: [localId, fileHash, collectionID],
     );
 
-    if (rows.isEmpty) {
-      throw Exception("No cached links found for $localId and $fileHash");
-    }
+    _validateResume(rows, localId, encryptedFileName);
     final row = rows.first;
 
     return (
@@ -247,7 +279,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _trackUploadTable.table,
       {
@@ -269,8 +301,9 @@ class UploadLocksDB {
     String localId,
     String fileHash,
     int collectionID,
+    String encryptedFileName,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _trackUploadTable.table,
       where: '${_trackUploadTable.columnLocalID} = ?'
@@ -278,10 +311,9 @@ class UploadLocksDB {
           ' AND ${_trackUploadTable.columnCollectionID} = ?',
       whereArgs: [localId, fileHash, collectionID],
     );
-    if (rows.isEmpty) {
-      throw Exception("No cached links found for $localId and $fileHash");
-    }
+    _validateResume(rows, localId, encryptedFileName);
     final row = rows.first;
+
     final objectKey = row[_trackUploadTable.columnObjectKey] as String;
     final encFileSize = row[_trackUploadTable.columnEncryptedFileSize] as int;
     final partsStatus = await db.query(
@@ -313,6 +345,14 @@ class UploadLocksDB {
       partsURLs: partsURLs,
     );
 
+    // Retrieve MD5 data
+    final String? fileMd5 = row[_trackUploadTable.columnFileMd5] as String?;
+    List<String>? partMd5s;
+    if (row[_trackUploadTable.columnPartMd5s] != null) {
+      final partMd5sJson = row[_trackUploadTable.columnPartMd5s] as String;
+      partMd5s = List<String>.from(jsonDecode(partMd5sJson));
+    }
+
     return MultipartInfo(
       urls: urls,
       status: MultipartStatus.values
@@ -321,14 +361,38 @@ class UploadLocksDB {
       partETags: partETags,
       encFileSize: encFileSize,
       partSize: row[_trackUploadTable.columnPartSize] as int,
+      fileMd5: fileMd5,
+      partMd5s: partMd5s,
     );
+  }
+
+// validateResume checks if the cached links are valid for resuming upload
+  void _validateResume(
+    List<Map<String, Object?>> rows,
+    String localId,
+    String encryptedFileName,
+  ) {
+    if (rows.isEmpty) {
+      throw MultiPartError("No cached links found for $localId");
+    }
+    if (rows.length > 1) {
+      throw MultiPartError(
+        "Multiple entries found for localID: $localId",
+      );
+    }
+    if (encryptedFileName !=
+        rows.first[_trackUploadTable.columnEncryptedFileName]) {
+      throw MultiPartError(
+        "Encrypted file name mismatch for localID: $localId",
+      );
+    }
   }
 
   Future<void> appendStreamEntry(
     int uploadedFileID,
     String errorMessage,
   ) async {
-    final db = await UploadLocksDB.instance.database;
+    final db = await database;
 
     await db.insert(
       _streamUploadErrorTable.table,
@@ -346,7 +410,7 @@ class UploadLocksDB {
     int uploadedFileID,
     String errorMessage,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _streamUploadErrorTable.table,
       {
@@ -360,7 +424,7 @@ class UploadLocksDB {
   }
 
   Future<int> deleteStreamUploadErrorEntry(int uploadedFileID) async {
-    final db = await instance.database;
+    final db = await database;
     return await db.delete(
       _streamUploadErrorTable.table,
       where: '${_streamUploadErrorTable.columnUploadedFileID} = ?',
@@ -369,7 +433,7 @@ class UploadLocksDB {
   }
 
   Future<Map<int, String>> getStreamUploadError() {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _streamUploadErrorTable.table,
         columns: [
@@ -397,8 +461,10 @@ class UploadLocksDB {
     String fileNonce,
     String keyNonce, {
     required int partSize,
+    String? fileMd5,
+    List<String>? partMd5s,
   }) async {
-    final db = await UploadLocksDB.instance.database;
+    final db = await database;
     final objectKey = urls.objectKey;
 
     await db.insert(
@@ -417,6 +483,9 @@ class UploadLocksDB {
         _trackUploadTable.columnPartSize: partSize,
         _trackUploadTable.columnLastAttemptedAt:
             DateTime.now().millisecondsSinceEpoch,
+        if (fileMd5 != null) _trackUploadTable.columnFileMd5: fileMd5,
+        if (partMd5s != null)
+          _trackUploadTable.columnPartMd5s: jsonEncode(partMd5s),
       },
     );
 
@@ -441,7 +510,7 @@ class UploadLocksDB {
     int partNumber,
     String etag,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _partsTable.table,
       {
@@ -458,7 +527,7 @@ class UploadLocksDB {
     String objectKey,
     MultipartStatus status,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _trackUploadTable.table,
       {
@@ -472,7 +541,7 @@ class UploadLocksDB {
   Future<int> deleteMultipartTrack(
     String localId,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     return await db.delete(
       _trackUploadTable.table,
       where: '${_trackUploadTable.columnLocalID} = ?',
@@ -482,7 +551,7 @@ class UploadLocksDB {
 
   // getFileNameToLastAttemptedAtMap returns a map of encrypted file name to last attempted at time
   Future<Map<String, int>> getFileNameToLastAttemptedAtMap() {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
         columns: [
@@ -504,7 +573,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
         where: '${_trackUploadTable.columnLocalID} = ?'
@@ -515,8 +584,70 @@ class UploadLocksDB {
       if (rows.isEmpty) {
         return null;
       }
+      if (rows.length > 1) {
+        await db.delete(
+          _trackUploadTable.table,
+          where: '${_trackUploadTable.columnLocalID} = ?',
+          whereArgs: [localId],
+        );
+        throw MultiPartError(
+          "Multiple entries found for localID: $localId",
+        );
+      }
       final row = rows.first;
       return row[_trackUploadTable.columnEncryptedFileName] as String;
     });
+  }
+
+  // Stream Queue Management Methods
+  Future<void> addToStreamQueue(
+    int uploadedFileID,
+    String queueType, // 'create' or 'recreate'
+  ) async {
+    final db = await database;
+    await db.insert(
+      _streamQueueTable.table,
+      {
+        _streamQueueTable.columnUploadedFileID: uploadedFileID,
+        _streamQueueTable.columnQueueType: queueType,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> removeFromStreamQueue(int uploadedFileID) async {
+    final db = await database;
+    await db.delete(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<Map<int, String>> getStreamQueue() async {
+    final db = await database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      columns: [
+        _streamQueueTable.columnUploadedFileID,
+        _streamQueueTable.columnQueueType,
+      ],
+    );
+    final map = <int, String>{};
+    for (final row in rows) {
+      map[row[_streamQueueTable.columnUploadedFileID] as int] =
+          row[_streamQueueTable.columnQueueType] as String;
+    }
+    return map;
+  }
+
+  Future<bool> isInStreamQueue(int uploadedFileID) async {
+    final db = await database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+    return rows.isNotEmpty;
   }
 }

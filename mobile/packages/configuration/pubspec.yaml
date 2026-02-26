@@ -8,26 +8,32 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   bip39: ^1.0.6
   ente_base:
     path: ../../packages/base
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../ente_crypto_api
   ente_events:
     path: ../../packages/events
   ente_logging:
     path: ../../packages/logging
-  flutter_secure_storage: ^9.0.0
+  flutter:
+    sdk: flutter
+  # Do not upgrade this package unless this issue is resolved:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
+  # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
+  # Let's wait till the issue is resolved by the package maintainer.
+  # If not resolved and we need to upgrade, write a migration script.
+  flutter_secure_storage: 9.0.0
+  path: ^1.9.0
   path_provider: ^2.1.5
   shared_preferences: ^2.5.3
   tuple: ^2.0.2
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:

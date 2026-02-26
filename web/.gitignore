@@ -21,3 +21,9 @@ dist
 .next-desktop/
 out/
 next-env.d.ts
+
+# Static export outputs
+apps/ensu/next/
+
+packages/wasm/pkg/
+packages/wasm/target/

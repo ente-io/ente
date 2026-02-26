@@ -7,11 +7,8 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
-import "package:pro_image_editor/models/editor_callbacks/pro_image_editor_callbacks.dart";
-import "package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart";
-import "package:pro_image_editor/modules/tune_editor/tune_editor.dart";
-import "package:pro_image_editor/widgets/animated/fade_in_up.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
+import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorTuneBar extends StatefulWidget with SimpleConfigsAccess {
   const ImageEditorTuneBar({
@@ -320,11 +317,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: showValue || widget.isSelected
-                  ? progressColor.withOpacity(0.2)
+                  ? progressColor.withValues(alpha: 0.2)
                   : Theme.of(context).colorScheme.editorBackgroundColor,
               border: Border.all(
                 color: widget.isSelected
-                    ? progressColor.withOpacity(0.4)
+                    ? progressColor.withValues(alpha: 0.4)
                     : Theme.of(context).colorScheme.editorBackgroundColor,
                 width: 2,
               ),

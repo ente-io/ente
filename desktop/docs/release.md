@@ -53,6 +53,8 @@ add the release notes, and convert it to a release.
 
 Once it is marked as latest, the release goes live.
 
+At this point, also update the `docs/docs/photos/changelog.md` file with the release notes for this version.
+
 We are done at this point, and can now update the other pre-release that'll hold
 subsequent nightly builds.
 

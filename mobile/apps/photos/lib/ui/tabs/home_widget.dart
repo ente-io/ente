@@ -1,86 +1,99 @@
-import 'dart:async';
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
-import "package:flutter_animate/flutter_animate.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
+import "package:flutter/services.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
-import 'package:logging/logging.dart';
+import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:move_to_background/move_to_background.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/account_configured_event.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/events/account_configured_event.dart";
+import "package:photos/events/app_mode_changed_event.dart";
+import "package:photos/events/backup_folders_updated_event.dart";
+import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
-import 'package:photos/events/permission_granted_event.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/events/trigger_logout_event.dart';
-import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
+import "package:photos/events/opened_settings_event.dart";
+import "package:photos/events/permission_granted_event.dart";
+import "package:photos/events/subscription_purchased_event.dart";
+import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/events/tab_changed_event.dart";
+import "package:photos/events/trigger_logout_event.dart";
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
-import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
-import 'package:photos/models/selected_files.dart';
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/account/user_service.dart';
+import "package:photos/services/account/user_service.dart";
 import "package:photos/services/album_home_widget_service.dart";
-import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/collections_service.dart';
+import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
-import 'package:photos/states/user_details_state.dart';
-import 'package:photos/theme/colors.dart';
-import "package:photos/theme/effects.dart";
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/states/user_details_state.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import 'package:photos/ui/extents_page_view.dart';
-import 'package:photos/ui/home/grant_permissions_widget.dart';
-import 'package:photos/ui/home/header_widget.dart';
-import 'package:photos/ui/home/home_bottom_nav_bar.dart';
-import 'package:photos/ui/home/home_gallery_widget.dart';
-import 'package:photos/ui/home/landing_page_widget.dart';
+import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
+import "package:photos/ui/home/christmas/christmas_utils.dart";
+import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
+import "package:photos/ui/home/gallery_download_banner.dart";
+import "package:photos/ui/home/grant_permissions_widget.dart";
+import "package:photos/ui/home/header_widget.dart";
+import "package:photos/ui/home/home_bottom_nav_bar.dart";
+import "package:photos/ui/home/home_gallery_widget.dart";
+import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import 'package:photos/ui/home/start_backup_hook_widget.dart';
-import 'package:photos/ui/notification/update/change_log_page.dart';
+import "package:photos/ui/home/start_backup_hook_widget.dart";
+import "package:photos/ui/notification/update/change_log_page.dart";
+import "package:photos/ui/rituals/ritual_camera_page.dart";
+import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
+import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
-import "package:photos/ui/viewer/search/search_widget.dart";
-import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
-import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/navigation_util.dart";
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import "package:photos/utils/dialog_util.dart";
+import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     super.key,
+    this.startWithoutAccount = false,
   });
+
+  final bool startWithoutAccount;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -89,9 +102,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
-  static final _settingsPage = SettingsPage(
-    emailNotifier: UserService.instance.emailValueNotifier,
-  );
 
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
@@ -99,6 +109,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
+  final ValueNotifier<double> _christmasPullOffsetNotifier =
+      ValueNotifier<double>(0);
+  final ValueNotifier<bool> _christmasPullReleasedNotifier =
+      ValueNotifier<bool>(false);
 
   // for receiving media files
   // ignore: unused_field
@@ -106,7 +120,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  bool _personSyncTriggered = false;
+  bool _collectionsSyncTriggered = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
+      ValueNotifier<bool>(false);
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -119,6 +137,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
+  StreamSubscription<Uri?>? _authDeepLinkSubscription;
+  late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
+      _homepageSwipeToSelectInProgressEventSubscription;
+  late StreamSubscription<ChristmasBannerEvent>
+      _christmasBannerEventSubscription;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -127,11 +151,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
-    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
 
       if (event.selectedIndex == 3) {
@@ -141,14 +166,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       if (event.source != TabChangedEventSource.pageView) {
         debugPrint(
-          "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
+          "TabChange going from $previousTabIndex to ${event.selectedIndex} source: ${event.source}",
         );
         if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn,
-          );
+          final pageDelta = (event.selectedIndex - previousTabIndex).abs();
+          if (pageDelta <= 1) {
+            _pageController.animateToPage(
+              event.selectedIndex,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeIn,
+            );
+          } else {
+            _pageController.jumpToPage(event.selectedIndex);
+          }
         }
       }
     });
@@ -160,7 +190,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
       // fetch user flags on login
-      flagService.flags;
+      if (!isOfflineMode) {
+        flagService.flags;
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -175,6 +207,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _appModeChangedEventSubscription =
+        Bus.instance.on<AppModeChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
@@ -237,10 +275,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
-    // MediaExtension plugin handles the deeplink for android
-    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
-    // android deep linking
-    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
+    // Initialize deep link subscription for public albums on both iOS and Android
+    _initDeepLinkSubscriptionForPublicAlbums();
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -273,6 +309,19 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       });
     }
+
+    _homepageSwipeToSelectInProgressEventSubscription = Bus.instance
+        .on<HomepageSwipeToSelectInProgressEvent>()
+        .listen((inProgress) {
+      _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
+    });
+
+    _christmasBannerEventSubscription =
+        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   Future<void> syncWidget() async {
@@ -286,6 +335,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
+    if (!mounted) {
+      _logger.warning("Cannot handle public album link - widget not mounted");
+      return;
+    }
     try {
       _logger.info("Handling public album link: via $via");
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -302,8 +355,12 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
 
-      final Collection collection = await CollectionsService.instance
+      final Collection? collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+      if (collection == null) {
+        return;
+      }
+
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
 
@@ -317,6 +374,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         return;
       }
+
+      // Check for action=join parameter to show join dialog
+      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
+          Configuration.instance.isLoggedIn();
+
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs[0];
       if (!publicUrl.enableDownload) {
@@ -330,8 +392,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (publicUrl.passwordEnabled) {
         await showTextInputDialog(
           context,
-          title: S.of(context).enterPassword,
-          submitButtonLabel: S.of(context).ok,
+          title: AppLocalizations.of(context).enterPassword,
+          submitButtonLabel: AppLocalizations.of(context).ok,
           alwaysShowSuccessState: false,
           popnavAfterSubmission: false,
           onSubmit: (String text) async {
@@ -369,11 +431,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                     await routeToPage(
                       context,
                       SharedPublicCollectionPage(
-                        files: sharedFiles,
                         CollectionWithThumbnail(
                           collection,
                           null,
                         ),
+                        files: sharedFiles,
+                        shouldShowJoinDialog: shouldShowJoinDialog,
                       ),
                     );
                   }
@@ -396,16 +459,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        routeToPage(
+        await routeToPage(
           context,
           SharedPublicCollectionPage(
-            files: sharedFiles,
             CollectionWithThumbnail(
               collection,
               null,
             ),
+            files: sharedFiles,
+            shouldShowJoinDialog: shouldShowJoinDialog,
           ),
-        ).ignore();
+        );
         if (sharedFiles.length == 1) {
           await routeToPage(
             context,
@@ -427,12 +491,12 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _autoLogoutAlert() async {
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).sessionExpired),
-      content: Text(S.of(context).pleaseLoginAgain),
+      title: Text(AppLocalizations.of(context).sessionExpired),
+      content: Text(AppLocalizations.of(context).pleaseLoginAgain),
       actions: [
         TextButton(
           child: Text(
-            S.of(context).ok,
+            AppLocalizations.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -440,8 +504,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           onPressed: () async {
             Navigator.of(context).pop('dialog');
             Navigator.of(context).popUntil((route) => route.isFirst);
-            final dialog =
-                createProgressDialog(context, S.of(context).loggingOut);
+            final dialog = createProgressDialog(
+              context,
+              AppLocalizations.of(context).loggingOut,
+            );
             await dialog.show();
             await Configuration.instance.logout();
             await dialog.hide();
@@ -466,6 +532,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _permissionGrantedEvent.cancel();
+    _appModeChangedEventSubscription.cancel();
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
@@ -473,9 +540,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    if (Platform.isIOS) {
-      _publicAlbumLinkSubscription.cancel();
-    }
+    _publicAlbumLinkSubscription.cancel();
+    _authDeepLinkSubscription?.cancel();
+    _homepageSwipeToSelectInProgressEventSubscription.cancel();
+    _christmasBannerEventSubscription.cancel();
+    _swipeToSelectInProgressNotifier.dispose();
+    _christmasPullOffsetNotifier.dispose();
+    _christmasPullReleasedNotifier.dispose();
     super.dispose();
   }
 
@@ -487,7 +558,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value.isEmpty) {
           return;
         }
-        if (value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (_isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
@@ -503,7 +575,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 actions: [
                   const SizedBox(height: 24),
                   ButtonWidget(
-                    labelText: S.of(context).openFile,
+                    labelText: AppLocalizations.of(context).openFile,
                     buttonType: ButtonType.primary,
                     onTap: () async {
                       Navigator.of(context).pop(true);
@@ -514,7 +586,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ),
                   ButtonWidget(
                     buttonType: ButtonType.secondary,
-                    labelText: S.of(context).backupFile,
+                    labelText: AppLocalizations.of(context).backupFile,
                     onTap: () async {
                       Navigator.of(context).pop(false);
                     },
@@ -554,7 +626,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
@@ -585,14 +658,20 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
+
+    // Handle public album deep links:
+    // - iOS: Universal Links (https://albums.ente.io/...)
+    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
-        if (initialUri.toString().contains("albums.ente.io")) {
+        if (_isPublicAlbumUrl(initialUri.toString()) &&
+            (Platform.isIOS ||
+                (Platform.isAndroid && initialUri.scheme == "ente"))) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
-            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+            "Ignoring deep link: $initialUri",
           );
         }
       } else {
@@ -607,11 +686,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.toString().contains("albums.ente.io")) {
+          if (_isPublicAlbumUrl(uri.toString()) &&
+              (Platform.isIOS ||
+                  (Platform.isAndroid && uri.scheme == "ente"))) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
-              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+              "Ignoring deep link: $uri",
             );
           }
         } else {
@@ -624,17 +705,28 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  bool _isPublicAlbumUrl(String url) {
+    return url.contains("albums.ente.io");
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
+    final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          final isStartWithoutAccountFlow = widget.startWithoutAccount &&
+              !Configuration.instance.hasConfiguredAccount() &&
+              !localSettings.isAppModeSet;
+          if (isStartWithoutAccountFlow) {
+            Navigator.pop(context);
+            return;
+          }
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
               _selectedFiles.clearAll();
@@ -668,26 +760,93 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Drawer(
                     width: double.infinity,
                     shape: const RoundedRectangleBorder(),
-                    child: _settingsPage,
+                    child: SettingsPage(
+                      emailNotifier: UserService.instance.emailValueNotifier,
+                    ),
                   ),
                 )
               : null,
-          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
-          body: SafeArea(
-            bottom: false,
-            child: Builder(
-              builder: (context) {
-                return _getBody(context);
-              },
-            ),
+          onDrawerChanged: (isOpened) {
+            isSettingsOpen = isOpened;
+            if (isOpened) {
+              Bus.instance.fire(OpenedSettingsEvent());
+            }
+          },
+          body: Stack(
+            children: [
+              Builder(
+                builder: (context) {
+                  return _getBody(context);
+                },
+              ),
+              if (isChristmasPeriod())
+                ValueListenableBuilder<double>(
+                  valueListenable: _christmasPullOffsetNotifier,
+                  builder: (context, pullOffset, child) {
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: _christmasPullReleasedNotifier,
+                      builder: (context, isReleased, child) {
+                        if (pullOffset <= 0) {
+                          return const SizedBox.shrink();
+                        }
+                        return Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: ChristmasPullOverlay(
+                            pullOffset: pullOffset,
+                            isReleased: isReleased,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              if (isChristmasPeriod())
+                Positioned.fill(
+                  child: FadingSnowOverlay(
+                    pullOffsetNotifier: _christmasPullOffsetNotifier,
+                  ),
+                ),
+            ],
           ),
 
           ///To fix the status bar not adapting it's color when switching
           ///screens the have different appbar colours.
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
-            child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isOnSearchTabNotifier,
+              builder: (context, isOnSearchTab, _) {
+                return AnimatedBuilder(
+                  animation: IndexOfStackNotifier(),
+                  builder: (context, _) {
+                    final colorScheme = getEnteColorScheme(context);
+                    final resultsBackground = EnteTheme.isDark(context)
+                        ? const Color.fromRGBO(22, 22, 22, 1)
+                        : colorScheme.backgroundElevated2;
+                    final isSearchResults =
+                        isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    final isOnLandingPage =
+                        !Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            !widget.startWithoutAccount;
+                    final isOnOnlineGrantPermissionScreen =
+                        Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            _shouldShowPermissionWidget();
+                    return AppBar(
+                      backgroundColor: isOnLandingPage
+                          ? colorScheme.greenBase
+                          : isSearchResults
+                              ? resultsBackground
+                              : isOnOnlineGrantPermissionScreen
+                                  ? colorScheme.backgroundColour
+                                  : colorScheme.backgroundBase,
+                    );
+                  },
+                );
+              },
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -697,17 +856,36 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      final shouldBootstrapOfflineEntryFlow =
+          widget.startWithoutAccount && !offlineMode;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      final canResumePersistedOfflineMode =
+          hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
+      final shouldUseOfflineEntryFlow =
+          widget.startWithoutAccount || canResumePersistedOfflineMode;
+
+      if (shouldBootstrapOfflineEntryFlow) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (shouldUseOfflineEntryFlow && _shouldShowPermissionWidget()) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (!shouldUseOfflineEntryFlow) {
+        return const LandingPageWidget();
+      }
     }
-    if (!permissionService.hasGrantedPermissions()) {
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      _ensurePersonSync();
+      _ensureCollectionsSync();
+    }
+    if (_shouldShowPermissionWidget()) {
+      _ensurePersonSync();
       return const GrantPermissionsWidget();
     }
-    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (_shouldShowLoadingWidget()) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
@@ -727,41 +905,82 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook =
-        !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !permissionService.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    _showShowBackupHook = _shouldShowBackupHook();
 
     return Stack(
       children: [
         Builder(
           builder: (context) {
-            return ExtentsPageView(
-              onPageChanged: (page) {
-                Bus.instance.fire(
-                  TabChangedEvent(
-                    page,
-                    TabChangedEventSource.pageView,
-                  ),
+            return ValueListenableBuilder(
+              valueListenable: _swipeToSelectInProgressNotifier,
+              builder: (context, inProgress, child) {
+                return ExtentsPageView(
+                  onPageChanged: (page) {
+                    Bus.instance.fire(
+                      TabChangedEvent(
+                        page,
+                        TabChangedEventSource.pageView,
+                      ),
+                    );
+                  },
+                  controller: _pageController,
+                  openDrawer: Scaffold.of(context).openDrawer,
+                  physics: inProgress
+                      ? const NeverScrollableScrollPhysics()
+                      : const BouncingScrollPhysics(),
+                  children: [
+                    _showShowBackupHook
+                        ? const StartBackupHookWidget(
+                            headerWidget: HeaderWidget(),
+                          )
+                        : child!,
+                    UserCollectionsTab(selectedAlbums: _selectedAlbums),
+                    _sharedCollectionTab,
+                    _searchTab,
+                  ],
                 );
               },
-              controller: _pageController,
-              openDrawer: Scaffold.of(context).openDrawer,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _showShowBackupHook
-                    ? const StartBackupHookWidget(headerWidget: HeaderWidget())
-                    : HomeGalleryWidget(
-                        header: const HeaderWidget(),
-                        footer: const SizedBox(
-                          height: 160,
-                        ),
-                        selectedFiles: _selectedFiles,
-                      ),
-                UserCollectionsTab(selectedAlbums: _selectedAlbums),
-                _sharedCollectionTab,
-                _searchTab,
-              ],
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (!isChristmasPeriod()) return false;
+
+                  if (notification.metrics.axis != Axis.vertical) return false;
+
+                  const double maxPullOffset = 200.0;
+
+                  if (notification is ScrollUpdateNotification) {
+                    final double pixels = notification.metrics.pixels;
+                    if (pixels < 0) {
+                      if (pixels < -maxPullOffset) {
+                        final scrollPosition =
+                            Scrollable.of(notification.context!).position;
+                        scrollPosition.correctBy(-maxPullOffset - pixels);
+                      }
+
+                      final double clampedOffset =
+                          (-pixels).clamp(0.0, maxPullOffset);
+                      _christmasPullOffsetNotifier.value = clampedOffset;
+                      if (_christmasPullReleasedNotifier.value) {
+                        _christmasPullReleasedNotifier.value = false;
+                      }
+                    } else if (_christmasPullOffsetNotifier.value != 0) {
+                      _christmasPullOffsetNotifier.value = 0;
+                    }
+                  } else if (notification is ScrollEndNotification) {
+                    if (_christmasPullOffsetNotifier.value > 0) {
+                      _christmasPullReleasedNotifier.value = true;
+                    }
+                  }
+                  return false;
+                },
+                child: HomeGalleryWidget(
+                  header: const HeaderWidget(),
+                  footer: const SizedBox(
+                    height: 160,
+                  ),
+                  selectedFiles: _selectedFiles,
+                ),
+              ),
             );
           },
         ),
@@ -770,46 +989,16 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return Container(
-                decoration: value
-                    ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
-                        boxShadow: shadowFloatFaintLight,
-                      )
-                    : null,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidget()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 225),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.4),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    HomeBottomNavigationBar(
-                      _selectedFiles,
-                      _selectedAlbums,
-                      selectedTabIndex: _selectedTabIndex,
-                    ),
-                  ],
-                ),
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (flagService.internalUser) const GalleryDownloadBanner(),
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    _selectedAlbums,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                ],
               );
             },
           ),
@@ -847,7 +1036,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    appLinks.uriLinkStream.listen(
+    _authDeepLinkSubscription = appLinks.uriLinkStream.listen(
       (link) {
         _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
@@ -860,10 +1049,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _getCredentials(BuildContext context, Uri? link) {
-    if (Configuration.instance.hasConfiguredAccount()) {
+    if (Configuration.instance.hasConfiguredAccount() || link == null) {
       return;
     }
-    final ott = link!.queryParameters["ott"]!;
+    final ott = link.queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
   }
 
@@ -900,9 +1089,61 @@ class _HomeWidgetState extends State<HomeWidget> {
   void _onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) async {
+    if (!mounted) return;
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
+      final uri = Uri.tryParse(payload);
+      if (uri != null &&
+          (uri.host.toLowerCase() == "ritual" ||
+              uri.host.toLowerCase() == "camera")) {
+        final ritualId = uri.queryParameters["ritualId"] ?? "";
+        final albumIdRaw = uri.queryParameters["albumId"];
+        final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
+            ? int.tryParse(albumIdRaw)
+            : null;
+        var canOpenRitual = true;
+        if (ritualId.isNotEmpty) {
+          final ritual = findRitualById(ritualId);
+          canOpenRitual = ritual != null
+              ? await requestHiddenRitualAccess(context, ritual)
+              : await requestHiddenRitualAccessForAlbumId(context, albumId);
+          if (!mounted || !canOpenRitual) {
+            return;
+          }
+          // Ensure the camera is stacked on top of the ritual page so the user
+          // lands on the ritual details after adding photos via a notification.
+          // ignore: unawaited_futures
+          routeToPage(
+            context,
+            RitualPage(ritualId: ritualId),
+          );
+        }
+        if (!canOpenRitual) return;
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          RitualCameraPage(
+            ritualId: ritualId,
+            albumId: albumId,
+          ),
+        );
+        return;
+      }
+      if (uri != null && uri.host.toLowerCase() == "feed") {
+        if (!Configuration.instance.isLoggedIn()) {
+          return;
+        }
+        final target = FeedNavigationTarget.fromUri(uri);
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          FeedScreen(
+            initialTarget: target,
+          ),
+        );
+        return;
+      }
       if (payload.toLowerCase().contains("onthisday")) {
         _logger.info("On this day notification received");
         // ignore: unawaited_futures
@@ -933,5 +1174,80 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       }
     }
+  }
+
+  bool _shouldEnableDrawer() {
+    final isFirstImportCompleted =
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    return isFirstImportCompleted;
+  }
+
+  bool _shouldShowPermissionWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return !permissionService.hasGrantedPermissions() &&
+          !backupPreferenceService.hasSkippedOnboardingPermission;
+    } else {
+      return !permissionService.hasGrantedPermissions();
+    }
+  }
+
+  bool _shouldShowLoadingWidget() {
+    if (isOfflineMode) {
+      return false;
+    }
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      if (!permissionService.hasGrantedPermissions()) {
+        return false;
+      }
+      return !LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    } else {
+      return !LocalSyncService.instance.hasCompletedFirstImport();
+    }
+  }
+
+  bool _shouldShowBackupHook() {
+    if (isOfflineMode) {
+      return false;
+    }
+    final bool noFoldersSelected =
+        !backupPreferenceService.hasSelectedAnyBackupFolder;
+    final bool hasLimitedPermission =
+        permissionService.hasGrantedLimitedPermissions();
+    final bool hasActiveCollections =
+        CollectionsService.instance.getActiveCollections().isNotEmpty;
+
+    return !hasActiveCollections && noFoldersSelected && !hasLimitedPermission;
+  }
+
+  void _ensurePersonSync() {
+    if (_personSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
+      return;
+    }
+    _personSyncTriggered = true;
+    entityService.syncEntities().then((_) {
+      PersonService.instance.refreshPersonCache();
+    });
+  }
+
+  void _ensureCollectionsSync() {
+    if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
+      return;
+    }
+    if (!(backupPreferenceService.hasSkippedOnboardingPermission ||
+        backupPreferenceService.isOnlyNewBackupEnabled)) {
+      return;
+    }
+    _collectionsSyncTriggered = true;
+    CollectionsService.instance.sync().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 }

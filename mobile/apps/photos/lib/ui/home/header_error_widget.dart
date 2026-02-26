@@ -1,10 +1,10 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/email_util.dart';
-import "package:photos/utils/navigation_util.dart";
 
 class HeaderErrorWidget extends StatelessWidget {
   final Error? _error;
@@ -19,8 +19,8 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.info_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).subscribe,
-          subText: S.of(context).yourSubscriptionHasExpired,
+          text: AppLocalizations.of(context).subscribe,
+          subText: AppLocalizations.of(context).yourSubscriptionHasExpired,
           onTap: () async => {
             await routeToPage(
               context,
@@ -36,8 +36,8 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.disc_full_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).upgrade,
-          subText: S.of(context).storageLimitExceeded,
+          text: AppLocalizations.of(context).upgrade,
+          subText: AppLocalizations.of(context).storageLimitExceeded,
           onTap: () async => {
             await routeToPage(
               context,
@@ -53,14 +53,14 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.error_outline_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).backupFailed,
-          subText: S.of(context).couldNotBackUpTryLater,
+          text: AppLocalizations.of(context).backupFailed,
+          subText: AppLocalizations.of(context).couldNotBackUpTryLater,
           onTap: () async => {
             sendLogs(
               context,
-              S.of(context).raiseTicket,
+              AppLocalizations.of(context).raiseTicket,
               "support@ente.io",
-              subject: S.of(context).backupFailed,
+              subject: AppLocalizations.of(context).backupFailed,
             ),
           },
         ),

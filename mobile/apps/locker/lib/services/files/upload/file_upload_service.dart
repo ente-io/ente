@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_accounts/models/user_details.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:locker/core/constants.dart';
 import 'package:locker/core/errors.dart';
@@ -23,9 +24,7 @@ import 'package:locker/services/files/upload/models/backup_item.dart';
 import 'package:locker/services/files/upload/models/backup_item_status.dart';
 import 'package:locker/services/files/upload/models/upload_url.dart';
 import "package:locker/utils/crypto_helper.dart";
-import 'package:locker/utils/data_util.dart';
 import 'package:logging/logging.dart';
-import "package:path/path.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
@@ -34,7 +33,7 @@ class FileUploader {
   static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
-  static const kMaxFileSize5Gib = 5368709120;
+  static const kMaxFileSize10Gib = 10737418240;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
@@ -49,7 +48,6 @@ class FileUploader {
       LinkedHashMap<String, BackupItem>();
   final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
-  final _uploadURLs = Queue<UploadURL>();
 
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
@@ -97,6 +95,70 @@ class FileUploader {
     return completer.future;
   }
 
+  /// Special upload method for info files that contain only metadata
+  Future<EnteFile> uploadInfoFile(
+    EnteFile infoFile,
+    Collection collection,
+  ) async {
+    try {
+      _logger.info('Starting upload of info file');
+
+      _checkIfWithinFileCountLimit();
+
+      // Generate a file key for encryption
+      final fileKey = CryptoUtil.generateKey();
+
+      // Create metadata for the info file
+      final Map<String, dynamic> metadata = infoFile.metadata;
+      final encryptedMetadataResult = await CryptoUtil.encryptData(
+        utf8.encode(jsonEncode(metadata)),
+        fileKey,
+      );
+
+      final encryptedMetadata = CryptoUtil.bin2base64(
+        encryptedMetadataResult.encryptedData!,
+      );
+      final metadataDecryptionHeader = CryptoUtil.bin2base64(
+        encryptedMetadataResult.header!,
+      );
+
+      // Encrypt the file key with collection key
+      final encryptedFileKeyData = CryptoUtil.encryptSync(
+        fileKey,
+        CryptoHelper.instance.getCollectionKey(collection),
+      );
+      final encryptedKey =
+          CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
+      final keyDecryptionNonce =
+          CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+
+      final pubMetadataRequest = await getPubMetadataRequest(
+        infoFile,
+        {'info': infoFile.pubMagicMetadata.info},
+        fileKey,
+      );
+
+      // Upload as metadata-only file (no file content or thumbnail)
+      final uploadedFile = await _uploadInfoFileMetadata(
+        infoFile,
+        collection.id,
+        encryptedKey,
+        keyDecryptionNonce,
+        encryptedMetadata,
+        metadataDecryptionHeader,
+        pubMetadataRequest,
+      );
+
+      _logger.info(
+        'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',
+      );
+      return uploadedFile;
+    } catch (e, s) {
+      _logger.severe('Failed to upload info file', e, s);
+      rethrow;
+    }
+  }
+
   int getCurrentSessionUploadCount() {
     return _totalCountInUploadSession;
   }
@@ -117,10 +179,6 @@ class FileUploader {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _totalCountInUploadSession = 0;
-  }
-
-  void clearCachedUploadURLs() {
-    _uploadURLs.clear();
   }
 
   void removeFromQueueWhere(
@@ -185,7 +243,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file $file";
+          const message = "Upload timed out for file";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -262,10 +320,7 @@ class FileUploader {
     // or not.
     var uploadHardFailure = false;
     try {
-      _logger.info(
-        'starting ${forcedUpload ? 'forced' : ''} '
-        'upload of ${file.toString()}',
-      );
+      _logger.info('starting ${forcedUpload ? 'forced' : ''} upload');
 
       Uint8List? key;
       final encryptedFileExists = File(encryptedFilePath).existsSync();
@@ -274,10 +329,19 @@ class FileUploader {
         // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
+
+      // Validate source file before encryption
+      final sourceFileSize = await file.length();
+      if (sourceFileSize == 0) {
+        throw Exception('Source file is empty (0 bytes)');
+      }
+      _logger.info('Source file size: $sourceFileSize bytes');
+
+      _checkIfWithinFileCountLimit();
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFile(
+      final fileAttributes = await CryptoUtil.encryptFileWithMd5(
         file.path,
         encryptedFilePath,
         key: key,
@@ -287,7 +351,7 @@ class FileUploader {
       final thumbnailData = base64Decode(blackThumbnailBase64);
       final encryptedThumbnailData = await CryptoUtil.encryptData(
         thumbnailData,
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
@@ -297,25 +361,60 @@ class FileUploader {
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       final encThumbSize = await encryptedThumbnailFile.length();
 
-      final thumbnailUploadURL = await _getUploadURL();
+      // Validate file sizes before upload
+      if (encFileSize == 0) {
+        throw Exception(
+          'Encrypted file size is 0',
+        );
+      }
+      if (encThumbSize == 0) {
+        throw Exception(
+          'Encrypted thumbnail size is 0',
+        );
+      }
+
+      // Calculate MD5 hashes for checksum verification
+      final thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
+      final fileMd5 = fileAttributes.fileMd5;
+
+      // Validate that MD5 was calculated during encryption
+      if (fileMd5 == null || fileMd5.isEmpty) {
+        throw Exception('File MD5 hash is null or empty');
+      }
+
+      _logger.info(
+        'Uploading file: encFileSize=$encFileSize, encThumbSize=$encThumbSize',
+      );
+
+      final thumbnailUploadURL = await _getUploadURL(
+        contentLength: encThumbSize,
+        md5: thumbnailMd5,
+      );
       final thumbnailObjectKey = await _putFile(
         thumbnailUploadURL,
         encryptedThumbnailFile,
         encThumbSize,
+        thumbnailMd5,
       );
 
-      final fileUploadURL = await _getUploadURL();
-      final fileObjectKey =
-          await _putFile(fileUploadURL, encryptedFile, encFileSize);
+      final fileUploadURL = await _getUploadURL(
+        contentLength: encFileSize,
+        md5: fileMd5,
+      );
+      final fileObjectKey = await _putFile(
+        fileUploadURL,
+        encryptedFile,
+        encFileSize,
+        fileMd5,
+      );
 
       final enteFile = EnteFile.fromFile(file);
 
       final encryptedMetadataResult = await CryptoUtil.encryptData(
         utf8.encode(jsonEncode(enteFile.metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+      final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -324,7 +423,7 @@ class FileUploader {
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       final encryptedFileKeyData = CryptoUtil.encryptSync(
-        fileAttributes.key!,
+        fileAttributes.key,
         CryptoHelper.instance.getCollectionKey(collection),
       );
       final encryptedKey =
@@ -338,7 +437,7 @@ class FileUploader {
         pubMetadataRequest = await getPubMetadataRequest(
           enteFile,
           pubMetadata,
-          fileAttributes.key!,
+          fileAttributes.key,
         );
       }
       final remoteFile = await _uploadFile(
@@ -356,7 +455,7 @@ class FileUploader {
         metadataDecryptionHeader,
         pubMetadata: pubMetadataRequest,
       );
-      _logger.info("File upload complete for $remoteFile");
+      _logger.info("File upload complete for ID: ${remoteFile.uploadedFileID}");
       uploadCompleted = true;
       return remoteFile;
     } catch (e, s) {
@@ -365,15 +464,17 @@ class FileUploader {
           e is WiFiUnavailableError ||
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||
-          e is FileTooLargeForPlanError)) {
-        _logger.severe("File upload failed for $file", e, s);
+          e is FileTooLargeForPlanError ||
+          e is FileLimitReachedError)) {
+        _logger.severe("File upload failed", e, s);
       }
       if (e is InvalidFileError) {
-        _logger.severe("File upload ignored for $file", e);
+        _logger.severe("File upload ignored", e);
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
-          e is NoActiveSubscriptionError)) {
+          e is NoActiveSubscriptionError ||
+          e is FileLimitReachedError)) {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
@@ -432,6 +533,48 @@ class FileUploader {
   }
 
   /*
+  _checkIfWithinFileCountLimit verifies if the user has reached their file count
+   limit. It throws FileLimitReachedError if the limit is reached. For family
+   plan users, it checks the combined family file count against the shared limit.
+   This check is best effort and may not be completely accurate due to UserDetail
+   cache.
+   */
+  void _checkIfWithinFileCountLimit() {
+    try {
+      final userDetails = UserService.instance.getCachedUserDetails();
+      if (userDetails == null) {
+        return;
+      }
+      final maxFileCount = _effectiveLockerFileLimit(userDetails);
+      final currentFileCount =
+          userDetails.isPartOfFamily() && userDetails.lockerFamilyUsage != null
+              ? userDetails.lockerFamilyUsage!.familyFileCount
+              : userDetails.fileCount;
+      if (currentFileCount >= maxFileCount) {
+        _logger.warning(
+          'File count limit reached: currentFileCount $currentFileCount, '
+          'maxFileCount $maxFileCount',
+        );
+        throw FileLimitReachedError();
+      }
+    } catch (e) {
+      if (e is FileLimitReachedError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking file count limit', e);
+      }
+    }
+  }
+
+  int _effectiveLockerFileLimit(UserDetails userDetails) {
+    final currentLimit = userDetails.getLockerFileLimit();
+    if (!Configuration.instance.isEnteProduction() && currentLimit < 1000) {
+      return 1000;
+    }
+    return currentLimit;
+  }
+
+  /*
   _checkIfWithinStorageLimit verifies if the file size for encryption and upload
    is within the storage limit. It throws StorageLimitExceededError if the limit
     is exceeded. This check is best effort and may not be completely accurate
@@ -450,14 +593,15 @@ class FileUploader {
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
-        _logger.warning('Storage limit exceeded fileSize $fileSize and '
-            'freeStorage $freeStorage');
+        _logger.warning(
+          'Storage limit exceeded fileSize $fileSize and freeStorage $freeStorage',
+        );
         throw StorageLimitExceededError();
       }
-      if (fileSize > kMaxFileSize5Gib) {
-        _logger.warning('File size exceeds 5GiB fileSize $fileSize');
+      if (fileSize > kMaxFileSize10Gib) {
+        _logger.warning('File size exceeds 10GiB fileSize $fileSize');
         throw InvalidFileError(
-          'file size above 5GiB',
+          'file size above 10GiB',
           InvalidReason.tooLargeFile,
         );
       }
@@ -523,15 +667,19 @@ class FileUploader {
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
-      if (statusCode == 413) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      } else if (statusCode == 402) {
+        final error = NoActiveSubscriptionError();
+        clearQueue(error);
+        throw error;
+      } else if (statusCode == 413) {
         throw FileTooLargeForPlanError();
       } else if (statusCode == 426) {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
         // retry when DioException contains no response/status code
-        _logger.info(
-          "Upload file (${file.displayName}) failed, will retry in 3 seconds",
-        );
+        _logger.info("Upload failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -550,65 +698,59 @@ class FileUploader {
           pubMetadata: pubMetadata,
         );
       } else {
-        _logger.severe("Failed to upload file ${file.displayName}", e);
+        _logger.severe("Failed to upload file", e);
       }
       rethrow;
     }
   }
 
-  Future<UploadURL> _getUploadURL() async {
-    if (_uploadURLs.isEmpty) {
-      // the queue is empty, fetch at least for one file to handle force uploads
-      // that are not in the queue. This is to also avoid
-      await fetchUploadURLs(math.max(_queue.length, 1));
-    }
+  // Fetch a fresh upload URL for each file with content length and MD5
+  Future<UploadURL> _getUploadURL({
+    required int contentLength,
+    required String md5,
+  }) async {
     try {
-      return _uploadURLs.removeFirst();
-    } catch (e) {
-      if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
-        _logger.warning("Oops, uploadUrls has no element now, fetching again");
-        return _getUploadURL();
-      } else {
-        rethrow;
+      final response = await _enteDio.post(
+        "/files/upload-url",
+        data: {
+          "contentLength": contentLength,
+          "contentMD5": md5,
+        },
+      );
+      return UploadURL.fromMap(
+        (response.data as Map).cast<String, dynamic>(),
+      );
+    } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
       }
+      if (e.response != null) {
+        if (e.response!.statusCode == 402) {
+          final error = NoActiveSubscriptionError();
+          clearQueue(error);
+          throw error;
+        } else if (e.response!.statusCode == 426) {
+          final error = StorageLimitExceededError();
+          clearQueue(error);
+          throw error;
+        } else {
+          _logger.warning("Could not fetch upload URL", e, s);
+        }
+      }
+      rethrow;
     }
   }
 
-  Future<void>? _uploadURLFetchInProgress;
-
-  Future<void> fetchUploadURLs(int fileCount) async {
-    _uploadURLFetchInProgress ??= Future<void>(() async {
-      try {
-        final response = await _enteDio.get(
-          "/files/upload-urls",
-          queryParameters: {
-            "count": math.min(42, fileCount * 2), // m4gic number
-          },
-        );
-        final urls = (response.data["urls"] as List)
-            .map((e) => UploadURL.fromMap(e))
-            .toList();
-        _uploadURLs.addAll(urls);
-      } on DioException catch (e, s) {
-        if (e.response != null) {
-          if (e.response!.statusCode == 402) {
-            final error = NoActiveSubscriptionError();
-            clearQueue(error);
-            throw error;
-          } else if (e.response!.statusCode == 426) {
-            final error = StorageLimitExceededError();
-            clearQueue(error);
-            throw error;
-          } else {
-            _logger.warning("Could not fetch upload URLs", e, s);
-          }
-        }
-        rethrow;
-      } finally {
-        _uploadURLFetchInProgress = null;
-      }
-    });
-    return _uploadURLFetchInProgress;
+  bool _isFileLimitReachedResponse(Response? response) {
+    if (response?.statusCode != 403) {
+      return false;
+    }
+    final dynamic data = response?.data;
+    if (data is! Map) {
+      return false;
+    }
+    final code = data['code'];
+    return code is String && code == 'FILE_LIMIT_REACHED';
   }
 
   void _onStorageLimitExceeded() {
@@ -619,11 +761,11 @@ class FileUploader {
   Future<String> _putFile(
     UploadURL uploadURL,
     File file,
-    int fileSize, {
+    int fileSize,
+    String md5, {
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    final fileName = basename(file.path);
     try {
       await _dio.put(
         uploadURL.url,
@@ -631,11 +773,12 @@ class FileUploader {
         options: Options(
           headers: {
             Headers.contentLengthHeader: fileSize,
+            'Content-MD5': md5,
           },
         ),
       );
       _logger.info(
-        "Uploaded object $fileName of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
+        "Uploaded object of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
       );
 
       return uploadURL.objectKey;
@@ -643,21 +786,71 @@ class FileUploader {
       if (e.message?.startsWith("HttpException: Content size") ?? false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload failed for $fileName, retrying");
-        final newUploadURL = await _getUploadURL();
+        _logger.info("Upload failed, retrying");
+        final newUploadURL = await _getUploadURL(
+          contentLength: fileSize,
+          md5: md5,
+        );
         return _putFile(
           newUploadURL,
           file,
           fileSize,
+          md5,
           attempt: attempt + 1,
         );
       } else {
-        _logger.info(
-          "Failed to upload file ${basename(file.path)} after $attempt attempts",
-          e,
-        );
+        _logger.info("Failed to upload file after $attempt attempts", e);
         rethrow;
       }
+    }
+  }
+
+  /// Upload method specifically for info files that don't require file content or thumbnails
+  Future<EnteFile> _uploadInfoFileMetadata(
+    EnteFile file,
+    int collectionID,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String encryptedMetadata,
+    String metadataDecryptionHeader,
+    MetadataRequest pubMetadata,
+  ) async {
+    final request = {
+      "collectionID": collectionID,
+      "encryptedKey": encryptedKey,
+      "keyDecryptionNonce": keyDecryptionNonce,
+      "metadata": {
+        "encryptedData": encryptedMetadata,
+        "decryptionHeader": metadataDecryptionHeader,
+      },
+      "pubMagicMetadata": pubMetadata,
+    };
+    try {
+      final response = await _enteDio.post("/files/meta", data: request);
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.collectionID = collectionID;
+      file.updationTime = data["updationTime"];
+      file.ownerID = data["ownerID"];
+      file.encryptedKey = encryptedKey;
+      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
+      return file;
+    } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      }
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 402) {
+        throw NoActiveSubscriptionError();
+      } else if (statusCode == 426) {
+        throw StorageLimitExceededError();
+      }
+      _logger.severe("Info file upload failed", e, s);
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("Info file upload failed", e, s);
+      rethrow;
     }
   }
 }

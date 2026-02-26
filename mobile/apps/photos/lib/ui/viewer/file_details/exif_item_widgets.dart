@@ -70,7 +70,7 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
-      title: S.of(context).exif,
+      title: AppLocalizations.of(context).exif,
       subtitleSection: _exifButton(context, widget.file, widget.exif),
       onTap: _onTap,
     );
@@ -84,10 +84,10 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
     late final String label;
     late final VoidCallback? onTap;
     if (exif == null) {
-      label = S.of(context).loadingExifData;
+      label = AppLocalizations.of(context).loadingExifData;
       onTap = null;
     } else if (exif.isNotEmpty) {
-      label = S.of(context).viewAllExifData;
+      label = AppLocalizations.of(context).viewAllExifData;
       onTap = () => showDialog(
             useRootNavigator: false,
             context: context,
@@ -97,9 +97,11 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
             barrierColor: backdropFaintDark,
           );
     } else {
-      label = S.of(context).noExifData;
-      onTap =
-          () => showShortToast(context, S.of(context).thisImageHasNoExifData);
+      label = AppLocalizations.of(context).noExifData;
+      onTap = () => showShortToast(
+            context,
+            AppLocalizations.of(context).thisImageHasNoExifData,
+          );
     }
     setState(() {
       _onTap = onTap;

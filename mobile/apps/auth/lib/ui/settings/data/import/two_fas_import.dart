@@ -8,12 +8,12 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -117,8 +117,8 @@ Future<int?> _process2FasExportFile(
     try {
       await showTextInputDialog(
         context,
-        title: "Enter password to decrypt 2FAS backup",
-        submitButtonLabel: "Submit",
+        title: context.l10n.enterPasswordToDecrypt2FASBackup,
+        submitButtonLabel: context.l10n.submit,
         isPasswordInput: true,
         onSubmit: (value) async {
           password = value;
@@ -137,8 +137,8 @@ Future<int?> _process2FasExportFile(
       if (password != null) {
         await showErrorDialog(
           context,
-          "Failed to decrypt 2Fas export",
-          "Please check your password and try again.",
+          context.l10n.failedToDecrypt2FASExport,
+          context.l10n.pleaseCheckPasswordAndTryAgain,
         );
       }
       return null;

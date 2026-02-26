@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as file_path;
@@ -10,12 +11,14 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/device_files_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/module/download/file_url.dart";
+import "package:photos/module/download/manager.dart";
 import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -23,10 +26,60 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/data.dart";
-import "package:photos/utils/standalone/fake_progress.dart";
 
 final _logger = Logger("file_download_util");
+
+class DownloadFailedError implements Exception {
+  final String message;
+
+  DownloadFailedError(this.message);
+
+  @override
+  String toString() => message;
+}
+
+class DownloadNoConnectionError extends DownloadFailedError {
+  DownloadNoConnectionError() : super("No connection");
+}
+
+class DownloadNotEnoughStorageError extends DownloadFailedError {
+  DownloadNotEnoughStorageError() : super("Not enough storage");
+}
+
+class DownloadUnavailableError extends DownloadFailedError {
+  DownloadUnavailableError() : super("Unavailable");
+}
+
+/// Use this instead of `file.displayName` directly for skip toasts.
+///
+/// Rationale:
+/// 1. We prefer the original title for stable, filename-like copy in the toast.
+String getDownloadSkipToastFileName(EnteFile file) {
+  final title = (file.title ?? "").trim();
+  final displayName = file.displayName.trim();
+  return title.isNotEmpty ? title : displayName;
+}
+
+Future<String?> getExistingLocalFolderNameForDownloadSkipToast(
+  EnteFile file,
+) async {
+  if (file.localID == null) {
+    return null;
+  }
+  final asset = await file.getAsset;
+  if (asset == null || !(await asset.exists)) {
+    return null;
+  }
+  final folderNames =
+      await FilesDB.instance.getDeviceCollectionNamesForLocalID(file.localID!);
+  if (folderNames.isNotEmpty) {
+    return folderNames.last;
+  }
+  throw StateError(
+    "Expected non-empty device collection name for localID=${file.localID}, "
+    "but found none.",
+  );
+}
 
 Future<File?> downloadAndDecryptPublicFile(
   EnteFile file, {
@@ -81,7 +134,9 @@ Future<File?> downloadAndDecryptPublicFile(
       _logger.info('$logPrefix file saved at $decryptedFilePath');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      final metadata =
+          await _getFileMetadataForLogging(file, encryptedFilePath);
+      _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
     return File(decryptedFilePath);
@@ -94,6 +149,8 @@ Future<File?> downloadAndDecryptPublicFile(
 Future<File?> downloadAndDecrypt(
   EnteFile file, {
   ProgressCallback? progressCallback,
+  bool forceResumableDownload = false,
+  bool throwOnFailure = false,
 }) async {
   if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
     return await downloadAndDecryptPublicFile(
@@ -112,7 +169,8 @@ Future<File?> downloadAndDecrypt(
   final startTime = DateTime.now().millisecondsSinceEpoch;
 
   try {
-    if (downloadManager.enableResumableDownload(file.fileSize)) {
+    if (forceResumableDownload ||
+        downloadManager.enableResumableDownload(file.fileSize)) {
       final DownloadResult result = await downloadManager.download(
         file.uploadedFileID!,
         file.displayName,
@@ -125,6 +183,9 @@ Future<File?> downloadAndDecrypt(
         _logger.warning(
           '$logPrefix download failed ${result.task.error} ${result.task.status}',
         );
+        if (throwOnFailure) {
+          throw _toDownloadFailure(result.task.error);
+        }
         return null;
       }
     } else {
@@ -146,6 +207,9 @@ Future<File?> downloadAndDecrypt(
       );
       if (response.statusCode != 200 || !encryptedFile.existsSync()) {
         _logger.warning('$logPrefix download failed ${response.toString()}');
+        if (throwOnFailure) {
+          throw DownloadFailedError(response.toString());
+        }
         return null;
       }
     }
@@ -184,24 +248,89 @@ Future<File?> downloadAndDecrypt(
           .info('$logPrefix decryption completed (genID ${file.generatedID})');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      final metadata =
+          await _getFileMetadataForLogging(file, encryptedFilePath);
+      _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
+      if (throwOnFailure) {
+        throw DownloadFailedError("Failed to decrypt downloaded file");
+      }
       return null;
     }
     await encryptedFile.delete();
     return File(decryptedFilePath);
   } catch (e, s) {
     _logger.severe("$logPrefix failed to download or decrypt", e, s);
+    if (throwOnFailure) {
+      if (e is DownloadFailedError) {
+        rethrow;
+      }
+      if (_isStorageError(e)) {
+        throw DownloadNotEnoughStorageError();
+      }
+      throw DownloadFailedError(e.toString());
+    }
     return null;
   }
 }
 
-Future<void> downloadToGallery(EnteFile file) async {
+DownloadFailedError _toDownloadFailure(String? error) {
+  if (error == DownloadManager.noConnectionError) {
+    return DownloadNoConnectionError();
+  }
+  if (error == DownloadManager.notEnoughStorageError) {
+    return DownloadNotEnoughStorageError();
+  }
+  if (error == DownloadManager.unavailableError) {
+    return DownloadUnavailableError();
+  }
+  return DownloadFailedError(error ?? "Download failed");
+}
+
+bool _isStorageError(Object error) {
+  if (error is FileSystemException) {
+    final code = error.osError?.errorCode;
+    return code == 28 || code == 112;
+  }
+  if (error is DioException && error.error != null) {
+    return _isStorageError(error.error!);
+  }
+  return false;
+}
+
+Future<String> _getFileMetadataForLogging(
+  EnteFile file,
+  String encFilePath,
+) async {
+  final buffer = StringBuffer();
+  if (File(encFilePath).existsSync()) {
+    buffer.write('encFileSha1: ${await computeSha1(encFilePath)}, ');
+  } else {
+    buffer.write('encFileSha1: file not found, ');
+  }
+  buffer.write('metadataVersion: ${file.metadataVersion}, ');
+  buffer.write(
+    'fileSize: ${file.fileSize != null ? file.fileSize! : "null"}, ',
+  );
+  buffer.write('viaMobile: ${(file.deviceFolder ?? "") != ""}');
+  return buffer.toString();
+}
+
+Future<void> downloadToGallery(
+  EnteFile file, {
+  bool forceResumableDownload = false,
+}) async {
   try {
     final FileType type = file.fileType;
     final bool downloadLivePhotoOnDroid =
         type == FileType.livePhoto && Platform.isAndroid;
     AssetEntity? savedAsset;
-    final File? fileToSave = await getFile(file);
+    final File? fileToSave = await getFile(
+      file,
+      forGalleryDownload: forceResumableDownload,
+    );
+    if (fileToSave == null) {
+      throw DownloadFailedError("Unable to fetch file for gallery download");
+    }
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -211,21 +340,24 @@ Future<void> downloadToGallery(EnteFile file) async {
       await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave!.path, title: file.title!);
+            .saveImageWithPath(fileToSave.path, title: file.title!);
       } else if (type == FileType.video) {
-        savedAsset = await PhotoManager.editor
-            .saveVideo(fileToSave!, title: file.title!);
+        savedAsset =
+            await PhotoManager.editor.saveVideo(fileToSave, title: file.title!);
       } else if (type == FileType.livePhoto) {
-        final File? liveVideoFile =
-            await getFileFromServer(file, liveVideo: true);
+        final File? liveVideoFile = await getFileFromServer(
+          file,
+          liveVideo: true,
+          forGalleryDownload: forceResumableDownload,
+        );
         if (liveVideoFile == null) {
           throw AssertionError("Live video can not be null");
         }
         if (downloadLivePhotoOnDroid) {
-          await _saveLivePhotoOnDroid(fileToSave!, liveVideoFile, file);
+          await _saveLivePhotoOnDroid(fileToSave, liveVideoFile, file);
         } else {
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
-            imageFile: fileToSave!,
+            imageFile: fileToSave,
             videoFile: liveVideoFile,
             title: file.title!,
           );
@@ -246,6 +378,10 @@ Future<void> downloadToGallery(EnteFile file) async {
       }
     });
   } catch (e) {
+    if (forceResumableDownload && _isStorageError(e)) {
+      _logger.severe("Failed to save file due to storage limit", e);
+      throw DownloadNotEnoughStorageError();
+    }
     _logger.severe("Failed to save file", e);
     rethrow;
   } finally {
@@ -263,7 +399,7 @@ Future<void> _saveLivePhotoOnDroid(
   AssetEntity? savedAsset = await (PhotoManager.editor
           .saveImageWithPath(image.path, title: enteFile.title!))
       .catchError((err) {
-    throw Exception("Failed to save image of live photo");
+    throw Exception("Failed to save image of live photo: $err");
   });
   IgnoredFile ignoreVideoFile = IgnoredFile(
     savedAsset.id,
@@ -277,7 +413,12 @@ Future<void> _saveLivePhotoOnDroid(
   savedAsset = (await (PhotoManager.editor.saveVideo(
     video,
     title: videoTitle,
-  )).catchError((_) => throw Exception("Failed to save video of live photo")));
+  )).catchError(
+    (err) {
+      _logger.warning('Failed to save video $videoTitle of live photo');
+      throw Exception("Failed to save video of live photo: $err");
+    },
+  ));
 
   ignoreVideoFile = IgnoredFile(
     savedAsset.id,

@@ -7,12 +7,14 @@ import type { Location } from "ente-base/types";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
+    fileCameraMake,
+    fileCameraModel,
     fileCreationPhotoDate,
     fileFileName,
     fileLocation,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { NamedPerson } from "../ml/people";
 import {
     pullUserEntities,
@@ -144,6 +146,8 @@ const suggestionsForString = (
         collectionSuggestions(re, collections),
         fileNameSuggestion(s, re, searchString, files),
         fileCaptionSuggestion(re, searchString, files),
+        cameraMakeSuggestions(re, files),
+        cameraModelSuggestions(re, files),
     ].flat(),
 ];
 
@@ -204,6 +208,54 @@ const fileCaptionSuggestion = (
         : [];
 };
 
+const cameraMakeSuggestions = (
+    re: RegExp,
+    files: EnteFile[],
+): SearchSuggestion[] => {
+    const matches = new Map<string, { label: string; fileIDs: number[] }>();
+    for (const file of files) {
+        const label = fileCameraMake(file);
+        if (!label || !re.test(label)) continue;
+        const key = label.toLowerCase();
+        const existing = matches.get(key);
+        if (existing) {
+            existing.fileIDs.push(file.id);
+        } else {
+            matches.set(key, { label, fileIDs: [file.id] });
+        }
+    }
+
+    return Array.from(matches.values()).map(({ label, fileIDs }) => ({
+        type: "cameraMake" as const,
+        label,
+        fileIDs,
+    }));
+};
+
+const cameraModelSuggestions = (
+    re: RegExp,
+    files: EnteFile[],
+): SearchSuggestion[] => {
+    const matches = new Map<string, { label: string; fileIDs: number[] }>();
+    for (const file of files) {
+        const label = fileCameraModel(file);
+        if (!label || !re.test(label)) continue;
+        const key = label.toLowerCase();
+        const existing = matches.get(key);
+        if (existing) {
+            existing.fileIDs.push(file.id);
+        } else {
+            matches.set(key, { label, fileIDs: [file.id] });
+        }
+    }
+
+    return Array.from(matches.values()).map(({ label, fileIDs }) => ({
+        type: "cameraModel" as const,
+        label,
+        fileIDs,
+    }));
+};
+
 const peopleSuggestions = (
     re: RegExp,
     people: NamedPerson[],
@@ -255,8 +307,49 @@ const parseDateComponents = (
 const parseChrono = (
     s: string,
     locale: string,
-): LabelledSearchDateComponents[] =>
-    chrono
+): LabelledSearchDateComponents[] => {
+    // Use the appropriate chrono parser based on locale
+    // For US locales, use the default parser (MM/DD/YYYY)
+    // For other locales, use the GB parser (DD/MM/YYYY)
+    const isUSLocale =
+        locale.toLowerCase().includes("en-us") || locale.toLowerCase() === "en";
+
+    // Select the appropriate chrono instance based on locale
+    let chronoInstance;
+    if (isUSLocale) {
+        // For US locale, use the default chrono parser (MM/DD/YYYY)
+        chronoInstance = chrono;
+    } else {
+        // For non-US locales, use GB parser (DD/MM/YYYY) and add DD.MM.YYYY support
+        chronoInstance = new chrono.Chrono(chrono.en.GB);
+
+        // Add parser for DD.MM.YYYY format (common in Germany, Switzerland, etc.)
+        // This format uses dots as separators instead of slashes
+        chronoInstance.parsers.push({
+            pattern: () => /\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/,
+            extract: (_context, match) => {
+                if (!match[1] || !match[2] || !match[3]) return null;
+
+                const day = parseInt(match[1]);
+                const month = parseInt(match[2]);
+                let year = parseInt(match[3]);
+
+                // Handle 2-digit years
+                if (year < 100) {
+                    year = year > 50 ? 1900 + year : 2000 + year;
+                }
+
+                // Validate the date
+                if (day < 1 || day > 31 || month < 1 || month > 12) {
+                    return null;
+                }
+
+                return { day, month, year };
+            },
+        });
+    }
+
+    return chronoInstance
         .parse(s)
         .map((result) => {
             const p = result.start;
@@ -287,6 +380,7 @@ const parseChrono = (
             return { components, label };
         })
         .filter((x) => x !== undefined);
+};
 
 /** chrono does not parse years like "2024", so do it manually. */
 const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
@@ -356,13 +450,16 @@ const locationSuggestions = (
 const filterSearchableFiles = (
     { files, collectionFiles }: SearchCollectionsAndFiles,
     suggestion: SearchSuggestion,
-) =>
-    sortMatchesIfNeeded(
+) => {
+    if (suggestion.type == "sidebarAction") return [];
+
+    return sortMatchesIfNeeded(
         (suggestion.type == "collection" ? collectionFiles : files).filter(
             (f) => isMatchingFile(f, suggestion),
         ),
         suggestion,
     );
+};
 
 /**
  * Return true if file satisfies the given {@link query}.
@@ -379,6 +476,8 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.fileIDs.includes(file.id);
 
         case "fileCaption":
+        case "cameraMake":
+        case "cameraModel":
             return suggestion.fileIDs.includes(file.id);
 
         case "date":
@@ -406,6 +505,9 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
 
         case "person":
             return suggestion.person.fileIDs.includes(file.id);
+
+        case "sidebarAction":
+            return false;
     }
 };
 

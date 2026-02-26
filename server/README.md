@@ -124,7 +124,7 @@ documentation PRs around this too.
 > [!TIP]
 >
 > For more documentation around self-hosting, see
-> **[help.ente.io/self-hosting](https://help.ente.io/self-hosting)**.
+> **[ente.io/help/self-hosting](https://ente.io/help/self-hosting)**.
 
 ## Thanks ❤️
 

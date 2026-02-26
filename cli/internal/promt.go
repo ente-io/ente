@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/ente-io/cli/internal/api"
-	"golang.org/x/term"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/ente-io/cli/internal/api"
+	"golang.org/x/term"
 )
 
 func GetSensitiveField(label string) (string, error) {
@@ -225,12 +227,24 @@ func ValidateDirForWrite(dir string) (bool, error) {
 }
 
 func ResolvePath(path string) (string, error) {
-	if path[:2] != "~/" {
-		return path, nil
+	// Expand home directory if path starts with ~
+	if strings.HasPrefix(path, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		if len(path) == 1 {
+			path = home
+		} else if strings.HasPrefix(path, "~/") {
+			path = filepath.Join(home, path[2:])
+		}
 	}
-	home, err := os.UserHomeDir()
+
+	// Convert to absolute path
+	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
 	}
-	return home + path[1:], nil
+
+	return absPath, nil
 }

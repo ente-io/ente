@@ -6,15 +6,17 @@ import {
 } from "ente-accounts/services/accounts-db";
 import { getSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
+import { appName } from "ente-base/app";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
+import { JOIN_ALBUM_CONTEXT_KEY } from "ente-new/albums/services/join-album";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback } from "react";
-import { z } from "zod/v4";
+import React, { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
 interface LoginContentsProps {
@@ -39,6 +41,14 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     host,
 }) => {
     const router = useRouter();
+    const [isJoinAlbumContext, setIsJoinAlbumContext] = useState(false);
+    const isEnsu = appName === "ensu";
+
+    useEffect(() => {
+        // Check if we're in a join album context
+        const joinAlbumContext = sessionStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
+        setIsJoinAlbumContext(!!joinAlbumContext);
+    }, []);
 
     const loginUser = useCallback(
         async (email: string, setFieldError: (message: string) => void) => {
@@ -94,7 +104,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     return (
         <>
             <AccountsPageTitleWithCaption>
-                {t("login")}
+                {isJoinAlbumContext ? t("login_to_join_album") : t("login")}
             </AccountsPageTitleWithCaption>
             <form onSubmit={formik.handleSubmit}>
                 <TextField
@@ -124,9 +134,15 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
             </form>
             <AccountsPageFooter>
                 <Stack sx={{ gap: 3, textAlign: "center" }}>
-                    <LinkButton onClick={onSignUp}>
-                        {t("no_account")}
-                    </LinkButton>
+                    {isEnsu ? (
+                        <LinkButton onClick={() => void router.push("/chat")}>
+                            {t("cancel")}
+                        </LinkButton>
+                    ) : (
+                        <LinkButton onClick={onSignUp}>
+                            {t("no_account")}
+                        </LinkButton>
+                    )}
                     <Typography
                         variant="mini"
                         sx={{ color: "text.faint", minHeight: "16px" }}

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,19 +10,13 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/settings/pending_sync/pending_sync_info_screen.dart";
-import 'package:photos/utils/standalone/data.dart';
-import 'package:photos/utils/standalone/directory_content.dart';
 
 class PathStorageItem {
   final String path;
   final String title;
   final bool allowCacheClear;
 
-  PathStorageItem.name(
-    this.path,
-    this.title, {
-    this.allowCacheClear = false,
-  });
+  PathStorageItem.name(this.path, this.title, {this.allowCacheClear = false});
 }
 
 class PathStorageViewer extends StatefulWidget {
@@ -44,22 +39,36 @@ class PathStorageViewer extends StatefulWidget {
 
 class _PathStorageViewerState extends State<PathStorageViewer> {
   final Logger _logger = Logger((_PathStorageViewerState).toString());
+  late Future<DirectoryStat> _statFuture;
 
   @override
   void initState() {
     super.initState();
+    _statFuture = getDirectoryStat(Directory(widget.item.path));
+  }
+
+  @override
+  void didUpdateWidget(PathStorageViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refresh the future when the widget updates (key changes)
+    if (oldWidget.item.path != widget.item.path ||
+        oldWidget.key != widget.key) {
+      _statFuture = getDirectoryStat(Directory(widget.item.path));
+    }
   }
 
   void _safeRefresh() async {
     if (mounted) {
-      setState(() => {});
+      setState(() {
+        _statFuture = getDirectoryStat(Directory(widget.item.path));
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DirectoryStat>(
-      future: getDirectoryStat(Directory(widget.item.path)),
+      future: _statFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _buildMenuItemWidget(snapshot.data, null);
@@ -90,9 +99,9 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
               padding: const EdgeInsets.only(left: 12.0),
               child: Text(
                 formatBytes(stat.size),
-                style: getEnteTextTheme(context)
-                    .small
-                    .copyWith(color: getEnteColorScheme(context).textFaint),
+                style: getEnteTextTheme(
+                  context,
+                ).small.copyWith(color: getEnteColorScheme(context).textFaint),
               ),
             )
           : SizedBox.fromSize(
@@ -122,7 +131,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
         }
       },
       onLongPress: () async {
-        if (widget.item.title == S.of(context).pendingSync) {
+        if (widget.item.title == AppLocalizations.of(context).pendingSync) {
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const PendingSyncInfoScreen(),

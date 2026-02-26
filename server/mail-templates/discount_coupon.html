@@ -1,0 +1,26 @@
+{{template "base" .}}
+
+{{define "content"}}
+<h2>Your Discount Code is Here! 🎉</h2>
+
+<p>Hi there,</p>
+
+<p>Great news! We've got a special discount code just for you from <strong>{{.ProviderName}}</strong>.</p>
+
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #0055d4; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #0055d4;">Your Discount Code:</h3>
+    <div style="font-family: 'Courier New', monospace; font-size: 24px; font-weight: bold; color: #333; background-color: #fff; padding: 15px; border-radius: 4px; border: 2px dashed #0055d4; text-align: center; letter-spacing: 2px;">
+        {{.CouponCode}}
+    </div>
+</div>
+
+<p>This exclusive discount is available to you as a valued Ente customer. Simply use the code above when making your purchase with {{.ProviderName}}.</p>
+
+<p><strong>Important:</strong> This discount code is unique to you and cannot be transferred to another account.</p>
+
+<p>Thank you for being part of the Ente community!</p>
+
+<p>Best regards,<br>
+The Ente Team</p>
+
+{{end}}

@@ -2,8 +2,10 @@ export const appNames = [
     "accounts",
     "auth",
     "cast",
-    "locker",
+    "embed",
+    "share",
     "photos",
+    "ensu",
 ] as const;
 
 /**
@@ -62,8 +64,11 @@ export const staticAppTitle = {
     accounts: "Ente Accounts",
     auth: "Ente Auth",
     cast: "Ente Photos",
-    locker: "Ente Locker",
+    embed: "Ente Photos",
+    share: "Ente Locker",
     photos: "Ente Photos",
+    // Ensu (chat) web app.
+    ensu: "Ensu",
 }[appName];
 
 /**
@@ -76,16 +81,19 @@ export const staticAppTitle = {
  */
 export const clientPackageName = (() => {
     if (isDesktop) {
-        if (appName != "photos")
-            throw new Error(`Unsupported desktop appName ${appName}`);
-        return "io.ente.photos.desktop";
+        if (appName === "photos") return "io.ente.photos.desktop";
+        if (appName === "ensu") return "io.ente.ensu.desktop";
+        throw new Error(`Unsupported desktop appName ${appName}`);
     }
     return {
         accounts: "io.ente.accounts.web",
         auth: "io.ente.auth.web",
         cast: "io.ente.cast.web",
-        locker: "io.ente.locker.web",
+        embed: "io.ente.photos.web", // Use photos package name for embed app
+        share: "io.ente.share.web",
         photos: "io.ente.photos.web",
+        // Ensu (chat) web app.
+        ensu: "io.ente.ensu",
     }[appName];
 })();
 
@@ -100,11 +108,17 @@ export const clientPackageName = (() => {
  */
 export const clientIdentifier = (() => {
     if (isDesktop) {
-        if (appName != "photos")
-            throw new Error(`Unsupported desktop appName ${appName}`);
         if (!desktopAppVersion)
             throw new Error(`desktopAppVersion is not defined`);
-        return `io.ente.photos.desktop/${desktopAppVersion}`;
+
+        if (appName === "photos") {
+            return `io.ente.photos.desktop/${desktopAppVersion}`;
+        }
+        if (appName === "ensu") {
+            return `io.ente.ensu.desktop/${desktopAppVersion}`;
+        }
+
+        throw new Error(`Unsupported desktop appName ${appName}`);
     }
     return clientPackageName;
 })();

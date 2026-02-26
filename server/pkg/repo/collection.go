@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"strconv"
@@ -47,10 +48,11 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 	}
 
 	err := repo.DB.QueryRow(`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, magic_metadata, pub_magic_metadata, app) 
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING collection_id`,
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING collection_id`,
 		c.Owner.ID, c.EncryptedKey, c.KeyDecryptionNonce, c.Name, c.EncryptedName, c.NameDecryptionNonce, c.Type, c.Attributes, c.UpdationTime, c.MagicMetadata, c.PublicMagicMetadata, c.App).Scan(&c.ID)
 	if err != nil {
-		if err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index\"" {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index\"" ||
+			err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index_v2\"" {
 			return ente.Collection{}, ente.ErrFavoriteCollectionAlreadyExist
 		} else if err.Error() == "pq: duplicate key value violates unique constraint \"collections_uncategorized_constraint_index_v2\"" {
 			return ente.Collection{}, ente.ErrUncategorizeCollectionAlreadyExists
@@ -61,12 +63,12 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 
 // Get returns a collection identified by the collectionID
 func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
 		FROM collections
 		WHERE collection_id = $1`, collectionID)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -75,7 +77,11 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 		c.EncryptedName = encryptedName.String
 		c.NameDecryptionNonce = nameDecryptionNonce.String
 	}
-	urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID})
+	app := ente.Photos
+	if len(c.App) > 0 && ente.App(c.App).IsValid() {
+		app = ente.App(c.App)
+	}
+	urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID}, app)
 	if err != nil {
 		return ente.Collection{}, stacktrace.Propagate(err, "failed to get publicURL info")
 	}
@@ -84,10 +90,54 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 	}
 	return c, nil
 }
-func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string) (ente.Collection, error) {
+
+// GetWithSharingDetailsForUser returns the collection along with sharees, active public URLs,
+// and decrypted owner email. If the actor is a sharee, the encrypted key sealed for that actor is returned.
+func (repo *CollectionRepository) GetWithSharingDetailsForUser(collectionID int64, actorUserID int64) (ente.Collection, error) {
+	c, err := repo.Get(collectionID)
+	if err != nil {
+		return c, stacktrace.Propagate(err, "")
+	}
+	sharees, err := repo.GetSharees(collectionID)
+	if err != nil {
+		return ente.Collection{}, stacktrace.Propagate(err, "failed to get sharees info")
+	}
+	c.Sharees = sharees
+
+	var encryptedEmail, nonce []byte
+	err = repo.DB.QueryRow(`SELECT encrypted_email, email_decryption_nonce FROM users WHERE user_id = $1`, c.Owner.ID).
+		Scan(&encryptedEmail, &nonce)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c, nil
+		}
+		return ente.Collection{}, stacktrace.Propagate(err, "failed to fetch owner email")
+	}
+	if len(encryptedEmail) > 0 && len(nonce) > 0 {
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return ente.Collection{}, stacktrace.Propagate(err, "failed to decrypt owner email")
+		}
+		c.Owner.Email = email
+	}
+	if actorUserID != c.Owner.ID {
+		var encryptedKey sql.NullString
+		err := repo.DB.QueryRow(`SELECT encrypted_key FROM collection_shares WHERE collection_id = $1 AND to_user_id = $2 AND is_deleted = $3`,
+			collectionID, actorUserID, false).Scan(&encryptedKey)
+		if err != nil {
+			return ente.Collection{}, stacktrace.Propagate(err, "failed to fetch sharee encrypted key")
+		}
+		if !encryptedKey.Valid {
+			return ente.Collection{}, stacktrace.Propagate(fmt.Errorf("share key missing for user %d collection %d", actorUserID, collectionID), "")
+		}
+		c.EncryptedKey = encryptedKey.String
+	}
+	return c, nil
+}
+func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string, app string) (ente.Collection, error) {
 	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
-		FROM collections
-		WHERE owner_id = $1 and type = $2`, userID, collectionType)
+        FROM collections
+        WHERE owner_id = $1 and type = $2 and app = $3`, userID, collectionType, app)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
 	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata); err != nil {
@@ -107,7 +157,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_comment, pct.enable_join, pct.min_role 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -134,14 +184,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var c ente.Collection
 		var name, encryptedName, nameDecryptionNonce sql.NullString
 		var pctDeviceLimit sql.NullInt32
-		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
+		var pctEnableDownload, pctEnableCollect, pctEnableComment, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
-		var shareeRoleType, pctToken, pctPwHash, pctPwNonce sql.NullString
+		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableComment, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -175,11 +225,12 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 			if _, ok := addPublicUrlMap[pctToken.String]; !ok {
 				addPublicUrlMap[pctToken.String] = true
 				url := ente.PublicURL{
-					URL:             repo.CollectionLinkRepo.GetAlbumUrl(pctToken.String),
+					URL:             repo.CollectionLinkRepo.GetAlbumUrl(app, pctToken.String),
 					DeviceLimit:     int(pctDeviceLimit.Int32),
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,
 					EnableCollect:   pctEnableCollect.Bool,
+					EnableComment:   pctEnableComment.Bool,
 					PasswordEnabled: pctPwNonce.Valid,
 					EnableJoin:      pctEnableJoin.Bool,
 				}
@@ -187,6 +238,11 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					url.Nonce = &pctPwNonce.String
 					url.MemLimit = &pctMemLimit.Int64
 					url.OpsLimit = &pctOpsLimit.Int64
+				}
+				if pctMinRole.Valid {
+					role := ente.ConvertStringToCollectionParticipantRole(pctMinRole.String)
+					rolePtr := role
+					url.MinRole = &rolePtr
 				}
 				currentCollection.PublicURLs = append(currentCollection.PublicURLs, url)
 			}
@@ -202,7 +258,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type, collection_shares.shared_at
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -221,12 +277,19 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 	defer rows.Close()
 
 	collections := make([]ente.Collection, 0)
+	shareeRoleByCollection := make(map[int64]ente.CollectionParticipantRole)
 	for rows.Next() {
 		var c ente.Collection
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted); err != nil {
+		var roleType sql.NullString
+		var sharedAt sql.NullInt64
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType, &sharedAt); err != nil {
 			return collections, stacktrace.Propagate(err, "")
+		}
+		if sharedAt.Valid {
+			sharedAtValue := sharedAt.Int64
+			c.SharedAt = &sharedAtValue
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
 			c.Name = collectionName.String
@@ -256,7 +319,38 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 			}
 			c.Sharees = sharees
 		}
+		role := ente.ConvertStringToCollectionParticipantRole(roleType.String)
+		if role == ente.UNKNOWN {
+			role = ente.VIEWER
+		}
+		shareeRoleByCollection[c.ID] = role
 		collections = append(collections, c)
+	}
+
+	collectionIDs := make([]int64, 0, len(collections))
+	for _, collection := range collections {
+		if collection.IsDeleted {
+			continue
+		}
+		collectionIDs = append(collectionIDs, collection.ID)
+	}
+	if len(collectionIDs) > 0 {
+		urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), collectionIDs, app)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to get public URLs")
+		}
+		for idx := range collections {
+			if collections[idx].IsDeleted {
+				collections[idx].PublicURLs = []ente.PublicURL{}
+				continue
+			}
+			role := shareeRoleByCollection[collections[idx].ID]
+			collections[idx].PublicURLs = ente.FilterPublicURLsForRole(urlMap[collections[idx].ID], role)
+		}
+	} else {
+		for idx := range collections {
+			collections[idx].PublicURLs = []ente.PublicURL{}
+		}
 	}
 	return collections, nil
 }
@@ -282,6 +376,37 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 		cIDs = append(cIDs, cID)
 	}
 	return cIDs, nil
+}
+
+// FilterNonDeletedCollectionIDs returns collection IDs that are not deleted and match the provided app.
+func (repo *CollectionRepository) FilterNonDeletedCollectionIDs(collectionIDs []int64, app ente.App) ([]int64, error) {
+	if len(collectionIDs) == 0 {
+		return nil, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collections
+		WHERE collection_id = ANY($1)
+		  AND is_deleted = FALSE
+		  AND app = $2
+	`, pq.Array(collectionIDs), app)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	result := make([]int64, 0, len(collectionIDs))
+	for rows.Next() {
+		var collectionID int64
+		if err := rows.Scan(&collectionID); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, collectionID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return result, nil
 }
 
 func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
@@ -383,14 +508,21 @@ func (repo *CollectionRepository) Share(
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if role != ente.VIEWER && role != ente.COLLABORATOR {
+	if role != ente.VIEWER && role != ente.COLLABORATOR && role != ente.ADMIN {
 		err = fmt.Errorf("invalid role %s", string(role))
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type) VALUES($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (collection_id, from_user_id, to_user_id)
-		DO UPDATE SET(is_deleted, updation_time, role_type) = (FALSE, $5, $6)`,
-		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role)
+	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type, shared_at) VALUES($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (collection_id, from_user_id, to_user_id)
+			DO UPDATE SET
+				is_deleted = FALSE,
+				updation_time = $5,
+				role_type = $6,
+				shared_at = CASE
+					WHEN collection_shares.is_deleted = TRUE THEN $7
+					ELSE collection_shares.shared_at
+				END`,
+		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role, updationTime)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
@@ -494,10 +626,19 @@ func (repo *CollectionRepository) AddFiles(
 	}
 	for _, file := range files {
 		_, err := tx.ExecContext(context, `INSERT INTO collection_files
-			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)
-			ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-			DO UPDATE SET(is_deleted, updation_time) = ($5, $6)`, collectionID, file.ID, file.EncryptedKey,
+            (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, collectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, collectionOwnerID, fileOwnerID)
 		if err != nil {
 			tx.Rollback()
@@ -536,10 +677,19 @@ func (repo *CollectionRepository) RestoreFiles(ctx context.Context, userID int64
 
 	for _, file := range newCollectionFiles {
 		_, err := tx.ExecContext(ctx, `INSERT INTO collection_files
-			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)
-			ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-			DO UPDATE SET(is_deleted, updation_time) = ($5, $6)`, collectionID, file.ID, file.EncryptedKey,
+            (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, collectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, userID, userID)
 		if err != nil {
 			tx.Rollback()
@@ -564,8 +714,19 @@ func (repo *CollectionRepository) RestoreFiles(ctx context.Context, userID int64
 
 // RemoveFilesV3 just remove the entries from the collection. This method assume that collection owner is
 // different from the file owners
-func (repo *CollectionRepository) RemoveFilesV3(context context.Context, collectionID int64, fileIDs []int64) error {
+func (repo *CollectionRepository) RemoveFilesV3(context context.Context, collectionID int64, collectionOwnerID int64, fileIDs []int64) error {
 	updationTime := time.Microseconds()
+	ownerToFileIDs, err := repo.FileRepo.GetOwnerToFileIDsMap(context, fileIDs)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	// verify that none of the file belongs to the collection owner
+	if _, ok := ownerToFileIDs[collectionOwnerID]; ok {
+		return errors.New("can not remove files owned by album owner")
+	}
+
+	// check if there are files owned by collection owner
+
 	tx, err := repo.DB.BeginTx(context, nil)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -587,6 +748,33 @@ func (repo *CollectionRepository) RemoveFilesV3(context context.Context, collect
 	return stacktrace.Propagate(err, "")
 }
 
+// SuggestAction sets action markers for the given files in the collection so that
+// clients can act on them. It does not mark the membership as deleted.
+func (repo *CollectionRepository) SuggestAction(ctx context.Context, collectionID int64, actorUserID int64, fileIDs []int64, action string) error {
+	if len(fileIDs) == 0 {
+		return nil
+	}
+	updationTime := time.Microseconds()
+	tx, err := repo.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	_, err = tx.ExecContext(ctx, `UPDATE collection_files
+            SET action_user = $1, action = $2, updation_time = $3
+            WHERE collection_id = $4 AND file_id = ANY($5)`,
+		actorUserID, action, updationTime, collectionID, pq.Array(fileIDs))
+	if err != nil {
+		tx.Rollback()
+		return stacktrace.Propagate(err, "")
+	}
+	_, err = tx.ExecContext(ctx, `UPDATE collections SET updation_time = $1 WHERE collection_id = $2`, updationTime, collectionID)
+	if err != nil {
+		tx.Rollback()
+		return stacktrace.Propagate(err, "")
+	}
+	return tx.Commit()
+}
+
 // MoveFiles move files from one collection to another collection
 func (repo *CollectionRepository) MoveFiles(ctx context.Context,
 	toCollectionID int64, fromCollectionID int64,
@@ -606,10 +794,19 @@ func (repo *CollectionRepository) MoveFiles(ctx context.Context,
 	for _, file := range fileItems {
 		fileIDs = append(fileIDs, file.ID)
 		_, err := tx.ExecContext(ctx, `INSERT INTO collection_files
-			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)
-			ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-			DO UPDATE SET(is_deleted, updation_time) = ($5, $6)`, toCollectionID, file.ID, file.EncryptedKey,
+            (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, toCollectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, collectionOwner, fileOwner)
 		if err != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
@@ -650,17 +847,17 @@ func (repo *CollectionRepository) GetDiff(collectionID int64, sinceTime int64, l
 			Observe(float64(t.Since(startTime).Milliseconds()))
 	}()
 	rows, err := repo.DB.Query(`
-		SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
-			collection_files.encrypted_key, collection_files.key_decryption_nonce,
-			files.file_decryption_header, files.thumbnail_decryption_header,
-			files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata, 
-			files.info, collection_files.is_deleted, collection_files.updation_time
-		FROM files
-		INNER JOIN collection_files
-		ON collection_files.file_id = files.file_id
-			AND collection_files.collection_id = $1
-			AND collection_files.updation_time > $2
-		ORDER BY collection_files.updation_time LIMIT $3`,
+        SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
+            collection_files.encrypted_key, collection_files.key_decryption_nonce,
+            files.file_decryption_header, files.thumbnail_decryption_header,
+            files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata, 
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
+        FROM files
+        INNER JOIN collection_files
+        ON collection_files.file_id = files.file_id
+            AND collection_files.collection_id = $1
+            AND collection_files.updation_time > $2
+        ORDER BY collection_files.updation_time LIMIT $3`,
 		collectionID, sinceTime, limit)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -675,16 +872,16 @@ func (repo *CollectionRepository) GetFilesWithVersion(collectionID int64, update
 			Observe(float64(t.Since(startTime).Milliseconds()))
 	}()
 	rows, err := repo.DB.Query(`
-		SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
-			collection_files.encrypted_key, collection_files.key_decryption_nonce,
-			files.file_decryption_header, files.thumbnail_decryption_header,
-			files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
-			files.info, collection_files.is_deleted, collection_files.updation_time
-		FROM files
-		INNER JOIN collection_files
-		ON collection_files.file_id = files.file_id
-			AND collection_files.collection_id = $1
-			AND collection_files.updation_time = $2`,
+        SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
+            collection_files.encrypted_key, collection_files.key_decryption_nonce,
+            files.file_decryption_header, files.thumbnail_decryption_header,
+            files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
+        FROM files
+        INNER JOIN collection_files
+        ON collection_files.file_id = files.file_id
+            AND collection_files.collection_id = $1
+            AND collection_files.updation_time = $2`,
 		collectionID, updateAtTime)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -694,16 +891,16 @@ func (repo *CollectionRepository) GetFilesWithVersion(collectionID int64, update
 
 func (repo *CollectionRepository) GetFile(collectionID int64, fileID int64) ([]ente.File, error) {
 	rows, err := repo.DB.Query(`
-		SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
-			collection_files.encrypted_key, collection_files.key_decryption_nonce,
-			files.file_decryption_header, files.thumbnail_decryption_header,
-			files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
-			files.info, collection_files.is_deleted, collection_files.updation_time
-		FROM files
-		INNER JOIN collection_files
-		ON collection_files.file_id = files.file_id
-			AND collection_files.collection_id = $1
-			AND collection_files.file_id = $2`,
+        SELECT files.file_id, files.owner_id, collection_files.collection_id, collection_files.c_owner_id,
+            collection_files.encrypted_key, collection_files.key_decryption_nonce,
+            files.file_decryption_header, files.thumbnail_decryption_header,
+            files.metadata_decryption_header, files.encrypted_metadata, files.magic_metadata, files.pub_magic_metadata,
+            files.info, collection_files.action_user, collection_files.action, collection_files.is_deleted, collection_files.updation_time, collection_files.created_at
+        FROM files
+        INNER JOIN collection_files
+        ON collection_files.file_id = files.file_id
+            AND collection_files.collection_id = $1
+            AND collection_files.file_id = $2`,
 		collectionID, fileID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -805,7 +1002,7 @@ func (repo *CollectionRepository) TrashV3(ctx context.Context, collectionID int6
 		return stacktrace.Propagate(err, "")
 	}
 	if count != 0 {
-		removedFiles, removeErr := repo.removeAllFilesAddedByOthers(collectionID)
+		removedFiles, removeErr := repo.removeAllFilesAddedByOthers(collectionID, ownerID)
 		if removeErr != nil {
 			return stacktrace.Propagate(removeErr, "")
 		}
@@ -822,7 +1019,7 @@ func (repo *CollectionRepository) TrashV3(ctx context.Context, collectionID int6
 	return nil
 }
 
-func (repo *CollectionRepository) removeAllFilesAddedByOthers(collectionID int64) (int64, error) {
+func (repo *CollectionRepository) removeAllFilesAddedByOthers(collectionID int64, cOwnerID int64) (int64, error) {
 	var fileIDs []int64
 	rows, err := repo.DB.Query(`SELECT file_id FROM collection_files WHERE collection_id = $1 AND is_deleted=false AND f_owner_id IS NOT NULL AND c_owner_id IS NOT NULL AND f_owner_id <> c_owner_id`, collectionID)
 	if err != nil {
@@ -839,7 +1036,7 @@ func (repo *CollectionRepository) removeAllFilesAddedByOthers(collectionID int64
 	if len(fileIDs) == 0 {
 		return 0, nil
 	}
-	removeErr := repo.RemoveFilesV3(context.Background(), collectionID, fileIDs)
+	removeErr := repo.RemoveFilesV3(context.Background(), collectionID, cOwnerID, fileIDs)
 	if removeErr != nil {
 		return 0, stacktrace.Propagate(removeErr, "")
 	}

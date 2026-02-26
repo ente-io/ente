@@ -7,6 +7,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  dio: ^5.8.0+1
   flutter:
     sdk: flutter
   http: ^1.4.0

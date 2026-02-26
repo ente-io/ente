@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorMainBottomBar extends StatefulWidget with SimpleConfigsAccess {
@@ -91,7 +91,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                       children: <Widget>[
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-crop.svg",
-                          label: S.of(context).crop,
+                          label: AppLocalizations.of(context).crop,
                           onTap: () {
                             widget.editor.openCropRotateEditor();
                           },
@@ -99,29 +99,29 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                         CircularIconButton(
                           svgPath:
                               "assets/image-editor/image-editor-filter.svg",
-                          label: S.of(context).filter,
+                          label: AppLocalizations.of(context).filter,
                           onTap: () {
                             widget.editor.openFilterEditor();
                           },
                         ),
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-tune.svg",
-                          label: S.of(context).adjust,
+                          label: AppLocalizations.of(context).adjust,
                           onTap: () {
                             widget.editor.openTuneEditor();
                           },
                         ),
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-paint.svg",
-                          label: S.of(context).draw,
+                          label: AppLocalizations.of(context).draw,
                           onTap: () {
-                            widget.editor.openPaintingEditor();
+                            widget.editor.openPaintEditor();
                           },
                         ),
                         CircularIconButton(
                           svgPath:
                               "assets/image-editor/image-editor-sticker.svg",
-                          label: S.of(context).sticker,
+                          label: AppLocalizations.of(context).sticker,
                           onTap: () {
                             widget.editor.openEmojiEditor();
                           },

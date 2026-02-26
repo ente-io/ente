@@ -1,15 +1,15 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/backup_flow_helper.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
-import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
+import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   const BackupSectionWidget({super.key});
@@ -22,7 +22,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).backup,
+      title: AppLocalizations.of(context).backup,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.backup_outlined,
     );
@@ -33,24 +33,19 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).backedUpFolders,
+          title: AppLocalizations.of(context).backedUpFolders,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          await routeToPage(
-            context,
-            const BackupFolderSelectionPage(
-              isFirstBackup: false,
-            ),
-          );
+          await handleFolderSelectionBackupFlow(context);
         },
       ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).backupStatus,
+          title: AppLocalizations.of(context).backupStatus,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -65,7 +60,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).backupSettings,
+          title: AppLocalizations.of(context).backupSettings,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -84,7 +79,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       [
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).freeUpSpace,
+            title: AppLocalizations.of(context).freeUpSpace,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

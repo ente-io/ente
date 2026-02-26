@@ -36,4 +36,8 @@ class ThumbnailInMemoryLruCache {
       enteFile.cacheKey() + "_" + thumbnailSmallSize.toString(),
     );
   }
+
+  static void clearAll() {
+    _map.clear();
+  }
 }

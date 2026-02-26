@@ -110,6 +110,10 @@ interface OverflowMenuOptionProps {
      * An optional icon to show at the trailing edge of the menu option.
      */
     endIcon?: React.ReactNode;
+    /**
+     * If true, the menu option will be styled as selected with a hover effect.
+     */
+    selected?: boolean;
 }
 
 /**
@@ -117,7 +121,14 @@ interface OverflowMenuOptionProps {
  */
 export const OverflowMenuOption: React.FC<
     React.PropsWithChildren<OverflowMenuOptionProps>
-> = ({ onClick, color = "primary", startIcon, endIcon, children }) => {
+> = ({
+    onClick,
+    color = "primary",
+    startIcon,
+    endIcon,
+    selected,
+    children,
+}) => {
     const menuContext = useContext(OverflowMenuContext);
 
     const handleClick = () => {
@@ -133,12 +144,17 @@ export const OverflowMenuOption: React.FC<
     return (
         <MenuItem
             onClick={handleClick}
+            selected={selected}
             sx={(theme) => ({
                 minWidth: 220,
                 color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
                 "& .MuiSvgIcon-root": { fontSize: "20px" },
+                ...(selected && {
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
+                }),
             })}
         >
             <Stack

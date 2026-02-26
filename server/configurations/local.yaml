@@ -71,8 +71,13 @@ log-file: ""
 
 # HTTP connection parameters
 http:
-    # If true, bind to 443 and use TLS.
-    # By default, this is false, and museum will bind to 8080 without TLS.
+    # The port to bind to.
+    # If not specified, defaults to 8080 (HTTP) or 443 (HTTPS with use-tls: true)
+    # port: 8080
+
+    # If true, use TLS for HTTPS connections.
+    # When true and port is not specified, defaults to port 443.
+    # When false and port is not specified, defaults to port 8080.
     # use-tls: true
 
 # Specify the base endpoints for various apps
@@ -82,11 +87,19 @@ apps:
     # If you're running a self hosted instance and wish to serve public links for photos,
     # set this to the URL where your albums web app is running.
     public-albums:
-    # Default is https://locker.ente.io
+    # Default is https://embed.ente.io
+    # For self-hosted instances, set this to the URL where your embed app is running.
+    embed-albums:
+    # Default is https://share.ente.io
     #
     # If you're running a self-hosted instance and wish to serve public links for locker,
     # set this to the URL where your albums web app is running.
     public-locker:
+    # Default is https://paste.ente.io
+    #
+    # If you're running a self-hosted instance and wish to serve Ente Paste,
+    # set this to the URL where your paste web app is running.
+    public-paste:
     # Default is https://cast.ente.io
     cast:
     # Default is https://accounts.ente.io
@@ -255,6 +268,8 @@ smtp:
     # Optional override for the sender name in the emails. If specified, it will
     # be used for all emails sent by the instance (default is email specific).
     sender-name:
+    # Optional encryption method. If tls or ssl is chosen, encryption is enabled.
+    encryption:
 
 # Zoho Zeptomail config (optional)
 #
@@ -335,6 +350,9 @@ internal:
     # restoration test, where we want to be able to access data but otherwise
     # minimize external side effects.
     silent: false
+    # Header gin will trust for resolving the original client IP when requests are proxied.
+    # If the header or value is missing, server will default to X-Forwarded-For, X-Real-IP, remote-addr (in that order).
+    trusted-client-ip-header:
     # If provided, this external healthcheck url is periodically pinged.
     health-check-url:
     # Hardcoded verification codes, useful for logging in when developing.

@@ -1,10 +1,10 @@
 import 'package:ente_base/typedefs.dart';
 import 'package:ente_logging/logging.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/components/separators.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_utils/debouncer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

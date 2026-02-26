@@ -1,8 +1,11 @@
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
-import SearchIcon from "@mui/icons-material/Search";
+import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
     Divider,
@@ -21,13 +24,17 @@ import {
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
+import {
+    isMLSupported,
+    mlStatusSnapshot,
+    peopleStateSnapshot,
+} from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -38,6 +45,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
+import { sidebarSearchOptionsForString } from "../services/search/sidebar-search-registry";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
@@ -74,7 +82,10 @@ export interface SearchBarProps {
     /**
      * Set or clear the selected {@link SearchOption}.
      */
-    onSelectSearchOption: (o: SearchOption | undefined) => void;
+    onSelectSearchOption: (
+        o: SearchOption | undefined,
+        options?: { shouldExitSearchMode?: boolean },
+    ) => void;
     /**
      * Called when the user selects the generic "People" header in the empty
      * state view.
@@ -138,7 +149,7 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
             <EnteLogo height={15} />
         </EnteLogoBox>
         <IconButton onClick={onSearch}>
-            <SearchIcon />
+            <HugeiconsIcon icon={Search01Icon} />
         </IconButton>
     </Stack>
 );
@@ -151,6 +162,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
+    // Subscribe to people state so that we re-render when people data arrives.
+    // This is needed because shouldShowEmptyState reads peopleStateSnapshot().
+    usePeopleStateSnapshot();
     // The currently selected option.
     //
     // We need to use `null` instead of `undefined` to indicate missing values,
@@ -159,17 +173,36 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const [value, setValue] = useState<SearchOption | null>(null);
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
 
     const theme = useTheme();
 
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
+    // Handle ctrl+K keyboard shortcut to focus search
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for ctrl+K (cmd+K on macOS)
+            if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+                event.preventDefault();
+                selectRef.current?.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
-        if (type == "collection" || type == "person") {
+        if (
+            type == "collection" ||
+            type == "person" ||
+            type == "sidebarAction"
+        ) {
             setValue(null);
             setInputValue("");
         } else {
@@ -178,7 +211,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         }
 
         // Let our parent know the selection was changed.
-        onSelectSearchOption(nullToUndefined(value));
+        // When selecting an option, we should exit search mode if needed.
+        onSelectSearchOption(nullToUndefined(value), {
+            shouldExitSearchMode: true,
+        });
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -186,11 +222,26 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         // We anyways need the ref so that we can blur on selecting a person
         // from the default options. So also use it to blur the entire Select
         // (including the menu) when the user selects an option.
-        selectRef.current?.blur();
+        //
+        // Only blur when an actual option was selected, not when clearing
+        // (e.g., via backspace on empty input).
+        if (value) selectRef.current?.blur();
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action == "input-change") setInputValue(value);
+        if (actionMeta.action == "input-change") {
+            setInputValue(value);
+
+            // If the input is cleared, also clear the selected value.
+            if (value === "") {
+                setValue(null);
+                setInputValue("");
+                // Notify parent but don't exit search mode on mobile
+                onSelectSearchOption(undefined, {
+                    shouldExitSearchMode: false,
+                });
+            }
+        }
     };
 
     const resetSearch = () => {
@@ -201,8 +252,8 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         setValue(null);
         setInputValue("");
 
-        // Let our parent know.
-        onSelectSearchOption(undefined);
+        // Let our parent know and exit search mode entirely.
+        onSelectSearchOption(undefined, { shouldExitSearchMode: true });
     };
 
     const handleSelectPeople = () => {
@@ -216,6 +267,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleFocus = () => {
+        setIsFocused(true);
         // A workaround to show the suggestions again for the current non-empty
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
@@ -224,6 +276,16 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 action: "set-value",
                 prevInputValue: "",
             });
+        }
+    };
+
+    const handleBlur = () => {
+        setIsFocused(false);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Escape") {
+            selectRef.current?.blur();
         }
     };
 
@@ -238,18 +300,30 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 isClearable
                 escapeClearsValue
-                onFocus={handleFocus}
-                placeholder={t("search_hint")}
-                noOptionsMessage={({ inputValue }) =>
-                    shouldShowEmptyState(inputValue) ? (
-                        <EmptyState
-                            onSelectPeople={handleSelectPeople}
-                            onSelectPerson={handleSelectPerson}
-                        />
-                    ) : null
+                menuIsOpen={
+                    isFocused && (inputValue !== "" || shouldShowEmptyState(""))
                 }
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                placeholder={t("search_hint")}
+                loadingMessage={() => null}
+                noOptionsMessage={({ inputValue }) => {
+                    if (inputValue) {
+                        return t("no_results");
+                    }
+                    if (shouldShowEmptyState(inputValue)) {
+                        return (
+                            <EmptyState
+                                onSelectPeople={handleSelectPeople}
+                                onSelectPerson={handleSelectPerson}
+                            />
+                        );
+                    }
+                    return null;
+                }}
             />
 
             {isInSearchMode && (
@@ -272,7 +346,16 @@ const SearchInputWrapper = styled("div")`
     margin: auto;
 `;
 
-const loadOptions = pDebounce(searchOptionsForString, 250);
+const loadOptions = pDebounce(async (input: string) => {
+    const [sidebarActions, photoOptions] = await Promise.all([
+        sidebarSearchOptionsForString(input),
+        searchOptionsForString(input),
+    ]);
+
+    return [...photoOptions, ...sidebarActions];
+}, 250);
+
+// const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = (
     theme: Theme,
@@ -324,31 +407,62 @@ const createSelectStyles = (
     clearIndicator: (style) => ({ ...style, display: "none" }),
 });
 
-const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
-    <SelectComponents.Control {...props}>
-        <Stack
-            direction="row"
-            sx={{
-                alignItems: "center",
-                // Fill the entire control (the control uses display flex).
-                flex: 1,
-            }}
-        >
-            <Box
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
+    // The shortcut UI element will be shown once the search bar supports searching the settings as well.
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.userAgent.toUpperCase().includes("MAC");
+    const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+
+    const hasValue =
+        props.getValue().length > 0 || props.selectProps.inputValue;
+
+    return (
+        <SelectComponents.Control {...props}>
+            <Stack
+                direction="row"
                 sx={{
-                    display: "inline-flex",
-                    // Match the default padding of the ValueContainer to make
-                    // the icon look properly spaced and aligned.
-                    pl: "8px",
-                    color: "stroke.muted",
+                    alignItems: "center",
+                    // Fill the entire control (the control uses display flex).
+                    flex: 1,
                 }}
             >
-                {iconForOption(props.getValue()[0])}
-            </Box>
-            {children}
-        </Stack>
-    </SelectComponents.Control>
-);
+                <Box
+                    sx={{
+                        display: "inline-flex",
+                        // Match the default padding of the ValueContainer to make
+                        // the icon look properly spaced and aligned.
+                        pl: "8px",
+                        color: "stroke.muted",
+                    }}
+                >
+                    {iconForOption(props.getValue()[0])}
+                </Box>
+                {children}
+                {!hasValue && (
+                    <Box
+                        sx={{
+                            display: ["none", "none", "inline-flex"],
+                            alignItems: "center",
+                            pr: "8px",
+                            color: "text.faint",
+                            fontSize: "12px",
+                            fontFamily: "monospace",
+                            border: "1px solid",
+                            borderColor: "stroke.faint",
+                            borderRadius: "4px",
+                            px: "6px",
+                            py: "2px",
+                            mr: "8px",
+                        }}
+                    >
+                        {shortcutKey}
+                    </Box>
+                )}
+            </Stack>
+        </SelectComponents.Control>
+    );
+};
 
 const iconForOption = (option: SearchOption | undefined) => {
     switch (option?.suggestion.type) {
@@ -356,11 +470,16 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
+        case "cameraMake":
+        case "cameraModel":
+            return <CameraIcon />;
+        case "sidebarAction":
+            return <SettingsIcon />;
         case "location":
         case "city":
             return <LocationIcon />;
         default:
-            return <SearchIcon />;
+            return <HugeiconsIcon icon={Search01Icon} />;
     }
 };
 
@@ -397,14 +516,20 @@ const shouldShowEmptyState = (inputValue: string) => {
 
     const mlStatus = mlStatusSnapshot();
     const vpStatus = hlsGenerationStatusSnapshot();
-    if (
-        (!mlStatus || mlStatus.phase == "disabled") &&
-        (!vpStatus?.enabled || vpStatus.status != "processing")
-    ) {
-        // ML is either not supported or currently disabled AND video processing
-        // is either not supported or currently not happening. Don't show the
-        // empty state.
-        return false;
+
+    const isMLInactive =
+        !mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done";
+    const isVideoProcessing =
+        vpStatus?.enabled && vpStatus.status == "processing";
+
+    if (isMLInactive && !isVideoProcessing) {
+        // ML is inactive AND video processing is not happening.
+        // Only show empty state if there are people to display.
+        const people = peopleStateSnapshot()?.visiblePeople;
+        const hasPeople = people && people.length > 0;
+        if (!hasPeople) {
+            return false;
+        }
     }
 
     // Show it otherwise.
@@ -446,9 +571,9 @@ const EmptyState: React.FC<
             break;
     }
 
-    // If ML is disabled and we're not video processing, then don't show the
-    // empty state content.
-    if ((!mlStatus || mlStatus.phase == "disabled") && !label) {
+    // If there's nothing to show (no people and no status label), return empty.
+    const hasPeople = people && people.length > 0;
+    if (!hasPeople && !label) {
         return <></>;
     }
 
@@ -486,20 +611,16 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     </SelectComponents.Option>
 );
 
-const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
-        <Typography variant="mini" sx={{ color: "text.muted" }}>
-            {labelForOption(option)}
-        </Typography>
-        <Stack
-            direction="row"
-            sx={{
-                gap: 1,
-                alignItems: "center",
-                justifyContent: "space-between",
-            }}
-        >
-            <Box>
+const OptionContents = ({ data: option }: { data: SearchOption }) => {
+    if (option.suggestion.type === "sidebarAction") {
+        return (
+            <Stack
+                className="option-contents"
+                sx={{ gap: "4px", px: 2, py: 1 }}
+            >
+                <Typography variant="mini" sx={{ color: "text.muted" }}>
+                    {labelForOption(option)}
+                </Typography>
                 <Typography
                     sx={{
                         color: "text.base",
@@ -510,22 +631,52 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     {option.suggestion.label}
                 </Typography>
                 <Typography sx={{ color: "text.muted" }}>
-                    {t("photos_count", { count: option.fileCount })}
+                    {option.suggestion.path.join(" > ")}
                 </Typography>
-            </Box>
+            </Stack>
+        );
+    }
+    return (
+        <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+            <Typography variant="mini" sx={{ color: "text.muted" }}>
+                {labelForOption(option)}
+            </Typography>
+            <Stack
+                direction="row"
+                sx={{
+                    gap: 1,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}
+            >
+                <Box>
+                    <Typography
+                        sx={{
+                            color: "text.base",
+                            fontWeight: "medium",
+                            wordBreak: "break-word",
+                        }}
+                    >
+                        {option.suggestion.label}
+                    </Typography>
+                    <Typography sx={{ color: "text.muted" }}>
+                        {t("photos_count", { count: option.fileCount })}
+                    </Typography>
+                </Box>
 
-            <Stack direction="row" sx={{ gap: 1 }}>
-                {option.previewFiles.map((file) => (
-                    <ItemCard
-                        key={file.id}
-                        coverFile={file}
-                        TileComponent={PreviewItemTile}
-                    />
-                ))}
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    {option.previewFiles.map((file) => (
+                        <ItemCard
+                            key={file.id}
+                            coverFile={file}
+                            TileComponent={PreviewItemTile}
+                        />
+                    ))}
+                </Stack>
             </Stack>
         </Stack>
-    </Stack>
-);
+    );
+};
 
 const labelForOption = (option: SearchOption) => {
     switch (option.suggestion.type) {
@@ -541,6 +692,12 @@ const labelForOption = (option: SearchOption) => {
         case "fileCaption":
             return t("description");
 
+        case "cameraMake":
+            return t("cameraMake", { defaultValue: "Camera Make" });
+
+        case "cameraModel":
+            return t("cameraModel", { defaultValue: "Camera Model" });
+
         case "date":
             return t("date");
 
@@ -555,5 +712,8 @@ const labelForOption = (option: SearchOption) => {
 
         case "person":
             return t("people");
+
+        case "sidebarAction":
+            return t("settings");
     }
 };

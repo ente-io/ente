@@ -8,6 +8,10 @@ class SearchableAppBar extends StatefulWidget {
   final Function(String) onSearch;
   final VoidCallback? onSearchClosed;
   final String heroTag;
+  final bool autoActivateSearch;
+  final Color? backgroundColor;
+  final bool? centerTitle;
+  final EdgeInsetsGeometry searchIconPadding;
 
   const SearchableAppBar({
     super.key,
@@ -16,6 +20,10 @@ class SearchableAppBar extends StatefulWidget {
     required this.onSearch,
     this.onSearchClosed,
     this.heroTag = "",
+    this.autoActivateSearch = false,
+    this.backgroundColor,
+    this.centerTitle,
+    this.searchIconPadding = const EdgeInsets.all(12.0),
   });
 
   @override
@@ -26,6 +34,28 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
   bool _isSearchActive = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoActivateSearch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _activateSearch();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchableAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.autoActivateSearch &&
+        !oldWidget.autoActivateSearch &&
+        !_isSearchActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _activateSearch();
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -59,8 +89,12 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return SliverAppBar(
       floating: true,
+      backgroundColor:
+          widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: !_isSearchActive,
+      centerTitle: widget.centerTitle,
       title: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         switchInCurve: Curves.easeOut,
@@ -73,11 +107,13 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
         },
         child: _isSearchActive
             ? _buildSearchField()
-            : Hero(
-                key: const ValueKey('titleBar'),
-                tag: widget.heroTag,
-                child: widget.title,
-              ),
+            : widget.heroTag.isNotEmpty
+                ? Hero(
+                    key: const ValueKey('titleBar'),
+                    tag: widget.heroTag,
+                    child: widget.title,
+                  )
+                : widget.title,
       ),
       actions: _isSearchActive
           ? null
@@ -85,7 +121,7 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
               GestureDetector(
                 onTap: _activateSearch,
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: widget.searchIconPadding,
                   child: SizedBox(
                     height: 18,
                     width: 18,

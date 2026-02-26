@@ -14,10 +14,12 @@ providers specifically listed in the documentation, the supported providers are:
 
 - 2FAS Authenticator
 - Aegis Authenticator
+- andOTP (including encrypted backups, except MOTP)
 - Bitwarden
 - Google Authenticator
-- Raivo OTP
 - LastPass
+- Proton
+- Raivo OTP
 
 Details as to how codes may be imported from these providers may be found within
 the app.

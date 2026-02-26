@@ -37,6 +37,7 @@ lib/generated_plugin_registrant.dart
 android/key.properties
 android/app/.settings/*
 android/.settings/
+android/.kotlin/
 .env
 
 fastlane/report.xml
@@ -46,3 +47,10 @@ android/app/build/
 
 # FVM Version Cache
 .fvm/
+
+lib/generated/intl/app_localizations*.dart
+
+# Generated rust bindings
+lib/src/rust/*
+rust/src/frb_generated*
+test/**/*.mocks.dart

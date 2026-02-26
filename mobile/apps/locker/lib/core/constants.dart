@@ -9,10 +9,17 @@ const int android11SDKINT = 30;
 const mnemonicKeyWordCount = 24;
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
+const String githubDiscussionsUrl =
+    "https://github.com/ente-io/ente/discussions";
+
+const supportEmail = 'support@ente.io';
 
 final tempDirCleanUpInterval = kDebugMode
     ? const Duration(hours: 1).inMicroseconds
     : const Duration(hours: 6).inMicroseconds;
+
+// Note: 0 indicates no device limit
+const publicLinkDeviceLimits = [0, 50, 25, 10, 5, 2, 1];
 
 const uploadTempFilePrefix = "upload_file_";
 

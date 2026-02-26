@@ -12,7 +12,7 @@ Upgrading Ente depends on the method of installation you have chosen.
 ::: tip For Docker users
 
 You can free up some disk space by deleting older images that were used by
-obsolette containers.
+obsolete containers.
 
 ```shell
 docker image prune

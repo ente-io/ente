@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
@@ -25,10 +27,10 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
 
 enum DetailPageMode {
@@ -41,12 +43,19 @@ class DetailPageConfiguration {
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
+  final bool isLocalOnlyContext;
+
+  /// Callback invoked with the page context after the page is ready.
+  /// Useful for showing bottom sheets or dialogs after navigation completes.
+  final void Function(BuildContext context)? onPageReady;
 
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
+    this.isLocalOnlyContext = false,
+    this.onPageReady,
   });
 
   DetailPageConfiguration copyWith({
@@ -54,26 +63,50 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
+    bool? isLocalOnlyContext,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
+      isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
     );
   }
 }
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
   const DetailPage(this.config, {super.key});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  final _enableFullScreenNotifier = ValueNotifier(false);
+  final _isInSharedCollectionNotifier = ValueNotifier(false);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
+
+  @override
+  void dispose() {
+    _enableFullScreenNotifier.dispose();
+    _isInSharedCollectionNotifier.dispose();
+    _showingThumbnailFallbackNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Separating body to a different widget to avoid
     // unnecessary reinitialization of the InheritedDetailPageState
     // when the body is rebuilt, which can reset state stored in it.
-    return InheritedDetailPageState(child: _Body(config));
+    return InheritedDetailPageState(
+      enableFullScreenNotifier: _enableFullScreenNotifier,
+      isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
+      showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
+      child: _Body(widget.config),
+    );
   }
 }
 
@@ -110,6 +143,13 @@ class _BodyState extends State<_Body> {
         isGuestView = event.isGuestView;
         swipeLocked = event.swipeLocked;
       });
+    });
+
+    // Update shared collection state after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      widget.config.onPageReady?.call(context);
     });
   }
 
@@ -169,9 +209,10 @@ class _BodyState extends State<_Body> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
-                widget.config.mode == DetailPageMode.full,
+                _onEditFileRequested,
                 enableFullScreenNotifier: InheritedDetailPageState.of(context)
                     .enableFullScreenNotifier,
+                mode: widget.config.mode,
               );
             },
             valueListenable: _selectedIndexNotifier,
@@ -186,19 +227,33 @@ class _BodyState extends State<_Body> {
               _buildPageView(),
               ValueListenableBuilder(
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return FileBottomBar(
-                    _files![selectedIndex],
-                    _onEditFileRequested,
-                    widget.config.mode == DetailPageMode.minimalistic &&
-                        !isGuestView,
-                    onFileRemoved: _onFileRemoved,
-                    userID: Configuration.instance.getUserID(),
-                    enableFullScreenNotifier:
-                        InheritedDetailPageState.of(context)
-                            .enableFullScreenNotifier,
-                  );
+                  return widget.config.mode == DetailPageMode.minimalistic
+                      ? const SizedBox()
+                      : FileBottomBar(
+                          _files![selectedIndex],
+                          onFileRemoved: _onFileRemoved,
+                          userID: Configuration.instance.getUserID(),
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                          isLocalOnlyContext: widget.config.isLocalOnlyContext,
+                        );
                 },
                 valueListenable: _selectedIndexNotifier,
+              ),
+              ValueListenableBuilder(
+                valueListenable: _selectedIndexNotifier,
+                builder: (BuildContext context, int selectedIndex, _) {
+                  return widget.config.mode == DetailPageMode.minimalistic
+                      ? const SizedBox.shrink()
+                      : TextDetectionOverlayButton(
+                          file: _files![selectedIndex],
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                          isGuestView: isGuestView,
+                        );
+                },
               ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
@@ -216,7 +271,7 @@ class _BodyState extends State<_Body> {
                             child: Align(
                               alignment: Alignment.center,
                               child: Tooltip(
-                                message: S.of(context).panorama,
+                                message: AppLocalizations.of(context).panorama,
                                 child: IconButton(
                                   style: IconButton.styleFrom(
                                     backgroundColor: const Color(0xAA252525),
@@ -286,10 +341,12 @@ class _BodyState extends State<_Body> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
+          playbackCallback: (shouldEnable, reason) {
             Future.delayed(Duration.zero, () {
-              InheritedDetailPageState.of(context)
-                  .toggleFullScreen(shouldEnable: isPlaying);
+              InheritedDetailPageState.of(context).requestFullScreen(
+                shouldEnable: shouldEnable,
+                reason: reason,
+              );
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
@@ -297,7 +354,7 @@ class _BodyState extends State<_Body> {
         return GestureDetector(
           onTap: () {
             file.fileType != FileType.video
-                ? InheritedDetailPageState.of(context).toggleFullScreen()
+                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
                 : null;
           },
           child: fileContent,
@@ -316,6 +373,7 @@ class _BodyState extends State<_Body> {
           _selectedIndexNotifier.value = index;
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
+        _updateSharedCollectionState(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -380,18 +438,23 @@ class _BodyState extends State<_Body> {
       // ignore: unawaited_futures
       showErrorDialog(
         context,
-        S.of(context).sorry,
-        S.of(context).weDontSupportEditingPhotosAndAlbumsThatYouDont,
+        AppLocalizations.of(context).sorry,
+        AppLocalizations.of(context)
+            .weDontSupportEditingPhotosAndAlbumsThatYouDont,
       );
       return;
     }
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
 
     try {
       final ioFile = await getFile(file);
       if (ioFile == null) {
-        showShortToast(context, S.of(context).failedToFetchOriginalForEdit);
+        showShortToast(
+          context,
+          AppLocalizations.of(context).failedToFetchOriginalForEdit,
+        );
         await dialog.hide();
         return;
       }
@@ -436,5 +499,27 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
+  }
+
+  Future<void> _updateSharedCollectionState(EnteFile file) async {
+    final fileID = file.uploadedFileID;
+    final notifier =
+        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+
+    if (notifier == null) return;
+
+    if (fileID == null) {
+      notifier.value = false;
+      return;
+    }
+
+    final isShared =
+        await CollectionsService.instance.isFileInSharedCollection(fileID);
+
+    // Guard: Only update if still showing the same file
+    // (user may have swiped to a different file while awaiting)
+    if (_files![_selectedIndexNotifier.value].uploadedFileID == fileID) {
+      notifier.value = isShared;
+    }
   }
 }

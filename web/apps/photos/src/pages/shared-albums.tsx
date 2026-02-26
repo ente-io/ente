@@ -1,32 +1,35 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import {
+    Download01Icon,
+    ImageAdd02Icon,
+    Share08Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import {
     Box,
     Button,
     IconButton,
-    Link,
     Stack,
     styled,
     Tooltip,
+    useMediaQuery,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
+import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
+import { TripLayout } from "components/TripLayout";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import {
-    CenteredFill,
-    SpacedRow,
-    Stack100vhCenter,
-} from "ente-base/components/containers";
+import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -36,17 +39,11 @@ import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
 import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "ente-base/components/OverflowMenu";
-import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
-import {
-    useIsSmallWidth,
-    useIsTouchscreen,
-} from "ente-base/components/utils/hooks";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
@@ -54,11 +51,21 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
     type AddSaveGroup,
 } from "ente-gallery/components/utils/save-groups";
+import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
+import {
+    PublicFeedSidebar,
+    type PublicFeedItemClickInfo,
+} from "ente-gallery/components/viewer/PublicFeedSidebar";
 import { downloadManager } from "ente-gallery/services/download";
 import {
     downloadAndSaveCollectionFiles,
@@ -69,10 +76,11 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
-    savedLastPublicCollectionReferralCode,
     savedPublicCollectionAccessTokenJWT,
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
@@ -88,15 +96,18 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { Notification } from "ente-new/photos/components/Notification";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
-import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
+import { getEnteURL } from "utils/public-album";
+import { quickLinkDateRangeForFiles } from "utils/quick-link";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -108,7 +119,6 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
-    const [referralCode, setReferralCode] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
@@ -129,7 +139,45 @@ export default function PublicCollectionGallery() {
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string | undefined>(undefined);
 
+    const isRedirectingToAlbumsAppRef = useRef<boolean>(false);
+
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+    const { show: showPublicFeed, props: publicFeedVisibilityProps } =
+        useModalVisibility();
+
+    // Pending navigation from feed item click
+    const [pendingFileNavigation, setPendingFileNavigation] = useState<{
+        fileIndex: number;
+        sidebar?: FileViewerInitialSidebar;
+        commentID?: string;
+    }>();
+
+    /**
+     * Handle clicks on feed items to navigate to the file and open sidebar.
+     */
+    const handleFeedItemClick = (info: PublicFeedItemClickInfo) => {
+        if (!publicFiles) return;
+
+        // Find the file index in publicFiles
+        const fileIndex = publicFiles.findIndex((f) => f.id === info.fileID);
+        if (fileIndex === -1) return;
+
+        // Close the feed sidebar
+        publicFeedVisibilityProps.onClose();
+
+        // Determine which sidebar to open
+        const sidebar: FileViewerInitialSidebar =
+            info.type === "liked_photo" || info.type === "liked_video"
+                ? "likes"
+                : "comments";
+
+        // Set navigation state
+        setPendingFileNavigation({
+            fileIndex,
+            sidebar,
+            commentID: info.commentID,
+        });
+    };
 
     const router = useRouter();
 
@@ -146,6 +194,32 @@ export default function PublicCollectionGallery() {
             },
             cancel: false,
         });
+
+    /**
+     * Check if we need to redirect Trip albums from custom domains to albums.ente.io
+     * Returns true if a redirect was initiated, false otherwise.
+     * Reason: custom domains do not support the Trip layout fully
+     */
+    const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
+        if (
+            collection.pubMagicMetadata?.data.layout === "trip" &&
+            shouldOnlyServeAlbumsApp
+        ) {
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL(albumsAppOrigin());
+
+            if (currentURL.host !== albumsURL.host) {
+                isRedirectingToAlbumsAppRef.current = true;
+
+                albumsURL.search = currentURL.search;
+                albumsURL.hash = currentURL.hash;
+
+                window.location.href = albumsURL.href;
+                return true;
+            }
+        }
+        return false;
+    };
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -175,8 +249,11 @@ export default function PublicCollectionGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    window.location.href = "https://ente.io";
-                    redirectingToWebsite = true;
+                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    if (!isCustomAlbumsAppOrigin) {
+                        window.location.href = "https://ente.io";
+                        redirectingToWebsite = true;
+                    }
                 }
                 if (!t || !ck) {
                     return;
@@ -186,9 +263,6 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    setReferralCode(
-                        (await savedLastPublicCollectionReferralCode()) ?? "",
-                    );
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
@@ -208,7 +282,10 @@ export default function PublicCollectionGallery() {
                 void updateShouldDisableCFUploadProxy();
                 await publicAlbumsRemotePull();
             } finally {
-                if (!redirectingToWebsite) {
+                if (
+                    !redirectingToWebsite &&
+                    !isRedirectingToAlbumsAppRef.current
+                ) {
                     setLoading(false);
                 }
             }
@@ -230,9 +307,14 @@ export default function PublicCollectionGallery() {
         showLoadingBar();
         setLoading(true);
         try {
-            const { collection, referralCode: userReferralCode } =
-                await pullCollection(accessToken, collectionKey.current!);
-            setReferralCode(userReferralCode);
+            const { collection } = await pullCollection(
+                accessToken,
+                collectionKey.current!,
+            );
+
+            if (checkAndRedirectForTripAlbum(collection)) {
+                return;
+            }
 
             setPublicCollection(collection);
             const isPasswordProtected =
@@ -314,7 +396,9 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             hideLoadingBar();
-            setLoading(false);
+            if (!isRedirectingToAlbumsAppRef.current) {
+                setLoading(false);
+            }
         }
     }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
@@ -323,6 +407,14 @@ export default function PublicCollectionGallery() {
         showLoadingBar();
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
+
+    // Join album handler for use in file viewer's public like modal
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken: credentials.current?.accessToken,
+        collectionKey: collectionKey.current,
+        credentials,
+    });
 
     const handleSubmitPassword: SingleInputFormProps["onSubmit"] = async (
         password,
@@ -373,11 +465,13 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
-            await downloadAndSaveFiles(
-                selectedFiles,
-                t("files_count", { count: selectedFiles.length }),
-                onAddSaveGroup,
-            );
+            const singleFile =
+                selectedFiles.length === 1 ? selectedFiles[0] : undefined;
+            const title =
+                singleFile?.metadata.fileType === FileType.livePhoto
+                    ? fileFileName(singleFile)
+                    : t("files_count", { count: selectedFiles.length });
+            await downloadAndSaveFiles(selectedFiles, title, onAddSaveGroup);
             clearSelection();
         } catch (e) {
             log.error("failed to download selected files", e);
@@ -394,6 +488,17 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
+    const commentsEnabled =
+        publicCollection?.publicURLs[0]?.enableComment ?? false;
+    const joinEnabled = publicCollection?.publicURLs[0]?.enableJoin ?? false;
+    const addPhotosEnabled = !!onAddPhotos;
+
+    const hasSelection = selected.count > 0;
+    const isMobileHeaderLayout = useMediaQuery("(width < 720px)");
+    const fileListHeaderHeightForViewport = isMobileHeaderLayout
+        ? fileListHeaderHeightMobile
+        : fileListHeaderHeight;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -405,30 +510,51 @@ export default function PublicCollectionGallery() {
                                   publicFiles,
                                   downloadEnabled,
                                   onAddSaveGroup,
+                                  onAddPhotos,
+                                  onShowFeed: commentsEnabled
+                                      ? showPublicFeed
+                                      : undefined,
+                                  hasSelection,
                               }}
                           />
                       ),
-                      height: fileListHeaderHeight,
+                      height: fileListHeaderHeightForViewport,
                   }
                 : undefined,
-        [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
+        [
+            onAddSaveGroup,
+            publicCollection,
+            publicFiles,
+            downloadEnabled,
+            showPublicFeed,
+            commentsEnabled,
+            onAddPhotos,
+            hasSelection,
+            fileListHeaderHeightForViewport,
+        ],
     );
 
-    const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = { referralCode, onAddPhotos };
-        return {
-            component: <FileListFooter {...props} />,
-            height: fileListFooterHeightForProps(props),
+    const fileListFooter = useMemo<FileListHeaderOrFooter>(
+        () => ({
+            component: <FileListFooter />,
+            height: fileListFooterHeight,
             extendToInlineEdges: true,
-        };
-    }, [referralCode, onAddPhotos]);
+        }),
+        [],
+    );
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
     } else if (errorMessage) {
         return (
             <Stack100vhCenter>
-                <Typography sx={{ color: "critical.main" }}>
+                <Typography
+                    sx={{
+                        color: "critical.main",
+                        px: { xs: 2, sm: 0 },
+                        textAlign: { xs: "center", sm: "inherit" },
+                    }}
+                >
                     {errorMessage}
                 </Typography>
             </Stack100vhCenter>
@@ -462,51 +588,139 @@ export default function PublicCollectionGallery() {
         );
     }
 
+    const layout = normalizedPublicAlbumLayout(
+        publicCollection?.pubMagicMetadata?.data.layout,
+    );
+    const quickLinkDateRange = quickLinkDateRangeForFiles(publicFiles);
+    const isQuickLinkAlbum =
+        quickLinkDateRange !== undefined &&
+        publicCollection?.name === quickLinkDateRange;
+    const isSingleFileAlbum = publicFiles.length === 1;
+    const shouldShowSingleFileViewer = isQuickLinkAlbum && isSingleFileAlbum;
+
+    if (shouldShowSingleFileViewer) {
+        return (
+            <>
+                <PublicAlbumSingleFileViewer
+                    file={publicFiles[0]!}
+                    publicAlbumsCredentials={credentials.current}
+                    collectionKey={collectionKey.current!}
+                    enableDownload={downloadEnabled}
+                    enableComment={commentsEnabled}
+                    enableJoin={publicCollection.publicURLs[0]?.enableJoin}
+                    onJoinAlbum={handleJoinAlbum}
+                    onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
+                />
+                {blockingLoad && <TranslucentLoadingOverlay />}
+                <DownloadStatusNotifications
+                    {...{ saveGroups, onRemoveSaveGroup }}
+                    fullWidthOnMobile
+                />
+            </>
+        );
+    }
+
     return (
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
+            message={t("upload_dropzone_hint_public_album")}
         >
-            <NavbarBase
-                sx={{
-                    mb: "16px",
-                    px: "24px",
-                    "@media (width < 720px)": { px: "4px" },
-                }}
-            >
-                {selected.count > 0 ? (
-                    <SelectedFileOptions
-                        count={selected.count}
-                        clearSelection={clearSelection}
-                        downloadFilesHelper={downloadFilesHelper}
-                    />
-                ) : (
-                    <SpacedRow sx={{ flex: 1 }}>
-                        <EnteLogoLink href="https://ente.io">
-                            <EnteLogo height={15} />
-                        </EnteLogoLink>
-                        {onAddPhotos ? (
-                            <AddPhotosButton onClick={onAddPhotos} />
+            {layout === "trip" ? (
+                <TripLayout
+                    files={publicFiles}
+                    collection={publicCollection}
+                    onAddPhotos={onAddPhotos}
+                    enableDownload={downloadEnabled}
+                    accessToken={credentials.current.accessToken}
+                    collectionKey={collectionKey.current}
+                    credentials={credentials}
+                    enableComment={commentsEnabled}
+                    enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                />
+            ) : (
+                <>
+                    <NavbarBase
+                        sx={[
+                            {
+                                flex: "0 0 60px",
+                                px: "24px",
+                                "@media (width < 720px)": { px: "4px" },
+                            },
+                            selected.count > 0 && {
+                                borderColor: "accent.main",
+                                overflowX: "hidden",
+                            },
+                        ]}
+                    >
+                        {selected.count > 0 ? (
+                            <SelectedFileOptions
+                                count={selected.count}
+                                clearSelection={clearSelection}
+                                downloadFilesHelper={downloadFilesHelper}
+                            />
                         ) : (
-                            <GoToEnte />
+                            <SpacedRow sx={{ flex: 1 }}>
+                                <EnteLogoLink href="https://ente.io">
+                                    <EnteLogo height={15} />
+                                </EnteLogoLink>
+                                <Stack direction="row" spacing={2}>
+                                    <SecondaryActionButton
+                                        onAddPhotos={onAddPhotos}
+                                        enableJoin={joinEnabled}
+                                        publicCollection={publicCollection}
+                                        accessToken={
+                                            credentials.current.accessToken
+                                        }
+                                        collectionKey={collectionKey.current}
+                                        credentials={credentials}
+                                    />
+                                    <PrimaryActionButton
+                                        showJoinAsPrimary={
+                                            addPhotosEnabled && joinEnabled
+                                        }
+                                        publicCollection={publicCollection}
+                                        accessToken={
+                                            credentials.current.accessToken
+                                        }
+                                        collectionKey={collectionKey.current}
+                                        credentials={credentials}
+                                    />
+                                </Stack>
+                            </SpacedRow>
                         )}
-                    </SpacedRow>
-                )}
-            </NavbarBase>
-
-            <FileListWithViewer
-                files={publicFiles}
-                header={fileListHeader}
-                footer={fileListFooter}
-                enableDownload={downloadEnabled}
-                enableSelect={downloadEnabled}
-                selected={selected}
-                setSelected={setSelected}
-                activeCollectionID={PseudoCollectionID.all}
-                onRemotePull={publicAlbumsRemotePull}
-                onVisualFeedback={handleVisualFeedback}
-                onAddSaveGroup={onAddSaveGroup}
-            />
+                    </NavbarBase>
+                    <FileListWithViewer
+                        files={publicFiles}
+                        layout={layout === "masonry" ? "masonry" : "grid"}
+                        header={fileListHeader}
+                        footer={fileListFooter}
+                        enableDownload={downloadEnabled}
+                        enableSelect={downloadEnabled}
+                        selected={selected}
+                        setSelected={setSelected}
+                        activeCollectionID={PseudoCollectionID.all}
+                        disableGrouping={false}
+                        onRemotePull={publicAlbumsRemotePull}
+                        onVisualFeedback={handleVisualFeedback}
+                        onAddSaveGroup={onAddSaveGroup}
+                        publicAlbumsCredentials={credentials.current}
+                        collectionKey={collectionKey.current}
+                        onJoinAlbum={handleJoinAlbum}
+                        enableComment={commentsEnabled}
+                        enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
+                        pendingFileIndex={pendingFileNavigation?.fileIndex}
+                        pendingFileSidebar={pendingFileNavigation?.sidebar}
+                        pendingHighlightCommentID={
+                            pendingFileNavigation?.commentID
+                        }
+                        onPendingNavigationConsumed={() =>
+                            setPendingFileNavigation(undefined)
+                        }
+                    />
+                </>
+            )}
             {blockingLoad && <TranslucentLoadingOverlay />}
             <Upload
                 publicAlbumsCredentials={credentials.current}
@@ -523,7 +737,17 @@ export default function PublicCollectionGallery() {
             />
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
+                fullWidthOnMobile
             />
+            {publicCollection && collectionKey.current && (
+                <PublicFeedSidebar
+                    {...publicFeedVisibilityProps}
+                    files={publicFiles}
+                    credentials={credentials.current}
+                    collectionKey={collectionKey.current}
+                    onItemClick={handleFeedItemClick}
+                />
+            )}
         </FullScreenDropZone>
     );
 }
@@ -535,6 +759,16 @@ export default function PublicCollectionGallery() {
 const sortFilesForCollection = (files: EnteFile[], collection?: Collection) =>
     sortFiles(files, collection?.pubMagicMetadata?.data.asc ?? false);
 
+const normalizedPublicAlbumLayout = (layout: string | undefined) => {
+    if (layout === "continuous") {
+        return "masonry";
+    }
+    if (layout === "grouped" || layout === "trip" || layout === "masonry") {
+        return layout;
+    }
+    return "masonry";
+};
+
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
@@ -542,56 +776,127 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
     ":hover": { color: theme.vars.palette.accent.main },
 }));
 
+const GreenButton = styled(Button)(() => ({
+    backgroundColor: "#08C225",
+    borderRadius: "16px",
+    paddingBlock: "11px",
+    paddingInline: "20px",
+    "&:hover": { backgroundColor: "#07A820" },
+}));
+
+const navbarActionButtonSx = { borderRadius: "16px", paddingBlock: "11px" };
+
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlinedIcon />;
-
-    return (
-        <Box>
-            {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
-            ) : (
-                <FocusVisibleButton
-                    color="secondary"
-                    startIcon={icon}
-                    {...{ onClick, disabled }}
-                >
-                    {t("add_photos")}
-                </FocusVisibleButton>
-            )}
-        </Box>
-    );
-};
-
-/**
- * A visually different variation of {@link AddPhotosButton}. It also does not
- * shrink on mobile sized screens.
- */
-const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = uploadManager.isUploadInProgress();
-
     return (
         <FocusVisibleButton
-            color="accent"
-            startIcon={<AddPhotoAlternateOutlinedIcon />}
+            color="secondary"
+            startIcon={
+                isSmallWidth ? undefined : (
+                    <HugeiconsIcon
+                        icon={ImageAdd02Icon}
+                        size={20}
+                        strokeWidth={1.8}
+                    />
+                )
+            }
+            sx={navbarActionButtonSx}
             {...{ onClick, disabled }}
         >
-            {t("add_more_photos")}
+            {t("add_photos")}
         </FocusVisibleButton>
     );
 };
 
-const GoToEnte: React.FC = () => {
-    // Touchscreen devices are overwhemingly likely to be Android or iOS.
-    const isTouchscreen = useIsTouchscreen();
+interface PrimaryActionButtonProps {
+    /** If true, shows "Join Album" as the primary action */
+    showJoinAsPrimary?: boolean;
+    /** Collection to join (required if showJoinAsPrimary is true) */
+    publicCollection?: Collection;
+    /** Access token for the public link */
+    accessToken?: string;
+    /** Collection key from URL (base64 encoded) */
+    collectionKey?: string;
+    /** Credentials ref for JWT token access */
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+}
+
+const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
+    showJoinAsPrimary,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
+}) => {
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
+
+    if (showJoinAsPrimary) {
+        return (
+            <GreenButton color="accent" onClick={handleJoinAlbum}>
+                {t("join_album")}
+            </GreenButton>
+        );
+    }
+
+    const handleGetEnte = () => {
+        window.location.href = getEnteURL();
+    };
 
     return (
-        <Button color="accent" href="https://ente.io">
-            {isTouchscreen ? t("install") : t("sign_up")}
-        </Button>
+        <GreenButton color="accent" onClick={handleGetEnte}>
+            {t("try_ente")}
+        </GreenButton>
     );
+};
+
+interface SecondaryActionButtonProps {
+    onAddPhotos?: () => void;
+    enableJoin?: boolean;
+    publicCollection?: Collection;
+    accessToken?: string;
+    collectionKey?: string;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+}
+
+const SecondaryActionButton: React.FC<SecondaryActionButtonProps> = ({
+    onAddPhotos,
+    enableJoin,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
+}) => {
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
+
+    if (onAddPhotos) {
+        return <AddPhotosButton onClick={onAddPhotos} />;
+    }
+
+    if (enableJoin) {
+        return (
+            <FocusVisibleButton
+                color="secondary"
+                sx={navbarActionButtonSx}
+                onClick={handleJoinAlbum}
+            >
+                {t("join_album")}
+            </FocusVisibleButton>
+        );
+    }
+
+    return null;
 };
 
 interface SelectedFileOptionsProps {
@@ -607,17 +912,37 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 }) => (
     <Stack
         direction="row"
-        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+        sx={{
+            flex: 1,
+            minWidth: 0,
+            gap: 1,
+            alignItems: "center",
+            width: "100%",
+        }}
     >
-        <IconButton onClick={clearSelection}>
+        <IconButton
+            onClick={clearSelection}
+            sx={{ flexShrink: 0, ml: "-15px" }}
+        >
             <CloseIcon />
         </IconButton>
-        <Typography sx={{ mr: "auto" }}>
+        <Typography
+            sx={{
+                mr: "auto",
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+            }}
+        >
             {t("selected_count", { selected: count })}
         </Typography>
         <Tooltip title={t("download")}>
-            <IconButton onClick={downloadFilesHelper}>
-                <DownloadIcon />
+            <IconButton
+                onClick={downloadFilesHelper}
+                sx={{ flexShrink: 0, mr: "-15px" }}
+            >
+                <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -628,12 +953,22 @@ interface FileListHeaderProps {
     publicFiles: EnteFile[];
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
+    onAddPhotos?: () => void;
+    onShowFeed?: () => void;
+    hasSelection: boolean;
 }
 
 /**
  * The fixed height (in px) of {@link FileListHeader}.
  */
-const fileListHeaderHeight = 68;
+const fileListHeaderHeight = 84;
+
+/**
+ * The height (in px) of {@link FileListHeader} on mobile.
+ *
+ * Keep this fixed so the virtualized list has a stable header row height.
+ */
+const fileListHeaderHeightMobile = 132;
 
 /**
  * A header shown before the listing of files.
@@ -646,7 +981,21 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicFiles,
     downloadEnabled,
     onAddSaveGroup,
+    onAddPhotos,
+    onShowFeed,
+    hasSelection,
 }) => {
+    const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+    const addPhotosDisabled = uploadManager.isUploadInProgress();
+
+    const memoriesDateRange = useMemo(() => {
+        return quickLinkDateRangeForFiles(publicFiles);
+    }, [publicFiles]);
+
+    const isQuickLinkAlbum =
+        memoriesDateRange !== undefined &&
+        publicCollection.name === memoriesDateRange;
+
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
@@ -656,103 +1005,160 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
             onAddSaveGroup,
         );
 
+    const handleShare = async () => {
+        if (typeof window === "undefined") return;
+
+        const shareUrl = window.location.href;
+        const shareText = `${publicCollection.name}\n${shareUrl}`;
+        const isMobile = window.matchMedia("(width < 720px)").matches;
+
+        if (isMobile && typeof navigator.share === "function") {
+            try {
+                await navigator.share({ text: shareText });
+                return;
+            } catch (error) {
+                if (error instanceof Error && error.name === "AbortError") {
+                    return;
+                }
+            }
+        }
+
+        void navigator.clipboard.writeText(isMobile ? shareText : shareUrl);
+        setShowCopiedMessage(true);
+        setTimeout(() => setShowCopiedMessage(false), 2000);
+    };
+
     return (
-        <GalleryItemsHeaderAdapter>
-            <SpacedRow>
-                <GalleryItemsSummary
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
-                {downloadEnabled && (
-                    <OverflowMenu ariaID="collection-options">
-                        <OverflowMenuOption
-                            startIcon={<FileDownloadOutlinedIcon />}
-                            onClick={downloadAllFiles}
+        <>
+            <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
+                <SpacedRow
+                    sx={{
+                        width: "100%",
+                        "@media (width < 720px)": {
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            gap: 1,
+                        },
+                    }}
+                >
+                    <Box
+                        sx={{
+                            minWidth: 0,
+                            flex: 1,
+                            "@media (width < 720px)": { width: "100%" },
+                        }}
+                    >
+                        <GalleryItemsSummary
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                            endIcon={
+                                !isQuickLinkAlbum && memoriesDateRange ? (
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted", ml: "-6px" }}
+                                    >
+                                        <Box
+                                            component="span"
+                                            sx={{ mr: "6px" }}
+                                        >
+                                            {"\u00b7"}
+                                        </Box>
+                                        {memoriesDateRange}
+                                    </Typography>
+                                ) : undefined
+                            }
+                            nameProps={{
+                                noWrap: true,
+                                sx: { width: "100%", maxWidth: "100%" },
+                            }}
+                        />
+                    </Box>
+                    <Stack
+                        direction="row"
+                        spacing={0}
+                        sx={{
+                            alignItems: "center",
+                            "@media (width > 720px)": { mr: -1.5 },
+                            "@media (width < 720px)": { ml: -1.5 },
+                        }}
+                    >
+                        {onShowFeed && (
+                            <IconButton
+                                onClick={onShowFeed}
+                                disabled={hasSelection}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <FeedIcon />
+                                </Box>
+                            </IconButton>
+                        )}
+                        {downloadEnabled && (
+                            <IconButton
+                                onClick={downloadAllFiles}
+                                disabled={hasSelection}
+                            >
+                                <HugeiconsIcon
+                                    icon={Download01Icon}
+                                    strokeWidth={1.6}
+                                />
+                            </IconButton>
+                        )}
+                        {onAddPhotos && (
+                            <IconButton
+                                onClick={onAddPhotos}
+                                disabled={addPhotosDisabled || hasSelection}
+                            >
+                                <HugeiconsIcon
+                                    icon={ImageAdd02Icon}
+                                    strokeWidth={1.8}
+                                />
+                            </IconButton>
+                        )}
+                        <IconButton
+                            onClick={handleShare}
+                            disabled={hasSelection}
                         >
-                            {t("download_album")}
-                        </OverflowMenuOption>
-                    </OverflowMenu>
-                )}
-            </SpacedRow>
-        </GalleryItemsHeaderAdapter>
+                            <HugeiconsIcon
+                                icon={Share08Icon}
+                                strokeWidth={1.6}
+                            />
+                        </IconButton>
+                    </Stack>
+                </SpacedRow>
+            </GalleryItemsHeaderAdapter>
+            <Notification
+                open={showCopiedMessage}
+                onClose={() => setShowCopiedMessage(false)}
+                horizontal="left"
+                attributes={{
+                    color: "secondary",
+                    startIcon: <CheckIcon />,
+                    title: "Copied!",
+                }}
+            />
+        </>
     );
 };
 
-interface FileListFooterProps {
-    referralCode?: string;
-    onAddPhotos?: () => void;
-}
-
 /**
- * The dynamic (prop-dependent) height of {@link FileListFooter}.
+ * The fixed height (in px) of {@link FileListFooter}.
  */
-const fileListFooterHeightForProps = ({
-    referralCode,
-    onAddPhotos,
-}: FileListFooterProps) => (onAddPhotos ? 104 : 0) + (referralCode ? 113 : 75);
+const fileListFooterHeight = 24;
 
 /**
  * A footer shown after the listing of files.
  *
- * It scrolls along with the content. It has a dynamic height, dependent on the
- * props, calculated using {@link fileListFooterHeightForProps}.
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListFooterHeight}.
  */
-
-const FileListFooter: React.FC<FileListFooterProps> = ({
-    referralCode,
-    onAddPhotos,
-}) => (
-    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
-        {onAddPhotos && (
-            <CenteredFill>
-                <AddMorePhotosButton onClick={onAddPhotos} />
-            </CenteredFill>
-        )}
-        {/* Make the entire area tappable, otherwise it is hard to
-            get at on mobile devices. */}
-        <Link
-            color="text.muted"
-            sx={{
-                mt: "48px",
-                mb: "6px",
-                textAlign: "center",
-                "&:hover": { color: "inherit" },
-            }}
-            target="_blank"
-            href="https://ente.io"
-        >
-            <Typography variant="small">
-                <Trans
-                    i18nKey="shared_using"
-                    components={{
-                        a: (
-                            <Typography
-                                variant="small"
-                                component="span"
-                                sx={{ color: "accent.main" }}
-                            />
-                        ),
-                    }}
-                    values={{ url: "ente.io" }}
-                />
-            </Typography>
-        </Link>
-        {referralCode && (
-            <Typography
-                sx={{
-                    mt: "6px",
-                    mb: 0,
-                    padding: "8px",
-                    bgcolor: "accent.main",
-                    color: "accent.contrastText",
-                    textAlign: "center",
-                }}
-            >
-                <Trans
-                    i18nKey={"sharing_referral_code"}
-                    values={{ referralCode }}
-                />
-            </Typography>
-        )}
-    </Stack>
+const FileListFooter: React.FC = () => (
+    <Box sx={{ height: fileListFooterHeight }} />
 );

@@ -122,7 +122,9 @@ class QuickLinkAlbumItem extends StatelessWidget {
                                 ],
                               );
                             } else if (snapshot.hasError) {
-                              return Text(S.of(context).somethingWentWrong);
+                              return Text(
+                                AppLocalizations.of(context).somethingWentWrong,
+                              );
                             } else {
                               return const EnteLoadingWidget(size: 10);
                             }

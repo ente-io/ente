@@ -9,7 +9,7 @@ import { apiURL } from "ente-base/origins";
 import { ensureString } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { codeFromURIString, type Code } from "services/code";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export interface AuthCodesAndTimeOffset {
     codes: Code[];

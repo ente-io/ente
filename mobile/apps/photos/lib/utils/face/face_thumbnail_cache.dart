@@ -2,19 +2,20 @@ import "dart:async";
 import "dart:io" show File;
 import "dart:math" show pow;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/extensions/stop_watch.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("FaceCropUtils");
@@ -57,8 +58,9 @@ Future<String?> checkUsedFaceIDForPersonOrClusterId(
   final String? cachedFaceID =
       _personOrClusterIdToCachedFaceID.get(personOrClusterID);
   if (cachedFaceID != null) return cachedFaceID;
-  final String? faceIDFromDB = await MLDataDB.instance
-      .getFaceIdUsedForPersonOrCluster(personOrClusterID);
+  final mlDataDB = isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+  final String? faceIDFromDB =
+      await mlDataDB.getFaceIdUsedForPersonOrCluster(personOrClusterID);
   if (faceIDFromDB != null) {
     _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceIDFromDB);
   }
@@ -69,7 +71,8 @@ Future<void> putFaceIdCachedForPersonOrCluster(
   String personOrClusterID,
   String faceID,
 ) async {
-  await MLDataDB.instance.putFaceIdCachedForPersonOrCluster(
+  final mlDataDB = isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+  await mlDataDB.putFaceIdCachedForPersonOrCluster(
     personOrClusterID,
     faceID,
   );
@@ -90,12 +93,12 @@ Future<void> _putCachedCropForFaceID(
 Future<void> checkRemoveCachedFaceIDForPersonOrClusterId(
   String personOrClusterID,
 ) async {
-  final String? cachedFaceID = await MLDataDB.instance
-      .getFaceIdUsedForPersonOrCluster(personOrClusterID);
+  final mlDataDB = isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+  final String? cachedFaceID =
+      await mlDataDB.getFaceIdUsedForPersonOrCluster(personOrClusterID);
   if (cachedFaceID != null) {
     _personOrClusterIdToCachedFaceID.remove(personOrClusterID);
-    await MLDataDB.instance
-        .removeFaceIdCachedForPersonOrCluster(personOrClusterID);
+    await mlDataDB.removeFaceIdCachedForPersonOrCluster(personOrClusterID);
   }
 }
 
@@ -307,10 +310,10 @@ Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
   late final String taskId;
   if (useFullFile) {
     relevantTaskQueue = _queueFullFileFaceGenerations;
-    taskId = [file.uploadedFileID!, "-full"].join();
+    taskId = await _faceCropTaskId(file, useFullFile: true);
   } else {
     relevantTaskQueue = _queueThumbnailFaceGenerations;
-    taskId = [file.uploadedFileID!, "-thumbnail"].join();
+    taskId = await _faceCropTaskId(file, useFullFile: false);
   }
 
   await relevantTaskQueue.addTask(taskId, () async {
@@ -323,6 +326,27 @@ Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
   });
 
   return completer.future;
+}
+
+Future<String> _faceCropTaskId(
+  EnteFile file, {
+  required bool useFullFile,
+}) async {
+  final suffix = useFullFile ? "-full" : "-thumbnail";
+  if (isOfflineMode) {
+    final localId = file.localID;
+    if (localId != null && localId.isNotEmpty) {
+      final localIntId =
+          await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+      return "$localIntId$suffix";
+    }
+    return "${file.hashCode}$suffix";
+  }
+  final baseId = file.uploadedFileID?.toString() ??
+      file.generatedID?.toString() ??
+      file.localID ??
+      file.hashCode.toString();
+  return "$baseId${useFullFile ? "-full" : "-thumbnail"}";
 }
 
 Future<Map<String, Uint8List>?> _getFaceCrops(

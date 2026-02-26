@@ -1,10 +1,10 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -34,6 +34,8 @@ class MenuItemWidget extends StatefulWidget {
   final VoidCallback? onLongPress;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
+
+  final EdgeInsets? padding;
 
   // singleBorderRadius is applied to the border when it's a standalone menu item.
   // Widget will apply singleBorderRadius if value of both isTopBorderRadiusRemoved
@@ -86,8 +88,9 @@ class MenuItemWidget extends StatefulWidget {
     this.isTopBorderRadiusRemoved = false,
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
-    this.surfaceExecutionStates = true,
+    this.surfaceExecutionStates = false,
     this.alwaysShowSuccessState = false,
+    this.padding,
     super.key,
   });
 
@@ -97,8 +100,10 @@ class MenuItemWidget extends StatefulWidget {
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
-  ValueNotifier<ExecutionState> executionStateNotifier =
-      ValueNotifier(ExecutionState.idle);
+  ValueNotifier<ExecutionState> executionStateNotifier = ValueNotifier(
+    ExecutionState.idle,
+  );
+  VoidCallback? _expandableControllerListener;
 
   Color? menuItemColor;
   late double borderRadius;
@@ -111,9 +116,10 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             ? widget.multipleBorderRadius
             : widget.singleBorderRadius;
     if (widget.expandableController != null) {
-      widget.expandableController!.addListener(() {
+      _expandableControllerListener = () {
         setState(() {});
-      });
+      };
+      widget.expandableController!.addListener(_expandableControllerListener!);
     }
     super.initState();
   }
@@ -133,8 +139,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   @override
   void dispose() {
     if (widget.expandableController != null) {
+      if (_expandableControllerListener != null) {
+        widget.expandableController!
+            .removeListener(_expandableControllerListener!);
+      }
       widget.expandableController!.dispose();
     }
+    _debouncer.cancelDebounceTimer();
     executionStateNotifier.dispose();
     super.dispose();
   }
@@ -167,7 +178,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.only(left: 16, right: 12),
+      padding: widget.padding ?? const EdgeInsets.only(left: 16, right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: topBorderRadius,
@@ -180,14 +191,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.alignCaptionedTextToLeft && widget.leadingIcon == null
-              ? const SizedBox.shrink()
-              : LeadingWidget(
-                  leadingIconSize: widget.leadingIconSize,
-                  leadingIcon: widget.leadingIcon,
-                  leadingIconColor: widget.leadingIconColor,
-                  leadingIconWidget: widget.leadingIconWidget,
-                ),
+          if (!widget.alignCaptionedTextToLeft || widget.leadingIcon != null)
+            LeadingWidget(
+              leadingIconSize: widget.leadingIconSize,
+              leadingIcon: widget.leadingIcon,
+              leadingIconColor: widget.leadingIconColor,
+              leadingIconWidget: widget.leadingIconWidget,
+            ),
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(
@@ -217,11 +227,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       return;
     }
     _debouncer.run(
-      () => Future(
-        () {
-          executionStateNotifier.value = ExecutionState.inProgress;
-        },
-      ),
+      () => Future(() {
+        executionStateNotifier.value = ExecutionState.inProgress;
+      }),
     );
     await widget.onTap?.call().then(
       (value) {

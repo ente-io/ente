@@ -5,7 +5,7 @@ import {
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "ente-media/file-type";
-import FileTypeDetect from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 
 /**
  * Read the file's initial contents or use the file's name to detect its type.
@@ -102,7 +102,7 @@ const readInitialChunkOfFile = async (file: File) => {
 };
 
 const detectFileTypeFromBuffer = async (buffer: Uint8Array) => {
-    const result = await FileTypeDetect.fromBuffer(buffer);
+    const result = await fileTypeFromBuffer(buffer);
     if (!result)
         throw Error("Could not deduce file type from the file's contents");
     return result;

@@ -23,6 +23,7 @@ import "package:photos/utils/separators_util.dart";
 enum ActionTypesToShow {
   addViewer,
   addCollaborator,
+  addAdmin,
 }
 
 class AddParticipantPage extends StatefulWidget {
@@ -97,7 +98,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              S.of(context).addANewEmail,
+              AppLocalizations.of(context).addANewEmail,
               style: enteTextTheme.small
                   .copyWith(color: enteColorScheme.textMuted),
             ),
@@ -114,7 +115,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 children: [
                   filterSuggestedUsers.isNotEmpty
                       ? MenuSectionTitle(
-                          title: S.of(context).orPickAnExistingOne,
+                          title:
+                              AppLocalizations.of(context).orPickAnExistingOne,
                         )
                       : const SizedBox.shrink(),
                   Expanded(
@@ -131,8 +133,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               children: [
                                 filterSuggestedUsers.isNotEmpty
                                     ? MenuSectionDescriptionWidget(
-                                        content: S
-                                            .of(context)
+                                        content: AppLocalizations.of(context)
                                             .longPressAnEmailToVerifyEndToEndEncryption,
                                       )
                                     : const SizedBox.shrink(),
@@ -140,9 +141,16 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   ActionTypesToShow.addCollaborator,
                                 )
                                     ? MenuSectionDescriptionWidget(
-                                        content: S
-                                            .of(context)
+                                        content: AppLocalizations.of(context)
                                             .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
+                                      )
+                                    : const SizedBox.shrink(),
+                                widget.actionTypesToShow.contains(
+                                  ActionTypesToShow.addAdmin,
+                                )
+                                    ? MenuSectionDescriptionWidget(
+                                        content: AppLocalizations.of(context)
+                                            .adminsCanManagePhotosAndParticipants,
                                       )
                                     : const SizedBox.shrink(),
                               ],
@@ -163,7 +171,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
                                 currentUser,
-                                type: AvatarType.mini,
+                                type: AvatarType.md,
                               ),
                               menuItemColor:
                                   getEnteColorScheme(context).fillFaint,
@@ -243,43 +251,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<Widget> _actionButtons() {
     final widgets = <Widget>[];
-    if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
-      widgets.add(
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
-          labelText: S.of(context).addViewers(_selectedEmails.length),
-          isDisabled: _selectedEmails.isEmpty,
-          onTap: () async {
-            final results = <bool>[];
-            final collections = widget.collections;
-
-            for (String email in _selectedEmails) {
-              bool result = false;
-              for (Collection collection in collections) {
-                result = await collectionActions.addEmailToCollection(
-                  context,
-                  collection,
-                  email,
-                  CollectionParticipantRole.viewer,
-                );
-              }
-              results.add(result);
-            }
-
-            final noOfSuccessfullAdds = results.where((e) => e).length;
-            showToast(
-              context,
-              S.of(context).viewersSuccessfullyAdded(noOfSuccessfullAdds),
-            );
-
-            if (!results.any((e) => e == false) && mounted) {
-              Navigator.of(context).pop(true);
-            }
-          },
-        ),
-      );
-    }
     if (widget.actionTypesToShow.contains(
       ActionTypesToShow.addCollaborator,
     )) {
@@ -290,7 +261,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                   ? ButtonType.neutral
                   : ButtonType.primary,
           buttonSize: ButtonSize.large,
-          labelText: S.of(context).addCollaborators(_selectedEmails.length),
+          labelText: AppLocalizations.of(context)
+              .addCollaborators(count: _selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             // TODO: This is not currently designed for best UX for action on
@@ -316,7 +288,88 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             final noOfSuccessfullAdds = results.where((e) => e).length;
             showToast(
               context,
-              S.of(context).collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
+              AppLocalizations.of(context)
+                  .collaboratorsSuccessfullyAdded(count: noOfSuccessfullAdds),
+            );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
+      widgets.add(
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: AppLocalizations.of(context)
+              .addViewers(count: _selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (final email in _selectedEmails) {
+              bool result = false;
+              for (final collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.viewer,
+                );
+              }
+              results.add(result);
+            }
+
+            final noOfSuccessfullAdds = results.where((e) => e).length;
+            showToast(
+              context,
+              AppLocalizations.of(context)
+                  .viewersSuccessfullyAdded(count: noOfSuccessfullAdds),
+            );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addAdmin)) {
+      widgets.add(
+        ButtonWidget(
+          buttonType: widget.actionTypesToShow.length == 1
+              ? ButtonType.primary
+              : ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          labelText: AppLocalizations.of(context)
+              .addAdmins(count: _selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (final email in _selectedEmails) {
+              bool result = false;
+              for (final collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.admin,
+                );
+              }
+              results.add(result);
+            }
+
+            final successful = results.where((e) => e).length;
+            showToast(
+              context,
+              AppLocalizations.of(context)
+                  .adminsSuccessfullyAdded(count: successful),
             );
 
             if (!results.any((e) => e == false) && mounted) {
@@ -360,7 +413,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               ),
               fillColor: getEnteColorScheme(context).fillFaint,
               filled: true,
-              hintText: S.of(context).enterEmail,
+              hintText: AppLocalizations.of(context).enterEmail,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
@@ -398,7 +451,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.small,
-          labelText: S.of(context).add,
+          labelText: AppLocalizations.of(context).add,
           isDisabled: !_emailIsValid,
           onTap: () async {
             if (_emailIsValid) {
@@ -434,12 +487,18 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     if (collections.isEmpty) {
       return [];
     }
+    final Set<String> ownerEmails = {};
 
     for (final Collection collection in collections) {
       for (final User u in collection.sharees) {
         if (u.id != null && u.email.isNotEmpty) {
           existingEmails.add(u.email);
         }
+      }
+      final ownerEmail = collection.owner.email;
+      if (ownerEmail.isNotEmpty) {
+        ownerEmails.add(ownerEmail);
+        existingEmails.add(ownerEmail);
       }
     }
 
@@ -455,6 +514,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             .contains(_textController.text.trim().toLowerCase()),
       );
     }
+    suggestedUsers.removeWhere(
+      (element) => ownerEmails.contains(element.email),
+    );
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
 
     return suggestedUsers;
@@ -462,11 +524,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   String _getTitle() {
     if (widget.actionTypesToShow.length > 1) {
-      return S.of(context).addParticipants;
-    } else if (widget.actionTypesToShow.first == ActionTypesToShow.addViewer) {
-      return S.of(context).addViewer;
-    } else {
-      return S.of(context).addCollaborator;
+      return AppLocalizations.of(context).addParticipants;
+    }
+    switch (widget.actionTypesToShow.first) {
+      case ActionTypesToShow.addViewer:
+        return AppLocalizations.of(context).addViewer;
+      case ActionTypesToShow.addCollaborator:
+        return AppLocalizations.of(context).addCollaborator;
+      case ActionTypesToShow.addAdmin:
+        return AppLocalizations.of(context).addAdmin;
     }
   }
 }

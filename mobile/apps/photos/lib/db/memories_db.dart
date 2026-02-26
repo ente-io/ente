@@ -15,10 +15,15 @@ class MemoriesDB {
   static const columnFileID = 'file_id';
   static const columnSeenTime = 'seen_time';
 
-  MemoriesDB._privateConstructor();
-  static final MemoriesDB instance = MemoriesDB._privateConstructor();
+  final String _dbName;
 
-  static Future<Database>? _dbFuture;
+  MemoriesDB._privateConstructor({String dbName = _databaseName})
+      : _dbName = dbName;
+  static final MemoriesDB instance = MemoriesDB._privateConstructor();
+  static final MemoriesDB offlineInstance =
+      MemoriesDB._privateConstructor(dbName: "ente.memories.offline.db");
+
+  Future<Database>? _dbFuture;
   Future<Database> get database async {
     _dbFuture ??= _initDatabase();
     return _dbFuture!;
@@ -27,7 +32,7 @@ class MemoriesDB {
   Future<Database> _initDatabase() async {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
-    final String path = join(documentsDirectory.path, _databaseName);
+    final String path = join(documentsDirectory.path, _dbName);
     return await openDatabase(
       path,
       version: _databaseVersion,
@@ -47,12 +52,12 @@ class MemoriesDB {
   }
 
   Future<void> clearTable() async {
-    final db = await instance.database;
+    final db = await database;
     await db.delete(table);
   }
 
   Future<int> clearMemoriesSeenBeforeTime(int timestamp) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       table,
       where: '$columnSeenTime < ?',
@@ -60,23 +65,31 @@ class MemoriesDB {
     );
   }
 
-  Future<int> markMemoryAsSeen(Memory memory, int timestamp) async {
-    final db = await instance.database;
+  Future<int> markMemoryAsSeen(
+    Memory memory,
+    int timestamp, {
+    int? seenTimeKey,
+  }) async {
+    final db = await database;
     return await db.insert(
       table,
-      _getRowForSeenMemory(memory, timestamp),
+      _getRowForSeenMemory(memory, timestamp, seenTimeKey: seenTimeKey),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   Future<Map<int, int>> getSeenTimes() async {
-    final db = await instance.database;
+    final db = await database;
     return _convertToSeenTimes(await db.query(table));
   }
 
-  Map<String, dynamic> _getRowForSeenMemory(Memory memory, int timestamp) {
+  Map<String, dynamic> _getRowForSeenMemory(
+    Memory memory,
+    int timestamp, {
+    int? seenTimeKey,
+  }) {
     final row = <String, dynamic>{};
-    row[columnFileID] = memory.file.generatedID;
+    row[columnFileID] = seenTimeKey ?? memory.file.generatedID;
     row[columnSeenTime] = timestamp;
     return row;
   }

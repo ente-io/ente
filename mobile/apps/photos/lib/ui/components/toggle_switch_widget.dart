@@ -1,12 +1,12 @@
 import "dart:io";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
 
 class ToggleSwitchWidget extends StatefulWidget {
   final BoolCallBack value;
@@ -30,6 +30,23 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   void initState() {
     super.initState();
     toggleValue = widget.value.call();
+  }
+
+  @override
+  void didUpdateWidget(covariant ToggleSwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newValue = widget.value.call();
+    if (toggleValue != newValue) {
+      setState(() {
+        toggleValue = newValue;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _debouncer.cancelDebounceTimer();
+    super.dispose();
   }
 
   @override
@@ -106,12 +123,14 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   }
 
   Future<void> _onChanged(bool negationOfToggleValue) async {
+    if (!mounted) return;
     setState(() {
       toggleValue = negationOfToggleValue;
       //start showing inProgress statu icons if toggle takes more than debounce time
       _debouncer.run(
         () => Future(
           () {
+            if (!mounted) return;
             setState(() {
               executionState = ExecutionState.inProgress;
             });
@@ -129,16 +148,16 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     _debouncer.cancelDebounceTimer();
 
     final newValue = widget.value.call();
+    if (!mounted) return;
     setState(() {
       if (toggleValue == newValue) {
         if (executionState == ExecutionState.inProgress) {
           executionState = ExecutionState.successful;
           Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() {
-                executionState = ExecutionState.idle;
-              });
-            }
+            if (!mounted) return;
+            setState(() {
+              executionState = ExecutionState.idle;
+            });
           });
         }
       } else {

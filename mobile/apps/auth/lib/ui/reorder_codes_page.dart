@@ -34,7 +34,7 @@ class _ReorderCodesPageState extends State<ReorderCodesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Custom order"),
+        title: Text(context.l10n.customOrder),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () async {

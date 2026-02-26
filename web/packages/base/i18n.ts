@@ -22,6 +22,7 @@ export const supportedLocales = [
     "en-US" /* English */,
     "fr-FR" /* French */,
     "de-DE" /* German */,
+    "ca-ES" /* Catalan */,
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
@@ -36,6 +37,8 @@ export const supportedLocales = [
     "ja-JP" /* Japanese */,
     "ar-SA" /* Arabic */,
     "tr-TR" /* Turkish */,
+    "cs-CZ" /* Czech */,
+    "el-GR" /* Greek */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -171,6 +174,8 @@ const closestSupportedLocale = (
             return "fr-FR";
         } else if (ls.startsWith("de")) {
             return "de-DE";
+        } else if (ls.startsWith("ca")) {
+            return "ca-ES";
         } else if (ls.startsWith("zh")) {
             return "zh-CN";
         } else if (ls.startsWith("nl")) {
@@ -201,6 +206,10 @@ const closestSupportedLocale = (
             return "ar-SA";
         } else if (ls.startsWith("tr")) {
             return "tr-TR";
+        } else if (ls.startsWith("cs")) {
+            return "cs-CZ";
+        } else if (ls.startsWith("el")) {
+            return "el-GR";
         }
     }
 

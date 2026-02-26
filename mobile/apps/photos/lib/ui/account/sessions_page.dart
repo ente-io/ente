@@ -1,15 +1,16 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/gateways/users/models/sessions.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/user/sessions.dart';
 import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/standalone/date_time.dart";
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
@@ -25,7 +26,10 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   void initState() {
     _fetchActiveSessions().onError((error, stackTrace) {
-      showToast(context, S.of(context).failedToFetchActiveSessions);
+      showToast(
+        context,
+        AppLocalizations.of(context).failedToFetchActiveSessions,
+      );
     });
     super.initState();
   }
@@ -35,7 +39,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).activeSessions),
+        title: Text(AppLocalizations.of(context).activeSessions),
       ),
       body: _getBody(),
     );
@@ -91,7 +95,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     const Padding(padding: EdgeInsets.all(8)),
                     Flexible(
                       child: Text(
-                        getFormattedTime(context, lastUsedTime),
+                        getFormattedTime(lastUsedTime, context: context),
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
@@ -115,7 +119,8 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -125,10 +130,11 @@ class _SessionsPageState extends State<SessionsPage> {
       await dialog.hide();
       _logger.severe('failed to terminate');
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        S.of(context).oops,
-        S.of(context).somethingWentWrongPleaseTryAgain,
+        title: AppLocalizations.of(context).oops,
+        message: AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }
@@ -154,14 +160,15 @@ class _SessionsPageState extends State<SessionsPage> {
     Widget text;
     if (isLoggingOutFromThisDevice) {
       text = Text(
-        S.of(context).thisWillLogYouOutOfThisDevice,
+        AppLocalizations.of(context).thisWillLogYouOutOfThisDevice,
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              S.of(context).thisWillLogYouOutOfTheFollowingDevice,
+              AppLocalizations.of(context)
+                  .thisWillLogYouOutOfTheFollowingDevice,
             ),
             const Padding(padding: EdgeInsets.all(8)),
             Text(
@@ -173,12 +180,12 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).terminateSession),
+      title: Text(AppLocalizations.of(context).terminateSession),
       content: text,
       actions: [
         TextButton(
           child: Text(
-            S.of(context).terminate,
+            AppLocalizations.of(context).terminate,
             style: const TextStyle(
               color: Colors.red,
             ),
@@ -194,7 +201,7 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            S.of(context).cancel,
+            AppLocalizations.of(context).cancel,
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).colorScheme.greenAlternative
@@ -220,7 +227,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        S.of(context).thisDevice,
+        AppLocalizations.of(context).thisDevice,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.greenAlternative,

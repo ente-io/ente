@@ -12,6 +12,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -22,6 +23,7 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -52,34 +54,39 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.hide,
       },
       tagPrefix: "device_folder:" + deviceCollection.name,
+      galleryType: GalleryType.localFolder,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
           ? BackupHeaderWidget(deviceCollection)
           : const SizedBox.shrink(),
-      initialFiles: [deviceCollection.thumbnail!],
+      initialFiles: deviceCollection.thumbnail != null
+          ? [deviceCollection.thumbnail!]
+          : const <EnteFile>[],
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            GalleryType.localFolder,
-            deviceCollection.name,
-            _selectedFiles,
-            deviceCollection: deviceCollection,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              GalleryType.localFolder,
+              deviceCollection.name,
+              _selectedFiles,
+              deviceCollection: deviceCollection,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                GalleryType.localFolder,
-                _selectedFiles,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  GalleryType.localFolder,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -121,8 +128,9 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               MenuItemWidget(
-                captionedTextWidget:
-                    CaptionedTextWidget(title: S.of(context).backup),
+                captionedTextWidget: CaptionedTextWidget(
+                  title: AppLocalizations.of(context).backup,
+                ),
                 singleBorderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
@@ -138,6 +146,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                           .updateDeviceFolderSyncStatus(
                         {widget.deviceCollection.id: !shouldBackup.value},
                       );
+                      await backupPreferenceService
+                          .setHasManualFolderSelection(true);
                       if (mounted) {
                         setState(() {
                           shouldBackup.value = !shouldBackup.value;
@@ -157,8 +167,9 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 builder: (BuildContext context, bool value, _) {
                   return MenuSectionDescriptionWidget(
                     content: value
-                        ? S.of(context).deviceFilesAutoUploading
-                        : S.of(context).turnOnBackupForAutoUpload,
+                        ? AppLocalizations.of(context).deviceFilesAutoUploading
+                        : AppLocalizations.of(context)
+                            .turnOnBackupForAutoUpload,
                   );
                 },
               ),
@@ -250,7 +261,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
         const SizedBox(height: 24),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).resetIgnoredFiles,
+            title: AppLocalizations.of(context).resetIgnoredFiles,
           ),
           singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -269,7 +280,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           },
         ),
         MenuSectionDescriptionWidget(
-          content: S.of(context).ignoredFolderUploadReason,
+          content: AppLocalizations.of(context).ignoredFolderUploadReason,
         ),
       ],
     );

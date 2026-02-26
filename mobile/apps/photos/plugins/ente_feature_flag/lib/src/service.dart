@@ -12,6 +12,11 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
+  static const int _uploadV2Flag = 1 << 0;
+  static const int _commentsFlag = 1 << 1;
+  static const int _backupOptionsFlag = 1 << 2;
+  static const int _videoStreamingFlag = 1 << 3;
+
   final SharedPreferences _prefs;
   final Dio _enteDio;
 
@@ -40,7 +45,13 @@ class FlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || kDebugMode;
+  /// Returns true if the user is an internal user, respecting the debug toggle.
+  bool get internalUser {
+    final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
+    return (flags.internalUser || kDebugMode) && !isDisabled;
+  }
+
+  bool get cloudflareUploadWorker => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -58,11 +69,48 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
-  bool get enableVectorDb => flags.internalUser;
+  bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
+
+  bool get enableVectorDb => hasGrantedMLConsent;
+
+  bool get usearchForSearch => true;
+
+  bool get usearchForSuggestions => internalUser;
 
   String get castUrl => flags.castUrl;
 
   String get customDomain => flags.customDomain;
+
+  String get embedUrl => flags.embedUrl;
+
+  bool get useNativeVideoEditor => true;
+
+  bool get enableOnlyBackupFuturePhotos =>
+      internalUser || _isServerFlagEnabled(_backupOptionsFlag);
+
+  bool get facesTimeline => internalUser;
+  bool get ritualsFlag => true;
+
+  bool get stopStreamProcess => true;
+
+  bool get streamEnabledByDefault => _isServerFlagEnabled(_videoStreamingFlag);
+
+  bool get manualTagFileToPerson => hasGrantedMLConsent;
+
+  bool get enableShareePin => true;
+
+  bool get isSocialEnabled =>
+      internalUser || _isServerFlagEnabled(_commentsFlag);
+
+  bool get useRustForML => internalUser;
+
+  Future<void> tryRefreshFlags() async {
+    try {
+      await _fetch();
+    } catch (e) {
+      debugPrint("Failed to refresh flags: $e");
+    }
+  }
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
@@ -112,10 +160,7 @@ class FlagService {
     try {
       final response = await _enteDio.post(
         "/remote-store/update",
-        data: {
-          "key": key,
-          "value": value,
-        },
+        data: {"key": key, "value": value},
       );
       if (response.statusCode != HttpStatus.ok) {
         throw Exception("Unexpected state");
@@ -131,4 +176,7 @@ class FlagService {
     _prefs.setString("remote_flags", flags.toJson());
     _fetch().ignore();
   }
+
+  bool _isServerFlagEnabled(int flagBit) =>
+      (flags.serverApiFlag & flagBit) != 0;
 }

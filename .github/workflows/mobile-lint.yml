@@ -1,20 +1,23 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every pull request (open or push to it) that changes mobile/
+    # Run on every pull request (open or push to it) that changes photos app or rust core
     pull_request:
         paths:
             - "mobile/apps/photos/**"
+            - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
     FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.90.0"
+    RUSTFLAGS: -D warnings
 
 permissions:
     contents: read
 
 jobs:
-    lint:
+    mobile-lint:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -32,6 +35,64 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt,clippy
+
+            - name: Cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      mobile/packages/rust/rust/target
+                      mobile/apps/photos/rust/target
+                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
+
             - run: flutter pub get
 
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
+
             - run: flutter analyze --no-fatal-infos
+
+            - name: Check formatting (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo build
+
+            - name: Test (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo test
+
+            - name: Check formatting (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo build
+
+            - name: Test (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo test

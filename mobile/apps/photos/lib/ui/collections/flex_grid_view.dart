@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:math';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
@@ -16,10 +17,10 @@ import "package:photos/ui/collections/album/list_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/collections/album/new_row_item.dart";
 import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
   /*
@@ -44,6 +45,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final SelectedAlbums? selectedAlbums;
   final double scrollBottomSafeArea;
   final bool onlyAllowSelection;
+  final UISectionType? sectionType;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -57,6 +59,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.selectedAlbums,
     this.scrollBottomSafeArea = 8,
     this.onlyAllowSelection = false,
+    this.sectionType,
   });
 
   @override
@@ -104,12 +107,15 @@ class _CollectionsFlexiGridViewWidgetState
         widget.tag +
         "_" +
         c.id.toString();
+    final bool hasVerifiedLock =
+        widget.sectionType == UISectionType.hiddenCollections;
     // ignore: unawaited_futures
     routeToPage(
       context,
       CollectionPage(
         tagPrefix: tagPrefix,
         CollectionWithThumbnail(c, thumbnail),
+        hasVerifiedLock: hasVerifiedLock,
       ),
     );
   }
@@ -173,6 +179,9 @@ class _CollectionsFlexiGridViewWidgetState
             return AlbumRowItemWidget(
               widget.collections![collectionIndex],
               sideOfThumbnail,
+              key: ValueKey(
+                '${widget.tag}_${widget.collections![collectionIndex].id}',
+              ),
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
               onTapCallback: (c) {
@@ -238,9 +247,9 @@ class _CollectionsFlexiGridViewWidgetState
                     onTap: () async {
                       final result = await showTextInputDialog(
                         context,
-                        title: S.of(context).newAlbum,
-                        submitButtonLabel: S.of(context).create,
-                        hintText: S.of(context).enterAlbumName,
+                        title: AppLocalizations.of(context).newAlbum,
+                        submitButtonLabel: AppLocalizations.of(context).create,
+                        hintText: AppLocalizations.of(context).enterAlbumName,
                         alwaysShowSuccessState: false,
                         initialValue: "",
                         textCapitalization: TextCapitalization.words,

@@ -20,7 +20,7 @@ import { loadCast } from "ente-new/photos/utils/chromecast-sender";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 type AlbumCastDialogProps = ModalVisibilityProps & {
     /** The collection that we want to cast. */

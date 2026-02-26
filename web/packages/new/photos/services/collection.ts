@@ -7,6 +7,7 @@ import {
     encryptBox,
     generateKey,
 } from "ente-base/crypto";
+import { haveWindow } from "ente-base/env";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -36,7 +37,7 @@ import {
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
 import { splitByPredicate } from "ente-utils/array";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
     removeCollectionIDLastSyncTime,
@@ -66,6 +67,30 @@ const favoritesCollectionName = "Favorites";
  */
 export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
+
+/**
+ * Create a new quick link collection on remote, and return its local
+ * representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name to use for the new quick link collection.
+ */
+export const createQuickLinkCollection = (name: string) =>
+    createCollection(name, "album", {
+        subType: CollectionSubType.quicklink,
+        visibility: ItemVisibility.visible,
+    });
+
+/**
+ * Create a new hidden album on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param albumName The name to use for the new hidden album.
+ */
+export const createHiddenAlbum = (albumName: string) =>
+    createCollection(albumName, "album", { visibility: ItemVisibility.hidden });
 
 /**
  * Create a new collection on remote, and return its local representation.
@@ -458,6 +483,13 @@ const clearCachedThumbnailIfContentChanged = async (
 };
 
 /**
+ * Return all collections (both normal and hidden) that are present in our
+ * local database.
+ */
+export const savedAllCollections = (): Promise<Collection[]> =>
+    savedCollections();
+
+/**
  * Return all normal (non-hidden) collections that are present in our local
  * database.
  */
@@ -469,9 +501,14 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
 /**
  * Return all hidden collections that are present in our local database.
  */
-export const savedHiddenCollections = (): Promise<Collection[]> =>
+export const savedHiddenCollections = (
+    currentUserID?: number,
+): Promise<Collection[]> =>
     savedCollections().then(
-        (cs) => splitByPredicate(cs, isHiddenCollection)[0],
+        (cs) =>
+            splitByPredicate(cs, (c) =>
+                isHiddenCollection(c, currentUserID),
+            )[0],
     );
 
 /**
@@ -688,31 +725,33 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *
  * @param files The files to remove from the collection. The files owned by the
  * user will be removed. If the collection is not owned by the user, then any
- * files that are not owned by the user will not be processed. In such cases,
- * this function will return a count less than the count of the provided files
- * (after having removed what can be removed).
+ * files that are not owned by the user will not be processed (unless the user
+ * is an admin of the collection). In such cases, this function will return a
+ * count less than the count of the provided files (after having removed what
+ * can be removed).
  *
  * @returns The count of files that were processed. This can be less than the
  * count of the provided {@link files} if some files were not processed because
  * because they belong to other users (and {@link collection} also does not
- * belong to the current user).
+ * belong to the current user, and the user is not an admin).
  *
  * [Note: Removing files from a collection]
  *
- * There are three scenarios
+ * There are four scenarios
  *
  *                             own file      shared file
  *     own collection             M               R
+ *     admin in collection        R               R
  *     others collection          R         not supported
  *
  *     M (move)   when both collection and file belongs to user
- *     R (remove) when only one of them belongs to the user
+ *     R (remove) when only one of them belongs to the user, or user is admin
  *
  * The move operation is not supported across ownership boundaries. The remove
  * operation is only supported across ownership boundaries, but the user should
- * have ownership of either the file or collection (not both).
+ * have ownership of either the file or collection (not both), or be an admin.
  *
- * In more detail, the above three scenarios can be described this way.
+ * In more detail, the above scenarios can be described this way.
  *
  * 1. Move: If the user owns both the collection and the file they're trying to
  *    remove from the collection, then instead of a remove the client needs to
@@ -727,9 +766,11 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *    removed, they can remove it from the collection using the POST
  *    "/collections/v3/remove-files".
  *
- * 3. Not supported: Currently the possibility of removing a file the user does
- *    not own from a collection that the user does not own, even if they are a
- *    collaborator, is not supported.
+ * 3. Admin remove: If the user is an admin of a collection they don't own, they
+ *    can remove any file from the collection (including files they don't own).
+ *
+ * 4. Not supported: Removing a file the user does not own from a collection
+ *    that the user does not own and is not an admin of.
  *
  * The "remove from collection" primitive is provided to the user both as a UI
  * action (on selecting files in a collection), and as an implicit action if the
@@ -743,9 +784,9 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
  *    collections by delegating to either "Move" or "Remove"
  *
- * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
- *    other's collections by delegating to "Remove", then if needed, also
- *    throwing an error for the unsupported case.
+ * 3. [Private] {@link removeFromOthersCollection} - Handles cases for other's
+ *    collections. If the user is an admin, they can remove all files. Otherwise
+ *    only the user's own files can be removed.
  *
  * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
  *
@@ -757,7 +798,7 @@ export const removeFromCollection = async (
 ): Promise<number> =>
     collection.owner.id == ensureLocalUser().id
         ? removeFromOwnCollection(collection.id, files)
-        : removeFromOthersCollection(collection.id, files);
+        : removeFromOthersCollection(collection, files);
 
 export const removeFromOwnCollection = async (
     collectionID: number,
@@ -778,13 +819,26 @@ export const removeFromOwnCollection = async (
 };
 
 const removeFromOthersCollection = async (
-    collectionID: number,
+    collection: Collection,
     files: EnteFile[],
 ) => {
     const userID = ensureLocalUser().id;
+    // Check if user is an admin of this collection
+    const isAdmin =
+        collection.sharees.find((s) => s.id == userID)?.role == "ADMIN";
+
+    if (isAdmin) {
+        // Admins can remove all files from the collection
+        if (files.length) {
+            await removeNonCollectionOwnerFiles(collection.id, files);
+        }
+        return files.length;
+    }
+
+    // Non-admins can only remove their own files
     const [userFiles] = splitByPredicate(files, (f) => f.ownerID == userID);
     if (userFiles.length) {
-        await removeNonCollectionOwnerFiles(collectionID, userFiles);
+        await removeNonCollectionOwnerFiles(collection.id, userFiles);
     }
     return userFiles.length;
 };
@@ -1020,6 +1074,22 @@ export const updateCollectionOrder = async (
 ) => updateCollectionPrivateMagicMetadata(collection, { order });
 
 /**
+ * Change the order (pin/unpin) of a shared collection on remote for the sharee.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections shared with the user (not owned).
+ *
+ * @param collection The shared collection whose order we want to change.
+ *
+ * @param order Whether on not the collection is pinned by the sharee.
+ */
+export const updateShareeCollectionOrder = async (
+    collection: Collection,
+    order: CollectionOrder,
+) => updateCollectionShareeMagicMetadata(collection, { order });
+
+/**
  * Change the sort order of the files with a collection on remote.
  *
  * Remote only, does not modify local state.
@@ -1035,6 +1105,22 @@ export const updateCollectionSortOrder = async (
     collection: Collection,
     asc: boolean,
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
+
+/**
+ * Change the layout type of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose layout we want to change.
+ *
+ * @param layout The layout type ("masonry", "grouped", "continuous", "trip").
+ */
+export const updateCollectionLayout = async (
+    collection: Collection,
+    layout: string,
+) => updateCollectionPublicMagicMetadata(collection, { layout });
 
 /**
  * Update the private magic metadata of a collection on remote.
@@ -1282,11 +1368,35 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 /**
  * Return `true` if the given collection is hidden.
  *
- * Hidden collections are those that have their visibility set to hidden in the
- * collection's owner's private magic metadata.
+ * Hidden collections are those that have their visibility set to hidden for
+ * the current user (owner or sharee).
+ *
+ * In one instance, the isHiddenCollection function is called outside of a window, like
+ * for the people tab's review suggestions, this function was trigged from a worker.
+ * In that case, since the worker has no access to the localStorage, we need to pass the currentUserID
+ * explicitly.
  */
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+export const isHiddenCollection = (
+    collection: Collection,
+    currentUserID?: number,
+) => {
+    const userID =
+        currentUserID ?? (haveWindow() ? ensureLocalUser().id : undefined);
+
+    if (userID === undefined) {
+        throw new Error(
+            "isHiddenCollection: currentUserID is required outside window context",
+        );
+    }
+    if (collection.owner.id == userID) {
+        return (
+            collection.magicMetadata?.data.visibility == ItemVisibility.hidden
+        );
+    }
+    return (
+        collection.sharedMagicMetadata?.data.visibility == ItemVisibility.hidden
+    );
+};
 
 /**
  * Return `true` if the given collection is archived.
@@ -1297,6 +1407,25 @@ export const isHiddenCollection = (collection: Collection) =>
 export const isArchivedCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility == ItemVisibility.archived ||
     collection.sharedMagicMetadata?.data.visibility == ItemVisibility.archived;
+
+/**
+ * Return `true` if the current user can remove files from all participants in
+ * the given collection.
+ *
+ * This is true if the user is either:
+ * - The owner of the collection, or
+ * - An admin of the collection
+ *
+ * This is used to determine if the user can remove files added by other users
+ * from a shared collection.
+ */
+export const canRemoveFilesFromAllParticipants = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) return true;
+    // Check if the user is an admin of this collection
+    const sharee = collection.sharees.find((s) => s.id == userID);
+    return sharee?.role == "ADMIN";
+};
 
 /**
  * Hide the provided {@link files} by moving them to the default hidden
@@ -1367,7 +1496,11 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  */
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
-    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+    | "enableCollect"
+    | "enableJoin"
+    | "enableComment"
+    | "validTill"
+    | "deviceLimit"
 >;
 
 /**
@@ -1384,10 +1517,11 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
+    const enableComment = true;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({ collectionID, ...attributes }),
+        body: JSON.stringify({ collectionID, enableComment, ...attributes }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
@@ -1455,3 +1589,235 @@ export const leaveSharedCollection = async (collectionID: number) =>
             headers: await authenticatedRequestHeaders(),
         }),
     );
+
+/**
+ * Zod schema for a collection action (used for pending removal actions).
+ */
+const CollectionAction = z.object({
+    collectionID: z.number(),
+    fileID: z.number().nullish(),
+});
+
+type CollectionAction = z.infer<typeof CollectionAction>;
+
+/**
+ * Zod schema for the pending removal actions response.
+ */
+const PendingRemovalActionsResponse = z.object({
+    actions: z.array(CollectionAction).nullish(),
+});
+
+/**
+ * Fetch pending removal actions from remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Pending removal actions indicate files that have been removed from a
+ * collection by the owner or an admin, and should be moved to the user's
+ * uncategorized collection if they exist locally.
+ *
+ * @returns A list of {@link CollectionAction} objects representing files that
+ * should be moved to uncategorized.
+ */
+export const fetchPendingRemovalActions = async (): Promise<
+    CollectionAction[]
+> => {
+    const res = await fetch(
+        await apiURL("/collection-actions/pending-remove"),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { actions } = PendingRemovalActionsResponse.parse(await res.json());
+    return actions ?? [];
+};
+
+/**
+ * Process pending removal actions by moving affected files to the user's
+ * uncategorized collection.
+ *
+ * This function fetches pending removal actions from remote, identifies which
+ * files are affected, and moves them to the uncategorized collection. This
+ * ensures that files removed from shared collections by owners/admins are not
+ * lost but instead moved to a safe location.
+ *
+ * @param collections The current list of collections (used to find affected
+ * files).
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const movePendingRemovalActionsToUncategorized = async (
+    collections: Collection[],
+) => {
+    const pendingActions = await fetchPendingRemovalActions();
+    if (!pendingActions.length) return;
+
+    // Group file IDs by collection ID
+    const collectionToFileIDs = new Map<number, Set<number>>();
+    for (const action of pendingActions) {
+        if (action.fileID == null) continue;
+        const fileIDs = collectionToFileIDs.get(action.collectionID);
+        if (fileIDs) {
+            fileIDs.add(action.fileID);
+        } else {
+            collectionToFileIDs.set(
+                action.collectionID,
+                new Set([action.fileID]),
+            );
+        }
+    }
+
+    if (!collectionToFileIDs.size) return;
+
+    // Get all files from local storage
+    const collectionFiles = await savedCollectionFiles();
+
+    // Group files by collection ID for efficient lookup
+    const filesByCollectionID = groupFilesByCollectionID(collectionFiles);
+
+    // Create a map of collection ID to collection for quick lookup
+    const collectionByID = new Map(collections.map((c) => [c.id, c]));
+
+    // Lazily initialized target collections (only created if needed)
+    let uncategorizedCollection: Collection | undefined;
+    let defaultHiddenCollection: Collection | undefined;
+
+    // Process each collection with pending removal actions
+    for (const [
+        collectionID,
+        pendingFileIDs,
+    ] of collectionToFileIDs.entries()) {
+        const sourceCollection = collectionByID.get(collectionID);
+        const filesInCollection = filesByCollectionID.get(collectionID) ?? [];
+        const filesToMove = filesInCollection.filter((file) =>
+            pendingFileIDs.has(file.id),
+        );
+
+        if (!filesToMove.length) continue;
+
+        // Determine target collection based on whether source is hidden
+        const isSourceHidden =
+            sourceCollection && isHiddenCollection(sourceCollection);
+
+        let targetCollection: Collection;
+        if (isSourceHidden) {
+            // Move files from hidden collections to default hidden collection
+            if (!defaultHiddenCollection) {
+                defaultHiddenCollection =
+                    collections.find(isDefaultHiddenCollection) ??
+                    (await createDefaultHiddenCollection());
+            }
+            targetCollection = defaultHiddenCollection;
+        } else {
+            // Move files from normal collections to uncategorized
+            if (!uncategorizedCollection) {
+                uncategorizedCollection =
+                    collections.find((c) => c.type == "uncategorized") ??
+                    (await createUncategorizedCollection());
+            }
+            targetCollection = uncategorizedCollection;
+        }
+
+        // Move files to target collection (this also removes them from the
+        // source collection, which is the primary goal here)
+        await moveFromCollection(collectionID, targetCollection, filesToMove);
+    }
+};
+
+/**
+ * Remove files from the uncategorized collection if they exist in other
+ * user-owned albums.
+ *
+ * This is a cleanup operation that helps users remove duplicates from their
+ * uncategorized collection. Files that exist both in uncategorized and in
+ * other albums are moved out of uncategorized to one of those albums.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param uncategorizedCollection The user's uncategorized collection.
+ */
+export const cleanUncategorized = async (
+    uncategorizedCollection: Collection,
+): Promise<number> => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    const collectionFiles = await savedCollectionFiles();
+
+    // Get files in the uncategorized collection
+    const uncategorizedFiles = collectionFiles.filter(
+        (f) => f.collectionID == uncategorizedCollection.id,
+    );
+
+    if (!uncategorizedFiles.length) return 0;
+
+    // Build a map from file ID to the collections it belongs to (excluding
+    // uncategorized itself)
+    const fileIDToCollectionIDs = new Map<number, number[]>();
+    for (const file of collectionFiles) {
+        if (file.collectionID == uncategorizedCollection.id) continue;
+        const existing = fileIDToCollectionIDs.get(file.id);
+        if (existing) {
+            existing.push(file.collectionID);
+        } else {
+            fileIDToCollectionIDs.set(file.id, [file.collectionID]);
+        }
+    }
+
+    // Filter to only user-owned normal collections (not hidden, not shared)
+    const userOwnedCollectionIDs = new Set(
+        collections
+            .filter(
+                (c) =>
+                    c.owner.id == userID &&
+                    c.type != "uncategorized" &&
+                    !isHiddenCollection(c),
+            )
+            .map((c) => c.id),
+    );
+
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+
+    // Find files that exist in other user-owned collections
+    const filesToClean = uncategorizedFiles.filter((file) => {
+        const otherCollectionIDs = fileIDToCollectionIDs.get(file.id);
+        if (!otherCollectionIDs) return false;
+        // Check if any of these collections are user-owned normal collections
+        return otherCollectionIDs.some((cid) =>
+            userOwnedCollectionIDs.has(cid),
+        );
+    });
+
+    if (!filesToClean.length) return 0;
+
+    // Group files by their target collection for efficient batching
+    const filesByTargetCollection = new Map<number, EnteFile[]>();
+    for (const file of filesToClean) {
+        const otherCollectionIDs = fileIDToCollectionIDs.get(file.id)!;
+        const targetCollectionID = otherCollectionIDs.find((cid) =>
+            userOwnedCollectionIDs.has(cid),
+        );
+        if (!targetCollectionID) continue;
+
+        const existing = filesByTargetCollection.get(targetCollectionID) ?? [];
+        existing.push(file);
+        filesByTargetCollection.set(targetCollectionID, existing);
+    }
+
+    // Move files in batches per target collection
+    let cleanedCount = 0;
+    for (const [targetCollectionID, files] of filesByTargetCollection) {
+        const targetCollection = collectionsByID.get(targetCollectionID);
+        if (!targetCollection) continue;
+
+        // Move files from uncategorized to the target collection.
+        // This effectively removes them from uncategorized since they already
+        // exist in the target.
+        await moveFromCollection(
+            uncategorizedCollection.id,
+            targetCollection,
+            files,
+        );
+        cleanedCount += files.length;
+    }
+
+    return cleanedCount;
+};

@@ -28,7 +28,7 @@ func (c *Controller) getUserCountAndUpdateCache(userID int64, app ente.App, oldC
 	if err != nil {
 		return 0, stacktrace.Propagate(err, "")
 	}
-	if oldCache != nil && oldCache.Usage == usage && oldCache.TrashUpdatedAt == trashUpdatedAt {
+	if oldCache != nil && oldCache.Usage == usage && oldCache.TrashUpdatedAt == trashUpdatedAt && app != ente.Locker {
 		logrus.Debugf("Cache hit for user %d", userID)
 		return oldCache.Count, nil
 	}

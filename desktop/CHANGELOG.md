@@ -1,8 +1,55 @@
 # CHANGELOG
 
-## v1.7.15 (Unreleased)
+## v1.7.19 (unreleased)
 
-- .
+-
+
+## v1.7.18
+
+- Hide shared albums
+- Watch folders will now be marked as inaccessible if they can't be accessed, instead of completely removing them from the list
+- Watch folders now support hidden albums
+- Watch folders will now skip unsupported files (zip, etc) instead of trying to upload them on every sync
+- Right-click context menu for files
+- Clean large files
+- Fix search bar losing focus on last backspace
+- Hide empty favorites album from albums bar
+- "Clean uncategorized" button
+- Hide favorites from album selector dialogs
+- Show current album in the album selector for upload flow
+- Show sort options in album selector (for upload, add, move, etc)
+- "Select all" button in the gallery and albums view
+- Edit location
+- Better sort for albums list
+- Improved UI for login, sign-up, etc, pages
+- Improved Map View Rendering Logic
+- Public album improvements
+- Upload to hidden albums
+
+## v1.7.17
+
+- Map view.
+- Manually tag people in photos.
+- Album admins can now remove photos added by collaborators.
+- Viewers and collaborators can see and copy public links.
+- Free users can now create public links (device limit of 5).
+
+## v1.7.16
+
+- Support Greek translations.
+- Ability to terminate sessions on other devices.
+- Quick access for search: Ctrl/Cmd + K.
+- Search now shows settings.
+- Ability to pin people.
+- Ability to add a photo to an album from the photo viewer menu.
+
+## v1.7.15
+
+- Support Czech translations.
+- Custom domain support for public album sharing.
+- New layouts for public albums - grouped, continuous and trip.
+- Quicker way to create new albums.
+- Search functionality for album selection dialogs.
 
 ## v1.7.14
 
@@ -13,7 +60,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 

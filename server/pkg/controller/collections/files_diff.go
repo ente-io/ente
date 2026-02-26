@@ -2,6 +2,7 @@ package collections
 
 import (
 	"fmt"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/stacktrace"
@@ -31,8 +32,18 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 	}
 	// hide private metadata before returning files info in diff
 	for idx := range diff {
+		// Treat action markers as soft-deletes for non-owners
+		if diff[idx].Action != nil && !diff[idx].IsDeleted {
+			if *diff[idx].Action == ente.ActionRemove || *diff[idx].Action == ente.ActionDeleteSuggested {
+				if diff[idx].OwnerID != userID { // non-owner view: mask as deleted
+					diff[idx].IsDeleted = true
+				}
+			}
+		}
 		if diff[idx].OwnerID != userID {
 			diff[idx].MagicMetadata = nil
+			diff[idx].Action = nil
+			diff[idx].ActionUserID = nil
 		}
 		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
 			// This indicates that the file is deleted, but we still have a stale entry in the collection

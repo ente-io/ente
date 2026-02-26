@@ -29,10 +29,10 @@ class SearchThumbnailWidget extends StatelessWidget {
     return Hero(
       tag: tagPrefix + (file?.tag ?? ""),
       child: SizedBox(
-        height: 60,
-        width: 60,
+        height: 56,
+        width: 56,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(12),
           child: file != null
               ? (searchResult != null &&
                       searchResult!.type() == ResultType.faces)
@@ -84,12 +84,26 @@ class _ContactSearchThumbnailWidgetState
   }
 
   @override
+  void didUpdateWidget(covariant ContactSearchThumbnailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newPersonID = widget.searchResult.params[kPersonParamID];
+    final newEmail = widget.searchResult.params[kContactEmail];
+    if (newPersonID != _personID) {
+      _personID = newPersonID;
+      _canUsePersonFaceWidget = newPersonID != null;
+    }
+    if (newEmail != _email) {
+      _email = newEmail;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 60,
-      width: 60,
+      height: 56,
+      width: 56,
       child: ClipRRect(
-        borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
+        borderRadius: BorderRadius.circular(12),
         child: _canUsePersonFaceWidget
             ? PersonFaceWidget(
                 personId: _personID,
@@ -126,9 +140,7 @@ class NoFaceForContactWidget extends StatelessWidget {
     final enteColorScheme = getEnteColorScheme(context);
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.horizontal(
-          left: Radius.circular(4),
-        ),
+        borderRadius: BorderRadius.circular(12),
         border: addBorder
             ? Border.all(
                 color: enteColorScheme.strokeFaint,

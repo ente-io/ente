@@ -1,10 +1,13 @@
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
-import { Paper, Typography, styled } from "@mui/material";
+import { Paper, Stack, Typography, styled } from "@mui/material";
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
-import { Stack100vhCenter } from "ente-base/components/containers";
+import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "ente-base/components/Navbar";
+import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
@@ -13,7 +16,7 @@ import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     isWebAuthnSupported,
-    isWhitelistedRedirect,
+    parseRedirectURLParam,
     passkeyAuthenticationSuccessRedirectURL,
     passkeySessionAlreadyClaimedErrorMessage,
     redirectToPasskeyRecoverPage,
@@ -35,6 +38,8 @@ const Page = () => {
         | "unrecoverableFailure" /* Unrecoverable error - generic */
         | "failedDuringSignChallenge" /* Recoverable error in signChallenge */
         | "failed" /* Recoverable error otherwise */
+        | "lockerRegistrationDisabled" /* Locker only for Photos paid users */
+        | "lockerRolloutLimitReached" /* Locker beta seats exhausted */
         | "needUserFocus" /* See docs for `Continuation` */
         | "waitingForUser" /* ...to authenticate with their passkey */
         | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
@@ -82,11 +87,11 @@ const Page = () => {
 
         // Extract redirect from the query params.
         const redirect = nullToUndefined(searchParams.get("redirect"));
-        const redirectURL = redirect ? new URL(redirect) : undefined;
+        const redirectURL = parseRedirectURLParam(redirect);
 
-        // Ensure that redirectURL is whitelisted, otherwise show an invalid
-        // "login" URL error to the user.
-        if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
+        // Ensure that redirectURL is valid/whitelisted, otherwise show an
+        // invalid "login" URL error to the user.
+        if (!redirectURL) {
             log.error(`Redirect '${redirect}' is not whitelisted`);
             setStatus("unknownRedirect");
             return;
@@ -174,7 +179,14 @@ const Page = () => {
             });
         } catch (e) {
             log.error("Failed to finish passkey authentication", e);
-            setStatus("failed");
+            const lockerErrorCode = await lockerAccessErrorCode(e);
+            if (lockerErrorCode == "LOCKER_REGISTRATION_DISABLED") {
+                setStatus("lockerRegistrationDisabled");
+            } else if (lockerErrorCode == "LOCKER_ROLLOUT_LIMIT") {
+                setStatus("lockerRolloutLimitReached");
+            } else {
+                setStatus("failed");
+            }
             return;
         }
 
@@ -223,7 +235,10 @@ const Page = () => {
             return undefined;
         }
 
-        return () => redirectToPasskeyRecoverPage(new URL(recover));
+        const recoverURL = parseRedirectURLParam(recover);
+        if (!recoverURL) return undefined;
+
+        return () => redirectToPasskeyRecoverPage(recoverURL);
     })();
 
     const handleRedirectAgain = () => redirectToURL(successRedirectURL!);
@@ -244,13 +259,56 @@ const Page = () => {
         failed: (
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
+        lockerRegistrationDisabled: (
+            <LockerAccessError
+                title="Oops"
+                body="Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker"
+            />
+        ),
+        lockerRolloutLimitReached: (
+            <LockerAccessError
+                title="We're out of beta seats for now"
+                body="This preview access has reached capacity. We'll be opening it to more users soon."
+            />
+        ),
         needUserFocus: <Verify onVerify={handleVerify} />,
         waitingForUser: <WaitingForUser />,
         redirectingWeb: <RedirectingWeb />,
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
-    return <Stack100vhCenter>{components[status]}</Stack100vhCenter>;
+    return (
+        <Stack
+            sx={[
+                { minHeight: "100svh", bgcolor: "secondary.main" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
+            <NavbarBase
+                sx={{
+                    boxShadow: "none",
+                    borderBottom: "none",
+                    bgcolor: "transparent",
+                }}
+            >
+                <EnteLogo />
+            </NavbarBase>
+            <CenteredFill
+                sx={[
+                    { bgcolor: "secondary.main" },
+                    (theme) =>
+                        theme.applyStyles("dark", {
+                            bgcolor: "background.default",
+                        }),
+                ]}
+            >
+                {components[status]}
+            </CenteredFill>
+        </Stack>
+    );
 };
 
 export default Page;
@@ -305,18 +363,33 @@ const Failed: React.FC<FailedProps> = ({ message }) => (
     </ContentPaper>
 );
 
-const ContentPaper = styled(Paper)`
-    width: 100%;
-    max-width: 24rem;
-    padding: 1rem;
-    /* Slight asymmetry, look visually better since the bottom half of the paper
-       is usually muted text that carries less visual weight. */
-    padding-block-end: 1.15rem;
+interface LockerAccessErrorProps {
+    title: string;
+    body: string;
+}
 
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-`;
+const LockerAccessError: React.FC<LockerAccessErrorProps> = ({
+    title,
+    body,
+}) => (
+    <ContentPaper>
+        <InfoIcon color="secondary" fontSize="large" />
+        <Typography variant="h5">{title}</Typography>
+        <Typography sx={{ color: "text.muted" }}>{body}</Typography>
+    </ContentPaper>
+);
+
+const ContentPaper = styled(Paper)(({ theme }) => ({
+    marginBlock: theme.spacing(2),
+    padding: theme.spacing(5, 3),
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
+    width: "min(420px, 85vw)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    boxShadow: "none",
+    borderRadius: "20px",
+}));
 
 interface VerifyProps {
     /** Called when the user presses the "Verify" button. */
@@ -457,3 +530,44 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => (
         </ButtonStack>
     </ContentPaper>
 );
+
+type LockerErrorCode =
+    | "LOCKER_REGISTRATION_DISABLED"
+    | "LOCKER_ROLLOUT_LIMIT"
+    | undefined;
+
+interface LockerErrorPayload {
+    code: string;
+}
+
+const isLockerErrorPayload = (
+    payload: unknown,
+): payload is LockerErrorPayload =>
+    typeof payload == "object" &&
+    payload !== null &&
+    "code" in payload &&
+    typeof (payload as { code: unknown }).code === "string";
+
+const lockerAccessErrorCode = async (
+    error: unknown,
+): Promise<LockerErrorCode> => {
+    if (!(error instanceof HTTPError) || error.res.status !== 403) {
+        return undefined;
+    }
+
+    try {
+        const payload = (await error.res.clone().json()) as unknown;
+        const code = isLockerErrorPayload(payload) ? payload.code : undefined;
+
+        if (
+            code === "LOCKER_REGISTRATION_DISABLED" ||
+            code === "LOCKER_ROLLOUT_LIMIT"
+        ) {
+            return code;
+        }
+    } catch (parseError) {
+        log.warn("Failed to parse locker access error payload", parseError);
+    }
+
+    return undefined;
+};

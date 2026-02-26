@@ -51,6 +51,14 @@ incorrect time when certain privacy settings are enabled.
 > If you've recently changed your system time and the codes are still incorrect,
 > try to refresh / restart the app if needed.
 
+### Why may TOTP verification fail with Google Workspace? {#google-workspace-totp-verification}
+
+Google Workspace doesn't explicitly block Ente Auth, but its implementation of TOTP is more restrictive and can sometimes be incompatible with third-party authenticators. While Ente Auth follows the open TOTP standard, Google's system occasionally expects additional metadata or a specific app ID, which can cause verification to fail.
+
+That said, many users are able to use Ente Auth with Google Workspace without issues, so this behavior can vary.
+
+Also ensure that your system time is accurate, as any time drift can cause TOTP codes to be invalid. You can verify your time at https://time.is/
+
 ### Can I access my codes on web?
 
 You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
@@ -60,10 +68,41 @@ You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
 No, Ente Auth does not require an account. You can choose to use the app without
 backups if you prefer.
 
+### Will I lose my offline codes if I create an account later?
+
+No. When you sign in after using Ente Auth offline, the desktop app migrates any
+remaining offline codes into the newly created account so you keep them.
+
+> [!NOTE]
+>
+> The app will still recommend you to export your codes first before starting the sign in, so you have your own copy in case something unexpected happens during the sign-in.
+
 ### Can I use Ente Auth on multiple devices and sync them?
 
 Yes, you can download Ente Auth on multiple devices and sync the codes with
 end-to-end encryption.
+
+### Do you support exporting to Google Authenticator format? {#export-google-authenticator}
+
+Yes, you can export your codes as HTML QR codes and then scan them in Google
+Authenticator to import them.
+
+**To export for Google Authenticator:**
+
+1. Open `Settings > Data > Export`
+2. Select "Plain HTML"
+3. Acknowledge the security warning (this export is unencrypted)
+4. Save or share the HTML file
+5. Open the HTML file in a browser
+6. Use Google Authenticator's "Scan a QR code" feature to scan each QR code
+   from the HTML page
+
+The HTML export generates individual QR codes for each of your codes, making it
+easy to import them into Google Authenticator or other compatible authenticator
+apps.
+
+> **Note**: This export is unencrypted. Handle the exported HTML file carefully
+> and delete it after importing your codes.
 
 ### What information about my codes is stored on Ente server?
 

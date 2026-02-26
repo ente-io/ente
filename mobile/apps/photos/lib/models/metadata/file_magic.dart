@@ -13,6 +13,8 @@ const streamVersionKey = 'sv';
 const mediaTypeKey = 'mediaType';
 const latKey = "lat";
 const longKey = "long";
+const cameraMakeKey = 'cameraMake';
+const cameraModelKey = 'cameraModel';
 const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
 const dateTimeKey = 'dateTime';
@@ -48,6 +50,8 @@ class PubMagicMetadata {
   int? h;
   double? lat;
   double? long;
+  String? cameraMake;
+  String? cameraModel;
 
   // Indicates streaming version of the file.
   // If this is set, then the file is a streaming version of the original file.
@@ -83,6 +87,8 @@ class PubMagicMetadata {
     this.h,
     this.lat,
     this.long,
+    this.cameraMake,
+    this.cameraModel,
     this.mvi,
     this.noThumb,
     this.mediaType,
@@ -108,6 +114,8 @@ class PubMagicMetadata {
       h: safeParseInt(map[heightKey], heightKey),
       lat: map[latKey],
       long: map[longKey],
+      cameraMake: map[cameraMakeKey],
+      cameraModel: map[cameraModelKey],
       mvi: map[motionVideoIndexKey],
       noThumb: map[noThumbKey],
       mediaType: map[mediaTypeKey],

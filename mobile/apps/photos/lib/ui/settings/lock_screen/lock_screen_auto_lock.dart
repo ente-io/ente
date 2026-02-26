@@ -25,7 +25,7 @@ class _LockScreenAutoLockState extends State<LockScreenAutoLock> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).autoLock,
+              title: AppLocalizations.of(context).autoLock,
             ),
           ),
           SliverList(

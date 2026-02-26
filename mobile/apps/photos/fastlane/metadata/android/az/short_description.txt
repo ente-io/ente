@@ -1,0 +1,1 @@
+ente, ucdan-uca şifrələnmiş end-to-end encrypted şəkil saxlama tətbiqidir

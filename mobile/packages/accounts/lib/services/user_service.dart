@@ -1,5 +1,6 @@
 import 'dart:async';
 import "dart:convert";
+import "dart:io";
 import "dart:math";
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -24,11 +25,12 @@ import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/user_details_changed_event.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_strings/ente_strings.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -60,14 +62,23 @@ class UserService {
   late ValueNotifier<String?> emailValueNotifier;
   late BaseConfiguration _config;
   late BaseHomePage _homePage;
+  late String _clientPackageName;
+  late String _passkeyRedirectUrl;
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> init(BaseConfiguration config, BaseHomePage homePage) async {
+  Future<void> init(
+    BaseConfiguration config,
+    BaseHomePage homePage, {
+    required String clientPackageName,
+    required String passkeyRedirectUrl,
+  }) async {
     _config = config;
     _homePage = homePage;
+    _clientPackageName = clientPackageName;
+    _passkeyRedirectUrl = passkeyRedirectUrl;
     emailValueNotifier = ValueNotifier<String?>(config.getEmail());
     _preferences = await SharedPreferences.getInstance();
   }
@@ -88,6 +99,7 @@ class UserService {
         data: {
           "email": email,
           "purpose": isChangeEmail ? "change" : purpose ?? "",
+          "mobile": Platform.isIOS || Platform.isAndroid,
         },
       );
       await dialog.hide();
@@ -115,26 +127,29 @@ class UserService {
       final String? enteErrCode = e.response?.data["code"];
       if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailAlreadyRegistered,
+            title: context.strings.oops,
+            message: context.strings.emailAlreadyRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailNotRegistered,
+            title: context.strings.oops,
+            message: context.strings.emailNotRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.thisEmailIsAlreadyInUse,
+            title: context.strings.oops,
+            message: context.strings.thisEmailIsAlreadyInUse,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else {
@@ -158,6 +173,24 @@ class UserService {
     );
   }
 
+  // getPublicKey returns null value if email id is not
+  // associated with another ente account
+  Future<String?> getPublicKey(String email) async {
+    try {
+      final response = await _enteDio.get(
+        "/users/public-key",
+        queryParameters: {"email": email},
+      );
+      final publicKey = response.data["publicKey"];
+      return publicKey;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.statusCode == 404) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   Future<UserDetails> getUserDetailsV2({
     bool memoryCount = false,
     bool shouldCache = true,
@@ -171,6 +204,7 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
         if (userDetails.profileData != null) {
           await _preferences.setBool(
             kIsEmailMFAEnabled,
@@ -242,7 +276,9 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        unawaited(
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+        );
       } else {
         throw Exception("Log out action failed");
       }
@@ -251,7 +287,9 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        unawaited(
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+        );
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -342,20 +380,29 @@ class UserService {
     try {
       final userPassword = _config.getVolatilePassword();
       await _saveConfiguration(response);
+      if (!context.mounted) {
+        await dialog.hide();
+        return;
+      }
+      final navigator = Navigator.of(context);
       if (userPassword == null) {
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return PasswordReentryPage(
                 _config,
                 _homePage,
               );
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
+        return;
       } else {
         Widget page;
         if (_config.getEncryptedToken() != null) {
@@ -369,16 +416,20 @@ class UserService {
           throw Exception("unexpected response during passkey verification");
         }
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
 
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return page;
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
+        return;
       }
     } catch (e) {
       _logger.severe(e);
@@ -422,6 +473,8 @@ class UserService {
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
+            redirectUrl: _passkeyRedirectUrl,
+            clientPackage: _clientPackageName,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -464,28 +517,31 @@ class UserService {
       _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 410) {
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.yourVerificationCodeHasExpired,
+          title: context.strings.oops,
+          message: context.strings.yourVerificationCodeHasExpired,
+          assetPath: 'assets/warning-grey.png',
         );
         Navigator.of(context).pop();
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          title: context.strings.incorrectCode,
+          message: context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.verificationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.verificationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -747,6 +803,8 @@ class UserService {
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
+          redirectUrl: _passkeyRedirectUrl,
+          clientPackage: _clientPackageName,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -758,6 +816,7 @@ class UserService {
             _config.getKeyAttributes()!,
             keyEncryptionKey: keyEncryptionKey,
           );
+          _config.resetVolatilePassword();
           page = _homePage;
         } else {
           throw Exception("unexpected response during email verification");
@@ -771,7 +830,9 @@ class UserService {
             return page!;
           },
         ),
-        (route) => route.isFirst,
+        identical(page, _homePage)
+            ? (route) => false
+            : (route) => route.isFirst,
       );
     } else {
       // should never reach here
@@ -871,20 +932,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.authenticationFailedPleaseTryAgain,
+          title: context.strings.incorrectCode,
+          message: context.strings.authenticationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.authenticationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.authenticationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -937,20 +1000,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -986,10 +1051,11 @@ class UserService {
       );
     } catch (e) {
       await dialog.hide();
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.strings.incorrectRecoveryKey,
-        context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        title: context.strings.incorrectRecoveryKey,
+        message: context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        assetPath: 'assets/warning-grey.png',
       );
       return;
     }
@@ -1038,20 +1104,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -1078,7 +1146,7 @@ class UserService {
   }
 
   bool hasEmailMFAEnabled() {
-    return _preferences.getBool(kIsEmailMFAEnabled) ?? true;
+    return _preferences.getBool(kIsEmailMFAEnabled) ?? false;
   }
 
   Future<void> updateEmailMFA(bool isEnabled) async {

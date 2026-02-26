@@ -1,13 +1,13 @@
 import "dart:async";
 
-import "package:flutter/cupertino.dart";
-import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/theme/colors.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -22,23 +22,42 @@ Future<void> showSingleFileDeleteSheet(
   BuildContext context,
   EnteFile file, {
   Function(EnteFile)? onFileRemoved,
+  bool isLocalOnlyContext = false,
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
-      ? S.of(context).videoSmallCase
-      : S.of(context).photoSmallCase;
+      ? AppLocalizations.of(context).videoSmallCase
+      : AppLocalizations.of(context).photoSmallCase;
   final bool isBothLocalAndRemote =
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
-  final String bodyHighlight = S.of(context).singleFileDeleteHighlight;
+  if (isOfflineMode) {
+    if (file.localID == null) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
+      return;
+    }
+    await deleteFilesOnDeviceOnly(context, [file]);
+    if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+      onFileRemoved(file);
+    }
+    return;
+  }
+  final String bodyHighlight =
+      AppLocalizations.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {
-    body = S.of(context).singleFileInBothLocalAndRemote(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileInBothLocalAndRemote(fileType: fileType);
   } else if (isRemoteOnly) {
-    body = S.of(context).singleFileInRemoteOnly(fileType);
+    body =
+        AppLocalizations.of(context).singleFileInRemoteOnly(fileType: fileType);
   } else if (isLocalOnly) {
-    body = S.of(context).singleFileDeleteFromDevice(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileDeleteFromDevice(fileType: fileType);
   } else {
     throw AssertionError("Unexpected state");
   }
@@ -47,8 +66,8 @@ Future<void> showSingleFileDeleteSheet(
     buttons.add(
       ButtonWidget(
         labelText: isBothLocalAndRemote
-            ? S.of(context).deleteFromEnte
-            : S.of(context).yesDelete,
+            ? AppLocalizations.of(context).deleteFromEnte
+            : AppLocalizations.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -57,11 +76,12 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast(context, S.of(context).movedToTrash);
-          if (isRemoteOnly) {
-            if (onFileRemoved != null) {
-              onFileRemoved(file);
-            }
+          showShortToast(context, AppLocalizations.of(context).movedToTrash);
+          // Remove from viewer if:
+          // 1. File is remote-only (no local copy), OR
+          // 2. File has both copies but we're not in a local-only context
+          if (onFileRemoved != null && (isRemoteOnly || !isLocalOnlyContext)) {
+            onFileRemoved(file);
           }
         },
       ),
@@ -72,8 +92,8 @@ Future<void> showSingleFileDeleteSheet(
     buttons.add(
       ButtonWidget(
         labelText: isBothLocalAndRemote
-            ? S.of(context).deleteFromDevice
-            : S.of(context).yesDelete,
+            ? AppLocalizations.of(context).deleteFromDevice
+            : AppLocalizations.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -82,10 +102,11 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesOnDeviceOnly(context, [file]);
-          if (isLocalOnly) {
-            if (onFileRemoved != null) {
-              onFileRemoved(file);
-            }
+          // Remove from viewer if:
+          // 1. File is local-only (no remote copy), OR
+          // 2. We're in a local-only context (device folder - file disappears from this view)
+          if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+            onFileRemoved(file);
           }
         },
       ),
@@ -94,7 +115,7 @@ Future<void> showSingleFileDeleteSheet(
   if (isBothLocalAndRemote) {
     buttons.add(
       ButtonWidget(
-        labelText: S.of(context).deleteFromBoth,
+        labelText: AppLocalizations.of(context).deleteFromBoth,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -113,7 +134,7 @@ Future<void> showSingleFileDeleteSheet(
   }
   buttons.add(
     ButtonWidget(
-      labelText: S.of(context).cancel,
+      labelText: AppLocalizations.of(context).cancel,
       buttonType: ButtonType.secondary,
       buttonSize: ButtonSize.large,
       shouldStickToDarkTheme: true,
@@ -138,8 +159,9 @@ Future<void> showSingleFileDeleteSheet(
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
-  guardedCheckPanorama(file).ignore();
-  final colorScheme = getEnteColorScheme(context);
+  if (file.canEditMetaInfo && file.isPanorama() == null) {
+    guardedCheckPanorama(file).ignore();
+  }
   Bus.instance.fire(
     DetailsSheetEvent(
       localID: file.localID,
@@ -147,23 +169,11 @@ Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
       opened: true,
     ),
   );
-  await showBarModalBottomSheet(
-    topControl: const SizedBox.shrink(),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
-    ),
-    backgroundColor: colorScheme.backgroundElevated,
-    barrierColor: backdropFaintDark,
+  await showModalBottomSheet(
     context: context,
-    builder: (BuildContext context) {
-      return Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: FileDetailsWidget(file),
-      );
-    },
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => _DraggableDetailsSheet(file: file),
   );
   Bus.instance.fire(
     DetailsSheetEvent(
@@ -172,4 +182,64 @@ Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
       opened: false,
     ),
   );
+}
+
+class _DraggableDetailsSheet extends StatefulWidget {
+  final EnteFile file;
+  const _DraggableDetailsSheet({required this.file});
+
+  @override
+  State<_DraggableDetailsSheet> createState() => _DraggableDetailsSheetState();
+}
+
+class _DraggableDetailsSheetState extends State<_DraggableDetailsSheet> {
+  final _sheetController = DraggableScrollableController();
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sheetController.addListener(_onSheetSizeChanged);
+  }
+
+  @override
+  void dispose() {
+    _sheetController.removeListener(_onSheetSizeChanged);
+    _sheetController.dispose();
+    super.dispose();
+  }
+
+  void _onSheetSizeChanged() {
+    final isNowExpanded = _sheetController.size >= 0.75;
+    if (isNowExpanded != _isExpanded) {
+      setState(() {
+        _isExpanded = isNowExpanded;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 60;
+    final disableSnap = isKeyboardOpen || _isExpanded;
+    return DraggableScrollableSheet(
+      controller: _sheetController,
+      initialChildSize: disableSnap ? 0.95 : 0.75,
+      minChildSize: disableSnap ? 0.75 : 0.5,
+      maxChildSize: 0.95,
+      snap: !disableSnap,
+      snapSizes: disableSnap ? null : const [0.75],
+      expand: false,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: getEnteColorScheme(context).backgroundElevated,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        ),
+        child: FileDetailsWidget(
+          widget.file,
+          scrollController: scrollController,
+        ),
+      ),
+    );
+  }
 }

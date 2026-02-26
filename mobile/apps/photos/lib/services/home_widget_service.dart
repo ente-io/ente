@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart' as hw;
-import 'package:home_widget/home_widget.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
@@ -14,7 +13,7 @@ import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-import "package:synchronized/synchronized.dart";
+import 'package:synchronized/synchronized.dart';
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -35,6 +34,8 @@ class HomeWidgetService {
   // Constants
   static const double THUMBNAIL_SIZE = 512.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
+  static const int WIDGET_IMAGE_LIMIT_V1 = 50;
+  static const int WIDGET_IMAGE_LIMIT_MINIMAL = 5;
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -66,6 +67,10 @@ class HomeWidgetService {
       },
     );
     _isAppGroupSet = true;
+  }
+
+  int getWidgetImageLimit() {
+    return WIDGET_IMAGE_LIMIT_V1;
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
@@ -101,7 +106,7 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final result = await _captureFile(file, key, title, mainKey);
+    final result = await _captureFileLegacy(file, key, title, mainKey);
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
@@ -126,11 +131,11 @@ class HomeWidgetService {
     return relevantWidgets.length;
   }
 
-  Future<List<HomeWidgetInfo>> getInstalledWidgets() async {
+  Future<List<hw.HomeWidgetInfo>> getInstalledWidgets() async {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<bool> _captureFileLegacy(
     EnteFile file,
     String key,
     String title,

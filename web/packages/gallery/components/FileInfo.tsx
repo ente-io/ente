@@ -65,19 +65,22 @@ import {
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
+import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
 import { FilePeopleList } from "ente-new/photos/components/PeopleList";
 import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog-attributes";
-import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+    usePeopleStateSnapshot,
+    useSettingsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import {
     updateFileCaption,
     updateFileFileName,
     updateFilePublicMagicMetadata,
+    updateFilesLocation,
 } from "ente-new/photos/services/file";
 import {
+    addManualFileAssignmentsToPerson,
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
@@ -197,20 +200,48 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onSelectCollection,
     onSelectPerson,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-
     const { mapEnabled } = useSettingsSnapshot();
+    const peopleState = usePeopleStateSnapshot();
+    const { onGenericError } = useBaseContext();
 
     const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
     const { show: showRawExif, props: rawExifVisibilityProps } =
         useModalVisibility();
+    const { show: showAssignPerson, props: assignPersonVisibilityProps } =
+        useModalVisibility();
+    const { show: showEditLocation, props: editLocationVisibilityProps } =
+        useModalVisibility();
 
-    const location = useMemo(
-        // Prefer the location in the EnteFile, then fall back to Exif.
-        () => fileLocation(file) ?? exif?.parsed?.location,
-        [file, exif],
+    const assignablePeople = useMemo(
+        () =>
+            (peopleState?.visiblePeople ?? []).filter(
+                (p) => p.type == "cgroup" && !!p.name,
+            ),
+        [peopleState],
     );
+
+    const manuallyAssignedPeople = useMemo(() => {
+        if (!isMLEnabled()) return [];
+
+        const detectedPersonIDs = new Set(
+            annotatedFaces.map((f) => f.personID),
+        );
+        return (peopleState?.people ?? []).filter(
+            (p) =>
+                p.type == "cgroup" &&
+                !!p.name &&
+                p.cgroup.data.manuallyAssigned.includes(file.id) &&
+                !detectedPersonIDs.has(p.id),
+        );
+    }, [peopleState, file.id, annotatedFaces]);
+
+    const canAddPerson = isMLEnabled() && assignablePeople.length > 0;
+
+    // Prefer the location in the EnteFile, then fall back to Exif.
+    const fileLocationValue = fileLocation(file) ?? exif?.parsed?.location;
+
+    const location = fileLocationValue;
 
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
@@ -243,19 +274,31 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         };
     }, [file, open]);
 
-    const openEnableMapConfirmationDialog = () =>
-        showMiniDialog(
-            confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
-        );
-
-    const openDisableMapConfirmationDialog = () =>
-        showMiniDialog(
-            confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
-        );
-
     const handleSelectFace = ({ personID, faceID }: AnnotatedFaceID) => {
         log.info(`Selected person ${personID} for faceID ${faceID}`);
         onSelectPerson?.(personID);
+    };
+
+    const handleAddPerson = async (personID: string) => {
+        assignPersonVisibilityProps.onClose();
+        try {
+            await addManualFileAssignmentsToPerson(personID, [file.id]);
+        } catch (e) {
+            onGenericError(e);
+        }
+    };
+
+    const handleEditLocationConfirm = async (newLocation: Location) => {
+        try {
+            await updateFilesLocation(
+                [file],
+                newLocation.latitude,
+                newLocation.longitude,
+            );
+            await onFileMetadataUpdate?.();
+        } catch (e) {
+            onGenericError(e);
+        }
     };
 
     const uploaderName = file.pubMagicMetadata?.data.uploaderName;
@@ -299,7 +342,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     />
                 )}
 
-                {location && (
+                {location ? (
                     <>
                         <InfoItem
                             icon={<LocationOnOutlinedIcon />}
@@ -316,31 +359,48 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     </Link>
                                 ) : (
                                     <LinkButtonUndecorated
-                                        onClick={
-                                            openDisableMapConfirmationDialog
-                                        }
+                                        onClick={() => updateMapEnabled(false)}
                                     >
                                         {t("disable_map")}
                                     </LinkButtonUndecorated>
                                 )
                             }
                             trailingButton={
-                                <CopyButton
-                                    size="medium"
-                                    text={openStreetMapLink(location)}
-                                />
+                                <Stack direction="row" sx={{ gap: 1 }}>
+                                    {allowEdits && (
+                                        <EditButton
+                                            onClick={showEditLocation}
+                                        />
+                                    )}
+                                    <CopyButton
+                                        size="medium"
+                                        text={openStreetMapLink(location)}
+                                    />
+                                </Stack>
                             }
                         />
                         {allowMap && (
                             <MapBox
+                                key={`${location.latitude}-${location.longitude}`}
                                 location={location}
                                 mapEnabled={mapEnabled}
-                                openUpdateMapConfirmationDialog={
-                                    openEnableMapConfirmationDialog
-                                }
                             />
                         )}
                     </>
+                ) : (
+                    allowEdits && (
+                        <InfoItem
+                            icon={<LocationOnOutlinedIcon />}
+                            title={t("location")}
+                            caption={
+                                <LinkButtonUndecorated
+                                    onClick={showEditLocation}
+                                >
+                                    {t("add_location_button")}
+                                </LinkButtonUndecorated>
+                            }
+                        />
+                    )
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}
@@ -357,15 +417,25 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
-                {annotatedFaces.length > 0 && (
-                    <InfoItem icon={<FaceRetouchingNaturalIcon />}>
-                        <FilePeopleList
-                            file={file}
-                            annotatedFaceIDs={annotatedFaces}
-                            onSelectFace={handleSelectFace}
-                        />
-                    </InfoItem>
-                )}
+                {isMLEnabled() &&
+                    (annotatedFaces.length > 0 ||
+                        manuallyAssignedPeople.length > 0 ||
+                        canAddPerson) && (
+                        <InfoItem icon={<FaceRetouchingNaturalIcon />}>
+                            <FilePeopleList
+                                file={file}
+                                annotatedFaceIDs={annotatedFaces}
+                                onSelectFace={handleSelectFace}
+                                manuallyAssignedPeople={manuallyAssignedPeople}
+                                onSelectPerson={onSelectPerson}
+                                onAddPerson={
+                                    canAddPerson ? showAssignPerson : undefined
+                                }
+                                addPersonTitle={t("add_a_person")}
+                                addPersonLabel={t("add")}
+                            />
+                        </InfoItem>
+                    )}
                 {showCollections &&
                     fileCollectionIDs &&
                     collectionNameByID &&
@@ -394,6 +464,23 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 tags={exif?.tags}
                 fileName={fileFileName(file)}
             />
+
+            {canAddPerson && (
+                <AssignPersonDialog
+                    {...assignPersonVisibilityProps}
+                    people={assignablePeople}
+                    title={t("add_a_person")}
+                    onSelectPerson={handleAddPerson}
+                />
+            )}
+
+            {allowEdits && (
+                <EditLocationDialog
+                    {...editLocationVisibilityProps}
+                    files={[file]}
+                    onConfirm={handleEditLocationConfirm}
+                />
+            )}
         </FileInfoSidebar>
     );
 };
@@ -870,54 +957,73 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
 
+const leafletAttributionPrefix =
+    '<a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>';
+
 interface MapBoxProps {
     location: Location;
     mapEnabled: boolean;
-    openUpdateMapConfirmationDialog: () => void;
 }
 
-const MapBox: React.FC<MapBoxProps> = ({
-    location,
-    mapEnabled,
-    openUpdateMapConfirmationDialog,
-}) => {
+const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
     const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
-        '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+        '&copy; <a target="_blank" rel="noopener noreferrer" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     const zoom = 16;
 
     const mapBoxContainerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<L.Map | null>(null);
+    const markerRef = useRef<L.Marker | null>(null);
 
     useEffect(() => {
-        const mapContainer = mapBoxContainerRef.current;
-        if (mapEnabled) {
-            const position: L.LatLngTuple = [
-                location.latitude,
-                location.longitude,
-            ];
-            if (mapContainer && !mapContainer.hasChildNodes()) {
-                // @ts-ignore
-                const map = leaflet.map(mapContainer).setView(position, zoom);
-                // @ts-ignore
-                leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
-                // @ts-ignore
-                leaflet.marker(position).addTo(map).openPopup();
+        if (!leaflet) return;
+        if (!mapEnabled) {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                markerRef.current = null;
             }
-        } else {
-            if (mapContainer?.hasChildNodes()) {
-                if (mapContainer.firstChild) {
-                    mapContainer.removeChild(mapContainer.firstChild);
-                }
-            }
+            return;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mapEnabled]);
+
+        const mapContainer = mapBoxContainerRef.current;
+        if (!mapContainer) return;
+
+        const position: L.LatLngTuple = [location.latitude, location.longitude];
+        if (!mapRef.current) {
+            // @ts-ignore
+            const map = leaflet.map(mapContainer).setView(position, zoom);
+            map.attributionControl.setPrefix(leafletAttributionPrefix);
+            // @ts-ignore
+            leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
+            // @ts-ignore
+            markerRef.current = leaflet.marker(position).addTo(map);
+            mapRef.current = map;
+        } else {
+            mapRef.current.setView(position, zoom);
+            markerRef.current?.setLatLng(position);
+        }
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                markerRef.current = null;
+            }
+        };
+    }, [
+        mapEnabled,
+        location.latitude,
+        location.longitude,
+        zoom,
+        attribution,
+        urlTemplate,
+    ]);
 
     return mapEnabled ? (
         <MapBoxContainer ref={mapBoxContainerRef} />
     ) : (
         <MapBoxEnableContainer>
-            <ChipButton onClick={openUpdateMapConfirmationDialog}>
+            <ChipButton onClick={() => updateMapEnabled(true)}>
                 {t("enable_map")}
             </ChipButton>
         </MapBoxEnableContainer>

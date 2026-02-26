@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import "package:logging/logging.dart";
@@ -16,7 +17,6 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/tools/debug/path_storage_viewer.dart';
-import 'package:photos/utils/standalone/directory_content.dart';
 
 class AppStorageViewer extends StatefulWidget {
   const AppStorageViewer({super.key});
@@ -61,25 +61,28 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     paths.addAll([
       PathStorageItem.name(
         imageCachePath,
-        S.of(context).remoteImages,
+        AppLocalizations.of(context).remoteImages,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         videoCachePath,
-        S.of(context).remoteVideos,
+        AppLocalizations.of(context).remoteVideos,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         cacheDirectory,
-        S.of(context).remoteThumbnails,
+        AppLocalizations.of(context).remoteThumbnails,
         allowCacheClear: true,
       ),
-      PathStorageItem.name(tempDownload, S.of(context).pendingSync),
+      PathStorageItem.name(
+        tempDownload,
+        AppLocalizations.of(context).pendingSync,
+      ),
       PathStorageItem.name(
         Platform.isAndroid
             ? androidGlideCacheDirectory
             : iOSPhotoManagerInAppCacheDirectory,
-        S.of(context).localGallery,
+        AppLocalizations.of(context).localGallery,
         allowCacheClear: true,
       ),
     ]);
@@ -136,7 +139,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).manageDeviceStorage,
+              title: AppLocalizations.of(context).manageDeviceStorage,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -165,7 +168,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                       Column(
                         children: [
                           MenuSectionTitle(
-                            title: S.of(context).cachedData,
+                            title: AppLocalizations.of(context).cachedData,
                           ),
                           ListView.builder(
                             shrinkWrap: true,
@@ -184,13 +187,11 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             },
                             itemCount: paths.length,
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ),
+                          const SizedBox(height: 24),
                           MenuItemWidget(
                             leadingIcon: Icons.delete_sweep_outlined,
                             captionedTextWidget: CaptionedTextWidget(
-                              title: S.of(context).clearCaches,
+                              title: AppLocalizations.of(context).clearCaches,
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,
@@ -199,9 +200,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             onTap: () async {
                               for (var pathItem in paths) {
                                 if (pathItem.allowCacheClear) {
-                                  await deleteDirectoryContents(
-                                    pathItem.path,
-                                  );
+                                  await deleteDirectoryContents(pathItem.path);
                                 }
                               }
                               if (!Platform.isAndroid) {
@@ -209,15 +208,17 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                                   iosTempDirectoryPath,
                                 );
                               }
+                              // Small delay to allow file system to sync
+                              await Future.delayed(
+                                const Duration(milliseconds: 300),
+                              );
                               _refreshCounterKey++;
                               if (mounted) {
                                 setState(() => {});
                               }
                             },
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ],

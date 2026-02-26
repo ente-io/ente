@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -11,10 +12,12 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -73,33 +76,50 @@ class ArchivePage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: EmptyState(
-        text: S.of(context).youDontHaveAnyArchivedItems,
+        text: AppLocalizations.of(context).youDontHaveAnyArchivedItems,
       ),
       header: AlbumHorizontalList(
         CollectionsService.instance.getArchivedCollection,
+        onViewAllTapped: () async {
+          final collections =
+              await CollectionsService.instance.getArchivedCollection();
+          if (context.mounted) {
+            await routeToPage(
+              context,
+              CollectionListPage(
+                collections,
+                sectionType: UISectionType.archivedCollections,
+                appTitle: Text(AppLocalizations.of(context).archive),
+                tag: "archived",
+              ),
+            );
+          }
+        },
       ),
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            appBarType,
-            S.of(context).archive,
-            _selectedFiles,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              appBarType,
+              AppLocalizations.of(context).archive,
+              _selectedFiles,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                overlayType,
-                _selectedFiles,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  overlayType,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),

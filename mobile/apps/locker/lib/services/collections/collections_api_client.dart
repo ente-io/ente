@@ -1,17 +1,24 @@
+import "dart:async";
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
+import "package:ente_events/event_bus.dart";
 import 'package:ente_network/network.dart';
+import "package:ente_sharing/collection_sharing_service.dart";
+import "package:ente_sharing/models/user.dart";
 import 'package:locker/core/errors.dart';
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
+import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
@@ -29,7 +36,11 @@ class CollectionApiClient {
   final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
-  Future<void> init() async {}
+  late LockerDB _db;
+
+  Future<void> init() async {
+    _db = LockerDB.instance;
+  }
 
   Future<List<Collection>> getCollections(int sinceTime) async {
     try {
@@ -102,7 +113,19 @@ class CollectionApiClient {
     params["files"] = [];
     for (final file in files) {
       final int uploadedFileID = file.uploadedFileID!;
-      final fileKey = await CollectionService.instance.getFileKey(file);
+
+      // Follow Photos pattern: decrypt using file's current collectionID
+      final fileCurrentCollection =
+          await CollectionService.instance.getCollection(file.collectionID!);
+      final fileCurrentCollectionKey =
+          CryptoHelper.instance.getCollectionKey(fileCurrentCollection);
+      final fileKey = CryptoHelper.instance.getFileKey(
+        file.encryptedKey!,
+        file.keyDecryptionNonce!,
+        fileCurrentCollectionKey,
+      );
+
+      // Re-encrypt the file key with the destination collection's key
       final encryptedKeyData = CryptoUtil.encryptSync(fileKey, collectionKey);
       final String encryptedKey =
           CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
@@ -139,6 +162,48 @@ class CollectionApiClient {
     }
   }
 
+  Future<void> removeFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) return;
+
+    final params = <String, dynamic>{};
+    params["collectionID"] = collectionID;
+
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["fileIDs"] = <int>[];
+      for (final file in batch) {
+        if (file.uploadedFileID != null) {
+          params["fileIDs"].add(file.uploadedFileID);
+        }
+      }
+
+      if (params["fileIDs"].isNotEmpty) {
+        final response = await _enteDio.post(
+          "/collections/v3/remove-files",
+          data: params,
+        );
+        if (response.statusCode != 200) {
+          throw Exception("Failed to remove files from collection");
+        }
+
+        await _db.deleteFilesFromCollection(
+          await _db.getCollection(collectionID),
+          batch,
+        );
+      }
+    }
+  }
+
   Future<void> rename(Collection collection, String newName) async {
     final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
     final encryptedName = CryptoUtil.encryptSync(
@@ -161,38 +226,105 @@ class CollectionApiClient {
     }
   }
 
+  Future<void> leaveCollection(Collection collection) async {
+    await CollectionSharingService.instance.leaveCollection(collection.id);
+    await _handleCollectionDeletion(collection);
+    await CollectionService.instance.sync();
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _db.deleteCollection(collection);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    await _updateCollectionInDB(deletedCollection);
+  }
+
   Future<void> move(
-    EnteFile file,
+    List<EnteFile> files,
     Collection fromCollection,
     Collection toCollection,
   ) async {
+    if (files.isEmpty) {
+      _logger.info("No files to move");
+      return;
+    }
+
     final params = <String, dynamic>{};
     params["fromCollectionID"] = fromCollection.id;
     params["toCollectionID"] = toCollection.id;
-    final fileKey = await CollectionService.instance.getFileKey(file);
-    final encryptedKeyData = CryptoUtil.encryptSync(
-      fileKey,
-      CryptoHelper.instance.getCollectionKey(toCollection),
-    );
-    params["files"] = [];
-    params["files"].add(
-      CollectionFileItem(
-        file.uploadedFileID!,
-        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
-        CryptoUtil.bin2base64(encryptedKeyData.nonce!),
-      ).toMap(),
-    );
-    await _enteDio.post(
-      "/collections/move-files",
-      data: params,
-    );
+
+    // Process files in batches
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        // Follow Photos pattern: use file's collectionID to get the key
+        final fileCollection = await CollectionService.instance.getCollection(
+          file.collectionID!,
+        );
+        final fileCollectionKey =
+            CryptoHelper.instance.getCollectionKey(fileCollection);
+        final fileKey = CryptoHelper.instance.getFileKey(
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          fileCollectionKey,
+        );
+
+        // Update file's collectionID to the destination (like Photos does)
+        file.collectionID = toCollection.id;
+
+        // Re-encrypt the file key with the destination collection's key
+        final destCollectionKey =
+            CryptoHelper.instance.getCollectionKey(toCollection);
+        final encryptedKeyData = CryptoUtil.encryptSync(
+          fileKey,
+          destCollectionKey,
+        );
+
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID!,
+            file.encryptedKey!,
+            file.keyDecryptionNonce!,
+          ).toMap(),
+        );
+      }
+      await _enteDio.post(
+        "/collections/move-files",
+        data: params,
+      );
+    }
   }
 
-  Future<void> trashCollection(Collection collection) async {
+  Future<void> trashCollection(
+    Collection collection, {
+    bool keepFiles = false,
+    bool skipEventFiring = false,
+  }) async {
     try {
       await _enteDio.delete(
-        "/collections/v3/${collection.id}?keepFiles=False&collectionID=${collection.id}",
+        "/collections/v3/${collection.id}"
+        "?keepFiles=${keepFiles ? "True" : "False"}"
+        "&collectionID=${collection.id}",
       );
+      if (skipEventFiring) {
+        await _db.deleteCollection(collection);
+        final deletedCollection = collection.copyWith(isDeleted: true);
+        await _updateCollectionInDB(deletedCollection);
+      } else {
+        await _handleCollectionDeletion(collection);
+      }
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;
@@ -393,6 +525,96 @@ class CollectionApiClient {
       final collection = await _fromRemoteCollection(collectionData);
       return collection;
     });
+  }
+
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
+    final response = await CollectionSharingService.instance.createShareUrl(
+      collection.id,
+      enableCollect,
+    );
+
+    collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+    await _updateCollectionInDB(collection);
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_created");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_created"));
+    unawaited(CollectionService.instance.sync());
+  }
+
+  Future<void> disableShareUrl(Collection collection) async {
+    await CollectionSharingService.instance.disableShareUrl(collection.id);
+    collection.publicURLs.clear();
+    await _updateCollectionInDB(collection);
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_disabled");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_disabled"));
+    unawaited(CollectionService.instance.sync());
+  }
+
+  Future<void> updateShareUrl(
+    Collection collection,
+    Map<String, dynamic> prop,
+  ) async {
+    prop.putIfAbsent('collectionID', () => collection.id);
+
+    final response = await CollectionSharingService.instance.updateShareUrl(
+      collection.id,
+      prop,
+    );
+    // remove existing url information
+    collection.publicURLs.clear();
+    collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+    await _updateCollectionInDB(collection);
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_updated");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_updated"));
+    unawaited(CollectionService.instance.sync());
+  }
+
+  Future<List<User>> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
+    final collectionKey =
+        CollectionService.instance.getCollectionKey(collectionID);
+    final encryptedKey = CryptoUtil.sealSync(
+      collectionKey,
+      CryptoUtil.base642bin(publicKey),
+    );
+
+    final sharees = await CollectionSharingService.instance.share(
+      collectionID,
+      email,
+      publicKey,
+      role.toStringVal(),
+      collectionKey,
+      encryptedKey,
+    );
+
+    final collection = CollectionService.instance.getFromCache(collectionID);
+    final updatedCollection = collection!.copyWith(sharees: sharees);
+    await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_added"));
+    unawaited(CollectionService.instance.sync());
+    return sharees;
+  }
+
+  Future<List<User>> unshare(int collectionID, String email) async {
+    final sharees =
+        await CollectionSharingService.instance.unshare(collectionID, email);
+    final collection = CollectionService.instance.getFromCache(collectionID);
+    final updatedCollection = collection!.copyWith(sharees: sharees);
+    await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_removed"));
+    unawaited(CollectionService.instance.sync());
+    return sharees;
+  }
+
+  Future<void> _updateCollectionInDB(Collection collection) async {
+    await _db.updateCollections([collection]);
+    CollectionService.instance.updateCollectionCache(collection);
   }
 }
 

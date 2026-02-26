@@ -15,6 +15,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -22,6 +23,7 @@ class MapPullUpGallery extends StatefulWidget {
   final StreamController<List<EnteFile>> visibleImages;
   final double bottomUnsafeArea;
   final double bottomSheetDraggableAreaHeight;
+  final bool hasLocationData;
   static const gridCrossAxisSpacing = 4.0;
   static const gridMainAxisSpacing = 4.0;
   static const gridPadding = 2.0;
@@ -30,6 +32,7 @@ class MapPullUpGallery extends StatefulWidget {
     this.visibleImages,
     this.bottomSheetDraggableAreaHeight,
     this.bottomUnsafeArea, {
+    this.hasLocationData = true,
     super.key,
   });
 
@@ -50,41 +53,46 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
     Widget? cachedScrollableContent;
 
     return DeferredPointerHandler(
-      child: GalleryFilesState(
-        child: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              DraggableScrollableSheet(
-                expand: false,
-                initialChildSize: initialChildSize,
-                minChildSize: initialChildSize,
-                maxChildSize: 0.8,
-                snap: true,
-                snapSizes: const [0.5],
-                builder: (context, scrollController) {
-                  //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
-                  //is snapped to it's initialChildSize
-                  cachedScrollableContent ??=
-                      cacheScrollableContent(scrollController, context, logger);
-                  return cachedScrollableContent!;
-                },
-              ),
-              DeferPointer(
-                //This is to make the FileSelectionOverlayBar respect SafeArea
-                child: MediaQuery(
-                  data: MediaQueryData.fromView(View.of(context)),
-                  child: FileSelectionOverlayBar(
-                    GalleryType.searchResults,
-                    _selectedFiles,
-                    backgroundColor:
-                        getEnteColorScheme(context).backgroundElevated2,
+      child: GalleryBoundariesProvider(
+        child: GalleryFilesState(
+          child: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              clipBehavior: Clip.none,
+              children: [
+                DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: initialChildSize,
+                  minChildSize: initialChildSize,
+                  maxChildSize: 0.8,
+                  snap: true,
+                  snapSizes: const [0.5],
+                  builder: (context, scrollController) {
+                    //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
+                    //is snapped to it's initialChildSize
+                    cachedScrollableContent ??= cacheScrollableContent(
+                      scrollController,
+                      context,
+                      logger,
+                    );
+                    return cachedScrollableContent!;
+                  },
+                ),
+                DeferPointer(
+                  //This is to make the FileSelectionOverlayBar respect SafeArea
+                  child: MediaQuery(
+                    data: MediaQueryData.fromView(View.of(context)),
+                    child: FileSelectionOverlayBar(
+                      GalleryType.searchResults,
+                      _selectedFiles,
+                      backgroundColor:
+                          getEnteColorScheme(context).backgroundElevated2,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -146,12 +154,16 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                S.of(context).noPhotosFoundHere,
+                                AppLocalizations.of(context).noPhotosFoundHere,
                                 style: textTheme.large,
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                S.of(context).zoomOutToSeePhotos,
+                                widget.hasLocationData
+                                    ? AppLocalizations.of(context)
+                                        .zoomOutToSeePhotos
+                                    : AppLocalizations.of(context)
+                                        .noImagesWithLocation,
                                 style: textTheme.smallFaint,
                               ),
                             ],

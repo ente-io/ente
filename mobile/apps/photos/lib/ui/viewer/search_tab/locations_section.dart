@@ -3,6 +3,7 @@ import "dart:math";
 import "dart:ui";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -11,18 +12,18 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LocationsSection extends StatefulWidget {
   final List<GenericSearchResult> locationsSearchResults;
@@ -379,17 +380,25 @@ class GoToMapWithBG extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () async {
-          final bool result = await requestForMapEnable(context);
-          if (result) {
-            // ignore: unawaited_futures
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MapScreen(
-                  filesFutureFn: SearchService.instance.getAllFilesForSearch,
-                ),
-              ),
-            );
+          if (!mapEnabled) {
+            try {
+              await setMapEnabled(true);
+            } catch (e) {
+              showShortToast(
+                context,
+                AppLocalizations.of(context).somethingWentWrong,
+              );
+              return;
+            }
           }
+          // ignore: unawaited_futures
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MapScreen(
+                filesFutureFn: SearchService.instance.getAllFilesForSearch,
+              ),
+            ),
+          );
         },
         child: Stack(
           alignment: Alignment.center,
@@ -461,7 +470,7 @@ class GoToMapWithBG extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      S.of(context).yourMap,
+                                      AppLocalizations.of(context).yourMap,
                                       style: enteTextTheme.mini.copyWith(
                                         color: Colors.white,
                                       ),
@@ -581,7 +590,7 @@ class LocationCTA extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  S.of(context).addNew,
+                                  AppLocalizations.of(context).addNew,
                                   style: enteTextTheme.miniFaint,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

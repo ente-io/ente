@@ -9,6 +9,8 @@ dependencies:
   collection:
   computer:
     git: "https://github.com/ente-io/computer.git"
+  convert: ^3.1.1
+  crypto: ^3.0.3
   flutter:
     sdk: flutter
   flutter_sodium: ^0.2.0

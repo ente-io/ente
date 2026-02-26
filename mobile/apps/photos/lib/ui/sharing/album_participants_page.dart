@@ -1,10 +1,12 @@
+import 'package:collection/collection.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/extensions/list.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -14,16 +16,13 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/sharing/add_participant_page.dart";
 import 'package:photos/ui/sharing/manage_album_participant.dart';
+import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class AlbumParticipantsPage extends StatefulWidget {
   final Collection collection;
 
-  const AlbumParticipantsPage(
-    this.collection, {
-    super.key,
-  });
+  const AlbumParticipantsPage(this.collection, {super.key});
 
   @override
   State<AlbumParticipantsPage> createState() => _AlbumParticipantsPageState();
@@ -31,11 +30,27 @@ class AlbumParticipantsPage extends StatefulWidget {
 
 class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   late int currentUserID;
+  late Collection _collection;
+  final GlobalKey _sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
-    currentUserID = Configuration.instance.getUserID()!;
     super.initState();
+    currentUserID = Configuration.instance.getUserID()!;
+    _collection = widget.collection;
+    _refreshCollection();
+  }
+
+  Future<void> _refreshCollection() async {
+    try {
+      final latest =
+          await collectionsService.fetchCollectionByID(widget.collection.id);
+      if (mounted) {
+        setState(() {
+          _collection = latest;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _navigateToManageUser(User user) async {
@@ -44,45 +59,61 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     }
     await routeToPage(
       context,
-      ManageIndividualParticipant(collection: widget.collection, user: user),
+      ManageIndividualParticipant(collection: _collection, user: user),
     );
-    if (mounted) {
-      setState(() => {});
-    }
+    await _refreshCollection();
   }
 
-  Future<void> _navigateToAddUser(bool addingViewer) async {
+  Future<void> _navigateToAddUser(List<ActionTypesToShow> actions) async {
     await routeToPage(
       context,
-      AddParticipantPage(
-        [widget.collection],
-        addingViewer
-            ? [ActionTypesToShow.addViewer]
-            : [ActionTypesToShow.addCollaborator],
-      ),
+      AddParticipantPage([_collection], actions),
     );
-    if (mounted) {
-      setState(() => {});
-    }
+    await _refreshCollection();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isOwner =
-        widget.collection.owner.id == Configuration.instance.getUserID();
-    final colorScheme = getEnteColorScheme(context);
     final currentUserID = Configuration.instance.getUserID()!;
-    final int participants = 1 + widget.collection.getSharees().length;
-    final User owner = widget.collection.owner;
+    final role = _collection.getRole(currentUserID);
+    final bool isOwner = role == CollectionParticipantRole.owner;
+    final bool isAdmin = role == CollectionParticipantRole.admin;
+    final bool canManageParticipants = isOwner || isAdmin;
+    final bool hasActivePublicLink = _collection.hasLink &&
+        !(_collection.publicURLs.firstOrNull?.isExpired ?? true);
+    final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
+    final colorScheme = getEnteColorScheme(context);
+    final int participants = 1 + _collection.getSharees().length;
+    final User owner = _collection.owner;
     if (owner.id == currentUserID && owner.email == "") {
       owner.email = Configuration.instance.getEmail()!;
     }
-    final splitResult =
-        widget.collection.getSharees().splitMatch((x) => x.isViewer);
-    final List<User> viewers = splitResult.matched;
-    viewers.sort((a, b) => a.email.compareTo(b.email));
-    final List<User> collaborators = splitResult.unmatched;
+    final List<User> allSharees = _collection.getSharees();
+    final List<User> admins = [];
+    final List<User> collaborators = [];
+    final List<User> viewers = [];
+    for (final User sharee in allSharees) {
+      if (sharee.isAdmin) {
+        admins.add(sharee);
+      } else if (sharee.isCollaborator) {
+        collaborators.add(sharee);
+      } else {
+        viewers.add(sharee);
+      }
+    }
+    admins.sort((a, b) => a.email.compareTo(b.email));
     collaborators.sort((a, b) => a.email.compareTo(b.email));
+    viewers.sort((a, b) => a.email.compareTo(b.email));
+    if (isAdmin && !admins.any((u) => u.id == currentUserID)) {
+      admins.insert(
+        0,
+        User(
+          id: currentUserID,
+          email: Configuration.instance.getEmail() ?? "",
+          role: CollectionParticipantRole.admin.toStringVal(),
+        ),
+      );
+    }
 
     return Scaffold(
       body: CustomScrollView(
@@ -90,11 +121,32 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: widget.collection.displayName,
+              title: _collection.displayName,
             ),
-            flexibleSpaceCaption:
-                S.of(context).albumParticipantsCount(participants),
+            flexibleSpaceCaption: AppLocalizations.of(
+              context,
+            ).albumParticipantsCount(count: participants),
           ),
+          if (shouldShowPublicLink)
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MenuSectionTitle(
+                      title: AppLocalizations.of(context).publicLinkEnabled,
+                      iconData: Icons.public,
+                    ),
+                    PublicLinkEnabledActionsWidget(
+                      collection: _collection,
+                      sendLinkButtonKey: _sendLinkButtonKey,
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -105,15 +157,15 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       Column(
                         children: [
                           MenuSectionTitle(
-                            title: S.of(context).albumOwner,
+                            title: AppLocalizations.of(context).albumOwner,
                             iconData: Icons.admin_panel_settings_outlined,
                           ),
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
                               title: isOwner
-                                  ? S.of(context).you
+                                  ? AppLocalizations.of(context).you
                                   : _nameIfAvailableElseEmail(
-                                      widget.collection.owner,
+                                      _collection.owner,
                                     ),
                               makeTextBold: isOwner,
                             ),
@@ -135,14 +187,99 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               childCount: 1,
             ),
           ),
+          if (admins.isNotEmpty || canManageParticipants)
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == 0 &&
+                        (canManageParticipants || admins.isNotEmpty)) {
+                      return MenuSectionTitle(
+                        title: AppLocalizations.of(context).admins,
+                        iconData: Icons.admin_panel_settings_outlined,
+                      );
+                    } else if (index > 0 && index <= admins.length) {
+                      final listIndex = index - 1;
+                      final currentUser = admins[listIndex];
+                      final isSameAsLoggedInUser =
+                          currentUserID == currentUser.id;
+                      final isLastItem =
+                          !canManageParticipants && index == admins.length;
+                      return Column(
+                        children: [
+                          MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: isSameAsLoggedInUser
+                                  ? AppLocalizations.of(context).you
+                                  : _nameIfAvailableElseEmail(currentUser),
+                              makeTextBold: isSameAsLoggedInUser,
+                            ),
+                            leadingIconSize: 24.0,
+                            leadingIconWidget: UserAvatarWidget(
+                              currentUser,
+                              type: AvatarType.md,
+                              currentUserID: currentUserID,
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingIcon:
+                                canManageParticipants && !isSameAsLoggedInUser
+                                    ? Icons.chevron_right
+                                    : null,
+                            trailingIconIsMuted: true,
+                            onTap: canManageParticipants &&
+                                    !isSameAsLoggedInUser
+                                ? () async {
+                                    await _navigateToManageUser(currentUser);
+                                  }
+                                : null,
+                            isTopBorderRadiusRemoved: listIndex > 0,
+                            isBottomBorderRadiusRemoved: !isLastItem,
+                            singleBorderRadius: 8,
+                          ),
+                          isLastItem
+                              ? const SizedBox.shrink()
+                              : DividerWidget(
+                                  dividerType: DividerType.menu,
+                                  bgColor: colorScheme.fillFaint,
+                                ),
+                        ],
+                      );
+                    } else if (index == (1 + admins.length) &&
+                        canManageParticipants) {
+                      return MenuItemWidget(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: admins.isNotEmpty
+                              ? AppLocalizations.of(context).addMoreAdmins
+                              : AppLocalizations.of(context).addAdmin,
+                          makeTextBold: true,
+                        ),
+                        leadingIcon: Icons.add_outlined,
+                        menuItemColor: colorScheme.fillFaint,
+                        onTap: () async {
+                          await _navigateToAddUser(
+                            [ActionTypesToShow.addAdmin],
+                          );
+                        },
+                        isTopBorderRadiusRemoved: admins.isNotEmpty,
+                        singleBorderRadius: 8,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                  childCount: 1 + admins.length + 1,
+                ),
+              ),
+            ),
           SliverPadding(
             padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
+                  if (index == 0 &&
+                      (canManageParticipants || collaborators.isNotEmpty)) {
                     return MenuSectionTitle(
-                      title: S.of(context).collaborator,
+                      title: AppLocalizations.of(context).collaborator,
                       iconData: Icons.edit_outlined,
                     );
                   } else if (index > 0 && index <= collaborators.length) {
@@ -151,31 +288,30 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     final isSameAsLoggedInUser =
                         currentUserID == currentUser.id;
                     final isLastItem =
-                        !isOwner && index == collaborators.length;
+                        !canManageParticipants && index == collaborators.length;
                     return Column(
                       children: [
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? S.of(context).you
+                                ? AppLocalizations.of(context).you
                                 : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: isOwner ? Icons.chevron_right : null,
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingIcon: canManageParticipants
+                              ? Icons.chevron_right
+                              : null,
                           trailingIconIsMuted: true,
-                          onTap: isOwner
+                          onTap: canManageParticipants
                               ? () async {
-                                  if (isOwner) {
-                                    // ignore: unawaited_futures
-                                    _navigateToManageUser(currentUser);
-                                  }
+                                  await _navigateToManageUser(currentUser);
                                 }
                               : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
@@ -186,23 +322,25 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ? const SizedBox.shrink()
                             : DividerWidget(
                                 dividerType: DividerType.menu,
-                                bgColor: getEnteColorScheme(context).fillFaint,
+                                bgColor: colorScheme.fillFaint,
                               ),
                       ],
                     );
-                  } else if (index == (1 + collaborators.length) && isOwner) {
+                  } else if (index == (1 + collaborators.length) &&
+                      canManageParticipants) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: collaborators.isNotEmpty
-                            ? S.of(context).addMore
-                            : S.of(context).addCollaborator,
+                            ? AppLocalizations.of(context).addMore
+                            : AppLocalizations.of(context).addCollaborator,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: colorScheme.fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        _navigateToAddUser(false);
+                        await _navigateToAddUser([
+                          ActionTypesToShow.addCollaborator,
+                        ]);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
                       singleBorderRadius: 8,
@@ -219,9 +357,10 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  if (index == 0 && (isOwner || viewers.isNotEmpty)) {
+                  if (index == 0 &&
+                      (canManageParticipants || viewers.isNotEmpty)) {
                     return MenuSectionTitle(
-                      title: S.of(context).viewer,
+                      title: AppLocalizations.of(context).viewer,
                       iconData: Icons.photo_outlined,
                     );
                   } else if (index > 0 && index <= viewers.length) {
@@ -229,31 +368,31 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     final currentUser = viewers[listIndex];
                     final isSameAsLoggedInUser =
                         currentUserID == currentUser.id;
-                    final isLastItem = !isOwner && index == viewers.length;
+                    final isLastItem =
+                        !canManageParticipants && index == viewers.length;
                     return Column(
                       children: [
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? S.of(context).you
+                                ? AppLocalizations.of(context).you
                                 : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: isOwner ? Icons.chevron_right : null,
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingIcon: canManageParticipants
+                              ? Icons.chevron_right
+                              : null,
                           trailingIconIsMuted: true,
-                          onTap: isOwner
+                          onTap: canManageParticipants
                               ? () async {
-                                  if (isOwner) {
-                                    // ignore: unawaited_futures
-                                    _navigateToManageUser(currentUser);
-                                  }
+                                  await _navigateToManageUser(currentUser);
                                 }
                               : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
@@ -264,23 +403,23 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ? const SizedBox.shrink()
                             : DividerWidget(
                                 dividerType: DividerType.menu,
-                                bgColor: getEnteColorScheme(context).fillFaint,
+                                bgColor: colorScheme.fillFaint,
                               ),
                       ],
                     );
-                  } else if (index == (1 + viewers.length) && isOwner) {
+                  } else if (index == (1 + viewers.length) &&
+                      canManageParticipants) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: viewers.isNotEmpty
-                            ? S.of(context).addMore
-                            : S.of(context).addViewer,
+                            ? AppLocalizations.of(context).addMore
+                            : AppLocalizations.of(context).addViewer,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: colorScheme.fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        _navigateToAddUser(true);
+                        await _navigateToAddUser([ActionTypesToShow.addViewer]);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
                       singleBorderRadius: 8,

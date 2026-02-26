@@ -80,7 +80,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                 .copyWith(left: 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -97,8 +97,8 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                 const SizedBox(width: 8),
                 Text(
                   (_syncingCollection?.$2 ?? true)
-                      ? S.of(context).addingPhotos
-                      : S.of(context).gettingReady,
+                      ? AppLocalizations.of(context).addingPhotos
+                      : AppLocalizations.of(context).gettingReady,
                   style: textTheme.small.copyWith(color: Colors.white),
                 ),
               ],

@@ -7,7 +7,7 @@ import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorTextBar extends StatefulWidget with SimpleConfigsAccess {
@@ -77,7 +77,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       children: [
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-color.svg",
-          label: S.of(context).color,
+          label: AppLocalizations.of(context).color,
           isSelected: selectedActionIndex == 0,
           onTap: () {
             _selectAction(0);
@@ -85,7 +85,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-font.svg",
-          label: S.of(context).font,
+          label: AppLocalizations.of(context).font,
           isSelected: selectedActionIndex == 1,
           onTap: () {
             _selectAction(1);
@@ -93,7 +93,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-background.svg",
-          label: S.of(context).background,
+          label: AppLocalizations.of(context).background,
           isSelected: selectedActionIndex == 2,
           onTap: () {
             setState(() {
@@ -103,7 +103,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-align-left.svg",
-          label: S.of(context).align,
+          label: AppLocalizations.of(context).align,
           isSelected: selectedActionIndex == 3,
           onTap: () {
             setState(() {
@@ -233,10 +233,10 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
-        'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
+        'selectedInnerBackgroundColor': Colors.black.withValues(alpha: 0.11),
         'innerBackgroundColor': isLightMode
-            ? Colors.black.withOpacity(0.11)
-            : Colors.white.withOpacity(0.11),
+            ? Colors.black.withValues(alpha: 0.11)
+            : Colors.white.withValues(alpha: 0.11),
       },
       LayerBackgroundMode.onlyColor: {
         'text': 'Aa',
@@ -247,7 +247,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.white,
-        'innerBackgroundColor': Colors.white.withOpacity(0.6),
+        'innerBackgroundColor': Colors.white.withValues(alpha: 0.6),
       },
     };
 
