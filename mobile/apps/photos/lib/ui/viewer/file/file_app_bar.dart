@@ -742,8 +742,7 @@ class FileAppBarState extends State<FileAppBar> {
       sharedCollection,
     );
     unawaited(Clipboard.setData(ClipboardData(text: url)));
-    const description =
-        'Check out, comment and react on photos privately with Ente\'s end to end encryption';
+    final description = AppLocalizations.of(context).shareLinkMessage;
     await shareLinkWithDescription(
       url,
       description: description,

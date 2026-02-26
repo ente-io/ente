@@ -114,6 +114,14 @@ class CollectionActions {
   ) async {
     late final Collection newCollection;
     try {
+      final reusableQuickLink = await _getReusableQuickLinkCollection(files);
+      if (reusableQuickLink != null) {
+        if (!reusableQuickLink.hasLink) {
+          await CollectionsService.instance.createShareUrl(reusableQuickLink);
+        }
+        return reusableQuickLink;
+      }
+
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
       logger.info("creating album for sharing files");
@@ -161,6 +169,50 @@ class CollectionActions {
       }
     }
     return null;
+  }
+
+  Future<Collection?> _getReusableQuickLinkCollection(
+    List<EnteFile> files,
+  ) async {
+    if (files.length != 1) {
+      return null;
+    }
+
+    final uploadedFileID = files.first.uploadedFileID;
+    if (uploadedFileID == null || uploadedFileID <= 0) {
+      return null;
+    }
+
+    final currentUserID = Configuration.instance.getUserID();
+    final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
+      uploadedFileID,
+    );
+    Collection? quickLinkWithoutPublicUrl;
+
+    for (final collectionID in collectionIDs) {
+      final collection = collectionsService.getCollectionByID(collectionID);
+      if (collection == null ||
+          collection.isDeleted ||
+          !collection.isQuickLinkCollection() ||
+          (currentUserID != null && !collection.isOwner(currentUserID))) {
+        continue;
+      }
+
+      final fileCount = await collectionsService.getFileCount(
+        collection,
+        useCache: false,
+      );
+      if (fileCount != 1) {
+        continue;
+      }
+
+      if (collection.hasLink) {
+        return collection;
+      }
+      quickLinkWithoutPublicUrl ??= collection;
+    }
+
+    return quickLinkWithoutPublicUrl;
   }
 
   // removeParticipant remove the user from a share album

@@ -906,6 +906,13 @@
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
   "shareLink": "Share link",
+  "shareLinkMessage": "Check out, comment and react on photos privately with Ente's end to end encryption",
+  "shareAlbumLinkMessage": "Check out, comment and react on photos from \"{albumName}\" privately with Ente's end to end encryption",
+  "@shareAlbumLinkMessage": {
+    "placeholders": {
+      "albumName": {}
+    }
+  },
   "createCollage": "Create collage",
   "saveCollage": "Save collage",
   "collageSaved": "Collage saved to gallery",
