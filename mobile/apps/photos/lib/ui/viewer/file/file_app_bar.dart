@@ -1,9 +1,11 @@
 import "dart:async";
 import 'dart:io';
+import "dart:math" as math;
 
 import "package:ente_icons/ente_icons.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
@@ -27,6 +29,7 @@ import "package:photos/services/video_preview_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
@@ -39,6 +42,7 @@ import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
@@ -322,6 +326,21 @@ class FileAppBarState extends State<FileAppBar> {
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
+        if (isOwnedByUser && !isFileHidden) {
+          items.add(
+            EntePopupMenuItem(
+              AppLocalizations.of(context).sendLink,
+              value: 14,
+              iconWidget: Transform.rotate(
+                angle: math.pi / 2,
+                child: Icon(
+                  Icons.navigation_rounded,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
+            ),
+          );
+        }
       }
       // Edit option for images, live photos, and videos
       if (widget.file.fileType == FileType.image ||
@@ -502,6 +521,8 @@ class FileAppBarState extends State<FileAppBar> {
             _handleMenuClosed();
             if (value == 1) {
               await _download(widget.file);
+            } else if (value == 14) {
+              await _onSendLinkTapped();
             } else if (value == 2) {
               await _toggleFileArchiveStatus(widget.file);
             } else if (value == 3) {
@@ -686,6 +707,48 @@ class FileAppBarState extends State<FileAppBar> {
       _logger.severe("Failed to use as", e);
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _onSendLinkTapped() async {
+    if (!widget.file.isOwner || !widget.file.isUploaded) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+      );
+      return;
+    }
+
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).creatingLink,
+      isDismissible: true,
+    );
+    await dialog.show();
+    try {
+      final sharedCollection = await CollectionActions(
+        CollectionsService.instance,
+      ).createSharedCollectionLink(context, [widget.file]);
+      if (sharedCollection == null) {
+        return;
+      }
+      await _sendLink(sharedCollection);
+    } finally {
+      await dialog.hide();
+    }
+  }
+
+  Future<void> _sendLink(Collection sharedCollection) async {
+    final String url = CollectionsService.instance.getPublicUrl(
+      sharedCollection,
+    );
+    unawaited(Clipboard.setData(ClipboardData(text: url)));
+    const description =
+        'Check out, comment and react on photos privately with Ente\'s end to end encryption';
+    await shareLinkWithDescription(
+      url,
+      description: description,
+      context: context,
+    );
   }
 
   Future<void> _onTapGuestView() async {
