@@ -23,11 +23,14 @@ export const findReusableSingleFileQuickLinkCollection = ({
     const quickLinkCollections = collections.filter(
         (collection) =>
             collection.owner.id == userID &&
-            collection.magicMetadata?.data.subType == CollectionSubType.quicklink,
+            collection.magicMetadata?.data.subType ==
+                CollectionSubType.quicklink,
     );
     if (!quickLinkCollections.length) return undefined;
 
-    const quickLinkCollectionIDs = new Set(quickLinkCollections.map((c) => c.id));
+    const quickLinkCollectionIDs = new Set(
+        quickLinkCollections.map((c) => c.id),
+    );
     const quickLinkFileIDsByCollectionID = new Map<number, Set<number>>();
     for (const collectionFile of collectionFiles) {
         if (!quickLinkCollectionIDs.has(collectionFile.collectionID)) continue;
@@ -133,9 +136,7 @@ export const createOrReuseQuickLinkURLForFiles = async ({
         );
         await addToCollection(quickLinkCollection, files);
         publicURL = (
-            await createPublicURL(quickLinkCollection.id, {
-                enableJoin: false,
-            })
+            await createPublicURL(quickLinkCollection.id, { enableJoin: false })
         ).url;
         shouldPull = true;
     }

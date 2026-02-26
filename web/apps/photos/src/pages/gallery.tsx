@@ -964,7 +964,13 @@ const Page: React.FC = () => {
             setPublicLinkToast({ open: true, url: result.url });
             if (result.shouldPull) await remotePull({ silent: true });
         },
-        [customDomain, remotePull, state.collectionFiles, state.collections, user],
+        [
+            customDomain,
+            remotePull,
+            state.collectionFiles,
+            state.collections,
+            user,
+        ],
     );
 
     const createFileOpHandler =
