@@ -99,11 +99,8 @@ import {
 } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
-    addToCollection,
     addToFavoritesCollection,
     createAlbum,
-    createPublicURL,
-    createQuickLinkCollection,
     removeFromCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
@@ -153,6 +150,7 @@ import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
+import { createOrReuseQuickLinkURLForFiles } from "services/quick-link";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
 import {
@@ -160,7 +158,6 @@ import {
     performFileOp,
     type SelectedState,
 } from "utils/file";
-import { quickLinkNameForFiles, resolveQuickLinkURL } from "utils/quick-link";
 
 /**
  * The default view for logged in users.
@@ -951,6 +948,25 @@ const Page: React.FC = () => {
         [createOnSelectForCollectionOp, remotePull],
     );
 
+    const sendQuickLinkForFiles = useCallback(
+        async (files: EnteFile[]) => {
+            if (!user || !files.length) return;
+
+            const result = await createOrReuseQuickLinkURLForFiles({
+                files,
+                userID: user.id,
+                collections: state.collections,
+                collectionFiles: state.collectionFiles,
+                customDomain,
+            });
+            if (!result) return;
+
+            setPublicLinkToast({ open: true, url: result.url });
+            if (result.shouldPull) await remotePull({ silent: true });
+        },
+        [customDomain, remotePull, state.collectionFiles, state.collections, user],
+    );
+
     const createFileOpHandler =
         (op: FileOp, options?: { suppressSelectionBar?: boolean }) => () => {
             void (async () => {
@@ -973,27 +989,9 @@ const Page: React.FC = () => {
                             showMiniDialog(notifyOthersFilesDialogAttributes());
                         }
 
-                        const quickLinkCollection =
-                            await createQuickLinkCollection(
-                                quickLinkNameForFiles(ownedSelectedFiles),
-                            );
-                        await addToCollection(
-                            quickLinkCollection,
-                            ownedSelectedFiles,
-                        );
-                        const publicURL = await createPublicURL(
-                            quickLinkCollection.id,
-                            { enableJoin: false },
-                        );
-                        const resolvedURL = await resolveQuickLinkURL(
-                            publicURL.url,
-                            quickLinkCollection.key,
-                            customDomain,
-                        );
-                        setPublicLinkToast({ open: true, url: resolvedURL });
+                        await sendQuickLinkForFiles(ownedSelectedFiles);
 
                         clearSelection();
-                        await remotePull({ silent: true });
                         return;
                     }
 
@@ -1310,21 +1308,7 @@ const Page: React.FC = () => {
 
             showLoadingBar();
             try {
-                const quickLinkCollection = await createQuickLinkCollection(
-                    quickLinkNameForFiles([file]),
-                );
-                await addToCollection(quickLinkCollection, [file]);
-                const publicURL = await createPublicURL(
-                    quickLinkCollection.id,
-                    { enableJoin: false },
-                );
-                const resolvedURL = await resolveQuickLinkURL(
-                    publicURL.url,
-                    quickLinkCollection.key,
-                    customDomain,
-                );
-                setPublicLinkToast({ open: true, url: resolvedURL });
-                await remotePull({ silent: true });
+                await sendQuickLinkForFiles([file]);
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -1335,8 +1319,7 @@ const Page: React.FC = () => {
             user?.id,
             showLoadingBar,
             hideLoadingBar,
-            customDomain,
-            remotePull,
+            sendQuickLinkForFiles,
             onGenericError,
         ],
     );
