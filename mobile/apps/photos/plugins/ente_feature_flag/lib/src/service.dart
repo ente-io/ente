@@ -16,6 +16,7 @@ class FlagService {
   static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
+  static const int _ios26NativeBgUploadFlag = 1 << 4;
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -70,6 +71,8 @@ class FlagService {
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
   bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
+  bool get enableIos26NativeBgUpload =>
+      internalUser || _isServerFlagEnabled(_ios26NativeBgUploadFlag);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
