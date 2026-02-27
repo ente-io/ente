@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/scanner_utils.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,8 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
   String? totp;
+  StreamSubscription<Barcode>? _scanSubscription;
+  bool _hasHandledResult = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -70,28 +74,46 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
       controller.pauseCamera();
       controller.resumeCamera();
     }
-    controller.scannedDataStream.listen((scanData) {
+    _scanSubscription?.cancel();
+    _scanSubscription = controller.scannedDataStream.listen((scanData) async {
+      if (!shouldHandleScanResult(
+        hasHandledResult: _hasHandledResult,
+        scannedCode: scanData.code,
+      )) {
+        return;
+      }
       try {
-        if (scanData.code == null) {
-          return;
-        }
         if (scanData.code!.startsWith(kGoogleAuthExportPrefix)) {
-          List<Code> codes = parseGoogleAuth(scanData.code!);
+          final List<Code> codes = parseGoogleAuth(scanData.code!);
+          _hasHandledResult = true;
+          await _scanSubscription?.cancel();
+          await controller.pauseCamera();
+          await controller.stopCamera();
           controller.dispose();
+          if (!mounted) {
+            return;
+          }
           Navigator.of(context).pop(codes);
         } else {
-          showToast(context, "Invalid QR code");
+          if (mounted) {
+            showToast(context, "Invalid QR code");
+          }
         }
       } catch (e) {
+        _hasHandledResult = true;
+        await _scanSubscription?.cancel();
         controller.dispose();
-        Navigator.of(context).pop();
-        showToast(context, "Error $e");
+        if (mounted) {
+          Navigator.of(context).pop();
+          showToast(context, "Error $e");
+        }
       }
     });
   }
 
   @override
   void dispose() {
+    _scanSubscription?.cancel();
     controller?.dispose();
     super.dispose();
   }

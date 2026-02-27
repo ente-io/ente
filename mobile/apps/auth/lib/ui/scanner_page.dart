@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
+import 'package:ente_auth/ui/scanner_utils.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
@@ -33,6 +35,8 @@ class ScannerPageState extends State<ScannerPage> {
   QRViewController? controller;
   String? totp;
   bool _isImportingFromGallery = false;
+  StreamSubscription<Barcode>? _scanSubscription;
+  bool _hasHandledResult = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -134,16 +138,31 @@ class ScannerPageState extends State<ScannerPage> {
       controller.pauseCamera();
       controller.resumeCamera();
     }
-    controller.scannedDataStream.listen((scanData) {
+    _scanSubscription?.cancel();
+    _scanSubscription = controller.scannedDataStream.listen((scanData) async {
+      if (!shouldHandleScanResult(
+        hasHandledResult: _hasHandledResult,
+        scannedCode: scanData.code,
+      )) {
+        return;
+      }
       try {
         final code = Code.fromOTPAuthUrl(scanData.code!);
+        _hasHandledResult = true;
+        await _scanSubscription?.cancel();
+        await controller.pauseCamera();
+        await controller.stopCamera();
         controller.dispose();
+        if (!mounted) {
+          return;
+        }
         Navigator.of(context).pop(
           ScannerPageResult(code: code, fromGallery: false),
         );
       } catch (e) {
-        // Log
-        showToast(context, context.l10n.invalidQRCode);
+        if (mounted) {
+          showToast(context, context.l10n.invalidQRCode);
+        }
       }
     });
   }
@@ -160,6 +179,8 @@ class ScannerPageState extends State<ScannerPage> {
       if (code == null) {
         return;
       }
+      _hasHandledResult = true;
+      await _scanSubscription?.cancel();
       controller?.dispose();
       if (!mounted) {
         return;
@@ -180,6 +201,7 @@ class ScannerPageState extends State<ScannerPage> {
 
   @override
   void dispose() {
+    _scanSubscription?.cancel();
     controller?.dispose();
     super.dispose();
   }
