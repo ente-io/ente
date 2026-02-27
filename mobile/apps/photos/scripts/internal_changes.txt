@@ -1,3 +1,4 @@
+- Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users
 - Neeraj: Improve public album link 429/device-limit error handling
 - Neeraj: File details: hide timezone in creation time and prefer editedTime over public metadata dateTime, falling back to creationTime

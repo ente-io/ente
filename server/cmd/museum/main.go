@@ -414,6 +414,13 @@ func main() {
 		userCache,
 		userCacheCtrl,
 	)
+	inactiveUserOrchestrator := user.NewInactiveUserOrchestrator(
+		userRepo,
+		notificationHistoryRepo,
+		lockController,
+		discordController,
+		userController,
+	)
 	fileLinkCtrl := &publicCtrl.FileLinkController{
 		FileController: fileController,
 		FileLinkRepo:   fileLinkRepo,
@@ -933,7 +940,7 @@ func main() {
 	setupAndStartCrons(
 		userAuthRepo, collectionLinkRepo, fileLinkRepo, pasteRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
-		embeddingController, healthCheckHandler, castDb)
+		embeddingController, healthCheckHandler, castDb, inactiveUserOrchestrator)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
@@ -1080,9 +1087,9 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	emergencyCtrl *emergency.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
-	castDb castRepo.Repository) {
+	castDb castRepo.Repository,
+	inactiveUserOrchestrator *user.InactiveUserOrchestrator) {
 	const deletedTokenRetentionDays = 397 // 13 months using a fixed-day approximation
-
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
 		log.Info("Skipping cron jobs")
@@ -1184,6 +1191,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 		} else if deleted > 0 {
 			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
 		}
+	})
+
+	scheduleAndRun(c, "@every 24h", func() {
+		inactiveUserOrchestrator.ProcessInactiveUsers()
 	})
 
 	schedule(c, "@every 1m", func() {

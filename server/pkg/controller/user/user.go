@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -235,6 +236,19 @@ func (c *UserController) GetTwoFactorStatus(userID int64) (bool, error) {
 }
 
 func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, true)
+}
+
+func (c *UserController) HandleAutomatedAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, false)
+}
+
+func (c *UserController) handleAccountDeletion(
+	ctx context.Context,
+	userID int64,
+	logger *logrus.Entry,
+	sendDeletionEmail bool,
+) (*ente.DeleteAccountResponse, error) {
 	isSubscriptionCancelled, err := c.BillingController.HandleAccountDeletion(ctx, userID, logger)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -287,7 +301,9 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	if sendDeletionEmail {
+		go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	}
 
 	return &ente.DeleteAccountResponse{
 		IsSubscriptionCancelled: isSubscriptionCancelled,

@@ -23,13 +23,15 @@ class MLIndexingIsolate extends SuperIsolate {
   final _logger = Logger("MLIndexingIsolate");
 
   @override
-  bool get isDartUiIsolate => true;
+  bool get isDartUiIsolate => !_shouldUseRustMl;
 
   @override
   String get isolateName => "MLIndexingIsolate";
 
   @override
   bool get shouldAutomaticDispose => true;
+
+  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
 
   int _loadedModelsCount = 0;
   int _deloadedModelsCount = 0;
@@ -112,8 +114,6 @@ class MLIndexingIsolate extends SuperIsolate {
     return result;
   }
 
-  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
-
   Future<void> prepareRustRuntime() async {
     if (!_shouldUseRustMl) {
       return;
@@ -131,6 +131,9 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> releaseRustRuntime() async {
+    if (!_shouldUseRustMl) {
+      return;
+    }
     if (!isIsolateSpawned) {
       _cachedRustRuntimeArgs = null;
       return;
@@ -256,6 +259,10 @@ class MLIndexingIsolate extends SuperIsolate {
 
   /// WARNING: This method is only for debugging purposes. It should not be used in production.
   Future<void> debugLoadSingleModel(MLModels model) {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't use legacy ML models when using rust");
+      return Future.value();
+    }
     return _initModelLock.synchronized(() async {
       final modelInstance = model.model;
       if (modelInstance.isInitialized) {
@@ -298,6 +305,10 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> _releaseModels() async {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't release legacy ML models when using rust");
+      return Future.value();
+    }
     final List<String> modelNames = [];
     final List<int> modelAddresses = [];
     final List<MLModels> models = [];

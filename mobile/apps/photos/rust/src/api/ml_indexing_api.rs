@@ -1,6 +1,6 @@
+use crate::image::decode::decode_image_from_path;
 use crate::ml::{
     clip::image::run_clip_image,
-    decode::decode_image_from_path,
     error::{MlError, MlResult},
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},

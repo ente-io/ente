@@ -12,6 +12,8 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
+import "package:photos/src/rust/api/image_processing_api.dart"
+    as rust_image_processing;
 import "package:photos/src/rust/api/ml_indexing_api.dart" as rust_ml;
 import "package:photos/src/rust/frb_generated.dart" show EntePhotosRust;
 import "package:photos/utils/image_ml_util.dart";
@@ -154,9 +156,30 @@ Future<dynamic> isolateFunction(
     /// MLComputer
     case IsolateOperation.generateFaceThumbnails:
       final imagePath = args['imagePath'] as String;
+      final useRustForFaceThumbnails =
+          args['useRustForFaceThumbnails'] as bool? ?? false;
       final faceBoxesJson = args['faceBoxesList'] as List<Map<String, dynamic>>;
       final List<FaceBox> faceBoxes =
           faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
+      if (useRustForFaceThumbnails) {
+        await _ensureRustLoaded();
+        final rustFaceBoxes = faceBoxes
+            .map(
+              (box) => rust_image_processing.RustFaceBox(
+                x: box.x,
+                y: box.y,
+                width: box.width,
+                height: box.height,
+              ),
+            )
+            .toList(growable: false);
+        final List<Uint8List> results =
+            await rust_image_processing.generateFaceThumbnails(
+          imagePath: imagePath,
+          faceBoxes: rustFaceBoxes,
+        );
+        return List.from(results);
+      }
       final List<Uint8List> results = await generateFaceThumbnailsUsingCanvas(
         imagePath,
         faceBoxes,

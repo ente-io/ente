@@ -351,8 +351,7 @@ fn pad_image_for_direction(image: &[Vec<i32>], direction: FaceDirection) -> Vec<
         }
         {
             let (upper_rows, bottom_rows) = padded.split_at_mut(rows + 1);
-            bottom_rows[0][1..=copy_cols]
-                .copy_from_slice(&upper_rows[rows - 1][1..=copy_cols]);
+            bottom_rows[0][1..=copy_cols].copy_from_slice(&upper_rows[rows - 1][1..=copy_cols]);
         }
     }
     for row in padded.iter_mut().take(rows + 2) {

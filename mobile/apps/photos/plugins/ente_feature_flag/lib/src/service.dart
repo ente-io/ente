@@ -104,6 +104,8 @@ class FlagService {
 
   bool get useRustForML => internalUser;
 
+  bool get useRustForFaceThumbnails => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();

@@ -171,7 +171,7 @@ jobs:
             - name: Setup signing keys
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
-                  KEYSTORE_PATH=../ensu-release.keystore
+                  KEYSTORE_PATH=$(pwd)/ensu-release.keystore
                   echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > "$KEYSTORE_PATH"
                   cat > key.properties << EOF
                   storeFile=$KEYSTORE_PATH

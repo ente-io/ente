@@ -1,5 +1,4 @@
 pub mod clip;
-pub mod decode;
 pub mod error;
 pub mod face;
 pub mod onnx;

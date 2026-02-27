@@ -364,22 +364,7 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
-func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
-	if app != ente.Locker {
-		return nil
-	}
-
-	// Check rollout limit
-	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
-		return stacktrace.Propagate(err, "locker access: rollout check failed")
-	}
-	return nil
-}
-
 func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, app ente.App, token string, ip string, userAgent string) error {
-	if err := c.ensureLockerAccess(userID, app); err != nil {
-		return err
-	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
@@ -507,9 +492,6 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
-			if lockerErr := c.ensureLockerAccess(userID, app); lockerErr != nil {
-				return ente.EmailAuthorizationResponse{}, lockerErr
-			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,
 				network.GetClientIP(context), context.Request.UserAgent())
 			if err != nil {

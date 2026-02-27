@@ -854,6 +854,8 @@ export const FileList: React.FC<FileListProps> = ({
 
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
+            const haveSelection =
+                !!enableSelect && !suppressSelectionUI && selected.count > 0;
             const showGroupCheckbox =
                 haveSelection && !(contextMenu && selected.count === 1);
             switch (item.type) {
