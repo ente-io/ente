@@ -9,7 +9,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/offline_files_db.dart";
-import "package:photos/main.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -543,7 +542,6 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       imagePath,
       includeRgbaBytes: true,
       includeDartUiImage: false,
-      inBackground: isProcessBg,
     );
     final rawRgbaBytes = decodedImage.rawRgbaBytes!;
     final imageDimensions = decodedImage.dimensions;

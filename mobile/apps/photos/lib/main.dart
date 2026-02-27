@@ -137,7 +137,7 @@ Future<void> runBackgroundTask(
   // Check if foreground is recently active to avoid conflicts
   final isRunningInFG = await _isRunningInForeground();
 
-  // If FG was active recently, skip BG work
+  // If FG was active in last 30 seconds, skip BG work
   if (isRunningInFG) {
     _logger.info(
       "[BG TASK] Foreground recently active, skipping background work",
