@@ -57,4 +57,25 @@ namespace core_uniffi {
 
   [Throws=EnsuError]
   AuthSecrets decrypt_secrets_with_kek(sequence<u8> kek, KeyAttributes key_attrs, string? encrypted_token, string? plain_token);
+
+  [Throws=EnsuError]
+  string normalize_hash_to_hex(string expected_hash);
+
+  [Throws=EnsuError]
+  string blake2b_hash_hex(sequence<u8> data, u32? out_len);
+
+  [Throws=EnsuError]
+  string blake2b_hash_b64(sequence<u8> data, u32? out_len);
+
+  [Throws=EnsuError]
+  boolean verify_blake2b_hash(sequence<u8> data, string expected_hash);
+
+  [Throws=EnsuError]
+  boolean verify_blake2b_hash_for_file(string file_path, string expected_hash);
+
+  [Throws=EnsuError]
+  sequence<u8> decrypt_secret_stream_payload(sequence<u8> encrypted_data, sequence<u8> decryption_header, sequence<u8> key);
+
+  [Throws=EnsuError]
+  sequence<u8> decrypt_and_verify_secret_stream_payload(sequence<u8> encrypted_data, sequence<u8> decryption_header, sequence<u8> key, string expected_hash);
 };

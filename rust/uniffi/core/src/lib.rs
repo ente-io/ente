@@ -62,6 +62,14 @@ impl From<auth::AuthError> for EnsuError {
     }
 }
 
+impl From<crypto::CryptoError> for EnsuError {
+    fn from(err: crypto::CryptoError) -> Self {
+        EnsuError::Message {
+            reason: err.to_string(),
+        }
+    }
+}
+
 struct SrpState {
     session: auth::SrpSession,
     kek: crypto::SecretVec,
@@ -128,6 +136,38 @@ fn decode_token(token: &str) -> Result<Vec<u8>, EnsuError> {
         .map_err(|e| EnsuError::Message {
             reason: format!("token: {}", e),
         })
+}
+
+fn decode_expected_hash(hash: &str) -> Result<Vec<u8>, EnsuError> {
+    let trimmed = hash.trim();
+    if trimmed.is_empty() {
+        return Err(EnsuError::Message {
+            reason: "expected hash is empty".to_string(),
+        });
+    }
+
+    let looks_like_hex = trimmed.len() % 2 == 0 && trimmed.chars().all(|c| c.is_ascii_hexdigit());
+    if looks_like_hex {
+        return crypto::decode_hex(trimmed).map_err(|e| EnsuError::Message {
+            reason: format!("invalid hex hash: {}", e),
+        });
+    }
+
+    BASE64_STANDARD
+        .decode(trimmed)
+        .or_else(|_| BASE64_URL_SAFE.decode(trimmed))
+        .map_err(|e| EnsuError::Message {
+            reason: format!("invalid base64 hash: {}", e),
+        })
+}
+
+fn resolve_hash_len(len: usize) -> Result<usize, EnsuError> {
+    if !(16..=64).contains(&len) {
+        return Err(EnsuError::Message {
+            reason: format!("invalid hash length: {}", len),
+        });
+    }
+    Ok(len)
 }
 
 pub fn init_crypto() -> Result<(), EnsuError> {
@@ -268,4 +308,169 @@ pub fn decrypt_secrets_with_kek(
     Err(EnsuError::Message {
         reason: "Missing auth token".to_string(),
     })
+}
+
+pub fn normalize_hash_to_hex(expected_hash: String) -> Result<String, EnsuError> {
+    let expected = decode_expected_hash(&expected_hash)?;
+    Ok(crypto::encode_hex(&expected))
+}
+
+pub fn blake2b_hash_hex(data: Vec<u8>, out_len: Option<u32>) -> Result<String, EnsuError> {
+    let out_len = out_len.map(|len| len as usize);
+    let hash = crypto::hash::hash(&data, out_len, None)?;
+    Ok(crypto::encode_hex(&hash))
+}
+
+pub fn blake2b_hash_b64(data: Vec<u8>, out_len: Option<u32>) -> Result<String, EnsuError> {
+    let out_len = out_len.map(|len| len as usize);
+    let hash = crypto::hash::hash(&data, out_len, None)?;
+    Ok(crypto::encode_b64(&hash))
+}
+
+pub fn verify_blake2b_hash(data: Vec<u8>, expected_hash: String) -> Result<bool, EnsuError> {
+    let expected = decode_expected_hash(&expected_hash)?;
+    let out_len = resolve_hash_len(expected.len())?;
+    let hash = crypto::hash::hash(&data, Some(out_len), None)?;
+    Ok(hash == expected)
+}
+
+pub fn verify_blake2b_hash_for_file(
+    file_path: String,
+    expected_hash: String,
+) -> Result<bool, EnsuError> {
+    let expected = decode_expected_hash(&expected_hash)?;
+    let out_len = resolve_hash_len(expected.len())?;
+    let file = std::fs::File::open(&file_path).map_err(|error| EnsuError::Message {
+        reason: format!("failed to read file '{}': {}", file_path, error),
+    })?;
+    let mut reader = std::io::BufReader::new(file);
+    let hash = crypto::hash::hash_reader(&mut reader, Some(out_len))?;
+    Ok(hash == expected)
+}
+
+pub fn decrypt_secret_stream_payload(
+    encrypted_data: Vec<u8>,
+    decryption_header: Vec<u8>,
+    key: Vec<u8>,
+) -> Result<Vec<u8>, EnsuError> {
+    crypto::stream::decrypt_file_data(&encrypted_data, &decryption_header, &key).map_err(Into::into)
+}
+
+pub fn decrypt_and_verify_secret_stream_payload(
+    encrypted_data: Vec<u8>,
+    decryption_header: Vec<u8>,
+    key: Vec<u8>,
+    expected_hash: String,
+) -> Result<Vec<u8>, EnsuError> {
+    let decrypted = decrypt_secret_stream_payload(encrypted_data, decryption_header, key)?;
+    let is_valid = verify_blake2b_hash(decrypted.clone(), expected_hash)?;
+    if !is_valid {
+        return Err(EnsuError::Message {
+            reason: "hash mismatch for decrypted payload".to_string(),
+        });
+    }
+    Ok(decrypted)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verify_hash_accepts_hex_and_base64() {
+        let data = b"ente-ios26-test".to_vec();
+        let hex_hash = blake2b_hash_hex(data.clone(), Some(32)).unwrap();
+        let b64_hash = blake2b_hash_b64(data.clone(), Some(32)).unwrap();
+
+        assert!(verify_blake2b_hash(data.clone(), hex_hash).unwrap());
+        assert!(verify_blake2b_hash(data, b64_hash).unwrap());
+    }
+
+    #[test]
+    fn normalize_hash_to_hex_accepts_hex_base64_and_urlsafe_base64() {
+        let data = b"ente-ios26-normalize-test".to_vec();
+        let hash_bytes = crypto::hash::hash(&data, Some(32), None).unwrap();
+        let hex_hash = crypto::encode_hex(&hash_bytes);
+        let b64_hash = crypto::encode_b64(&hash_bytes);
+        let url_b64_hash = BASE64_URL_SAFE.encode(&hash_bytes);
+
+        assert_eq!(normalize_hash_to_hex(hex_hash.clone()).unwrap(), hex_hash);
+        assert_eq!(normalize_hash_to_hex(b64_hash).unwrap(), hex_hash);
+        assert_eq!(normalize_hash_to_hex(url_b64_hash).unwrap(), hex_hash);
+    }
+
+    #[test]
+    fn verify_hash_rejects_expected_hash_too_short() {
+        let data = b"ente-ios26-short-hash".to_vec();
+        let short_hash = BASE64_STANDARD.encode([7u8; 8]);
+        let error = verify_blake2b_hash(data, short_hash).unwrap_err();
+
+        assert!(
+            error.to_string().contains("invalid hash length"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn decrypt_and_verify_secret_stream_payload_roundtrip() {
+        let plaintext = b"ente-ios26-decrypt-verify-roundtrip".to_vec();
+        let key = crypto::keys::generate_stream_key();
+        let encrypted = crypto::stream::encrypt(&plaintext, &key).unwrap();
+        let expected_hash = blake2b_hash_b64(plaintext.clone(), None).unwrap();
+
+        let decrypted = decrypt_and_verify_secret_stream_payload(
+            encrypted.encrypted_data,
+            encrypted.decryption_header,
+            key,
+            expected_hash,
+        )
+        .unwrap();
+
+        assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn decrypt_and_verify_secret_stream_payload_detects_hash_mismatch() {
+        let plaintext = b"ente-ios26-decrypt-verify-mismatch".to_vec();
+        let key = crypto::keys::generate_stream_key();
+        let encrypted = crypto::stream::encrypt(&plaintext, &key).unwrap();
+        let wrong_hash = blake2b_hash_b64(b"different-payload".to_vec(), Some(64)).unwrap();
+
+        let error = decrypt_and_verify_secret_stream_payload(
+            encrypted.encrypted_data,
+            encrypted.decryption_header,
+            key,
+            wrong_hash,
+        )
+        .unwrap_err();
+
+        assert!(
+            error.to_string().contains("hash mismatch"),
+            "unexpected error: {error}"
+        );
+    }
+
+    #[test]
+    fn verify_hash_for_file_roundtrip() {
+        let data = b"ente-ios26-file-hash-test".to_vec();
+        let expected_hash = blake2b_hash_b64(data.clone(), Some(32)).unwrap();
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let file_path = std::env::temp_dir().join(format!(
+            "ente-ios26-core-hash-{nonce}-{}.bin",
+            std::process::id()
+        ));
+        std::fs::write(&file_path, data).unwrap();
+
+        let result = verify_blake2b_hash_for_file(
+            file_path.to_string_lossy().to_string(),
+            expected_hash,
+        )
+        .unwrap();
+        let _ = std::fs::remove_file(file_path);
+
+        assert!(result);
+    }
 }
