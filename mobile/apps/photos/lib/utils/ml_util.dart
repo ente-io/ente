@@ -9,7 +9,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/offline_files_db.dart";
-import "package:photos/extensions/list.dart";
 import "package:photos/main.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -539,7 +538,6 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     );
     final startTime = DateTime.now();
 
-    _logger.info("Decoding image at path: $imagePath");
     // Decode the image once to use for both face detection and alignment
     final decodedImage = await decodeImageFromPath(
       imagePath,
@@ -549,17 +547,10 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     );
     final rawRgbaBytes = decodedImage.rawRgbaBytes!;
     final imageDimensions = decodedImage.dimensions;
-    _logger.info(
-      "Decoded image with rgbaLength: ${rawRgbaBytes.length}, dimensions: $imageDimensions",
-    );
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = imageDimensions;
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
-
-    _logger.info(
-      "Decoded image at path: $imagePath, in $decodeMs ms",
-    );
 
     String faceMsString = "", clipMsString = "";
     final pipelines = await Future.wait([

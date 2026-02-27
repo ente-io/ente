@@ -86,9 +86,6 @@ class FaceRecognitionService {
     final faceResults = <FaceResult>[];
     final startTime = DateTime.now();
 
-    _logger.info(
-      "Starting runFacesPipeline with fileID $enteFileID",
-    );
     // Get the faces
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
@@ -97,9 +94,6 @@ class FaceRecognitionService {
       rawRgbaBytes,
       faceDetectionAddress,
       faceResults,
-    );
-    _logger.info(
-      "Detected ${faceDetectionResult.length} faces in image with fileID $enteFileID",
     );
     final detectFacesTime = DateTime.now();
     final detectFacesMs = detectFacesTime.difference(startTime).inMilliseconds;
@@ -112,9 +106,6 @@ class FaceRecognitionService {
       return [];
     }
 
-    _logger.info(
-      "Detected ${faceDetectionResult.length} faces, proceeding to alignment and embedding",
-    );
     // Align the faces
     final Float32List faceAlignmentResult = await _alignFacesSync(
       dim,
@@ -126,9 +117,6 @@ class FaceRecognitionService {
     final alignFacesMs =
         alignFacesTime.difference(detectFacesTime).inMilliseconds;
 
-    _logger.info(
-      "Aligned ${faceDetectionResult.length} faces in image with fileID $enteFileID",
-    );
     // Get the embeddings of the faces
     await _embedFacesSync(
       faceAlignmentResult,
@@ -156,19 +144,12 @@ class FaceRecognitionService {
     List<FaceResult> faceResults,
   ) async {
     try {
-      _logger.info(
-        "Running face detection for fileID $fileID with interpreter at $interpreterAddress",
-      );
       // Get the bounding boxes of the faces
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
         dimensions,
         rawRgbaBytes,
         interpreterAddress,
-      );
-
-      _logger.info(
-        "Detected ${faces.length} faces in image with fileID $fileID",
       );
 
       // Add detected faces to the faceResults

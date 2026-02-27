@@ -84,16 +84,11 @@ Future<DecodedImage> decodeImageFromPath(
       );
     }
 
-    Uint8List? bytes;
-    for (final order in img_pkg.ChannelOrder.values) {
-      bytes = imageData.getBytes(order: order);
-      _logger.info("Bytes length is: ${bytes.length}, for order: : $order");
-    }
+    final bytes = imageData.getBytes(order: img_pkg.ChannelOrder.rgba);
     final dimensions = Dimensions(
       width: image!.width,
       height: image.height,
     );
-    _logger.info("Dimensions are: $dimensions");
     return DecodedImage(
       dimensions: dimensions,
       rawRgbaBytes: bytes,
@@ -123,9 +118,6 @@ Future<DecodedImage> decodeImageFromPath(
   }
 
   late Image image;
-  _logger.info(
-    'Decoding image at path: $imagePath, format: $format, includeRgbaBytes: $includeRgbaBytes',
-  );
   try {
     image = await decodeImageFromData(imageData);
   } catch (e, s) {
@@ -159,18 +151,12 @@ Future<DecodedImage> decodeImageFromPath(
       );
     }
   }
-  _logger.info(
-    "Decoded image at path: $imagePath [i]",
-  );
   if (!includeRgbaBytes) {
     return DecodedImage(
       dimensions: Dimensions(width: image.width, height: image.height),
       image: includeDartUiImage ? image : null,
     );
   }
-  _logger.info(
-    "Getting Raw RGBA",
-  );
   final rawRgbaBytes = await _getRawRgbaBytes(image);
   return DecodedImage(
     dimensions: Dimensions(width: image.width, height: image.height),

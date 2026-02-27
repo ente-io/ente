@@ -43,22 +43,36 @@ if [[ -n "$PODS_ROOT" ]] && [[ -d "$PODS_ROOT/onnxruntime-c/onnxruntime.xcframew
   ORT_XCFWK_LOCATION="$PODS_ROOT/onnxruntime-c/onnxruntime.xcframework"
   export ORT_IOS_XCFWK_LOCATION="$ORT_XCFWK_LOCATION"
 
-  # ort-sys currently does not handle x86_64 iOS simulator triples for
-  # ORT_IOS_XCFWK_LOCATION, so provide ORT_LIB_LOCATION with a thin archive.
-  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]] && [[ "$CARGOKIT_DARWIN_ARCHS" == "x86_64" ]]; then
-    ORT_SIM_LIB="$ORT_XCFWK_LOCATION/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime"
-    if [[ -f "$ORT_SIM_LIB" ]]; then
-      ORT_LIB_TEMP_DIR="$TARGET_TEMP_DIR/ort_sys_sim_x86_64"
-      mkdir -p "$ORT_LIB_TEMP_DIR"
-      lipo -thin x86_64 "$ORT_SIM_LIB" -output "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
-      export ORT_LIB_LOCATION="$ORT_LIB_TEMP_DIR"
+  # ort-sys v2.0.0-rc.4 uses ORT_LIB_LOCATION for linking. Build a thin
+  # libonnxruntime.a from the xcframework slice that matches the current SDK.
+  ORT_FRAMEWORK_SLICE=""
+  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphoneos" ]]; then
+    ORT_FRAMEWORK_SLICE="ios-arm64"
+  elif [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]]; then
+    ORT_FRAMEWORK_SLICE="ios-arm64_x86_64-simulator"
+  fi
 
-      # Link the simulator clang runtime; ort-sys links the device variant for
-      # x86_64-apple-ios, which misses simulator-only symbols.
-      CLANG_RESOURCE_DIR="$(xcrun clang --print-resource-dir 2>/dev/null || true)"
-      if [[ -n "$CLANG_RESOURCE_DIR" ]] && [[ -d "$CLANG_RESOURCE_DIR/lib/darwin" ]]; then
-        export RUSTFLAGS="${RUSTFLAGS} -L native=${CLANG_RESOURCE_DIR}/lib/darwin -l clang_rt.iossim"
+  if [[ -n "$ORT_FRAMEWORK_SLICE" ]]; then
+    ORT_FRAMEWORK_BIN="$ORT_XCFWK_LOCATION/$ORT_FRAMEWORK_SLICE/onnxruntime.framework/onnxruntime"
+    if [[ -f "$ORT_FRAMEWORK_BIN" ]]; then
+      ORT_LIB_TEMP_DIR="$TARGET_TEMP_DIR/ort_sys_${CARGOKIT_DARWIN_PLATFORM_NAME}_${CARGOKIT_DARWIN_ARCHS// /_}"
+      mkdir -p "$ORT_LIB_TEMP_DIR"
+
+      if [[ "$CARGOKIT_DARWIN_ARCHS" == *" "* ]]; then
+        cp "$ORT_FRAMEWORK_BIN" "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
+      else
+        lipo -thin "$CARGOKIT_DARWIN_ARCHS" "$ORT_FRAMEWORK_BIN" -output "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
       fi
+      export ORT_LIB_LOCATION="$ORT_LIB_TEMP_DIR"
+    fi
+  fi
+
+  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]] && [[ "$CARGOKIT_DARWIN_ARCHS" == "x86_64" ]]; then
+    # Link the simulator clang runtime; ort-sys links the device variant for
+    # x86_64-apple-ios, which misses simulator-only symbols.
+    CLANG_RESOURCE_DIR="$(xcrun clang --print-resource-dir 2>/dev/null || true)"
+    if [[ -n "$CLANG_RESOURCE_DIR" ]] && [[ -d "$CLANG_RESOURCE_DIR/lib/darwin" ]]; then
+      export RUSTFLAGS="${RUSTFLAGS} -L native=${CLANG_RESOURCE_DIR}/lib/darwin -l clang_rt.iossim"
     fi
   fi
 fi

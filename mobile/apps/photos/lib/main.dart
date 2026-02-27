@@ -137,7 +137,7 @@ Future<void> runBackgroundTask(
   // Check if foreground is recently active to avoid conflicts
   final isRunningInFG = await _isRunningInForeground();
 
-  // If FG was active in last 30 seconds, skip BG work
+  // If FG was active recently, skip BG work
   if (isRunningInFG) {
     _logger.info(
       "[BG TASK] Foreground recently active, skipping background work",
@@ -156,6 +156,11 @@ Future<void> runBackgroundTask(
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   try {
+    // Background worker can run in a process/isolate where Rust has been
+    // disposed or not initialized; always initialize before ML usage.
+    await EntePhotosRust.init();
+    _logger.info("Rust bridge initialized in background via: workmanager");
+
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
@@ -216,11 +221,13 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
-    if (isDeviceHealthy) {
-      await MLService.instance.init();
-      await PersonService.init(entityService, MLDataDB.instance, prefs);
-      await MLService.instance.runAllML(force: true);
+    if (flagService.enableMLInBackground) {
+      final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
+      if (isDeviceHealthy) {
+        await MLService.instance.init();
+        await PersonService.init(entityService, MLDataDB.instance, prefs);
+        await MLService.instance.runAllML(force: true);
+      }
     }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();

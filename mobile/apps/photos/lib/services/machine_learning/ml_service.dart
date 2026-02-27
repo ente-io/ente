@@ -303,7 +303,8 @@ class MLService {
           break stream;
         } else {
           await MLIndexingIsolate.instance.ensureDownloadedModels();
-          if ((flagService.useRustForML || isOfflineMode) && !rustRuntimePrepared) {
+          if ((flagService.useRustForML || isOfflineMode) &&
+              !rustRuntimePrepared) {
             await MLIndexingIsolate.instance.prepareRustRuntime();
             rustRuntimePrepared = true;
           }

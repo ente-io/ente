@@ -100,10 +100,6 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    // TODO: remove
-    // if (!isProcessBg) {
-    //   return;
-    // }
     if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
