@@ -3,6 +3,18 @@ import 'dart:async';
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import 'package:flutter/material.dart';
 
+PageRouteBuilder<dynamic> buildAppLockRoute(
+  RouteSettings settings,
+  Widget child,
+) {
+  return PageRouteBuilder(
+    settings: settings,
+    transitionDuration: Duration.zero,
+    reverseTransitionDuration: Duration.zero,
+    pageBuilder: (_, __, ___) => child,
+  );
+}
+
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.
 /// This should wrap around a `MyApp` widget (or equivalent).
 ///
@@ -128,15 +140,11 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/lock-screen':
-            return PageRouteBuilder(
-              pageBuilder: (_, __, ___) => this._lockScreen,
-              settings: settings,
-            );
+            return buildAppLockRoute(settings, this._lockScreen);
           case '/unlocked':
-            return PageRouteBuilder(
-              pageBuilder: (_, __, ___) =>
-                  this.widget.builder(settings.arguments),
-              settings: settings,
+            return buildAppLockRoute(
+              settings,
+              this.widget.builder(settings.arguments),
             );
         }
         return null;
