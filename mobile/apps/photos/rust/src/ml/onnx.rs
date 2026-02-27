@@ -3,8 +3,11 @@ use ort::{
     XNNPACKExecutionProvider,
 };
 
-#[cfg(target_vendor = "apple")]
-use ort::CoreMLExecutionProvider;
+// Temporarily disabled on Rust side to avoid iOS duplicate ObjC class collisions
+// (`CoreMLExecution`) while Dart ONNXRuntime is still linked in production.
+// Re-enable once iOS uses a single shared ORT runtime.
+// #[cfg(target_vendor = "apple")]
+// use ort::CoreMLExecutionProvider;
 #[cfg(target_os = "android")]
 use ort::NNAPIExecutionProvider;
 
@@ -64,10 +67,11 @@ fn providers_for_policy(
 ) -> Vec<ExecutionProviderDispatch> {
     let mut providers: Vec<ExecutionProviderDispatch> = Vec::new();
 
-    #[cfg(target_vendor = "apple")]
-    if policy.prefer_coreml {
-        providers.push(CoreMLExecutionProvider::default().build());
-    }
+    // Temporarily disabled on Rust side. Keep this block for easy re-enable.
+    // #[cfg(target_vendor = "apple")]
+    // if policy.prefer_coreml {
+    //     providers.push(CoreMLExecutionProvider::default().build());
+    // }
 
     #[cfg(target_os = "android")]
     if policy.prefer_nnapi {

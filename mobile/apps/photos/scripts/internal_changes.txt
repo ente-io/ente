@@ -1,3 +1,4 @@
+- Laurens: (I) Internal toggle to let ML run uninterrupted
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users
 - Neeraj: Improve public album link 429/device-limit error handling

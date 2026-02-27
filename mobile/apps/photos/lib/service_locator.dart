@@ -213,7 +213,7 @@ BillingService get billingService {
 
 ComputeController? _computeController;
 ComputeController get computeController {
-  _computeController ??= ComputeController();
+  _computeController ??= ComputeController(localSettings);
   return _computeController!;
 }
 
