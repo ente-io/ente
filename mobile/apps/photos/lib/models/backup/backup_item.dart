@@ -24,13 +24,14 @@ class BackupItem {
     int? collectionID,
     Completer<EnteFile>? completer,
     Object? error,
+    bool clearError = false,
   }) {
     return BackupItem(
       status: status ?? this.status,
       file: file ?? this.file,
       collectionID: collectionID ?? this.collectionID,
       completer: completer ?? this.completer,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 

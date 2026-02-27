@@ -15,6 +15,7 @@ import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/background_upload_verification_db.dart";
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/gallery_downloads_db.dart";
@@ -116,15 +117,11 @@ class Configuration {
         _logger.info(
           "(for debugging) Token found, loading secure storage data",
         );
-        _key = await _secureStorage.read(
-          key: keyKey,
-        );
+        _key = await _secureStorage.read(key: keyKey);
         _logger.info(
           "(for debugging) Key loaded from secure storage, is null: ${_key == null}",
         );
-        _secretKey = await _secureStorage.read(
-          key: secretKeyKey,
-        );
+        _secretKey = await _secureStorage.read(key: secretKeyKey);
         _logger.info(
           "(for debugging) Secret Key loaded from secure storage, is null: ${_secretKey == null}",
         );
@@ -201,9 +198,9 @@ class Configuration {
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
         try {
-          await SyncService.instance
-              .existingSync()
-              .timeout(const Duration(seconds: 5));
+          await SyncService.instance.existingSync().timeout(
+                const Duration(seconds: 5),
+              );
         } catch (e) {
           // ignore
         }
@@ -230,6 +227,7 @@ class Configuration {
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
+    await BackgroundUploadVerificationDB.instance.clearTable();
     await TrashDB.instance.clearTable();
 
     // Clear all in-memory caches
