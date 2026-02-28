@@ -1,5 +1,3 @@
-import "dart:io";
-
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/constants.dart";
@@ -23,9 +21,6 @@ class HelpSupportPage extends StatelessWidget {
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
-
-    final String bugsEmail =
-        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
 
     return Scaffold(
       backgroundColor: pageBackgroundColor,
@@ -88,7 +83,7 @@ class HelpSupportPage extends StatelessWidget {
                           await sendLogs(
                             context,
                             AppLocalizations.of(context).reportBug,
-                            bugsEmail,
+                            supportEmail,
                           );
                         },
                       ),
