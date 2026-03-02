@@ -3257,6 +3257,21 @@ const Page: React.FC = () => {
         [setStickToBottom],
     );
 
+    useEffect(() => {
+        if (!isGenerating || !stickToBottom) return;
+
+        const frame = window.requestAnimationFrame(() => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+            container.scrollTop = container.scrollHeight;
+            lastScrollTopRef.current = container.scrollTop;
+        });
+
+        return () => {
+            window.cancelAnimationFrame(frame);
+        };
+    }, [displayMessages, isGenerating, loadingDots, stickToBottom]);
+
     const handleOpenSessionSearch = useCallback(() => {
         setShowSessionSearch(true);
     }, []);
