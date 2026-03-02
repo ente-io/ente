@@ -55,6 +55,12 @@ class ComputeController {
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
+  /// Replays the latest compute eligibility state to listeners.
+  /// Useful when listeners are attached after initial health checks completed.
+  void emitCurrentComputeControlEvent() {
+    _fireControlEvent();
+  }
+
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
     _isDeviceHealthy = healthy;
@@ -286,29 +292,6 @@ class ComputeController {
   void _resetTimer() {
     _userInteractionTimer.cancel();
     _startInteractionTimer(kDefaultInteractionTimeout);
-  }
-
-  Future<bool> isDeviceHealthyFuture() async {
-    if (!isProcessBg) return isDeviceHealthy;
-
-    // Update Thermal status
-    _lastThermalStatus = await _thermal.thermalStatus;
-
-    // Update Battery info and device health
-    if (Platform.isIOS) {
-      _iosLastBatteryInfo = await BatteryInfoPlugin().iosBatteryInfo;
-      _setDeviceHealth(_computeIsiOSDeviceHealthy());
-    } else {
-      _androidLastBatteryInfo = await BatteryInfoPlugin().androidBatteryInfo;
-      _setDeviceHealth(_computeIsAndroidDeviceHealthy());
-    }
-
-    // In background we need this call-site to be self-sufficient so MLService
-    // listeners can react immediately without waiting on init races.
-    _hasCompletedInitialHealthChecks = true;
-    _fireControlEvent();
-    _logger.info("Device health status: $_isDeviceHealthy");
-    return _isDeviceHealthy;
   }
 
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {

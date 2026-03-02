@@ -188,6 +188,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize ComputeController early in background run so health listeners
+    // and checks begin before MLService wiring.
+    ensureComputeControllerInitialized();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -224,8 +227,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     if (flagService.enableMLInBackground) {
       await MLService.instance.init();
       await PersonService.init(entityService, MLDataDB.instance, prefs);
-      // Refresh health in background and emit ComputeControlEvent.
-      await computeController.isDeviceHealthyFuture();
+      // Trigger ML via ComputeControlEvent from current controller state.
+      computeController.emitCurrentComputeControlEvent();
     }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
