@@ -124,3 +124,20 @@ pub fn run_f32(
     let data = tensor.iter().copied().collect::<Vec<_>>();
     Ok((shape, data))
 }
+
+pub fn run_i32_f32(
+    session: &mut Session,
+    input: Vec<i32>,
+    input_shape: Vec<i64>,
+) -> MlResult<(Vec<i64>, Vec<f32>)> {
+    let input_tensor = Tensor::<i32>::from_array((input_shape, input))?;
+    let outputs = session.run(ort::inputs![input_tensor]?)?;
+    if outputs.is_empty() {
+        return Err(MlError::Ort("missing first output tensor".to_string()));
+    }
+    let output = &outputs[0];
+    let tensor = output.try_extract_tensor::<f32>()?;
+    let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
+    let data = tensor.iter().copied().collect::<Vec<_>>();
+    Ok((shape, data))
+}

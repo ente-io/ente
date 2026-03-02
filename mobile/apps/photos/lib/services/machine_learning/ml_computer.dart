@@ -1,10 +1,12 @@
 import 'dart:async';
+import "dart:io" show Platform;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
     show Uint64List;
 import "package:logging/logging.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import "package:photos/services/machine_learning/ml_constants.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
@@ -20,6 +22,8 @@ class MLComputer extends SuperIsolate {
   final _logger = Logger('MLComputer');
 
   final _initModelLock = Lock();
+  bool _isClipTokenizerInitialized = false;
+  String? _clipTextModelPath;
 
   @override
   bool get isDartUiIsolate => false;
@@ -29,6 +33,8 @@ class MLComputer extends SuperIsolate {
 
   @override
   bool get shouldAutomaticDispose => false;
+
+  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
 
   // Singleton pattern
   MLComputer._privateConstructor();
@@ -71,11 +77,26 @@ class MLComputer extends SuperIsolate {
 
   Future<List<double>> runClipText(String query) async {
     try {
-      await _ensureLoadedClipTextModel();
-      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
+      final useRustMl = _shouldUseRustMl;
+      await _ensureLoadedClipTextModel(useRustMl);
+      final modelPath = _clipTextModelPath;
+      if (useRustMl && (modelPath == null || modelPath.trim().isEmpty)) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextModelPath",
+        );
+      }
       final textEmbedding = await runInIsolate(IsolateOperation.runClipText, {
         "text": query,
-        "address": clipAddress,
+        "useRustMl": useRustMl,
+        if (useRustMl) ...{
+          "clipTextModelPath": modelPath,
+          "preferCoreml": Platform.isIOS,
+          "preferNnapi": Platform.isAndroid,
+          "preferXnnpack": Platform.isAndroid,
+          "allowCpuFallback": true,
+        } else ...{
+          "address": ClipTextEncoder.instance.sessionAddress,
+        },
       }) as List<double>;
       return textEmbedding;
     } catch (e, s) {
@@ -84,32 +105,46 @@ class MLComputer extends SuperIsolate {
     }
   }
 
-  Future<void> _ensureLoadedClipTextModel() async {
+  Future<void> _ensureLoadedClipTextModel(bool useRustMl) async {
     return _initModelLock.synchronized(() async {
-      if (ClipTextEncoder.instance.isInitialized) return;
       try {
+        if (_isClipTokenizerInitialized &&
+            _clipTextModelPath != null &&
+            (useRustMl || ClipTextEncoder.instance.isInitialized)) {
+          return;
+        }
+
         // Initialize ClipText tokenizer
-        final String tokenizerRemotePath =
-            ClipTextEncoder.instance.vocabRemotePath;
-        final String tokenizerVocabPath = await RemoteAssetsService.instance
-            .getAssetPath(tokenizerRemotePath);
-        await runInIsolate(
-          IsolateOperation.initializeClipTokenizer,
-          {'vocabPath': tokenizerVocabPath},
-        );
+        if (!_isClipTokenizerInitialized) {
+          final String tokenizerRemotePath =
+              ClipTextEncoder.instance.vocabRemotePath;
+          final String tokenizerVocabPath = await RemoteAssetsService.instance
+              .getAssetPath(tokenizerRemotePath);
+          await runInIsolate(
+            IsolateOperation.initializeClipTokenizer,
+            {'vocabPath': tokenizerVocabPath},
+          );
+          _isClipTokenizerInitialized = true;
+        }
 
         // Load ClipText model
-        final String modelName = ClipTextEncoder.instance.modelName;
-        final String? modelPath =
+        final String? downloadedModelPath =
             await ClipTextEncoder.instance.downloadModelSafe();
-        if (modelPath == null) {
+        if (downloadedModelPath == null) {
           throw Exception("Could not download clip text model, no wifi");
         }
+        _clipTextModelPath = downloadedModelPath;
+
+        if (useRustMl || ClipTextEncoder.instance.isInitialized) {
+          return;
+        }
+
+        final String modelName = ClipTextEncoder.instance.modelName;
         final address = await runInIsolate(
           IsolateOperation.loadModel,
           {
             'modelName': modelName,
-            'modelPath': modelPath,
+            'modelPath': downloadedModelPath,
           },
         ) as int;
         ClipTextEncoder.instance.storeSessionAddress(address);

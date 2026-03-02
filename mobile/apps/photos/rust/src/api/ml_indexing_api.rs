@@ -1,6 +1,6 @@
 use crate::image::decode::decode_image_from_path;
 use crate::ml::{
-    clip::image::run_clip_image,
+    clip::{image::run_clip_image, text::run_clip_text},
     error::{MlError, MlResult},
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
@@ -30,6 +30,7 @@ pub struct RustModelPaths {
     pub face_detection: String,
     pub face_embedding: String,
     pub clip_image: String,
+    pub clip_text: String,
 }
 
 #[derive(Clone, Debug)]
@@ -91,6 +92,18 @@ pub struct AnalyzeImageResult {
     pub clip: Option<RustClipResult>,
 }
 
+#[derive(Clone, Debug)]
+pub struct RunClipTextRequest {
+    pub token_ids: Vec<i32>,
+    pub model_path: String,
+    pub provider_policy: RustExecutionProviderPolicy,
+}
+
+#[derive(Clone, Debug)]
+pub struct RunClipTextResult {
+    pub embedding: Vec<f64>,
+}
+
 pub fn init_ml_runtime(config: RustMlRuntimeConfig) -> Result<(), String> {
     runtime::ensure_runtime(&to_runtime_config(&config)).map_err(|e| e.to_string())
 }
@@ -101,6 +114,10 @@ pub fn release_ml_runtime() -> Result<(), String> {
 
 pub fn analyze_image_rust(req: AnalyzeImageRequest) -> Result<AnalyzeImageResult, String> {
     analyze_image_rust_inner(req).map_err(|e| e.to_string())
+}
+
+pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, String> {
+    run_clip_text_rust_inner(req).map_err(|e| e.to_string())
 }
 
 fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
@@ -150,6 +167,41 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
     })
 }
 
+fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResult> {
+    let RunClipTextRequest {
+        token_ids,
+        model_path,
+        provider_policy,
+    } = req;
+
+    if model_path.trim().is_empty() {
+        return Err(MlError::InvalidRequest(
+            "missing model path: clipTextModelPath".to_string(),
+        ));
+    }
+
+    let runtime_config = MlRuntimeConfig {
+        model_paths: ModelPaths {
+            face_detection: String::new(),
+            face_embedding: String::new(),
+            clip_image: String::new(),
+            clip_text: model_path,
+        },
+        provider_policy: to_provider_policy(&provider_policy),
+    };
+
+    runtime::with_runtime_mut(&runtime_config, move |runtime| {
+        let clip = run_clip_text(runtime, &token_ids)?;
+        Ok(RunClipTextResult {
+            embedding: clip
+                .embedding
+                .into_iter()
+                .map(|value| value as f64)
+                .collect(),
+        })
+    })
+}
+
 fn validate_request_model_paths(req: &AnalyzeImageRequest) -> MlResult<()> {
     let mut missing = Vec::new();
     if req.run_faces {
@@ -185,6 +237,7 @@ fn to_model_paths(paths: &RustModelPaths) -> ModelPaths {
         face_detection: paths.face_detection.clone(),
         face_embedding: paths.face_embedding.clone(),
         clip_image: paths.clip_image.clone(),
+        clip_text: paths.clip_text.clone(),
     }
 }
 

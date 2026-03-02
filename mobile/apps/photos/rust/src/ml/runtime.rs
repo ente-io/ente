@@ -32,6 +32,7 @@ pub struct ModelPaths {
     pub face_detection: String,
     pub face_embedding: String,
     pub clip_image: String,
+    pub clip_text: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -45,6 +46,7 @@ pub struct MlRuntime {
     face_detection: Option<Session>,
     face_embedding: Option<Session>,
     clip_image: Option<Session>,
+    clip_text: Option<Session>,
 }
 
 #[derive(Debug)]
@@ -62,10 +64,12 @@ fn create_runtime(config: &MlRuntimeConfig) -> MlResult<MlRuntime> {
         build_optional_session(&config.model_paths.face_embedding, &config.provider_policy)?;
     let clip_image =
         build_optional_session(&config.model_paths.clip_image, &config.provider_policy)?;
+    let clip_text = build_optional_session(&config.model_paths.clip_text, &config.provider_policy)?;
     Ok(MlRuntime {
         face_detection,
         face_embedding,
         clip_image,
+        clip_text,
     })
 }
 
@@ -102,6 +106,15 @@ impl MlRuntime {
         self.clip_image.as_mut().ok_or_else(|| {
             MlError::InvalidRequest(
                 "missing model path: clipImageModelPath is required when runClip is true"
+                    .to_string(),
+            )
+        })
+    }
+
+    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.clip_text.as_mut().ok_or_else(|| {
+            MlError::InvalidRequest(
+                "missing model path: clipTextModelPath is required when running clip text"
                     .to_string(),
             )
         })
