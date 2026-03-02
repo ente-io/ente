@@ -13,6 +13,8 @@ import "package:photos/db/ml/base.dart";
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
+import "package:photos/db/ml/db_pet_model_mappers.dart";
+import "package:photos/db/ml/pet_vector_db.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
@@ -96,6 +98,15 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createFaceCacheTable,
     createTextEmbeddingsCacheTable,
     createClusterCentroidVectorIdMappingTable,
+    createPetFacesTable,
+    createPetBodiesTable,
+    createPetFaceClustersTable,
+    petFcClusterIDIndex,
+    createPetClusterSummaryTable,
+    createPetFaceVectorIdMappingTable,
+    createPetBodyVectorIdMappingTable,
+    alterPetFacesAddEmbedding,
+    alterPetBodiesAddEmbedding,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -169,6 +180,127 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         ];
       }).toList();
 
+      await db.executeBatch(sql, parameterSets);
+    }
+  }
+
+  @override
+  Future<void> bulkInsertPetFaces(List<DBPetFace> petFaces) async {
+    final db = await asyncDB;
+    const batchSize = 500;
+    final numBatches = (petFaces.length / batchSize).ceil();
+    for (int i = 0; i < numBatches; i++) {
+      final start = i * batchSize;
+      final end = min((i + 1) * batchSize, petFaces.length);
+      final batch = petFaces.sublist(start, end);
+
+      const String sql = '''
+        INSERT INTO $petFacesTable (
+          $fileIDColumn, $petFaceIDColumn, $faceDetectionColumn, $petLandmarksColumn, $faceVectorIdColumn, $speciesColumn, $faceScore, $imageHeight, $imageWidth, $mlVersionColumn, $petFaceEmbeddingColumn
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT($fileIDColumn, $petFaceIDColumn) DO UPDATE SET $faceDetectionColumn = excluded.$faceDetectionColumn, $petLandmarksColumn = excluded.$petLandmarksColumn, $faceVectorIdColumn = excluded.$faceVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $faceScore = excluded.$faceScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn, $petFaceEmbeddingColumn = excluded.$petFaceEmbeddingColumn
+      ''';
+      final parameterSets = batch.map((petFace) {
+        final map = petFace.toMap();
+        return [
+          map[fileIDColumn],
+          map[petFaceIDColumn],
+          map[faceDetectionColumn],
+          map[petLandmarksColumn],
+          map[faceVectorIdColumn],
+          map[speciesColumn],
+          map[faceScore],
+          map[imageHeight],
+          map[imageWidth],
+          map[mlVersionColumn],
+          map[petFaceEmbeddingColumn],
+        ];
+      }).toList();
+
+      await db.executeBatch(sql, parameterSets);
+    }
+  }
+
+  @override
+  Future<void> bulkInsertPetBodies(List<DBPetBody> petBodies) async {
+    final db = await asyncDB;
+    const batchSize = 500;
+    final numBatches = (petBodies.length / batchSize).ceil();
+    for (int i = 0; i < numBatches; i++) {
+      final start = i * batchSize;
+      final end = min((i + 1) * batchSize, petBodies.length);
+      final batch = petBodies.sublist(start, end);
+
+      const String sql = '''
+        INSERT INTO $petBodiesTable (
+          $fileIDColumn, $petBodyIDColumn, $faceDetectionColumn, $bodyVectorIdColumn, $speciesColumn, $faceScore, $imageHeight, $imageWidth, $mlVersionColumn, $petBodyEmbeddingColumn
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT($fileIDColumn, $petBodyIDColumn) DO UPDATE SET $faceDetectionColumn = excluded.$faceDetectionColumn, $bodyVectorIdColumn = excluded.$bodyVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $faceScore = excluded.$faceScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn, $petBodyEmbeddingColumn = excluded.$petBodyEmbeddingColumn
+      ''';
+      final parameterSets = batch.map((petBody) {
+        final map = petBody.toMap();
+        return [
+          map[fileIDColumn],
+          map[petBodyIDColumn],
+          map[faceDetectionColumn],
+          map[bodyVectorIdColumn],
+          map[speciesColumn],
+          map[faceScore],
+          map[imageHeight],
+          map[imageWidth],
+          map[mlVersionColumn],
+          map[petBodyEmbeddingColumn],
+        ];
+      }).toList();
+
+      await db.executeBatch(sql, parameterSets);
+    }
+  }
+
+  @override
+  Future<void> updatePetFaceVectorIds(
+    Map<String, int> petFaceIdToVectorId,
+  ) async {
+    if (petFaceIdToVectorId.isEmpty) return;
+    final db = await asyncDB;
+    const batchSize = 500;
+    final entries = petFaceIdToVectorId.entries.toList();
+    final numBatches = (entries.length / batchSize).ceil();
+    for (int i = 0; i < numBatches; i++) {
+      final start = i * batchSize;
+      final end = min((i + 1) * batchSize, entries.length);
+      final batch = entries.sublist(start, end);
+
+      const String sql = '''
+        UPDATE $petFacesTable
+        SET $faceVectorIdColumn = ?
+        WHERE $petFaceIDColumn = ?
+      ''';
+      final parameterSets = batch.map((e) => [e.value, e.key]).toList();
+      await db.executeBatch(sql, parameterSets);
+    }
+  }
+
+  @override
+  Future<void> updatePetBodyVectorIds(
+    Map<String, int> petBodyIdToVectorId,
+  ) async {
+    if (petBodyIdToVectorId.isEmpty) return;
+    final db = await asyncDB;
+    const batchSize = 500;
+    final entries = petBodyIdToVectorId.entries.toList();
+    final numBatches = (entries.length / batchSize).ceil();
+    for (int i = 0; i < numBatches; i++) {
+      final start = i * batchSize;
+      final end = min((i + 1) * batchSize, entries.length);
+      final batch = entries.sublist(start, end);
+
+      const String sql = '''
+        UPDATE $petBodiesTable
+        SET $bodyVectorIdColumn = ?
+        WHERE $petBodyIDColumn = ?
+      ''';
+      final parameterSets = batch.map((e) => [e.value, e.key]).toList();
       await db.executeBatch(sql, parameterSets);
     }
   }
@@ -307,6 +439,16 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteFileDataTable);
     await _clipVectorDB.deleteIndexFile();
     await _clusterCentroidVectorDB.deleteIndexFile();
+    // Pet tables
+    await db.execute(deletePetFacesTable);
+    await db.execute(deletePetBodiesTable);
+    await db.execute(deletePetFaceClustersTable);
+    await db.execute(deletePetClusterSummaryTable);
+    await db.execute(deletePetFaceVectorIdMappingTable);
+    await db.execute(deletePetBodyVectorIdMappingTable);
+    for (final vdb in PetVectorDB.allInstances) {
+      await vdb.deleteIndexFile();
+    }
     _markClusterSummaryMutated();
   }
 
@@ -474,6 +616,40 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       return null;
     }
     return maps.map((e) => mapRowToFace(e)).toList();
+  }
+
+  @override
+  Future<List<DBPetFace>?> getPetFacesForFileID(int fileUploadID) async {
+    final db = await asyncDB;
+    final String query = '''
+      SELECT * FROM $petFacesTable
+      WHERE $fileIDColumn = ?
+    ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      query,
+      [fileUploadID],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return maps.map((e) => DBPetFace.fromMap(e)).toList();
+  }
+
+  @override
+  Future<List<DBPetBody>?> getPetBodiesForFileID(int fileUploadID) async {
+    final db = await asyncDB;
+    final String query = '''
+      SELECT * FROM $petBodiesTable
+      WHERE $fileIDColumn = ?
+    ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      query,
+      [fileUploadID],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return maps.map((e) => DBPetBody.fromMap(e)).toList();
   }
 
   @override
