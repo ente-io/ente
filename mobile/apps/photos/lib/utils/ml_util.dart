@@ -15,6 +15,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/ml_typedefs.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
@@ -95,7 +96,9 @@ Future<IndexStatus> getIndexStatus() async {
 int _lastFetchTimeForOthersIndexed = 0;
 
 /// Return a list of file instructions for files that should be indexed for ML
-Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
+Future<List<FileMLInstruction>> getFilesForMlIndexing({
+  bool forceAll = false,
+}) async {
   _logger.info('getFilesForMlIndexing called');
   final mlDataDB = MLDataDB.instance;
   final time = DateTime.now();
@@ -127,9 +130,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
 
-    final shouldRunFaces =
+    final shouldRunFaces = forceAll ||
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip =
+    final shouldRunClip = forceAll ||
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
@@ -157,9 +160,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       continue;
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
-    final shouldRunFaces =
+    final shouldRunFaces = forceAll ||
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip =
+    final shouldRunClip = forceAll ||
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
@@ -203,7 +206,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return [...splitResult.matched, ...splitResult.unmatched];
 }
 
-Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
+Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing({
+  bool forceAll = false,
+}) async {
   _logger.info('getOfflineFilesForMlIndexing called');
   final mlDataDB = MLDataDB.offlineInstance;
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
@@ -242,16 +247,18 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
       continue;
     }
     queuedFileIDs.add(localIntId);
-    final shouldRunFaces = _shouldRunIndexingWithFileId(
-      localIntId,
-      faceIndexedFileIDs,
-      faceMlVersion,
-    );
-    final shouldRunClip = _shouldRunIndexingWithFileId(
-      localIntId,
-      clipIndexedFileIDs,
-      clipMlVersion,
-    );
+    final shouldRunFaces = forceAll ||
+        _shouldRunIndexingWithFileId(
+          localIntId,
+          faceIndexedFileIDs,
+          faceMlVersion,
+        );
+    final shouldRunClip = forceAll ||
+        _shouldRunIndexingWithFileId(
+          localIntId,
+          clipIndexedFileIDs,
+          clipMlVersion,
+        );
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -274,10 +281,12 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize, {
   required MLMode mode,
+  bool forceAll = false,
 }) async* {
-  if (mode == MLMode.offline) {
-    final List<FileMLInstruction> filesToIndex =
-        await getOfflineFilesForMlIndexing();
+  if (mode == MLMode.offline || forceAll) {
+    final List<FileMLInstruction> filesToIndex = mode == MLMode.offline
+        ? await getOfflineFilesForMlIndexing(forceAll: forceAll)
+        : await getFilesForMlIndexing(forceAll: forceAll);
     final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
     for (final batch in chunks) {
       yield batch;
@@ -601,11 +610,24 @@ Future<MLResult> analyzeImageRust(Map args) async {
     final String imagePath = args["filePath"] as String;
     final bool runFaces = args["runFaces"] as bool;
     final bool runClip = args["runClip"] as bool;
+    final bool runPets = args["runPets"] as bool? ?? false;
     final String? faceDetectionModelPath =
         args["faceDetectionModelPath"] as String?;
     final String? faceEmbeddingModelPath =
         args["faceEmbeddingModelPath"] as String?;
     final String? clipImageModelPath = args["clipImageModelPath"] as String?;
+    final String? petFaceDetectionModelPath =
+        args["petFaceDetectionModelPath"] as String?;
+    final String? petFaceEmbeddingDogModelPath =
+        args["petFaceEmbeddingDogModelPath"] as String?;
+    final String? petFaceEmbeddingCatModelPath =
+        args["petFaceEmbeddingCatModelPath"] as String?;
+    final String? petBodyDetectionModelPath =
+        args["petBodyDetectionModelPath"] as String?;
+    final String? petBodyEmbeddingDogModelPath =
+        args["petBodyEmbeddingDogModelPath"] as String?;
+    final String? petBodyEmbeddingCatModelPath =
+        args["petBodyEmbeddingCatModelPath"] as String?;
     final bool preferCoreml = args["preferCoreml"] as bool? ?? true;
     final bool preferNnapi = args["preferNnapi"] as bool? ?? true;
     final bool preferXnnpack = args["preferXnnpack"] as bool? ?? false;
@@ -625,6 +647,26 @@ Future<MLResult> analyzeImageRust(Map args) async {
     if (runClip && isMissingModelPath(clipImageModelPath)) {
       missingModelPaths.add("clipImageModelPath");
     }
+    if (runPets) {
+      if (isMissingModelPath(petFaceDetectionModelPath)) {
+        missingModelPaths.add("petFaceDetectionModelPath");
+      }
+      if (isMissingModelPath(petFaceEmbeddingDogModelPath)) {
+        missingModelPaths.add("petFaceEmbeddingDogModelPath");
+      }
+      if (isMissingModelPath(petFaceEmbeddingCatModelPath)) {
+        missingModelPaths.add("petFaceEmbeddingCatModelPath");
+      }
+      if (isMissingModelPath(petBodyDetectionModelPath)) {
+        missingModelPaths.add("petBodyDetectionModelPath");
+      }
+      if (isMissingModelPath(petBodyEmbeddingDogModelPath)) {
+        missingModelPaths.add("petBodyEmbeddingDogModelPath");
+      }
+      if (isMissingModelPath(petBodyEmbeddingCatModelPath)) {
+        missingModelPaths.add("petBodyEmbeddingCatModelPath");
+      }
+    }
     if (missingModelPaths.isNotEmpty) {
       throw Exception(
         "RustMLMissingModelPath: Missing required model paths: ${missingModelPaths.join(', ')}",
@@ -635,6 +677,12 @@ Future<MLResult> analyzeImageRust(Map args) async {
       faceDetection: faceDetectionModelPath ?? "",
       faceEmbedding: faceEmbeddingModelPath ?? "",
       clipImage: clipImageModelPath ?? "",
+      petFaceDetection: petFaceDetectionModelPath ?? "",
+      petFaceEmbeddingDog: petFaceEmbeddingDogModelPath ?? "",
+      petFaceEmbeddingCat: petFaceEmbeddingCatModelPath ?? "",
+      petBodyDetection: petBodyDetectionModelPath ?? "",
+      petBodyEmbeddingDog: petBodyEmbeddingDogModelPath ?? "",
+      petBodyEmbeddingCat: petBodyEmbeddingCatModelPath ?? "",
     );
     final providerPolicy = rust_ml.RustExecutionProviderPolicy(
       preferCoreml: preferCoreml,
@@ -652,6 +700,7 @@ Future<MLResult> analyzeImageRust(Map args) async {
           imagePath: analyzePath,
           runFaces: runFaces,
           runClip: runClip,
+          runPets: runPets,
           modelPaths: modelPaths,
           providerPolicy: providerPolicy,
         ),
@@ -749,6 +798,46 @@ Future<MLResult> analyzeImageRust(Map args) async {
         fileID: enteFileID,
         embedding: rustClip.embedding,
       );
+    }
+
+    if (runPets) {
+      if (rustResult.petFaces != null) {
+        result.petFaces = rustResult.petFaces!.map((face) {
+          final detection = FaceDetectionRelative(
+            score: face.detection.score,
+            box: face.detection.boxXyxy.toList(growable: false),
+            allKeypoints: face.detection.keypoints
+                .map((point) => point.toList(growable: false))
+                .toList(growable: false),
+          );
+          final alignment = AlignmentResult(
+            affineMatrix: [],
+            center: face.alignment.center.toList(growable: false),
+            size: face.alignment.cropSize,
+            rotation: face.alignment.angle,
+          );
+          return PetFaceResult(
+            fileId: enteFileID,
+            petFaceId: face.petFaceId,
+            detection: detection,
+            alignment: alignment,
+            species: face.species,
+            embedding: Embedding.from(face.faceEmbedding),
+          );
+        }).toList(growable: false);
+      }
+
+      if (rustResult.petBodies != null) {
+        result.petBodies = rustResult.petBodies!.map((body) {
+          return PetBodyResult(
+            boxXyxy: body.boxXyxy.toList(growable: false),
+            score: body.score,
+            cocoClass: body.cocoClass,
+            petBodyId: body.petBodyId,
+            embedding: Embedding.from(body.bodyEmbedding),
+          );
+        }).toList(growable: false);
+      }
     }
 
     return result;

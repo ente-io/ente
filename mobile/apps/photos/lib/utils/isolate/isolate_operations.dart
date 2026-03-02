@@ -292,6 +292,16 @@ Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
     faceDetection: (args["faceDetectionModelPath"] as String?) ?? "",
     faceEmbedding: (args["faceEmbeddingModelPath"] as String?) ?? "",
     clipImage: (args["clipImageModelPath"] as String?) ?? "",
+    petFaceDetection: (args["petFaceDetectionModelPath"] as String?) ?? "",
+    petFaceEmbeddingDog:
+        (args["petFaceEmbeddingDogModelPath"] as String?) ?? "",
+    petFaceEmbeddingCat:
+        (args["petFaceEmbeddingCatModelPath"] as String?) ?? "",
+    petBodyDetection: (args["petBodyDetectionModelPath"] as String?) ?? "",
+    petBodyEmbeddingDog:
+        (args["petBodyEmbeddingDogModelPath"] as String?) ?? "",
+    petBodyEmbeddingCat:
+        (args["petBodyEmbeddingCatModelPath"] as String?) ?? "",
   );
   final providerPolicy = rust_ml.RustExecutionProviderPolicy(
     preferCoreml: args["preferCoreml"] as bool? ?? true,

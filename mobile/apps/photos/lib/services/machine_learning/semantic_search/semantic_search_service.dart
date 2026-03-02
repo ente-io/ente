@@ -16,6 +16,7 @@ import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
@@ -327,6 +328,10 @@ class SemanticSearchService {
   }
 
   Future<void> _loadTextModel({bool delay = false}) async {
+    if (MLService.instance.debugPetOnlyMode) {
+      _logger.info("Skipping ClipText load (debugPetOnlyMode)");
+      return;
+    }
     _logger.info("Initializing ClipText");
     try {
       if (delay) await Future.delayed(const Duration(seconds: 5));

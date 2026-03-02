@@ -12,6 +12,8 @@ class MLResult {
 
   List<FaceResult>? faces = <FaceResult>[];
   ClipResult? clip;
+  List<PetFaceResult>? petFaces;
+  List<PetBodyResult>? petBodies;
 
   Dimensions decodedImageSize;
 
@@ -23,6 +25,8 @@ class MLResult {
     this.fileId = -1,
     this.faces,
     this.clip,
+    this.petFaces,
+    this.petBodies,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
@@ -35,6 +39,8 @@ class MLResult {
         'fileId': fileId,
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
+        'petFaces': petFaces?.map((pf) => pf.toJson()).toList(),
+        'petBodies': petBodies?.map((pb) => pb.toJson()).toList(),
         'decodedImageSize': {
           'width': decodedImageSize.width,
           'height': decodedImageSize.height,
@@ -53,6 +59,20 @@ class MLResult {
           : null,
       clip: json['clip'] != null
           ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
+          : null,
+      petFaces: json['petFaces'] != null
+          ? (json['petFaces'] as List)
+              .map(
+                (item) => PetFaceResult.fromJson(item as Map<String, dynamic>),
+              )
+              .toList()
+          : null,
+      petBodies: json['petBodies'] != null
+          ? (json['petBodies'] as List)
+              .map(
+                (item) => PetBodyResult.fromJson(item as Map<String, dynamic>),
+              )
+              .toList()
           : null,
       decodedImageSize: json['decodedImageSize'] != null
           ? Dimensions(
@@ -174,5 +194,77 @@ int? tryGetFileIdFromFaceId(String faceId) {
       s,
     );
     return null;
+  }
+}
+
+class PetFaceResult {
+  late FaceDetectionRelative detection;
+  late AlignmentResult alignment;
+  late int species;
+  late Embedding embedding;
+  late int fileId;
+  late String petFaceId;
+
+  PetFaceResult({
+    required this.fileId,
+    required this.petFaceId,
+    required this.detection,
+    required this.alignment,
+    required this.species,
+    required this.embedding,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'detection': detection.toJson(),
+        'alignment': alignment.toJson(),
+        'species': species,
+        'embedding': embedding,
+        'fileId': fileId,
+        'petFaceId': petFaceId,
+      };
+
+  static PetFaceResult fromJson(Map<String, dynamic> json) {
+    return PetFaceResult(
+      detection: FaceDetectionRelative.fromJson(json['detection']),
+      alignment: AlignmentResult.fromJson(json['alignment']),
+      species: json['species'],
+      embedding: Embedding.from(json['embedding']),
+      fileId: json['fileId'],
+      petFaceId: json['petFaceId'],
+    );
+  }
+}
+
+class PetBodyResult {
+  late List<double> boxXyxy;
+  late double score;
+  late int cocoClass;
+  late String petBodyId;
+  late Embedding embedding;
+
+  PetBodyResult({
+    required this.boxXyxy,
+    required this.score,
+    required this.cocoClass,
+    required this.petBodyId,
+    required this.embedding,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'boxXyxy': boxXyxy,
+        'score': score,
+        'cocoClass': cocoClass,
+        'petBodyId': petBodyId,
+        'embedding': embedding,
+      };
+
+  static PetBodyResult fromJson(Map<String, dynamic> json) {
+    return PetBodyResult(
+      boxXyxy: (json['boxXyxy'] as List).cast<double>(),
+      score: json['score'],
+      cocoClass: json['cocoClass'],
+      petBodyId: json['petBodyId'],
+      embedding: Embedding.from(json['embedding']),
+    );
   }
 }
