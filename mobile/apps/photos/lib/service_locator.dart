@@ -217,10 +217,6 @@ ComputeController get computeController {
   return _computeController!;
 }
 
-void ensureComputeControllerInitialized() {
-  _computeController ??= ComputeController(localSettings);
-}
-
 FaceRecognitionService? _faceRecognitionService;
 FaceRecognitionService get faceRecognitionService {
   _faceRecognitionService ??= FaceRecognitionService();

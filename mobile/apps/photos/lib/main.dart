@@ -190,7 +190,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     );
     // Initialize ComputeController early in background run so health listeners
     // and checks begin before MLService wiring.
-    ensureComputeControllerInitialized();
+    computeController;
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
