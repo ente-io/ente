@@ -172,18 +172,26 @@ export const ChatDialogs = memo(
         modelGateStatus,
     }: ChatDialogsProps) => {
         const openExternalUrl = async (url: string) => {
-            if (isTauriRuntime) {
+            const hasTauriBridge =
+                typeof window !== "undefined" &&
+                (Boolean((window as any).__TAURI__) ||
+                    Boolean((window as any).__TAURI_IPC__));
+
+            if (isTauriRuntime || hasTauriBridge) {
                 try {
                     const { open } = await import("@tauri-apps/api/shell");
                     await open(url);
                     return;
                 } catch {
-                    // fall through to browser open
+                    // fall through to browser open fallback
                 }
             }
 
             if (typeof window !== "undefined") {
-                window.open(url, "_blank", "noopener,noreferrer");
+                const popup = window.open(url, "_blank", "noopener,noreferrer");
+                if (!popup) {
+                    window.location.href = url;
+                }
             }
         };
 
