@@ -72,10 +72,17 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                     }}
                 >
                     <Stack
+                        component="a"
+                        href="https://paste.ente.io"
                         direction="row"
                         alignItems="center"
                         spacing={0.35}
-                        sx={{ color: tokens.frame.logoTint, lineHeight: 0 }}
+                        aria-label="Go to Ente Paste home"
+                        sx={{
+                            color: tokens.frame.logoTint,
+                            lineHeight: 0,
+                            textDecoration: "none",
+                        }}
                     >
                         <Box>
                             <EnteLogo height={22} />
