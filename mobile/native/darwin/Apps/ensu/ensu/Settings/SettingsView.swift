@@ -34,21 +34,21 @@ struct SettingsView: View {
 
                     ForEach(filteredLinkItems) { item in
                         Button(action: item.action) {
-                            settingsCard(title: item.title, showsChevron: false)
+                            settingsCard(title: item.title, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
                     ForEach(filteredAccountItems) { item in
                         Button(action: item.action) {
-                            settingsCard(title: item.title, showsChevron: false)
+                            settingsCard(title: item.title, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
                     if shouldShowSignInRow {
                         Button(action: onSignIn) {
-                            settingsCard(title: signInTitle, showsChevron: false)
+                            settingsCard(title: signInTitle, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
@@ -102,6 +102,10 @@ struct SettingsView: View {
 
     private var linkItems: [SettingsActionItem] {
         [
+            SettingsActionItem(
+                title: "About",
+                action: { openExternalLink("https://ente.io/blog/ensu/") }
+            ),
             SettingsActionItem(
                 title: "Privacy Policy",
                 action: { openExternalLink("https://ente.io/privacy") }

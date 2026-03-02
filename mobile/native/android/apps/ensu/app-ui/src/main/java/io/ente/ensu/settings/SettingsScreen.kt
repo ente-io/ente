@@ -84,6 +84,12 @@ fun SettingsScreen(
 
             add(
                 SettingsItem(
+                    title = "About",
+                    onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
+                )
+            )
+            add(
+                SettingsItem(
                     title = "Privacy Policy",
                     onClick = { context.openExternalLink("https://ente.io/privacy") }
                 )
