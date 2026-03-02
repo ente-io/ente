@@ -699,6 +699,62 @@
   "reportBug": "Report bug",
   "suggestFeatures": "Suggest features",
   "support": "Support",
+  "helpAndSupport": "Help & Support",
+  "browseHelpPages": "Browse help pages",
+  "searchAndDiscovery": "Search and discovery",
+  "searchAndDiscoveryDesc": "Faces, locations, descriptions, and more",
+  "backupAndSync": "Backup and sync",
+  "backupAndSyncDesc": "Auto-backup, sync status, and uploads",
+  "sharingAndCollaboration": "Sharing and collaboration",
+  "sharingAndCollaborationDesc": "Albums, links, and family plans",
+  "storageAndPlans": "Storage and plans",
+  "storageAndPlansDesc": "Plans, billing, and storage usage",
+  "troubleshooting": "Troubleshooting",
+  "troubleshootingDesc": "Common issues and their solutions",
+  "viewAllHelpTopics": "View all help topics",
+  "getInTouch": "Get in touch",
+  "reportAnIssue": "Report an issue",
+  "askAQuestion": "Ask a question",
+  "requestAFeature": "Request a feature",
+  "subject": "Subject",
+  "description": "Description",
+  "oneLineAboutTheIssue": "One line about the issue",
+  "detailsAboutTheIssue": "Details about the issue",
+  "yourQuestion": "Your question",
+  "anyAdditionalInformation": "Any additional information",
+  "attachLogs": "Attach logs",
+  "attachLogsHelper": "Helps us diagnose the issue faster",
+  "deviceInfoNote": "Device details such as OS version, app version, and device model will be included automatically.",
+  "pleaseEnterASubject": "Please enter a subject",
+  "pleaseEnterADescription": "Please enter a description",
+  "noEmailAppFound": "No email app found",
+  "noEmailAppBody": "Copy your message and send it to {email} from any email service.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.io"
+      }
+    }
+  },
+  "message": "Message",
+  "deviceInfo": "Device info",
+  "logs": "Logs",
+  "export": "Export",
+  "logsNotCopiedDownloadNote": "Logs are not copied. Export the logs and attach them to your email.",
+  "attachedSize": "Attached ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Copy all to clipboard",
+  "copied": "Copied",
   "appearance": "Appearance",
   "theme": "Theme",
   "lightTheme": "Light",

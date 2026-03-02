@@ -167,10 +167,10 @@ class MLIndexingIsolate extends SuperIsolate {
       if (areModelsDownloaded) {
         return;
       }
-      final goodInternet = await canUseHighBandwidth();
+      final goodInternet = isOfflineMode || await canUseHighBandwidth();
       if (!goodInternet) {
         _logger.info(
-          "Cannot download models because user is not connected to wifi",
+          "Cannot download models because user is not connected to wifi and is in online mode",
         );
         return;
       }
