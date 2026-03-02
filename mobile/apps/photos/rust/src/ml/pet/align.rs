@@ -21,9 +21,9 @@ const CROP_EXPAND: f32 = 0.1;
 ///
 /// Mirrors `pet_pipeline/detection.py` `_align_face()`:
 ///   1. Skip if eye distance < 5 px
-///   2. If angle < 1°, crop bounding box directly (no rotation)
+///   2. If angle < 1 deg, crop bounding box directly (no rotation)
 ///   3. Otherwise rotate around face center, then crop with 10% expand
-///   4. Resize to 224×224
+///   4. Resize to 224x224
 ///   5. Apply ImageNet normalization (CHW)
 pub fn run_pet_face_alignment(
     file_id: i64,
@@ -70,7 +70,7 @@ pub fn run_pet_face_alignment(
         let angle_rad = dy.atan2(dx);
 
         let aligned_rgb = if angle_deg.abs() < ANGLE_SKIP_DEG {
-            // No rotation needed — just crop the bounding box directly
+            // No rotation needed -- just crop the bounding box directly
             let cx1 = box_x1.max(0) as u32;
             let cy1 = box_y1.max(0) as u32;
             let cx2 = (box_x2 as u32).min(img_w);
@@ -213,7 +213,7 @@ fn rotate_around_center(
     output
 }
 
-/// Crop a region from an RGB image and resize to 224×224 using bilinear interpolation.
+/// Crop a region from an RGB image and resize to 224x224 using bilinear interpolation.
 fn crop_and_resize_rgb(
     source: &RgbImage,
     x: u32,
@@ -280,7 +280,7 @@ fn extract_rgb_region(
         .ok_or_else(|| MlError::Preprocess("failed to build region image".to_string()))
 }
 
-/// Crop directly from decoded image bytes and resize — avoids building a
+/// Crop directly from decoded image bytes and resize -- avoids building a
 /// full-size RgbImage when no rotation is needed.
 fn crop_and_resize_decoded(
     decoded: &DecodedImage,

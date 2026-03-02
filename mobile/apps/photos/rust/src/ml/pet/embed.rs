@@ -12,20 +12,17 @@ const BODY_EMBED_INPUT_SIZE: i64 = 224;
 const FACE_EMBED_CHANNELS: i64 = 3;
 const BODY_EMBED_CHANNELS: i64 = 3;
 
-/// Run pet face embedding on aligned face inputs.
+/// Run pet face embedding using each face's own `class_id` to select the model.
 ///
-/// The species parameter (0=dog, 1=cat) selects the model to use.
+/// Faces are grouped by species and batched per model to avoid running the
+/// wrong embedding model on any detection.
 ///
 /// Input per face: CHW float32 of shape [1, 3, 224, 224], ImageNet-normalized.
 /// Output: L2-normalized embedding vector (128-d for BYOL).
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_face()`.
-/// Run pet face embedding using each face's own `class_id` to select the model.
-///
-/// Faces are grouped by species and batched per model to avoid running the
-/// wrong embedding model on any detection.
 pub fn run_pet_face_embedding(
-    runtime: &MlRuntime,
+    runtime: &mut MlRuntime,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [PetFaceResult],
 ) -> MlResult<()> {
@@ -73,9 +70,9 @@ pub fn run_pet_face_embedding(
         }
 
         let session = if species == 0 {
-            runtime.pet_face_embedding_dog_session()?
+            runtime.pet_face_embedding_dog_session_mut()?
         } else {
-            runtime.pet_face_embedding_cat_session()?
+            runtime.pet_face_embedding_cat_session_mut()?
         };
 
         let (shape, output) = onnx::run_f32(
@@ -129,7 +126,7 @@ pub fn run_pet_face_embedding(
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_body()`.
 pub fn run_pet_body_embedding(
-    runtime: &MlRuntime,
+    runtime: &mut MlRuntime,
     decoded: &DecodedImage,
     body_results: &mut [PetBodyResult],
 ) -> MlResult<()> {
@@ -176,9 +173,9 @@ pub fn run_pet_body_embedding(
         }
 
         let session = if is_cat {
-            runtime.pet_body_embedding_cat_session()?
+            runtime.pet_body_embedding_cat_session_mut()?
         } else {
-            runtime.pet_body_embedding_dog_session()?
+            runtime.pet_body_embedding_dog_session_mut()?
         };
 
         let (shape, output) = onnx::run_f32(
