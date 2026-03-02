@@ -124,7 +124,7 @@ struct SettingsView: View {
             ),
             SettingsActionItem(
                 title: "Terms of Service",
-                iconName: "LegalDocument01Icon",
+                iconName: "DescriptionIcon",
                 action: { openExternalLink("https://ente.io/terms") }
             )
         ]
