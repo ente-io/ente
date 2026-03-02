@@ -170,7 +170,6 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
-    if (!isProcessBg) return;
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -262,7 +261,6 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
-    if (!isProcessBg) return;
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     bool rustRuntimePrepared = false;
