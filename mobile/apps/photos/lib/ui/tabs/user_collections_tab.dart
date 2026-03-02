@@ -27,7 +27,7 @@ import "package:photos/ui/collections/device/device_folders_vertical_grid_view.d
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/offline/empty/on_ente.dart";
+import "package:photos/ui/offline/empty/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
@@ -259,8 +259,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
             isOfflineMode
-                ? SliverToBoxAdapter(
-                    child: EmptyOnEnteSection(collections: collections),
+                ? const SliverToBoxAdapter(
+                    child: EmptyOnEnteSection(),
                   )
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(

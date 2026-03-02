@@ -2,8 +2,10 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/email_entry_page.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class GetStartedBanner extends StatefulWidget {
   const GetStartedBanner({super.key});
@@ -22,42 +24,29 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
       return const SizedBox.shrink();
     }
 
-    const titleStyle = TextStyle(
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
+
+    final titleStyle = textTheme.largeBold.copyWith(
       fontFamily: "Nunito",
       fontWeight: FontWeight.w800,
-      fontSize: 18,
-      height: 28 / 18,
+      fontSize: 20,
+      height: 24 / 18,
       letterSpacing: -1,
       color: Colors.white,
-    );
-
-    const descriptionStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.w600,
-      fontSize: 12,
-      height: 18 / 12,
-      color: Color.fromRGBO(255, 255, 255, 0.8),
-    );
-
-    const buttonTextStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.w600,
-      fontSize: 10,
-      height: 12 / 10,
-      color: Colors.black,
     );
 
     return GestureDetector(
       onTap: _onGetStarted,
       child: Container(
-        height: 165,
+        height: 180,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: getEnteColorScheme(context).greenBase,
+          color: colorScheme.greenBase,
         ),
         child: Stack(
-          clipBehavior: Clip.none,
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
@@ -68,23 +57,32 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          AppLocalizations.of(context).moreThanJustAGallery,
-                          style: titleStyle,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 235),
+                          child: Text(
+                            l10n.moreThanJustAGallery,
+                            style: titleStyle,
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                       GestureDetector(
                         onTap: _onDismiss,
                         behavior: HitTestBehavior.opaque,
-                        child: const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: Center(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: greenDark,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
                             child: HugeIcon(
                               icon: HugeIcons.strokeRoundedCancel01,
-                              color: Colors.white,
-                              size: 20,
-                              strokeWidth: 2,
+                              color: contentDark,
+                              size: 18,
+                              strokeWidth: 2.5,
                             ),
                           ),
                         ),
@@ -95,26 +93,9 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 235),
                     child: Text(
-                      AppLocalizations.of(context).encryptedBackupDescription,
-                      style: descriptionStyle,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _onGetStarted,
-                    child: Container(
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        widthFactor: 1,
-                        child: Text(
-                          AppLocalizations.of(context).getStarted,
-                          style: buttonTextStyle,
-                        ),
+                      l10n.encryptedBackupDescription,
+                      style: textTheme.smallMuted.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ),
@@ -122,12 +103,21 @@ class _GetStartedBannerState extends State<GetStartedBanner> {
               ),
             ),
             Positioned(
-              right: 12,
+              left: 16,
+              bottom: 16,
+              child: BannerActionButton(
+                label: l10n.getStarted,
+                onTap: _onGetStarted,
+                variant: BannerActionButtonVariant.neutral,
+              ),
+            ),
+            Positioned(
+              right: 16,
               bottom: 12,
               child: IgnorePointer(
                 child: Image.asset(
                   "assets/ducky_get_started.png",
-                  height: 100,
+                  height: 120,
                   fit: BoxFit.contain,
                 ),
               ),

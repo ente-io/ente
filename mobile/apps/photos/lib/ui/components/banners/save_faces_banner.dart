@@ -4,6 +4,7 @@ import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/email_entry_page.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class SaveFacesBanner extends StatefulWidget {
   const SaveFacesBanner({super.key});
@@ -24,6 +25,7 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
     }
 
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final l10n = AppLocalizations.of(context);
 
     return Padding(
@@ -46,12 +48,12 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
                     child: Text(
                       l10n.offlineFacesBannerTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: textTheme.largeBold.copyWith(
                         fontFamily: "Nunito",
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        height: 20 / 16,
-                        letterSpacing: -1.0,
+                        fontSize: 20,
+                        height: 24 / 18,
+                        letterSpacing: -1,
                         color: colorScheme.textBase,
                       ),
                     ),
@@ -59,15 +61,18 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
                           color: colorScheme.contentLight,
                           size: 18,
-                          strokeWidth: 2,
+                          strokeWidth: 2.5,
                         ),
                       ),
                     ),
@@ -76,22 +81,17 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
               ),
             ),
             const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 l10n.offlineFacesBannerSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: "Inter",
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  height: 16 / 12,
-                  color: colorScheme.contentLight,
-                ),
+                style: textTheme.smallMuted,
               ),
             ),
             const SizedBox(height: 16),
-            GestureDetector(
+            BannerActionButton(
+              label: l10n.signUp,
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -99,27 +99,7 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
                   ),
                 );
               },
-              child: Container(
-                width: 140,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colorScheme.greenBase,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 18,
-                ),
-                child: Text(
-                  l10n.signUp,
-                  style: const TextStyle(
-                    fontFamily: "Montserrat",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                    height: 12 / 10,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              variant: BannerActionButtonVariant.primary,
             ),
           ],
         ),
