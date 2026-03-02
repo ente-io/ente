@@ -242,6 +242,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Album-Layout",
+  "layoutMasonry": "Mauerwerk",
   "layoutGrouped": "Gruppiert",
   "layoutContinuous": "Kontinuierlich",
   "layoutTrip": "Reise",
@@ -290,6 +291,7 @@
   "copyLink": "Link kopieren",
   "copyEmbedHtml": "Einzubettendes HTML kopieren",
   "linkHasExpired": "Link ist abgelaufen",
+  "linkRequestLimitExceeded": "Dieses Album wurde auf zu vielen Geräten angesehen",
   "publicLinkEnabled": "Öffentlicher Link aktiviert",
   "shareALink": "Einen Link teilen",
   "sharedAlbumSectionDescription": "Erstelle gemeinsam mit anderen Ente-Nutzern geteilte Alben, inkl. Nutzern ohne Bezahltarif.",
@@ -1189,7 +1191,14 @@
   "didYouKnow": "Schon gewusst?",
   "loadingMessage": "Fotos werden geladen...",
   "loadMessage1": "Du kannst dein Abonnement mit deiner Familie teilen",
-  "loadMessage2": "Wir haben bereits über 200 Millionen Erinnerungen bewahrt",
+  "loadMessage2": "Wir haben bisher über {memoriesCountInMillions} Millionen Erinnerungen bewahrt",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker",
   "loadMessage4": "Alle unsere Apps sind Open-Source",
   "loadMessage5": "Unser Quellcode und unsere Kryptografie wurden extern geprüft",
@@ -2365,7 +2374,7 @@
   },
   "festivities": "Festlicher Beifall",
   "snowAdventures": "Winterabenteuer",
-  "waterfalls": "Wasserfälle jagen",
+  "waterfalls": "Wasserfälle",
   "wildlife": "In die Wildnis",
   "flowers": "Blühende Schönheiten",
   "nightLights": "Nächte in Neon",

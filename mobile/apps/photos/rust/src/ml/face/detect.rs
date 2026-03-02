@@ -17,10 +17,10 @@ pub fn run_face_detection(
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
     let face_detection = runtime.face_detection_session_mut()?;
-    let (output_shape, output_data) = onnx::run_f32(
+    let output_data = onnx::run_f32_data(
         face_detection,
         input,
-        vec![1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
+        [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
 
     let row_len = 16usize;
@@ -75,7 +75,6 @@ pub fn run_face_detection(
         });
     }
 
-    let _ = output_shape;
     Ok(naive_non_max_suppression(detections, IOU_THRESHOLD))
 }
 
@@ -122,20 +121,28 @@ fn naive_non_max_suppression(
 ) -> Vec<FaceDetection> {
     detections.sort_by(|a, b| b.score.total_cmp(&a.score));
 
-    let mut i = 0usize;
-    while i + 1 < detections.len() {
-        let mut j = i + 1;
-        while j < detections.len() {
+    let mut suppressed = vec![false; detections.len()];
+    for i in 0..detections.len() {
+        if suppressed[i] {
+            continue;
+        }
+
+        for j in (i + 1)..detections.len() {
+            if suppressed[j] {
+                continue;
+            }
             let iou = calculate_iou(&detections[i], &detections[j]);
             if iou >= iou_threshold {
-                detections.remove(j);
-            } else {
-                j += 1;
+                suppressed[j] = true;
             }
         }
-        i += 1;
     }
+
     detections
+        .into_iter()
+        .enumerate()
+        .filter_map(|(index, detection)| (!suppressed[index]).then_some(detection))
+        .collect()
 }
 
 fn calculate_iou(a: &FaceDetection, b: &FaceDetection) -> f32 {

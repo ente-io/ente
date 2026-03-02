@@ -290,6 +290,7 @@
   "copyLink": "Kopírovat odkaz",
   "copyEmbedHtml": "Zkopírovat vložené HTML",
   "linkHasExpired": "Platnost odkazu vypršela",
+  "linkRequestLimitExceeded": "Toto album bylo zobrazeno na příliš mnoha zařízeních",
   "publicLinkEnabled": "Veřejný odkaz povolen",
   "shareALink": "Sdílet odkaz",
   "sharedAlbumSectionDescription": "Vytvářejte sdílená a společná alba s ostatními uživateli Ente, včetně uživatelů na bezplatném plánu.",
@@ -673,7 +674,7 @@
   "general": "Obecné",
   "security": "Zabezpečení",
   "authToViewYourRecoveryKey": "Pro zobrazení Vašeho obnovovacího klíče se prosím ověřte",
-  "twofactor": "Dvoufázové",
+  "twofactor": "Dvoufázové ověření",
   "authToConfigureTwofactorAuthentication": "Pro konfiguraci dvoufázového ověřování se prosím ověřte",
   "lockscreen": "Zámek obrazovky",
   "authToChangeLockscreenSetting": "Pro změnu nastavení uzamčení obrazovky se prosím ověřte",
@@ -832,6 +833,7 @@
   "continueWithoutAccount": "Pokračovat bez účtu",
   "loginToExistingAccount": "Přihlásit se k existujícímu účtu",
   "shareTheMoment": "Sdílet okamžik",
+  "letFriendsAndFamilyReact": "Nechte přátele a rodinu reagovat a komentovat vaše fotografie.",
   "pleaseLoginAgain": "Prosím, přihlaste se znovu",
   "autoLogoutMessage": "Z technických důvodů jste byli odhlášeni. Omlouváme se za způsobené nepříjemnosti.",
   "yourSubscriptionHasExpired": "Vaše předplatné vypršelo",
@@ -967,6 +969,8 @@
   "sortAlbumsBy": "Seřadit podle",
   "sortNewestFirst": "Od nejnovějších",
   "sortOldestFirst": "Od nejstarších",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Přejmenovat",
   "leaveSharedAlbum": "Opustit sdílené album?",
   "leaveAlbum": "Opustit album",
@@ -1006,6 +1010,39 @@
   "filesSavedToGallery": "Soubory uloženy do galerie",
   "fileFailedToSaveToGallery": "Nepodařilo se uložit soubor do galerie",
   "download": "Stáhnout",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} je již k dispozici v albu {albumName} ve vašem zařízení",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionSingleFile": "Stahování souboru {fileName} bylo přeskočeno, protože je již k dispozici v albu {albumName} ve vašem zařízení",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Stažení {fileCount} souborů bylo přeskočeno, protože již jsou ve vašem zařízení",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Stiskněte a podržte pro přehrání videa",
   "pressAndHoldToPlayVideoDetailed": "Stiskněte a podržte prst na obrázku aby se spustilo přehrávání videa",
   "downloadFailed": "Stahování selhalo",
@@ -1153,7 +1190,14 @@
   "didYouKnow": "Věděli jste?",
   "loadingMessage": "Načítání Vašich fotografií...",
   "loadMessage1": "Své předplatné můžete sdílet se svou rodinou",
-  "loadMessage2": "Dosud jsme zachovali více než 200 milionů vzpomínek",
+  "loadMessage2": "Dosud jsme uchovali více než {memoriesCountInMillions} milionů vzpomínek",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Vaše data uchováváme ve 3 kopiích, z nichž jedna je uložena v podzemním protiatomovém krytu",
   "loadMessage4": "Všechny naše aplikace jsou open source",
   "loadMessage5": "Náš zdrojový kód a kryptografie byly podrobeny externímu auditu",
@@ -1370,6 +1414,7 @@
   "moveToHiddenAlbum": "Přesunout do skrytého alba",
   "fileTypes": "Typy souborů",
   "deleteConfirmDialogBody": "Tento účet je propojen s dalšími aplikacemi Ente, pokud je používáte. Vaše nahraná data ve všech aplikacích Ente budou naplánována k odstranění a Váš účet bude trvale smazán.",
+  "hearUsWhereTitle": "Jak jste se dozvěděli o Ente?",
   "hearUsExplanation": "Nesledujeme instalace aplikace. Pomůže nám, když nám sdělíte, kde jste nás našli!",
   "viewAddOnButton": "Zobrazit doplňky",
   "addOns": "Doplňky",
@@ -1803,9 +1848,94 @@
   "legacyPageDesc2": "Důvěryhodné kontakty mohou zahájit obnovení účtu a pokud nebude do 30 dnů zablokováno, mohou resetovat Vaše heslo a získat přístup k Vašemu účtu.",
   "legacyAccounts": "Účty pro dědictví",
   "trustedContacts": "Důvěryhodné kontakty",
+  "addTrustedContact": "Přidat důvěryhodný kontakt",
+  "chooseFromAnExistingContact": "Vyberte z existujícího kontaktu",
+  "chooseARecoveryTime": "Vyberte čas obnovy",
+  "addContact": "Přidat kontakt",
   "removeInvite": "Odstranit pozvání",
   "recoveryWarning": "Důvěryhodný kontakt se snaží získat přístup k Vašemu účtu",
   "rejectRecovery": "Odmítnout obnovu",
+  "cannotUpdateRecoveryTime": "Čas obnovení nelze aktualizovat",
+  "cannotUpdateRecoveryTimeMessage": "Čas obnovení nelze změnit, pokud je aktivní relace obnovy. Zrušte nebo počkejte, až bude obnova dokončena.",
+  "updateTime": "Čas aktualizace",
+  "revokeInvite": "Zrušit pozvánku",
+  "trustedContactInvitePending": "Pozvali jste {email} jako důvěryhodný kontakt. Vaše pozvání zatím nepřijali.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "Přidali jste {email} jako důvěryhodný kontakt. Přijali vaše pozvání.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Zrušit pozvánku",
+  "cancelInviteDesc": "Pokud tuto pozvánku smažete, budete muset poslat novou, pokud si to rozmyslíte.",
+  "removeContactDesc": "Pokud tento kontakt smažete, budete muset odeslat novou pozvánku a kontakt ji bude muset znovu přijmout.",
+  "removeContact": "Odstranit kontakt",
+  "letsTryThatAgain": "Zkusme to znovu",
+  "removeYourselfDesc": "Pokud se odstraníte jako důvěryhodný kontakt, ztratíte přístup k účtu {email} po uplynutí doby neaktivity.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Zrušit obnovení",
+  "cancelRecoveryDesc": "Opravdu chcete zrušit obnovení účtu {email}?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Zahájit obnovení",
+  "startRecoveryDesc": "Opravdu chcete zahájit obnovení účtu {email}?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "Účet {email} můžete obnovit do {days} dnů od zahájení procesu obnovy.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "Účet {email} můžete obnovit po uplynutí {time}.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Nebo se odstraňte jako důvěryhodný kontakt uživatele {email}",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Obnovení zahájeno",
   "recoveryInitiatedDesc": "K účtu budete mít přístup po {days} dnech. Oznámení bude zasláno na adresu {email}.",
   "@recoveryInitiatedDesc": {
@@ -1844,6 +1974,19 @@
       "email": {
         "type": "String",
         "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "confirmAddingTrustedContacts": "Chystáte se přidat {count} důvěryhodných kontaktů. Ti budou moci obnovit Váš účet, pokud budete {numOfDays} dní nepřítomní.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
       },
       "numOfDays": {
         "type": "int",
@@ -1981,6 +2124,10 @@
   "personIsAge": "{name} má {age} let!",
   "personTurningAge": "{name} brzy oslaví {age} let",
   "lastTimeWithThem": "Naposledy s {name}",
+  "unnamedPeopleSpotlight": "Známá tvář",
+  "unnamedPeopleYouAndThem": "Vy dva",
+  "unnamedPeopleDoingSomethingTogether": "Dělat to společně",
+  "unnamedPeopleLastTimeYouSawThem": "Naposledy spolu",
   "tripToLocation": "Výlet do {location}",
   "tripInYear": "Cesta v roce {year}",
   "lastYearsTrip": "Loňský výlet",
@@ -2022,9 +2169,10 @@
   "wishThemAHappyBirthday": "Popřejte {name} všechno nejlepší k narozeninám! 🎉",
   "areYouSureRemoveThisFaceFromPerson": "Opravdu chcete odstranit tento obličej z této osoby?",
   "otherDetectedFaces": "Další detekované obličeje",
-  "areThey": "Jsou to ",
+  "areThey": "Je to ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Uložit jako jinou osobu",
+  "showLessFaces": "Zobrazit méně tváří",
   "showMoreFaces": "Zobrazit více obličejů",
   "ignore": "Ignorovat",
   "merge": "Sloučit",
@@ -2036,6 +2184,10 @@
   "areYouSureYouWantToMergeThem": "Opravdu je chcete sloučit?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Všechny nepojmenované skupiny budou sloučeny do vybrané osoby. Tuto akci lze stále vrátit zpět z přehledu historie návrhů dané osoby.",
   "yesIgnore": "Ano, ignorovat",
+  "areYouSureYouWantToShowThisPersonInPeopleSectionAgain": "Opravdu chcete tuto osobu znovu zobrazit v sekci „Lidé“?",
+  "areYouSureYouWantToShowThesePeopleInPeopleSectionAgain": "Opravdu chcete tyto osoby znovu zobrazit v sekci „Lidé“?",
+  "yesShowPerson": "Ano, ukázat osobu",
+  "yesShowPeople": "Ano, ukázat osoby",
   "same": "Stejné",
   "different": "Odlišné",
   "sameperson": "Stejná osoba?",
@@ -2211,7 +2363,7 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "closeBy": "Zavřít",
+  "closeBy": "Blízké",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
@@ -2406,6 +2558,46 @@
   "ritualEmojiUseAction": "Použít",
   "ritualSearchEmpty": "Vytvořte rituál, abyste udrželi svůj návyk s fotografiemi v chodu.",
   "feed": "Kanál",
+  "newCommentNotificationTitle": "Máte komentář",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Dostal jsi lajk",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "Líbí se Vaše fotografie",
+  "likedAPhoto": "Líbí se fotografie",
+  "likedYourVideo": "Líbí se video",
+  "commentedOnYourPhoto": "Okomentoval(a) vaši fotografii",
+  "commentedOnAPhoto": "Okomentoval(a) fotografii",
+  "commentedOnYourVideo": "Okomentoval(a) vaše video",
+  "commentedOnAVideo": "Okomentoval(a) video",
+  "repliedToYourComment": "Odpověděl(a) na Váš komentář",
+  "repliedToAComment": "Odpověděl(a) na komentář",
+  "likedYourComment": "Se libí Váš komentář",
+  "likedAComment": "Se libí komentář",
+  "likedYourReply": "Se líbí Vaše odpověď",
+  "likedAReply": "Se líbí odpověď",
+  "addedAMemoryTo": "Přidána vzpomínka do {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Přidáno {count} vzpomínek do {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "a 1 další",
   "andXOthers": "a {count} další",
   "@andXOthers": {
@@ -2534,5 +2726,55 @@
   },
   "searchSettings": "Nastavení vyhledávání",
   "suggestions": "Doporučení",
-  "grantPermission": "Udělit oprávnění"
+  "cleanupHiddenFiles": "Vyčistit skryté soubory",
+  "cleanupHiddenFilesDescription": "Některé soubory ve skrytých albech stále existují v neskrytých albech, takže jsou viditelné mimo skrytou sekci. Vyčištění je odstraní z neskrytých alb.",
+  "cleanupComplete": "Vyčištění dokončeno",
+  "deleteHiddenFilesFromDevice": "Odstranit skryté soubory ze zařízení",
+  "deleteHiddenFilesFromDeviceDescription": "Odstranit místní kopie skrytých souborů z vašeho zařízení",
+  "deleteOnDeviceFiles": "Odstranit soubory ze zařízení",
+  "noHiddenFilesOnDevice": "Na zařízení nejsou žádné skryté soubory",
+  "welcome": "Vítejte",
+  "grantGalleryPermissionDesc": "Udělte oprávnění k přístupu a organizaci fotek s rozpoznáváním obličeje.\n\nVšechno zpracování se děje na vašem zařízení.",
+  "grantPermission": "Udělit oprávnění",
+  "privateAI": "Soukromá AI",
+  "privateAIDescription": "Ente využívá AI pouze ve Vašem zařízení k analýze vašich fotografií a rozpoznávání tváří, objektů, míst a textu. Tyto údaje se používají k napájení funkcí, jako je rozpoznávání tváří a inteligentní vyhledávání. Vše se zpracovává a ukládá lokálně ve Vašem zařízení – nic se nikdy nenahrává na naše servery.",
+  "byAgreeing": "Pokračováním souhlasíte s <terms>podmínkami služby</terms> a <policy>zásadami ochrany osobních údajů</policy>.",
+  "moreThanJustAGallery": "Více než jen galerie.",
+  "encryptedBackupDescription": "Šifrované zálohování, inteligentní vyhledávání, sdílené odkazy a plynulá synchronizace napříč všemi Vašimi zařízeními.",
+  "getStarted": "Pojďme na to",
+  "unlockSmartFeatures": "Odemkněte chytré funkce",
+  "enableOnDeviceMLDescription": "Povolte strojové učení v zařízení, abyste mohli vyhledávat podle tváří, míst a dalších kritérií. Vaše fotografie nikdy neopustí vaše zařízení.",
+  "offlineEnableSharingTitle": "Sdílení začíná zde",
+  "offlineEnableSharingDesc": "Zaregistrujte se a sdílejte fotografie se všemi – i s těmi, kteří nejsou na Ente",
+  "offlineEnableBackupTitle": "Zde se zobrazí vaše zálohovaná alba",
+  "offlineEnableBackupDesc": "Zaregistrujte se a uchovejte své vzpomínky s Ente.",
+  "offlineEnableBackupAction": "Začněte s 10 GB ZDARMA",
+  "offlineSettingsBannerTitle": "Vaše fotografie nemůžeme vidět. Nikdy.",
+  "offlineSettingsBannerDesc": "Šifrování s nulovou znalostí znamená, že vaše vzpomínky zůstanou vaše.",
+  "alreadyHaveAnAccount": "Už máte účet?",
+  "loginToEnte": "Přihlásit se do Ente",
+  "searchAndDiscover": "Hledejte a Objevujte",
+  "searchAndDiscoverDesc": "Vyhledávejte fotografie pomocí textu nebo objevujte staré vzpomínky pomocí strojového učení v zařízení",
+  "shareYourMemories": "Sdílejte své vzpomínky",
+  "shareYourMemoriesDesc": "Sdílejte svá alba, vytvářejte odkazy, sbírejte fotografie a přidávejte komentáře",
+  "privateAndSecureBackups": "Soukromé a bezpečné zálohy",
+  "privateAndSecureBackupsDesc": "Šifrování typu end-to-end, trojnásobná replikace, open source a nezávisle auditováno",
+  "mlProgressBannerTitle": "Vydržte!",
+  "mlProgressBannerDescription": "Vaše fotografie se zpracovávají v zařízení za účelem detekce obličejů, objektů a dalších prvků.",
+  "mlProgressBannerStatus": "{indexed} z {total} fotografií zpracováno",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "Chcete tyto tváře uložit?",
+  "offlineFacesBannerSubtitle": "Zaregistrujte se, abyste mohli označovat lidi a snadno je později najít.",
+  "offlineNameFaceBannerTitle": "Dejte této tváři jméno",
+  "offlineNameFaceBannerSubtitle": "Zaregistrujte se, abyste je mohli označit a později snadno najít jejich fotografie.",
+  "signUp": "Zaregistrovat se"
 }

@@ -512,6 +512,7 @@ const Plans: React.FC<PlansProps> = ({
                     disabled={
                         !!(
                             subscription &&
+                            isSubscriptionActive(subscription) &&
                             isSubscriptionForPlan(subscription, plan)
                         )
                     }

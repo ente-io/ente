@@ -4,6 +4,35 @@
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
 /**
+ * Native provider used for desktop app lock authentication.
+ *
+ * `touchid` means we can use the platform-native auth prompt.
+ * `none` means no supported native provider is currently available.
+ */
+export type NativeDeviceLockProvider = "touchid" | "none";
+
+/**
+ * Why native device lock is unavailable on this machine/session.
+ */
+export type NativeDeviceLockUnavailableReason =
+    | "unsupported-platform"
+    | "touchid-not-enrolled"
+    | "touchid-api-error";
+
+/**
+ * Capability metadata used by the renderer to decide whether to show and use
+ * "Device lock" as an app-lock mode.
+ */
+export interface NativeDeviceLockCapability {
+    /** True when native auth can be prompted right now. */
+    available: boolean;
+    /** Which native provider backs authentication (if available). */
+    provider: NativeDeviceLockProvider;
+    /** Present when unavailable, with a machine-readable reason. */
+    reason?: NativeDeviceLockUnavailableReason;
+}
+
+/**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
  *
@@ -113,6 +142,18 @@ export interface Electron {
     onMainWindowFocus: (cb: (() => void) | undefined) => void;
 
     /**
+     * Set or clear the callback {@link cb} to invoke whenever the app goes to
+     * the background. More precisely, the callback gets invoked when the main
+     * window blurs and the app is no longer focused.
+     *
+     * Setting a callback clears any previous callbacks.
+     *
+     * @param cb The function to call when the app is backgrounded. Pass
+     * `undefined` to clear the callback.
+     */
+    onMainWindowBlur: (cb: (() => void) | undefined) => void;
+
+    /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
      * asked to open a deeplink that begins with "ente://". This allows the
      * Node.js layer to ask the renderer to handle deeplinks and redirect itself
@@ -157,6 +198,22 @@ export interface Electron {
      * @see {@link isAutoLaunchEnabled}
      */
     toggleAutoLaunch: () => Promise<void>;
+
+    /**
+     * Return native device lock capability details for the current machine.
+     *
+     * Includes whether native auth is available, provider metadata, and a
+     * reason when unavailable.
+     */
+    getNativeDeviceLockCapability: () => Promise<NativeDeviceLockCapability>;
+
+    /**
+     * Prompt native device lock authentication.
+     *
+     * The {@link reason} can be shown by the OS in the native auth prompt.
+     * Returns true on successful authentication.
+     */
+    promptDeviceLock: (reason: string) => Promise<boolean>;
 
     // - App update
 

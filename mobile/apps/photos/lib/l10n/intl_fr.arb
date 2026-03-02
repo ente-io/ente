@@ -242,6 +242,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Disposition de l'album",
+  "layoutMasonry": "Maçonnerie",
   "layoutGrouped": "Groupé",
   "layoutContinuous": "En continu",
   "layoutTrip": "Excursion",
@@ -290,6 +291,7 @@
   "copyLink": "Copier le lien",
   "copyEmbedHtml": "Copier le code HTML intégré",
   "linkHasExpired": "Le lien a expiré",
+  "linkRequestLimitExceeded": "Cet album a été consulté sur trop d'appareils",
   "publicLinkEnabled": "Lien public activé",
   "shareALink": "Partager le lien",
   "sharedAlbumSectionDescription": "Créez des albums partagés et collaboratifs avec d'autres utilisateurs de Ente, y compris des utilisateurs ayant des plans gratuits.",
@@ -1189,7 +1191,14 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "loadMessage1": "Vous pouvez partager votre abonnement avec votre famille",
-  "loadMessage2": "Nous avons préservé plus de 200 millions de souvenirs jusqu'à présent",
+  "loadMessage2": "Nous avons à ce jour déjà préservé {memoriesCountInMillions} millions de souvenirs",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Nous conservons 3 copies de vos données, l'une dans un abri anti-atomique",
   "loadMessage4": "Toutes nos applications sont open source",
   "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",

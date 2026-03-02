@@ -42,7 +42,7 @@ pub fn run_face_embedding(
     let (shape, output) = onnx::run_f32(
         face_embedding,
         input,
-        vec![
+        [
             aligned_faces.len() as i64,
             FACE_INPUT_HEIGHT,
             FACE_INPUT_WIDTH,

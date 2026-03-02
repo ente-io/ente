@@ -3199,7 +3199,10 @@ const Page: React.FC = () => {
 
     const handleLogoClick = useCallback(() => {
         if (typeof window === "undefined") return;
-        if (!DEVELOPER_SETTINGS_ENABLED) return;
+        if (!DEVELOPER_SETTINGS_ENABLED) {
+            window.location.reload();
+            return;
+        }
         if (logoClickTimeoutRef.current) {
             window.clearTimeout(logoClickTimeoutRef.current);
         }

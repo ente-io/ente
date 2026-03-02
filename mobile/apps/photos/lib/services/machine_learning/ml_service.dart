@@ -291,9 +291,9 @@ class MLService {
           }
           await MLIndexingIsolate.instance.cleanupLocalIndexingModels();
           continue;
-        } else if (!await canUseHighBandwidth()) {
+        } else if (!(isOfflineMode || await canUseHighBandwidth())) {
           _logger.info(
-            'stopping indexing because user is not connected to wifi',
+            'stopping indexing because user is not connected to wifi and in online mode',
           );
           break stream;
         } else {

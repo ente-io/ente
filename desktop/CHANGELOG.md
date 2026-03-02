@@ -2,7 +2,13 @@
 
 ## v1.7.19 (unreleased)
 
--
+- App lock
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
 
 ## v1.7.18
 
