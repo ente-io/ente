@@ -95,11 +95,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
+                const SizedBox(height: 16),
                 Center(
                   child: Image.asset(
                     'assets/recovery_key.png',
-                    width: 101,
-                    height: 82,
+                    width: 100,
+                    height: 100,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -111,7 +112,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     color: colorScheme.textBase,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 20),
                 Text(
                   widget.subText ??
                       AppLocalizations.of(context).recoveryKeySaveDescription,
@@ -120,7 +121,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     color: colorScheme.textMuted,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
                     color: colorScheme.greenBase,
