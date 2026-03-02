@@ -192,6 +192,15 @@ jobs:
                 working-directory: mobile/native/android/apps/ensu
 
         steps:
+            - name: Set release tag
+              shell: bash
+              run: |
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+                      echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+                  else
+                      echo "RELEASE_TAG=ensu-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
+                  fi
+
             - name: Checkout code and submodules
               uses: actions/checkout@v4
               with:
