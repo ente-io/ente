@@ -251,6 +251,10 @@ export const ChatDialogs = memo(
                                 <Typography variant="small" sx={{ flex: 1 }}>
                                     Save logs
                                 </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
                             </ListItemButton>
 
                             {isLoggedIn && (
@@ -271,26 +275,10 @@ export const ChatDialogs = memo(
                                     >
                                         Passkeys
                                     </Typography>
-                                </ListItemButton>
-                            )}
-
-                            {isLoggedIn && (
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeSettingsModal();
-                                        handleLogout();
-                                    }}
-                                    sx={[
-                                        settingsItemSx,
-                                        { color: "critical.main" },
-                                    ]}
-                                >
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1, fontWeight: 600 }}
-                                    >
-                                        Sign Out
-                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
                                 </ListItemButton>
                             )}
 
@@ -312,6 +300,100 @@ export const ChatDialogs = memo(
                                     >
                                         Sign In to Backup
                                     </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            )}
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/blog/ensu/",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    About
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/privacy",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Privacy Policy
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/terms",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Terms of Service
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            {isLoggedIn && (
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        handleLogout();
+                                    }}
+                                    sx={[
+                                        settingsItemSx,
+                                        { color: "critical.main" },
+                                    ]}
+                                >
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1, fontWeight: 600 }}
+                                    >
+                                        Sign Out
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
                                 </ListItemButton>
                             )}
                         </Stack>
