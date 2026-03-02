@@ -1,6 +1,6 @@
 use crate::image::decode::decode_image_from_path;
 use crate::ml::{
-    clip::{image::run_clip_image, text::run_clip_text_query},
+    clip::{image::run_clip_image, text::run_clip_text_query, tokenizer::tokenize_clip_text},
     error::{MlError, MlResult},
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
@@ -121,6 +121,10 @@ pub fn run_clip_text_rust(req: RunClipTextRequest) -> Result<RunClipTextResult, 
     run_clip_text_rust_inner(req).map_err(|e| e.to_string())
 }
 
+pub fn tokenize_clip_text_rust(text: String, vocab_path: String) -> Result<Vec<i32>, String> {
+    tokenize_clip_text_rust_inner(&text, &vocab_path).map_err(|e| e.to_string())
+}
+
 fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageResult> {
     validate_request_model_paths(&req)?;
 
@@ -207,6 +211,15 @@ fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResu
                 .collect(),
         })
     })
+}
+
+fn tokenize_clip_text_rust_inner(text: &str, vocab_path: &str) -> MlResult<Vec<i32>> {
+    if vocab_path.trim().is_empty() {
+        return Err(MlError::InvalidRequest(
+            "missing model path: clipTextVocabPath".to_string(),
+        ));
+    }
+    tokenize_clip_text(text, vocab_path)
 }
 
 fn validate_request_model_paths(req: &AnalyzeImageRequest) -> MlResult<()> {

@@ -15,7 +15,10 @@ const BPE_MERGES_END_EXCLUSIVE: usize = 49152 - 256 - 2 + 1;
 
 static TOKEN_PATTERN: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
-        r"(?i)<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-zA-Z]+|[0-9]+|[^\s\p{L}\p{N}]+",
+        // Keep this expression behaviorally aligned with Dart's RegExp in
+        // clip_text_tokenizer.dart. Dart does not support \p{L}/\p{N} here,
+        // so those sequences are treated literally.
+        r"(?i)<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-zA-Z]+|[0-9]+|[^\sp{L}p{N}]+",
     )
     .expect("valid clip tokenizer regex")
 });

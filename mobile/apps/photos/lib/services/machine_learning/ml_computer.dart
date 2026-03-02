@@ -25,6 +25,7 @@ class MLComputer extends SuperIsolate {
   bool _isClipTokenizerInitialized = false;
   String? _clipTextModelPath;
   String? _clipTextVocabPath;
+  Future<void>? _clipTextWarmupFuture;
 
   @override
   bool get isDartUiIsolate => false;
@@ -109,6 +110,21 @@ class MLComputer extends SuperIsolate {
       return textEmbedding;
     } catch (e, s) {
       _logger.severe("Could not run clip text in isolate", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> warmUpClipTextEncoder() {
+    _clipTextWarmupFuture ??= _warmUpClipTextEncoderInternal();
+    return _clipTextWarmupFuture!;
+  }
+
+  Future<void> _warmUpClipTextEncoderInternal() async {
+    try {
+      await runClipText("warm up text encoder");
+    } catch (e, s) {
+      _clipTextWarmupFuture = null;
+      _logger.warning("Clip text warmup failed in MLComputer", e, s);
       rethrow;
     }
   }
