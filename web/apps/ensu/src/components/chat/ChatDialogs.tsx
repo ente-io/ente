@@ -2,14 +2,13 @@ import {
     ArrowRight01Icon,
     Bug01Icon,
     Cancel01Icon,
+    File01Icon,
     InformationCircleIcon,
     Key01Icon,
-    LegalDocument01Icon,
-    Login01Icon,
-    Logout01Icon,
     Settings01Icon,
-    Shield02Icon,
     SlidersHorizontalIcon,
+    Upload01Icon,
+    ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -348,7 +347,7 @@ export const ChatDialogs = memo(
                                         sx={settingsItemSx}
                                     >
                                         <HugeiconsIcon
-                                            icon={Login01Icon}
+                                            icon={Upload01Icon}
                                             {...compactIconProps}
                                         />
                                         <Typography
@@ -376,7 +375,7 @@ export const ChatDialogs = memo(
                                         ]}
                                     >
                                         <HugeiconsIcon
-                                            icon={Logout01Icon}
+                                            icon={Cancel01Icon}
                                             {...compactIconProps}
                                         />
                                         <Typography
@@ -402,7 +401,7 @@ export const ChatDialogs = memo(
                                     sx={settingsItemSx}
                                 >
                                     <HugeiconsIcon
-                                        icon={Shield02Icon}
+                                        icon={ViewIcon}
                                         {...compactIconProps}
                                     />
                                     <Typography
@@ -427,7 +426,7 @@ export const ChatDialogs = memo(
                                     sx={settingsItemSx}
                                 >
                                     <HugeiconsIcon
-                                        icon={LegalDocument01Icon}
+                                        icon={File01Icon}
                                         {...compactIconProps}
                                     />
                                     <Typography
