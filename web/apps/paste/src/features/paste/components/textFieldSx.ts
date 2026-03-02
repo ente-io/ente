@@ -1,32 +1,35 @@
+import type { PasteThemeTokens } from "../theme/pasteThemeTokens";
+
+type PasteTextFieldTokens = Pick<PasteThemeTokens, "accent" | "surface" | "text">;
+
 export const pasteTextFieldSx = (
+    tokens: PasteTextFieldTokens,
     radius = "16px",
-    bgColor = "#24262c",
-    borderColor = "rgba(255, 255, 255, 0.12)",
 ) => ({
     margin: 0,
     "& .MuiFilledInput-root": {
         borderRadius: radius,
-        bgcolor: bgColor,
+        bgcolor: tokens.surface.inputBg,
         border: "1px solid",
-        borderColor,
+        borderColor: tokens.surface.inputBorder,
         alignItems: "flex-start",
         boxSizing: "border-box",
-        color: "#f4f7ff",
+        color: tokens.text.primary,
         padding: "14px",
         transition: "border-color 180ms ease, box-shadow 180ms ease",
         "&:before": { display: "none" },
         "&:after": { display: "none" },
         "&:hover:not(.Mui-disabled, .Mui-error):before": { display: "none" },
-        "&:hover": { bgcolor: bgColor },
+        "&:hover": { bgcolor: tokens.surface.inputBg },
         "&.Mui-focused": {
-            bgcolor: bgColor,
-            borderColor: "#2f6df7",
-            boxShadow: "0 0 0 2px rgba(47, 109, 247, 0.24)",
+            bgcolor: tokens.surface.inputBg,
+            borderColor: tokens.accent.main,
+            boxShadow: `0 0 0 2px ${tokens.accent.soft}`,
         },
     },
     "& .MuiInputBase-input": {
         padding: "0 !important",
-        color: "#f4f7ff",
+        color: tokens.text.primary,
         fontSize: "1.02rem",
         lineHeight: 1.55,
     },
@@ -44,7 +47,7 @@ export const pasteTextFieldSx = (
         overflowY: "auto",
     },
     "& textarea::placeholder": {
-        color: "rgba(230, 236, 255, 0.42)",
+        color: tokens.text.placeholder,
         opacity: 1,
     },
 });

@@ -1,13 +1,15 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 
-const productLinkSx = (hoverColor: string) => ({
-    color: "rgba(230, 236, 255, 0.82)",
+const productLinkSx = (color: string, hoverColor: string) => ({
+    color,
     fontWeight: 700,
     fontSize: { xs: "0.74rem", sm: "0.8rem" },
     letterSpacing: "0.03em",
     textDecoration: "underline",
-    textDecorationColor: "rgba(230, 236, 255, 0.5)",
+    textDecorationColor: "currentColor",
     textUnderlineOffset: "3px",
     cursor: "pointer",
     whiteSpace: "nowrap",
@@ -19,81 +21,86 @@ const productLinkSx = (hoverColor: string) => ({
     },
 });
 
-export const PasteFooter = () => (
-    <Stack
-        alignItems="center"
-        spacing={1.1}
-    >
-        <Box
-            component="a"
-            href="https://ente.io"
-            target="_blank"
-            rel="noopener"
-            aria-label="Ente"
-            sx={{
-                lineHeight: 0,
-                color: "rgba(236, 243, 255, 0.92)",
-                transition: "color 180ms ease",
-                "&:hover": {
-                    color: "#08C225",
-                },
-            }}
-        >
-            <EnteLogo height={26} />
-        </Box>
+export const PasteFooter = () => {
+    const { resolvedMode } = usePasteColorMode();
+    const tokens = getPasteThemeTokens(resolvedMode);
 
+    return (
         <Stack
-            direction="row"
-            spacing={1}
             alignItems="center"
-            justifyContent="center"
-            flexWrap="nowrap"
+            spacing={1.1}
         >
-            <Typography
+            <Box
                 component="a"
                 href="https://ente.io"
                 target="_blank"
                 rel="noopener"
-                sx={productLinkSx("#08C225")}
-            >
-                Photos
-            </Typography>
-            <Box
-                component="span"
+                aria-label="Ente"
                 sx={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    bgcolor: "rgba(230, 236, 255, 0.52)",
+                    lineHeight: 0,
+                    color: tokens.text.footer,
+                    transition: "color 180ms ease",
+                    "&:hover": {
+                        color: "#08C225",
+                    },
                 }}
-            />
-            <Typography
-                component="a"
-                href="https://ente.io/locker"
-                target="_blank"
-                rel="noopener"
-                sx={productLinkSx("#076AE2")}
             >
-                Documents
-            </Typography>
-            <Box
-                component="span"
-                sx={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    bgcolor: "rgba(230, 236, 255, 0.52)",
-                }}
-            />
-            <Typography
-                component="a"
-                href="https://ente.io/auth"
-                target="_blank"
-                rel="noopener"
-                sx={productLinkSx("#A75CFF")}
+                <EnteLogo height={26} />
+            </Box>
+
+            <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                justifyContent="center"
+                flexWrap="nowrap"
             >
-                Auth
-            </Typography>
+                <Typography
+                    component="a"
+                    href="https://ente.io"
+                    target="_blank"
+                    rel="noopener"
+                    sx={productLinkSx(tokens.text.footer, "#08C225")}
+                >
+                    Photos
+                </Typography>
+                <Box
+                    component="span"
+                    sx={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: "50%",
+                        bgcolor: tokens.text.footerDot,
+                    }}
+                />
+                <Typography
+                    component="a"
+                    href="https://ente.io/locker"
+                    target="_blank"
+                    rel="noopener"
+                    sx={productLinkSx(tokens.text.footer, "#076AE2")}
+                >
+                    Documents
+                </Typography>
+                <Box
+                    component="span"
+                    sx={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: "50%",
+                        bgcolor: tokens.text.footerDot,
+                    }}
+                />
+                <Typography
+                    component="a"
+                    href="https://ente.io/auth"
+                    target="_blank"
+                    rel="noopener"
+                    sx={productLinkSx(tokens.text.footer, "#A75CFF")}
+                >
+                    Auth
+                </Typography>
+            </Stack>
         </Stack>
-    </Stack>
-);
+    );
+};

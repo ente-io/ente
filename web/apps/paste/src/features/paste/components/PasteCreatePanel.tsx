@@ -8,6 +8,8 @@ import {
     Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import { MAX_PASTE_CHARS } from "../constants";
 import { PasteLinkCard } from "./PasteLinkCard";
 import { pasteTextFieldSx } from "./textFieldSx";
@@ -34,15 +36,12 @@ export const PasteCreatePanel = ({
     onShareLink,
 }: PasteCreatePanelProps) => {
     const isMobile = useMediaQuery("(max-width:599.95px)", { noSsr: true });
+    const { resolvedMode } = usePasteColorMode();
+    const tokens = getPasteThemeTokens(resolvedMode);
     const isInputEmpty = inputText.trim().length === 0;
-    const frameBlue = "#2f6df7";
-    const inputGlassBg = "rgba(39, 42, 52, 0.76)";
-    const inputGlassBorder = "rgba(213, 225, 255, 0.14)";
     const nearLimitThreshold = Math.floor(MAX_PASTE_CHARS * 0.9);
     const isNearCharLimit = inputText.length >= nearLimitThreshold;
     const isCreateDisabled = isInputEmpty;
-    const mutedCounterColor = "rgba(234, 238, 255, 0.6)";
-    const softBlueCounterColor = "rgba(204, 224, 255, 0.96)";
     const privacyPills = [
         "Private",
         isMobile ? "E2EE" : "End To End Encrypted",
@@ -80,11 +79,7 @@ export const PasteCreatePanel = ({
                         onInputChange(event.target.value);
                     }}
                     sx={[
-                        pasteTextFieldSx(
-                            "20px",
-                            inputGlassBg,
-                            inputGlassBorder,
-                        ),
+                        pasteTextFieldSx(tokens, "20px"),
                         {
                             "& .MuiFilledInput-root": {
                                 paddingTop: { xs: "12px", sm: "14px" },
@@ -95,25 +90,19 @@ export const PasteCreatePanel = ({
                                 backdropFilter: "blur(9px) saturate(112%)",
                                 WebkitBackdropFilter:
                                     "blur(9px) saturate(112%)",
-                                background:
-                                    "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                boxShadow:
-                                    "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                background: tokens.surface.inputGradient,
+                                boxShadow: tokens.surface.inputShadow,
                                 "&:hover": {
-                                    bgcolor: inputGlassBg,
-                                    borderColor: inputGlassBorder,
-                                    background:
-                                        "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                    boxShadow:
-                                        "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                    bgcolor: tokens.surface.inputBg,
+                                    borderColor: tokens.surface.inputBorder,
+                                    background: tokens.surface.inputGradient,
+                                    boxShadow: tokens.surface.inputShadow,
                                 },
                                 "&.Mui-focused": {
-                                    bgcolor: inputGlassBg,
-                                    borderColor: inputGlassBorder,
-                                    background:
-                                        "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                    boxShadow:
-                                        "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                    bgcolor: tokens.surface.inputBg,
+                                    borderColor: tokens.surface.inputBorder,
+                                    background: tokens.surface.inputGradient,
+                                    boxShadow: tokens.surface.inputShadow,
                                 },
                             },
                             "& .MuiInputBase-input": {
@@ -143,7 +132,7 @@ export const PasteCreatePanel = ({
                             display: "flex",
                             alignItems: "center",
                             height: { xs: 32, sm: 36 },
-                            color: mutedCounterColor,
+                            color: tokens.text.counter,
                             fontWeight: 600,
                             lineHeight: 1,
                             letterSpacing: "0.01em",
@@ -153,13 +142,13 @@ export const PasteCreatePanel = ({
                             component="span"
                             sx={{
                                 color: isNearCharLimit
-                                    ? softBlueCounterColor
-                                    : mutedCounterColor,
+                                    ? tokens.text.counterHighlight
+                                    : tokens.text.counter,
                             }}
                         >
                             {inputText.length}
                         </Box>
-                        <Box component="span" sx={{ color: mutedCounterColor }}>
+                        <Box component="span" sx={{ color: tokens.text.counter }}>
                             /{MAX_PASTE_CHARS}
                         </Box>
                     </Typography>
@@ -178,20 +167,16 @@ export const PasteCreatePanel = ({
                             marginBottom: { xs: "3px", sm: "4px" },
                             marginRight: { xs: "-1px", sm: "-2px" },
                             borderRadius: { xs: "12px", sm: "14px" },
-                            bgcolor: frameBlue,
-                            color: "#f4f7ff",
+                            bgcolor: tokens.button.primaryBg,
+                            color: tokens.button.primaryText,
                             boxShadow: "none",
                             "&:hover": {
-                                bgcolor: frameBlue,
+                                bgcolor: tokens.button.primaryHoverBg,
                                 boxShadow: "none",
                             },
                             "&.Mui-disabled": {
-                                bgcolor: isCreateDisabled
-                                    ? "rgba(255, 255, 255, 0.18)"
-                                    : "rgba(47, 109, 247, 0.45)",
-                                color: isCreateDisabled
-                                    ? "rgba(230, 236, 255, 0.44)"
-                                    : "rgba(244, 247, 255, 0.72)",
+                                bgcolor: tokens.button.primaryDisabledBg,
+                                color: tokens.button.primaryDisabledText,
                             },
                         }}
                     >
@@ -199,7 +184,7 @@ export const PasteCreatePanel = ({
                             <CircularProgress
                                 size={17}
                                 thickness={5.2}
-                                sx={{ color: "rgba(244, 247, 255, 0.95)" }}
+                                sx={{ color: tokens.button.primaryText }}
                             />
                         ) : (
                             <Box
@@ -251,16 +236,15 @@ export const PasteCreatePanel = ({
                                 px: { xs: 1.2, sm: 1.4 },
                                 py: { xs: 0.45, sm: 0.6 },
                                 borderRadius: "999px",
-                                border: "1px solid rgba(147, 155, 177, 0.24)",
-                                bgcolor: "rgba(255, 255, 255, 0.045)",
-                                color: "rgba(220, 229, 255, 0.55)",
+                                border: `1px solid ${tokens.surface.chipBorder}`,
+                                bgcolor: tokens.surface.chipBg,
+                                color: tokens.surface.chipText,
                                 fontSize: { xs: "0.74rem", sm: "0.79rem" },
                                 fontWeight: 600,
                                 letterSpacing: "0.01em",
                                 lineHeight: 1.2,
                                 whiteSpace: "nowrap",
-                                boxShadow:
-                                    "inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+                                boxShadow: tokens.surface.chipInsetShadow,
                                 opacity: 0.78,
                             }}
                         >

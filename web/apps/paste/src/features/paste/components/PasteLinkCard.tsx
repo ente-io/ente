@@ -11,6 +11,8 @@ import {
     Typography,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
     parseArrowLottie,
@@ -36,12 +38,12 @@ export const PasteLinkCard = ({
     onCopy,
     onShare,
 }: PasteLinkCardProps) => {
-    const inputGlassBg = "rgba(39, 42, 52, 0.76)";
-    const inputGlassBorder = "rgba(213, 225, 255, 0.14)";
-    const inputGlassSurface =
-        "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)";
-    const inputGlassShadow =
-        "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)";
+    const { resolvedMode } = usePasteColorMode();
+    const tokens = getPasteThemeTokens(resolvedMode);
+    const inputGlassBg = tokens.surface.dialogBg;
+    const inputGlassBorder = tokens.surface.dialogBorder;
+    const inputGlassSurface = tokens.surface.inputGradient;
+    const inputGlassShadow = tokens.surface.inputShadow;
     const linkCardRef = useRef<HTMLDivElement | null>(null);
     const arrowSvgRef = useRef<SVGSVGElement | null>(null);
     const [arrow, setArrow] = useState<ParsedArrow | null>(null);
@@ -208,6 +210,7 @@ export const PasteLinkCard = ({
         handleCloseViewConfirm();
         window.open(link, "_blank", "noopener,noreferrer");
     };
+    const arrowStrokeColor = resolvedMode === "dark" ? "#ffffff" : null;
 
     return (
         <Stack
@@ -225,7 +228,7 @@ export const PasteLinkCard = ({
                     fontSize: "0.88rem",
                     fontWeight: 600,
                     letterSpacing: "0.01em",
-                    color: "rgba(220, 229, 255, 0.76)",
+                    color: tokens.text.secondary,
                     maxWidth: "100%",
                 }}
             >
@@ -256,11 +259,11 @@ export const PasteLinkCard = ({
                         px: { xs: 1.9, sm: 2.2 },
                         py: { xs: 1.05, sm: 1.2 },
                         borderRadius: "14px",
-                        border: "1px solid rgba(214, 226, 255, 0.16)",
-                        bgcolor: "rgba(255, 255, 255, 0.05)",
+                        border: `1px solid ${tokens.surface.linkRowBorder}`,
+                        bgcolor: tokens.surface.linkRowBg,
                         backdropFilter: "blur(8px) saturate(108%)",
                         WebkitBackdropFilter: "blur(8px) saturate(108%)",
-                        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+                        boxShadow: tokens.surface.linkRowInsetShadow,
                         overflow: "hidden",
                     }}
                 >
@@ -283,7 +286,7 @@ export const PasteLinkCard = ({
                             maxWidth: "100%",
                             gap: 0.9,
                             minWidth: 0,
-                            color: "rgba(244, 247, 255, 0.9)",
+                            color: tokens.text.primary,
                             textDecoration: "none",
                             fontSize: { xs: "0.9rem", sm: "0.93rem" },
                             lineHeight: 1.4,
@@ -291,7 +294,7 @@ export const PasteLinkCard = ({
                             overflow: "hidden",
                             "&:hover": {
                                 textDecoration: "underline",
-                                color: "rgba(244, 247, 255, 1)",
+                                color: tokens.text.primary,
                             },
                         }}
                     >
@@ -358,7 +361,7 @@ export const PasteLinkCard = ({
                                         key={`${path.d}-mobile-${idx}`}
                                         d={path.d}
                                         fill="none"
-                                        stroke={path.color}
+                                        stroke={arrowStrokeColor ?? path.color}
                                         strokeWidth={
                                             path.width * path.strokeScale
                                         }
@@ -425,7 +428,7 @@ export const PasteLinkCard = ({
                                         data-arrow-index={idx}
                                         d={path.d}
                                         fill="none"
-                                        stroke={path.color}
+                                        stroke={arrowStrokeColor ?? path.color}
                                         strokeWidth={
                                             path.width * path.strokeScale
                                         }
@@ -468,19 +471,19 @@ export const PasteLinkCard = ({
                                 width: { xs: 36, sm: 40 },
                                 height: { xs: 36, sm: 40 },
                                 borderRadius: "11px",
-                                border: "1px solid rgba(244, 247, 255, 0.35)",
+                                border: `1px solid ${tokens.button.qrToggleBorder}`,
                                 bgcolor: showQr
-                                    ? "rgba(244, 247, 255, 0.22)"
-                                    : "rgba(244, 247, 255, 0.12)",
-                                color: "#f4f7ff",
+                                    ? tokens.button.qrToggleActiveBg
+                                    : tokens.button.qrToggleBg,
+                                color: tokens.button.qrToggleText,
                                 transform: {
                                     xs: "translateY(4px) rotate(-4deg)",
                                     sm: "translateY(74px) rotate(-4deg)",
                                 },
                                 "&:hover": {
                                     bgcolor: showQr
-                                        ? "rgba(244, 247, 255, 0.28)"
-                                        : "rgba(244, 247, 255, 0.18)",
+                                        ? tokens.button.qrToggleActiveHoverBg
+                                        : tokens.button.qrToggleHoverBg,
                                 },
                             }}
                         >
@@ -497,7 +500,7 @@ export const PasteLinkCard = ({
                                 fontFamily:
                                     '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
                                 fontSize: { xs: "2rem", sm: "2.5rem" },
-                                color: "#2f6df7",
+                                color: tokens.button.scriptLink,
                                 background: "none",
                                 border: "none",
                                 p: 0,
@@ -511,7 +514,7 @@ export const PasteLinkCard = ({
                                     sm: "translateY(68px) rotate(-4deg)",
                                 },
                                 "&:hover": {
-                                    color: "#5d92ff",
+                                    color: tokens.button.scriptLinkHover,
                                     textDecoration: "underline",
                                     textUnderlineOffset: "3px",
                                 },
@@ -539,7 +542,7 @@ export const PasteLinkCard = ({
                                     fontFamily:
                                         '"Gochi Hand", "Comic Sans MS", "Bradley Hand", cursive',
                                     fontSize: { xs: "2rem", sm: "2.5rem" },
-                                    color: "#2f6df7",
+                                    color: tokens.button.scriptLink,
                                     background: "none",
                                     border: "none",
                                     p: 0,
@@ -549,7 +552,7 @@ export const PasteLinkCard = ({
                                     textDecoration: "underline",
                                     textUnderlineOffset: "3px",
                                     "&:hover": {
-                                        color: "#5d92ff",
+                                        color: tokens.button.scriptLinkHover,
                                         textDecoration: "underline",
                                         textUnderlineOffset: "3px",
                                     },
@@ -568,7 +571,7 @@ export const PasteLinkCard = ({
                                     transform: "translateX(-50%)",
                                     mt: 0.5,
                                     whiteSpace: "nowrap",
-                                    color: "rgba(182, 190, 208, 0.9)",
+                                    color: tokens.text.copied,
                                     fontSize: "0.94rem",
                                     fontWeight: 600,
                                     lineHeight: 1,
@@ -591,9 +594,9 @@ export const PasteLinkCard = ({
                                 zIndex: 1300,
                                 p: 0.95,
                                 borderRadius: "14px",
-                                border: "1px solid rgba(47, 109, 247, 0.4)",
-                                bgcolor: "rgba(47, 109, 247, 0.14)",
-                                boxShadow: "0 10px 24px rgba(0, 0, 0, 0.22)",
+                                border: `1px solid ${tokens.surface.floatingCardBorder}`,
+                                bgcolor: tokens.accent.soft,
+                                boxShadow: tokens.surface.floatingCardShadow,
                                 backdropFilter: "blur(8px) saturate(106%)",
                                 WebkitBackdropFilter:
                                     "blur(8px) saturate(106%)",
@@ -609,7 +612,7 @@ export const PasteLinkCard = ({
                                     width: { xs: 144, sm: 168, md: 184 },
                                     height: { xs: 144, sm: 168, md: 184 },
                                     borderRadius: "10px",
-                                    bgcolor: "#fff",
+                                    bgcolor: tokens.qr.paperBg,
                                     p: 1,
                                 }}
                             >
@@ -623,8 +626,8 @@ export const PasteLinkCard = ({
                                         rx={module.finder ? 0.08 : 0.34}
                                         fill={
                                             module.finder
-                                                ? "#1d3d9f"
-                                                : "#2f6df7"
+                                                ? tokens.qr.finder
+                                                : tokens.qr.module
                                         }
                                     />
                                 ))}
@@ -640,7 +643,7 @@ export const PasteLinkCard = ({
                     slotProps={{
                         backdrop: {
                             sx: {
-                                bgcolor: "rgba(5, 10, 24, 0.74)",
+                                bgcolor: tokens.surface.dialogBackdrop,
                                 backdropFilter: "blur(2px)",
                             },
                         },
@@ -671,7 +674,7 @@ export const PasteLinkCard = ({
                                 position: "absolute",
                                 top: 10,
                                 right: 10,
-                                color: "rgba(225, 233, 255, 0.86)",
+                                color: tokens.text.secondary,
                             }}
                         >
                             <CloseRoundedIcon fontSize="small" />
@@ -689,7 +692,7 @@ export const PasteLinkCard = ({
                         </Typography>
                         <Typography
                             sx={{
-                                color: "rgba(244, 247, 255, 0.95)",
+                                color: tokens.text.primary,
                                 fontWeight: 700,
                                 fontSize: { xs: "1rem", sm: "1.06rem" },
                                 lineHeight: 1.3,
@@ -701,7 +704,7 @@ export const PasteLinkCard = ({
                         <Typography
                             sx={{
                                 mt: 1,
-                                color: "rgba(220, 229, 255, 0.82)",
+                                color: tokens.text.dialogBody,
                                 fontSize: { xs: "0.88rem", sm: "0.91rem" },
                                 lineHeight: 1.5,
                                 textAlign: "center",
@@ -727,12 +730,12 @@ export const PasteLinkCard = ({
                                     py: 0.58,
                                     px: 1.5,
                                     borderRadius: "10px",
-                                    borderColor: "rgba(214, 226, 255, 0.28)",
-                                    color: "rgba(236, 242, 255, 0.95)",
+                                    borderColor: tokens.button.ghostBorder,
+                                    color: tokens.button.ghostText,
                                     "&:hover": {
                                         borderColor:
-                                            "rgba(214, 226, 255, 0.44)",
-                                        bgcolor: "rgba(255, 255, 255, 0.06)",
+                                            tokens.button.ghostHoverBorder,
+                                        bgcolor: tokens.button.ghostHoverBg,
                                     },
                                 }}
                                 variant="outlined"
@@ -750,12 +753,11 @@ export const PasteLinkCard = ({
                                     py: 0.58,
                                     px: 1.5,
                                     borderRadius: "10px",
-                                    bgcolor: "#2f6df7",
-                                    color: "#f4f7ff",
-                                    boxShadow:
-                                        "0 2px 8px rgba(47, 109, 247, 0.2)",
+                                    bgcolor: tokens.button.primaryBg,
+                                    color: tokens.button.primaryText,
+                                    boxShadow: "0 2px 8px rgba(47, 109, 247, 0.2)",
                                     "&:hover": {
-                                        bgcolor: "#4c86ff",
+                                        bgcolor: tokens.button.primaryHoverBg,
                                         boxShadow:
                                             "0 3px 10px rgba(47, 109, 247, 0.24)",
                                     },
@@ -777,7 +779,7 @@ export const PasteLinkCard = ({
                         slotProps={{
                             backdrop: {
                                 sx: {
-                                    bgcolor: "rgba(5, 10, 24, 0.72)",
+                                    bgcolor: tokens.surface.qrBackdropMobile,
                                     backdropFilter: "blur(2px)",
                                 },
                             },
@@ -785,10 +787,9 @@ export const PasteLinkCard = ({
                                 sx: {
                                     m: 2,
                                     borderRadius: "18px",
-                                    border: "1px solid rgba(47, 109, 247, 0.44)",
-                                    bgcolor: "rgba(9, 18, 48, 0.9)",
-                                    boxShadow:
-                                        "0 16px 40px rgba(0, 0, 0, 0.42)",
+                                    border: `1px solid ${tokens.surface.floatingCardBorder}`,
+                                    bgcolor: tokens.surface.floatingCardBg,
+                                    boxShadow: tokens.surface.floatingCardShadow,
                                 },
                             },
                         }}
@@ -804,7 +805,7 @@ export const PasteLinkCard = ({
                                     width: 226,
                                     height: 226,
                                     borderRadius: "12px",
-                                    bgcolor: "#fff",
+                                    bgcolor: tokens.qr.mobilePaperBg,
                                     p: 1.1,
                                 }}
                             >
@@ -818,8 +819,8 @@ export const PasteLinkCard = ({
                                         rx={module.finder ? 0.08 : 0.34}
                                         fill={
                                             module.finder
-                                                ? "#1d3d9f"
-                                                : "#2f6df7"
+                                                ? tokens.qr.finder
+                                                : tokens.qr.module
                                         }
                                     />
                                 ))}

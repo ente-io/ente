@@ -9,6 +9,8 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
+import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
 import { pasteTextFieldSx } from "./textFieldSx";
 
 interface PasteViewPanelProps {
@@ -24,9 +26,8 @@ export const PasteViewPanel = ({
     resolvedText,
     onCopyText,
 }: PasteViewPanelProps) => {
-    const frameBlue = "#2f6df7";
-    const inputGlassBg = "rgba(39, 42, 52, 0.76)";
-    const inputGlassBorder = "rgba(213, 225, 255, 0.14)";
+    const { resolvedMode } = usePasteColorMode();
+    const tokens = getPasteThemeTokens(resolvedMode);
 
     return (
         <>
@@ -44,13 +45,13 @@ export const PasteViewPanel = ({
                         size={58}
                         thickness={4.5}
                         sx={{
-                            color: "rgba(176, 198, 234, 0.76)",
+                            color: tokens.status.spinner,
                             mb: { xs: 0.7, md: 0.9 },
                         }}
                     />
                     <Typography
                         sx={{
-                            color: "rgba(201, 212, 236, 0.66)",
+                            color: tokens.status.loadingTitle,
                             fontWeight: 600,
                             fontSize: { xs: "1rem", md: "1.1rem" },
                             lineHeight: 1.2,
@@ -63,7 +64,7 @@ export const PasteViewPanel = ({
                     <Typography
                         variant="mini"
                         sx={{
-                            color: "rgba(188, 201, 230, 0.44)",
+                            color: tokens.status.loadingBody,
                             fontWeight: 500,
                             textAlign: "center",
                         }}
@@ -87,13 +88,13 @@ export const PasteViewPanel = ({
                         icon={Alert02Icon}
                         size={56}
                         strokeWidth={2}
-                        style={{ color: "rgba(180, 198, 232, 0.76)" }}
+                        style={{ color: tokens.status.errorIcon }}
                     />
                     <Stack spacing={{ xs: 2.2, md: 2.6 }} alignItems="center">
                         <Typography
                             sx={{
                                 maxWidth: 560,
-                                color: "rgba(186, 201, 232, 0.46)",
+                                color: tokens.status.errorBody,
                                 fontWeight: 500,
                                 fontSize: { xs: "0.85rem", md: "0.92rem" },
                                 lineHeight: 1.3,
@@ -116,10 +117,10 @@ export const PasteViewPanel = ({
                                 fontWeight: 600,
                                 fontSize: "1rem",
                                 lineHeight: 1,
-                                bgcolor: frameBlue,
-                                color: "rgba(231, 238, 252, 0.9)",
+                                bgcolor: tokens.button.primaryBg,
+                                color: tokens.button.primaryText,
                                 "&:hover": {
-                                    bgcolor: frameBlue,
+                                    bgcolor: tokens.button.primaryHoverBg,
                                     boxShadow: "none",
                                 },
                             }}
@@ -130,12 +131,12 @@ export const PasteViewPanel = ({
                 </Stack>
             )}
 
-            {!resolvedText && (
+            {resolvedText && (
                 <Stack spacing={1.8}>
                     <Typography
                         sx={{
                             fontSize: "0.82rem",
-                            color: "rgba(186, 201, 232, 0.56)",
+                            color: tokens.text.muted,
                             fontWeight: 600,
                             letterSpacing: "0.01em",
                         }}
@@ -159,11 +160,7 @@ export const PasteViewPanel = ({
                                 },
                             }}
                             sx={[
-                                pasteTextFieldSx(
-                                    "20px",
-                                    inputGlassBg,
-                                    inputGlassBorder,
-                                ),
+                                pasteTextFieldSx(tokens, "20px"),
                                 {
                                     "& .MuiFilledInput-root": {
                                         paddingBottom: "72px",
@@ -173,25 +170,19 @@ export const PasteViewPanel = ({
                                             "blur(9px) saturate(112%)",
                                         WebkitBackdropFilter:
                                             "blur(9px) saturate(112%)",
-                                        background:
-                                            "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                        boxShadow:
-                                            "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                        background: tokens.surface.inputGradient,
+                                        boxShadow: tokens.surface.inputShadow,
                                         "&:hover": {
-                                            bgcolor: inputGlassBg,
-                                            borderColor: inputGlassBorder,
-                                            background:
-                                                "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                            boxShadow:
-                                                "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                            bgcolor: tokens.surface.inputBg,
+                                            borderColor: tokens.surface.inputBorder,
+                                            background: tokens.surface.inputGradient,
+                                            boxShadow: tokens.surface.inputShadow,
                                         },
                                         "&.Mui-focused": {
-                                            bgcolor: inputGlassBg,
-                                            borderColor: inputGlassBorder,
-                                            background:
-                                                "linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 58%, rgba(255, 255, 255, 0.015) 100%)",
-                                            boxShadow:
-                                                "0 12px 28px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                            bgcolor: tokens.surface.inputBg,
+                                            borderColor: tokens.surface.inputBorder,
+                                            background: tokens.surface.inputGradient,
+                                            boxShadow: tokens.surface.inputShadow,
                                         },
                                     },
                                 },
@@ -215,9 +206,6 @@ export const PasteViewPanel = ({
                                 size="small"
                                 disableElevation
                                 onClick={() => {
-                                    if (resolvedText === null) {
-                                        return;
-                                    }
                                     void onCopyText(resolvedText).catch(() => {
                                         // Ignore errors to avoid unhandled rejections in click handlers.
                                     });
@@ -235,12 +223,12 @@ export const PasteViewPanel = ({
                                     textTransform: "none",
                                     fontWeight: 600,
                                     fontSize: "0.78rem",
-                                    bgcolor: frameBlue,
-                                    color: "rgba(231, 238, 252, 0.9)",
+                                    bgcolor: tokens.button.primaryBg,
+                                    color: tokens.button.primaryText,
                                     boxShadow: "none",
                                     "& .MuiButton-startIcon": { mr: 0.6 },
                                     "&:hover": {
-                                        bgcolor: frameBlue,
+                                        bgcolor: tokens.button.primaryHoverBg,
                                         boxShadow: "none",
                                     },
                                 }}
@@ -252,7 +240,7 @@ export const PasteViewPanel = ({
                     <Typography
                         variant="mini"
                         sx={{
-                            color: "rgba(182, 197, 229, 0.44)",
+                            color: tokens.status.deletedNote,
                             fontWeight: 500,
                         }}
                     >
