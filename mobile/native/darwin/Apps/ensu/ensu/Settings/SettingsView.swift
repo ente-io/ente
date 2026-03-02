@@ -110,7 +110,7 @@ struct SettingsView: View {
     private var aboutItem: SettingsActionItem {
         SettingsActionItem(
             title: "About",
-            iconName: "Settings01Icon",
+            iconName: "InformationCircleIcon",
             action: { openExternalLink("https://ente.io/blog/ensu/") }
         )
     }
