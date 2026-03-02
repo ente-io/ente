@@ -1,6 +1,5 @@
 import {
     ArrowLeft01Icon,
-    ArrowReloadHorizontalIcon,
     ArrowRight01Icon,
     Cancel01Icon,
     Delete01Icon,
@@ -11,7 +10,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
     Box,
     Button,
-    Divider,
     IconButton,
     InputBase,
     List,
@@ -21,7 +19,6 @@ import {
     Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import HoverRiveLogo from "components/chat/HoverRiveLogo";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import React, { memo } from "react";
 import type { ChatSession } from "services/chat/store";
@@ -48,9 +45,7 @@ export interface ChatSidebarProps {
     handleSelectSession: (sessionId: string) => void;
     requestDeleteSession: (sessionId: string) => void;
     isLoggedIn: boolean;
-    syncNow: (options?: { showToast?: boolean }) => Promise<void>;
     openSettingsModal: () => void;
-    appIconSrc: string;
 }
 
 export const ChatSidebar = memo(
@@ -74,9 +69,7 @@ export const ChatSidebar = memo(
         handleSelectSession,
         requestDeleteSession,
         isLoggedIn,
-        syncNow,
         openSettingsModal,
-        appIconSrc,
     }: ChatSidebarProps) => (
         <Stack
             sx={{
@@ -85,124 +78,6 @@ export const ChatSidebar = memo(
                 bgcolor: "background.default",
             }}
         >
-            <Box
-                sx={{
-                    px: 2.5,
-                    height: 64,
-                    minHeight: 64,
-                    display: "flex",
-                    alignItems: "center",
-                }}
-            >
-                <Stack
-                    direction="row"
-                    sx={{ gap: 1, alignItems: "center", width: "100%" }}
-                >
-                    <Stack sx={{ flex: 1, gap: 1 }}>
-                        <Typography
-                            component="button"
-                            onClick={handleNewChat}
-                            variant="h2"
-                            aria-label="New chat"
-                            sx={{
-                                fontFamily: "inherit",
-                                fontWeight: 600,
-                                letterSpacing: "1px",
-                                textTransform: "lowercase",
-                                border: "none",
-                                padding: 0,
-                                background: "transparent",
-                                cursor: "pointer",
-                                color: "inherit",
-                                textAlign: "left",
-                                alignSelf: "flex-start",
-                                userSelect: "none",
-                                WebkitUserSelect: "none",
-                                MozUserSelect: "none",
-                                msUserSelect: "none",
-                                outline: "none",
-                                lineHeight: 1,
-                                display: "inline-flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            <HoverRiveLogo
-                                staticSrc={appIconSrc}
-                                alt="Ensu"
-                                sizePx={28}
-                            />
-                        </Typography>
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        sx={{ gap: 0.75, alignItems: "center" }}
-                    >
-                        {isLoggedIn && (
-                            <Button
-                                onClick={() => {
-                                    void syncNow({ showToast: true });
-                                }}
-                                variant="outlined"
-                                startIcon={
-                                    <HugeiconsIcon
-                                        icon={ArrowReloadHorizontalIcon}
-                                        {...tinyIconProps}
-                                    />
-                                }
-                                sx={{
-                                    height: 36,
-                                    minHeight: 36,
-                                    px: 1.5,
-                                    textTransform: "none",
-                                    fontWeight: 600,
-                                    fontSize: "12px",
-                                    whiteSpace: "nowrap",
-                                    borderRadius: 2,
-                                    borderColor: "divider",
-                                    color: "text.base",
-                                    bgcolor: "fill.faint",
-                                    flexWrap: "nowrap",
-                                    "& .MuiButton-startIcon": {
-                                        marginRight: 0.5,
-                                        marginLeft: 0,
-                                    },
-                                    "&:hover": {
-                                        bgcolor: "fill.faintHover",
-                                        borderColor: "divider",
-                                    },
-                                }}
-                            >
-                                Sync
-                            </Button>
-                        )}
-                        <IconButton
-                            aria-label={
-                                drawerCollapsed
-                                    ? "Expand drawer"
-                                    : "Collapse drawer"
-                            }
-                            sx={drawerIconButtonSx}
-                            onClick={
-                                drawerCollapsed
-                                    ? handleOpenDrawer
-                                    : handleCollapseDrawer
-                            }
-                        >
-                            <HugeiconsIcon
-                                icon={
-                                    drawerCollapsed
-                                        ? ArrowRight01Icon
-                                        : ArrowLeft01Icon
-                                }
-                                {...smallIconProps}
-                            />
-                        </IconButton>
-                    </Stack>
-                </Stack>
-            </Box>
-
-            <Divider />
-
             <List
                 sx={{
                     flex: 1,
@@ -281,6 +156,28 @@ export const ChatSidebar = memo(
                                     {...tinyIconProps}
                                 />
                             </IconButton>
+                            <IconButton
+                                aria-label={
+                                    drawerCollapsed
+                                        ? "Expand drawer"
+                                        : "Collapse drawer"
+                                }
+                                sx={drawerIconButtonSx}
+                                onClick={
+                                    drawerCollapsed
+                                        ? handleOpenDrawer
+                                        : handleCollapseDrawer
+                                }
+                            >
+                                <HugeiconsIcon
+                                    icon={
+                                        drawerCollapsed
+                                            ? ArrowRight01Icon
+                                            : ArrowLeft01Icon
+                                    }
+                                    {...smallIconProps}
+                                />
+                            </IconButton>
                         </>
                     ) : (
                         <>
@@ -345,6 +242,28 @@ export const ChatSidebar = memo(
                                     />
                                 </IconButton>
                             </Tooltip>
+                            <IconButton
+                                aria-label={
+                                    drawerCollapsed
+                                        ? "Expand drawer"
+                                        : "Collapse drawer"
+                                }
+                                sx={drawerIconButtonSx}
+                                onClick={
+                                    drawerCollapsed
+                                        ? handleOpenDrawer
+                                        : handleCollapseDrawer
+                                }
+                            >
+                                <HugeiconsIcon
+                                    icon={
+                                        drawerCollapsed
+                                            ? ArrowRight01Icon
+                                            : ArrowLeft01Icon
+                                    }
+                                    {...smallIconProps}
+                                />
+                            </IconButton>
                         </>
                     )}
                 </Stack>
