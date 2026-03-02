@@ -8,6 +8,28 @@ use crate::ml::{
     onnx,
 };
 
+/// Log to Android logcat or stderr.
+fn rt_log(msg: &str) {
+    #[cfg(target_os = "android")]
+    {
+        unsafe extern "C" {
+            unsafe fn __android_log_write(
+                prio: std::ffi::c_int,
+                tag: *const std::ffi::c_char,
+                text: *const std::ffi::c_char,
+            ) -> std::ffi::c_int;
+        }
+        use std::ffi::CString;
+        let tag = CString::new("ml_rt").unwrap();
+        let cmsg = CString::new(msg).unwrap_or_else(|_| CString::new("(invalid)").unwrap());
+        unsafe { __android_log_write(4, tag.as_ptr(), cmsg.as_ptr()); }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        eprintln!("[ml][rt] {msg}");
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ExecutionProviderPolicy {
     pub prefer_coreml: bool,
@@ -32,6 +54,12 @@ pub struct ModelPaths {
     pub face_detection: String,
     pub face_embedding: String,
     pub clip_image: String,
+    pub pet_face_detection: String,
+    pub pet_face_embedding_dog: String,
+    pub pet_face_embedding_cat: String,
+    pub pet_body_detection: String,
+    pub pet_body_embedding_dog: String,
+    pub pet_body_embedding_cat: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,10 +69,75 @@ pub struct MlRuntimeConfig {
 }
 
 #[derive(Debug)]
+struct LazySession {
+    path: String,
+    policy: ExecutionProviderPolicy,
+    session: Option<Session>,
+}
+
+impl LazySession {
+    fn new(path: String, policy: ExecutionProviderPolicy) -> Self {
+        Self {
+            path,
+            policy,
+            session: None,
+        }
+    }
+
+    fn get_mut(&mut self, error_msg: &str) -> MlResult<&mut Session> {
+        if self.path.trim().is_empty() {
+            return Err(MlError::InvalidRequest(error_msg.to_string()));
+        }
+        if self.session.is_none() {
+            let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
+            rt_log(&format!("loading {model_name}"));
+            let t = std::time::Instant::now();
+            // Lazy sessions load while the runtime mutex is held (inside func()),
+            // so the with_runtime_mut_inner EP fallback cannot catch hangs or OOM
+            // during session building. Use CPU-friendly policy to avoid NNAPI/CoreML
+            // driver issues (e.g. NNAPI on some MTK devices hangs or OOMs even when
+            // it only accelerates <1% of graph nodes).
+            let load_policy = ExecutionProviderPolicy {
+                prefer_coreml: false,
+                prefer_nnapi: false,
+                prefer_xnnpack: self.policy.prefer_xnnpack,
+                allow_cpu_fallback: true,
+            };
+            self.session = Some(onnx::build_session(&self.path, &load_policy)?);
+            rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
+        }
+        Ok(self.session.as_mut().unwrap())
+    }
+
+    fn unload(&mut self) {
+        if self.session.is_some() {
+            let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
+            rt_log(&format!("unloading {model_name}"));
+        }
+        self.session = None;
+        #[cfg(target_os = "android")]
+        unsafe {
+            let name = b"malloc_trim\0";
+            let sym = libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast());
+            if !sym.is_null() {
+                let f: unsafe extern "C" fn(usize) -> i32 = core::mem::transmute(sym);
+                f(0);
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct MlRuntime {
-    face_detection: Option<Session>,
-    face_embedding: Option<Session>,
-    clip_image: Option<Session>,
+    face_detection: LazySession,
+    face_embedding: LazySession,
+    clip_image: LazySession,
+    pet_face_detection: LazySession,
+    pet_face_embedding_dog: LazySession,
+    pet_face_embedding_cat: LazySession,
+    pet_body_detection: LazySession,
+    pet_body_embedding_dog: LazySession,
+    pet_body_embedding_cat: LazySession,
 }
 
 #[derive(Debug)]
@@ -55,56 +148,99 @@ struct RuntimeState {
 
 static GLOBAL_RUNTIME: Lazy<Mutex<Option<RuntimeState>>> = Lazy::new(|| Mutex::new(None));
 
-fn create_runtime(config: &MlRuntimeConfig) -> MlResult<MlRuntime> {
-    let face_detection =
-        build_optional_session(&config.model_paths.face_detection, &config.provider_policy)?;
-    let face_embedding =
-        build_optional_session(&config.model_paths.face_embedding, &config.provider_policy)?;
-    let clip_image =
-        build_optional_session(&config.model_paths.clip_image, &config.provider_policy)?;
-    Ok(MlRuntime {
-        face_detection,
-        face_embedding,
-        clip_image,
-    })
-}
-
-fn build_optional_session(
-    model_path: &str,
-    provider_policy: &ExecutionProviderPolicy,
-) -> MlResult<Option<Session>> {
-    if model_path.trim().is_empty() {
-        return Ok(None);
+fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
+    let p = &config.provider_policy;
+    MlRuntime {
+        face_detection: LazySession::new(config.model_paths.face_detection.clone(), p.clone()),
+        face_embedding: LazySession::new(config.model_paths.face_embedding.clone(), p.clone()),
+        clip_image: LazySession::new(config.model_paths.clip_image.clone(), p.clone()),
+        pet_face_detection: LazySession::new(config.model_paths.pet_face_detection.clone(), p.clone()),
+        pet_face_embedding_dog: LazySession::new(config.model_paths.pet_face_embedding_dog.clone(), p.clone()),
+        pet_face_embedding_cat: LazySession::new(config.model_paths.pet_face_embedding_cat.clone(), p.clone()),
+        pet_body_detection: LazySession::new(config.model_paths.pet_body_detection.clone(), p.clone()),
+        pet_body_embedding_dog: LazySession::new(config.model_paths.pet_body_embedding_dog.clone(), p.clone()),
+        pet_body_embedding_cat: LazySession::new(config.model_paths.pet_body_embedding_cat.clone(), p.clone()),
     }
-    Ok(Some(onnx::build_session(model_path, provider_policy)?))
 }
 
 impl MlRuntime {
     pub fn face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_detection.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: faceDetectionModelPath is required when runFaces is true"
-                    .to_string(),
-            )
-        })
+        self.face_detection.get_mut(
+            "missing model path: faceDetectionModelPath is required when runFaces is true",
+        )
     }
 
     pub fn face_embedding_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_embedding.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: faceEmbeddingModelPath is required when runFaces is true"
-                    .to_string(),
-            )
-        })
+        self.face_embedding.get_mut(
+            "missing model path: faceEmbeddingModelPath is required when runFaces is true",
+        )
     }
 
     pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_image.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: clipImageModelPath is required when runClip is true"
-                    .to_string(),
-            )
-        })
+        self.clip_image.get_mut(
+            "missing model path: clipImageModelPath is required when runClip is true",
+        )
+    }
+
+    pub fn pet_face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_face_detection.get_mut(
+            "missing model path: petFaceDetectionModelPath is required when runPets is true",
+        )
+    }
+
+    pub fn pet_face_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_face_embedding_dog
+            .get_mut("missing model path: petFaceEmbeddingDogModelPath is required")
+    }
+
+    pub fn pet_face_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_face_embedding_cat
+            .get_mut("missing model path: petFaceEmbeddingCatModelPath is required")
+    }
+
+    pub fn pet_body_detection_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_body_detection.get_mut(
+            "missing model path: petBodyDetectionModelPath is required when runPets is true",
+        )
+    }
+
+    pub fn pet_body_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_body_embedding_dog
+            .get_mut("missing model path: petBodyEmbeddingDogModelPath is required")
+    }
+
+    pub fn pet_body_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_body_embedding_cat
+            .get_mut("missing model path: petBodyEmbeddingCatModelPath is required")
+    }
+
+    /// Drop loaded face sessions to free native memory between analysis phases.
+    pub fn unload_face_sessions(&mut self) {
+        self.face_detection.unload();
+        self.face_embedding.unload();
+    }
+
+    /// Drop the loaded CLIP session to free native memory between analysis phases.
+    pub fn unload_clip_session(&mut self) {
+        self.clip_image.unload();
+    }
+
+    /// Drop loaded pet detection sessions to free native memory between analysis phases.
+    pub fn unload_pet_detection_sessions(&mut self) {
+        self.pet_face_detection.unload();
+        self.pet_body_detection.unload();
+    }
+
+    /// Drop loaded pet face embedding sessions to free native memory between analysis phases.
+    pub fn unload_pet_face_embedding_sessions(&mut self) {
+        self.pet_face_embedding_dog.unload();
+        self.pet_face_embedding_cat.unload();
+    }
+
+    /// Drop loaded pet body embedding sessions to free native memory between analysis phases.
+    pub fn unload_pet_body_embedding_sessions(&mut self) {
+        self.pet_body_embedding_dog.unload();
+        self.pet_body_embedding_cat.unload();
     }
 }
 
@@ -130,7 +266,7 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     };
 
     if should_rebuild {
-        let runtime = create_runtime(config)?;
+        let runtime = create_runtime(config);
         let mut guard = lock_runtime();
         *guard = Some(RuntimeState {
             config: config.clone(),
@@ -169,9 +305,7 @@ where
             }
 
             let fallback_config = cpu_only_runtime_config(config);
-            eprintln!(
-                "[ml][runtime] execution provider failed, retrying with CPU-only runtime: {first_error}"
-            );
+            rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
             ensure_runtime(&fallback_config)?;
             let retry_result = {
                 let mut guard = lock_runtime();
