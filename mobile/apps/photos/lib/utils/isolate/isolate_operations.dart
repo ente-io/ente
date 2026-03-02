@@ -1,4 +1,4 @@
-import 'dart:typed_data' show Float32List, Int32List, Uint8List;
+import 'dart:typed_data' show Float32List, Uint8List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
@@ -219,11 +219,18 @@ Future<dynamic> isolateFunction(
         );
       }
 
-      final tokenIds = await ClipTextTokenizer.instance.tokenize(text);
+      final clipTextVocabPath = args["clipTextVocabPath"] as String?;
+      if (clipTextVocabPath == null || clipTextVocabPath.trim().isEmpty) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
+        );
+      }
+
       final result = await rust_ml.runClipTextRust(
         req: rust_ml.RunClipTextRequest(
-          tokenIds: Int32List.fromList(tokenIds),
+          text: text,
           modelPath: clipTextModelPath,
+          vocabPath: clipTextVocabPath,
           providerPolicy: rust_ml.RustExecutionProviderPolicy(
             preferCoreml: args["preferCoreml"] as bool? ?? true,
             preferNnapi: args["preferNnapi"] as bool? ?? true,

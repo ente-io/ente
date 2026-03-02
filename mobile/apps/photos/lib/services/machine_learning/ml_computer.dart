@@ -24,6 +24,7 @@ class MLComputer extends SuperIsolate {
   final _initModelLock = Lock();
   bool _isClipTokenizerInitialized = false;
   String? _clipTextModelPath;
+  String? _clipTextVocabPath;
 
   @override
   bool get isDartUiIsolate => false;
@@ -80,9 +81,15 @@ class MLComputer extends SuperIsolate {
       final useRustMl = _shouldUseRustMl;
       await _ensureLoadedClipTextModel(useRustMl);
       final modelPath = _clipTextModelPath;
+      final vocabPath = _clipTextVocabPath;
       if (useRustMl && (modelPath == null || modelPath.trim().isEmpty)) {
         throw Exception(
           "RustMLMissingModelPath: Missing required model path: clipTextModelPath",
+        );
+      }
+      if (useRustMl && (vocabPath == null || vocabPath.trim().isEmpty)) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
         );
       }
       final textEmbedding = await runInIsolate(IsolateOperation.runClipText, {
@@ -90,6 +97,7 @@ class MLComputer extends SuperIsolate {
         "useRustMl": useRustMl,
         if (useRustMl) ...{
           "clipTextModelPath": modelPath,
+          "clipTextVocabPath": vocabPath,
           "preferCoreml": Platform.isIOS,
           "preferNnapi": Platform.isAndroid,
           "preferXnnpack": Platform.isAndroid,
@@ -108,26 +116,32 @@ class MLComputer extends SuperIsolate {
   Future<void> _ensureLoadedClipTextModel(bool useRustMl) async {
     return _initModelLock.synchronized(() async {
       try {
-        if (_isClipTokenizerInitialized &&
-            _clipTextModelPath != null &&
-            (useRustMl || ClipTextEncoder.instance.isInitialized)) {
+        if (_clipTextVocabPath == null) {
+          final tokenizerRemotePath = ClipTextEncoder.instance.vocabRemotePath;
+          _clipTextVocabPath = await RemoteAssetsService.instance
+              .getAssetPath(tokenizerRemotePath);
+        }
+
+        if (useRustMl &&
+            _clipTextVocabPath != null &&
+            _clipTextModelPath != null) {
           return;
         }
 
-        // Initialize ClipText tokenizer
-        if (!_isClipTokenizerInitialized) {
-          final String tokenizerRemotePath =
-              ClipTextEncoder.instance.vocabRemotePath;
-          final String tokenizerVocabPath = await RemoteAssetsService.instance
-              .getAssetPath(tokenizerRemotePath);
+        if (!useRustMl &&
+            _isClipTokenizerInitialized &&
+            ClipTextEncoder.instance.isInitialized) {
+          return;
+        }
+
+        if (!useRustMl && !_isClipTokenizerInitialized) {
           await runInIsolate(
             IsolateOperation.initializeClipTokenizer,
-            {'vocabPath': tokenizerVocabPath},
+            {'vocabPath': _clipTextVocabPath!},
           );
           _isClipTokenizerInitialized = true;
         }
 
-        // Load ClipText model
         final String? downloadedModelPath =
             await ClipTextEncoder.instance.downloadModelSafe();
         if (downloadedModelPath == null) {

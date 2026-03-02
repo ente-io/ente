@@ -1,6 +1,6 @@
 use crate::image::decode::decode_image_from_path;
 use crate::ml::{
-    clip::{image::run_clip_image, text::run_clip_text},
+    clip::{image::run_clip_image, text::run_clip_text_query},
     error::{MlError, MlResult},
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
@@ -94,8 +94,9 @@ pub struct AnalyzeImageResult {
 
 #[derive(Clone, Debug)]
 pub struct RunClipTextRequest {
-    pub token_ids: Vec<i32>,
+    pub text: String,
     pub model_path: String,
+    pub vocab_path: String,
     pub provider_policy: RustExecutionProviderPolicy,
 }
 
@@ -169,14 +170,20 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
 
 fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResult> {
     let RunClipTextRequest {
-        token_ids,
+        text,
         model_path,
+        vocab_path,
         provider_policy,
     } = req;
 
     if model_path.trim().is_empty() {
         return Err(MlError::InvalidRequest(
             "missing model path: clipTextModelPath".to_string(),
+        ));
+    }
+    if vocab_path.trim().is_empty() {
+        return Err(MlError::InvalidRequest(
+            "missing model path: clipTextVocabPath".to_string(),
         ));
     }
 
@@ -191,7 +198,7 @@ fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResu
     };
 
     runtime::with_runtime_mut(&runtime_config, move |runtime| {
-        let clip = run_clip_text(runtime, &token_ids)?;
+        let clip = run_clip_text_query(runtime, &text, &vocab_path)?;
         Ok(RunClipTextResult {
             embedding: clip
                 .embedding

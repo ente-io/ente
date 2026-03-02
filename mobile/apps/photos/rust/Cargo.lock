@@ -645,6 +645,7 @@ dependencies = [
  "ente_media_inspector",
  "fast_image_resize",
  "flutter_rust_bridge",
+ "html-escape",
  "image",
  "imageproc",
  "kamadak-exif",
@@ -653,6 +654,7 @@ dependencies = [
  "ndarray 0.16.1",
  "once_cell",
  "ort",
+ "regex",
  "thiserror 2.0.18",
  "usearch",
 ]
@@ -1007,6 +1009,15 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "html-escape"
+version = "0.2.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d1ad449764d627e22bfd7cd5e8868264fc9236e07c752972b4080cd351cb476"
+dependencies = [
+ "utf8-width",
+]
 
 [[package]]
 name = "image"
@@ -2309,6 +2320,12 @@ dependencies = [
  "cxx",
  "cxx-build",
 ]
+
+[[package]]
+name = "utf8-width"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1292c0d970b54115d14f2492fe0170adf21d68a1de108eebc51c1df4f346a091"
 
 [[package]]
 name = "v_frame"

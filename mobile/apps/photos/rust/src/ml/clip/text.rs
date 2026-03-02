@@ -1,4 +1,5 @@
 use crate::ml::{
+    clip::tokenizer,
     error::{MlError, MlResult},
     onnx,
     runtime::MlRuntime,
@@ -41,6 +42,15 @@ pub fn run_clip_text(runtime: &mut MlRuntime, token_ids: &[i32]) -> MlResult<Cli
 
     normalize_embedding(&mut embedding);
     Ok(ClipResult { embedding })
+}
+
+pub fn run_clip_text_query(
+    runtime: &mut MlRuntime,
+    query: &str,
+    vocab_path: &str,
+) -> MlResult<ClipResult> {
+    let token_ids = tokenizer::tokenize_clip_text(query, vocab_path)?;
+    run_clip_text(runtime, &token_ids)
 }
 
 fn normalize_embedding(embedding: &mut [f32]) {
