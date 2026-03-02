@@ -93,7 +93,7 @@ export const PasteFooter = () => {
                     rel="noopener"
                     sx={productLinkSx(tokens.text.footer, "#A75CFF")}
                 >
-                    Auth
+                    Auth Codes
                 </Typography>
             </Stack>
         </Stack>
