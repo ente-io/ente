@@ -95,40 +95,35 @@ class MLService {
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
-    // Listen on ComputeController
-    /// Only listen for events when in foreground,
-    /// so we don't waste resources when the app is in background
-    /// and we just do things sequentially
-    if (!isProcessBg) {
-      Bus.instance.on<ComputeControlEvent>().listen((event) {
-        if (!hasGrantedMLConsent) {
-          if (event.shouldRun) {
-            VideoPreviewService.instance.queueFiles(duration: Duration.zero);
-          }
-          return;
+    // Listen on ComputeController in both foreground and background.
+    Bus.instance.on<ComputeControlEvent>().listen((event) {
+      if (!hasGrantedMLConsent) {
+        if (!isProcessBg && event.shouldRun) {
+          VideoPreviewService.instance.queueFiles(duration: Duration.zero);
         }
+        return;
+      }
 
-        _mlControllerStatus = event.shouldRun;
-        if (_mlControllerStatus) {
-          if (_shouldPauseIndexingAndClustering) {
-            _cancelPauseIndexingAndClustering();
-            _logger.info(
-              "MLController allowed running ML, faces indexing undoing previous pause",
-            );
-          } else {
-            _logger.info(
-              "MLController allowed running ML, faces indexing starting",
-            );
-          }
-          unawaited(runAllML());
+      _mlControllerStatus = event.shouldRun;
+      if (_mlControllerStatus) {
+        if (_shouldPauseIndexingAndClustering) {
+          _cancelPauseIndexingAndClustering();
+          _logger.info(
+            "MLController allowed running ML, faces indexing undoing previous pause",
+          );
         } else {
           _logger.info(
-            "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
+            "MLController allowed running ML, faces indexing starting",
           );
-          pauseIndexingAndClustering();
         }
-      });
-    }
+        unawaited(runAllML());
+      } else {
+        _logger.info(
+          "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
+        );
+        pauseIndexingAndClustering();
+      }
+    });
 
     _isInitialized = true;
     unawaited(_maybePredownloadLocalModels());
@@ -175,6 +170,7 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (!isProcessBg) return;
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -266,6 +262,7 @@ class MLService {
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
+    if (!isProcessBg) return;
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     bool rustRuntimePrepared = false;

@@ -69,16 +69,18 @@ class ComputeController {
 
   // Directly assign the values + Attach listener for compute controller
   Future<void> init() async {
-    // we don't need listeners to be initialized in background
-    if (isProcessBg) return;
+    if (!isProcessBg) {
+      // Initialize interaction tracking before any await to avoid first-tap races.
+      _startInteractionTimer(kDefaultInteractionTimeout);
 
-    // Initialize interaction tracking before any await to avoid first-tap races.
-    _startInteractionTimer(kDefaultInteractionTimeout);
-
-    await setMLDebugInteractionOverride(
-      turnOn: _localSettings.runMLDuringInteractionOverride,
-      persist: false,
-    );
+      await setMLDebugInteractionOverride(
+        turnOn: _localSettings.runMLDuringInteractionOverride,
+        persist: false,
+      );
+    } else {
+      // In background there is no user interaction signal, keep this false.
+      _isUserInteracting = false;
+    }
 
     // Thermal related
     _onThermalStateUpdate(await _thermal.thermalStatus);
@@ -295,12 +297,16 @@ class ComputeController {
     // Update Battery info and device health
     if (Platform.isIOS) {
       _iosLastBatteryInfo = await BatteryInfoPlugin().iosBatteryInfo;
-      _isDeviceHealthy = _computeIsiOSDeviceHealthy();
+      _setDeviceHealth(_computeIsiOSDeviceHealthy());
     } else {
       _androidLastBatteryInfo = await BatteryInfoPlugin().androidBatteryInfo;
-      _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+      _setDeviceHealth(_computeIsAndroidDeviceHealthy());
     }
 
+    // In background we need this call-site to be self-sufficient so MLService
+    // listeners can react immediately without waiting on init races.
+    _hasCompletedInitialHealthChecks = true;
+    _fireControlEvent();
     _logger.info("Device health status: $_isDeviceHealthy");
     return _isDeviceHealthy;
   }

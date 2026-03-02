@@ -222,12 +222,10 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await _homeWidgetSync(true);
 
     if (flagService.enableMLInBackground) {
-      final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
-      if (isDeviceHealthy) {
-        await MLService.instance.init();
-        await PersonService.init(entityService, MLDataDB.instance, prefs);
-        await MLService.instance.runAllML(force: true);
-      }
+      await MLService.instance.init();
+      await PersonService.init(entityService, MLDataDB.instance, prefs);
+      // Refresh health in background and emit ComputeControlEvent.
+      await computeController.isDeviceHealthyFuture();
     }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
