@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +60,7 @@ fun SettingsScreen(
             add(
                 SettingsItem(
                     title = "About",
-                    iconRes = HugeIcons.Settings01Icon,
+                    iconVector = Icons.Outlined.Info,
                     onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
                 )
             )
@@ -106,7 +110,7 @@ fun SettingsScreen(
             add(
                 SettingsItem(
                     title = "Terms of Service",
-                    iconRes = HugeIcons.Settings01Icon,
+                    iconVector = Icons.Outlined.Description,
                     onClick = { context.openExternalLink("https://ente.io/terms") }
                 )
             )
@@ -190,7 +194,8 @@ fun SettingsScreen(
 
 private data class SettingsItem(
     val title: String,
-    val iconRes: Int,
+    val iconRes: Int? = null,
+    val iconVector: ImageVector? = null,
     val onClick: () -> Unit,
     val isDestructive: Boolean = false
 )
@@ -209,12 +214,21 @@ private fun SettingsRow(item: SettingsItem) {
         horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(item.iconRes),
-            contentDescription = null,
-            tint = iconAndTextColor,
-            modifier = Modifier.size(18.dp)
-        )
+        item.iconVector?.let { iconVector ->
+            Icon(
+                imageVector = iconVector,
+                contentDescription = null,
+                tint = iconAndTextColor,
+                modifier = Modifier.size(18.dp)
+            )
+        } ?: item.iconRes?.let { iconRes ->
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = iconAndTextColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(text = item.title, style = EnsuTypography.body, color = iconAndTextColor)
         }
