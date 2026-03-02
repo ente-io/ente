@@ -2,9 +2,13 @@ import {
     ArrowRight01Icon,
     Bug01Icon,
     Cancel01Icon,
+    InformationCircleIcon,
     Key01Icon,
+    LegalDocument01Icon,
     Login01Icon,
+    Logout01Icon,
     Settings01Icon,
+    Shield02Icon,
     SlidersHorizontalIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -240,6 +244,84 @@ export const ChatDialogs = memo(
                             <ListItemButton
                                 onClick={() => {
                                     closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/blog/ensu/",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={InformationCircleIcon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    About
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/privacy",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={Shield02Icon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Privacy Policy
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    if (typeof window !== "undefined") {
+                                        window.open(
+                                            "https://ente.io/terms",
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={LegalDocument01Icon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Terms of Service
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
                                     void saveLogs();
                                 }}
                                 sx={settingsItemSx}
@@ -307,72 +389,6 @@ export const ChatDialogs = memo(
                                 </ListItemButton>
                             )}
 
-                            <ListItemButton
-                                onClick={() => {
-                                    closeSettingsModal();
-                                    if (typeof window !== "undefined") {
-                                        window.open(
-                                            "https://ente.io/blog/ensu/",
-                                            "_blank",
-                                            "noopener,noreferrer",
-                                        );
-                                    }
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    About
-                                </Typography>
-                                <HugeiconsIcon
-                                    icon={ArrowRight01Icon}
-                                    {...smallIconProps}
-                                />
-                            </ListItemButton>
-
-                            <ListItemButton
-                                onClick={() => {
-                                    closeSettingsModal();
-                                    if (typeof window !== "undefined") {
-                                        window.open(
-                                            "https://ente.io/privacy",
-                                            "_blank",
-                                            "noopener,noreferrer",
-                                        );
-                                    }
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Privacy Policy
-                                </Typography>
-                                <HugeiconsIcon
-                                    icon={ArrowRight01Icon}
-                                    {...smallIconProps}
-                                />
-                            </ListItemButton>
-
-                            <ListItemButton
-                                onClick={() => {
-                                    closeSettingsModal();
-                                    if (typeof window !== "undefined") {
-                                        window.open(
-                                            "https://ente.io/terms",
-                                            "_blank",
-                                            "noopener,noreferrer",
-                                        );
-                                    }
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Terms of Service
-                                </Typography>
-                                <HugeiconsIcon
-                                    icon={ArrowRight01Icon}
-                                    {...smallIconProps}
-                                />
-                            </ListItemButton>
-
                             {isLoggedIn && (
                                 <ListItemButton
                                     onClick={() => {
@@ -384,6 +400,10 @@ export const ChatDialogs = memo(
                                         { color: "critical.main" },
                                     ]}
                                 >
+                                    <HugeiconsIcon
+                                        icon={Logout01Icon}
+                                        {...compactIconProps}
+                                    />
                                     <Typography
                                         variant="small"
                                         sx={{ flex: 1, fontWeight: 600 }}
