@@ -17,7 +17,9 @@ export const usePasteColorMode = (): UsePasteColorModeResult => {
     const themeMode: PasteResolvedMode =
         theme.palette.mode === "light" ? "light" : "dark";
     const resolvedMode: PasteResolvedMode =
-        normalizedMode === "system" ? (systemMode ?? themeMode) : normalizedMode;
+        normalizedMode === "system"
+            ? (systemMode ?? themeMode)
+            : normalizedMode;
 
     return {
         mode: normalizedMode,

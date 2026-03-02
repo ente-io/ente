@@ -755,7 +755,8 @@ export const PasteLinkCard = ({
                                     borderRadius: "10px",
                                     bgcolor: tokens.button.primaryBg,
                                     color: tokens.button.primaryText,
-                                    boxShadow: "0 2px 8px rgba(47, 109, 247, 0.2)",
+                                    boxShadow:
+                                        "0 2px 8px rgba(47, 109, 247, 0.2)",
                                     "&:hover": {
                                         bgcolor: tokens.button.primaryHoverBg,
                                         boxShadow:
@@ -789,7 +790,8 @@ export const PasteLinkCard = ({
                                     borderRadius: "18px",
                                     border: `1px solid ${tokens.surface.floatingCardBorder}`,
                                     bgcolor: tokens.surface.floatingCardBg,
-                                    boxShadow: tokens.surface.floatingCardShadow,
+                                    boxShadow:
+                                        tokens.surface.floatingCardShadow,
                                 },
                             },
                         }}

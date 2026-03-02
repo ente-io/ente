@@ -1,6 +1,9 @@
 import type { PasteThemeTokens } from "../theme/pasteThemeTokens";
 
-type PasteTextFieldTokens = Pick<PasteThemeTokens, "accent" | "surface" | "text">;
+type PasteTextFieldTokens = Pick<
+    PasteThemeTokens,
+    "accent" | "surface" | "text"
+>;
 
 export const pasteTextFieldSx = (
     tokens: PasteTextFieldTokens,
@@ -46,8 +49,5 @@ export const pasteTextFieldSx = (
         margin: "0 !important",
         overflowY: "auto",
     },
-    "& textarea::placeholder": {
-        color: tokens.text.placeholder,
-        opacity: 1,
-    },
+    "& textarea::placeholder": { color: tokens.text.placeholder, opacity: 1 },
 });

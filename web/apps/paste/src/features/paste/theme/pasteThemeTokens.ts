@@ -1,12 +1,7 @@
 export type PasteResolvedMode = "light" | "dark";
 
 export interface PasteThemeTokens {
-    accent: {
-        main: string;
-        hover: string;
-        soft: string;
-        contrastText: string;
-    };
+    accent: { main: string; hover: string; soft: string; contrastText: string };
     frame: {
         outerBg: string;
         innerBg: string;

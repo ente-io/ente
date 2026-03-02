@@ -26,10 +26,7 @@ export const PasteFooter = () => {
     const tokens = getPasteThemeTokens(resolvedMode);
 
     return (
-        <Stack
-            alignItems="center"
-            spacing={1.1}
-        >
+        <Stack alignItems="center" spacing={1.1}>
             <Box
                 component="a"
                 href="https://ente.io"
@@ -40,9 +37,7 @@ export const PasteFooter = () => {
                     lineHeight: 0,
                     color: tokens.text.footer,
                     transition: "color 180ms ease",
-                    "&:hover": {
-                        color: "#08C225",
-                    },
+                    "&:hover": { color: "#08C225" },
                 }}
             >
                 <EnteLogo height={26} />

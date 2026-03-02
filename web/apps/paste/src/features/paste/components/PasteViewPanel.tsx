@@ -142,7 +142,7 @@ export const PasteViewPanel = ({
                 </Stack>
             )}
 
-            {!resolvedText && (
+            {resolvedText && (
                 <Stack spacing={1.8}>
                     <Typography
                         sx={{

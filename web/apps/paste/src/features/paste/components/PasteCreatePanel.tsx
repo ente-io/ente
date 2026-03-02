@@ -148,7 +148,10 @@ export const PasteCreatePanel = ({
                         >
                             {inputText.length}
                         </Box>
-                        <Box component="span" sx={{ color: tokens.text.counter }}>
+                        <Box
+                            component="span"
+                            sx={{ color: tokens.text.counter }}
+                        >
                             /{MAX_PASTE_CHARS}
                         </Box>
                     </Typography>

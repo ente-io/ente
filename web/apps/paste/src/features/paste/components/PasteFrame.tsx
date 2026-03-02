@@ -75,10 +75,7 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                         direction="row"
                         alignItems="center"
                         spacing={0.35}
-                        sx={{
-                            color: tokens.frame.logoTint,
-                            lineHeight: 0,
-                        }}
+                        sx={{ color: tokens.frame.logoTint, lineHeight: 0 }}
                     >
                         <Box>
                             <EnteLogo height={22} />
@@ -102,9 +99,7 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                         <IconButton
                             onClick={() => {
                                 setMode(
-                                    resolvedMode === "dark"
-                                        ? "light"
-                                        : "dark",
+                                    resolvedMode === "dark" ? "light" : "dark",
                                 );
                             }}
                             aria-label="Toggle color mode"
@@ -113,9 +108,7 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                                 height: 48,
                                 bgcolor: "transparent",
                                 color: tokens.frame.headerIcon,
-                                "&:hover": {
-                                    bgcolor: "transparent",
-                                },
+                                "&:hover": { bgcolor: "transparent" },
                             }}
                         >
                             <ActiveModeIcon sx={{ fontSize: 26 }} />
