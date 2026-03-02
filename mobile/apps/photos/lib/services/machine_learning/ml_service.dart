@@ -1,13 +1,16 @@
 import "dart:async";
+import "dart:convert" show jsonEncode;
 import "dart:io" show Platform;
 import "dart:math" show min;
-import "dart:typed_data" show Uint8List;
+import "dart:typed_data" show Float32List, Uint8List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/db_pet_model_mappers.dart";
+import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -18,6 +21,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -46,6 +50,7 @@ class MLService {
   bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
+  bool debugPetOnlyMode = false;
   bool _clusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
@@ -268,7 +273,11 @@ class MLService {
         await MLIndexingIsolate.instance.ensureDownloadedModels();
       }
       final Stream<List<FileMLInstruction>> instructionStream =
-          fetchEmbeddingsAndInstructions(fileDownloadMlLimit, mode: mode);
+          fetchEmbeddingsAndInstructions(
+        fileDownloadMlLimit,
+        mode: mode,
+        forceAll: debugPetOnlyMode || flagService.petEnabled,
+      );
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
@@ -532,6 +541,12 @@ class MLService {
   Future<bool> processImage(FileMLInstruction instruction) async {
     bool actuallyRanML = false;
 
+    // In pet-only mode, skip faces and clip to only run pet recognition
+    if (debugPetOnlyMode) {
+      instruction.shouldRunFaces = false;
+      instruction.shouldRunClip = false;
+    }
+
     final mlDataDB = _dbForMode(instruction.mode);
     try {
       final String filePath = await getImagePathForML(instruction.file);
@@ -626,6 +641,81 @@ class MLService {
           );
         }
       }
+
+      // Pet results locally
+      final rustPets = result.petFaces != null || result.petBodies != null;
+      if (rustPets) {
+        if (result.petFaces != null && result.petFaces!.isNotEmpty) {
+          final dbPetFaces = result.petFaces!.map((pf) {
+            final floatList = Float32List.fromList(pf.embedding);
+            final blob = Uint8List.view(
+              floatList.buffer,
+              floatList.offsetInBytes,
+              floatList.lengthInBytes,
+            );
+            return DBPetFace(
+              fileId: result.fileId,
+              petFaceId: pf.petFaceId,
+              detection: jsonEncode(pf.detection.toJson()),
+              landmarks: jsonEncode(
+                pf.detection.allKeypoints.map((kp) => [kp[0], kp[1]]).toList(),
+              ),
+              faceVectorId: -1,
+              species: pf.species == 0 ? "dog" : "cat",
+              faceScore: pf.detection.score,
+              imageHeight: result.decodedImageSize.height,
+              imageWidth: result.decodedImageSize.width,
+              mlVersion: faceMlVersion,
+              embeddingBlob: blob,
+            );
+          }).toList();
+          await mlDataDB.bulkInsertPetFaces(dbPetFaces);
+          await _storePetFaceEmbeddings(
+            dbPetFaces,
+            result.petFaces!,
+            mlDataDB,
+          );
+        }
+
+        if (result.petBodies != null && result.petBodies!.isNotEmpty) {
+          final dbPetBodies = result.petBodies!.map((pb) {
+            final detectionObj = FaceDetectionRelative(
+              score: pb.score,
+              box: [
+                pb.boxXyxy[0],
+                pb.boxXyxy[1],
+                pb.boxXyxy[2],
+                pb.boxXyxy[3],
+              ],
+              allKeypoints: const [],
+            );
+            final floatList = Float32List.fromList(pb.embedding);
+            final blob = Uint8List.view(
+              floatList.buffer,
+              floatList.offsetInBytes,
+              floatList.lengthInBytes,
+            );
+            return DBPetBody(
+              fileId: result.fileId,
+              petBodyId: pb.petBodyId,
+              detection: jsonEncode(detectionObj.toJson()),
+              bodyVectorId: -1,
+              species: pb.cocoClass == 15 ? "cat" : "dog",
+              faceScore: pb.score,
+              imageHeight: result.decodedImageSize.height,
+              imageWidth: result.decodedImageSize.width,
+              mlVersion: faceMlVersion,
+              embeddingBlob: blob,
+            );
+          }).toList();
+          await mlDataDB.bulkInsertPetBodies(dbPetBodies);
+          await _storePetBodyEmbeddings(
+            dbPetBodies,
+            result.petBodies!,
+            mlDataDB,
+          );
+        }
+      }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
@@ -662,6 +752,120 @@ class MLService {
         s,
       );
       return false;
+    }
+  }
+
+  /// Store pet face embeddings into PetVectorDB after SQLite insert.
+  /// Failure is logged but does not block indexing.
+  Future<void> _storePetFaceEmbeddings(
+    List<DBPetFace> dbPetFaces,
+    List<PetFaceResult> petFaces,
+    MLDataDB mlDataDB,
+  ) async {
+    try {
+      // Group by species
+      final bySpecies = <int, List<(DBPetFace, PetFaceResult)>>{};
+      for (int i = 0; i < dbPetFaces.length; i++) {
+        final species = petFaces[i].species;
+        bySpecies.putIfAbsent(species, () => []);
+        bySpecies[species]!.add((dbPetFaces[i], petFaces[i]));
+      }
+      for (final entry in bySpecies.entries) {
+        final vdb = PetVectorDB.forModel(
+          species: entry.key,
+          isFace: true,
+        );
+        final petFaceIds = entry.value.map((e) => e.$1.petFaceId).toList();
+        final idMap = await vdb.getPetFaceVectorIdMap(
+          petFaceIds,
+          createIfMissing: true,
+        );
+        final vectorIds = <int>[];
+        final embeddings = <Float32List>[];
+        for (final (dbFace, pfResult) in entry.value) {
+          final vid = idMap[dbFace.petFaceId];
+          if (vid == null) continue;
+          final emb = Float32List.fromList(pfResult.embedding);
+          if (emb.length != PetVectorDB.faceDimension) {
+            _logger.warning(
+              "Skipping pet face embedding with wrong dimension ${emb.length}",
+            );
+            continue;
+          }
+          vectorIds.add(vid);
+          embeddings.add(emb);
+        }
+        if (vectorIds.isNotEmpty) {
+          await vdb.bulkInsertEmbeddings(
+            vectorIds: vectorIds,
+            embeddings: embeddings,
+          );
+          final updateMap = Map.fromIterables(
+            entry.value.map((e) => e.$1.petFaceId),
+            vectorIds,
+          );
+          await mlDataDB.updatePetFaceVectorIds(updateMap);
+        }
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to store pet face embeddings in vector DB", e, s);
+    }
+  }
+
+  /// Store pet body embeddings into PetVectorDB after SQLite insert.
+  /// Failure is logged but does not block indexing.
+  Future<void> _storePetBodyEmbeddings(
+    List<DBPetBody> dbPetBodies,
+    List<PetBodyResult> petBodies,
+    MLDataDB mlDataDB,
+  ) async {
+    try {
+      // Group by species
+      final bySpecies = <int, List<(DBPetBody, PetBodyResult)>>{};
+      for (int i = 0; i < dbPetBodies.length; i++) {
+        final species = petBodies[i].cocoClass == 15 ? 1 : 0;
+        bySpecies.putIfAbsent(species, () => []);
+        bySpecies[species]!.add((dbPetBodies[i], petBodies[i]));
+      }
+      for (final entry in bySpecies.entries) {
+        final vdb = PetVectorDB.forModel(
+          species: entry.key,
+          isFace: false,
+        );
+        final petBodyIds = entry.value.map((e) => e.$1.petBodyId).toList();
+        final idMap = await vdb.getPetBodyVectorIdMap(
+          petBodyIds,
+          createIfMissing: true,
+        );
+        final vectorIds = <int>[];
+        final embeddings = <Float32List>[];
+        for (final (dbBody, pbResult) in entry.value) {
+          final vid = idMap[dbBody.petBodyId];
+          if (vid == null) continue;
+          final emb = Float32List.fromList(pbResult.embedding);
+          if (emb.length != PetVectorDB.bodyDimension) {
+            _logger.warning(
+              "Skipping pet body embedding with wrong dimension ${emb.length}",
+            );
+            continue;
+          }
+          vectorIds.add(vid);
+          embeddings.add(emb);
+        }
+        if (vectorIds.isNotEmpty) {
+          await vdb.bulkInsertEmbeddings(
+            vectorIds: vectorIds,
+            embeddings: embeddings,
+          );
+          final updateMap = Map.fromIterables(
+            entry.value.map((e) => e.$1.petBodyId),
+            vectorIds,
+          );
+          await mlDataDB.updatePetBodyVectorIds(updateMap);
+        }
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to store pet body embeddings in vector DB", e, s);
     }
   }
 
