@@ -294,6 +294,6 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🤖 Internal draft release available for Ensu"
-                  description: "Draft release uploaded to Play Store internal track"
+                  title: "🤖 Internal release available for Ensu"
+                  description: "Release uploaded to Play Store internal track"
                   color: 0x4CAF50
