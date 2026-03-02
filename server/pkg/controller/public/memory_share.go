@@ -2,12 +2,15 @@ package public
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // MemoryShareController handles public memory share operations
@@ -44,7 +47,6 @@ func (c *MemoryShareController) GetPublicMemoryShare(ctx context.Context, access
 
 // GetPublicFiles retrieves all files in a public memory share
 func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int64) (*ente.PublicMemoryShareFilesResponse, error) {
-	// Get memory share files
 	shareFiles, err := c.Repo.GetFiles(ctx, shareID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to get memory share files")
@@ -54,26 +56,25 @@ func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int6
 		return &ente.PublicMemoryShareFilesResponse{Files: []ente.PublicMemoryShareFile{}}, nil
 	}
 
-	// Get file details from the files table
-	// Note: We need to get files from different owners potentially
 	publicFiles := make([]ente.PublicMemoryShareFile, 0, len(shareFiles))
 
 	for _, sf := range shareFiles {
 		file, err := c.FileRepo.GetFileAttributes(sf.FileID)
 		if err != nil {
-			// File might have been deleted, skip it
-			continue
+			if errors.Is(err, sql.ErrNoRows) {
+				logrus.WithField("fileID", sf.FileID).Info("skipping deleted file")
+				continue
+			}
+			return nil, stacktrace.Propagate(err, "failed to get file attributes")
 		}
 
-		// Check if file is deleted (metadata marker)
 		if file.Metadata.EncryptedData == "-" {
+			logrus.WithField("fileID", sf.FileID).Info("skipping placeholder file")
 			continue
 		}
 
-		// Strip private metadata for public access
 		file.MagicMetadata = nil
 
-		// Build public file response with re-encrypted key
 		publicFile := ente.PublicMemoryShareFile{
 			File:               *file,
 			EncryptedKey:       sf.EncryptedKey,
@@ -87,7 +88,6 @@ func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int6
 
 // GetPublicFileURL returns a signed URL for accessing a file in a public memory share
 func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64, fileID int64, objType ente.ObjectType) (string, error) {
-	// Verify file exists in the memory share
 	exists, _, err := c.Repo.FileExistsInShare(ctx, shareID, fileID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "failed to check file existence")
@@ -96,7 +96,6 @@ func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64
 		return "", stacktrace.Propagate(ente.ErrNotFound, "file not found in memory share")
 	}
 
-	// Ensure file is still available (not deleted/placeholder)
 	file, err := c.FileRepo.GetFileAttributes(fileID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "failed to fetch file attributes")
@@ -105,8 +104,6 @@ func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64
 		return "", stacktrace.Propagate(ente.ErrNotFound, "file not available")
 	}
 
-	// Get signed URL for the file
-	// The FileController.GetSignedURLForPublicFile method handles getting the URL from object storage
 	url, err := c.FileController.GetSignedURLForPublicFile(ctx, fileID, objType)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "failed to get signed URL")

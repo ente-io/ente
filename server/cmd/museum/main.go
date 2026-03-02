@@ -736,7 +736,8 @@ func main() {
 		Controller: memoryShareController,
 	}
 	publicMemoryShareHandler := &api.PublicMemoryShareHandler{
-		PublicCtrl: memorySharePublicController,
+		PublicCtrl:   memorySharePublicController,
+		FileDataCtrl: fileDataCtrl,
 	}
 
 	privateAPI.POST("/memory-share", memoryShareHandler.Create)
@@ -747,6 +748,9 @@ func main() {
 	publicMemoryAPI.GET("/info", publicMemoryShareHandler.GetInfo)
 	publicMemoryAPI.GET("/files", publicMemoryShareHandler.GetFiles)
 	publicMemoryAPI.GET("/files/preview/:fileID", publicMemoryShareHandler.GetThumbnail)
+	publicMemoryAPI.GET("/files/:fileID", publicMemoryShareHandler.GetFile)
+	publicMemoryAPI.GET("/file-data", publicMemoryShareHandler.GetFileData)
+	publicMemoryAPI.GET("/files/data/preview", publicMemoryShareHandler.GetPreviewURL)
 
 	castAPI := server.Group("/cast")
 
@@ -1236,6 +1240,7 @@ func cacheHeaders() gin.HandlerFunc {
 				strings.HasPrefix(reqPath, "/public-collection/files/preview/") ||
 				strings.HasPrefix(reqPath, "/public-collection/files/download/") ||
 				strings.HasPrefix(reqPath, "/public-memory/files/preview/") ||
+				strings.HasPrefix(reqPath, "/public-memory/files/") ||
 				strings.HasPrefix(reqPath, "/cast/files/preview/") ||
 				strings.HasPrefix(reqPath, "/cast/files/download/") {
 				// Exclude those that redirect to S3 for file downloads.
