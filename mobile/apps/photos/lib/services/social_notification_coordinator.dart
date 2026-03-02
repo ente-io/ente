@@ -288,6 +288,7 @@ class SocialNotificationCoordinator {
           id: _buildSocialNotificationId(
             candidate.collectionID,
             fileID,
+            candidate.type,
             _notificationGroupForType(candidate.type),
           ),
         );
@@ -347,11 +348,13 @@ class SocialNotificationCoordinator {
   int _buildSocialNotificationId(
     int collectionID,
     int? fileID,
+    FeedItemType type,
     _SocialNotificationGroup group,
   ) {
     const int base = 0x10000000;
     int hash = collectionID & 0x7fffffff;
     hash = ((hash * 31) ^ (fileID ?? 0)) & 0x7fffffff;
+    hash = ((hash * 31) ^ type.index) & 0x7fffffff;
     hash = ((hash * 31) ^ group.index) & 0x7fffffff;
     return base | (hash & 0x0fffffff);
   }
