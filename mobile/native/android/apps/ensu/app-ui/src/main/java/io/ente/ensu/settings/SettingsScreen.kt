@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -56,27 +55,42 @@ fun SettingsScreen(
         buildList {
             add(
                 SettingsItem(
+                    title = "About",
+                    iconRes = HugeIcons.Settings01Icon,
+                    onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
+                )
+            )
+
+            add(
+                SettingsItem(
                     title = "Logs",
+                    iconRes = HugeIcons.Bug01Icon,
                     onClick = onOpenLogs
                 )
             )
+
             if (isLoggedIn) {
                 add(
                     SettingsItem(
                         title = "Delete Account",
-                        onClick = onDeleteAccount
+                        iconRes = HugeIcons.Delete01Icon,
+                        onClick = onDeleteAccount,
+                        isDestructive = true
                     )
                 )
                 add(
                     SettingsItem(
                         title = "Sign Out",
-                        onClick = onSignOut
+                        iconRes = HugeIcons.Cancel01Icon,
+                        onClick = onSignOut,
+                        isDestructive = true
                     )
                 )
             } else {
                 add(
                     SettingsItem(
                         title = "Sign In to Backup",
+                        iconRes = HugeIcons.Settings01Icon,
                         onClick = onSignIn
                     )
                 )
@@ -84,19 +98,15 @@ fun SettingsScreen(
 
             add(
                 SettingsItem(
-                    title = "About",
-                    onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
-                )
-            )
-            add(
-                SettingsItem(
                     title = "Privacy Policy",
+                    iconRes = HugeIcons.ViewIcon,
                     onClick = { context.openExternalLink("https://ente.io/privacy") }
                 )
             )
             add(
                 SettingsItem(
                     title = "Terms of Service",
+                    iconRes = HugeIcons.Settings01Icon,
                     onClick = { context.openExternalLink("https://ente.io/terms") }
                 )
             )
@@ -155,10 +165,9 @@ fun SettingsScreen(
         val defaultEndpoint = "https://api.ente.io"
         val isCustomEndpoint = query.isBlank() && normalizedEndpoint.isNotBlank() && normalizedEndpoint != defaultEndpoint
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
             items(filteredItems, key = { it.title }) { item ->
                 SettingsRow(item)
-                HorizontalDivider(color = EnsuColor.border())
             }
 
             if (isCustomEndpoint) {
@@ -181,21 +190,33 @@ fun SettingsScreen(
 
 private data class SettingsItem(
     val title: String,
-    val onClick: () -> Unit
+    val iconRes: Int,
+    val onClick: () -> Unit,
+    val isDestructive: Boolean = false
 )
 
 @Composable
 private fun SettingsRow(item: SettingsItem) {
+    val iconAndTextColor = if (item.isDestructive) EnsuColor.error else EnsuColor.textPrimary()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
+            .background(EnsuColor.fillFaint())
             .clickable(onClick = item.onClick)
-            .padding(vertical = EnsuSpacing.sm.dp),
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp),
         horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            painter = painterResource(item.iconRes),
+            contentDescription = null,
+            tint = iconAndTextColor,
+            modifier = Modifier.size(18.dp)
+        )
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = item.title, style = EnsuTypography.body, color = EnsuColor.textPrimary())
+            Text(text = item.title, style = EnsuTypography.body, color = iconAndTextColor)
         }
         Icon(
             painter = painterResource(HugeIcons.ArrowRight01Icon),
