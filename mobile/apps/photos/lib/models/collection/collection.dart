@@ -26,6 +26,7 @@ class Collection {
   final List<User> sharees;
   final List<PublicURL> publicURLs;
   final int updationTime;
+  final int? sharedAt;
   final bool isDeleted;
 
   // In early days before public launch, we used to store collection name
@@ -93,6 +94,7 @@ class Collection {
     this.sharees,
     this.publicURLs,
     this.updationTime, {
+    this.sharedAt,
     this.isDeleted = false,
   });
 
@@ -242,6 +244,7 @@ class Collection {
     List<User>? sharees,
     List<PublicURL>? publicURLs,
     int? updationTime,
+    int? sharedAt,
     bool? isDeleted,
     String? mMdEncodedJson,
     int? mMdVersion,
@@ -262,6 +265,7 @@ class Collection {
       sharees ?? this.sharees,
       publicURLs ?? this.publicURLs,
       updationTime ?? this.updationTime,
+      sharedAt: sharedAt ?? this.sharedAt,
       isDeleted: isDeleted ?? this.isDeleted,
     );
     result.mMdVersion = mMdVersion ?? this.mMdVersion;
@@ -299,8 +303,22 @@ class Collection {
       sharees,
       publicURLs,
       map['updationTime'],
+      sharedAt: _parseNullableInt(map['sharedAt'] ?? map['shared_at']),
       isDeleted: map['isDeleted'] ?? false,
     );
+  }
+
+  static int? _parseNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 }
 
