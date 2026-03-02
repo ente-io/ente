@@ -55,12 +55,6 @@ class ComputeController {
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
-  /// Replays the latest compute eligibility state to listeners.
-  /// Useful when listeners are attached after initial health checks completed.
-  void emitCurrentComputeControlEvent() {
-    _fireControlEvent();
-  }
-
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
     _isDeviceHealthy = healthy;

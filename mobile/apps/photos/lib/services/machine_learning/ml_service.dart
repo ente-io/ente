@@ -116,7 +116,11 @@ class MLService {
             "MLController allowed running ML, faces indexing starting",
           );
         }
-        unawaited(runAllML());
+        // Background start is driven manually from _runMinimally to avoid
+        // duplicate runAllML invocations in the same cycle.
+        if (!isProcessBg) {
+          unawaited(runAllML());
+        }
       } else {
         _logger.info(
           "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -170,6 +174,11 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (_isRunningML) {
+      _logger.info("runAllML called while already running, skipping");
+      return;
+    }
+    bool computeAcquiredInternally = false;
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -177,7 +186,10 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (!_canRunMLFunction(function: "AllML") && !force) return;
-      if (!force && !computeController.requestCompute(ml: true)) return;
+      if (!force) {
+        if (!computeController.requestCompute(ml: true)) return;
+        computeAcquiredInternally = true;
+      }
       _isRunningML = true;
       await sync();
       if (_hasModeChanged(mode)) {
@@ -229,8 +241,10 @@ class MLService {
     } finally {
       _logger.info("ML finished running");
       _isRunningML = false;
-      if (!isProcessBg) {
+      if (computeAcquiredInternally) {
         computeController.releaseCompute(ml: true);
+      }
+      if (!isProcessBg) {
         VideoPreviewService.instance.queueFiles();
       }
     }
