@@ -94,7 +94,7 @@ fn build_session_with_providers(
     providers: Vec<ExecutionProviderDispatch>,
 ) -> MlResult<Session> {
     let mut builder = Session::builder()?
-        .with_optimization_level(GraphOptimizationLevel::Level3)?
+        .with_optimization_level(GraphOptimizationLevel::Level1)?
         .with_intra_threads(1)?
         .with_inter_threads(1)?;
 
@@ -186,8 +186,16 @@ pub fn run_i32_f32<const N: usize>(
         return Err(MlError::Ort("missing first output tensor".to_string()));
     }
     let output = &outputs[0];
-    let tensor = output.try_extract_tensor::<f32>()?;
-    let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
-    let data = tensor.iter().copied().collect::<Vec<_>>();
-    Ok((shape, data))
+
+    // Extract output: try f32 first, fall back to f16 with conversion.
+    if let Ok(tensor) = output.try_extract_tensor::<f32>() {
+        let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
+        let data = tensor.iter().copied().collect::<Vec<_>>();
+        Ok((shape, data))
+    } else {
+        let tensor = output.try_extract_tensor::<half::f16>()?;
+        let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
+        let data = tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>();
+        Ok((shape, data))
+    }
 }
