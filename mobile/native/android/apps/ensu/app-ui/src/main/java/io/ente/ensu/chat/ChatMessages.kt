@@ -48,8 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -62,8 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
-import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
-import io.ente.ensu.components.ensuRiveAnimation
+import io.ente.ensu.components.GeneratingDotsIndicator
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -273,8 +270,7 @@ internal fun MessageList(
                             branchSelections = branchSelections,
                             onRetry = { onRetryMessage(message) },
                             onBranchChange = onBranchChange,
-                            showsMetadata = true,
-                            showOutroRive = false
+                            showsMetadata = true
                         )
                     }
                 }
@@ -529,8 +525,7 @@ private fun AssistantMessageBubble(
     branchSelections: Map<String, Int>,
     onRetry: () -> Unit,
     onBranchChange: (String, Int) -> Unit,
-    showsMetadata: Boolean,
-    showOutroRive: Boolean
+    showsMetadata: Boolean
 ) {
     val clipboard = LocalClipboardManager.current
     val haptic = rememberEnsuHaptics()
@@ -582,26 +577,6 @@ private fun AssistantMessageBubble(
                     }
                 )
             )
-        }
-
-        if (showOutroRive) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = EnsuSpacing.sm.dp)
-                    .width(115.dp)
-                    .height(52.5.dp),
-                contentAlignment = Alignment.TopStart
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .offset(y = (-4).dp),
-                    alignment = RiveAlignment.TOP_LEFT,
-                    outroTrigger = true,
-                    outroInputName = "outro",
-                    clipContent = false
-                )
-            }
         }
 
         AnimatedVisibility(
@@ -702,7 +677,8 @@ private fun StreamingMessageBubble(
 ) {
     var renderedText by remember { mutableStateOf(text) }
     var showCursor by remember { mutableStateOf(true) }
-    val shouldBlink = isGenerating && renderedText.isNotBlank()
+    val hasText = renderedText.isNotBlank()
+    val shouldBlink = isGenerating && hasText
 
     LaunchedEffect(shouldBlink) {
         if (!shouldBlink) {
@@ -729,16 +705,21 @@ private fun StreamingMessageBubble(
         renderedText = text
     }
 
-    if (isGenerating && renderedText.isNotBlank()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = EnsuSpacing.sm.dp)
-                .padding(vertical = EnsuSpacing.md.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
+    if (!isGenerating) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = EnsuSpacing.sm.dp)
+            .padding(vertical = if (hasText) EnsuSpacing.md.dp else 0.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(if (hasText) EnsuSpacing.sm.dp else 0.dp)
+    ) {
+        if (hasText) {
             MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
+
+        GeneratingDotsIndicator(alignment = Alignment.CenterStart)
     }
 }
 
