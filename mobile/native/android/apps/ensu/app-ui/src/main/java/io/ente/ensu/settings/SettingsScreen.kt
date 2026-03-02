@@ -205,7 +205,7 @@ private fun SettingsRow(item: SettingsItem) {
             .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
             .background(EnsuColor.fillFaint())
             .clickable(onClick = item.onClick)
-            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp),
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.lg.dp),
         horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
