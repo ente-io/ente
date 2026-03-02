@@ -304,4 +304,4 @@ jobs:
                   nodetail: true
                   title: "🤖 Internal release available for Ensu"
                   description: "Release uploaded to Play Store internal track"
-                  color: 0x4CAF50
+                  color: 0xFDCE13
