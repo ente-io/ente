@@ -9,6 +9,24 @@
 - Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
 - Python 3 (used to patch llama.cpp mtmd sources)
 
+## Quick scripts
+
+From `mobile/native/android/apps/ensu`:
+
+```bash
+./build.sh                 # builds Rust + debug APK
+./build.sh release         # builds Rust + release APK
+./run.sh                   # builds + installs + launches on connected adb device
+```
+
+Helpful flags:
+
+- `--skip-rust` to skip Rust/jni rebuild
+- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
+- `--device <serial>` for `run.sh`
+
+Run `./build.sh --help` or `./run.sh --help` for full options.
+
 ## Building
 
 ### 1. Build Rust Libraries
