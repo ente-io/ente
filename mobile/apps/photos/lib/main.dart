@@ -233,11 +233,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
           "[BG TASK] skipping ML, compute requirements not satisfied",
         );
       } else {
-        try {
-          await MLService.instance.runAllML(force: true);
-        } finally {
-          controller.releaseCompute(ml: true);
-        }
+        await MLService.instance.runAllML(force: true);
       }
     }
     _logger.info("[BG TASK] smart albums sync");

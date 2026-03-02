@@ -178,7 +178,6 @@ class MLService {
       _logger.info("runAllML called while already running, skipping");
       return;
     }
-    bool computeAcquiredInternally = false;
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -186,10 +185,7 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (!_canRunMLFunction(function: "AllML") && !force) return;
-      if (!force) {
-        if (!computeController.requestCompute(ml: true)) return;
-        computeAcquiredInternally = true;
-      }
+      if (!force && !computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
       await sync();
       if (_hasModeChanged(mode)) {
@@ -241,9 +237,7 @@ class MLService {
     } finally {
       _logger.info("ML finished running");
       _isRunningML = false;
-      if (computeAcquiredInternally) {
-        computeController.releaseCompute(ml: true);
-      }
+      computeController.releaseCompute(ml: true);
       if (!isProcessBg) {
         VideoPreviewService.instance.queueFiles();
       }
