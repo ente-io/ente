@@ -94,7 +94,7 @@ fun SettingsScreen(
                 add(
                     SettingsItem(
                         title = "Sign In to Backup",
-                        iconRes = HugeIcons.Settings01Icon,
+                        iconRes = HugeIcons.Upload01Icon,
                         onClick = onSignIn
                     )
                 )

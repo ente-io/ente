@@ -48,7 +48,7 @@ struct SettingsView: View {
 
                     if shouldShowSignInRow {
                         Button(action: onSignIn) {
-                            settingsCard(title: signInTitle, iconName: "Settings01Icon", showsChevron: true)
+                            settingsCard(title: signInTitle, iconName: "Upload01Icon", showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
@@ -119,7 +119,7 @@ struct SettingsView: View {
         [
             SettingsActionItem(
                 title: "Privacy Policy",
-                iconName: "ViewOffSlashIcon",
+                iconName: "ViewIcon",
                 action: { openExternalLink("https://ente.io/privacy") }
             ),
             SettingsActionItem(
