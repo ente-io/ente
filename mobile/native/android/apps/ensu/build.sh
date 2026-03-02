@@ -14,7 +14,14 @@ usage() {
 Build Ensu Android app.
 
 Usage:
-  ./build.sh [debug|release] [options]
+  ./build.sh [debug|release|release-apk|bundle|release-aab] [options]
+
+Modes:
+  debug        Build debug APK
+  release      Build release APK
+  release-apk  Alias for release
+  bundle       Build release Android App Bundle (.aab)
+  release-aab  Alias for bundle
 
 Options:
   --skip-rust          Skip Rust/jni build step
@@ -25,13 +32,14 @@ Options:
 Examples:
   ./build.sh
   ./build.sh release
+  ./build.sh bundle
   ./build.sh debug --endpoint https://api.example.com
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    debug|release)
+    debug|release|release-apk|bundle|release-aab)
       MODE="$1"
       shift
       ;;
@@ -75,15 +83,25 @@ fi
 if [[ "$SKIP_APP" -eq 0 ]]; then
   cd "$ROOT"
 
-  if [[ "$MODE" == "release" ]]; then
-    TASK=":app-ui:assembleRelease"
-    APK_PATH="app-ui/build/outputs/apk/release/app-ui-release.apk"
-  else
-    TASK=":app-ui:assembleDebug"
-    APK_PATH="app-ui/build/outputs/apk/debug/app-ui-debug.apk"
-  fi
+  case "$MODE" in
+    release|release-apk)
+      TASK=":app-ui:assembleRelease"
+      OUTPUT_LABEL="APK"
+      OUTPUT_PATH="app-ui/build/outputs/apk/release/app-ui-release.apk"
+      ;;
+    bundle|release-aab)
+      TASK=":app-ui:bundleRelease"
+      OUTPUT_LABEL="AAB"
+      OUTPUT_PATH="app-ui/build/outputs/bundle/release/app-ui-release.aab"
+      ;;
+    *)
+      TASK=":app-ui:assembleDebug"
+      OUTPUT_LABEL="APK"
+      OUTPUT_PATH="app-ui/build/outputs/apk/debug/app-ui-debug.apk"
+      ;;
+  esac
 
   echo "==> Running Gradle task $TASK"
   ./gradlew "$TASK"
-  echo "✅ APK: $ROOT/$APK_PATH"
+  echo "✅ $OUTPUT_LABEL: $ROOT/$OUTPUT_PATH"
 fi

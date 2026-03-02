@@ -16,6 +16,7 @@ From `mobile/native/android/apps/ensu`:
 ```bash
 ./build.sh                 # builds Rust + debug APK
 ./build.sh release         # builds Rust + release APK
+./build.sh bundle          # builds Rust + release AAB (app bundle)
 ./run.sh                   # builds + installs + launches on connected adb device
 ```
 
@@ -24,6 +25,7 @@ Helpful flags:
 - `--skip-rust` to skip Rust/jni rebuild
 - `--endpoint <url>` to set `ENTE_API_ENDPOINT`
 - `--device <serial>` for `run.sh`
+- mode aliases: `release-apk` and `release-aab`
 
 Run `./build.sh --help` or `./run.sh --help` for full options.
 

@@ -9,29 +9,37 @@ DERIVED_DATA_PATH="$ROOT/build"
 MODE="sim"
 DESTINATION_ID=""
 ENDPOINT=""
+ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/ensu.xcarchive"
+EXPORT_PATH="$DERIVED_DATA_PATH/Export"
+EXPORT_OPTIONS_PLIST="$ROOT/ExportOptions-AppStore.plist"
 
 usage() {
   cat <<'EOF'
 Build Ensu Apple app.
 
 Usage:
-  ./build.sh [sim|device|archive] [options]
+  ./build.sh [sim|device|archive|ipa] [options]
 
 Modes:
   sim        Debug build for iOS simulator (default, prefers booted iPhone)
   device     Debug build for connected iOS device
-  archive    Release archive for App Store/TestFlight flow
+  archive    Release archive (.xcarchive)
+  ipa        Build + export IPA using ExportOptions plist
 
 Options:
-  --destination-id <id>  Force specific destination id (sim/device)
-  --endpoint <url>       Set ENTE_API_ENDPOINT for this build
-  -h, --help             Show help
+  --destination-id <id>         Force specific destination id (sim/device)
+  --endpoint <url>              Set ENTE_API_ENDPOINT for this build
+  --archive-path <path>         Override archive output path
+  --export-path <path>          Override IPA export directory (ipa mode)
+  --export-options-plist <path> Override export options plist (ipa mode)
+  -h, --help                    Show help
 
 Examples:
   ./build.sh
   ./build.sh sim
   ./build.sh device
   ./build.sh archive
+  ./build.sh ipa
 EOF
 }
 
@@ -107,7 +115,7 @@ pick_destination_id() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    sim|device|archive)
+    sim|device|archive|ipa)
       MODE="$1"
       shift
       ;;
@@ -123,6 +131,30 @@ while [[ $# -gt 0 ]]; do
       ENDPOINT="${2:-}"
       if [[ -z "$ENDPOINT" ]]; then
         echo "Missing value for --endpoint" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
+    --archive-path)
+      ARCHIVE_PATH="${2:-}"
+      if [[ -z "$ARCHIVE_PATH" ]]; then
+        echo "Missing value for --archive-path" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
+    --export-path)
+      EXPORT_PATH="${2:-}"
+      if [[ -z "$EXPORT_PATH" ]]; then
+        echo "Missing value for --export-path" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
+    --export-options-plist)
+      EXPORT_OPTIONS_PLIST="${2:-}"
+      if [[ -z "$EXPORT_OPTIONS_PLIST" ]]; then
+        echo "Missing value for --export-options-plist" >&2
         exit 1
       fi
       shift 2
@@ -144,6 +176,20 @@ cd "$ROOT"
 if [[ -n "$ENDPOINT" ]]; then
   export ENTE_API_ENDPOINT="$ENDPOINT"
 fi
+
+build_archive() {
+  mkdir -p "$(dirname "$ARCHIVE_PATH")"
+  echo "==> Building Release archive"
+  xcodebuild \
+    -project "$PROJECT" \
+    -scheme "$SCHEME" \
+    -configuration Release \
+    -sdk iphoneos \
+    -destination 'generic/platform=iOS' \
+    -archivePath "$ARCHIVE_PATH" \
+    archive
+  echo "✅ Archive: $ARCHIVE_PATH"
+}
 
 case "$MODE" in
   sim)
@@ -186,15 +232,30 @@ case "$MODE" in
       -derivedDataPath "$DERIVED_DATA_PATH"
     ;;
   archive)
-    echo "==> Building Release archive"
+    build_archive
+    ;;
+  ipa)
+    if [[ ! -f "$EXPORT_OPTIONS_PLIST" ]]; then
+      echo "Export options plist not found: $EXPORT_OPTIONS_PLIST" >&2
+      exit 1
+    fi
+
+    build_archive
+
+    mkdir -p "$EXPORT_PATH"
+    echo "==> Exporting IPA"
     xcodebuild \
-      -project "$PROJECT" \
-      -scheme "$SCHEME" \
-      -configuration Release \
-      -sdk iphoneos \
-      -destination 'generic/platform=iOS' \
-      -archivePath "$DERIVED_DATA_PATH/Archive/ensu.xcarchive" \
-      archive
+      -exportArchive \
+      -archivePath "$ARCHIVE_PATH" \
+      -exportPath "$EXPORT_PATH" \
+      -exportOptionsPlist "$EXPORT_OPTIONS_PLIST"
+
+    IPA_PATH="$(find "$EXPORT_PATH" -maxdepth 1 -type f -name '*.ipa' | head -n 1 || true)"
+    if [[ -n "$IPA_PATH" ]]; then
+      echo "✅ IPA: $IPA_PATH"
+    else
+      echo "✅ Exported to: $EXPORT_PATH"
+    fi
     ;;
 esac
 
