@@ -14,14 +14,16 @@ usage() {
 Build Ensu Android app.
 
 Usage:
-  ./build.sh [debug|release|release-apk|bundle|release-aab] [options]
+  ./build.sh [debug|apk|aab] [options]
 
 Modes:
-  debug        Build debug APK
-  release      Build release APK
-  release-apk  Alias for release
-  bundle       Build release Android App Bundle (.aab)
-  release-aab  Alias for bundle
+  debug  Build debug APK
+  apk    Build release APK
+  aab    Build release Android App Bundle (.aab)
+
+Aliases (still supported):
+  release, release-apk => apk
+  bundle, release-aab  => aab
 
 Options:
   --skip-rust          Skip Rust/jni build step
@@ -31,15 +33,15 @@ Options:
 
 Examples:
   ./build.sh
-  ./build.sh release
-  ./build.sh bundle
+  ./build.sh apk
+  ./build.sh aab
   ./build.sh debug --endpoint https://api.example.com
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    debug|release|release-apk|bundle|release-aab)
+    debug|apk|aab|release|release-apk|bundle|release-aab)
       MODE="$1"
       shift
       ;;
@@ -84,12 +86,12 @@ if [[ "$SKIP_APP" -eq 0 ]]; then
   cd "$ROOT"
 
   case "$MODE" in
-    release|release-apk)
+    apk|release|release-apk)
       TASK=":app-ui:assembleRelease"
       OUTPUT_LABEL="APK"
       OUTPUT_PATH="app-ui/build/outputs/apk/release/app-ui-release.apk"
       ;;
-    bundle|release-aab)
+    aab|bundle|release-aab)
       TASK=":app-ui:bundleRelease"
       OUTPUT_LABEL="AAB"
       OUTPUT_PATH="app-ui/build/outputs/bundle/release/app-ui-release.aab"
