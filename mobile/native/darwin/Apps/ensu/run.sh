@@ -23,16 +23,75 @@ Options:
   -h, --help             Show help
 
 Examples:
-  ./run.sh
+  ./run.sh                          # prefers currently booted iPhone simulator
   ./run.sh --destination-id <SIMULATOR_UUID>
 EOF
 }
 
+pick_booted_simulator_id() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    return
+  fi
+
+  python3 - <<'PY' 2>/dev/null
+import json
+import subprocess
+import sys
+
+try:
+    out = subprocess.check_output(
+        ["xcrun", "simctl", "list", "devices", "booted", "--json"],
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+except Exception:
+    sys.exit(0)
+
+try:
+    data = json.loads(out)
+except Exception:
+    sys.exit(0)
+
+booted = []
+for runtime_devices in data.get("devices", {}).values():
+    for device in runtime_devices:
+        if device.get("state") != "Booted":
+            continue
+        if device.get("isAvailable") is False:
+            continue
+        name = device.get("name", "")
+        udid = device.get("udid", "")
+        if not udid:
+            continue
+        booted.append((name, udid))
+
+if not booted:
+    sys.exit(0)
+
+booted.sort(key=lambda item: (0 if "iphone" in item[0].lower() else 1, item[0]))
+print(booted[0][1])
+PY
+}
+
 pick_simulator_id() {
-  xcodebuild -project ensu.xcodeproj -scheme ensu -showdestinations 2>/dev/null \
-    | sed -n 's/.*platform:iOS Simulator,.*id:\([^,}]*\).*/\1/p' \
-    | grep -v '^dvtdevice-' \
-    | head -n 1
+  local destinations
+
+  destinations="$(xcodebuild -project ensu.xcodeproj -scheme ensu -showdestinations 2>/dev/null \
+    | sed -n 's/.*platform:iOS Simulator,.*id:\([^,}]*\).*, name:\([^}]*\).*/\1|\2/p' \
+    | grep -v '^dvtdevice-' || true)"
+
+  if [[ -z "$destinations" ]]; then
+    return
+  fi
+
+  local iphone_id
+  iphone_id="$(printf "%s\n" "$destinations" | awk -F'|' '/iPhone/ { print $1; exit }')"
+  if [[ -n "$iphone_id" ]]; then
+    echo "$iphone_id"
+    return
+  fi
+
+  printf "%s\n" "$destinations" | head -n 1 | cut -d'|' -f1
 }
 
 while [[ $# -gt 0 ]]; do
@@ -71,6 +130,9 @@ done
 
 cd "$ROOT"
 
+if [[ -z "$DESTINATION_ID" ]]; then
+  DESTINATION_ID="$(pick_booted_simulator_id)"
+fi
 if [[ -z "$DESTINATION_ID" ]]; then
   DESTINATION_ID="$(pick_simulator_id)"
 fi

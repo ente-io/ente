@@ -7,10 +7,10 @@ All commands below assume you run them from `darwin/Apps/ensu`.
 ## Quick scripts
 
 ```bash
-./build.sh                 # Debug build for iOS simulator
+./build.sh                 # Debug build for iOS simulator (prefers booted iPhone)
 ./build.sh device          # Debug build for connected iOS device
 ./build.sh archive         # Release archive
-./run.sh                   # Build + install + launch on iOS simulator
+./run.sh                   # Build + install + launch on iOS simulator (prefers booted iPhone)
 ```
 
 Helpful flags:
