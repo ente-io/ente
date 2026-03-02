@@ -2735,7 +2735,7 @@
   "deleteOnDeviceFiles": "Delete on device files",
   "noHiddenFilesOnDevice": "No hidden files on device",
   "welcome": "Welcome",
-  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition.\n\nAll processing happens on your device.",
+  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition. All processing happens on your device.",
   "grantPermission": "Grant permission",
   "privateAI": "Private AI",
   "privateAIDescription": "Ente uses on-device AI to analyze your photos for faces, objects, locations, and text. This data is used to power features like face recognition and smart search. Everything is processed and stored locally on your device — nothing is ever uploaded to our servers.",
@@ -2755,19 +2755,23 @@
   "alreadyHaveAnAccount": "Already have an account?",
   "loginToEnte": "Login to Ente",
   "searchAndDiscover": "Search and Discover",
-  "searchAndDiscoverDesc": "Search photos with text or rediscover old memories with on-device ML",
+  "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",
   "shareYourMemories": "Share your Memories",
-  "shareYourMemoriesDesc": "Share your albums, create links, collect photos and drop a comment",
-  "privateAndSecureBackups": "Private and Secure Backups",
-  "privateAndSecureBackupsDesc": "End-to-End encrypted, triple replication, open source, and independently audited",
+  "shareYourMemoriesDesc": "Share albums, collect photos and gather comments with public links",
+  "privateAndSecureBackups": "Backup with Privacy",
+  "privateAndSecureBackupsDesc": "End-to-end encrypted, independently audited and fully open source",
   "mlProgressBannerTitle": "Hang tight!",
   "mlProgressBannerDescription": "Your photos are getting processed on device to detect faces, objects and more.",
   "mlProgressBannerPaused": "Paused",
   "mlProgressBannerStatus": "{indexed} out of {total} photos processed",
   "@mlProgressBannerStatus": {
     "placeholders": {
-      "indexed": { "type": "String" },
-      "total": { "type": "String" }
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "offlineFacesBannerTitle": "Want to save these faces?",
