@@ -137,6 +137,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
           filterQuality: FilterQuality.high,
           scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
+          scaleStateCycle: (actual) {
+            if (actual == PhotoViewScaleState.initial) {
+              return PhotoViewScaleState.covering;
+            }
+            return PhotoViewScaleState.initial;
+          },
           minScale: widget.shouldCover
               ? PhotoViewComputedScale.covered
               : PhotoViewComputedScale.contained,
