@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
 import { getPasteThemeTokens } from "features/paste/theme/pasteThemeTokens";
+import { useEffect, useRef, useState } from "react";
 import { pasteTextFieldSx } from "./textFieldSx";
 
 interface PasteViewPanelProps {
@@ -28,6 +29,16 @@ export const PasteViewPanel = ({
 }: PasteViewPanelProps) => {
     const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
+    const [copied, setCopied] = useState(false);
+    const copiedTimerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (copiedTimerRef.current !== null) {
+                window.clearTimeout(copiedTimerRef.current);
+            }
+        };
+    }, []);
 
     return (
         <>
@@ -131,7 +142,7 @@ export const PasteViewPanel = ({
                 </Stack>
             )}
 
-            {resolvedText && (
+            {!resolvedText && (
                 <Stack spacing={1.8}>
                     <Typography
                         sx={{
@@ -170,19 +181,26 @@ export const PasteViewPanel = ({
                                             "blur(9px) saturate(112%)",
                                         WebkitBackdropFilter:
                                             "blur(9px) saturate(112%)",
-                                        background: tokens.surface.inputGradient,
+                                        background:
+                                            tokens.surface.inputGradient,
                                         boxShadow: tokens.surface.inputShadow,
                                         "&:hover": {
                                             bgcolor: tokens.surface.inputBg,
-                                            borderColor: tokens.surface.inputBorder,
-                                            background: tokens.surface.inputGradient,
-                                            boxShadow: tokens.surface.inputShadow,
+                                            borderColor:
+                                                tokens.surface.inputBorder,
+                                            background:
+                                                tokens.surface.inputGradient,
+                                            boxShadow:
+                                                tokens.surface.inputShadow,
                                         },
                                         "&.Mui-focused": {
                                             bgcolor: tokens.surface.inputBg,
-                                            borderColor: tokens.surface.inputBorder,
-                                            background: tokens.surface.inputGradient,
-                                            boxShadow: tokens.surface.inputShadow,
+                                            borderColor:
+                                                tokens.surface.inputBorder,
+                                            background:
+                                                tokens.surface.inputGradient,
+                                            boxShadow:
+                                                tokens.surface.inputShadow,
                                         },
                                     },
                                 },
@@ -206,9 +224,26 @@ export const PasteViewPanel = ({
                                 size="small"
                                 disableElevation
                                 onClick={() => {
-                                    void onCopyText(resolvedText).catch(() => {
-                                        // Ignore errors to avoid unhandled rejections in click handlers.
-                                    });
+                                    void onCopyText(resolvedText)
+                                        .then(() => {
+                                            setCopied(true);
+                                            if (
+                                                copiedTimerRef.current !== null
+                                            ) {
+                                                window.clearTimeout(
+                                                    copiedTimerRef.current,
+                                                );
+                                            }
+                                            copiedTimerRef.current =
+                                                window.setTimeout(() => {
+                                                    setCopied(false);
+                                                    copiedTimerRef.current =
+                                                        null;
+                                                }, 900);
+                                        })
+                                        .catch(() => {
+                                            // Ignore errors to avoid unhandled rejections in click handlers.
+                                        });
                                 }}
                                 startIcon={
                                     <ContentCopyRoundedIcon
@@ -233,7 +268,7 @@ export const PasteViewPanel = ({
                                     },
                                 }}
                             >
-                                Copy
+                                {copied ? "Copied" : "Copy"}
                             </Button>
                         </Box>
                     </Box>
