@@ -240,6 +240,7 @@ class SocialNotificationCoordinator {
           FeedItemType.commentLike => false,
           FeedItemType.replyLike => false,
           FeedItemType.sharedPhoto => false,
+          FeedItemType.sharedCollection => false,
         };
         final title = await _getSocialNotificationTitle(candidate);
         await NotificationService.instance.showNotification(
@@ -281,6 +282,7 @@ class SocialNotificationCoordinator {
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
       case FeedItemType.sharedPhoto:
+      case FeedItemType.sharedCollection:
         return false;
     }
   }
@@ -294,6 +296,7 @@ class SocialNotificationCoordinator {
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
       case FeedItemType.sharedPhoto:
+      case FeedItemType.sharedCollection:
         return _SocialNotificationGroup.like;
     }
   }
@@ -360,6 +363,9 @@ class SocialNotificationCoordinator {
         return s.likedYourReply;
       case FeedItemType.sharedPhoto:
         // Shared photos don't trigger notifications
+        return '';
+      case FeedItemType.sharedCollection:
+        // Shared collections don't trigger notifications
         return '';
     }
   }

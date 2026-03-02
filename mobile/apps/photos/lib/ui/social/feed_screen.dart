@@ -324,6 +324,22 @@ class _FeedScreenState extends State<FeedScreen> {
       );
       return true;
     }
+    if (target.type == FeedItemType.sharedPhoto ||
+        target.type == FeedItemType.sharedCollection) {
+      await _openSharedCollection(
+        FeedItem(
+          type: target.type,
+          collectionID: target.collectionID,
+          actorUserIDs: const [0],
+          actorAnonIDs: const [null],
+          createdAt: DateTime.now().microsecondsSinceEpoch,
+          isOwnedByCurrentUser: false,
+          sharedFileIDs: target.fileID != null ? [target.fileID!] : null,
+        ),
+        jumpToFileID: target.fileID,
+      );
+      return true;
+    }
 
     var fileID = target.fileID;
     if (fileID == null && target.commentID != null) {
@@ -475,6 +491,9 @@ class _FeedScreenState extends State<FeedScreen> {
         break;
       case FeedItemType.sharedPhoto:
         _openSharedPhotos(item);
+        break;
+      case FeedItemType.sharedCollection:
+        _openSharedCollection(item);
         break;
       case FeedItemType.comment:
       case FeedItemType.reply:

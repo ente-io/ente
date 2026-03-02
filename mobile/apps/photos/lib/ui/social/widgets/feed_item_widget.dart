@@ -47,8 +47,9 @@ class FeedItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SharedPhoto has a different layout with photos grid below
-    if (feedItem.type == FeedItemType.sharedPhoto) {
+    // Shared feed items have a different layout with photos grid below.
+    if (feedItem.type == FeedItemType.sharedPhoto ||
+        feedItem.type == FeedItemType.sharedCollection) {
       return _buildSharedPhotoLayout(context);
     }
 
@@ -129,6 +130,9 @@ class FeedItemWidget extends StatelessWidget {
   }
 
   Widget _buildSharedPhotoLayout(BuildContext context) {
+    final hasSharedPhotos =
+        feedItem.sharedFileIDs != null && feedItem.sharedFileIDs!.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 18),
       child: Column(
@@ -143,7 +147,8 @@ class FeedItemWidget extends StatelessWidget {
               _FeedTypeIconWithTimeline(
                 type: feedItem.type,
                 showTimeline: !isLastItem,
-                timelineExtensionHeight: 400, // Longer for shared photo layout
+                timelineExtensionHeight:
+                    hasSharedPhotos ? 400 : 95, // Longer only when grid exists
               ),
               const SizedBox(width: 10),
               // Avatar and text
@@ -178,8 +183,7 @@ class FeedItemWidget extends StatelessWidget {
             ],
           ),
           // Photos grid below with left padding to align with text
-          if (feedItem.sharedFileIDs != null &&
-              feedItem.sharedFileIDs!.isNotEmpty)
+          if (hasSharedPhotos)
             Padding(
               padding: const EdgeInsets.only(left: 42, top: 12),
               child: SharedPhotosGrid(
@@ -319,6 +323,12 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
           ],
         );
       case FeedItemType.sharedPhoto:
+        return Icon(
+          Icons.add_rounded,
+          size: 18,
+          color: getEnteColorScheme(context).textMuted,
+        );
+      case FeedItemType.sharedCollection:
         return Icon(
           Icons.add_rounded,
           size: 18,
@@ -554,6 +564,9 @@ class _FeedTextContent extends StatelessWidget {
         return isOwn ? l10n.likedYourReply : l10n.likedAReply;
       case FeedItemType.sharedPhoto:
         return _getSharedPhotoDescription(context);
+      case FeedItemType.sharedCollection:
+        final albumName = feedItem.collectionName ?? l10n.albums;
+        return l10n.sharedAlbumWithYou(albumName: albumName);
     }
   }
 

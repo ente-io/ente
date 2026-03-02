@@ -333,6 +333,9 @@ class _PreviewTextContent extends StatelessWidget {
         } else {
           return l10n.addedNMemoriesTo(count: count, albumName: albumName);
         }
+      case FeedItemType.sharedCollection:
+        final albumName = feedItem.collectionName ?? l10n.albums;
+        return l10n.sharedAlbumWithYou(albumName: albumName);
     }
   }
 
