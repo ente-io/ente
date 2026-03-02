@@ -201,15 +201,17 @@ class MLService {
         );
         await clusterAllImages();
       }
-      if (!isProcessBg && _mlControllerStatus == true) {
+      if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
-        magicCacheService.updateCache(forced: force).ignore();
-        // refresh memories section
-        memoriesCacheService.updateCache(forced: force).ignore();
+        if (!isProcessBg) {
+          // refresh discover section
+          magicCacheService.updateCache(forced: force).ignore();
+          // refresh memories section
+          memoriesCacheService.updateCache(forced: force).ignore();
+        }
       }
       if (canFetch()) {
         await fetchAndIndexAllImages(mode: mode);
@@ -221,15 +223,17 @@ class MLService {
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
-      if (!isProcessBg && _mlControllerStatus == true) {
+      if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
-        magicCacheService.updateCache().ignore();
-        // refresh memories section (only runs if forced is true)
-        memoriesCacheService.updateCache(forced: force).ignore();
+        if (!isProcessBg) {
+          // refresh discover section
+          magicCacheService.updateCache().ignore();
+          // refresh memories section (only runs if forced is true)
+          memoriesCacheService.updateCache(forced: force).ignore();
+        }
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
