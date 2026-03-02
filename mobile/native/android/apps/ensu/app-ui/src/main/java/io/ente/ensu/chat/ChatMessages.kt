@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -60,7 +61,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
-import io.ente.ensu.components.GeneratingDotsIndicator
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -719,8 +719,27 @@ private fun StreamingMessageBubble(
             MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
 
-        GeneratingDotsIndicator(alignment = Alignment.CenterStart)
+        generatingDotsIndicator()
     }
+}
+
+@Composable
+private fun generatingDotsIndicator() {
+    var dotCount by remember { mutableStateOf(1) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(420)
+            dotCount = if (dotCount == 3) 1 else dotCount + 1
+        }
+    }
+
+    Text(
+        text = ".".repeat(dotCount),
+        style = EnsuTypography.message,
+        color = EnsuColor.textMuted(),
+        modifier = Modifier.widthIn(min = 24.dp)
+    )
 }
 
 @Composable
