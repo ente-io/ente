@@ -600,7 +600,6 @@ const Page: React.FC = () => {
     const isSmall = useMediaQuery(theme.breakpoints.down("md"));
     const assetBasePath = router.basePath ?? "";
     const logoSrc = `${assetBasePath}/images/ensu-logo.svg`;
-    const appIconSrc = `${assetBasePath}/images/ensu-app-icon-foreground.png`;
     const comingSoonDuckySrc = `${assetBasePath}/images/ensu-ducky.png`;
     const [isDarkMode, setIsDarkMode] = useState(theme.palette.mode === "dark");
 
@@ -3261,6 +3260,21 @@ const Page: React.FC = () => {
         [setStickToBottom],
     );
 
+    useEffect(() => {
+        if (!isGenerating || !stickToBottom) return;
+
+        const frame = window.requestAnimationFrame(() => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+            container.scrollTop = container.scrollHeight;
+            lastScrollTopRef.current = container.scrollTop;
+        });
+
+        return () => {
+            window.cancelAnimationFrame(frame);
+        };
+    }, [displayMessages, isGenerating, loadingDots, stickToBottom]);
+
     const handleOpenSessionSearch = useCallback(() => {
         setShowSessionSearch(true);
     }, []);
@@ -3958,9 +3972,7 @@ const Page: React.FC = () => {
             handleSelectSession={handleSelectSession}
             requestDeleteSession={requestDeleteSession}
             isLoggedIn={isLoggedIn}
-            syncNow={syncNow}
             openSettingsModal={openSettingsModal}
-            appIconSrc={appIconSrc}
         />
     );
 

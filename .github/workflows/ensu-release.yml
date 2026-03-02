@@ -266,19 +266,10 @@ jobs:
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ env.RELEASE_TAG }}.apk
+                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/${{ env.RELEASE_TAG }}.apk
                   if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
-                      cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ env.RELEASE_TAG }}.aab
+                      cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/${{ env.RELEASE_TAG }}.aab
                   fi
-
-            - name: Attach Android artifacts to draft GitHub release
-              if: startsWith(github.ref, 'refs/tags/ensu-v') && env.HAS_ANDROID_SIGNING == 'true'
-              uses: ncipollo/release-action@v1
-              with:
-                  artifacts: "mobile/native/android/apps/ensu/artifacts/*"
-                  draft: true
-                  allowUpdates: true
-                  updateOnlyUnreleased: true
 
             - name: Upload Android artifacts
               if: env.HAS_ANDROID_SIGNING == 'true'
@@ -302,6 +293,6 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🤖 Internal draft release available for Ensu"
-                  description: "Draft release uploaded to Play Store internal track"
-                  color: 0x4CAF50
+                  title: "🤖 Internal release available for Ensu"
+                  description: "Release uploaded to Play Store internal track"
+                  color: 0xFDCE13

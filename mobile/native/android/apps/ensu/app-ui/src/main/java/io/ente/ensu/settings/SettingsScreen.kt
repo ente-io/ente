@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,27 +59,42 @@ fun SettingsScreen(
         buildList {
             add(
                 SettingsItem(
+                    title = "About",
+                    iconVector = Icons.Outlined.Info,
+                    onClick = { context.openExternalLink("https://ente.io/blog/ensu/") }
+                )
+            )
+
+            add(
+                SettingsItem(
                     title = "Logs",
+                    iconRes = HugeIcons.Bug01Icon,
                     onClick = onOpenLogs
                 )
             )
+
             if (isLoggedIn) {
                 add(
                     SettingsItem(
                         title = "Delete Account",
-                        onClick = onDeleteAccount
+                        iconRes = HugeIcons.Delete01Icon,
+                        onClick = onDeleteAccount,
+                        isDestructive = true
                     )
                 )
                 add(
                     SettingsItem(
                         title = "Sign Out",
-                        onClick = onSignOut
+                        iconRes = HugeIcons.Cancel01Icon,
+                        onClick = onSignOut,
+                        isDestructive = true
                     )
                 )
             } else {
                 add(
                     SettingsItem(
                         title = "Sign In to Backup",
+                        iconRes = HugeIcons.Upload01Icon,
                         onClick = onSignIn
                     )
                 )
@@ -85,12 +103,14 @@ fun SettingsScreen(
             add(
                 SettingsItem(
                     title = "Privacy Policy",
+                    iconRes = HugeIcons.ViewIcon,
                     onClick = { context.openExternalLink("https://ente.io/privacy") }
                 )
             )
             add(
                 SettingsItem(
                     title = "Terms of Service",
+                    iconVector = Icons.Outlined.Description,
                     onClick = { context.openExternalLink("https://ente.io/terms") }
                 )
             )
@@ -149,10 +169,9 @@ fun SettingsScreen(
         val defaultEndpoint = "https://api.ente.io"
         val isCustomEndpoint = query.isBlank() && normalizedEndpoint.isNotBlank() && normalizedEndpoint != defaultEndpoint
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
             items(filteredItems, key = { it.title }) { item ->
                 SettingsRow(item)
-                HorizontalDivider(color = EnsuColor.border())
             }
 
             if (isCustomEndpoint) {
@@ -175,21 +194,43 @@ fun SettingsScreen(
 
 private data class SettingsItem(
     val title: String,
-    val onClick: () -> Unit
+    val iconRes: Int? = null,
+    val iconVector: ImageVector? = null,
+    val onClick: () -> Unit,
+    val isDestructive: Boolean = false
 )
 
 @Composable
 private fun SettingsRow(item: SettingsItem) {
+    val iconAndTextColor = if (item.isDestructive) EnsuColor.error else EnsuColor.textPrimary()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
+            .background(EnsuColor.fillFaint())
             .clickable(onClick = item.onClick)
-            .padding(vertical = EnsuSpacing.sm.dp),
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.lg.dp),
         horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        item.iconVector?.let { iconVector ->
+            Icon(
+                imageVector = iconVector,
+                contentDescription = null,
+                tint = iconAndTextColor,
+                modifier = Modifier.size(18.dp)
+            )
+        } ?: item.iconRes?.let { iconRes ->
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = iconAndTextColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = item.title, style = EnsuTypography.body, color = EnsuColor.textPrimary())
+            Text(text = item.title, style = EnsuTypography.body, color = iconAndTextColor)
         }
         Icon(
             painter = painterResource(HugeIcons.ArrowRight01Icon),
