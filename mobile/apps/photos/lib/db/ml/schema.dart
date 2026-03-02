@@ -182,3 +182,126 @@ CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
   $offlineFileKeyLocalIdColumn TEXT NOT NULL UNIQUE
 );
 ''';
+
+// ── PET RECOGNITION TABLES ─────────────────────────────────────────────
+
+// Shared column names
+const petFaceIDColumn = 'pet_face_id';
+const petBodyIDColumn = 'pet_body_id';
+const speciesColumn = 'species';
+const petLandmarksColumn = 'landmarks';
+const faceVectorIdColumn = 'face_vector_id';
+const bodyVectorIdColumn = 'body_vector_id';
+
+// ── Pet Faces Table ──
+
+const petFacesTable = 'pet_faces';
+
+const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
+  $fileIDColumn INTEGER NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL UNIQUE,
+  $faceDetectionColumn TEXT NOT NULL,
+  $petLandmarksColumn TEXT NOT NULL,
+  $faceVectorIdColumn INTEGER NOT NULL,
+  $speciesColumn TEXT NOT NULL,
+  $faceScore REAL NOT NULL,
+  $imageHeight INTEGER NOT NULL DEFAULT 0,
+  $imageWidth INTEGER NOT NULL DEFAULT 0,
+  $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
+  PRIMARY KEY($fileIDColumn, $petFaceIDColumn)
+);
+''';
+
+const deletePetFacesTable = 'DELETE FROM $petFacesTable';
+
+// ── Pet Bodies Table ──
+
+const petBodiesTable = 'pet_bodies';
+
+const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
+  $fileIDColumn INTEGER NOT NULL,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE,
+  $faceDetectionColumn TEXT NOT NULL,
+  $bodyVectorIdColumn INTEGER NOT NULL,
+  $speciesColumn TEXT NOT NULL,
+  $faceScore REAL NOT NULL,
+  $imageHeight INTEGER NOT NULL DEFAULT 0,
+  $imageWidth INTEGER NOT NULL DEFAULT 0,
+  $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
+  PRIMARY KEY($fileIDColumn, $petBodyIDColumn)
+);
+''';
+
+const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
+
+// ── Clustering Tables ──
+
+const petFaceClustersTable = 'pet_face_clusters';
+
+const createPetFaceClustersTable = '''
+CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
+  $petFaceIDColumn TEXT NOT NULL,
+  $clusterIDColumn TEXT NOT NULL,
+  PRIMARY KEY($petFaceIDColumn)
+);
+''';
+
+const petFcClusterIDIndex =
+    '''CREATE INDEX IF NOT EXISTS idx_petFcClusterID ON $petFaceClustersTable($clusterIDColumn);''';
+
+const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
+
+const petClusterSummaryTable = 'pet_cluster_summary';
+
+const createPetClusterSummaryTable = '''
+CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
+  $clusterIDColumn TEXT NOT NULL,
+  $avgColumn BLOB NOT NULL,
+  $countColumn INTEGER NOT NULL,
+  $speciesColumn TEXT NOT NULL,
+  PRIMARY KEY($clusterIDColumn)
+);
+''';
+
+const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
+
+// ── Embedding BLOB Columns (nullable, added via ALTER TABLE) ──
+
+const petFaceEmbeddingColumn = 'pet_face_embedding';
+const petBodyEmbeddingColumn = 'pet_body_embedding';
+
+const alterPetFacesAddEmbedding =
+    'ALTER TABLE $petFacesTable ADD COLUMN $petFaceEmbeddingColumn BLOB';
+
+const alterPetBodiesAddEmbedding =
+    'ALTER TABLE $petBodiesTable ADD COLUMN $petBodyEmbeddingColumn BLOB';
+
+// ── Vector ID Mapping Tables ──
+
+/// Maps pet_face_id (string) → integer for face usearch index
+const petFaceVectorIdMappingTable = 'pet_face_vector_id_map';
+const petFaceVectorIdColumn = 'pet_face_vector_id';
+
+const createPetFaceVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petFaceVectorIdMappingTable (
+  $petFaceVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL UNIQUE
+);
+''';
+
+const deletePetFaceVectorIdMappingTable =
+    'DELETE FROM $petFaceVectorIdMappingTable';
+
+/// Maps pet_body_id (string) → integer for body usearch index
+const petBodyVectorIdMappingTable = 'pet_body_vector_id_map';
+const petBodyVectorIdColumn = 'pet_body_vector_id';
+
+const createPetBodyVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
+  $petBodyVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE
+);
+''';
+
+const deletePetBodyVectorIdMappingTable =
+    'DELETE FROM $petBodyVectorIdMappingTable';
