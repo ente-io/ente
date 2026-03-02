@@ -130,7 +130,7 @@ export const PasteViewPanel = ({
                 </Stack>
             )}
 
-            {resolvedText && (
+            {!resolvedText && (
                 <Stack spacing={1.8}>
                     <Typography
                         sx={{
@@ -149,6 +149,7 @@ export const PasteViewPanel = ({
                             fullWidth
                             multiline
                             minRows={10}
+                            maxRows={14}
                             value={resolvedText}
                             slotProps={{
                                 htmlInput: { "aria-label": "Paste contents" },
@@ -166,6 +167,8 @@ export const PasteViewPanel = ({
                                 {
                                     "& .MuiFilledInput-root": {
                                         paddingBottom: "72px",
+                                        maxHeight: { xs: 320, sm: 360 },
+                                        overflow: "hidden",
                                         backdropFilter:
                                             "blur(9px) saturate(112%)",
                                         WebkitBackdropFilter:
@@ -201,26 +204,20 @@ export const PasteViewPanel = ({
                                 right: 18,
                                 bottom: 18,
                                 display: "flex",
-                                justifyContent: "space-between",
+                                justifyContent: "flex-end",
                                 alignItems: "center",
                                 gap: 1.2,
                                 pointerEvents: "none",
                             }}
                         >
-                            <Typography
-                                variant="mini"
-                                sx={{
-                                    color: "rgba(182, 197, 229, 0.44)",
-                                    fontWeight: 500,
-                                }}
-                            >
-                                This paste has been removed from Ente servers.
-                            </Typography>
                             <Button
                                 variant="contained"
                                 size="small"
                                 disableElevation
                                 onClick={() => {
+                                    if (resolvedText === null) {
+                                        return;
+                                    }
                                     void onCopyText(resolvedText).catch(() => {
                                         // Ignore errors to avoid unhandled rejections in click handlers.
                                     });
@@ -252,6 +249,15 @@ export const PasteViewPanel = ({
                             </Button>
                         </Box>
                     </Box>
+                    <Typography
+                        variant="mini"
+                        sx={{
+                            color: "rgba(182, 197, 229, 0.44)",
+                            fontWeight: 500,
+                        }}
+                    >
+                        This paste has been removed from Ente servers.
+                    </Typography>
                 </Stack>
             )}
         </>
