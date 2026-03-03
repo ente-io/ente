@@ -121,17 +121,7 @@ jobs:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}
                   releaseName: "Ensu Desktop ${{ env.RELEASE_TAG }}"
-                  releaseBody: |
-                      Release artifacts for Ensu.
-
-                      **Desktop:**
-                      - Linux (AppImage, deb)
-                      - macOS (dmg, app)
-                      - Windows (msi, exe)
-
-                      **Android:**
-                      - APK is attached to this release
-                      - AAB is uploaded to Play Store only
+                  releaseBody: "Ensu release assets: Linux/macOS/Windows desktop + Android APK (AAB on Play Store)."
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
