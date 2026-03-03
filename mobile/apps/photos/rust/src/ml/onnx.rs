@@ -94,7 +94,7 @@ fn build_session_with_providers(
     providers: Vec<ExecutionProviderDispatch>,
 ) -> MlResult<Session> {
     let mut builder = Session::builder()?
-        .with_optimization_level(GraphOptimizationLevel::Level1)?
+        .with_optimization_level(GraphOptimizationLevel::Level3)?
         .with_intra_threads(1)?
         .with_inter_threads(1)?;
 
