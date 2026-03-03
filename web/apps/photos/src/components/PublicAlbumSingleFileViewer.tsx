@@ -663,6 +663,9 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                     aria-label={t("more")}
                                     sx={{
                                         color: "white",
+                                        width: 40,
+                                        height: 40,
+                                        p: 0.75,
                                         bgcolor: "rgba(0, 0, 0, 0.4)",
                                         "&:hover": {
                                             bgcolor: "rgba(0, 0, 0, 0.55)",
