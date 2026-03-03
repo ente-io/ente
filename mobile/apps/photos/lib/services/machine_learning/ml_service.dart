@@ -50,7 +50,6 @@ class MLService {
   bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
-  bool debugPetOnlyMode = false;
   bool _clusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
@@ -273,11 +272,7 @@ class MLService {
         await MLIndexingIsolate.instance.ensureDownloadedModels();
       }
       final Stream<List<FileMLInstruction>> instructionStream =
-          fetchEmbeddingsAndInstructions(
-        fileDownloadMlLimit,
-        mode: mode,
-        forceAll: debugPetOnlyMode,
-      );
+          fetchEmbeddingsAndInstructions(fileDownloadMlLimit, mode: mode);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
@@ -540,12 +535,6 @@ class MLService {
 
   Future<bool> processImage(FileMLInstruction instruction) async {
     bool actuallyRanML = false;
-
-    // In pet-only mode, skip faces and clip to only run pet recognition
-    if (debugPetOnlyMode) {
-      instruction.shouldRunFaces = false;
-      instruction.shouldRunClip = false;
-    }
 
     final mlDataDB = _dbForMode(instruction.mode);
     try {

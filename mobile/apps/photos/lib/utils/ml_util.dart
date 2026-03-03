@@ -96,9 +96,7 @@ Future<IndexStatus> getIndexStatus() async {
 int _lastFetchTimeForOthersIndexed = 0;
 
 /// Return a list of file instructions for files that should be indexed for ML
-Future<List<FileMLInstruction>> getFilesForMlIndexing({
-  bool forceAll = false,
-}) async {
+Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
   final mlDataDB = MLDataDB.instance;
   final time = DateTime.now();
@@ -130,9 +128,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing({
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
 
-    final shouldRunFaces = forceAll ||
+    final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip = forceAll ||
+    final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
@@ -160,9 +158,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing({
       continue;
     }
     queuedFiledIDs.add(enteFile.uploadedFileID!);
-    final shouldRunFaces = forceAll ||
+    final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip = forceAll ||
+    final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
@@ -206,9 +204,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing({
   return [...splitResult.matched, ...splitResult.unmatched];
 }
 
-Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing({
-  bool forceAll = false,
-}) async {
+Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
   _logger.info('getOfflineFilesForMlIndexing called');
   final mlDataDB = MLDataDB.offlineInstance;
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
@@ -247,18 +243,16 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing({
       continue;
     }
     queuedFileIDs.add(localIntId);
-    final shouldRunFaces = forceAll ||
-        _shouldRunIndexingWithFileId(
-          localIntId,
-          faceIndexedFileIDs,
-          faceMlVersion,
-        );
-    final shouldRunClip = forceAll ||
-        _shouldRunIndexingWithFileId(
-          localIntId,
-          clipIndexedFileIDs,
-          clipMlVersion,
-        );
+    final shouldRunFaces = _shouldRunIndexingWithFileId(
+      localIntId,
+      faceIndexedFileIDs,
+      faceMlVersion,
+    );
+    final shouldRunClip = _shouldRunIndexingWithFileId(
+      localIntId,
+      clipIndexedFileIDs,
+      clipMlVersion,
+    );
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -281,12 +275,10 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing({
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize, {
   required MLMode mode,
-  bool forceAll = false,
 }) async* {
-  if (mode == MLMode.offline || forceAll) {
-    final List<FileMLInstruction> filesToIndex = mode == MLMode.offline
-        ? await getOfflineFilesForMlIndexing(forceAll: forceAll)
-        : await getFilesForMlIndexing(forceAll: forceAll);
+  if (mode == MLMode.offline) {
+    final List<FileMLInstruction> filesToIndex =
+        await getOfflineFilesForMlIndexing();
     final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
     for (final batch in chunks) {
       yield batch;
