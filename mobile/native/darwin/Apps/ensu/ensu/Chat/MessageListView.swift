@@ -25,12 +25,7 @@ struct MessageListView: View {
     @State private var lastContentHeight: CGFloat = 0
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
-    @State private var suppressAutoScrollAfterGeneration = false
-    @State private var showStreamingBubble = false
-    @State private var streamingWasGenerating = false
     @State private var streamingTextStorageId = UUID().uuidString
-    @State private var streamingHideWorkItem: DispatchWorkItem?
-    private let streamingOutroDuration: TimeInterval = 0.52
 
     var body: some View {
         GeometryReader { proxy in
@@ -79,52 +74,7 @@ struct MessageListView: View {
                     .onAppear {
                         lastScrollChange = currentScrollChange
                         didInitialScroll = false
-                        showStreamingBubble = isGenerating
-                        streamingWasGenerating = isGenerating
                         scheduleInitialScroll(scrollProxy)
-                    }
-                    .onChange(of: isGenerating) { generating in
-                        if generating {
-                            streamingHideWorkItem?.cancel()
-                            streamingHideWorkItem = nil
-                            showStreamingBubble = true
-                            suppressAutoScrollAfterGeneration = false
-                        } else {
-                            suppressAutoScrollAfterGeneration = true
-                            if streamingWasGenerating {
-                                let workItem = DispatchWorkItem {
-                                    showStreamingBubble = false
-                                    suppressAutoScrollAfterGeneration = false
-                                    streamingHideWorkItem = nil
-                                }
-                                streamingHideWorkItem?.cancel()
-                                streamingHideWorkItem = workItem
-                                DispatchQueue.main.asyncAfter(deadline: .now() + streamingOutroDuration, execute: workItem)
-                            }
-                        }
-                        streamingWasGenerating = generating
-                    }
-                    .onChange(of: sessionId) { _ in
-                        streamingHideWorkItem?.cancel()
-                        streamingHideWorkItem = nil
-                        showStreamingBubble = isGenerating
-                        streamingWasGenerating = isGenerating
-                    }
-
-                    if showStreamingBubble {
-                        EnsuBrandIllustration(
-                            width: 115,
-                            height: 52.5,
-                            outroTrigger: !isGenerating,
-                            outroInputName: "outro",
-                            clipsContent: false,
-                            riveAlignment: .center
-                        )
-                        .offset(y: -4)
-                        .frame(width: 115, height: 52.5, alignment: .top)
-                        .padding(.bottom, floatingStreamingBottomPadding)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .allowsHitTesting(false)
                     }
                 }
             }
@@ -246,8 +196,7 @@ struct MessageListView: View {
                             onRetry: { onRetry(message) },
                             onBranchChange: { delta in onBranchChange(message, delta) },
                             onOpenAttachment: openAttachment,
-                            showsMetadata: true,
-                            showOutroRive: false
+                            showsMetadata: true
                         )
                         .id(message.id)
                         .transition(messageTransition)
@@ -292,17 +241,21 @@ struct MessageListView: View {
         let hasText = !trimmed.isEmpty
 
         return HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 0) {
-                TimelineView(.periodic(from: .now, by: 0.55)) { context in
-                    let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
-                    let showCursor = phase == 0
-                    AssistantMessageRenderer(
-                        text: streamingResponse,
-                        isStreaming: true,
-                        storageId: streamingTextStorageId,
-                        showsCursor: showCursor
-                    )
+            VStack(alignment: .leading, spacing: hasText ? EnsuSpacing.sm : 0) {
+                if hasText {
+                    TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                        let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
+                        let showCursor = phase == 0
+                        AssistantMessageRenderer(
+                            text: streamingResponse,
+                            isStreaming: true,
+                            storageId: streamingTextStorageId,
+                            showsCursor: showCursor
+                        )
+                    }
                 }
+
+                StreamingDotsView()
             }
             .padding(.vertical, hasText ? EnsuSpacing.md : 0)
             .padding(.horizontal, EnsuSpacing.sm)
@@ -313,13 +266,6 @@ struct MessageListView: View {
 
     private var messageTransition: AnyTransition {
         .identity
-    }
-
-    private var floatingStreamingBottomPadding: CGFloat {
-        let floatingGap: CGFloat = 36
-        let minPadding = EnsuSpacing.xxxl + floatingGap
-        let inputPadding = inputBarHeight > 0 ? inputBarHeight + floatingGap : minPadding
-        return max(minPadding, inputPadding)
     }
 
     private var contentBottomPadding: CGFloat {
@@ -373,6 +319,20 @@ struct MessageListView: View {
         let invalidCharacters = CharacterSet(charactersIn: "/\\:")
         let sanitized = baseName.components(separatedBy: invalidCharacters).joined(separator: "-")
         return sanitized.isEmpty ? attachment.id.uuidString : sanitized
+    }
+}
+
+private struct StreamingDotsView: View {
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.42)) { context in
+            let step = Int(context.date.timeIntervalSinceReferenceDate / 0.42)
+            let count = (step % 3) + 1
+            Text(String(repeating: ".", count: count))
+                .font(EnsuTypography.message)
+                .monospaced()
+                .foregroundStyle(EnsuColor.textMuted)
+                .frame(minWidth: 24, alignment: .leading)
+        }
     }
 }
 

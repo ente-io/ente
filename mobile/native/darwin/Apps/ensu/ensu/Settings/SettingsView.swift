@@ -23,32 +23,39 @@ struct SettingsView: View {
                         signedInCard(email: email)
                     }
 
-                    ForEach(filteredItems) { item in
-                        NavigationLink {
-                            item.destination
-                        } label: {
-                            settingsCard(title: item.title, showsChevron: true)
+                    if let aboutItem = filteredAboutItem {
+                        Button(action: aboutItem.action) {
+                            settingsCard(title: aboutItem.title, iconName: aboutItem.iconName, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
-                    ForEach(filteredLinkItems) { item in
-                        Button(action: item.action) {
-                            settingsCard(title: item.title, showsChevron: false)
+                    ForEach(filteredItems) { item in
+                        NavigationLink {
+                            item.destination
+                        } label: {
+                            settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
                     ForEach(filteredAccountItems) { item in
                         Button(action: item.action) {
-                            settingsCard(title: item.title, showsChevron: false)
+                            settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
 
                     if shouldShowSignInRow {
                         Button(action: onSignIn) {
-                            settingsCard(title: signInTitle, showsChevron: false)
+                            settingsCard(title: signInTitle, iconName: "Upload01Icon", showsChevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    ForEach(filteredLegalLinkItems) { item in
+                        Button(action: item.action) {
+                            settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
                         }
                         .buttonStyle(.plain)
                     }
@@ -100,14 +107,24 @@ struct SettingsView: View {
         }
     }
 
-    private var linkItems: [SettingsActionItem] {
+    private var aboutItem: SettingsActionItem {
+        SettingsActionItem(
+            title: "About",
+            iconName: "InformationCircleIcon",
+            action: { openExternalLink("https://ente.io/blog/ensu/") }
+        )
+    }
+
+    private var legalLinkItems: [SettingsActionItem] {
         [
             SettingsActionItem(
                 title: "Privacy Policy",
+                iconName: "ViewIcon",
                 action: { openExternalLink("https://ente.io/privacy") }
             ),
             SettingsActionItem(
                 title: "Terms of Service",
+                iconName: "DescriptionIcon",
                 action: { openExternalLink("https://ente.io/terms") }
             )
         ]
@@ -118,10 +135,12 @@ struct SettingsView: View {
         return [
             SettingsActionItem(
                 title: "Delete Account",
+                iconName: "Delete01Icon",
                 action: { openDeleteAccountEmail() }
             ),
             SettingsActionItem(
                 title: "Sign Out",
+                iconName: "Cancel01Icon",
                 action: { showSignOutConfirm = true }
             )
         ]
@@ -135,10 +154,16 @@ struct SettingsView: View {
         }
     }
 
-    private var filteredLinkItems: [SettingsActionItem] {
-        guard !trimmedQuery.isEmpty else { return linkItems }
+    private var filteredAboutItem: SettingsActionItem? {
+        guard !trimmedQuery.isEmpty else { return aboutItem }
         let q = trimmedQuery.lowercased()
-        return linkItems.filter { item in
+        return aboutItem.title.lowercased().contains(q) ? aboutItem : nil
+    }
+
+    private var filteredLegalLinkItems: [SettingsActionItem] {
+        guard !trimmedQuery.isEmpty else { return legalLinkItems }
+        let q = trimmedQuery.lowercased()
+        return legalLinkItems.filter { item in
             item.title.lowercased().contains(q)
         }
     }
@@ -157,6 +182,7 @@ struct SettingsView: View {
         [
             SettingsItem(
                 title: "Logs",
+                iconName: "Bug01Icon",
                 destination: AnyView(LogsView(embeddedInNavigation: true))
             )
         ]
@@ -206,8 +232,14 @@ struct SettingsView: View {
         .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
     }
 
-    private func settingsCard(title: String, showsChevron: Bool) -> some View {
+    private func settingsCard(title: String, iconName: String, showsChevron: Bool) -> some View {
         HStack(spacing: EnsuSpacing.md) {
+            Image(iconName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .foregroundStyle(EnsuColor.textPrimary)
+
             Text(title)
                 .font(EnsuTypography.body)
                 .foregroundStyle(EnsuColor.textPrimary)
@@ -230,12 +262,14 @@ struct SettingsView: View {
 private struct SettingsItem: Identifiable {
     let id = UUID()
     let title: String
+    let iconName: String
     let destination: AnyView
 }
 
 private struct SettingsActionItem: Identifiable {
     let id = UUID()
     let title: String
+    let iconName: String
     let action: () -> Void
 }
 #else

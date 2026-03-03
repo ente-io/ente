@@ -161,7 +161,7 @@ struct PasskeyView: View {
     @MainActor
     private func handleAuthResponse(_ payload: AuthResponsePayload) async throws {
         guard let keyAttrs = payload.keyAttributes else {
-            throw EnsuError.Message(message: "Invalid passkey response")
+            throw EnsuError.Message(reason: "Invalid passkey response")
         }
 
         if let password, !password.isEmpty {

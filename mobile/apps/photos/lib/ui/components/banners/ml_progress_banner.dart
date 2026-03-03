@@ -139,6 +139,15 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     final showPausedPhase = _shouldShowPausedPhase(status);
     final showModelDownloadPhase = _shouldShowModelDownloadPhase(status);
 
+    final titleStyle = textTheme.largeBold.copyWith(
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      height: 24 / 18,
+      letterSpacing: -1,
+      color: colorScheme.greenBase,
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: GestureDetector(
@@ -160,25 +169,23 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                 children: [
                   Text(
                     l10n.mlProgressBannerTitle,
-                    style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: colorScheme.greenBase,
-                    ),
+                    style: titleStyle,
                   ),
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
-                          color: colorScheme.textFaint,
-                          size: 20,
-                          strokeWidth: 2,
+                          color: colorScheme.contentDark,
+                          size: 18,
+                          strokeWidth: 2.5,
                         ),
                       ),
                     ),
@@ -188,10 +195,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
               const SizedBox(height: 8),
               Text(
                 l10n.mlProgressBannerDescription,
-                style: textTheme.miniMuted.copyWith(
-                  fontFamily: "Montserrat",
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textTheme.smallMuted,
               ),
               const SizedBox(height: 24),
               ClipRRect(
@@ -232,7 +236,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                               indexed: format.format(status.indexedItems),
                               total: format.format(total),
                             ),
-                  style: textTheme.tinyMuted,
+                  style: textTheme.miniMuted,
                 ),
               ),
             ],

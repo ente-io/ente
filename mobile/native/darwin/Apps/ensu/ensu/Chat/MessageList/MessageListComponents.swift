@@ -166,7 +166,6 @@ struct AssistantMessageBubbleView: View {
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
     let showsMetadata: Bool
-    let showOutroRive: Bool
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -195,19 +194,6 @@ struct AssistantMessageBubbleView: View {
                     }
                 }
                 #endif
-
-                if showOutroRive {
-                    EnsuBrandIllustration(
-                        width: 115,
-                        height: 52.5,
-                        outroTrigger: true,
-                        outroInputName: "outro",
-                        clipsContent: false
-                    )
-                    .padding(.horizontal, EnsuSpacing.sm)
-                    .offset(y: -4)
-                    .frame(width: 115, height: 52.5, alignment: .topLeading)
-                }
 
                 if showsMetadata {
                     HStack(spacing: EnsuSpacing.sm) {
@@ -239,12 +225,9 @@ private enum StreamingCursor {
 struct StreamingBubbleView: View {
     let text: String
     let isGenerating: Bool
-    let isOutroPhase: Bool
 
     @State private var storageId = UUID().uuidString
     @State private var renderedText = ""
-    private let riveWidth: CGFloat = 115
-    private let riveHeight: CGFloat = 52.5
 
     var body: some View {
         let hasText = isGenerating && !renderedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -266,15 +249,15 @@ struct StreamingBubbleView: View {
                     }
                 }
 
-                EnsuBrandIllustration(
-                    width: riveWidth,
-                    height: riveHeight,
-                    outroTrigger: isOutroPhase,
-                    outroInputName: "outro",
-                    clipsContent: false
-                )
-                .offset(y: -4)
-                .frame(width: riveWidth, height: riveHeight, alignment: .topLeading)
+                TimelineView(.periodic(from: .now, by: 0.42)) { context in
+                    let step = Int(context.date.timeIntervalSinceReferenceDate / 0.42)
+                    let count = (step % 3) + 1
+                    Text(String(repeating: ".", count: count))
+                        .font(EnsuTypography.message)
+                        .monospaced()
+                        .foregroundStyle(EnsuColor.textMuted)
+                        .frame(minWidth: 24, alignment: .leading)
+                }
             }
             .padding(.vertical, bubbleVerticalPadding)
             .padding(.horizontal, EnsuSpacing.sm)

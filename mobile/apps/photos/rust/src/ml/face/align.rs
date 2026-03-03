@@ -34,7 +34,7 @@ struct FaceDetectionAbsolute {
 pub fn run_face_alignment(
     file_id: i64,
     decoded: &DecodedImage,
-    detections: &[FaceDetection],
+    detections: Vec<FaceDetection>,
 ) -> MlResult<(Vec<Vec<f32>>, Vec<FaceResult>)> {
     let source = rgb_image_from_decoded(decoded)?;
     let mut aligned_face_inputs = Vec::with_capacity(detections.len());
@@ -42,7 +42,7 @@ pub fn run_face_alignment(
 
     for detection in detections {
         let absolute_detection = to_absolute_detection(
-            detection,
+            &detection,
             decoded.dimensions.width,
             decoded.dimensions.height,
         );
@@ -54,7 +54,7 @@ pub fn run_face_alignment(
 
         aligned_face_inputs.push(normalized);
         face_results.push(FaceResult {
-            detection: detection.clone(),
+            detection,
             blur_value,
             alignment,
             embedding: Vec::new(),
@@ -275,9 +275,11 @@ fn face_direction(detection: &FaceDetectionAbsolute) -> FaceDirection {
 }
 
 fn compute_blur_value(face_image: &RgbImage, direction: FaceDirection) -> f32 {
-    let gray = to_grayscale_matrix(face_image);
-    let lap = apply_laplacian(&gray, direction);
-    let variance = variance_2d(&lap);
+    let (gray, gray_rows, gray_cols) = to_grayscale_buffer(face_image);
+    let (padded, padded_rows, padded_cols) =
+        pad_image_for_direction(&gray, gray_rows, gray_cols, direction);
+    let (laplacian, lap_rows, lap_cols) = apply_laplacian(&padded, padded_rows, padded_cols);
+    let variance = variance_2d(&laplacian, lap_rows, lap_cols);
     if variance.is_finite() {
         variance
     } else {
@@ -285,51 +287,51 @@ fn compute_blur_value(face_image: &RgbImage, direction: FaceDirection) -> f32 {
     }
 }
 
-fn to_grayscale_matrix(face_image: &RgbImage) -> Vec<Vec<i32>> {
+fn to_grayscale_buffer(face_image: &RgbImage) -> (Vec<i32>, usize, usize) {
     let w = face_image.width() as usize;
     let h = face_image.height() as usize;
-    let mut gray = vec![vec![0i32; w]; h];
-    for (y, row) in gray.iter_mut().enumerate().take(h) {
-        for (x, value) in row.iter_mut().enumerate().take(w) {
+    let mut gray = vec![0i32; w * h];
+    for y in 0..h {
+        for x in 0..w {
             let px = face_image.get_pixel(x as u32, y as u32).0;
-            *value = (0.299 * px[0] as f32 + 0.587 * px[1] as f32 + 0.114 * px[2] as f32)
+            gray[y * w + x] = (0.299 * px[0] as f32 + 0.587 * px[1] as f32 + 0.114 * px[2] as f32)
                 .round()
                 .clamp(0.0, 255.0) as i32;
         }
     }
-    gray
+    (gray, h, w)
 }
 
-fn apply_laplacian(image: &[Vec<i32>], direction: FaceDirection) -> Vec<Vec<i32>> {
-    let padded = pad_image_for_direction(image, direction);
-    let rows = padded.len().saturating_sub(2);
-    let cols = padded
-        .first()
-        .map(|r| r.len().saturating_sub(2))
-        .unwrap_or(0);
-    let kernel = [[0i32, 1, 0], [1, -4, 1], [0, 1, 0]];
-    let mut out = vec![vec![0i32; cols]; rows];
-
+fn apply_laplacian(
+    padded: &[i32],
+    padded_rows: usize,
+    padded_cols: usize,
+) -> (Vec<i32>, usize, usize) {
+    let rows = padded_rows.saturating_sub(2);
+    let cols = padded_cols.saturating_sub(2);
+    let mut out = vec![0i32; rows * cols];
     for i in 0..rows {
         for j in 0..cols {
-            let mut sum = 0i32;
-            for ki in 0..3 {
-                for kj in 0..3 {
-                    sum += padded[i + ki][j + kj] * kernel[ki][kj];
-                }
-            }
-            out[i][j] = sum;
+            let top = padded[i * padded_cols + (j + 1)];
+            let left = padded[(i + 1) * padded_cols + j];
+            let center = padded[(i + 1) * padded_cols + (j + 1)];
+            let right = padded[(i + 1) * padded_cols + (j + 2)];
+            let bottom = padded[(i + 2) * padded_cols + (j + 1)];
+            out[i * cols + j] = top + left - (4 * center) + right + bottom;
         }
     }
-    out
+    (out, rows, cols)
 }
 
-fn pad_image_for_direction(image: &[Vec<i32>], direction: FaceDirection) -> Vec<Vec<i32>> {
-    let rows = image.len();
-    let cols = image.first().map(|r| r.len()).unwrap_or(0);
+fn pad_image_for_direction(
+    image: &[i32],
+    rows: usize,
+    cols: usize,
+    direction: FaceDirection,
+) -> (Vec<i32>, usize, usize) {
     let padded_cols = cols + 2 - REMOVE_SIDE_COLUMNS;
     let padded_rows = rows + 2;
-    let mut padded = vec![vec![0i32; padded_cols]; padded_rows];
+    let mut padded = vec![0i32; padded_rows * padded_cols];
 
     let start_col = match direction {
         FaceDirection::Straight => REMOVE_SIDE_COLUMNS / 2,
@@ -340,51 +342,43 @@ fn pad_image_for_direction(image: &[Vec<i32>], direction: FaceDirection) -> Vec<
 
     for i in 0..rows {
         for j in 0..copy_cols {
-            padded[i + 1][j + 1] = image[i][j + start_col];
+            padded[(i + 1) * padded_cols + (j + 1)] = image[i * cols + (j + start_col)];
         }
     }
 
     if copy_cols > 0 {
-        {
-            let (top_rows, other_rows) = padded.split_at_mut(1);
-            top_rows[0][1..=copy_cols].copy_from_slice(&other_rows[1][1..=copy_cols]);
+        for col in 0..copy_cols {
+            padded[1 + col] = padded[2 * padded_cols + 1 + col];
+            padded[(rows + 1) * padded_cols + 1 + col] = padded[(rows - 1) * padded_cols + 1 + col];
         }
-        {
-            let (upper_rows, bottom_rows) = padded.split_at_mut(rows + 1);
-            bottom_rows[0][1..=copy_cols].copy_from_slice(&upper_rows[rows - 1][1..=copy_cols]);
-        }
-    }
-    for row in padded.iter_mut().take(rows + 2) {
-        row[0] = row[2];
-        row[padded_cols - 1] = row[padded_cols - 3];
     }
 
-    padded
+    for row in 0..(rows + 2) {
+        let row_start = row * padded_cols;
+        padded[row_start] = padded[row_start + 2];
+        padded[row_start + padded_cols - 1] = padded[row_start + padded_cols - 3];
+    }
+
+    (padded, padded_rows, padded_cols)
 }
 
-fn variance_2d(matrix: &[Vec<i32>]) -> f32 {
-    if matrix.is_empty() || matrix[0].is_empty() {
+fn variance_2d(matrix: &[i32], rows: usize, cols: usize) -> f32 {
+    if rows == 0 || cols == 0 {
         return 0.0;
     }
 
-    let rows = matrix.len();
-    let cols = matrix[0].len();
     let total = (rows * cols) as f32;
 
     let mut mean = 0.0f32;
-    for row in matrix {
-        for value in row {
-            mean += *value as f32;
-        }
+    for value in matrix {
+        mean += *value as f32;
     }
     mean /= total;
 
     let mut variance = 0.0f32;
-    for row in matrix {
-        for value in row {
-            let diff = *value as f32 - mean;
-            variance += diff * diff;
-        }
+    for value in matrix {
+        let diff = *value as f32 - mean;
+        variance += diff * diff;
     }
     variance / total
 }

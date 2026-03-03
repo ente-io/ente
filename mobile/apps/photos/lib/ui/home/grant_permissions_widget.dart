@@ -15,10 +15,12 @@ import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
   const GrantPermissionsWidget({
@@ -236,10 +238,16 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _showPermissionDeniedDialog() async {
+    final title = widget.startWithoutAccount
+        ? context.l10n.grantPermission
+        : context.l10n.allowPermTitle;
+    final message = widget.startWithoutAccount
+        ? context.l10n.grantPermissionDesc
+        : context.l10n.allowPermBody;
     await showAlertBottomSheet(
       context,
-      title: context.l10n.allowPermTitle,
-      message: context.l10n.allowPermBody,
+      title: title,
+      message: message,
       assetPath: 'assets/ducky_smart_feature.png',
       buttons: [
         ButtonWidgetV2(
@@ -328,6 +336,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       body: Stack(
         children: [
           _buildSkeletonGallery(context),
+          _buildOfflinePermissionHeader(context),
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -338,7 +347,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                     colorScheme.contentReverse.withValues(alpha: 0.4),
                     colorScheme.contentReverse,
                   ],
-                  stops: const [0.0, 0.55],
+                  stops: const [0.0, 0.45],
                 ),
               ),
             ),
@@ -346,33 +355,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    height: 52,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedMenu01,
-                          size: 24,
-                          color: colorScheme.strokeBase,
-                        ),
-                        Text(
-                          "ente",
-                          style: textTheme.h3Bold.copyWith(
-                            fontFamily: "Montserrat",
-                          ),
-                        ),
-                        HugeIcon(
-                          icon: HugeIcons.strokeRoundedUpload01,
-                          size: 24,
-                          color: colorScheme.strokeBase,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -413,6 +395,8 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                               AppLocalizations.of(context).grantPermission,
                           onTap: _onTapOfflineGrantPermission,
                         ),
+                        const SizedBox(height: 20),
+                        _buildOfflineTermsAndPrivacy(context),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -422,6 +406,90 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineTermsAndPrivacy(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: StyledText(
+        text: AppLocalizations.of(context).byAgreeing,
+        textAlign: TextAlign.center,
+        style: textTheme.bodyMuted,
+        tags: {
+          'terms': StyledTextActionTag(
+            (String? text, Map<String?, String?> attrs) =>
+                Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage(
+                    AppLocalizations.of(context).termsOfServicesTitle,
+                    "https://ente.io/terms",
+                  );
+                },
+              ),
+            ),
+            style: textTheme.bodyMuted.copyWith(
+              decoration: TextDecoration.underline,
+              decorationColor: textTheme.bodyMuted.color,
+            ),
+          ),
+          'policy': StyledTextActionTag(
+            (String? text, Map<String?, String?> attrs) =>
+                Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage(
+                    AppLocalizations.of(context).privacyPolicyTitle,
+                    "https://ente.io/privacy",
+                  );
+                },
+              ),
+            ),
+            style: textTheme.bodyMuted.copyWith(
+              decoration: TextDecoration.underline,
+              decorationColor: textTheme.bodyMuted.color,
+            ),
+          ),
+        },
+      ),
+    );
+  }
+
+  Widget _buildOfflinePermissionHeader(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedMenu01,
+                size: 24,
+                color: colorScheme.strokeBase,
+              ),
+              Text(
+                "ente",
+                style: textTheme.h3Bold.copyWith(
+                  fontFamily: "Montserrat",
+                ),
+              ),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedUpload01,
+                size: 24,
+                color: colorScheme.strokeBase,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

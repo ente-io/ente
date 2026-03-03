@@ -1,5 +1,6 @@
 - Ashil: Show notifications for newly added photos to shared album
 - Ashil: Show feed item and notification for newly shared album
+- Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Internal toggle to let ML run uninterrupted
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users
