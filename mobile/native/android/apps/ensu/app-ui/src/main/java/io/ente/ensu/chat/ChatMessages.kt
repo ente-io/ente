@@ -341,7 +341,7 @@ private fun EmptyState(
 @Composable
 private fun AiSafetyFooter() {
     Text(
-        text = "Ensu can make mistakes. Double-check key details.",
+        text = "Ensu can make mistakes. Please double-check key details.",
         style = EnsuTypography.small.copy(fontSize = 12.sp),
         color = EnsuColor.textMuted(),
         textAlign = TextAlign.Center,

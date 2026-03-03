@@ -118,7 +118,7 @@ const AiSafetyFooter = memo(() => {
                 lineHeight: "16px",
             }}
         >
-            Ensu can make mistakes. Double-check key details.
+            Ensu can make mistakes. Please double-check key details.
         </Typography>
     );
 });
