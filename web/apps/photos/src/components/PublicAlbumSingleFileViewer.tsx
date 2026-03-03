@@ -80,6 +80,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
         needsThumbnailPrime ? undefined : file.id,
     );
     const isViewerPrimed = !needsThumbnailPrime || primedFileID === file.id;
+    const viewerFiles = useMemo(() => [file], [file]);
 
     useEffect(() => {
         document.body.classList.add(bodyClassName);
@@ -336,7 +337,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
             <FileViewer
                 open
                 onClose={handleViewerClose}
-                files={[file]}
+                files={viewerFiles}
                 initialIndex={0}
                 disableEscapeClose
                 disableDownload={!enableDownload}
