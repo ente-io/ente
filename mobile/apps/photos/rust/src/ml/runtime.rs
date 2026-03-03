@@ -92,18 +92,7 @@ impl LazySession {
             let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
             rt_log(&format!("loading {model_name}"));
             let t = std::time::Instant::now();
-            // Lazy sessions load while the runtime mutex is held (inside func()),
-            // so the with_runtime_mut_inner EP fallback cannot catch hangs or OOM
-            // during session building. Use CPU-friendly policy to avoid NNAPI/CoreML
-            // driver issues (e.g. NNAPI on some MTK devices hangs or OOMs even when
-            // it only accelerates <1% of graph nodes).
-            let load_policy = ExecutionProviderPolicy {
-                prefer_coreml: false,
-                prefer_nnapi: false,
-                prefer_xnnpack: self.policy.prefer_xnnpack,
-                allow_cpu_fallback: true,
-            };
-            self.session = Some(onnx::build_session(&self.path, &load_policy)?);
+            self.session = Some(onnx::build_session(&self.path, &self.policy)?);
             rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
         }
         Ok(self.session.as_mut().unwrap())
@@ -150,16 +139,24 @@ static GLOBAL_RUNTIME: Lazy<Mutex<Option<RuntimeState>>> = Lazy::new(|| Mutex::n
 
 fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
     let p = &config.provider_policy;
+    // Pet models use CPU-only to avoid NNAPI/CoreML driver issues with
+    // FP16 models on some devices.
+    let pet_policy = ExecutionProviderPolicy {
+        prefer_coreml: false,
+        prefer_nnapi: false,
+        prefer_xnnpack: false,
+        allow_cpu_fallback: true,
+    };
     MlRuntime {
         face_detection: LazySession::new(config.model_paths.face_detection.clone(), p.clone()),
         face_embedding: LazySession::new(config.model_paths.face_embedding.clone(), p.clone()),
         clip_image: LazySession::new(config.model_paths.clip_image.clone(), p.clone()),
-        pet_face_detection: LazySession::new(config.model_paths.pet_face_detection.clone(), p.clone()),
-        pet_face_embedding_dog: LazySession::new(config.model_paths.pet_face_embedding_dog.clone(), p.clone()),
-        pet_face_embedding_cat: LazySession::new(config.model_paths.pet_face_embedding_cat.clone(), p.clone()),
-        pet_body_detection: LazySession::new(config.model_paths.pet_body_detection.clone(), p.clone()),
-        pet_body_embedding_dog: LazySession::new(config.model_paths.pet_body_embedding_dog.clone(), p.clone()),
-        pet_body_embedding_cat: LazySession::new(config.model_paths.pet_body_embedding_cat.clone(), p.clone()),
+        pet_face_detection: LazySession::new(config.model_paths.pet_face_detection.clone(), pet_policy.clone()),
+        pet_face_embedding_dog: LazySession::new(config.model_paths.pet_face_embedding_dog.clone(), pet_policy.clone()),
+        pet_face_embedding_cat: LazySession::new(config.model_paths.pet_face_embedding_cat.clone(), pet_policy.clone()),
+        pet_body_detection: LazySession::new(config.model_paths.pet_body_detection.clone(), pet_policy.clone()),
+        pet_body_embedding_dog: LazySession::new(config.model_paths.pet_body_embedding_dog.clone(), pet_policy.clone()),
+        pet_body_embedding_cat: LazySession::new(config.model_paths.pet_body_embedding_cat.clone(), pet_policy),
     }
 }
 

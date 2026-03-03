@@ -397,8 +397,8 @@ class MLIndexingIsolate extends SuperIsolate {
       "petBodyEmbeddingDogModelPath": petBodyEmbeddingDogPath,
       "petBodyEmbeddingCatModelPath": petBodyEmbeddingCatPath,
       "preferCoreml": Platform.isIOS,
-      "preferNnapi": false,
-      "preferXnnpack": false,
+      "preferNnapi": Platform.isAndroid,
+      "preferXnnpack": Platform.isAndroid,
       "allowCpuFallback": true,
     };
   }
