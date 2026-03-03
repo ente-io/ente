@@ -150,6 +150,7 @@ jobs:
                   releaseBody: "Ensu release assets: Linux/macOS/Windows desktop + Android APK."
                   releaseDraft: true
                   prerelease: false
+                  uploadWorkflowArtifacts: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
 
