@@ -180,6 +180,7 @@ jobs:
                   node <<'NODE'
                   const fs = require('node:fs');
 
+                  (async () => {
                   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
                   const repo = process.env.GH_REPO;
                   const tag = process.env.RELEASE_TAG;
@@ -283,6 +284,10 @@ jobs:
 
                   fs.writeFileSync('/tmp/ensu-latest.json', JSON.stringify(latest, null, 2));
                   console.log(`Generated /tmp/ensu-latest.json with platforms: ${Object.keys(platforms).join(', ')}`);
+                  })().catch((error) => {
+                    console.error(error);
+                    process.exit(1);
+                  });
                   NODE
 
             - name: Upload latest.json to GitHub release
@@ -297,6 +302,7 @@ jobs:
         env:
             HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
             HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+            SHOULD_UPLOAD_PLAYSTORE: ${{ github.event_name != 'workflow_dispatch' && secrets.SERVICE_ACCOUNT_JSON != '' }}
             HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
         defaults:
@@ -353,6 +359,7 @@ jobs:
               run: |
                   echo "HAS_ANDROID_SIGNING=${HAS_ANDROID_SIGNING}"
                   echo "HAS_PLAYSTORE_SERVICE_ACCOUNT=${HAS_PLAYSTORE_SERVICE_ACCOUNT}"
+                  echo "SHOULD_UPLOAD_PLAYSTORE=${SHOULD_UPLOAD_PLAYSTORE}"
                   echo "HAS_DISCORD_WEBHOOK=${HAS_DISCORD_WEBHOOK}"
 
             - name: Setup signing keys
@@ -370,7 +377,7 @@ jobs:
             - name: Build signed Android artifacts
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
-                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
+                  if [ "${SHOULD_UPLOAD_PLAYSTORE}" = "true" ]; then
                       ./gradlew :app-ui:assembleRelease :app-ui:bundleRelease
                   else
                       ./gradlew :app-ui:assembleRelease
@@ -393,7 +400,7 @@ jobs:
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to PlayStore
-              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true'
               uses: r0adkll/upload-google-play@v1
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
@@ -402,7 +409,7 @@ jobs:
                   track: internal
 
             - name: Notify Discord
-              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
+              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
               uses: sarisia/actions-status-discord@v1
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
