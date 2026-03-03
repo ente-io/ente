@@ -193,7 +193,6 @@ class FeedDataProvider {
           sharedCollectionsContext.collectionNames,
           initialSharedFileIDsByCollection:
               sharedPhotoFeedResult.initialSharedFileIDsByCollection,
-          sharedFeedCutoffTime: sharedFeedCutoffTime,
         ),
       );
 
@@ -619,12 +618,9 @@ class FeedDataProvider {
     List<Collection> incomingSharedCollections,
     Map<int, String> collectionNames, {
     required Map<int, List<int>> initialSharedFileIDsByCollection,
-    required int sharedFeedCutoffTime,
   }) {
     return incomingSharedCollections
-        .where(
-          (collection) => (collection.sharedAt ?? 0) > sharedFeedCutoffTime,
-        )
+        .where((collection) => (collection.sharedAt ?? 0) > 0)
         .map((collection) {
           final ownerID = collection.owner.id;
           if (ownerID == null) {
