@@ -132,13 +132,12 @@ jobs:
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
-                  GH_REPO: ${{ github.repository }}
               run: |
                   node - <<'NODE'
                   const fs = require('fs');
                   const path = 'rust/apps/ensu/src-tauri/tauri.conf.json';
                   const config = JSON.parse(fs.readFileSync(path, 'utf8'));
-                  const endpoint = (process.env.ENSU_TAURI_UPDATER_ENDPOINT || `https://github.com/${process.env.GH_REPO}/releases/latest/download/latest.json`).trim();
+                  const endpoint = (process.env.ENSU_TAURI_UPDATER_ENDPOINT || 'https://ente.io/release-info/ensu-desktop.json').trim();
 
                   if (!process.env.ENSU_TAURI_UPDATER_PUBKEY) {
                     throw new Error('ENSU_TAURI_UPDATER_PUBKEY is empty');
