@@ -1,5 +1,3 @@
-import "dart:io";
-
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -167,8 +165,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       _isSending = true;
     });
 
-    final bugsEmail =
-        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
+    final recipientEmail = supportEmail;
     String? logsZipFilePath;
     String? logsLabel;
 
@@ -187,14 +184,14 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       final didOpenComposer = _attachLogs
           ? await sendLogsWithSubjectAndBody(
               context,
-              toEmail: bugsEmail,
+              toEmail: recipientEmail,
               subject: subject,
               body: body,
               zipFilePath: logsZipFilePath,
             )
           : await sendComposedEmail(
               context,
-              to: bugsEmail,
+              to: recipientEmail,
               subject: subject,
               body: body,
             );
@@ -202,7 +199,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       if (!didOpenComposer && mounted) {
         await showNoMailAppSheet(
           context,
-          toEmail: bugsEmail,
+          toEmail: recipientEmail,
           subject: subject,
           message: description,
           deviceInfo: deviceInfo,
