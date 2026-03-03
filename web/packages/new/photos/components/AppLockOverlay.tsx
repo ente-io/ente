@@ -7,6 +7,8 @@
  * logout escape hatch.
  */
 
+import { Logout05Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -141,12 +143,13 @@ export const AppLockOverlay: React.FC = () => {
                         { WebkitAppRegion: "no-drag" } as React.CSSProperties
                     }
                 >
-                    {unlockForm}
-                    {showLogoutConfirm && (
+                    {showLogoutConfirm ? (
                         <LogoutConfirmation
                             onConfirm={logout}
                             onCancel={() => setShowLogoutConfirm(false)}
                         />
+                    ) : (
+                        unlockForm
                     )}
                 </Box>
             </Modal>
@@ -215,14 +218,13 @@ export const AppLockOverlay: React.FC = () => {
                 </Box>
 
                 {/* Centered form content */}
-                {unlockForm}
-
-                {/* Logout confirmation overlays on top */}
-                {showLogoutConfirm && (
+                {showLogoutConfirm ? (
                     <LogoutConfirmation
                         onConfirm={logout}
                         onCancel={() => setShowLogoutConfirm(false)}
                     />
+                ) : (
+                    unlockForm
                 )}
             </Box>
         </Modal>
@@ -384,7 +386,7 @@ const LockIllustration: React.FC = () => (
     <Box
         aria-hidden
         sx={{
-            width: 148,
+            width: 124,
             maxWidth: "100%",
             lineHeight: 0,
             "& svg": { display: "block", width: "100%", height: "auto" },
@@ -632,6 +634,15 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
         void handleSubmit();
     }, [fullPin, loading, handleSubmit]);
 
+    useEffect(() => {
+        if (!error || loading || cooldownText) return;
+
+        const rafID = requestAnimationFrame(() => {
+            focusPinInput(0);
+        });
+        return () => cancelAnimationFrame(rafID);
+    }, [error, loading, cooldownText, focusPinInput]);
+
     if (cooldownText) {
         return (
             <AppLockCard closeAction={closeAction}>
@@ -646,21 +657,21 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
     }
 
     return (
-        <AppLockCard closeAction={closeAction}>
-            <Stack
-                spacing={0}
-                useFlexGap
-                alignItems="center"
-                sx={{ maxWidth: 349, width: "100%" }}
-            >
+        <Stack spacing={0} useFlexGap alignItems="center">
+            <AppLockCard closeAction={closeAction}>
+                <Stack
+                    spacing={0}
+                    useFlexGap
+                    alignItems="center"
+                    sx={{ maxWidth: 349, width: "100%" }}
+                >
                 <Box
                     sx={{
-                        mt: -2.5,
-                        mb: 1,
+                        mt: -0.5,
+                        mb: 1.5,
                         display: "flex",
                         justifyContent: "center",
                         width: "100%",
-                        "& > *": { transform: "translateY(-4px)" },
                     }}
                 >
                     <LockIllustration />
@@ -673,10 +684,15 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                         alignItems: "center",
                         gap: "9px",
                         textAlign: "center",
-                        mb: 2,
+                        mb: 4,
                     }}
                 >
-                    <Typography sx={titleTextSx}>
+                    <Typography
+                        sx={(theme) => ({
+                            ...titleTextSx(theme),
+                            ...(isReauthentication ? {} : { mb: 0.5 }),
+                        })}
+                    >
                         {isReauthentication
                             ? t("authenticate")
                             : t("app_locked")}
@@ -688,10 +704,10 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
 
                 <Stack
                     direction="row"
-                    spacing={1.5}
+                    spacing={1.25}
                     justifyContent="center"
                     onClick={focusFirstEmptyPinInput}
-                    sx={{ mb: 0 }}
+                    sx={{ mb: 0, width: "100%" }}
                 >
                     {pin.map((digit, i) => (
                         <TextField
@@ -724,8 +740,9 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                                 },
                             }}
                             sx={(theme) => ({
-                                ...inputFieldSx(theme, { borderRadius: 6 }),
-                                width: 56,
+                                ...inputFieldSx(theme, { borderRadius: 12 }),
+                                flex: 1,
+                                minWidth: 0,
                                 "& .MuiInputBase-input": {
                                     padding: 0,
                                     textAlign: "center",
@@ -738,30 +755,34 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                     ))}
                 </Stack>
 
-                <FocusVisibleButton
-                    fullWidth
-                    color="accent"
-                    disabled={fullPin.length !== 4 || loading}
-                    onClick={() => {
-                        void handleSubmit();
-                    }}
-                    sx={(theme) => ({ ...primaryActionButtonSx(theme), mt: 2 })}
-                >
-                    {loading ? (
-                        <CircularProgress size={18} color="inherit" />
-                    ) : isReauthentication ? (
-                        t("authenticate")
-                    ) : (
-                        t("unlock")
-                    )}
-                </FocusVisibleButton>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="accent"
+                        disabled={fullPin.length !== 4 || loading}
+                        onClick={() => {
+                            void handleSubmit();
+                        }}
+                        sx={(theme) => ({
+                            ...primaryActionButtonSx(theme),
+                            mt: 2,
+                        })}
+                    >
+                        {loading ? (
+                            <CircularProgress size={18} color="inherit" />
+                        ) : isReauthentication ? (
+                            t("authenticate")
+                        ) : (
+                            t("unlock")
+                        )}
+                    </FocusVisibleButton>
+                </Stack>
+            </AppLockCard>
 
-                <ErrorMessage
-                    error={error}
-                    attemptCount={appLock.invalidAttemptCount}
-                />
-            </Stack>
-        </AppLockCard>
+            <ErrorMessage
+                error={error}
+                attemptCount={appLock.invalidAttemptCount}
+            />
+        </Stack>
     );
 };
 
@@ -804,6 +825,15 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
         [password, loading, logout],
     );
 
+    useEffect(() => {
+        if (!error || loading || cooldownText) return;
+
+        const rafID = requestAnimationFrame(() => {
+            inputRef.current?.focus();
+        });
+        return () => cancelAnimationFrame(rafID);
+    }, [error, loading, cooldownText]);
+
     if (cooldownText) {
         return (
             <AppLockCard closeAction={closeAction}>
@@ -818,95 +848,106 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
     }
 
     return (
-        <AppLockCard closeAction={closeAction}>
-            <Stack
-                component="form"
-                onSubmit={(e: React.FormEvent) => void handleSubmit(e)}
-                spacing={0}
-                useFlexGap
-                alignItems="center"
-                sx={{ maxWidth: 349, width: "100%" }}
-            >
-                <Box
-                    sx={{
-                        mt: -2.5,
-                        mb: 1,
-                        display: "flex",
-                        justifyContent: "center",
-                        width: "100%",
-                        "& > *": { transform: "translateY(-4px)" },
-                    }}
+        <Stack spacing={0} useFlexGap alignItems="center">
+            <AppLockCard closeAction={closeAction}>
+                <Stack
+                    component="form"
+                    onSubmit={(e: React.FormEvent) => void handleSubmit(e)}
+                    spacing={0}
+                    useFlexGap
+                    alignItems="center"
+                    sx={{ maxWidth: 349, width: "100%" }}
                 >
-                    <LockIllustration />
-                </Box>
+                    <Box
+                        sx={{
+                            mt: -0.5,
+                            mb: 1.5,
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "100%",
+                        }}
+                    >
+                        <LockIllustration />
+                    </Box>
 
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "9px",
-                        textAlign: "center",
-                        mb: 2,
-                    }}
-                >
-                    <Typography sx={titleTextSx}>
-                        {isReauthentication ? t("password") : t("app_locked")}
-                    </Typography>
-                    <Typography sx={subtitleTextSx}>
-                        {t("app_lock_enter_password")}
-                    </Typography>
-                </Box>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "9px",
+                            textAlign: "center",
+                            mb: 2,
+                        }}
+                    >
+                        <Typography
+                            sx={(theme) => ({
+                                ...titleTextSx(theme),
+                                ...(isReauthentication ? {} : { mb: 0.5 }),
+                            })}
+                        >
+                            {isReauthentication
+                                ? t("password")
+                                : t("app_locked")}
+                        </Typography>
+                        <Typography sx={subtitleTextSx}>
+                            {t("app_lock_enter_password")}
+                        </Typography>
+                    </Box>
 
-                <TextField
-                    inputRef={inputRef}
-                    fullWidth
-                    hiddenLabel
-                    variant="standard"
-                    autoFocus
-                    error={!!error}
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => {
-                        setPassword(e.target.value);
-                        setError(undefined);
-                    }}
-                    disabled={loading}
-                    placeholder={
-                        isReauthentication
-                            ? t("password")
-                            : t("app_lock_password")
-                    }
-                    autoComplete="off"
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <ShowHidePasswordInputAdornment
-                                    showPassword={showPassword}
-                                    onToggle={() => setShowPassword((s) => !s)}
-                                />
-                            ),
-                        },
-                    }}
-                    sx={inputFieldSx}
-                />
+                    <TextField
+                        inputRef={inputRef}
+                        fullWidth
+                        hiddenLabel
+                        variant="standard"
+                        autoFocus
+                        error={!!error}
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            setError(undefined);
+                        }}
+                        disabled={loading}
+                        placeholder={
+                            isReauthentication
+                                ? t("password")
+                                : t("app_lock_password")
+                        }
+                        autoComplete="off"
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <ShowHidePasswordInputAdornment
+                                        showPassword={showPassword}
+                                        onToggle={() => setShowPassword((s) => !s)}
+                                    />
+                                ),
+                            },
+                        }}
+                        sx={inputFieldSx}
+                    />
 
-                <FocusVisibleButton
-                    type="submit"
-                    fullWidth
-                    color="accent"
-                    disabled={!password || loading}
-                    sx={(theme) => ({ ...primaryActionButtonSx(theme), mt: 2 })}
-                >
-                    {isReauthentication ? t("authenticate") : t("unlock")}
-                </FocusVisibleButton>
+                    <FocusVisibleButton
+                        type="submit"
+                        fullWidth
+                        color="accent"
+                        disabled={!password || loading}
+                        sx={(theme) => ({
+                            ...primaryActionButtonSx(theme),
+                            mt: 2,
+                        })}
+                    >
+                        {isReauthentication ? t("authenticate") : t("unlock")}
+                    </FocusVisibleButton>
+                </Stack>
+            </AppLockCard>
 
-                <ErrorMessage
-                    error={error}
-                    attemptCount={appLock.invalidAttemptCount}
-                />
-            </Stack>
-        </AppLockCard>
+            <ErrorMessage
+                error={error}
+                attemptCount={appLock.invalidAttemptCount}
+            />
+        </Stack>
     );
 };
 
@@ -949,12 +990,11 @@ const DeviceLockUnlockForm: React.FC<{
             >
                 <Box
                     sx={{
-                        mt: -2.5,
-                        mb: 1,
+                        mt: -0.5,
+                        mb: 1.5,
                         display: "flex",
                         justifyContent: "center",
                         width: "100%",
-                        "& > *": { transform: "translateY(-4px)" },
                     }}
                 >
                     <LockIllustration />
@@ -970,7 +1010,12 @@ const DeviceLockUnlockForm: React.FC<{
                         mb: 2,
                     }}
                 >
-                    <Typography sx={titleTextSx}>
+                    <Typography
+                        sx={(theme) => ({
+                            ...titleTextSx(theme),
+                            ...(isReauthentication ? {} : { mb: 0.5 }),
+                        })}
+                    >
                         {isReauthentication
                             ? t("authenticate")
                             : t("app_locked")}
@@ -1033,8 +1078,11 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, attemptCount }) => {
             <Typography
                 sx={(theme) => ({
                     ...subtitleTextSx(theme),
-                    color: theme.palette.error.main,
-                    mt: 0.75,
+                    color: "#E53935",
+                    mt: 3,
+                    ...theme.applyStyles("dark", {
+                        color: "#FF6B6B",
+                    }),
                 })}
             >
                 {error}
@@ -1054,57 +1102,86 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
     onConfirm,
     onCancel,
 }) => (
-    <Box
-        sx={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 1,
-        }}
-        onClick={onCancel}
+    <AppLockCard
+        closeAction={
+            <IconButton
+                aria-label={t("close")}
+                onClick={onCancel}
+                sx={(theme) => ({
+                    backgroundColor: "#FAFAFA",
+                    color: "#000",
+                    p: 1.25,
+                    "&:hover": { backgroundColor: "#F0F0F0" },
+                    ...theme.applyStyles("dark", {
+                        backgroundColor: "rgba(255, 255, 255, 0.12)",
+                        color: "#fff",
+                        "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.16)",
+                        },
+                    }),
+                })}
+            >
+                <CloseIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+        }
     >
-        <Paper
-            elevation={0}
-            sx={{
-                width: "min(420px, 85vw)",
-                px: { xs: 3, sm: 5 },
-                py: 4,
-                borderRadius: "20px",
-                boxShadow: "var(--mui-palette-boxShadow-paper)",
-            }}
-            onClick={(e) => e.stopPropagation()}
+        <Stack
+            spacing={2}
+            useFlexGap
+            alignItems="center"
+            justifyContent="center"
+            sx={{ maxWidth: 349, width: "100%" }}
         >
-            <Stack spacing={3} alignItems="center" sx={{ width: "100%" }}>
-                <Typography variant="h3">{t("logout")}</Typography>
+            <Box
+                sx={{
+                    mb: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                }}
+            >
+                <HugeiconsIcon icon={Logout05Icon} size={42} color="#08C225" />
+            </Box>
+
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "9px",
+                    textAlign: "center",
+                    mb: 2,
+                }}
+            >
+                <Typography sx={titleTextSx}>{t("logout")}</Typography>
                 <Typography
-                    variant="small"
-                    color="text.muted"
-                    textAlign="center"
+                    sx={(theme) => ({
+                        ...subtitleTextSx(theme),
+                        maxWidth: 240,
+                    })}
                 >
                     {t("logout_message")}
                 </Typography>
-                <Stack direction="row" spacing={1.5} sx={{ width: "100%" }}>
-                    <FocusVisibleButton
-                        fullWidth
-                        color="secondary"
-                        onClick={onCancel}
-                    >
-                        {t("cancel")}
-                    </FocusVisibleButton>
-                    <FocusVisibleButton
-                        fullWidth
-                        color="critical"
-                        onClick={onConfirm}
-                    >
-                        {t("logout")}
-                    </FocusVisibleButton>
-                </Stack>
+            </Box>
+
+            <Stack spacing={1.5} sx={{ width: "100%" }}>
+                <FocusVisibleButton
+                    fullWidth
+                    onClick={onCancel}
+                    sx={secondaryActionButtonSx}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
+                    onClick={onConfirm}
+                    sx={primaryActionButtonSx}
+                >
+                    {t("logout")}
+                </FocusVisibleButton>
             </Stack>
-        </Paper>
-    </Box>
+        </Stack>
+    </AppLockCard>
 );
 
 interface CooldownScreenProps {
@@ -1132,12 +1209,11 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
         >
             <Box
                 sx={{
-                    mt: -2.5,
-                    mb: 1,
+                    mt: -0.5,
+                    mb: 1.5,
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
-                    "& > *": { transform: "translateY(-4px)" },
                 }}
             >
                 <LockIllustration />
@@ -1153,7 +1229,9 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                     mb: 2,
                 }}
             >
-                <Typography sx={titleTextSx}>{t("app_locked")}</Typography>
+                <Typography sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}>
+                    {t("app_locked")}
+                </Typography>
                 <Typography sx={subtitleTextSx}>
                     {t("app_lock_please_try_again_in")}
                 </Typography>
