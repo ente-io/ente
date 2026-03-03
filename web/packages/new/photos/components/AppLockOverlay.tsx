@@ -318,6 +318,19 @@ const secondaryActionButtonSx = (theme: Theme) => ({
     }),
 });
 
+const cooldownTimerButtonSx = (theme: Theme) => ({
+    ...secondaryActionButtonSx(theme),
+    width: "100%",
+    backgroundColor: "#232323",
+    color: "#fff",
+    "&:hover": { backgroundColor: "#232323", boxShadow: "none" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#232323",
+        color: "#fff",
+        "&:hover": { backgroundColor: "#232323" },
+    }),
+});
+
 const inputFieldSx = (theme: Theme, options?: { borderRadius?: number }) => ({
     borderRadius: options?.borderRadius ?? 12,
     "& .MuiInputBase-root": {
@@ -414,6 +427,51 @@ const LogoutIllustration: React.FC = () => (
         >
             <path d="M7.86907 4C4.97674 5.49689 3 8.51664 3 11.9981C3 16.9686 7.02944 20.9981 12 20.9981C16.9706 20.9981 21 16.9686 21 11.9981C21 8.51664 19.0233 5.49689 16.1309 4" />
             <path d="M12 3V10" />
+        </g>
+        <path
+            d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
+            fill={ENTE_GREEN}
+        />
+        <path
+            d="M119.579 91.9746C111.591 92.7003 105.114 97.1692 103.689 103.722C105.114 97.1692 101.077 90.4145 94.1117 86.438C102.099 85.7122 108.576 81.2434 110.001 74.6902C108.576 81.2434 112.613 87.9981 119.579 91.9746Z"
+            fill={ENTE_GREEN}
+        />
+        <path
+            d="M112.728 9.21189C108.334 9.91374 104.912 12.6353 104.37 16.3181C104.912 12.6353 102.421 9.04853 98.4114 7.10627C102.806 6.40442 106.228 3.68284 106.77 7.55054e-05C106.228 3.68284 108.719 7.26962 112.728 9.21189Z"
+            fill={ENTE_GREEN}
+        />
+    </svg>
+);
+
+const CooldownIllustration: React.FC = () => (
+    <svg
+        width="126"
+        height="121"
+        viewBox="0 0 126 121"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+    >
+        <circle
+            cx="67"
+            cy="52"
+            r="34"
+            fill={ENTE_GREEN}
+            stroke="#232323"
+            strokeWidth="5.73358"
+        />
+        <g
+            transform="translate(67 52) scale(1.18) translate(-12 -12)"
+            stroke="white"
+            fill="none"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M4 3H20" />
+            <path d="M5.5 3V5.03039C5.5 6.27227 6.07682 7.4437 7.06116 8.20089L12 12L16.9388 8.20089C17.9232 7.44371 18.5 6.27227 18.5 5.03039V3" />
+            <path d="M5.5 21V18.9696C5.5 17.7277 6.07682 16.5563 7.06116 15.7991L12 12L16.9388 15.7991C17.9232 16.5563 18.5 17.7277 18.5 18.9696V21" />
+            <path d="M4 21H20" />
         </g>
         <path
             d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
@@ -1213,14 +1271,14 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
         >
             <Box
                 sx={{
-                    mt: -0.5,
+                    mt: 1,
                     mb: 1.5,
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
                 }}
             >
-                <LockIllustration />
+                <CooldownIllustration />
             </Box>
 
             <Box
@@ -1228,50 +1286,85 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "9px",
+                    gap: 0,
                     textAlign: "center",
-                    mb: 2,
+                    mb: 3.5,
                 }}
             >
                 <Typography sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}>
                     {t("app_locked")}
                 </Typography>
-                <Typography sx={subtitleTextSx}>
-                    {t("app_lock_please_try_again_in")}
+                <Typography
+                    sx={(theme) => ({
+                        ...subtitleTextSx(theme),
+                        mt: 0.5,
+                    })}
+                >
+                    {t("wrong_unlock_code", {
+                        count: attemptCount,
+                    }).replace(
+                        `${String(attemptCount)} `,
+                        `${String(attemptCount)}\u00A0`,
+                    )}
                 </Typography>
             </Box>
 
-            <Typography
-                sx={(theme) => ({
-                    fontWeight: 600,
-                    fontSize: 33,
-                    lineHeight: "40px",
-                    color: theme.palette.error.main,
-                    textAlign: "center",
-                    mb: 2,
-                })}
+            <FocusVisibleButton
+                fullWidth
+                onClick={() => undefined}
+                sx={cooldownTimerButtonSx}
             >
-                {cooldownText}
-            </Typography>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        justifyContent: "center",
+                        gap: 0.5,
+                        width: "100%",
+                        flexWrap: "wrap",
+                        "& .countdown-timer": {
+                            fontVariantNumeric: "tabular-nums",
+                        },
+                    }}
+                >
+                    <Typography
+                        component="span"
+                        sx={{
+                            fontSize: 14,
+                            lineHeight: "20px",
+                            fontWeight: 500,
+                            color: "inherit",
+                            opacity: 0.8,
+                        }}
+                    >
+                        {t("app_lock_please_try_again_in")}
+                    </Typography>
+                    <Typography
+                        component="span"
+                        className="countdown-timer"
+                        sx={{
+                            fontSize: 18,
+                            lineHeight: "22px",
+                            fontWeight: 600,
+                            color: "inherit",
+                        }}
+                    >
+                        {cooldownText}
+                    </Typography>
+                </Box>
+            </FocusVisibleButton>
 
             <FocusVisibleButton
                 fullWidth
                 color="secondary"
                 onClick={onLogout}
-                sx={secondaryActionButtonSx}
+                sx={(theme) => ({
+                    ...secondaryActionButtonSx(theme),
+                    mt: 1.5,
+                })}
             >
                 {t("logout")}
             </FocusVisibleButton>
-            <Typography
-                sx={(theme) => ({
-                    ...subtitleTextSx(theme),
-                    mt: 1.25,
-                    fontSize: 12,
-                    lineHeight: "16px",
-                })}
-            >
-                {t("wrong_unlock_code", { count: attemptCount })}
-            </Typography>
         </Stack>
     );
 };
