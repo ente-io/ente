@@ -124,7 +124,7 @@ jobs:
                   releaseBody: |
                       Ensu release
 
-                      **Version:** ${{ env.RELEASE_TAG }} (${{ env.SHORT_SHA }})
+                      **Version:** ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}))
                       **Download:** [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
 
                       **Platforms:**
