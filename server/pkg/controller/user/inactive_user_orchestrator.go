@@ -180,12 +180,12 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		return false, nil
 	}
 
-	lastActivity, found, err := c.UserRepo.GetLatestTokenActivity(user.ID)
+	lastActivity, found, err := c.UserRepo.GetLatestActivity(user.ID)
 	if err != nil {
 		return false, err
 	}
 	if !found {
-		// Tokens are the source of truth for this workflow; skip if activity is no longer available.
+		// User is no longer active.
 		return false, nil
 	}
 
@@ -217,7 +217,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 
 		// Re-check right before deletion to avoid deleting users who became active
 		// after earlier reads in long processing runs.
-		latestActivity, latestFound, err := c.UserRepo.GetLatestTokenActivity(user.ID)
+		latestActivity, latestFound, err := c.UserRepo.GetLatestActivity(user.ID)
 		if err != nil {
 			return false, err
 		}
