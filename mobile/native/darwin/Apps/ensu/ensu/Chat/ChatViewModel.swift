@@ -1052,13 +1052,36 @@ final class ChatViewModel: ObservableObject {
     }
 
     func sendDraft() {
+        guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
+
         let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = draftAttachments
         guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
-        let sessionId = currentSessionId ?? createSessionForDraft()
-
         Task { @MainActor in
+            let target = self.modelSettings.currentTarget()
+            self.hasRequestedModelDownload = true
+
+            do {
+                try await self.ensureModelReadyShared(target: target)
+                self.isModelDownloaded = true
+            } catch {
+                if self.isCancellation(error) {
+                    return
+                }
+                self.isModelDownloaded = false
+                self.isDownloading = false
+                self.downloadToast = DownloadToastState(
+                    phase: .errorDownload,
+                    percent: -1,
+                    status: error.localizedDescription,
+                    offerRetryDownload: true
+                )
+                self.logger.error("Model readiness check failed before send", error)
+                return
+            }
+
+            let sessionId = self.currentSessionId ?? self.createSessionForDraft()
             let missing = await self.missingAttachments(for: sessionId)
             if !missing.isEmpty {
                 self.queueMissingAttachments(for: sessionId, missing: missing)
@@ -1255,6 +1278,7 @@ final class ChatViewModel: ObservableObject {
                         offerRetryDownload: true
                     )
                     self.isDownloading = false
+                    self.isModelDownloaded = false
                 }
             }
         }
@@ -1286,6 +1310,7 @@ final class ChatViewModel: ObservableObject {
                         offerRetryDownload: true
                     )
                     self.isDownloading = false
+                    self.isModelDownloaded = false
                 }
             }
         }
@@ -1429,6 +1454,7 @@ final class ChatViewModel: ObservableObject {
                 if self.activeGenerationId == generationId {
                     isGenerating = false
                     isDownloading = false
+                    isModelDownloaded = false
                     streamingParentId = nil
                     downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: error.localizedDescription, offerRetryDownload: true)
                     activeGenerationId = nil
@@ -1616,6 +1642,7 @@ final class ChatViewModel: ObservableObject {
             }
             downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: progress.status, offerRetryDownload: true)
             isDownloading = false
+            isModelDownloaded = false
             return
         }
 
