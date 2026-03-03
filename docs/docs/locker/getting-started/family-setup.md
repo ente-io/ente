@@ -139,10 +139,7 @@ you share collections (not individual items) with other Ente users.
 2. Tap the share button
 3. Select **Share with Ente user**
 4. Enter your family member's Ente email address
-5. Choose permissions:
-   - **Viewer**: Can view items (recommended for most family sharing)
-   - **Collaborator**: Can view and add items (for jointly managed collections)
-6. Tap **Share**
+5. Tap **Share**
 
 All items in the collection will be shared with that person.
 
@@ -153,14 +150,14 @@ To share a single item (like a specific document), create a
 
 ### Recommended sharing setup
 
-| Collection       | Share with         | Permission   |
-| ---------------- | ------------------ | ------------ |
-| Family Documents | All family members | Viewer       |
-| Medical          | All family members | Viewer       |
-| Home             | Adults             | Collaborator |
-| Vehicles         | Adults             | Collaborator |
-| Emergency Info   | All family members | Viewer       |
-| Kids' Documents  | Parents            | Collaborator |
+| Collection       | Share with         |
+| ---------------- | ------------------ |
+| Family Documents | All family members |
+| Medical          | All family members |
+| Home             | Adults             |
+| Vehicles         | Adults             |
+| Emergency Info   | All family members |
+| Kids' Documents  | Parents            |
 
 ## Step 5: Set up Legacy for account recovery
 

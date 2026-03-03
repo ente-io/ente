@@ -1,4 +1,5 @@
 - Laurens: (I) Clip text encoding in rust
+- Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Internal toggle to let ML run uninterrupted
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users

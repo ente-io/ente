@@ -20,7 +20,7 @@ pub fn run_clip_text(runtime: &mut MlRuntime, token_ids: &[i32]) -> MlResult<Cli
     let (shape, output) = onnx::run_i32_f32(
         clip_text,
         token_ids.to_vec(),
-        vec![1, CLIP_TEXT_TOKEN_COUNT as i64],
+        [1, CLIP_TEXT_TOKEN_COUNT as i64],
     )?;
 
     let mut embedding = if shape.len() == 2 {

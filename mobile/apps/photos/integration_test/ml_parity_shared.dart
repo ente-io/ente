@@ -8,6 +8,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
@@ -15,6 +16,7 @@ import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 const _manifestB64 = String.fromEnvironment("ML_PARITY_MANIFEST_B64");
 const _codeRevision =
@@ -284,8 +286,15 @@ Future<void> _ensureModelNetworkContext() async {
   }
 
   await Configuration.instance.init();
+  final prefs = await SharedPreferences.getInstance();
   final packageInfo = await PackageInfo.fromPlatform();
   await NetworkClient.instance.init(packageInfo);
+  ServiceLocator.instance.init(
+    prefs,
+    NetworkClient.instance.enteDio,
+    NetworkClient.instance.getDio(),
+    packageInfo,
+  );
   _modelNetworkContextInitialized = true;
 }
 

@@ -441,7 +441,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         MenuSectionTitle(title: AppLocalizations.of(context).status),
         const SizedBox(height: 8),
         FutureBuilder(
-          future: canUseHighBandwidth(),
+          future: canUseHighBandwidth().then((v) => isOfflineMode || v),
           builder: (context, snapshot) {
             String title = "";
             if (snapshot.hasData) {

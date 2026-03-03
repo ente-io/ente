@@ -242,6 +242,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Bố cục album",
+  "layoutMasonry": "Masonry",
   "layoutGrouped": "Đã phân nhóm",
   "layoutContinuous": "Liên tục",
   "layoutTrip": "Chuyến đi",
@@ -290,6 +291,7 @@
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
   "linkHasExpired": "Liên kết đã hết hạn",
+  "linkRequestLimitExceeded": "Album này đang được xem trên quá nhiều thiết bị",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
   "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
@@ -359,7 +361,7 @@
   "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
   "referralStep1": "1. Tùy chỉnh và chia sẻ mã của bạn.",
   "referralStep2": "2. Họ đăng ký Ente bằng mã của bạn.",
-  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bjan khi bạn nâng cấp.",
+  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bạn khi bạn nâng cấp.",
   "referralsAreCurrentlyPaused": "Giới thiệu hiện đang tạm dừng",
   "youCanAtMaxDoubleYourStorage": "Bạn có thể tối đa ×2 dung lượng của mình",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Gia đình bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} false {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} other {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại!}}",
@@ -623,9 +625,9 @@
   "removeDuplicates": "Xóa tệp trùng lặp",
   "removeDuplicatesDesc": "Xem và xóa các tệp hoàn toàn giống nhau.",
   "viewLargeFiles": "Xóa tệp dung lượng lớn",
-  "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "viewLargeFilesDesc": "Xem các tệp đang chiếm dung lượng nhiều nhất.",
   "deleteSuggestions": "Gợi ý xóa",
-  "deleteSuggestionsDesc": "Xóa những tệp được gợi ý xóa.",
+  "deleteSuggestionsDesc": "Xem các tệp được gợi ý xóa.",
   "rejectSuggestions": "Từ chối gợi ý",
   "noDeleteSuggestion": "Không có gợi ý xóa",
   "youHaveNoFileSuggestedForDeletion": "Bạn không có tệp được đề xuất xóa",
@@ -1189,7 +1191,14 @@
   "didYouKnow": "Bạn có biết?",
   "loadingMessage": "Đang tải ảnh của bạn...",
   "loadMessage1": "Bạn có thể chia sẻ gói của mình với gia đình",
-  "loadMessage2": "Chúng tôi đã lưu giữ hơn 200 triệu kỷ niệm cho đến hiện tại",
+  "loadMessage2": "Chúng tôi đã phục vụ hơn {memoriesCountInMillions} triệu kỷ niệm",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một cái lưu ở hầm trú ẩn hạt nhân",
   "loadMessage4": "Tất cả các ứng dụng của chúng tôi đều là mã nguồn mở",
   "loadMessage5": "Mã nguồn và mã hóa của chúng tôi đã được kiểm nghiệm ngoại bộ",
@@ -1599,7 +1608,7 @@
   "@pleaseNamePersonInPeopleSectionFirst": {
     "description": "Shown when manual tagging requires at least one named person."
   },
-  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ những tệp đã tải lên mới có thể được thêm vào",
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ các tệp đã tải lên mới có thể được thêm vào người",
   "@onlyUploadedFilesCanBeAddedToPerson": {
     "description": "Shown when user tries to manually tag files that are not uploaded yet."
   },
@@ -2201,9 +2210,9 @@
   "shouldRemoveFilesSmartAlbumsDesc": "Bạn có muốn xóa các tệp liên quan đến người đã được chọn trước đó trong album thông minh không?",
   "addingPhotos": "Đang thêm ảnh",
   "gettingReady": "Chuẩn bị sẵn sàng",
-  "addSomePhotosDesc1": "Thêm vài ảnh hoặc chọn ",
-  "addSomePhotosDesc2": "những khuôn mặt giống nhau",
-  "addSomePhotosDesc3": "\nđể bắt đầu với",
+  "addSomePhotosDesc1": "Thêm ảnh hoặc chọn ",
+  "addSomePhotosDesc2": "khuôn mặt giống nhau",
+  "addSomePhotosDesc3": "\nđể bắt đầu",
   "ignorePerson": "Bỏ qua người",
   "mixedGrouping": "Nhóm hỗn hợp?",
   "analysis": "Phân tích",

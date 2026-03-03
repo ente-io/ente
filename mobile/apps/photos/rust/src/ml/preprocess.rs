@@ -1,5 +1,6 @@
 use fast_image_resize::{
-    FilterType, PixelType, ResizeAlg, ResizeOptions, Resizer, images::Image as FirImage,
+    FilterType, PixelType, ResizeAlg, ResizeOptions, Resizer,
+    images::{Image as FirImage, ImageRef as FirImageRef},
 };
 
 use crate::ml::{
@@ -26,10 +27,10 @@ pub fn preprocess_yolo(decoded: &DecodedImage) -> MlResult<(Vec<f32>, usize, usi
     let scaled_width = (src_w * scale).round().clamp(1.0, YOLO_INPUT_WIDTH as f32) as u32;
     let scaled_height = (src_h * scale).round().clamp(1.0, YOLO_INPUT_HEIGHT as f32) as u32;
 
-    let src_image = FirImage::from_vec_u8(
+    let src_image = FirImageRef::new(
         decoded.dimensions.width,
         decoded.dimensions.height,
-        decoded.rgb.clone(),
+        decoded.rgb.as_slice(),
         PixelType::U8x3,
     )
     .map_err(|e| MlError::Preprocess(format!("failed to create FIR source image: {e}")))?;
@@ -87,10 +88,10 @@ pub fn preprocess_clip(decoded: &DecodedImage) -> MlResult<Vec<f32>> {
     let scaled_width = (src_w * scale).round().max(CLIP_INPUT_WIDTH as f32) as u32;
     let scaled_height = (src_h * scale).round().max(CLIP_INPUT_HEIGHT as f32) as u32;
 
-    let src_image = FirImage::from_vec_u8(
+    let src_image = FirImageRef::new(
         decoded.dimensions.width,
         decoded.dimensions.height,
-        decoded.rgb.clone(),
+        decoded.rgb.as_slice(),
         PixelType::U8x3,
     )
     .map_err(|e| MlError::Preprocess(format!("failed to create FIR source image: {e}")))?;

@@ -4,6 +4,25 @@
 
 All commands below assume you run them from `darwin/Apps/ensu`.
 
+## Quick scripts
+
+```bash
+./build.sh                 # Debug build for iOS simulator (prefers booted iPhone)
+./build.sh device          # Debug build for connected iOS device
+./build.sh archive         # Release archive (.xcarchive)
+./build.sh ipa             # Release IPA export (uses ExportOptions-AppStore.plist)
+./run.sh                   # Build + install + launch on iOS simulator (prefers booted iPhone)
+```
+
+Helpful flags:
+
+- `--destination-id <id>` to force a specific simulator/device
+- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
+- `--archive-path`, `--export-path`, `--export-options-plist` for release flows
+- `--skip-build` for `run.sh`
+
+Run `./build.sh --help` or `./run.sh --help` for full options.
+
 ## Generated bindings & dependencies
 
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
@@ -86,6 +105,8 @@ xcrun devicectl device install app \
 
 ### Release (IPA)
 Install the exported IPA via Apple Configurator or TestFlight after `xcodebuild -exportArchive`.
+
+Note: App Store IPA export requires valid distribution signing certificate/profile on this machine.
 
 ## Custom API Endpoint
 

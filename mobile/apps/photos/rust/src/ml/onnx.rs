@@ -108,10 +108,10 @@ fn build_session_with_providers(
     Ok(session)
 }
 
-pub fn run_f32(
+pub fn run_f32<const N: usize>(
     session: &mut Session,
     input: Vec<f32>,
-    input_shape: Vec<i64>,
+    input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {
     let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
     let outputs = session.run(ort::inputs![input_tensor]?)?;
@@ -125,10 +125,25 @@ pub fn run_f32(
     Ok((shape, data))
 }
 
-pub fn run_i32_f32(
+pub fn run_f32_data<const N: usize>(
+    session: &mut Session,
+    input: Vec<f32>,
+    input_shape: [i64; N],
+) -> MlResult<Vec<f32>> {
+    let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
+    let outputs = session.run(ort::inputs![input_tensor]?)?;
+    if outputs.is_empty() {
+        return Err(MlError::Ort("missing first output tensor".to_string()));
+    }
+    let output = &outputs[0];
+    let tensor = output.try_extract_tensor::<f32>()?;
+    Ok(tensor.iter().copied().collect::<Vec<_>>())
+}
+
+pub fn run_i32_f32<const N: usize>(
     session: &mut Session,
     input: Vec<i32>,
-    input_shape: Vec<i64>,
+    input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {
     let input_tensor = Tensor::<i32>::from_array((input_shape, input))?;
     let outputs = session.run(ort::inputs![input_tensor]?)?;

@@ -1,4 +1,5 @@
 import { assertionFailed } from "ente-base/assert";
+import { suppressMainWindowBlurForTrustedPrompt } from "ente-base/electron";
 import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -154,6 +155,7 @@ const downloadAndSave = async (
 
     let downloadDirPath: string | undefined;
     if (electron) {
+        suppressMainWindowBlurForTrustedPrompt();
         downloadDirPath = await electron.selectDirectory();
         if (!downloadDirPath) {
             // The user cancelled on the directory selection dialog.
