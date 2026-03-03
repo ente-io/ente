@@ -10,9 +10,8 @@ class DBPetFace {
   final int fileId;
   final String petFaceId;
   final String detection;
-  final String landmarks;
   final int faceVectorId;
-  final String species;
+  final int species;
   final double faceScore;
   final int imageHeight;
   final int imageWidth;
@@ -23,7 +22,6 @@ class DBPetFace {
     required this.fileId,
     required this.petFaceId,
     required this.detection,
-    required this.landmarks,
     required this.faceVectorId,
     required this.species,
     required this.faceScore,
@@ -38,7 +36,6 @@ class DBPetFace {
       fileIDColumn: fileId,
       petFaceIDColumn: petFaceId,
       faceDetectionColumn: detection,
-      petLandmarksColumn: landmarks,
       faceVectorIdColumn: faceVectorId,
       speciesColumn: species,
       'score': faceScore,
@@ -54,9 +51,8 @@ class DBPetFace {
       fileId: map[fileIDColumn] as int,
       petFaceId: map[petFaceIDColumn] as String,
       detection: map[faceDetectionColumn] as String,
-      landmarks: map[petLandmarksColumn] as String,
       faceVectorId: map[faceVectorIdColumn] as int,
-      species: map[speciesColumn] as String,
+      species: map[speciesColumn] as int,
       faceScore: parseIntOrDoubleAsDouble(map['score']) ?? 0.0,
       imageHeight: map['height'] as int,
       imageWidth: map['width'] as int,
@@ -66,28 +62,28 @@ class DBPetFace {
   }
 }
 
-// ── Pet Body DB Mapper ──
+// ── Detected Object DB Mapper ──
 
-/// Represents a row in the [petBodiesTable].
-class DBPetBody {
+/// Represents a row in the [detectedObjectsTable].
+class DBDetectedObject {
   final int fileId;
-  final String petBodyId;
+  final String objectId;
   final String detection;
   final int bodyVectorId;
-  final String species;
-  final double faceScore; // Reusing column name, but represents body score
+  final int species;
+  final double score;
   final int imageHeight;
   final int imageWidth;
   final int mlVersion;
   final Uint8List? embeddingBlob;
 
-  DBPetBody({
+  DBDetectedObject({
     required this.fileId,
-    required this.petBodyId,
+    required this.objectId,
     required this.detection,
     required this.bodyVectorId,
     required this.species,
-    required this.faceScore,
+    required this.score,
     required this.imageHeight,
     required this.imageWidth,
     required this.mlVersion,
@@ -97,11 +93,11 @@ class DBPetBody {
   Map<String, dynamic> toMap() {
     return {
       fileIDColumn: fileId,
-      petBodyIDColumn: petBodyId,
-      faceDetectionColumn: detection,
+      objectIDColumn: objectId,
+      detectionColumn: detection,
       bodyVectorIdColumn: bodyVectorId,
       speciesColumn: species,
-      'score': faceScore,
+      'score': score,
       'height': imageHeight,
       'width': imageWidth,
       mlVersionColumn: mlVersion,
@@ -109,14 +105,14 @@ class DBPetBody {
     };
   }
 
-  factory DBPetBody.fromMap(Map<String, dynamic> map) {
-    return DBPetBody(
+  factory DBDetectedObject.fromMap(Map<String, dynamic> map) {
+    return DBDetectedObject(
       fileId: map[fileIDColumn] as int,
-      petBodyId: map[petBodyIDColumn] as String,
-      detection: map[faceDetectionColumn] as String,
+      objectId: map[objectIDColumn] as String,
+      detection: map[detectionColumn] as String,
       bodyVectorId: map[bodyVectorIdColumn] as int,
-      species: map[speciesColumn] as String,
-      faceScore: parseIntOrDoubleAsDouble(map['score']) ?? 0.0,
+      species: map[speciesColumn] as int,
+      score: parseIntOrDoubleAsDouble(map['score']) ?? 0.0,
       imageHeight: map['height'] as int,
       imageWidth: map['width'] as int,
       mlVersion: map[mlVersionColumn] as int,

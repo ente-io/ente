@@ -181,7 +181,7 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
 
   Widget _buildPetThumbnail(_PetFaceInfo info, double thumbnailWidth) {
     final l10n = AppLocalizations.of(context);
-    final speciesLabel = info.species == "dog" ? l10n.dog : l10n.cat;
+    final speciesLabel = info.species == 0 ? l10n.dog : l10n.cat;
 
     return SizedBox(
       width: thumbnailWidth,
@@ -212,7 +212,7 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
 
 class _PetFaceInfo {
   final String petFaceId;
-  final String species;
+  final int species;
   final Uint8List faceCrop;
 
   _PetFaceInfo({

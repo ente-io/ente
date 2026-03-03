@@ -187,9 +187,9 @@ CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
 
 // Shared column names
 const petFaceIDColumn = 'pet_face_id';
-const petBodyIDColumn = 'pet_body_id';
+const objectIDColumn = 'object_id';
 const speciesColumn = 'species';
-const petLandmarksColumn = 'landmarks';
+const detectionColumn = 'detection';
 const faceVectorIdColumn = 'face_vector_id';
 const bodyVectorIdColumn = 'body_vector_id';
 
@@ -201,38 +201,40 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
   $fileIDColumn INTEGER NOT NULL,
   $petFaceIDColumn TEXT NOT NULL UNIQUE,
   $faceDetectionColumn TEXT NOT NULL,
-  $petLandmarksColumn TEXT NOT NULL,
   $faceVectorIdColumn INTEGER NOT NULL,
-  $speciesColumn TEXT NOT NULL,
+  $speciesColumn INTEGER NOT NULL,
   $faceScore REAL NOT NULL,
   $imageHeight INTEGER NOT NULL DEFAULT 0,
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
+  $petFaceEmbeddingColumn BLOB,
   PRIMARY KEY($fileIDColumn, $petFaceIDColumn)
 );
 ''';
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
 
-// ── Pet Bodies Table ──
+// ── Detected Objects Table ──
 
-const petBodiesTable = 'pet_bodies';
+const detectedObjectsTable = 'detected_objects';
 
-const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
+const createDetectedObjectsTable =
+    '''CREATE TABLE IF NOT EXISTS $detectedObjectsTable (
   $fileIDColumn INTEGER NOT NULL,
-  $petBodyIDColumn TEXT NOT NULL UNIQUE,
-  $faceDetectionColumn TEXT NOT NULL,
+  $objectIDColumn TEXT NOT NULL UNIQUE,
+  $detectionColumn TEXT NOT NULL,
   $bodyVectorIdColumn INTEGER NOT NULL,
-  $speciesColumn TEXT NOT NULL,
+  $speciesColumn INTEGER NOT NULL,
   $faceScore REAL NOT NULL,
   $imageHeight INTEGER NOT NULL DEFAULT 0,
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
-  PRIMARY KEY($fileIDColumn, $petBodyIDColumn)
+  $petBodyEmbeddingColumn BLOB,
+  PRIMARY KEY($fileIDColumn, $objectIDColumn)
 );
 ''';
 
-const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
+const deleteDetectedObjectsTable = 'DELETE FROM $detectedObjectsTable';
 
 // ── Clustering Tables ──
 
@@ -258,23 +260,17 @@ CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
   $clusterIDColumn TEXT NOT NULL,
   $avgColumn BLOB NOT NULL,
   $countColumn INTEGER NOT NULL,
-  $speciesColumn TEXT NOT NULL,
+  $speciesColumn INTEGER NOT NULL,
   PRIMARY KEY($clusterIDColumn)
 );
 ''';
 
 const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
 
-// ── Embedding BLOB Columns (nullable, added via ALTER TABLE) ──
+// ── Embedding BLOB Columns ──
 
 const petFaceEmbeddingColumn = 'pet_face_embedding';
 const petBodyEmbeddingColumn = 'pet_body_embedding';
-
-const alterPetFacesAddEmbedding =
-    'ALTER TABLE $petFacesTable ADD COLUMN $petFaceEmbeddingColumn BLOB';
-
-const alterPetBodiesAddEmbedding =
-    'ALTER TABLE $petBodiesTable ADD COLUMN $petBodyEmbeddingColumn BLOB';
 
 // ── Vector ID Mapping Tables ──
 
@@ -292,16 +288,16 @@ CREATE TABLE IF NOT EXISTS $petFaceVectorIdMappingTable (
 const deletePetFaceVectorIdMappingTable =
     'DELETE FROM $petFaceVectorIdMappingTable';
 
-/// Maps pet_body_id (string) → integer for body usearch index
-const petBodyVectorIdMappingTable = 'pet_body_vector_id_map';
-const petBodyVectorIdColumn = 'pet_body_vector_id';
+/// Maps object_id (string) → integer for body usearch index
+const objectVectorIdMappingTable = 'object_vector_id_map';
+const objectVectorIdColumn = 'object_vector_id';
 
-const createPetBodyVectorIdMappingTable = '''
-CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
-  $petBodyVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  $petBodyIDColumn TEXT NOT NULL UNIQUE
+const createObjectVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $objectVectorIdMappingTable (
+  $objectVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $objectIDColumn TEXT NOT NULL UNIQUE
 );
 ''';
 
-const deletePetBodyVectorIdMappingTable =
-    'DELETE FROM $petBodyVectorIdMappingTable';
+const deleteObjectVectorIdMappingTable =
+    'DELETE FROM $objectVectorIdMappingTable';
