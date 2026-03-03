@@ -654,6 +654,7 @@ dependencies = [
  "once_cell",
  "ort",
  "thiserror 2.0.18",
+ "tiff",
  "usearch",
 ]
 
