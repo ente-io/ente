@@ -192,6 +192,17 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             onChanged: _onRunMLDuringInteractionChanged,
           ),
         ),
+        MenuItemWidgetNew(
+          title: "Pet recognition",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.petRecognitionEnabled,
+            onChanged: _onPetRecognitionChanged,
+          ),
+        ),
       ],
     );
   }
@@ -708,6 +719,23 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       }
     } catch (e, s) {
       logger.warning('run ML during interaction toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Future<void> _onPetRecognitionChanged() async {
+    try {
+      await localSettings.togglePetRecognition();
+      logger.info(
+        'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('Pet recognition toggle failed ', e, s);
       if (mounted) {
         await showGenericErrorDialog(context: context, error: e);
       }
