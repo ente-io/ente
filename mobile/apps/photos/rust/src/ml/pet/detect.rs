@@ -200,24 +200,6 @@ pub fn run_pet_body_detection(
     Ok(naive_nms_pet_body(detections, BODY_IOU_THRESHOLD))
 }
 
-/// Auto-detect which species is dominant in the body detections.
-///
-/// Returns 0 for dog, 1 for cat based on which class has more/higher confidence detections.
-pub fn detect_species(body_detections: &[PetBodyDetection]) -> u8 {
-    let mut dog_score: f32 = 0.0;
-    let mut cat_score: f32 = 0.0;
-
-    for det in body_detections {
-        match det.coco_class {
-            COCO_DOG => dog_score += det.score,
-            COCO_CAT => cat_score += det.score,
-            _ => {}
-        }
-    }
-
-    if cat_score > dog_score { 1 } else { 0 }
-}
-
 fn correct_for_maintained_aspect_ratio_3kp(
     box_xyxy: &mut [f32; 4],
     keypoints: &mut [[f32; 2]; 3],

@@ -107,9 +107,13 @@ pub fn extract_crop(
     for row in y1..y2 {
         let row_start = ((row * img_w + x1) * 3) as usize;
         let row_end = ((row * img_w + x2) * 3) as usize;
-        if row_end <= decoded.rgb.len() {
-            crop.extend_from_slice(&decoded.rgb[row_start..row_end]);
+        if row_end > decoded.rgb.len() || row_start > decoded.rgb.len() {
+            return Err(MlError::Preprocess(format!(
+                "crop row {} out of bounds: start={}, end={}, buffer_len={}",
+                row, row_start, row_end, decoded.rgb.len()
+            )));
         }
+        crop.extend_from_slice(&decoded.rgb[row_start..row_end]);
     }
 
     Ok((crop, crop_w, crop_h))
