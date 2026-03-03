@@ -27,6 +27,7 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/qr_code_overlay_button.dart";
 import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -255,6 +256,21 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
+              if (flagService.qrFeatureEnabled)
+                ValueListenableBuilder(
+                  valueListenable: _selectedIndexNotifier,
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    return widget.config.mode == DetailPageMode.minimalistic
+                        ? const SizedBox.shrink()
+                        : QrCodeOverlayButton(
+                            file: _files![selectedIndex],
+                            enableFullScreenNotifier:
+                                InheritedDetailPageState.of(context)
+                                    .enableFullScreenNotifier,
+                            isGuestView: isGuestView,
+                          );
+                  },
+                ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
