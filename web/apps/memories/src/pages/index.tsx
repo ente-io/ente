@@ -1,8 +1,10 @@
 import { keyframes } from "@emotion/react";
-import { Box, Link, Typography, styled } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { Stack100vhCenter } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { CustomHead } from "ente-base/components/Head";
 import { LoadingIndicator } from "ente-base/components/loaders";
+import { toB64 } from "ente-base/crypto";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import {
@@ -22,6 +24,27 @@ import {
 import "hls-video-element";
 import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+const shortMemorySecretPattern = /^[0-9A-Za-z]{12}$/;
+
+const extractMemoryShareKeyFromURL = async (
+    url: URL,
+): Promise<string | null> => {
+    const fragment = url.hash.slice(1).trim();
+    if (!fragment) return null;
+
+    if (shortMemorySecretPattern.test(fragment)) {
+        const subtle = globalThis.crypto?.subtle;
+        if (!subtle) return null;
+        const digest = await subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(fragment),
+        );
+        return await toB64(new Uint8Array(digest));
+    }
+
+    return await extractCollectionKeyFromShareURL(url);
+};
 
 /**
  * Index page that handles both root redirect and memory share links
@@ -65,8 +88,7 @@ export default function PublicMemoryPage() {
                     window.location.href = "https://ente.io/memories";
                     return;
                 }
-                const shareKey =
-                    await extractCollectionKeyFromShareURL(currentURL);
+                const shareKey = await extractMemoryShareKeyFromURL(currentURL);
 
                 if (!shareKey) {
                     setErrorMessage("Invalid memory link. Missing secret.");
@@ -217,11 +239,55 @@ interface MemoryViewerProps {
 }
 
 const IMAGE_AUTO_PROGRESS_DURATION_MS = 5000;
+const MOBILE_LAYOUT_BREAKPOINT_PX = 600;
+const EDGE_NAV_TAP_ZONE_RATIO = 0.2;
+const HOLD_TO_PAUSE_NAV_SUPPRESSION_MS = 250;
+const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 280;
+const DESKTOP_MEDIA_MAX_WIDTH_PX = 1264;
+const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 48;
+const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 220;
+const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(100vw - ${DESKTOP_MEDIA_HORIZONTAL_PADDING_PX}px))`;
+const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(100vh - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
+
+const isInteractiveTapTarget = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(
+        target.closest(
+            "button, a, input, textarea, select, [role='button'], [data-memory-control='true']",
+        ),
+    );
+};
 
 const progressFillAnimation = keyframes`
     from { width: 0%; }
     to { width: 100%; }
 `;
+
+const backgroundPatternSVG = `
+<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220' fill='none'>
+  <g stroke='rgba(255,255,255,0.22)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'>
+    <circle cx='36' cy='38' r='9'/>
+    <path d='M84 26c0-4 3-7 7-7h10c4 0 7 3 7 7v10c0 4-3 7-7 7H91c-4 0-7-3-7-7V26Z'/>
+    <path d='M149 23l14 8-14 8'/>
+    <path d='M154 31h30'/>
+    <path d='M33 97c0-10 8-18 18-18h12c10 0 18 8 18 18v3c0 10-8 18-18 18H51c-10 0-18-8-18-18v-3Z'/>
+    <path d='M48 98h0.01M58 98h0.01M68 98h0.01'/>
+    <path d='M132 90c3-5 10-5 13 0 3-5 10-5 13 0 3 5-2 10-13 17-11-7-16-12-13-17Z'/>
+    <path d='M178 92l5 6 8-2-4 7 5 6-8-2-4 7-1-8-8-2 7-4-1-8Z'/>
+    <circle cx='104' cy='148' r='14'/>
+    <path d='M98 146h12M100 154h8'/>
+    <path d='M162 142l6 8 10-2-6 8 6 8-10-2-6 8-1-10-10-2 9-5-1-11Z'/>
+    <path d='M33 178l8 8M41 178l-8 8'/>
+    <path d='M64 170c4-7 14-7 18 0 4-7 14-7 18 0 4 7-2 13-18 23-16-10-22-16-18-23Z'/>
+    <path d='M124 186c0-6 5-11 11-11h8c6 0 11 5 11 11v8c0 6-5 11-11 11h-8c-6 0-11-5-11-11v-8Z'/>
+    <path d='M178 184h24M182 176l16 16'/>
+  </g>
+</svg>
+`;
+
+const backgroundPattern = `url("data:image/svg+xml,${encodeURIComponent(
+    backgroundPatternSVG,
+)}")`;
 
 const MemoryViewer: React.FC<MemoryViewerProps> = ({
     files,
@@ -239,13 +305,20 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const [progressDuration, setProgressDuration] = useState(
         IMAGE_AUTO_PROGRESS_DURATION_MS,
     );
+    const [mediaAspectRatio, setMediaAspectRatio] = useState<number>();
+    const [viewport, setViewport] = useState({ width: 1280, height: 720 });
+    const pressStartedAtRef = useRef<number | null>(null);
+    const suppressTapNavigationRef = useRef(false);
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
+    const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
 
     // Reset loaded state and duration when file changes.
     useEffect(() => {
+        setPaused(false);
         setFileLoaded(false);
         setVideoDurationKnown(false);
+        setMediaAspectRatio(undefined);
         // Reset to image duration; video will update this when it loads.
         setProgressDuration(IMAGE_AUTO_PROGRESS_DURATION_MS);
     }, [currentIndex]);
@@ -260,6 +333,14 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         setVideoDurationKnown(true);
     }, []);
 
+    const handleMediaAspectRatio = useCallback(
+        (width: number, height: number) => {
+            if (width <= 0 || height <= 0) return;
+            setMediaAspectRatio(width / height);
+        },
+        [],
+    );
+
     // Preload next file's thumbnail for smoother navigation.
     useEffect(() => {
         if (currentIndex < files.length - 1) {
@@ -268,61 +349,286 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         }
     }, [currentIndex, files]);
 
-    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        if (clickX < rect.width * 0.2) {
+    useEffect(() => {
+        const updateViewport = () =>
+            setViewport({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+
+        updateViewport();
+        window.addEventListener("resize", updateViewport);
+        return () => window.removeEventListener("resize", updateViewport);
+    }, []);
+
+    const currentFileDate = useMemo(() => {
+        try {
+            return formatMemoryDate(fileCreationPhotoDate(currentFile));
+        } catch {
+            return "";
+        }
+    }, [currentFile]);
+
+    const headerTitle = useMemo(() => {
+        if (memoryName && currentFileDate)
+            return `${memoryName} • ${currentFileDate}`;
+        return memoryName || currentFileDate || "Memory";
+    }, [memoryName, currentFileDate]);
+
+    const handleScreenTap = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (suppressTapNavigationRef.current) {
+            suppressTapNavigationRef.current = false;
+            return;
+        }
+        if (isInteractiveTapTarget(e.target)) return;
+
+        const screenWidth = viewport.width;
+        const clickX = e.clientX;
+        if (clickX <= screenWidth * EDGE_NAV_TAP_ZONE_RATIO) {
             onPrev();
-        } else {
+        } else if (clickX >= screenWidth * (1 - EDGE_NAV_TAP_ZONE_RATIO)) {
             onNext();
         }
     };
 
+    const mobileVariant = useMemo(() => {
+        if (typeof mediaAspectRatio !== "number") return "portrait";
+        if (mediaAspectRatio > 1.1) return "landscape";
+        if (mediaAspectRatio < 0.9) return "portrait";
+        return "square";
+    }, [mediaAspectRatio]);
+
+    const mobileFrameSize = useMemo(() => {
+        const availableWidth = Math.max(220, viewport.width - 48);
+        const baseWidth = Math.min(326, availableWidth);
+        const ratioByVariant = {
+            landscape: 196 / 326,
+            portrait: 532 / 327,
+            square: 1,
+        } as const;
+        const ratio = ratioByVariant[mobileVariant];
+        let width = baseWidth;
+        let height = Math.round(baseWidth * ratio);
+
+        const reservedVerticalSpace = MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX;
+        const maxMediaHeight = Math.max(
+            180,
+            viewport.height - reservedVerticalSpace,
+        );
+        if (height > maxMediaHeight) {
+            const scale = maxMediaHeight / height;
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+        }
+
+        return { width, height };
+    }, [mobileVariant, viewport.height, viewport.width]);
+
+    const desktopFrameSize = useMemo(() => {
+        const availableWidth = Math.max(
+            360,
+            viewport.width - DESKTOP_MEDIA_HORIZONTAL_PADDING_PX,
+        );
+        const availableHeight = Math.max(
+            240,
+            viewport.height - DESKTOP_MEDIA_VERTICAL_RESERVED_PX,
+        );
+        const maxWidth = Math.min(DESKTOP_MEDIA_MAX_WIDTH_PX, availableWidth);
+        const ratio =
+            typeof mediaAspectRatio === "number" && mediaAspectRatio > 0
+                ? mediaAspectRatio
+                : 4 / 3;
+
+        let width = maxWidth;
+        let height = width / ratio;
+
+        if (height > availableHeight) {
+            height = availableHeight;
+            width = height * ratio;
+        }
+
+        return { width: Math.round(width), height: Math.round(height) };
+    }, [mediaAspectRatio, viewport.height, viewport.width]);
+
+    const mediaFrameStyle = isMobileLayout
+        ? {
+              width: `${mobileFrameSize.width}px`,
+              height: `${mobileFrameSize.height}px`,
+              border: "3px solid #ffffff",
+              borderRadius: mobileVariant === "portrait" ? "16px" : "20px",
+          }
+        : {
+              width: `${desktopFrameSize.width}px`,
+              height: `${desktopFrameSize.height}px`,
+          };
+
     return (
-        <ViewerRoot>
-            <BackgroundImage file={currentFile} />
-            <BackgroundOverlay />
-            <ContentContainer>
-                <HeaderSection>
-                    <MemoryTitle variant="h6">
-                        {memoryName || "Memory"}
-                    </MemoryTitle>
-                    <ProgressIndicator
-                        total={files.length}
-                        current={currentIndex}
-                        paused={
-                            paused ||
-                            !fileLoaded ||
-                            (isVideo && !videoDurationKnown)
-                        }
-                        duration={progressDuration}
-                        onComplete={onNext}
-                        isVideo={isVideo}
-                    />
-                </HeaderSection>
+        <ViewerRoot onClick={handleScreenTap}>
+            <BackgroundPattern />
+            <ContentContainer
+                style={
+                    isMobileLayout
+                        ? {
+                              maxWidth: "375px",
+                              padding: "24px 24px 26px",
+                              gap: "16px",
+                          }
+                        : undefined
+                }
+            >
+                {isMobileLayout ? (
+                    <MobileHeaderSection>
+                        <MobileTitle variant="h6">{headerTitle}</MobileTitle>
+                        <ProgressIndicator
+                            total={files.length}
+                            current={currentIndex}
+                            paused={
+                                paused ||
+                                !fileLoaded ||
+                                (isVideo && !videoDurationKnown)
+                            }
+                            duration={progressDuration}
+                            onComplete={onNext}
+                            isVideo={isVideo}
+                            compact
+                        />
+                    </MobileHeaderSection>
+                ) : (
+                    <TopControls>
+                        <PlaybackControl
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setPaused((state) => !state);
+                            }}
+                            aria-label={paused ? "Play" : "Pause"}
+                            data-memory-control="true"
+                        >
+                            <PlaybackGlyph paused={paused} />
+                        </PlaybackControl>
+
+                        <HeaderSection>
+                            <MemoryTitle variant="h6">
+                                {headerTitle}
+                            </MemoryTitle>
+                            <ProgressIndicator
+                                total={files.length}
+                                current={currentIndex}
+                                paused={
+                                    paused ||
+                                    !fileLoaded ||
+                                    (isVideo && !videoDurationKnown)
+                                }
+                                duration={progressDuration}
+                                onComplete={onNext}
+                                isVideo={isVideo}
+                            />
+                        </HeaderSection>
+
+                        <JoinNowButton
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Join now
+                        </JoinNowButton>
+                    </TopControls>
+                )}
+
                 <PhotoContainer
-                    onMouseEnter={() => setPaused(true)}
-                    onMouseLeave={() => setPaused(false)}
-                    onClick={handleClick}
+                    onContextMenu={(event) => event.preventDefault()}
+                    onDragStart={(event) => event.preventDefault()}
+                    onPointerDown={
+                        isMobileLayout
+                            ? () => {
+                                  pressStartedAtRef.current = Date.now();
+                                  suppressTapNavigationRef.current = false;
+                                  setPaused(true);
+                              }
+                            : undefined
+                    }
+                    onPointerUp={
+                        isMobileLayout
+                            ? () => {
+                                  const startedAt = pressStartedAtRef.current;
+                                  pressStartedAtRef.current = null;
+                                  if (
+                                      startedAt &&
+                                      Date.now() - startedAt >
+                                          HOLD_TO_PAUSE_NAV_SUPPRESSION_MS
+                                  ) {
+                                      suppressTapNavigationRef.current = true;
+                                  }
+                                  setPaused(false);
+                              }
+                            : undefined
+                    }
+                    onPointerCancel={
+                        isMobileLayout
+                            ? () => {
+                                  pressStartedAtRef.current = null;
+                                  setPaused(false);
+                              }
+                            : undefined
+                    }
+                    onPointerLeave={
+                        isMobileLayout
+                            ? () => {
+                                  if (pressStartedAtRef.current !== null) {
+                                      pressStartedAtRef.current = null;
+                                      setPaused(false);
+                                  }
+                              }
+                            : undefined
+                    }
                 >
-                    {isVideo ? (
-                        <VideoPlayer
-                            file={currentFile}
-                            onReady={handleFullLoad}
-                            onDuration={handleVideoDuration}
-                            onEnded={onNext}
-                            paused={paused}
-                            dateBadge={<DateBadge file={currentFile} />}
-                        />
-                    ) : (
-                        <PhotoImage
-                            file={currentFile}
-                            onFullLoad={handleFullLoad}
-                            dateBadge={<DateBadge file={currentFile} />}
-                        />
-                    )}
+                    <MediaFrame style={mediaFrameStyle}>
+                        {isVideo ? (
+                            <VideoPlayer
+                                file={currentFile}
+                                onReady={handleFullLoad}
+                                onDuration={handleVideoDuration}
+                                onEnded={onNext}
+                                paused={paused}
+                                dateBadge={
+                                    isMobileLayout ? undefined : (
+                                        <EnteCornerBadge />
+                                    )
+                                }
+                                fillFrame
+                                onAspectRatio={handleMediaAspectRatio}
+                            />
+                        ) : (
+                            <PhotoImage
+                                file={currentFile}
+                                onFullLoad={handleFullLoad}
+                                dateBadge={
+                                    isMobileLayout ? undefined : (
+                                        <EnteCornerBadge />
+                                    )
+                                }
+                                fillFrame
+                                onAspectRatio={handleMediaAspectRatio}
+                            />
+                        )}
+                    </MediaFrame>
                 </PhotoContainer>
-                <Footer />
+
+                {isMobileLayout && (
+                    <MobileBottomBar>
+                        <MobileBrand>
+                            <EnteLogo height={30} />
+                            <MobileBrandTag>photos</MobileBrandTag>
+                        </MobileBrand>
+                        <MobileJoinNowButton
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Join now
+                        </MobileJoinNowButton>
+                    </MobileBottomBar>
+                )}
             </ContentContainer>
         </ViewerRoot>
     );
@@ -338,11 +644,13 @@ const ViewerRoot = styled("div")({
     justifyContent: "center",
 });
 
-const BackgroundOverlay = styled("div")({
+const BackgroundPattern = styled("div")({
     position: "absolute",
     inset: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.72)",
-    backdropFilter: "blur(7.3px)",
+    backgroundColor: "#1f1f1f",
+    backgroundImage: backgroundPattern,
+    backgroundRepeat: "repeat",
+    backgroundSize: "220px 220px",
     zIndex: 1,
 });
 
@@ -352,31 +660,181 @@ const ContentContainer = styled("div")({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "21px",
+    gap: "32px",
     width: "100%",
-    maxWidth: "1264px",
+    maxWidth: `${DESKTOP_MEDIA_MAX_WIDTH_PX}px`,
     height: "100vh",
-    padding: "24px 24px",
+    padding: "42px 24px 24px",
     boxSizing: "border-box",
 });
 
+const MobileHeaderSection = styled("div")({
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "12px",
+});
+
+const MobileTitle = styled(Typography)({
+    color: "white",
+    fontWeight: 700,
+    fontSize: "16px",
+    lineHeight: "17px",
+    letterSpacing: 0,
+    textAlign: "left",
+    maxWidth: "326px",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
+});
+
+const TopControls = styled("div")({
+    display: "grid",
+    gridTemplateColumns: "64px minmax(0, 1fr) auto",
+    alignItems: "center",
+    columnGap: "28px",
+    width: "100%",
+    "@media (max-width: 900px)": { columnGap: "12px" },
+});
+
 const HeaderSection = styled("div")({
+    width: "100%",
+    minWidth: 0,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     gap: "24px",
-    flexShrink: 0,
-    width: "100%",
 });
 
 const MemoryTitle = styled(Typography)({
     color: "white",
     fontWeight: 700,
     fontSize: "24px",
-    lineHeight: "17px",
+    lineHeight: 1.25,
     letterSpacing: "-0.48px",
     textAlign: "center",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
+    maxWidth: "100%",
+    "@media (max-width: 900px)": { fontSize: "20px" },
+    "@media (max-width: 700px)": { fontSize: "17px", lineHeight: 1.3 },
 });
+
+const PlaybackControl = styled("button")({
+    width: "64px",
+    height: "64px",
+    borderRadius: "19.2px",
+    border: 0,
+    cursor: "pointer",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    padding: 0,
+    transition: "background-color 150ms ease",
+    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.28)" },
+    "@media (max-width: 900px)": {
+        width: "56px",
+        height: "56px",
+        borderRadius: "16px",
+    },
+});
+
+const JoinNowButton = styled("a")({
+    backgroundColor: "#08c225",
+    color: "white",
+    textDecoration: "none",
+    borderRadius: "39.459px",
+    padding: "18px 32px",
+    fontWeight: 700,
+    fontSize: "16px",
+    lineHeight: "14px",
+    whiteSpace: "nowrap",
+    transition: "filter 150ms ease",
+    "&:hover": { filter: "brightness(1.08)" },
+    "@media (max-width: 900px)": { padding: "14px 24px", fontSize: "14px" },
+});
+
+const MobileBottomBar = styled("div")({
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    marginTop: "auto",
+    paddingBottom: "2px",
+});
+
+const MobileBrand = styled("div")({
+    color: "white",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: 0,
+});
+
+const MobileBrandTag = styled("div")({
+    marginTop: "-2px",
+    borderRadius: "999px",
+    padding: "2px 8px",
+    fontSize: "10px",
+    lineHeight: "12px",
+    fontWeight: 700,
+    backgroundColor: "#08c225",
+    color: "white",
+});
+
+const MobileJoinNowButton = styled("a")({
+    backgroundColor: "#08c225",
+    color: "white",
+    textDecoration: "none",
+    borderRadius: "32.836px",
+    padding: "15.636px 28.145px",
+    fontWeight: 700,
+    fontSize: "14px",
+    lineHeight: "12px",
+    whiteSpace: "nowrap",
+});
+
+const PlaybackGlyph: React.FC<{ paused: boolean }> = ({ paused }) => {
+    if (paused) {
+        return (
+            <Box
+                sx={{
+                    width: 0,
+                    height: 0,
+                    borderTop: "10px solid transparent",
+                    borderBottom: "10px solid transparent",
+                    borderLeft: "14px solid white",
+                    ml: "3px",
+                }}
+            />
+        );
+    }
+
+    return (
+        <Box sx={{ display: "flex", gap: "6px" }}>
+            <Box
+                sx={{
+                    width: "6px",
+                    height: "18px",
+                    borderRadius: "2px",
+                    backgroundColor: "white",
+                }}
+            />
+            <Box
+                sx={{
+                    width: "6px",
+                    height: "18px",
+                    borderRadius: "2px",
+                    backgroundColor: "white",
+                }}
+            />
+        </Box>
+    );
+};
 
 interface ProgressIndicatorProps {
     total: number;
@@ -386,6 +844,7 @@ interface ProgressIndicatorProps {
     onComplete: () => void;
     /** If true, the progress bar won't auto-advance (video handles its own end). */
     isVideo?: boolean;
+    compact?: boolean;
 }
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
@@ -395,25 +854,22 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     duration,
     onComplete,
     isVideo,
+    compact,
 }) => {
-    // Calculate the total width: 30px per bar + 12px gap between bars
-    const totalWidth = total * 30 + (total - 1) * 12;
-
     return (
         <Box
             sx={{
                 display: "flex",
                 gap: "12px",
                 alignItems: "center",
-                height: "6px",
-                width: `${totalWidth}px`,
-                maxWidth: "100%",
+                width: "100%",
+                maxWidth: compact ? "326px" : "448px",
+                minWidth: 0,
+                height: "4px",
             }}
         >
             {Array.from({ length: total }, (_, i) => (
                 <ProgressBar
-                    // Use a unique key for the active bar so it remounts
-                    // (restarting the CSS animation) when navigating.
                     key={i === current ? `active-${current}-${duration}` : i}
                     state={
                         i < current
@@ -424,7 +880,6 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                     }
                     paused={paused}
                     duration={duration}
-                    // For videos, don't trigger onComplete from animation - video's onEnded handles it.
                     onComplete={
                         i === current && !isVideo ? onComplete : undefined
                     }
@@ -451,9 +906,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         <Box
             sx={{
                 position: "relative",
-                width: "30px",
-                flexShrink: 0,
-                height: "6px",
+                flex: 1,
+                minWidth: "8px",
+                height: "4px",
                 borderRadius: "14px",
                 backgroundColor: "rgba(255, 255, 255, 0.45)",
                 overflow: "hidden",
@@ -496,57 +951,112 @@ const PhotoContainer = styled("div")({
     cursor: "pointer",
     userSelect: "none",
     WebkitUserSelect: "none",
+    WebkitTouchCallout: "none",
+    touchAction: "manipulation",
+});
+
+const MediaFrame = styled("div")({
+    position: "relative",
+    borderRadius: "24px",
+    overflow: "hidden",
+    backgroundColor: "#111111",
+    boxShadow: "0 14px 38px rgba(0, 0, 0, 0.35)",
+    width: "fit-content",
+    height: "fit-content",
+    maxWidth: DESKTOP_MEDIA_MAX_WIDTH_CSS,
+    maxHeight: DESKTOP_MEDIA_MAX_HEIGHT_CSS,
+    flexShrink: 0,
+    lineHeight: 0,
 });
 
 interface PhotoImageProps {
     file: EnteFile;
     onFullLoad?: () => void;
+    fillFrame?: boolean;
+    onAspectRatio?: (width: number, height: number) => void;
     dateBadge?: React.ReactNode;
 }
 
 const PhotoImage: React.FC<PhotoImageProps> = ({
     file,
     onFullLoad,
+    fillFrame,
+    onAspectRatio,
     dateBadge,
 }) => {
-    const [url, setUrl] = useState<string | undefined>(undefined);
+    const [thumbnailURL, setThumbnailURL] = useState<string | undefined>(
+        undefined,
+    );
+    const [fullImageURL, setFullImageURL] = useState<string | undefined>(
+        undefined,
+    );
     const [isLoading, setIsLoading] = useState(true);
     const onFullLoadRef = useRef(onFullLoad);
+    const hasSignaledReadyRef = useRef(false);
     onFullLoadRef.current = onFullLoad;
+    const signalReady = useCallback(() => {
+        if (hasSignaledReadyRef.current) return;
+        hasSignaledReadyRef.current = true;
+        onFullLoadRef.current?.();
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
-        const load = async () => {
+        setThumbnailURL(undefined);
+        setFullImageURL(undefined);
+        hasSignaledReadyRef.current = false;
+
+        const loadThumbnail = async () => {
             try {
                 const thumbnailURL =
                     await downloadManager.renderableThumbnailURL(file);
                 if (!cancelled && thumbnailURL) {
-                    setUrl(thumbnailURL);
+                    setThumbnailURL(thumbnailURL);
+                } else if (!cancelled) {
+                    setIsLoading(false);
                 }
             } catch (e) {
                 log.error("Failed to load thumbnail", e);
                 setIsLoading(false);
             }
         };
-        load();
+
+        const loadFullImage = async () => {
+            try {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                if (cancelled) return;
+                if (sourceURLs.type === "image") {
+                    setFullImageURL(sourceURLs.imageURL);
+                } else {
+                    signalReady();
+                }
+            } catch (e) {
+                log.error("Failed to load full image", e);
+                if (!cancelled) signalReady();
+            }
+        };
+
+        void loadThumbnail();
+        void loadFullImage();
         return () => {
             cancelled = true;
         };
-    }, [file]);
+    }, [file, signalReady]);
+
+    const displayURL = fullImageURL ?? thumbnailURL;
 
     return (
         <Box
             sx={{
                 position: "relative",
-                display: "inline-block",
-                maxWidth: "100%",
-                maxHeight: "100%",
-                borderRadius: "24px",
+                display: fillFrame ? "block" : "inline-block",
+                width: fillFrame ? "100%" : "auto",
+                height: fillFrame ? "100%" : "auto",
                 overflow: "hidden",
             }}
         >
-            {/* Loading overlay */}
             {isLoading && (
                 <Box
                     sx={{
@@ -562,27 +1072,41 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
                     <LoadingIndicator />
                 </Box>
             )}
-            {/* Image */}
-            {url && (
+
+            {displayURL && (
                 <img
-                    src={url}
+                    src={displayURL}
                     alt=""
                     draggable={false}
-                    onLoad={() => {
+                    onLoad={(event) => {
+                        onAspectRatio?.(
+                            event.currentTarget.naturalWidth,
+                            event.currentTarget.naturalHeight,
+                        );
                         setIsLoading(false);
-                        onFullLoadRef.current?.();
+                        if (
+                            fullImageURL &&
+                            event.currentTarget.src === fullImageURL
+                        ) {
+                            signalReady();
+                        }
                     }}
                     style={{
                         display: "block",
-                        maxWidth: "100%",
-                        maxHeight: "calc(100vh - 220px)",
+                        width: fillFrame ? "100%" : "auto",
+                        height: fillFrame ? "100%" : "auto",
+                        maxWidth: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_WIDTH_CSS,
+                        maxHeight: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_HEIGHT_CSS,
                         objectFit: "contain",
                         userSelect: "none",
                         pointerEvents: "none",
                     }}
                 />
             )}
-            {/* Date badge positioned over the image */}
             {dateBadge}
         </Box>
     );
@@ -594,6 +1118,8 @@ interface VideoPlayerProps {
     onDuration?: (durationSeconds: number) => void;
     onEnded?: () => void;
     paused?: boolean;
+    fillFrame?: boolean;
+    onAspectRatio?: (width: number, height: number) => void;
     dateBadge?: React.ReactNode;
 }
 
@@ -603,6 +1129,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     onDuration,
     onEnded,
     paused,
+    fillFrame,
+    onAspectRatio,
     dateBadge,
 }) => {
     const [hlsData, setHlsData] = useState<HLSPlaylistData | undefined>(
@@ -623,24 +1151,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     onDurationRef.current = onDuration;
     onEndedRef.current = onEnded;
 
-    // Load video URL (try HLS first, fallback to direct download)
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
         setError(false);
         setVideoURL(undefined);
         setHlsData(undefined);
+        setThumbnailURL(undefined);
 
         const load = async () => {
             try {
-                // First load thumbnail as poster
                 const thumbURL =
                     await downloadManager.renderableThumbnailURL(file);
                 if (!cancelled && thumbURL) {
                     setThumbnailURL(thumbURL);
                 }
 
-                // Try HLS streaming first (better quality, adaptive bitrate)
                 const hlsPlaylistData =
                     await downloadManager.hlsPlaylistDataForPublicMemory(file);
                 if (
@@ -652,11 +1178,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     return;
                 }
 
-                // Fallback to direct video download
                 const sourceURLs: RenderableSourceURLs =
                     await downloadManager.renderableSourceURLs(file);
                 if (!cancelled && sourceURLs.type === "video") {
                     setVideoURL(sourceURLs.videoURL);
+                } else if (!cancelled) {
+                    setIsLoading(false);
                 }
             } catch (e) {
                 log.error("Failed to load video", e);
@@ -672,7 +1199,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         };
     }, [file]);
 
-    // Handle pause/play state
     useEffect(() => {
         const video = videoRef.current;
         if (!video || (!videoURL && !hlsData)) return;
@@ -681,7 +1207,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             video.pause();
         } else {
             video.play().catch(() => {
-                // Autoplay may be blocked; ignore
+                // Autoplay may be blocked; ignore.
             });
         }
     }, [paused, videoURL, hlsData]);
@@ -689,18 +1215,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleLoadedMetadata = useCallback(() => {
         const video = videoRef.current;
         if (video && !isNaN(video.duration) && video.duration > 0) {
+            onAspectRatio?.(video.videoWidth, video.videoHeight);
             onDurationRef.current?.(video.duration);
         }
-    }, []);
+    }, [onAspectRatio]);
 
     const handleCanPlay = useCallback(() => {
         setIsLoading(false);
         onReadyRef.current?.();
-        // Auto-play when ready
         const video = videoRef.current;
         if (video) {
             video.play().catch(() => {
-                // Autoplay may be blocked
+                // Autoplay may be blocked.
             });
         }
     }, []);
@@ -731,14 +1257,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <Box
             sx={{
                 position: "relative",
-                display: "inline-block",
-                maxWidth: "100%",
-                maxHeight: "100%",
-                borderRadius: "24px",
+                display: fillFrame ? "block" : "inline-block",
+                width: fillFrame ? "100%" : "auto",
+                height: fillFrame ? "100%" : "auto",
                 overflow: "hidden",
             }}
         >
-            {/* Loading overlay */}
             {isLoading && (
                 <Box
                     sx={{
@@ -754,7 +1278,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     <LoadingIndicator />
                 </Box>
             )}
-            {/* HLS video element (when HLS streaming is available) */}
+
             {hlsData && (
                 <hls-video
                     ref={videoRef as React.RefObject<HTMLVideoElement>}
@@ -766,14 +1290,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     onEnded={handleEnded}
                     style={{
                         display: "block",
-                        maxWidth: "100%",
-                        maxHeight: "calc(100vh - 220px)",
+                        width: fillFrame ? "100%" : "auto",
+                        height: fillFrame ? "100%" : "auto",
+                        maxWidth: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_WIDTH_CSS,
+                        maxHeight: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_HEIGHT_CSS,
                         objectFit: "contain",
                         userSelect: "none",
+                        pointerEvents: "none",
                     }}
                 />
             )}
-            {/* Regular video element (fallback when HLS is not available) */}
+
             {!hlsData && videoURL && (
                 <video
                     ref={videoRef}
@@ -786,126 +1317,82 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     onEnded={handleEnded}
                     style={{
                         display: "block",
-                        maxWidth: "100%",
-                        maxHeight: "calc(100vh - 220px)",
-                        objectFit: "contain",
-                        userSelect: "none",
-                    }}
-                />
-            )}
-            {/* Show thumbnail while video loads */}
-            {!videoURL && !hlsData && thumbnailURL && (
-                <img
-                    src={thumbnailURL}
-                    alt=""
-                    style={{
-                        display: "block",
-                        maxWidth: "100%",
-                        maxHeight: "calc(100vh - 220px)",
+                        width: fillFrame ? "100%" : "auto",
+                        height: fillFrame ? "100%" : "auto",
+                        maxWidth: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_WIDTH_CSS,
+                        maxHeight: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_HEIGHT_CSS,
                         objectFit: "contain",
                         userSelect: "none",
                         pointerEvents: "none",
                     }}
                 />
             )}
-            {/* Date badge positioned over the video */}
+
+            {!videoURL && !hlsData && thumbnailURL && (
+                <img
+                    src={thumbnailURL}
+                    alt=""
+                    style={{
+                        display: "block",
+                        width: fillFrame ? "100%" : "auto",
+                        height: fillFrame ? "100%" : "auto",
+                        maxWidth: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_WIDTH_CSS,
+                        maxHeight: fillFrame
+                            ? "100%"
+                            : DESKTOP_MEDIA_MAX_HEIGHT_CSS,
+                        objectFit: "contain",
+                        userSelect: "none",
+                        pointerEvents: "none",
+                    }}
+                />
+            )}
             {dateBadge}
         </Box>
     );
 };
 
-interface FileImageProps {
-    file: EnteFile;
-}
-
-const BackgroundImage: React.FC<FileImageProps> = ({ file }) => {
-    const [url, setUrl] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        let cancelled = false;
-        const load = async () => {
-            try {
-                const thumbnailURL =
-                    await downloadManager.renderableThumbnailURL(file);
-                if (!cancelled && thumbnailURL) {
-                    setUrl(thumbnailURL);
-                }
-            } catch (e) {
-                // Silently fail for background
-            }
-        };
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, [file]);
-
-    if (!url) return null;
-
-    return (
+const EnteCornerBadge: React.FC = () => (
+    <Box
+        sx={{
+            position: "absolute",
+            top: "14px",
+            left: "14px",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            backgroundColor: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 3,
+        }}
+    >
         <img
-            src={url}
-            alt=""
+            src="/images/favicon.png"
+            alt="Ente"
+            draggable={false}
             style={{
-                position: "absolute",
-                inset: "-20px",
-                width: "calc(100% + 40px)",
-                height: "calc(100% + 40px)",
-                objectFit: "cover",
-                zIndex: 0,
+                width: "18px",
+                height: "18px",
+                userSelect: "none",
+                pointerEvents: "none",
             }}
         />
-    );
-};
-
-interface DateBadgeProps {
-    file: EnteFile;
-}
-
-const DateBadge: React.FC<DateBadgeProps> = ({ file }) => {
-    const dateString = useMemo(() => {
-        try {
-            const date = fileCreationPhotoDate(file);
-            return formatMemoryDate(date);
-        } catch {
-            return "";
-        }
-    }, [file]);
-
-    if (!dateString) return null;
-
-    return (
-        <Box
-            sx={{
-                position: "absolute",
-                top: "24px",
-                left: "24px",
-                backgroundColor: "rgba(0, 0, 0, 0.4)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                borderRadius: "42px",
-                padding: "14px",
-            }}
-        >
-            <Typography
-                sx={{
-                    color: "white",
-                    fontSize: "13.728px",
-                    fontWeight: 500,
-                    lineHeight: "11.669px",
-                }}
-            >
-                {dateString}
-            </Typography>
-        </Box>
-    );
-};
+    </Box>
+);
 
 /**
- * Format a date in the style "12th Jan, 2022".
+ * Format a date in the style "12th jan, 2022".
  */
 const formatMemoryDate = (date: Date): string => {
     const day = date.getDate();
-    const month = date.toLocaleString("en", { month: "short" });
+    const month = date.toLocaleString("en", { month: "short" }).toLowerCase();
     const year = date.getFullYear();
     const ordinal = getOrdinalSuffix(day);
     return `${day}${ordinal} ${month}, ${year}`;
@@ -916,38 +1403,3 @@ const getOrdinalSuffix = (n: number): string => {
     const v = n % 100;
     return s[(v - 20) % 10] || s[v] || s[0]!;
 };
-
-const Footer: React.FC = () => (
-    <Box sx={{ flexShrink: 0, textAlign: "center", width: "100%" }}>
-        <Link
-            href="https://ente.io"
-            target="_blank"
-            underline="none"
-            sx={{
-                color: "rgba(255, 255, 255, 0.53)",
-                "&:hover": { color: "rgba(255, 255, 255, 0.7)" },
-            }}
-        >
-            <Typography
-                sx={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    lineHeight: "12.741px",
-                }}
-            >
-                Shared using{" "}
-                <Typography
-                    component="span"
-                    sx={{
-                        fontSize: "16px",
-                        fontWeight: 600,
-                        lineHeight: "12.741px",
-                        color: "#08c225",
-                    }}
-                >
-                    ente.io
-                </Typography>
-            </Typography>
-        </Link>
-    </Box>
-);
