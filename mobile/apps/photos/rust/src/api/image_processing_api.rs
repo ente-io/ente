@@ -11,21 +11,45 @@ pub struct RustFaceBox {
     pub height: f64,
 }
 
+#[derive(Clone, Debug)]
+pub struct RustFaceThumbnailBatch {
+    pub thumbnails: Vec<Vec<u8>>,
+    pub source_width: u32,
+    pub source_height: u32,
+}
+
 pub fn generate_face_thumbnails(
     image_path: String,
     face_boxes: Vec<RustFaceBox>,
 ) -> Result<Vec<Vec<u8>>, String> {
+    generate_face_thumbnails_with_metadata(image_path, face_boxes).map(|batch| batch.thumbnails)
+}
+
+pub fn generate_face_thumbnails_with_metadata(
+    image_path: String,
+    face_boxes: Vec<RustFaceBox>,
+) -> Result<RustFaceThumbnailBatch, String> {
     let decoded = decode_image_from_path(&image_path).map_err(|e| e.to_string())?;
-    let face_boxes = face_boxes
+    let face_boxes = parse_face_boxes(face_boxes)?;
+    let thumbnails =
+        generate_face_thumbnails_impl(&decoded, &face_boxes).map_err(|e| e.to_string())?;
+
+    Ok(RustFaceThumbnailBatch {
+        thumbnails,
+        source_width: decoded.dimensions.width,
+        source_height: decoded.dimensions.height,
+    })
+}
+
+fn parse_face_boxes(face_boxes: Vec<RustFaceBox>) -> Result<Vec<FaceBox>, String> {
+    face_boxes
         .into_iter()
         .enumerate()
         .map(|(index, face_box)| {
             FaceBox::try_from(face_box)
                 .map_err(|e| format!("invalid face box at index {index}: {e}"))
         })
-        .collect::<Result<Vec<_>, _>>()?;
-
-    generate_face_thumbnails_impl(&decoded, &face_boxes).map_err(|e| e.to_string())
+        .collect::<Result<Vec<_>, _>>()
 }
 
 impl TryFrom<RustFaceBox> for FaceBox {

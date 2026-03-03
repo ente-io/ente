@@ -23,6 +23,8 @@ final _logger = Logger("FaceCropUtils");
 const int _retryLimit = 3;
 final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(100);
 final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(100);
+final LRUMap<int, ({int width, int height})>
+    _thumbnailSourceDimensionsByFileId = LRUMap(2000);
 
 final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(2000);
 
@@ -45,6 +47,12 @@ Uint8List? checkInMemoryCachedCropForPersonOrClusterID(
   if (faceID == null) return null;
   final Uint8List? cachedCover = _faceCropCache.get(faceID);
   return cachedCover;
+}
+
+({int width, int height})? getCachedThumbnailSourceDimensionsForFileId(
+  int fileId,
+) {
+  return _thumbnailSourceDimensionsByFileId.get(fileId);
 }
 
 Uint8List? _checkInMemoryCachedCropForFaceID(String faceID) {
@@ -299,6 +307,31 @@ void checkStopTryingToGenerateFaceThumbnails(
   }
 }
 
+bool areThumbnailFaceGenerationQueuesIdle() {
+  return _queueThumbnailFaceGenerations.pendingTasksCount == 0 &&
+      _queueThumbnailFaceGenerations.runningTasksCount == 0;
+}
+
+Future<void> waitForThumbnailFaceGenerationIdle({
+  Duration pollInterval = const Duration(milliseconds: 120),
+  bool Function()? shouldStopWaiting,
+}) async {
+  while (true) {
+    if (shouldStopWaiting?.call() ?? false) {
+      return;
+    }
+    if (areThumbnailFaceGenerationQueuesIdle()) {
+      return;
+    }
+    await Future.delayed(pollInterval);
+  }
+}
+
+Future<bool> hasPersistedFullFaceCrop(String faceID) async {
+  final faceCropCacheFile = cachedFaceCropPath(faceID, false);
+  return faceCropCacheFile.exists();
+}
+
 Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap, {
@@ -349,6 +382,35 @@ Future<String> _faceCropTaskId(
   return "$baseId${useFullFile ? "-full" : "-thumbnail"}";
 }
 
+Future<int?> _faceCropFileIdForDimensions(EnteFile file) async {
+  if (isOfflineMode) {
+    final localId = file.localID;
+    if (localId == null || localId.isEmpty) {
+      return null;
+    }
+    return OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+  }
+  return file.uploadedFileID;
+}
+
+Future<void> _cacheThumbnailSourceDimensionsForFile(
+  EnteFile file, {
+  required int width,
+  required int height,
+}) async {
+  if (width <= 0 || height <= 0) {
+    return;
+  }
+  final fileId = await _faceCropFileIdForDimensions(file);
+  if (fileId == null) {
+    return;
+  }
+  _thumbnailSourceDimensionsByFileId.put(
+    fileId,
+    (width: width, height: height),
+  );
+}
+
 Future<Map<String, Uint8List>?> _getFaceCrops(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap, {
@@ -376,12 +438,19 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
     faceIds.add(e.key);
     faceBoxes.add(e.value);
   }
-  final List<Uint8List> faceCrop =
-      await FaceThumbnailGenerator.instance.generateFaceThumbnails(
-    // await generateJpgFaceThumbnails(
+  final generationResult = await FaceThumbnailGenerator.instance
+      .generateFaceThumbnailsWithSourceDimensions(
     imagePath,
     faceBoxes,
   );
+  if (!useFullFile) {
+    await _cacheThumbnailSourceDimensionsForFile(
+      file,
+      width: generationResult.sourceWidth,
+      height: generationResult.sourceHeight,
+    );
+  }
+  final List<Uint8List> faceCrop = generationResult.thumbnails;
   final Map<String, Uint8List> result = {};
   for (int i = 0; i < faceCrop.length; i++) {
     result[faceIds[i]] = faceCrop[i];

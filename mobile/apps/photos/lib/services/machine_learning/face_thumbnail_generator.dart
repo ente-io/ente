@@ -8,6 +8,18 @@ import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/isolate/super_isolate.dart";
 
+class FaceThumbnailGenerationResult {
+  final List<Uint8List> thumbnails;
+  final int sourceWidth;
+  final int sourceHeight;
+
+  const FaceThumbnailGenerationResult({
+    required this.thumbnails,
+    required this.sourceWidth,
+    required this.sourceHeight,
+  });
+}
+
 @pragma('vm:entry-point')
 class FaceThumbnailGenerator extends SuperIsolate {
   @override
@@ -36,6 +48,18 @@ class FaceThumbnailGenerator extends SuperIsolate {
     String imagePath,
     List<FaceBox> faceBoxes,
   ) async {
+    final result = await generateFaceThumbnailsWithSourceDimensions(
+      imagePath,
+      faceBoxes,
+    );
+    return result.thumbnails;
+  }
+
+  Future<FaceThumbnailGenerationResult>
+      generateFaceThumbnailsWithSourceDimensions(
+    String imagePath,
+    List<FaceBox> faceBoxes,
+  ) async {
     try {
       final useRustForFaceThumbnails = flagService.useRustForFaceThumbnails;
       _logger.info(
@@ -43,25 +67,39 @@ class FaceThumbnailGenerator extends SuperIsolate {
       );
       final List<Map<String, dynamic>> faceBoxesJson =
           faceBoxes.map((box) => box.toJson()).toList();
-      final List<Uint8List> faces = await runInIsolate(
-        IsolateOperation.generateFaceThumbnails,
+      final Map<String, dynamic> rawResult = await runInIsolate(
+        IsolateOperation.generateFaceThumbnailsWithSourceDimensions,
         {
           'imagePath': imagePath,
           'faceBoxesList': faceBoxesJson,
           'useRustForFaceThumbnails': useRustForFaceThumbnails,
         },
-      ).then((value) => value.cast<Uint8List>());
-      _logger.info("Generated face thumbnails");
+      ).then((value) => Map<String, dynamic>.from(value));
+      final List<Uint8List> faces =
+          (rawResult['thumbnails'] as List<dynamic>).cast<Uint8List>();
+      final int sourceWidth = rawResult['sourceWidth'] as int? ?? 0;
+      final int sourceHeight = rawResult['sourceHeight'] as int? ?? 0;
+      _logger.info(
+        "Generated face thumbnails with source dimensions ${sourceWidth}x$sourceHeight",
+      );
       if (useRustForFaceThumbnails) {
         // Rust path already emits compressed JPEG bytes.
-        return faces;
+        return FaceThumbnailGenerationResult(
+          thumbnails: faces,
+          sourceWidth: sourceWidth,
+          sourceHeight: sourceHeight,
+        );
       }
       final compressedFaces =
           await compressFaceThumbnails({'listPngBytes': faces});
       _logger.fine(
         "Compressed face thumbnails from sizes ${faces.map((e) => e.length / 1024).toList()} to ${compressedFaces.map((e) => e.length / 1024).toList()} kilobytes",
       );
-      return compressedFaces;
+      return FaceThumbnailGenerationResult(
+        thumbnails: compressedFaces,
+        sourceWidth: sourceWidth,
+        sourceHeight: sourceHeight,
+      );
     } catch (e, s) {
       _logger.severe("Failed to generate face thumbnails", e, s);
 
