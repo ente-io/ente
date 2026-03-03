@@ -122,15 +122,16 @@ jobs:
                   tagName: ${{ env.RELEASE_TAG }}
                   releaseName: "Ensu Desktop ${{ env.RELEASE_TAG }}"
                   releaseBody: |
-                      Desktop release for Ensu
+                      Release artifacts for Ensu.
 
-                      **Platforms:**
+                      **Desktop:**
                       - Linux (AppImage, deb)
                       - macOS (dmg, app)
                       - Windows (msi, exe)
-                      - Android (apk)
 
-                      Download the appropriate file for your platform below.
+                      **Android:**
+                      - APK is attached to this release
+                      - AAB is uploaded to Play Store only
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
