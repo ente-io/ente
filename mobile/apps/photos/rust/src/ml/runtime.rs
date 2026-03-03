@@ -149,29 +149,6 @@ impl LazySession {
         }
         Ok(self.session.as_mut().unwrap())
     }
-
-    fn unload(&mut self) {
-        if self.session.is_some() {
-            let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
-            rt_log(&format!("unloading {model_name}"));
-        }
-        self.session = None;
-        #[cfg(target_os = "android")]
-        unsafe {
-            unsafe extern "C" {
-                unsafe fn dlsym(
-                    handle: *mut core::ffi::c_void,
-                    symbol: *const core::ffi::c_char,
-                ) -> *mut core::ffi::c_void;
-            }
-            let name = b"malloc_trim\0";
-            let sym = dlsym(core::ptr::null_mut(), name.as_ptr().cast());
-            if !sym.is_null() {
-                let f: unsafe extern "C" fn(usize) -> i32 = core::mem::transmute(sym);
-                f(0);
-            }
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -283,35 +260,6 @@ impl MlRuntime {
     pub fn pet_body_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
         self.pet_body_embedding_cat
             .get_mut("missing model path: petBodyEmbeddingCatModelPath is required")
-    }
-
-    /// Drop loaded face sessions to free native memory between analysis phases.
-    pub fn unload_face_sessions(&mut self) {
-        self.face_detection.unload();
-        self.face_embedding.unload();
-    }
-
-    /// Drop the loaded CLIP session to free native memory between analysis phases.
-    pub fn unload_clip_session(&mut self) {
-        self.clip_image.unload();
-    }
-
-    /// Drop loaded pet detection sessions to free native memory between analysis phases.
-    pub fn unload_pet_detection_sessions(&mut self) {
-        self.pet_face_detection.unload();
-        self.pet_body_detection.unload();
-    }
-
-    /// Drop loaded pet face embedding sessions to free native memory between analysis phases.
-    pub fn unload_pet_face_embedding_sessions(&mut self) {
-        self.pet_face_embedding_dog.unload();
-        self.pet_face_embedding_cat.unload();
-    }
-
-    /// Drop loaded pet body embedding sessions to free native memory between analysis phases.
-    pub fn unload_pet_body_embedding_sessions(&mut self) {
-        self.pet_body_embedding_dog.unload();
-        self.pet_body_embedding_cat.unload();
     }
 }
 
