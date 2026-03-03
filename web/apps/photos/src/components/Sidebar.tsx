@@ -85,6 +85,7 @@ import {
 } from "ente-new/photos/components/utils/use-snapshot";
 import {
     reauthenticateWithAppLock,
+    suppressAutoLockOnBlurForTrustedPrompt,
     suppressAppLockRefreshFromSessionForTrustedReload,
 } from "ente-new/photos/services/app-lock";
 import {
@@ -1003,8 +1004,22 @@ const Account: React.FC<AccountProps> = ({
         void router.push("/change-email");
     }, [router]);
 
+    const handleRecoveryKey = useCallback(async () => {
+        if (isDesktop) {
+            const didAuthenticateWithAppLock =
+                await reauthenticateWithAppLock();
+            if (!didAuthenticateWithAppLock) await onAuthenticateUser();
+        } else {
+            await onAuthenticateUser();
+        }
+        showRecoveryKey();
+    }, [onAuthenticateUser, showRecoveryKey]);
+
     const handlePasskeys = useCallback(async () => {
         onRootClose();
+        if (isDesktop) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         await openAccountsManagePasskeysPage();
     }, [onRootClose]);
 
@@ -1023,7 +1038,7 @@ const Account: React.FC<AccountProps> = ({
         if (!open || !pendingAction) return;
         switch (pendingAction) {
             case "account.recoveryKey":
-                showRecoveryKey();
+                void handleRecoveryKey();
                 break;
             case "account.twoFactor.reconfigure":
             case "account.twoFactor":
@@ -1050,12 +1065,12 @@ const Account: React.FC<AccountProps> = ({
         handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
+        handleRecoveryKey,
         handlePasskeys,
         open,
         onActionHandled,
         pendingAction,
         showDeleteAccount,
-        showRecoveryKey,
         showTwoFactor,
     ]);
 
@@ -1074,7 +1089,7 @@ const Account: React.FC<AccountProps> = ({
                             />
                         }
                         label={t("recovery_key")}
-                        onClick={showRecoveryKey}
+                        onClick={() => void handleRecoveryKey()}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
