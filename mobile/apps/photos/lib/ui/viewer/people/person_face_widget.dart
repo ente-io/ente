@@ -288,13 +288,17 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       _logger.fine(
         'person_face_thumbnail_upgrade_skipped reason=full_crop_cached face=${face.faceID}',
       );
-      if (_showingFallback && mounted && !_shouldAbortUpgrade(generation)) {
-        setState(() {
-          _showingFallback = false;
-        });
-      } else {
-        _showingFallback = false;
+      final Uint8List? fullCrop = await _getFaceCrop(
+        useFullFile: true,
+        notifyOnError: false,
+      );
+      if (fullCrop == null || _shouldAbortUpgrade(generation) || !mounted) {
+        return;
       }
+      setState(() {
+        _showingFallback = false;
+        faceCropFuture = Future.value(fullCrop);
+      });
       return;
     }
 
