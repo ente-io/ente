@@ -649,7 +649,6 @@ dependencies = [
  "image",
  "imageproc",
  "kamadak-exif",
- "libc",
  "libheic-rs",
  "nalgebra 0.33.2",
  "ndarray 0.16.1",
