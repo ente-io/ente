@@ -102,6 +102,29 @@ jobs:
               shell: bash
               run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
+            - name: Install trusted-signing-cli (Windows only)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: cargo install --locked trusted-signing-cli
+
+            - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              env:
+                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+              run: |
+                  node - <<'NODE'
+                  const fs = require('fs');
+                  const path = 'rust/apps/ensu/src-tauri/tauri.conf.json';
+                  const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+                  config.bundle = config.bundle || {};
+                  config.bundle.windows = config.bundle.windows || {};
+                  config.bundle.windows.signCommand = `trusted-signing-cli -e ${process.env.AZURE_ENDPOINT} -a ${process.env.AZURE_CODE_SIGNING_NAME} -c ${process.env.AZURE_CERT_PROFILE_NAME} -d Ensu "%1"`;
+                  fs.writeFileSync(path, JSON.stringify(config, null, 2));
+                  NODE
+
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:
@@ -117,6 +140,9 @@ jobs:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
                   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
               with:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}
@@ -126,51 +152,6 @@ jobs:
                   prerelease: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
-            - name: Locate Windows signing artifacts
-              id: windows-signing-artifacts
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              run: |
-                  ARTIFACT_DIR="${{ github.workspace }}/rust/apps/ensu/src-tauri/target/${{ matrix.platform.rust-target }}/release/bundle"
-                  mapfile -t SIGN_FILES < <(find "$ARTIFACT_DIR" -type f \( -name "*.exe" -o -name "*.msi" \))
-
-                  if [ "${#SIGN_FILES[@]}" -eq 0 ]; then
-                      echo "No Windows executable/MSI artifacts found for signing"
-                      exit 1
-                  fi
-
-                  {
-                    echo "files<<EOF"
-                    for file in "${SIGN_FILES[@]}"; do
-                      echo "$file"
-                    done
-                    echo "EOF"
-                  } >> "$GITHUB_OUTPUT"
-
-            - name: Sign files with Trusted Signing
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              uses: azure/trusted-signing-action@v0
-              with:
-                azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-                azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-                azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-                endpoint: ${{ secrets.AZURE_ENDPOINT }}
-                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-                files: ${{ steps.windows-signing-artifacts.outputs.files }}
-                file-digest: SHA256
-                timestamp-rfc3161: http://timestamp.acs.microsoft.com
-                timestamp-digest: SHA256
-
-            - name: Upload signed Windows artifacts to draft GitHub release
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              uses: ncipollo/release-action@v1
-              with:
-                  tag: ${{ env.RELEASE_TAG }}
-                  artifacts: ${{ steps.windows-signing-artifacts.outputs.files }}
-                  allowUpdates: true
-                  draft: true
-                  updateOnlyUnreleased: true
 
     build-android:
         runs-on: ubuntu-24.04
