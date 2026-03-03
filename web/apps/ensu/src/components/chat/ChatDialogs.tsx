@@ -173,8 +173,7 @@ export const ChatDialogs = memo(
         const openExternalUrl = async (url: string) => {
             const hasTauriBridge =
                 typeof window !== "undefined" &&
-                (Boolean((window as any).__TAURI__) ||
-                    Boolean((window as any).__TAURI_IPC__));
+                ("__TAURI__" in window || "__TAURI_IPC__" in window);
 
             if (isTauriRuntime || hasTauriBridge) {
                 try {
