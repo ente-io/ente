@@ -114,6 +114,8 @@ const AiSafetyFooter = memo(() => {
                 color: "text.muted",
                 textAlign: "center",
                 width: "100%",
+                fontSize: "12px",
+                lineHeight: "16px",
             }}
         >
             Ensu can make mistakes. Double-check key details.

@@ -58,6 +58,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
@@ -341,7 +342,7 @@ private fun EmptyState(
 private fun AiSafetyFooter() {
     Text(
         text = "Ensu can make mistakes. Double-check key details.",
-        style = EnsuTypography.small,
+        style = EnsuTypography.small.copy(fontSize = 12.sp),
         color = EnsuColor.textMuted(),
         textAlign = TextAlign.Center,
         modifier = Modifier
