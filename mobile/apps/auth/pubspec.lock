@@ -425,8 +425,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: dc995b62d6ec5bca3ba47966685b2af3c42235b2
+      ref: "981a9e0f4a227023991af3332ef0e6ab6d14a1c2"
+      resolved-ref: "981a9e0f4a227023991af3332ef0e6ab6d14a1c2"
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
@@ -854,10 +854,10 @@ packages:
     dependency: transitive
     description:
       name: freezed_annotation
-      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
+      sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.4"
+    version: "3.1.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -1612,18 +1612,18 @@ packages:
     dependency: transitive
     description:
       name: sodium
-      sha256: d9830a388e37c82891888e64cfd4c6764fa3ac716bed80ac6eab89ee42c3cd76
+      sha256: "515b86c186f4caca49051caf858d878ca7cc4ff4542411e9febb50654eac8a62"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.1+1"
+    version: "3.4.6"
   sodium_libs:
     dependency: transitive
     description:
       name: sodium_libs
-      sha256: aa764acd6ccc6113e119c2d99471aeeb4637a9a501639549b297d3a143ff49b3
+      sha256: "1c402af586f875399d8e419ec42097073c22ffaf78e86293ed807b92e849db6a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1+6"
+    version: "3.4.6+1"
   source_gen:
     dependency: transitive
     description:
@@ -1780,10 +1780,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "0669c70faae6270521ee4f05bffd2919892d42d1276e6c495be80174b6bc0ef6"
+      sha256: c254ade258ec8282947a0acbbc90b9575b4f19673533ee46f2f6e9b3aeefd7c0
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.1"
+    version: "3.4.0"
   term_glyph:
     dependency: transitive
     description:
@@ -2065,5 +2065,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.2 <4.0.0"
-  flutter: ">=3.29.0"
+  dart: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"

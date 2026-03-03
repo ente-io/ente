@@ -10,7 +10,7 @@ The content from **Sharing Logs** has been reorganized. You can find it in the f
 
 ## Getting Help
 
-- [How do I share debug logs with support?](/photos/faq/troubleshooting) - Step-by-step instructions for mobile, desktop, and web, including log file locations
+- [How do I share debug logs with support?](/photos/faq/troubleshooting#sharing-logs) - Step-by-step instructions for mobile, desktop, and web, including log file locations
 
 ## Related Topics
 

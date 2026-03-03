@@ -196,7 +196,7 @@ class MemoryHomeWidgetService {
   }
 
   Future<List<SmartMemory>> _getMemoriesForWidget() async {
-    final isMLEnabled = flagService.hasGrantedMLConsent;
+    final isMLEnabled = hasGrantedMLConsent;
     bool? smartMemoryValue = getMLMemoriesSelected();
     bool? lastYearValue = hasLastYearMemoriesSelected();
     bool? onThisDayValue = getOnThisDayMemoriesSelected();

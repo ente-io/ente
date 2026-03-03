@@ -5,6 +5,7 @@ on:
 
 env:
   FLUTTER_VERSION: "3.32.8"
+  RUST_VERSION: "1.90.0"
   ANDROID_KEYSTORE_PATH: "keystore/ente_photos_key.jks"
 
 jobs:
@@ -35,6 +36,11 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+
+      - name: Install Rust ${{ env.RUST_VERSION }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       # Android Build 
       - name: Setup Android signing key

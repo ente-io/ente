@@ -74,6 +74,32 @@ export const fetchUploadURLWithMetadata = async ({
     return ObjectUploadURL.parse(await res.json());
 };
 
+/**
+ * Sibling of {@link fetchUploadURLWithMetadata} for public albums.
+ */
+export const fetchPublicAlbumsUploadURLWithMetadata = async (
+    {
+        contentLength,
+        contentMd5,
+    }: { contentLength: number; contentMd5: string },
+    credentials: PublicAlbumsCredentials,
+) => {
+    const headers = new Headers(
+        authenticatedPublicAlbumsRequestHeaders(credentials),
+    );
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/public-collection/upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
+        },
+    );
+    ensureOk(res);
+    return ObjectUploadURL.parse(await res.json());
+};
+
 export const fetchMultipartUploadURLsWithMetadata = async ({
     contentLength,
     partLength,
@@ -87,6 +113,35 @@ export const fetchMultipartUploadURLsWithMetadata = async ({
     headers.set("Content-Type", "application/json");
     const res = await fetch(
         await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, partLength, partMd5s }),
+        },
+    );
+    ensureOk(res);
+    return MultipartUploadURLs.parse(await res.json());
+};
+
+/**
+ * Sibling of {@link fetchMultipartUploadURLsWithMetadata} for public albums.
+ */
+export const fetchPublicAlbumsMultipartUploadURLsWithMetadata = async (
+    {
+        contentLength,
+        partLength,
+        partMd5s,
+    }: { contentLength: number; partLength: number; partMd5s: string[] },
+    credentials: PublicAlbumsCredentials,
+) => {
+    const headers = new Headers(
+        authenticatedPublicAlbumsRequestHeaders(credentials),
+    );
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/public-collection/multipart-upload-url", {
+            ts: Date.now(),
+        }),
         {
             method: "POST",
             headers,

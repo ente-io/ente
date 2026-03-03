@@ -196,7 +196,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     return faceCrops;
   }
 
-  void _navigateToCluster() {
+  Future<void> _navigateToCluster() async {
     if (allSuggestions.isEmpty ||
         currentSuggestionIndex >= allSuggestions.length) {
       return;
@@ -209,7 +209,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     sortedFiles.sort(
       (a, b) => b.creationTime!.compareTo(a.creationTime!),
     );
-    Navigator.of(context).push(
+    final result = await Navigator.of(context).push<ClusterPageResult>(
       MaterialPageRoute(
         builder: (context) => ClusterPage(
           sortedFiles,
@@ -219,6 +219,46 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         ),
       ),
     );
+
+    if (!mounted || result != ClusterPageResult.ignoredPerson) {
+      return;
+    }
+
+    await _consumeCurrentSuggestionAfterExternalAction();
+  }
+
+  Future<void> _consumeCurrentSuggestionAfterExternalAction() async {
+    if (isProcessing ||
+        allSuggestions.isEmpty ||
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
+
+    setState(() {
+      isProcessing = true;
+    });
+
+    try {
+      await _animateOut();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        hasCurrentSuggestion = false;
+      });
+      await _prepareNextSuggestion();
+    } catch (e, s) {
+      _logger.severe(
+        "Error consuming suggestion after external action",
+        e,
+        s,
+      );
+      if (mounted) {
+        setState(() {
+          isProcessing = false;
+        });
+      }
+    }
   }
 
   Future<void> _handleUserChoice(bool accepted) async {

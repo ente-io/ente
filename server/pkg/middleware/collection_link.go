@@ -242,7 +242,7 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		"origin":  origin,
 	})
 	alertMessage := fmt.Sprintf("custom domain %s", reqId)
-	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	domain, err := m.RemoteStoreRepo.GetEffectiveDomain(c, ownerID)
 	if err != nil {
 		logger.WithError(err).Error("domainFetchFailed")
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainFetchFailed")

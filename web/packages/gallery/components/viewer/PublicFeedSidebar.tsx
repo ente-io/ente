@@ -158,10 +158,6 @@ export interface PublicFeedItemClickInfo {
 
 export interface PublicFeedSidebarProps extends ModalVisibilityProps {
     /**
-     * The album name to display in the header.
-     */
-    albumName: string;
-    /**
      * The files in the album, used to display thumbnails and determine file type.
      */
     files?: EnteFile[];
@@ -649,7 +645,6 @@ const getFeedItemClickInfo = (
 export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     open,
     onClose,
-    albumName,
     files = [],
     credentials,
     collectionKey,
@@ -799,7 +794,7 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                             ...theme.applyStyles("dark", { color: "#fff" }),
                         })}
                     >
-                        {albumName}
+                        {t("feed")}
                     </Typography>
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />

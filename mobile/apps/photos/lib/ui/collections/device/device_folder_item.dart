@@ -3,6 +3,7 @@ import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/device_collection.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -72,9 +73,8 @@ class DeviceFolderItem extends StatelessWidget {
                                   deviceCollection.thumbnail!.tag,
                             ),
                           ),
-                          isBackedUp
-                              ? const SizedBox.shrink()
-                              : const UnSyncedIcon(),
+                          if (!isBackedUp && !isOfflineMode)
+                            const UnSyncedIcon(),
                         ],
                       ),
                     ),

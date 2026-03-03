@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ente-io/museum/pkg/controller/usercache"
+	remoteStoreRepo "github.com/ente-io/museum/pkg/repo/remotestore"
 	"github.com/ente-io/museum/pkg/utils/time"
 
 	"github.com/ente-io/museum/ente"
@@ -23,11 +24,12 @@ const (
 
 // Controller exposes functions to interact with family module
 type Controller struct {
-	BillingCtrl   *controller.BillingController
-	UserRepo      *repo.UserRepository
-	FamilyRepo    *repo.FamilyRepository
-	UserCacheCtrl *usercache.Controller
-	UsageRepo     *repo.UsageRepository
+	BillingCtrl     *controller.BillingController
+	UserRepo        *repo.UserRepository
+	FamilyRepo      *repo.FamilyRepository
+	UserCacheCtrl   *usercache.Controller
+	UsageRepo       *repo.UsageRepository
+	RemoteStoreRepo *remoteStoreRepo.Repository
 }
 
 // FetchMembers return list of members who are part of a family plan
@@ -148,4 +150,30 @@ func (c *Controller) removeMembers(ctx context.Context, adminID int64, logger *l
 		}
 	}
 	return nil
+}
+
+func (c *Controller) clearFamilyCustomDomain(ctx context.Context, userID int64) error {
+	if c.RemoteStoreRepo == nil {
+		return nil
+	}
+	domain, err := c.RemoteStoreRepo.GetDomain(ctx, userID)
+	if err != nil {
+		logrus.WithField("user_id", userID).WithError(err).Warn("family custom domain fetch failed")
+		return nil
+	}
+	if domain == nil || *domain == "" {
+		return nil
+	}
+	_, _, isPointer, parseErr := ente.ParseFamilyCustomDomainPointer(*domain)
+	if parseErr != nil {
+		logrus.WithFields(logrus.Fields{
+			"user_id": userID,
+			"domain":  *domain,
+		}).WithError(parseErr).Warn("family custom domain parse failed")
+		return nil
+	}
+	if !isPointer {
+		return nil
+	}
+	return c.RemoteStoreRepo.RemoveKey(ctx, userID, string(ente.CustomDomain))
 }

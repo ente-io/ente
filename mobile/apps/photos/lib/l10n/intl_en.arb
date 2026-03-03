@@ -9,6 +9,7 @@
   "cancel": "Cancel",
   "verify": "Verify",
   "invalidEmailAddress": "Invalid email address",
+  "validEmailAddress": "Valid email address",
   "enterValidEmail": "Please enter a valid email address.",
   "deleteAccount": "Delete account",
   "deleteAccountWarning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
@@ -31,6 +32,7 @@
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
+  "createAccountTitle": "Create an account",
   "createNewAccount": "Create new account",
   "password": "Password",
   "confirmPassword": "Confirm password",
@@ -59,7 +61,7 @@
   "incorrectRecoveryKeyBody": "The recovery key you entered is incorrect",
   "forgotPassword": "Forgot password",
   "enterYourRecoveryKey": "Enter your recovery key",
-  "noRecoveryKey": "No recovery key?",
+  "noRecoveryKey": "Forgot recovery key?",
   "sorry": "Sorry",
   "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
   "verifyEmail": "Verify email",
@@ -67,9 +69,21 @@
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
   "resendEmail": "Resend email",
+  "resendCode": "Resend code",
   "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "We have sent a code to {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
     "placeholders": {
       "email": {
         "description": "The email address of the user",
@@ -88,6 +102,10 @@
   "weakStrength": "Weak",
   "strongStrength": "Strong",
   "moderateStrength": "Moderate",
+  "strongPassword": "Strong password",
+  "passwordRequirements": "Use 9+ characters, a capital letter, and a special character",
+  "passwordsMatch": "Passwords match",
+  "passwordsDontMatch": "Passwords don't match",
   "passwordStrength": "Password strength: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -117,6 +135,8 @@
   "changeEmail": "Change email",
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
+  "readyToBackupTitle": "Ready to backup",
+  "readyToBackupSubtitle": "Your photos will sync in the background. The first backup may take some time.",
   "contactSupport": "Contact support",
   "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
   "@locationPickerTip": {
@@ -130,9 +150,10 @@
   "verifyPassword": "Verify password",
   "recoveryKey": "Recovery key",
   "recoveryKeyOnForgotPassword": "If you forget your password, the only way you can recover your data is with this key.",
-  "recoveryKeySaveDescription": "We don't store this key, please save this 24 word key in a safe place.",
+  "recoveryKeySaveDescription": "Please save this key in a safe place.",
   "doThisLater": "Do this later",
   "saveKey": "Save key",
+  "shareKey": "Share key",
   "recoveryKeyCopiedToClipboard": "Recovery key copied to clipboard",
   "recoverAccount": "Recover account",
   "recover": "Recover",
@@ -153,6 +174,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Copy-paste this code\nto your authenticator app",
   "tapToCopy": "tap to copy",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Scan this barcode with\nyour authenticator app",
+  "twoFAVerification": "2FA verification",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Enter the 6-digit code from\nyour authenticator app",
   "confirm": "Confirm",
   "setupComplete": "Setup complete",
@@ -221,6 +243,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Album layout",
+  "layoutMasonry": "Masonry",
   "layoutGrouped": "Grouped",
   "layoutContinuous": "Continuous",
   "layoutTrip": "Trip",
@@ -269,6 +292,7 @@
   "copyLink": "Copy link",
   "copyEmbedHtml": "Copy embed HTML",
   "linkHasExpired": "Link has expired",
+  "linkRequestLimitExceeded": "This album has been viewed on too many devices",
   "publicLinkEnabled": "Public link enabled",
   "shareALink": "Share a link",
   "sharedAlbumSectionDescription": "Create shared and collaborative albums with other Ente users, including users on free plans.",
@@ -508,6 +532,8 @@
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
   "selectFolders": "Select folders",
+  "backupToEnte": "Backup to Ente",
+  "selectAlbumsToBackUpToEnte": "Select albums to back up to Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
@@ -590,7 +616,11 @@
   "backedUpFolders": "Backed up folders",
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
-  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have been already backed up.",
+  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have already been backed up.",
+  "freeUpDeviceSpaceDescICloud": "Files in iCloud shared albums cannot be cleared.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ All clear",
   "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
   "removeDuplicates": "Remove duplicates",
@@ -640,6 +670,8 @@
   "notifications": "Notifications",
   "sharedPhotoNotifications": "New shared photos",
   "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "socialNotifications": "Likes and comments",
+  "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
@@ -668,13 +700,69 @@
   "reportBug": "Report bug",
   "suggestFeatures": "Suggest features",
   "support": "Support",
+  "helpAndSupport": "Help & Support",
+  "browseHelpPages": "Browse help pages",
+  "searchAndDiscovery": "Search and discovery",
+  "searchAndDiscoveryDesc": "Faces, locations, descriptions, and more",
+  "backupAndSync": "Backup and sync",
+  "backupAndSyncDesc": "Auto-backup, sync status, and uploads",
+  "sharingAndCollaboration": "Sharing and collaboration",
+  "sharingAndCollaborationDesc": "Albums, links, and family plans",
+  "storageAndPlans": "Storage and plans",
+  "storageAndPlansDesc": "Plans, billing, and storage usage",
+  "troubleshooting": "Troubleshooting",
+  "troubleshootingDesc": "Common issues and their solutions",
+  "viewAllHelpTopics": "View all help topics",
+  "getInTouch": "Get in touch",
+  "reportAnIssue": "Report an issue",
+  "askAQuestion": "Ask a question",
+  "requestAFeature": "Request a feature",
+  "subject": "Subject",
+  "description": "Description",
+  "oneLineAboutTheIssue": "One line about the issue",
+  "detailsAboutTheIssue": "Details about the issue",
+  "yourQuestion": "Your question",
+  "anyAdditionalInformation": "Any additional information",
+  "attachLogs": "Attach logs",
+  "attachLogsHelper": "Helps us diagnose the issue faster",
+  "deviceInfoNote": "Device details such as OS version, app version, and device model will be included automatically.",
+  "pleaseEnterASubject": "Please enter a subject",
+  "pleaseEnterADescription": "Please enter a description",
+  "noEmailAppFound": "No email app found",
+  "noEmailAppBody": "Copy your message and send it to {email} from any email service.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.io"
+      }
+    }
+  },
+  "message": "Message",
+  "deviceInfo": "Device info",
+  "logs": "Logs",
+  "export": "Export",
+  "logsNotCopiedDownloadNote": "Logs are not copied. Export the logs and attach them to your email.",
+  "attachedSize": "Attached ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Copy all to clipboard",
+  "copied": "Copied",
   "appearance": "Appearance",
   "theme": "Theme",
   "lightTheme": "Light",
   "darkTheme": "Dark",
   "systemTheme": "System",
   "freeTrial": "Free trial",
-  "selectYourPlan": "Select your plan",
+  "chooseYourPlan": "Choose your plan",
   "enteSubscriptionPitch": "Ente preserves your memories, so they're always available to you, even if you lose your device.",
   "enteSubscriptionShareWithFamily": "Your family can be added to your plan as well.",
   "currentUsageIs": "Current usage is ",
@@ -743,6 +831,7 @@
   "appstoreSubscription": "AppStore subscription",
   "subAlreadyLinkedErrMessage": "Your {id} is already linked to another Ente account.\nIf you would like to use your {id} with this account, please contact our support''",
   "visitWebToManage": "Please visit web.ente.io to manage your subscription",
+  "managePaymentMethod": "Manage payment method",
   "couldNotUpdateSubscription": "Could not update subscription",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.io and we will be happy to help!",
   "paymentFailed": "Payment failed",
@@ -766,6 +855,26 @@
   "youAreOnAFamilyPlan": "You are on a family plan!",
   "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
+  "youAreOnAFamilyPlanSubtitle": "You are on a family plan.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " manages this plan.\nReach out to them for any changes.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Leave family plan",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Need help? Contact ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",
   "rateTheApp": "Rate the app",
@@ -775,20 +884,15 @@
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
   "allowPermTitle": "Allow access to photos",
   "allowPermBody": "Please allow access to your photos from Settings so Ente can display and backup your library.",
-  "openSettings": "Open Settings",
+  "openSettings": "Open settings",
   "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
-  "privateBackups": "Private backups",
-  "forYourMemories": "for your memories",
-  "endtoendEncryptedByDefault": "End-to-end encrypted by default",
-  "safelyStored": "Safely stored",
-  "atAFalloutShelter": "at a fallout shelter",
-  "designedToOutlive": "Designed to outlive",
-  "available": "Available",
-  "everywhere": "everywhere",
-  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
-  "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "New to Ente",
+  "createAnEnteAccount": "Create an Ente account",
+  "continueWithoutAccount": "Continue without an account",
+  "loginToExistingAccount": "Login to existing account",
+  "shareTheMoment": "Share the moment",
+  "letFriendsAndFamilyReact": "Let friends and family react and comment on your photos.",
   "pleaseLoginAgain": "Please login again",
   "autoLogoutMessage": "Due to technical glitch, you have been logged out. Our apologies for the inconvenience.",
   "yourSubscriptionHasExpired": "Your subscription has expired",
@@ -804,7 +908,7 @@
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente can encrypt and preserve files only if you grant access to them",
   "pleaseGrantPermissions": "Please grant permissions",
-  "grantPermission": "Grant permission",
+  "grantPermissionDesc": "Please allow Ente to access your library so we can organize it with face recognition. All processing happens on your device.",
   "privateSharing": "Private sharing",
   "shareOnlyWithThePeopleYouWant": "Share only with the people you want",
   "usePublicLinksForPeopleNotOnEnte": "Use public links for people not on Ente",
@@ -925,6 +1029,8 @@
   "sortAlbumsBy": "Sort by",
   "sortNewestFirst": "Newest first",
   "sortOldestFirst": "Oldest first",
+  "sortAToZ": "A-Z",
+  "sortZToA": "Z-A",
   "rename": "Rename",
   "leaveSharedAlbum": "Leave shared album?",
   "leaveAlbum": "Leave album",
@@ -964,6 +1070,39 @@
   "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
+  "downloadSkippedAlreadyAvailableOnDevice": "{fileName} is already available in the {albumName} album on your device",
+  "@downloadSkippedAlreadyAvailableOnDevice": {
+    "description": "Toast shown in single-file download flow when the file already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionSingleFile": "Download of {fileName} skipped as it is already available in the {albumName} album on your device",
+  "@downloadSkippedInSelectionSingleFile": {
+    "description": "Toast shown after multi-selection download when exactly one selected file is skipped because it already exists locally",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSkippedInSelectionMultipleFiles": "Download of {fileCount} files skipped as they are already on your device",
+  "@downloadSkippedInSelectionMultipleFiles": {
+    "description": "Toast shown after multi-selection download when multiple selected files are skipped because they already exist locally",
+    "placeholders": {
+      "fileCount": {
+        "type": "int"
+      }
+    }
+  },
   "pressAndHoldToPlayVideo": "Press and hold to play video",
   "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",
@@ -1111,7 +1250,14 @@
   "didYouKnow": "Did you know?",
   "loadingMessage": "Loading your photos...",
   "loadMessage1": "You can share your subscription with your family",
-  "loadMessage2": "We have preserved over 200 million memories so far",
+  "loadMessage2": "We have preserved over {memoriesCountInMillions} million memories so far",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "We keep 3 copies of your data, one in an underground fallout shelter",
   "loadMessage4": "All our apps are open source",
   "loadMessage5": "Our source code and cryptography have been externally audited",
@@ -1328,7 +1474,7 @@
   "moveToHiddenAlbum": "Move to hidden album",
   "fileTypes": "File types",
   "deleteConfirmDialogBody": "This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
-  "hearUsWhereTitle": "How did you hear about Ente? (optional)",
+  "hearUsWhereTitle": "How did you hear about Ente?",
   "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
   "viewAddOnButton": "View add-ons",
   "addOns": "Add-ons",
@@ -1762,10 +1908,94 @@
   "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Trusted contacts",
-  "addTrustedContact": "Add Trusted Contact",
+  "addTrustedContact": "Add trusted contact",
+  "chooseFromAnExistingContact": "Choose from an existing contact",
+  "chooseARecoveryTime": "Choose a recovery time",
+  "addContact": "Add contact",
   "removeInvite": "Remove invite",
   "recoveryWarning": "A trusted contact is trying to access your account",
   "rejectRecovery": "Reject recovery",
+  "cannotUpdateRecoveryTime": "Cannot update recovery time",
+  "cannotUpdateRecoveryTimeMessage": "Recovery time cannot be changed while there is an active recovery session. Please reject or wait for the recovery to complete.",
+  "updateTime": "Update time",
+  "revokeInvite": "Revoke invite",
+  "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "You have added {email} as a trusted contact. They have accepted your invite.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Cancel invite",
+  "cancelInviteDesc": "If you delete this invite, you'll need to send a new one if you change your mind.",
+  "removeContactDesc": "If you delete this contact, you'll need to send a new invitation, and the contact will have to accept it again.",
+  "removeContact": "Remove contact",
+  "letsTryThatAgain": "Let's try that again",
+  "removeYourselfDesc": "If you remove yourself as a trusted contact, you'll lose access to {email}'s account after their inactivity period.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Cancel recovery",
+  "cancelRecoveryDesc": "Are you sure you want to cancel recovery of {email}'s account?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Start recovery",
+  "startRecoveryDesc": "Are you sure you want to initiate recovery for {email}'s account?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "You can recover {email}'s account in {days} days after starting the recovery process.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "You can recover {email}'s account after {time}.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Or remove yourself as {email}'s trusted contact",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Recovery initiated",
   "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
   "@recoveryInitiatedDesc": {
@@ -1804,6 +2034,19 @@
       "email": {
         "type": "String",
         "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "confirmAddingTrustedContacts": "You are about to add {count} trusted contacts. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
       },
       "numOfDays": {
         "type": "int",
@@ -1941,6 +2184,10 @@
   "personIsAge": "{name} is {age}!",
   "personTurningAge": "{name} turning {age} soon",
   "lastTimeWithThem": "Last time with {name}",
+  "unnamedPeopleSpotlight": "A familiar face",
+  "unnamedPeopleYouAndThem": "You two",
+  "unnamedPeopleDoingSomethingTogether": "Doing it together",
+  "unnamedPeopleLastTimeYouSawThem": "Last time together",
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",
@@ -1985,7 +2232,7 @@
   "areThey": "Are they ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Save as another person",
-  "showLessFaces": "Show less faces",
+  "showLessFaces": "Show fewer faces",
   "showMoreFaces": "Show more faces",
   "ignore": "Ignore",
   "merge": "Merge",
@@ -1997,6 +2244,10 @@
   "areYouSureYouWantToMergeThem": "Are you sure you want to merge them?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.",
   "yesIgnore": "Yes, ignore",
+  "areYouSureYouWantToShowThisPersonInPeopleSectionAgain": "Are you sure you want to show this person in the people section again?",
+  "areYouSureYouWantToShowThesePeopleInPeopleSectionAgain": "Are you sure you want to show these people in the people section again?",
+  "yesShowPerson": "Yes, show person",
+  "yesShowPeople": "Yes, show people",
   "same": "Same",
   "different": "Different",
   "sameperson": "Same person?",
@@ -2172,12 +2423,6 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Design Changes",
-  "cLDesc1": "Settings screen and search results page has been redesigned. Search bar has moved to the top.",
-  "cLTitle2": "Improvements",
-  "cLDesc2": "Pinch to zoom on video. Faster search tab loading. Admins and album owners can delete comments. Preview rendering for unsupported formats. Search within discovery, location, people, and file type. Custom sort on people page. A better merge person flow. View all ignored person. Consistent contact sorting.",
-  "cLTitle3": "Bug fixes",
-  "cLDesc3": "Fixed music pausing on app open. Fixed swipe-to-select on Samsung S devices. Fixed frame rate issue on info sheet. Fixed gallery issues on tablets and in landscape. Fixed uncategorised page not updating after moves.",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2373,11 +2618,46 @@
   "ritualEmojiUseAction": "Use",
   "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
   "feed": "Feed",
-  "likedYourPhoto": "Liked a photo",
-  "commentedOnYourPhoto": "Commented on a photo",
-  "repliedToYourComment": "Replied to a comment",
-  "likedYourComment": "Liked a comment",
-  "likedYourReply": "Liked a reply",
+  "newCommentNotificationTitle": "You got a comment",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "You got a like",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "Liked your photo",
+  "likedAPhoto": "Liked a photo",
+  "likedYourVideo": "Liked your video",
+  "commentedOnYourPhoto": "Commented on your photo",
+  "commentedOnAPhoto": "Commented on a photo",
+  "commentedOnYourVideo": "Commented on your video",
+  "commentedOnAVideo": "Commented on a video",
+  "repliedToYourComment": "Replied to your comment",
+  "repliedToAComment": "Replied to a comment",
+  "likedYourComment": "Liked your comment",
+  "likedAComment": "Liked a comment",
+  "likedYourReply": "Liked your reply",
+  "likedAReply": "Liked a reply",
+  "addedAMemoryTo": "Added a memory to {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Added {count} memories to {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {
@@ -2505,5 +2785,58 @@
     }
   },
   "searchSettings": "Search settings",
-  "suggestions": "Suggestions"
+  "suggestions": "Suggestions",
+  "cleanupHiddenFiles": "Clean up hidden files",
+  "cleanupHiddenFilesDescription": "Some files in hidden albums still exist in non-hidden albums making them visible outside of the hidden section. Cleaning up will remove them from non-hidden albums.",
+  "cleanupComplete": "Cleanup complete",
+  "deleteHiddenFilesFromDevice": "Delete hidden files from device",
+  "deleteHiddenFilesFromDeviceDescription": "Delete local copies of hidden files from your device",
+  "deleteOnDeviceFiles": "Delete on device files",
+  "noHiddenFilesOnDevice": "No hidden files on device",
+  "welcome": "Welcome",
+  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition. All processing happens on your device.",
+  "grantPermission": "Grant permission",
+  "privateAI": "Private AI",
+  "privateAIDescription": "Ente uses on-device AI to analyze your photos for faces, objects, locations, and text. This data is used to power features like face recognition and smart search. Everything is processed and stored locally on your device — nothing is ever uploaded to our servers.",
+  "byAgreeing": "By continuing, you agree to the <terms>terms of service</terms> and <policy>privacy policy</policy>.",
+  "moreThanJustAGallery": "More than just a gallery.",
+  "encryptedBackupDescription": "Encrypted backup, smart search, shareable links, and seamless sync across all your devices.",
+  "getStarted": "Get started",
+  "unlockSmartFeatures": "Unlock smart features",
+  "enableOnDeviceMLDescription": "Enable on-device ML to search by faces, places, and more. Your photos never leave your device.",
+  "offlineEnableSharingTitle": "Sharing starts here",
+  "offlineEnableSharingDesc": "Sign up to share photos with everyone - even those not on Ente",
+  "offlineEnableBackupTitle": "Backed-up albums will appear here",
+  "offlineEnableBackupDesc": "Sign up to preserve your memories with Ente.",
+  "offlineEnableBackupTagLabel": "10 GB FREE!",
+  "offlineEnableBackupAction": "Start with 10 GB FREE",
+  "offlineSettingsBannerTitle": "We can't see your photos. Ever.",
+  "offlineSettingsBannerDesc": "Zero-knowledge encryption means your memories stay yours.",
+  "alreadyHaveAnAccount": "Already have an account?",
+  "loginToEnte": "Login to Ente",
+  "searchAndDiscover": "Search and Discover",
+  "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",
+  "shareYourMemories": "Share your Memories",
+  "shareYourMemoriesDesc": "Share albums, collect photos and gather comments with public links",
+  "privateAndSecureBackups": "Backup with Privacy",
+  "privateAndSecureBackupsDesc": "End-to-end encrypted, independently audited and fully open source",
+  "mlProgressBannerTitle": "Hang tight!",
+  "mlProgressBannerDescription": "Your photos are getting processed on device to detect faces, objects and more.",
+  "mlProgressBannerPaused": "Paused",
+  "mlProgressBannerStatus": "{indexed} out of {total} photos processed",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "Want to save these faces?",
+  "offlineFacesBannerSubtitle": "Sign up to tag people and easily find them later.",
+  "offlineNameFaceBannerTitle": "Give this face a name",
+  "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
+  "signUp": "Sign up"
 }

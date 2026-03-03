@@ -380,9 +380,9 @@ class GoToMapWithBG extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () async {
-          if (!flagService.mapEnabled) {
+          if (!mapEnabled) {
             try {
-              await flagService.setMapEnabled(true);
+              await setMapEnabled(true);
             } catch (e) {
               showShortToast(
                 context,

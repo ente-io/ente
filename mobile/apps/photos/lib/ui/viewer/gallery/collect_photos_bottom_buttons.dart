@@ -47,7 +47,6 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
     final String url = CollectionsService.instance.getPublicUrl(widget.c);
     await shareAlbumLink(
       context,
-      widget.c,
       url,
       shareLinkAlbumButtonKey,
     );

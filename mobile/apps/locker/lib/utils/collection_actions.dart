@@ -112,9 +112,9 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          showToast(
-            context,
-            context.l10n.failedToRenameCollection(error.toString()),
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: error,
           );
         }
       },
@@ -225,9 +225,9 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      showToast(
-        context,
-        context.l10n.failedToDeleteCollection(error.toString()),
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: error,
       );
     }
   }
@@ -271,9 +271,9 @@ class CollectionActions {
         await progressDialog.hide();
 
         if (context.mounted) {
-          showToast(
-            context,
-            l10n.failedToDeleteCollection(error.toString()),
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: error,
           );
         }
       }
@@ -322,9 +322,9 @@ class CollectionActions {
       await progressDialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          l10n.failedToDeleteCollection(error.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: error,
         );
       }
     }
@@ -362,9 +362,9 @@ class CollectionActions {
       } catch (e) {
         _logger.severe("Failed to leave collection", e);
         if (context.mounted) {
-          showToast(
-            context,
-            context.l10n.somethingWentWrong,
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
           );
         }
       }
@@ -405,9 +405,9 @@ class CollectionActions {
       } catch (e) {
         _logger.severe("Failed to leave collections", e);
         if (context.mounted) {
-          showToast(
-            context,
-            context.l10n.somethingWentWrong,
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
           );
         }
       }

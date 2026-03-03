@@ -608,13 +608,13 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             <DownloadStatusNotifications
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
+                fullWidthOnMobile
             />
 
             {/* Public feed sidebar */}
             {collection && credentials?.current && collectionKey && (
                 <PublicFeedSidebar
                     {...publicFeedVisibilityProps}
-                    albumName={collectionTitle}
                     files={files}
                     credentials={credentials.current}
                     collectionKey={collectionKey}

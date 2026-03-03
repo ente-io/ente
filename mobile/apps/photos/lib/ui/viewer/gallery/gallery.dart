@@ -163,6 +163,7 @@ class GalleryState extends State<Gallery> {
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
   InheritedSearchFilterData? _inheritedSearchFilterData;
+  InheritedGalleryBoundaries? _boundariesProvider;
 
   @override
   void initState() {
@@ -343,6 +344,7 @@ class GalleryState extends State<Gallery> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(context);
+    _boundariesProvider = GalleryBoundariesProvider.of(context);
   }
 
   void _updateGalleryGroups({bool callSetState = true}) {
@@ -563,7 +565,7 @@ class GalleryState extends State<Gallery> {
   @override
   void dispose() {
     // Clear scroll controller reference
-    GalleryBoundariesProvider.of(context)?.setScrollController(null);
+    _boundariesProvider?.setScrollController(null);
 
     _reloadEventSubscription?.cancel();
     _tabDoubleTapEvent?.cancel();
@@ -589,8 +591,7 @@ class GalleryState extends State<Gallery> {
     // Share scroll controller with boundaries provider after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        GalleryBoundariesProvider.of(context)
-            ?.setScrollController(_scrollController);
+        _boundariesProvider?.setScrollController(_scrollController);
       }
     });
 

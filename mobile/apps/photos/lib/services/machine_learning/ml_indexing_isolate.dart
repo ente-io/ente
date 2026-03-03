@@ -1,7 +1,9 @@
 import "dart:async";
+import "dart:io" show Platform;
 
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";
@@ -21,7 +23,7 @@ class MLIndexingIsolate extends SuperIsolate {
   final _logger = Logger("MLIndexingIsolate");
 
   @override
-  bool get isDartUiIsolate => true;
+  bool get isDartUiIsolate => !_shouldUseRustMl;
 
   @override
   String get isolateName => "MLIndexingIsolate";
@@ -29,13 +31,17 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
+  bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
+
   int _loadedModelsCount = 0;
   int _deloadedModelsCount = 0;
 
   final _initModelLock = Lock();
   final _downloadModelLock = Lock();
+  final _rustRuntimeLock = Lock();
 
   bool areModelsDownloaded = false;
+  Map<String, dynamic>? _cachedRustRuntimeArgs;
 
   @override
   Future<void> onDispose() async {
@@ -66,12 +72,22 @@ class MLIndexingIsolate extends SuperIsolate {
     late MLResult result;
 
     try {
+      final useRustMl = _shouldUseRustMl;
+      final rustRuntimeArgs = useRustMl
+          ? await _getCachedRustRuntimeArgs()
+          : const <String, dynamic>{};
+      _logger.info(
+        "Analyzing image ${instruction.fileKey} via rust or legacy: ${useRustMl ? "RUST" : "LEGACY"}",
+      );
+
       final resultJsonString =
           await runInIsolate(IsolateOperation.analyzeImage, {
-        "enteFileID": instruction.file.uploadedFileID ?? -1,
+        "enteFileID": instruction.fileKey,
         "filePath": filePath,
+        "useRustMl": useRustMl,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
+        ...rustRuntimeArgs,
         "faceDetectionAddress": FaceDetectionService.instance.sessionAddress,
         "faceEmbeddingAddress": FaceEmbeddingService.instance.sessionAddress,
         "clipImageAddress": ClipImageEncoder.instance.sessionAddress,
@@ -85,17 +101,54 @@ class MLIndexingIsolate extends SuperIsolate {
       result = MLResult.fromJsonString(resultJsonString);
     } catch (e, s) {
       _logger.severe(
-        "Could not analyze image with ID ${instruction.file.uploadedFileID} \n",
+        "Could not analyze image with ID ${instruction.fileKey} \n",
         e,
         s,
       );
       debugPrint(
-        "This image with fileID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
+        "This image with fileID ${instruction.fileKey} has name ${instruction.file.displayName}.",
       );
       rethrow;
     }
 
     return result;
+  }
+
+  Future<void> prepareRustRuntime() async {
+    if (!_shouldUseRustMl) {
+      return;
+    }
+    return _rustRuntimeLock.synchronized(() async {
+      final rustRuntimeArgs = await _buildRustRuntimeArgs();
+      final frozenRuntimeArgs =
+          Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+      await runInIsolate(
+        IsolateOperation.prepareRustMlRuntime,
+        frozenRuntimeArgs,
+      );
+      _cachedRustRuntimeArgs = frozenRuntimeArgs;
+    });
+  }
+
+  Future<void> releaseRustRuntime() async {
+    if (!_shouldUseRustMl) {
+      return;
+    }
+    if (!isIsolateSpawned) {
+      _cachedRustRuntimeArgs = null;
+      return;
+    }
+    return _rustRuntimeLock.synchronized(() async {
+      _cachedRustRuntimeArgs = null;
+      if (!isIsolateSpawned) {
+        return;
+      }
+      try {
+        await runInIsolate(IsolateOperation.releaseRustMlRuntime, {});
+      } catch (e, s) {
+        _logger.warning("Could not release rust runtime in isolate", e, s);
+      }
+    });
   }
 
   void triggerModelsDownload() {
@@ -114,10 +167,10 @@ class MLIndexingIsolate extends SuperIsolate {
       if (areModelsDownloaded) {
         return;
       }
-      final goodInternet = await canUseHighBandwidth();
+      final goodInternet = isOfflineMode || await canUseHighBandwidth();
       if (!goodInternet) {
         _logger.info(
-          "Cannot download models because user is not connected to wifi",
+          "Cannot download models because user is not connected to wifi and is in online mode",
         );
         return;
       }
@@ -133,6 +186,9 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> ensureLoadedModels(FileMLInstruction instruction) async {
+    if (_shouldUseRustMl) {
+      return;
+    }
     return _initModelLock.synchronized(() async {
       final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
       final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
@@ -203,6 +259,10 @@ class MLIndexingIsolate extends SuperIsolate {
 
   /// WARNING: This method is only for debugging purposes. It should not be used in production.
   Future<void> debugLoadSingleModel(MLModels model) {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't use legacy ML models when using rust");
+      return Future.value();
+    }
     return _initModelLock.synchronized(() async {
       final modelInstance = model.model;
       if (modelInstance.isInitialized) {
@@ -225,6 +285,7 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> cleanupLocalIndexingModels({bool delete = false}) async {
+    await releaseRustRuntime();
     if (!areModelsDownloaded) return;
     await _releaseModels();
 
@@ -244,6 +305,10 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> _releaseModels() async {
+    if (_shouldUseRustMl) {
+      _logger.severe("Can't release legacy ML models when using rust");
+      return Future.value();
+    }
     final List<String> modelNames = [];
     final List<int> modelAddresses = [];
     final List<MLModels> models = [];
@@ -275,5 +340,33 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.severe("Could not release models in MLIndexingIsolate", e, s);
       rethrow;
     }
+  }
+
+  Future<Map<String, dynamic>> _buildRustRuntimeArgs() async {
+    final faceDetection =
+        await FaceDetectionService.instance.getModelNameAndPath();
+    final faceEmbedding =
+        await FaceEmbeddingService.instance.getModelNameAndPath();
+    final clipImage = await ClipImageEncoder.instance.getModelNameAndPath();
+    return {
+      "faceDetectionModelPath": faceDetection.$2,
+      "faceEmbeddingModelPath": faceEmbedding.$2,
+      "clipImageModelPath": clipImage.$2,
+      "preferCoreml": Platform.isIOS,
+      "preferNnapi": Platform.isAndroid,
+      "preferXnnpack": Platform.isAndroid,
+      "allowCpuFallback": true,
+    };
+  }
+
+  Future<Map<String, dynamic>> _getCachedRustRuntimeArgs() async {
+    final cachedArgs = _cachedRustRuntimeArgs;
+    if (cachedArgs != null) {
+      return cachedArgs;
+    }
+    final rustRuntimeArgs = await _buildRustRuntimeArgs();
+    final frozenArgs = Map<String, dynamic>.unmodifiable(rustRuntimeArgs);
+    _cachedRustRuntimeArgs ??= frozenArgs;
+    return _cachedRustRuntimeArgs!;
   }
 }

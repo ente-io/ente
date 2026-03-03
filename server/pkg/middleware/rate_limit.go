@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/discord"
 	util "github.com/ente-io/museum/pkg/utils"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -24,6 +25,8 @@ type RateLimitMiddleware struct {
 	reset             time.Duration
 	ticker            *time.Ticker
 	limit10ReqPerMin  *limiter.Limiter
+	limit50ReqPerMin  *limiter.Limiter
+	limit300ReqPerMin *limiter.Limiter
 	limit200ReqPerMin *limiter.Limiter
 	limit200ReqPerSec *limiter.Limiter
 	discordCtrl       *discord.DiscordController
@@ -32,6 +35,8 @@ type RateLimitMiddleware struct {
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
 	rl := &RateLimitMiddleware{
 		limit10ReqPerMin:  util.NewRateLimiter("10-M"),
+		limit50ReqPerMin:  util.NewRateLimiter("50-M"),
+		limit300ReqPerMin: util.NewRateLimiter("300-M"),
 		limit200ReqPerMin: util.NewRateLimiter("200-M"),
 		limit200ReqPerSec: util.NewRateLimiter("200-S"),
 		discordCtrl:       discordCtrl,
@@ -79,9 +84,27 @@ func (r *RateLimitMiddleware) GlobalRateLimiter() gin.HandlerFunc {
 func (r *RateLimitMiddleware) APIRateLimitMiddleware(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestPath := urlSanitizer(c)
+
+		globalRateLimiter := r.getGlobalLimiter(requestPath, c.Request.Method)
+		if globalRateLimiter != nil {
+			limitContext, err := globalRateLimiter.Get(c, requestPath)
+			if err != nil {
+				log.Error("Failed to check global rate limit", err)
+				c.Next() // assume that limit hasn't reached
+				return
+			}
+			if limitContext.Reached {
+				msg := fmt.Sprintf("Global rate limit breached %s", requestPath)
+				go r.discordCtrl.NotifyPotentialAbuse(msg)
+				log.Error(msg)
+				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit breached, try later"})
+				return
+			}
+		}
+
 		rateLimiter := r.getLimiter(requestPath, c.Request.Method)
 		if rateLimiter != nil {
-			key := fmt.Sprintf("%s-%s", network.GetClientIP(c), requestPath)
+			key := r.getRateLimitKey(c, requestPath)
 			limitContext, err := rateLimiter.Get(c, key)
 			if err != nil {
 				log.Error("Failed to check rate limit", err)
@@ -130,6 +153,40 @@ func (r *RateLimitMiddleware) APIRateLimitForUserMiddleware(urlSanitizer func(_ 
 	}
 }
 
+// getGlobalLimiter, based on reqPath & reqMethod, returns a limiter that should
+// be applied globally for requests matching the route. It returns nil if no
+// global route-specific limit should be applied.
+func (r *RateLimitMiddleware) getGlobalLimiter(reqPath string, reqMethod string) *limiter.Limiter {
+	if reqPath == "/paste/create" || reqPath == "/paste/guard" || reqPath == "/paste/consume" {
+		return r.limit300ReqPerMin
+	}
+	return nil
+}
+
+func (r *RateLimitMiddleware) getRateLimitKey(c *gin.Context, reqPath string) string {
+	if !isPublicCollectionUploadURLPath(reqPath) {
+		return fmt.Sprintf("%s-%s", network.GetClientIP(c), reqPath)
+	}
+	value, ok := c.Get(auth.PublicAccessKey)
+	if !ok {
+		log.WithField("path", reqPath).Warn("public access context missing for collection scoped rate limit")
+		return fmt.Sprintf("%s-%s", network.GetClientIP(c), reqPath)
+	}
+	accessContext, ok := value.(ente.PublicAccessContext)
+	if !ok {
+		log.WithField("path", reqPath).Warn("invalid public access context for collection scoped rate limit")
+		return fmt.Sprintf("%s-%s", network.GetClientIP(c), reqPath)
+	}
+	return fmt.Sprintf("collection:%d-%s", accessContext.CollectionID, reqPath)
+}
+
+func isPublicCollectionUploadURLPath(reqPath string) bool {
+	return reqPath == "/public-collection/upload-urls" ||
+		reqPath == "/public-collection/upload-url" ||
+		reqPath == "/public-collection/multipart-upload-urls" ||
+		reqPath == "/public-collection/multipart-upload-url"
+}
+
 // getLimiter, based on reqPath & reqMethod, return instance of limiter.Limiter which needs to
 // be applied for a request. It returns nil if the request is not rate limited
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
@@ -137,9 +194,13 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		reqPath == "/custom-domain" {
 		return r.limit200ReqPerMin
 	}
+	if reqPath == "/paste/guard" || reqPath == "/paste/consume" {
+		return r.limit200ReqPerMin
+	}
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
 		reqPath == "/user/change-email" ||
+		reqPath == "/paste/create" ||
 		reqPath == "/discount/claim" ||
 		reqPath == "/public-collection/verify-password" ||
 		reqPath == "/file-link/verify-password" ||
@@ -164,6 +225,9 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		strings.HasPrefix(reqPath, "/public-collection/reactions")) &&
 		(reqMethod == http.MethodPost || reqMethod == http.MethodPut || reqMethod == http.MethodDelete) {
 		return r.limit200ReqPerMin
+	}
+	if isPublicCollectionUploadURLPath(reqPath) {
+		return r.limit50ReqPerMin
 	}
 	return nil
 }

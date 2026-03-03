@@ -93,7 +93,8 @@ docker compose down && docker compose up -d
 
 ## Step 3: Configure application endpoints
 
-You may wish to access some of the applications such as Auth, Albums, Cast via
+You may wish to access some of the applications such as Albums, Share, Paste,
+Cast, Accounts via
 your instance's endpoints through the application instead of our production
 instances.
 
@@ -104,9 +105,16 @@ endpoints of the corresponding web applications.
 # Replace yourdomain.tld with actual domain
 apps:
     public-albums: https://albums.ente.yourdomain.tld
+    public-locker: https://share.ente.yourdomain.tld
+    public-paste: https://paste.ente.yourdomain.tld
     cast: https://cast.ente.yourdomain.tld
-    auth: https://auth.ente.yourdomain.tld
+    embed-albums: https://embed.ente.yourdomain.tld
+    accounts: https://accounts.ente.yourdomain.tld
 ```
+
+If you are using quickstart, note that only Photos and Albums are exposed by
+default in `compose.yaml`. Expose or deploy Share / Paste separately before
+pointing `apps.public-locker` / `apps.public-paste` to those URLs.
 
 ## Step 4: Make it publicly accessible
 

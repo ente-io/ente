@@ -1,16 +1,18 @@
 import 'package:logging/logging.dart';
-import 'package:photos/core/network/network.dart';
+import 'package:photos/gateways/files/files_gateway.dart';
 import 'package:photos/models/duplicate_files.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/search_service.dart";
 
 class DeduplicationService {
   final _logger = Logger("DeduplicationService");
-  final _enteDio = NetworkClient.instance.enteDio;
+
+  FilesGateway get _gateway => filesGateway;
 
   DeduplicationService._privateConstructor();
 
@@ -112,7 +114,6 @@ class DeduplicationService {
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
-    final response = await _enteDio.get("/files/duplicates");
-    return DuplicateFilesResponse.fromMap(response.data);
+    return await _gateway.getDuplicates();
   }
 }

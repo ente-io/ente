@@ -1,0 +1,16 @@
+Ente Locker es una bóveda para proteger tus documentos más importantes y credenciales con cifrado de extremo a extremo.
+
+GUARDA LO QUE IMPORTA
+• Documentos personales y de identidad
+• Registros financieros y documentos importantes
+• Credenciales y datos de recuperación
+• Notas seguras
+
+COMPARTE DE FORMA PRIVADA
+Comparte elementos específicos con personas de confianza, según tus condiciones.
+
+TRANSFERENCIA DE EMERGENCIA
+Configura contactos de emergencia para que la información pertinente se comparta cuando más se necesita.
+
+PRIVACIDAD POR DISEÑO
+Tus datos están encriptados con tus claves antes de salir de tu dispositivo, por lo que solo tú puedes acceder a ellos. La arquitectura de Ente y el código fuente han sido auditados por Cure53.

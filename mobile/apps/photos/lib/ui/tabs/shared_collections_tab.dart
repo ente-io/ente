@@ -1,28 +1,29 @@
-import 'dart:async';
+import "dart:async";
 import "dart:math";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/collection_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/tab_changed_event.dart";
-import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/collections_service.dart';
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
-import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/banners/shared_empty_offline_state_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/widgets/feed_preview_widget.dart";
-import 'package:photos/ui/tabs/section_title.dart';
+import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
@@ -116,9 +117,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(CollectionsService.instance.getSharedCollections()),
+      future: isOfflineMode
+          ? Future.value(SharedCollections.empty())
+          : Future.value(CollectionsService.instance.getSharedCollections()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          if (isOfflineMode) {
+            return const SafeArea(
+              child: SharedEmptyOfflineStateWidget(),
+            );
+          }
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&
               (snapshot.data?.quickLinks.length ?? 0) == 0 &&
               (snapshot.data?.outgoing.length ?? 0) == 0) {

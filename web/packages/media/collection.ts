@@ -687,9 +687,7 @@ export interface CollectionPublicMagicMetadataData {
     /**
      * The layout type for the public collection display.
      *
-     * Expected to be one of: "grouped", "continuous", "trip".
-     *
-     * When undefined, the UI defaults to "grouped" behavior.
+     * Expected to be one of: "masonry", "grouped", "continuous", "trip".
      */
     layout?: string;
 }

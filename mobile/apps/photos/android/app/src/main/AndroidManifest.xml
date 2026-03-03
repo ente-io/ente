@@ -2,6 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="io.ente.photos">
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- The camera plugin unconditionally adds RECORD_AUDIO to the merged
+         manifest even when enableAudio is set to false. We don't record audio
+         anywhere, so strip it from the final build. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"
+        tools:node="remove" />
     <application android:name="${applicationName}"
         android:label="@string/app_name"
         android:icon="@mipmap/icon_green"

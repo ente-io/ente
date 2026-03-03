@@ -6,7 +6,7 @@ import "package:flutter/services.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/dynamic_fab.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_confirm_password.dart";
@@ -69,18 +69,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
-
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -97,18 +87,22 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _isFormValid,
         builder: (context, isFormValid, child) {
-          return DynamicFAB(
-            isKeypadOpen: isKeypadOpen,
-            buttonText: AppLocalizations.of(context).next,
-            isFormValid: isFormValid,
-            onPressedFunction: () async {
-              _submitNotifier.value = !_submitNotifier.value;
-            },
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: AppLocalizations.of(context).next,
+              isDisabled: !isFormValid,
+              onTap: isFormValid
+                  ? () async {
+                      _submitNotifier.value = !_submitNotifier.value;
+                    }
+                  : null,
+            ),
           );
         },
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: SingleChildScrollView(
         child: Center(
           child: Column(

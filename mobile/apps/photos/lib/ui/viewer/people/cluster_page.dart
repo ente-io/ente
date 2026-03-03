@@ -13,9 +13,11 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/ui/components/banners/name_face_banner.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -56,6 +58,10 @@ class ClusterPage extends StatefulWidget {
 
   @override
   State<ClusterPage> createState() => _ClusterPageState();
+}
+
+enum ClusterPageResult {
+  ignoredPerson,
 }
 
 class _ClusterPageState extends State<ClusterPage> {
@@ -120,6 +126,9 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleSavePerson() async {
+    if (isOfflineMode) {
+      return;
+    }
     if (widget.personID == null) {
       final result = await showAssignPersonAction(
         context,
@@ -146,6 +155,9 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleMergePerson() async {
+    if (isOfflineMode) {
+      return;
+    }
     final selection = await showMergeClustersToPersonPage(
       context,
       seedClusterId: widget.clusterID,
@@ -211,31 +223,33 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
-      header: widget.showNamingBanner &&
+      header: (isOfflineMode || widget.showNamingBanner) &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
-          ? SavePersonBanner(
-              faceWidget: PersonFaceWidget(
-                clusterID: widget.clusterID,
-              ),
-              text: AppLocalizations.of(context).savePerson,
-              subText: AppLocalizations.of(context).findThemQuickly,
-              primaryActionLabel: AppLocalizations.of(context).save,
-              secondaryActionLabel: AppLocalizations.of(context).merge,
-              onPrimaryTap: _handleSavePerson,
-              onSecondaryTap: _handleMergePerson,
-              onDismissed: () {
-                if (!mounted) {
-                  return;
-                }
-                setState(() {
-                  _isNamingBannerDismissed = true;
-                });
-              },
-              dismissibleKey: ValueKey(
-                "save-person-banner-${widget.clusterID}",
-              ),
-            )
+          ? isOfflineMode
+              ? const NameFaceBanner()
+              : SavePersonBanner(
+                  faceWidget: PersonFaceWidget(
+                    clusterID: widget.clusterID,
+                  ),
+                  text: AppLocalizations.of(context).savePerson,
+                  subText: AppLocalizations.of(context).findThemQuickly,
+                  primaryActionLabel: AppLocalizations.of(context).save,
+                  secondaryActionLabel: AppLocalizations.of(context).merge,
+                  onPrimaryTap: _handleSavePerson,
+                  onSecondaryTap: _handleMergePerson,
+                  onDismissed: () {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(() {
+                      _isNamingBannerDismissed = true;
+                    });
+                  },
+                  dismissibleKey: ValueKey(
+                    "save-person-banner-${widget.clusterID}",
+                  ),
+                )
           : null,
     );
     return GalleryBoundariesProvider(

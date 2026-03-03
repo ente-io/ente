@@ -9,7 +9,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
@@ -438,6 +438,10 @@ class PersonService {
   Future<bool> fetchRemoteClusterFeedback({
     bool skipClusterUpdateIfNoChange = true,
   }) async {
+    if (isOfflineMode) {
+      logger.finest("Skip fetching remote clusters in offline mode");
+      return false;
+    }
     final int changedEntities =
         await entityService.syncEntity(EntityType.cgroup);
     final bool changed = changedEntities > 0;

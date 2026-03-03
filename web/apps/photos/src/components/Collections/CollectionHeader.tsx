@@ -1,13 +1,20 @@
-import { CleanIcon } from "@hugeicons/core-free-icons";
+import {
+    CleanIcon,
+    Delete02Icon,
+    ModernTvIcon,
+    RemoveCircleIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import PublicIcon from "@mui/icons-material/Public";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
@@ -28,7 +35,11 @@ import { useBaseContext } from "ente-base/context";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
-import { CollectionOrder, type Collection } from "ente-media/collection";
+import {
+    CollectionOrder,
+    CollectionSubType,
+    type Collection,
+} from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
@@ -41,6 +52,7 @@ import {
     cleanUncategorized,
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
+    deleteShareURL,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     leaveSharedCollection,
@@ -90,7 +102,10 @@ export interface CollectionHeaderProps
      */
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
+    onCollectionManageLink: () => void;
     onCollectionCast: () => void;
+    canSetAlbumCover: boolean;
+    onSetAlbumCover: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -146,7 +161,10 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     setActiveCollectionID,
     onRemotePull,
     onCollectionShare,
+    onCollectionManageLink,
     onCollectionCast,
+    canSetAlbumCover,
+    onSetAlbumCover,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
     onMarkTempDeleted,
@@ -161,7 +179,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar, showNotification } =
         usePhotosAppContext();
-    const { mapEnabled, isInternalUser } = useSettingsSnapshot();
+    const { mapEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -172,6 +190,9 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         useModalVisibility();
 
     const { type: collectionSummaryType, fileCount } = collectionSummary;
+    const isQuickLinkAlbum =
+        activeCollection?.magicMetadata?.data.subType ==
+        CollectionSubType.quicklink;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -424,6 +445,18 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
+    const removeQuickLink = wrap(async () => {
+        if (!activeCollection) return;
+
+        if (isQuickLinkAlbum && activeCollection.sharees.length === 0) {
+            await deleteCollection(activeCollection.id, { keepFiles: true });
+            setActiveCollectionID(PseudoCollectionID.all);
+            return;
+        }
+
+        await deleteShareURL(activeCollection.id);
+    });
+
     const changeSortOrderAsc = wrap(async () => {
         if (!activeCollection) return;
         await updateCollectionSortOrder(activeCollection, true);
@@ -452,39 +485,13 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     // unique key.
     switch (collectionSummaryType) {
         case "trash":
-            menuOptions = [
-                <EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />,
-            ];
+            menuOptions = fileCount
+                ? [<EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />]
+                : [];
             break;
 
         case "userFavorites":
-            menuOptions = [
-                fileCount && (
-                    <DownloadOption
-                        key="download"
-                        isDownloadInProgress={
-                            isActiveCollectionDownloadInProgress
-                        }
-                        onClick={downloadCollection}
-                    >
-                        {t("download_favorites")}
-                    </DownloadOption>
-                ),
-                <OverflowMenuOption
-                    key="share"
-                    onClick={onCollectionShare}
-                    startIcon={<ShareIcon />}
-                >
-                    {t("share_favorites")}
-                </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="cast"
-                    startIcon={<TvIcon />}
-                    onClick={onCollectionCast}
-                >
-                    {t("cast_to_tv")}
-                </OverflowMenuOption>,
-            ];
+            menuOptions = [];
             break;
 
         case "uncategorized":
@@ -506,6 +513,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "sharedIncoming":
             menuOptions = [
+                shouldShowMapOption(collectionSummary) && (
+                    <OverflowMenuOption
+                        key="map"
+                        onClick={handleShowMap}
+                        startIcon={<MapOutlinedIcon />}
+                    >
+                        {t("map")}
+                    </OverflowMenuOption>
+                ),
                 // Pin/Unpin for shared incoming collections
                 collectionSummary.attributes.has("shareePinned") ? (
                     <OverflowMenuOption
@@ -541,26 +557,26 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         {t("archive_album")}
                     </OverflowMenuOption>
                 ),
-                isInternalUser &&
-                    (activeCollection ? (
-                        isHiddenCollection(activeCollection) ? (
-                            <OverflowMenuOption
-                                key="unhide"
-                                onClick={unhideAlbum}
-                                startIcon={<VisibilityOutlinedIcon />}
-                            >
-                                {t("unhide_collection")}
-                            </OverflowMenuOption>
-                        ) : (
-                            <OverflowMenuOption
-                                key="hide"
-                                onClick={hideAlbum}
-                                startIcon={<VisibilityOffOutlinedIcon />}
-                            >
-                                {t("hide_collection")}
-                            </OverflowMenuOption>
-                        )
-                    ) : undefined),
+
+                activeCollection ? (
+                    isHiddenCollection(activeCollection) ? (
+                        <OverflowMenuOption
+                            key="unhide"
+                            onClick={unhideAlbum}
+                            startIcon={<VisibilityOutlinedIcon />}
+                        >
+                            {t("unhide_collection")}
+                        </OverflowMenuOption>
+                    ) : (
+                        <OverflowMenuOption
+                            key="hide"
+                            onClick={hideAlbum}
+                            startIcon={<VisibilityOffOutlinedIcon />}
+                        >
+                            {t("hide_collection")}
+                        </OverflowMenuOption>
+                    )
+                ) : undefined,
                 <OverflowMenuOption
                     key="leave"
                     startIcon={<LogoutIcon />}
@@ -579,6 +595,47 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
 
         default:
+            if (isQuickLinkAlbum) {
+                menuOptions = [
+                    shouldShowMapOption(collectionSummary) && (
+                        <OverflowMenuOption
+                            key="map"
+                            onClick={handleShowMap}
+                            startIcon={<MapOutlinedIcon />}
+                        >
+                            {t("map")}
+                        </OverflowMenuOption>
+                    ),
+                    <OverflowMenuOption
+                        key="sort"
+                        onClick={showSortOrderMenu}
+                        startIcon={<SortIcon />}
+                    >
+                        {t("sort_by")}
+                    </OverflowMenuOption>,
+                    <OverflowMenuOption
+                        key="cast"
+                        startIcon={<TvIcon />}
+                        onClick={onCollectionCast}
+                    >
+                        {t("cast_album_to_tv")}
+                    </OverflowMenuOption>,
+                    <OverflowMenuOption
+                        key="remove-link"
+                        onClick={removeQuickLink}
+                        startIcon={
+                            <HugeiconsIcon
+                                icon={RemoveCircleIcon}
+                                size={20}
+                                strokeWidth={1.5}
+                            />
+                        }
+                    >
+                        {t("remove_link")}
+                    </OverflowMenuOption>,
+                ];
+                break;
+            }
             menuOptions = [
                 <OverflowMenuOption
                     key="rename"
@@ -587,6 +644,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("rename_album")}
                 </OverflowMenuOption>,
+                canSetAlbumCover && (
+                    <OverflowMenuOption
+                        key="set-cover"
+                        onClick={onSetAlbumCover}
+                        startIcon={<ImageOutlinedIcon />}
+                    >
+                        {t("set_cover")}
+                    </OverflowMenuOption>
+                ),
                 <OverflowMenuOption
                     key="sort"
                     onClick={showSortOrderMenu}
@@ -689,10 +755,17 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummary={collectionSummary}
+                isQuickLinkAlbum={!!isQuickLinkAlbum}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
+                onMapClick={handleShowMap}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
-                onShareClick={onCollectionShare}
+                onShareClick={
+                    isQuickLinkAlbum
+                        ? onCollectionManageLink
+                        : onCollectionShare
+                }
+                onCastClick={onCollectionCast}
                 onCleanUncategorizedClick={confirmCleanUncategorized}
             />
             {validMenuOptions.length > 0 && (
@@ -747,19 +820,25 @@ interface OptionProps {
 
 interface QuickOptionsProps {
     collectionSummary: CollectionSummary;
+    isQuickLinkAlbum: boolean;
     isDownloadInProgress: () => boolean;
+    onMapClick: () => void;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
+    onCastClick: () => void;
     onCleanUncategorizedClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
+    onMapClick,
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
+    onCastClick,
     onCleanUncategorizedClick,
     collectionSummary,
+    isQuickLinkAlbum,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
@@ -781,22 +860,29 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 onClick={onCleanUncategorizedClick}
             />
         )}
+        {showMapQuickOption(collectionSummary) && (
+            <MapQuickOption onClick={onMapClick} />
+        )}
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
                 collectionSummary={collectionSummary}
+                isQuickLinkAlbum={isQuickLinkAlbum}
                 onClick={onShareClick}
             />
+        )}
+        {showCastQuickOption(collectionSummary) && (
+            <CastQuickOption onClick={onCastClick} />
         )}
     </Stack>
 );
 
-const showEmptyTrashQuickOption = ({ type }: CollectionSummary) =>
-    type == "trash";
+const showEmptyTrashQuickOption = ({ type, fileCount }: CollectionSummary) =>
+    type == "trash" && fileCount > 0;
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("empty_trash")}>
         <IconButton onClick={onClick}>
-            <DeleteOutlinedIcon />
+            <HugeiconsIcon icon={Delete02Icon} size={22} strokeWidth={1.5} />
         </IconButton>
     </Tooltip>
 );
@@ -814,6 +900,24 @@ const CleanUncategorizedQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const MapQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("map")}>
+        <IconButton onClick={onClick}>
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <PublicIcon />
+            </Box>
+        </IconButton>
+    </Tooltip>
+);
+
 const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
@@ -821,6 +925,10 @@ const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "hiddenItems" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const showMapQuickOption = (collectionSummary: CollectionSummary) =>
+    collectionSummary.type == "userFavorites" &&
+    shouldShowMapOption(collectionSummary);
 
 const shouldShowMapOption = ({ type, fileCount }: CollectionSummary) =>
     fileCount > 0 &&
@@ -914,8 +1022,12 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     attributes.has("favorites") ||
     attributes.has("shared");
 
+const showCastQuickOption = ({ type }: CollectionSummary) =>
+    type == "userFavorites";
+
 interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;
+    isQuickLinkAlbum: boolean;
     onClick: () => void;
 }
 
@@ -953,17 +1065,20 @@ const SmallShareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
     collectionSummary: { attributes },
+    isQuickLinkAlbum,
     onClick,
 }) => (
     <Tooltip
         title={
-            attributes.has("userFavorites")
-                ? t("share_favorites")
-                : attributes.has("sharedIncoming")
-                  ? t("sharing_details")
-                  : attributes.has("shared")
-                    ? t("modify_sharing")
-                    : t("share_album")
+            isQuickLinkAlbum
+                ? t("manage_link")
+                : attributes.has("userFavorites")
+                  ? t("share_favorites")
+                  : attributes.has("sharedIncoming")
+                    ? t("sharing_details")
+                    : attributes.has("shared")
+                      ? t("modify_sharing")
+                      : t("share_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -976,7 +1091,29 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                     justifyContent: "center",
                 }}
             >
-                <ShareIcon />
+                {isQuickLinkAlbum ? <LinkIcon /> : <ShareIcon />}
+            </Box>
+        </IconButton>
+    </Tooltip>
+);
+
+const CastQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("cast_to_tv")}>
+        <IconButton onClick={onClick}>
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <HugeiconsIcon
+                    icon={ModernTvIcon}
+                    size={22}
+                    strokeWidth={1.8}
+                />
             </Box>
         </IconButton>
     </Tooltip>
@@ -985,7 +1122,9 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
 const EmptyTrashOption: React.FC<OptionProps> = ({ onClick }) => (
     <OverflowMenuOption
         color="critical"
-        startIcon={<DeleteOutlinedIcon />}
+        startIcon={
+            <HugeiconsIcon icon={Delete02Icon} size={20} strokeWidth={1.5} />
+        }
         onClick={onClick}
     >
         {t("empty_trash")}

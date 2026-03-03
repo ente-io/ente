@@ -20,47 +20,195 @@
   "pleaseWait": "Attendere...",
   "downloading": "Scaricamento in corso...",
   "downloadingProgress": "Download in corso... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "Scaricamento fallito",
   "failedToDownloadOrDecrypt": "Impossibile scaricare l'elemento",
   "errorOpeningFile": "Errore nell'apertura dell'elemento",
   "errorOpeningFileMessage": "Errore nell'apertura dell'elemento: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Impossibile aprire l'elemento: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes}m fa",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours}h fa",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Ieri",
   "daysAgo": "{days}g fa",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Raccolta rinominata con successo",
   "failedToRenameCollection": "Impossibile rinominare la raccolta: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Questa raccolta non puo essere eliminata",
   "collectionCannotBeEdited": "Questa raccolta non puo essere modificata",
   "collectionCannotBeShared": "Questa raccolta non puo essere condivisa",
   "deleteCollection": "Elimina raccolta",
   "deleteCollectionConfirmation": "Sei sicuro di voler eliminare \"{collectionName}\"?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "Annulla",
   "collectionDeletedSuccessfully": "Raccolta eliminata con successo",
   "failedToDeleteCollection": "Impossibile eliminare la raccolta: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Raccolte",
   "retry": "Riprova",
   "failedToSyncTrash": "Impossibile sincronizzare il cestino: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Seleziona almeno una raccolta",
   "unknownItemType": "Tipo di elemento sconosciuto",
   "fileDeletedSuccessfully": "Elemento eliminato con successo",
   "failedToDeleteFile": "Impossibile eliminare l'elemento: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Elemento aggiornato con successo!",
   "failedToUpdateFile": "Impossibile aggiornare l'elemento: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Nessuna modifica effettuata",
   "noCollectionsAvailableForRestore": "Nessuna raccolta disponibile per il ripristino",
   "trashClearedSuccessfully": "Cestino svuotato con successo",
   "failedToClearTrash": "Impossibile svuotare il cestino: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Cestino",
   "deletedPermanently": "\"{fileName}\" eliminato definitivamente",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "Impossibile ripristinare \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Crea nuova raccolta",
   "create": "Crea",
   "renameCollection": "Rinomina raccolta",
   "save": "Salva",
   "deleteFile": "Elimina elemento",
   "deleteFileConfirmation": "Sei sicuro di voler eliminare \"{fileName}\"?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Nessuna raccolta trovata",
   "createYourFirstCollection": "Crea la tua prima raccolta per iniziare",
   "createCollection": "Crea raccolta",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Clicca il pulsante + per iniziare",
   "uploadDocument": "Carica documento",
   "items": "{count} elementi",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{nessun elemento} =1{1 elemento} other{{count} elementi}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Crea raccolta",
   "uploadDocumentTooltip": "Carica documento",
   "restore": "Ripristina",
   "restoreFile": "Ripristina {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Nessuna raccolta disponibile",
   "emptyTrash": "Svuota cestino",
   "emptyTrashTooltip": "Svuota cestino",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Nessuna corrispondenza trovata",
   "searchEmptyDescription": "Prova a cercare qualcos'altro.",
   "searchEverywhereTitle": "Cerca ovunque \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Cerca in tutte le raccolte e i file.",
   "noCollectionsFoundForQuery": "Nessuna raccolta trovata per \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Senza categoria",
   "syncingTrash": "Sincronizzazione cestino...",
   "restoring": "Ripristino in corso...",
   "restoredFileToCollection": "\"{fileName}\" ripristinato in \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Svuotamento cestino...",
   "trashIsEmpty": "Il cestino e vuoto",
   "share": "Condividi",
@@ -121,18 +327,15 @@
   "changePasswordTitle": "Modifica password",
   "authToChangeYourPassword": "Autenticati per cambiare la tua password",
   "recoveryKey": "Chiave di recupero",
-  "ok": "Ok",
   "logout": "Disconnetti",
   "deleteAccount": "Elimina account",
   "areYouSureYouWantToLogout": "Sei sicuro di volerti disconnettere?",
   "yesLogout": "Sì, disconnetti",
   "changePassword": "Modifica password",
   "authToViewYourRecoveryKey": "Autenticati per visualizzare la tua chiave di recupero",
-  "account": "Account",
   "security": "Sicurezza",
   "emailVerificationToggle": "Verifica Email",
   "authToChangeEmailVerificationSetting": "Autenticati per modificare la verifica email",
-  "passkey": "Passkey",
   "authenticateGeneric": "Si prega di autenticarsi",
   "somethingWentWrong": "Qualcosa è andato storto",
   "appLock": "Blocco app",
@@ -147,7 +350,6 @@
   "settings": "Impostazioni",
   "about": "Info",
   "weAreOpenSource": "Siamo open source!",
-  "privacy": "Privacy",
   "terms": "Termini d'uso",
   "termsOfServicesTitle": "Termini d'uso",
   "support": "Assistenza",
@@ -157,15 +359,10 @@
   "reportABug": "Segnala un bug",
   "reportBug": "Segnala un bug",
   "logsDialogBodyLocker": "Questo inviera i log per aiutarci a risolvere il tuo problema.",
-  "social": "Social",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "rateUsOnStore": "Valutaci su {storeName}",
-  "blog": "Blog",
-  "merchandise": "Merchandise",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Informazioni",
   "saveInformation": "Salva informazioni",
   "saveToLocker": "Salva in Locker",
@@ -179,8 +376,17 @@
   "accountCredentials": "Segreto",
   "accountCredentialsDescription": "Conserva le credenziali degli account.",
   "editSecret": "Modifica segreto",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Modifica luogo",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Modifica nota",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Contatto di emergenza",
   "emergencyContactDescription": "Conserva i contatti delle persone chiave in caso di emergenza.",
   "noteName": "Titolo",
@@ -197,12 +403,9 @@
   "recordLocationHint": "Dove si trova questo oggetto?",
   "recordNotes": "Note",
   "recordNotesHint": "Informazioni aggiuntive sull'oggetto",
-  "credentialName": "Account",
   "credentialNameHint": "Nome del servizio",
   "username": "Nome utente",
   "usernameHint": "ID di accesso o email",
-  "password": "Password",
-  "passwordHint": "Password",
   "credentialNotes": "Note aggiuntive",
   "credentialNotesHint": "Metodi di recupero, domande di sicurezza, ...",
   "contactName": "Nome contatto",
@@ -259,6 +462,14 @@
   "expiredLinkInfo": "Questo link è scaduto. Si prega di selezionare un nuovo orario di scadenza o disabilitare la scadenza del link.",
   "linkExpiresOn": "Il link scadrà il {expiryTime}",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Condividi con persone specifiche} =1 {Condividi con una persona} other {Condividi con {numberOfPeople} persone}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Il link è scaduto",
   "publicLinkEnabled": "Link pubblico abilitato",
   "shareALink": "Condividi un link",
@@ -273,7 +484,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "I collaboratori possono aggiungere elementi alla raccolta condivisa.",
   "enterEmail": "Inserisci email",
   "viewersSuccessfullyAdded": "{count, plural, one {}=0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 collaboratori} =1 {Aggiunto 1 collaboratore} other {Aggiunti {count} collaboratori}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, one {}=0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
   "addCollaborators": "{count, plural, one {}=0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
@@ -291,6 +520,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Chi condivide gli album con te deve vedere lo stesso ID sul proprio dispositivo.",
   "howToViewShareeVerificationID": "Chiedi di premere a lungo il loro indirizzo email nella schermata delle impostazioni e verificare che gli ID su entrambi i dispositivi corrispondano.",
   "thisIsPersonVerificationId": "Questo è l'ID di verifica di {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "ID di verifica",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} non ha un account Ente.\n\nInvia un invito per condividere elementi.",
@@ -303,6 +540,15 @@
   "yesConvertToViewer": "Sì, converti in sola lettura",
   "changePermissions": "Modifica permessi",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} non potra piu aggiungere elementi alla raccolta dopo essere diventato visualizzatore.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Rimuovi?",
   "removeParticipantBody": "{userEmail} sara rimosso da questa raccolta condivisa\n\nAnche gli elementi aggiunti da questa persona saranno rimossi dalla raccolta",
   "yesRemove": "Sì, rimuovi",
@@ -311,33 +557,108 @@
   "collaborator": "Collaboratore",
   "collaboratorsCanAddFilesToTheSharedAlbum": "I collaboratori possono aggiungere elementi alla raccolta condivisa.",
   "albumParticipantsCount": "{count, plural, =0 {Nessun partecipante} =1 {1 Partecipante} other {{count} Partecipanti}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Aggiungi altri",
   "you": "Tu",
   "albumOwner": "Proprietario",
   "typeOfCollectionTypeIsNotSupportedForRename": "Il tipo di raccolta {collectionType} non supporta la ridenominazione",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Lascia raccolta",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Gli elementi aggiunti da te saranno rimossi dalla raccolta",
   "leaveSharedCollection": "Lasciare la raccolta condivisa?",
   "noSystemLockFound": "Nessun blocco di sistema trovato",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Per abilitare il blocco dell'app, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
-  "legacy": "Legacy",
   "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
   "uploadError": "Errore di caricamento",
   "uploadStorageLimitErrorTitle": "Limite di archiviazione raggiunto",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "Hai esaurito lo spazio di archiviazione. Libera spazio per continuare a caricare.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Limite file raggiunto",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Hai raggiunto il limite di file. Passa a un piano a pagamento per piu spazio.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "Azione fallita. Hai raggiunto il limite di file.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "File troppo grande",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Questo file supera la dimensione massima di caricamento supportata di 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Prova a modificare la tua ricerca",
   "noFilesFoundForQuery": "Nessun elemento trovato per \"{query}\"",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Deseleziona tutti",
   "selectAll": "Seleziona tutto",
   "unnamedCollection": "Raccolta senza nome",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "Caricati {completed}/{total} elementi...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "Caricati {completed}/{total} elementi... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Nessuna raccolta disponibile",
   "createCollectionButton": "Crea raccolta",
   "collectionButtonLabel": "Raccolta",
@@ -352,6 +673,15 @@
   "saveDocument": "Salva documento",
   "uploadFiles": "Carica elementi",
   "filesSelected": "{count, plural, =0{Nessun elemento selezionato} =1{1 elemento selezionato} other{{count} elementi selezionati}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Aggiungi alla raccolta",
   "newCollection": "Nuova raccolta",
   "title": "Titolo",
@@ -360,11 +690,50 @@
   "backToView": "Torna alla visualizzazione",
   "back": "Indietro",
   "failedToLoadCollections": "Impossibile caricare le raccolte: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Informazioni",
   "recordSavedToMultipleCollections": "Record salvato in {count, plural, =1{1 raccolta} other{{count} raccolte}} con successo",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "{fieldName} copiato negli appunti",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "{count, plural, =1{1 risultato} other{{count} risultati}} per \"{query}\"",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Accedi al tuo account Ente",
   "unlockLockerNewUserTitle": "Unisciti a Ente per usare Locker",
   "unlockLockerNewUserBody": "Locker e attualmente disponibile solo per gli utenti Ente esistenti. Puoi creare un account su Ente Photos per usare Locker.",
@@ -374,9 +743,7 @@
   "featureSaveImportant": "Salva i tuoi documenti e credenziali importanti",
   "featurePassAutomatically": "Trasmettili automaticamente in caso di emergenza",
   "featureShareAnytime": "Condividili in qualsiasi momento",
-  "emailIdLabel": "Email",
   "emailIdHint": "Inserisci il tuo indirizzo email",
-  "loginPasswordLabel": "Password",
   "loginPasswordHint": "Inserisci la tua password",
   "forgotPassword": "Password dimenticata?",
   "logInAction": "Accedi",
@@ -399,13 +766,60 @@
   "yesDeleteCollection": "Si, elimina raccolta",
   "yesDeleteFile": "Si, elimina elemento",
   "deleteCollectionDialogBody": "{collectionName} sara eliminata definitivamente.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 raccolta sara eliminata} other{{count} raccolte saranno eliminate}} definitivamente.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 elemento sara eliminato} other{{count} elementi saranno eliminati}} definitivamente.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "Elimina anche gli elementi ovunque",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Si, elimina {count, plural, =1{raccolta} other{raccolte}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Si, elimina {count, plural, =1{elemento} other{elementi}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Utilizzo",
-  "fileCount": "{used} / {max}",
   "important": "Importante",
   "unimportant": "Non importante",
   "removingFromImportant": "Rimozione da importanti...",
@@ -413,9 +827,36 @@
   "fileMarkedAsImportant": "Elemento contrassegnato come importante",
   "fileRemovedFromImportant": "Elemento rimosso dagli importanti",
   "filesMarkedAsImportant": "{count, plural, =1{1 elemento contrassegnato come importante} other{{count} elementi contrassegnati come importanti}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Tutti gli elementi sono gia contrassegnati come importanti",
   "failedToMarkFilesAsImportant": "Impossibile contrassegnare gli elementi come importanti: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Impossibile aggiornare lo stato importante: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Siamo spiacenti",
   "subscribe": "Iscriviti",
   "sharedWith": "Condiviso con",

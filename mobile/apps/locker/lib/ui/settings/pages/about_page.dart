@@ -1,8 +1,12 @@
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/update_service.dart";
+import "package:locker/ui/settings/widgets/app_update_dialog.dart";
 import "package:locker/ui/settings/widgets/settings_widget.dart";
 import "package:url_launcher/url_launcher.dart";
 
@@ -48,6 +52,13 @@ class AboutPage extends StatelessWidget {
                 title: l10n.termsOfServicesTitle,
                 onTap: () => _onTermsTapped(context),
               ),
+              if (UpdateService.instance.isIndependent()) ...[
+                const SizedBox(height: 8),
+                SettingsItem(
+                  title: l10n.checkForUpdates,
+                  onTap: () => _onCheckForUpdatesTapped(context),
+                ),
+              ],
             ],
           ),
         ),
@@ -75,6 +86,30 @@ class AboutPage extends StatelessWidget {
       context,
       l10n.termsOfServicesTitle,
       "https://ente.io/terms",
+    );
+  }
+
+  Future<void> _onCheckForUpdatesTapped(BuildContext context) async {
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.checkingForUpdates);
+    await dialog.show();
+    final shouldUpdate = await UpdateService.instance.shouldUpdate();
+    final latestVersion = UpdateService.instance.getLatestVersionInfo();
+    await dialog.hide();
+    if (!context.mounted) {
+      return;
+    }
+    if (latestVersion == null) {
+      showShortToast(context, l10n.unableToCheckForUpdatesRightNow);
+      return;
+    }
+    if (!shouldUpdate) {
+      showShortToast(context, l10n.youAreOnTheLatestVersion);
+      return;
+    }
+    await showAppUpdateBottomSheet(
+      context,
+      latestVersionInfo: latestVersion,
     );
   }
 }

@@ -262,7 +262,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   fk_user_agent: 137145b086229251761678fe034da53753f4ce59
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   flutter_local_authentication: 989278c681612f1ee0e36019e149137f114b9d7f

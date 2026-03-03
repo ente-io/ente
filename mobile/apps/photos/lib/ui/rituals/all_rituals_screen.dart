@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:ente_icons/ente_icons.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -12,6 +14,7 @@ import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
 
 class AllRitualsScreen extends StatelessWidget {
@@ -127,13 +130,13 @@ class _RitualOverviewCard extends StatelessWidget {
     final completions = [
       for (final day in days) progress?.hasCompleted(day) ?? false,
     ];
+    final isHiddenRitual = isRitualAlbumHidden(ritual);
 
     return GestureDetector(
-      onTap: () {
-        routeToPage(
-          context,
-          RitualPage(ritualId: ritual.id),
-        );
+      onTap: () async {
+        final canOpen = await requestHiddenRitualAccess(context, ritual);
+        if (!context.mounted || !canOpen) return;
+        unawaited(routeToPage(context, RitualPage(ritualId: ritual.id)));
       },
       onLongPress: () async {
         final action = await showModalBottomSheet<String>(
@@ -230,6 +233,7 @@ class _RitualOverviewCard extends StatelessWidget {
                                   : completions[index + 1],
                               index: index,
                               showFuturePreview: showFuturePreview,
+                              isHiddenRitual: isHiddenRitual,
                             ),
                           ),
                         ),
@@ -253,6 +257,7 @@ class _RitualOverviewCard extends StatelessWidget {
     required bool? nextCompleted,
     required int index,
     required bool showFuturePreview,
+    required bool isHiddenRitual,
   }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -264,6 +269,10 @@ class _RitualOverviewCard extends StatelessWidget {
         progress?.recentFileCountsByDay[dayKey] ?? (completed ? 1 : 0);
     final isToday = _isSameDay(day, today);
     final isYesterday = _isSameDay(day, yesterday);
+    final shouldShowCamera =
+        isToday && !completed && file == null && count == 0;
+    final shouldHidePhoto =
+        isHiddenRitual && !shouldShowCamera && !day.isAfter(today);
     final fadePhoto =
         completed && nextCompleted == false && !isYesterday && !isToday;
     final rotation = switch (index % 4) {
@@ -272,6 +281,14 @@ class _RitualOverviewCard extends StatelessWidget {
       2 => -0.08,
       _ => 0.08,
     };
+
+    if (shouldHidePhoto) {
+      return RitualDayThumbnail(
+        day: day,
+        variant: RitualDayThumbnailVariant.hidden,
+        width: tileWidth,
+      );
+    }
 
     final variant = completed
         ? RitualDayThumbnailVariant.photo
