@@ -33,6 +33,7 @@ jobs:
         runs-on: ${{ matrix.platform.os }}
         env:
             HAS_WINDOWS_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.AZURE_ENDPOINT != '' && secrets.AZURE_CODE_SIGNING_NAME != '' && secrets.AZURE_CERT_PROFILE_NAME != '' }}
+            HAS_UPDATER_CONFIG: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY != '' }}
 
         steps:
             - name: Set release tag
@@ -125,6 +126,35 @@ jobs:
                   fs.writeFileSync(path, JSON.stringify(config, null, 2));
                   NODE
 
+            - name: Enable updater artifacts for release builds
+              if: env.HAS_UPDATER_CONFIG == 'true'
+              shell: bash
+              env:
+                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
+                  ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+                  GH_REPO: ${{ github.repository }}
+              run: |
+                  node - <<'NODE'
+                  const fs = require('fs');
+                  const path = 'rust/apps/ensu/src-tauri/tauri.conf.json';
+                  const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+                  const endpoint = (process.env.ENSU_TAURI_UPDATER_ENDPOINT || `https://github.com/${process.env.GH_REPO}/releases/latest/download/latest.json`).trim();
+
+                  if (!process.env.ENSU_TAURI_UPDATER_PUBKEY) {
+                    throw new Error('ENSU_TAURI_UPDATER_PUBKEY is empty');
+                  }
+
+                  config.bundle = config.bundle || {};
+                  config.bundle.createUpdaterArtifacts = true;
+                  config.plugins = config.plugins || {};
+                  config.plugins.updater = {
+                    pubkey: process.env.ENSU_TAURI_UPDATER_PUBKEY,
+                    endpoints: [endpoint],
+                  };
+
+                  fs.writeFileSync(path, JSON.stringify(config, null, 2));
+                  NODE
+
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:
@@ -159,7 +189,7 @@ jobs:
     finalize-updater-json:
         runs-on: ubuntu-24.04
         needs: release-desktop
-        if: startsWith(github.ref, 'refs/tags/ensu-v')
+        if: startsWith(github.ref, 'refs/tags/ensu-v') && vars.ENSU_TAURI_UPDATER_PUBKEY != ''
 
         steps:
             - name: Set release tag and updater version
