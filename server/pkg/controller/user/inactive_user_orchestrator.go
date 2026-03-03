@@ -11,6 +11,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	"github.com/ente-io/museum/pkg/repo"
+	emergencyRepo "github.com/ente-io/museum/pkg/repo/emergency"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
@@ -24,50 +25,57 @@ const (
 	inactiveUserDeletionFromEmail    = "team@ente.io"
 	inactiveUserDeletionBaseTemplate = "ente_base.html"
 
-	InactiveUserDeletionWarn11mTemplateID   = "inactive_user_deletion_warn_11m"
-	InactiveUserDeletionWarn12m7dTemplateID = "inactive_user_deletion_warn_12m_7d"
-	InactiveUserDeletionWarn12m1dTemplateID = "inactive_user_deletion_warn_12m_1d"
-	InactiveUserDeletionFinalTemplateID     = "inactive_user_deletion_confirm_12m"
+	InactiveUserDeletionWarn2mTemplateID = "inactive_user_deletion_warn_2m_v2"
+	InactiveUserDeletionWarn1mTemplateID = "inactive_user_deletion_warn_1m_v2"
+	InactiveUserDeletionWarn7dTemplateID = "inactive_user_deletion_warn_7d_v2"
+	InactiveUserDeletionWarn1dTemplateID = "inactive_user_deletion_warn_1d_v2"
+	InactiveUserDeletionFinalTemplateID  = "inactive_user_deletion_confirm_13m_v2"
 
-	inactiveUserDeletionWarn11mTemplate   = "inactive-user-deletion/warn_11m.html"
-	inactiveUserDeletionWarn12m7dTemplate = "inactive-user-deletion/warn_12m_7d.html"
-	inactiveUserDeletionWarn12m1dTemplate = "inactive-user-deletion/warn_12m_1d.html"
-	inactiveUserDeletionFinalTemplate     = "inactive-user-deletion/confirm_12m.html"
+	inactiveUserDeletionWarn2mTemplate = "inactive-user-deletion/warn_2m.html"
+	inactiveUserDeletionWarn1mTemplate = "inactive-user-deletion/warn_1m.html"
+	inactiveUserDeletionWarn7dTemplate = "inactive-user-deletion/warn_7d.html"
+	inactiveUserDeletionWarn1dTemplate = "inactive-user-deletion/warn_1d.html"
+	inactiveUserDeletionFinalTemplate  = "inactive-user-deletion/confirm_13m.html"
 
-	inactiveUserDeletionWarn11mSubject   = "Your Ente account is scheduled for deletion due to inactivity"
-	inactiveUserDeletionWarn12m7dSubject = "Reminder: Your Ente account will be deleted in 7 days due to inactivity"
-	inactiveUserDeletionWarn12m1dSubject = "REMINDER: Your Ente account will be deleted tomorrow due to inactivity"
-	inactiveUserDeletionFinalSubject     = "Your Ente account has been deleted"
+	inactiveUserDeletionWarn2mSubject = "Your Ente account is scheduled for deletion due to inactivity"
+	inactiveUserDeletionWarn1mSubject = "Reminder: Your Ente account will be deleted in 30 days due to inactivity"
+	inactiveUserDeletionWarn7dSubject = "Reminder: Your Ente account will be deleted in 7 days due to inactivity"
+	inactiveUserDeletionWarn1dSubject = "REMINDER: Your Ente account will be deleted tomorrow due to inactivity"
+	inactiveUserDeletionFinalSubject  = "Your Ente account has been deleted"
 )
 
 const (
 	inactiveUserOneDayInMicroSeconds = 24 * time.MicroSecondsInOneHour
 
-	// 12 months is modeled as 365 days. The first stage (11 months) maps to
-	// 30 days before 12 months to preserve the desired 23/6/1 day replay gaps.
-	inactiveUserTwelveMonthsInMicroSeconds = 365 * inactiveUserOneDayInMicroSeconds
-	inactiveUserWarn11MonthsInMicroSeconds = inactiveUserTwelveMonthsInMicroSeconds - (30 * inactiveUserOneDayInMicroSeconds)
+	// 13 months is modeled as 395 days (365 + 30). The first warning (2 months
+	// before deletion) starts at 335 days of inactivity.
+	inactiveUserThirteenMonthsInMicroSeconds = (365 + 30) * inactiveUserOneDayInMicroSeconds
+	inactiveUserWarn2MonthsInMicroSeconds    = inactiveUserThirteenMonthsInMicroSeconds - (60 * inactiveUserOneDayInMicroSeconds)
 
-	inactiveUserGap11mTo12mMinus7d = 23 * inactiveUserOneDayInMicroSeconds
-	inactiveUserGap12mMinus7dTo1d  = 6 * inactiveUserOneDayInMicroSeconds
-	inactiveUserGap12mMinus1dTo12m = inactiveUserOneDayInMicroSeconds
+	// Stage progression is based on when the previous stage email was sent.
+	inactiveUserGap2mTo1m    = 30 * inactiveUserOneDayInMicroSeconds
+	inactiveUserGap1mTo7d    = 23 * inactiveUserOneDayInMicroSeconds
+	inactiveUserGap7dTo1d    = 6 * inactiveUserOneDayInMicroSeconds
+	inactiveUserGap1dToFinal = inactiveUserOneDayInMicroSeconds
 )
 
 var inactiveUserDeletionTemplateIDs = []string{
-	InactiveUserDeletionWarn11mTemplateID,
-	InactiveUserDeletionWarn12m7dTemplateID,
-	InactiveUserDeletionWarn12m1dTemplateID,
+	InactiveUserDeletionWarn2mTemplateID,
+	InactiveUserDeletionWarn1mTemplateID,
+	InactiveUserDeletionWarn7dTemplateID,
+	InactiveUserDeletionWarn1dTemplateID,
 	InactiveUserDeletionFinalTemplateID,
 }
 
 type inactivityEmailStage string
 
 const (
-	inactivityEmailStageNone      inactivityEmailStage = ""
-	inactivityEmailStageWarn11m   inactivityEmailStage = "warn_11m"
-	inactivityEmailStageWarn12m7d inactivityEmailStage = "warn_12m_7d"
-	inactivityEmailStageWarn12m1d inactivityEmailStage = "warn_12m_1d"
-	inactivityEmailStageFinal     inactivityEmailStage = "confirm_12m"
+	inactivityEmailStageNone   inactivityEmailStage = ""
+	inactivityEmailStageWarn2m inactivityEmailStage = "warn_2m"
+	inactivityEmailStageWarn1m inactivityEmailStage = "warn_1m"
+	inactivityEmailStageWarn7d inactivityEmailStage = "warn_7d"
+	inactivityEmailStageWarn1d inactivityEmailStage = "warn_1d"
+	inactivityEmailStageFinal  inactivityEmailStage = "confirm_13m"
 )
 
 type inactivityEmailStageConfig struct {
@@ -77,11 +85,12 @@ type inactivityEmailStageConfig struct {
 	IsFinal      bool
 }
 
-// InactiveUserOrchestrator sends inactivity warning emails and final manual
-// deletion reminders for users who stay inactive across all apps.
+// InactiveUserOrchestrator sends inactivity warning emails and final account
+// deletion notifications for users who stay inactive across all apps.
 type InactiveUserOrchestrator struct {
 	UserRepo                *repo.UserRepository
 	NotificationHistoryRepo *repo.NotificationHistoryRepository
+	EmergencyContactRepo    *emergencyRepo.Repository
 	LockController          *lock.LockController
 	DiscordController       *discord.DiscordController
 	UserController          *UserController
@@ -90,6 +99,7 @@ type InactiveUserOrchestrator struct {
 func NewInactiveUserOrchestrator(
 	userRepo *repo.UserRepository,
 	notificationHistoryRepo *repo.NotificationHistoryRepository,
+	emergencyContactRepo *emergencyRepo.Repository,
 	lockController *lock.LockController,
 	discordController *discord.DiscordController,
 	userController *UserController,
@@ -97,6 +107,7 @@ func NewInactiveUserOrchestrator(
 	return &InactiveUserOrchestrator{
 		UserRepo:                userRepo,
 		NotificationHistoryRepo: notificationHistoryRepo,
+		EmergencyContactRepo:    emergencyContactRepo,
 		LockController:          lockController,
 		DiscordController:       discordController,
 		UserController:          userController,
@@ -112,7 +123,7 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 	defer c.LockController.ReleaseLock(InactiveUserDeletionJobLock)
 
 	now := time.Microseconds()
-	beforeTime := now - inactiveUserWarn11MonthsInMicroSeconds
+	beforeTime := now - inactiveUserWarn2MonthsInMicroSeconds
 	var afterUserID int64
 	processedUsers := 0
 	sentEmails := 0
@@ -221,6 +232,19 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 			log.WithField("user_id", user.ID).Info("Skipping inactive user deletion because user is no longer in final stage")
 			return false, nil
 		}
+		if c.EmergencyContactRepo != nil {
+			hasActiveLegacyContact, err := c.EmergencyContactRepo.HasActiveLegacyContact(context.Background(), user.ID)
+			if err != nil {
+				return false, err
+			}
+			if hasActiveLegacyContact {
+				c.DiscordController.NotifyAdminAction(
+					fmt.Sprintf("Inactive user %d (%s) deletion paused at %s due to active legacy contact",
+						user.ID, user.Email, stdtime.UnixMicro(now).UTC().Format(stdtime.RFC3339)))
+				log.WithField("user_id", user.ID).Info("Skipping inactive user deletion because user has active legacy contact configured")
+				return false, nil
+			}
+		}
 
 		deleteLogger := log.WithFields(log.Fields{
 			"user_id": user.ID,
@@ -262,7 +286,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 
 	if config.IsFinal {
 		c.DiscordController.NotifyAdminAction(
-			fmt.Sprintf("Inactive user %d (%s) reached 12 months inactivity and account deletion was initiated",
+			fmt.Sprintf("Inactive user %d (%s) reached 13 months inactivity and account deletion was initiated",
 				user.ID, user.Email))
 	}
 
@@ -289,13 +313,13 @@ func (c *InactiveUserOrchestrator) resolveNextStage(userID int64, lastActivity i
 }
 
 func nextInactivityEmailStage(lastActivity int64, now int64, history map[string]int64) inactivityEmailStage {
-	if now-lastActivity < inactiveUserWarn11MonthsInMicroSeconds {
+	if now-lastActivity < inactiveUserWarn2MonthsInMicroSeconds {
 		return inactivityEmailStageNone
 	}
 
-	sent11m := history[InactiveUserDeletionWarn11mTemplateID]
-	if sent11m <= lastActivity {
-		return inactivityEmailStageWarn11m
+	sent2m := history[InactiveUserDeletionWarn2mTemplateID]
+	if sent2m <= lastActivity {
+		return inactivityEmailStageWarn2m
 	}
 
 	sentFinal := history[InactiveUserDeletionFinalTemplateID]
@@ -303,23 +327,31 @@ func nextInactivityEmailStage(lastActivity int64, now int64, history map[string]
 		return inactivityEmailStageNone
 	}
 
-	sent12mMinus7d := history[InactiveUserDeletionWarn12m7dTemplateID]
-	if sent12mMinus7d <= lastActivity {
-		if now >= sent11m+inactiveUserGap11mTo12mMinus7d {
-			return inactivityEmailStageWarn12m7d
+	sent1m := history[InactiveUserDeletionWarn1mTemplateID]
+	if sent1m <= lastActivity {
+		if now >= sent2m+inactiveUserGap2mTo1m {
+			return inactivityEmailStageWarn1m
 		}
 		return inactivityEmailStageNone
 	}
 
-	sent12mMinus1d := history[InactiveUserDeletionWarn12m1dTemplateID]
-	if sent12mMinus1d <= lastActivity {
-		if now >= sent12mMinus7d+inactiveUserGap12mMinus7dTo1d {
-			return inactivityEmailStageWarn12m1d
+	sent7d := history[InactiveUserDeletionWarn7dTemplateID]
+	if sent7d <= lastActivity {
+		if now >= sent1m+inactiveUserGap1mTo7d {
+			return inactivityEmailStageWarn7d
 		}
 		return inactivityEmailStageNone
 	}
 
-	if now >= sent12mMinus1d+inactiveUserGap12mMinus1dTo12m {
+	sent1d := history[InactiveUserDeletionWarn1dTemplateID]
+	if sent1d <= lastActivity {
+		if now >= sent7d+inactiveUserGap7dTo1d {
+			return inactivityEmailStageWarn1d
+		}
+		return inactivityEmailStageNone
+	}
+
+	if now >= sent1d+inactiveUserGap1dToFinal {
 		return inactivityEmailStageFinal
 	}
 	return inactivityEmailStageNone
@@ -327,23 +359,29 @@ func nextInactivityEmailStage(lastActivity int64, now int64, history map[string]
 
 func inactivityStageConfig(stage inactivityEmailStage) inactivityEmailStageConfig {
 	switch stage {
-	case inactivityEmailStageWarn11m:
+	case inactivityEmailStageWarn2m:
 		return inactivityEmailStageConfig{
-			TemplateID:   InactiveUserDeletionWarn11mTemplateID,
-			TemplateName: inactiveUserDeletionWarn11mTemplate,
-			Subject:      inactiveUserDeletionWarn11mSubject,
+			TemplateID:   InactiveUserDeletionWarn2mTemplateID,
+			TemplateName: inactiveUserDeletionWarn2mTemplate,
+			Subject:      inactiveUserDeletionWarn2mSubject,
 		}
-	case inactivityEmailStageWarn12m7d:
+	case inactivityEmailStageWarn1m:
 		return inactivityEmailStageConfig{
-			TemplateID:   InactiveUserDeletionWarn12m7dTemplateID,
-			TemplateName: inactiveUserDeletionWarn12m7dTemplate,
-			Subject:      inactiveUserDeletionWarn12m7dSubject,
+			TemplateID:   InactiveUserDeletionWarn1mTemplateID,
+			TemplateName: inactiveUserDeletionWarn1mTemplate,
+			Subject:      inactiveUserDeletionWarn1mSubject,
 		}
-	case inactivityEmailStageWarn12m1d:
+	case inactivityEmailStageWarn7d:
 		return inactivityEmailStageConfig{
-			TemplateID:   InactiveUserDeletionWarn12m1dTemplateID,
-			TemplateName: inactiveUserDeletionWarn12m1dTemplate,
-			Subject:      inactiveUserDeletionWarn12m1dSubject,
+			TemplateID:   InactiveUserDeletionWarn7dTemplateID,
+			TemplateName: inactiveUserDeletionWarn7dTemplate,
+			Subject:      inactiveUserDeletionWarn7dSubject,
+		}
+	case inactivityEmailStageWarn1d:
+		return inactivityEmailStageConfig{
+			TemplateID:   InactiveUserDeletionWarn1dTemplateID,
+			TemplateName: inactiveUserDeletionWarn1dTemplate,
+			Subject:      inactiveUserDeletionWarn1dSubject,
 		}
 	case inactivityEmailStageFinal:
 		return inactivityEmailStageConfig{
@@ -364,11 +402,13 @@ func isEnteDomainRolloutUser(email string) bool {
 func formatDeletionDateForStage(stage inactivityEmailStage, now int64) string {
 	var daysUntilDeletion int64
 	switch stage {
-	case inactivityEmailStageWarn11m:
+	case inactivityEmailStageWarn2m:
+		daysUntilDeletion = 60
+	case inactivityEmailStageWarn1m:
 		daysUntilDeletion = 30
-	case inactivityEmailStageWarn12m7d:
+	case inactivityEmailStageWarn7d:
 		daysUntilDeletion = 7
-	case inactivityEmailStageWarn12m1d:
+	case inactivityEmailStageWarn1d:
 		daysUntilDeletion = 1
 	case inactivityEmailStageFinal:
 		daysUntilDeletion = 0
