@@ -48,8 +48,5 @@ ort = { version = "=2.0.0-rc.4", default-features = false, features = [
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
-[profile.dev]
-opt-level = 3
-
 [features]
 default = []
