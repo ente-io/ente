@@ -85,8 +85,8 @@ import {
 } from "ente-new/photos/components/utils/use-snapshot";
 import {
     reauthenticateWithAppLock,
-    suppressAutoLockOnBlurForTrustedPrompt,
     suppressAppLockRefreshFromSessionForTrustedReload,
+    suppressAutoLockOnBlurForTrustedPrompt,
 } from "ente-new/photos/services/app-lock";
 import {
     PseudoCollectionID,

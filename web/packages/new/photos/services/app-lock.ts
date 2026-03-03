@@ -197,7 +197,8 @@ export const suppressAppLockRefreshFromSessionForTrustedReload = () => {
 const consumeAppLockRefreshSuppressionFromSession = () => {
     try {
         if (
-            sessionStorage.getItem(ssKeySuppressNextSessionRefreshLock) !== "true"
+            sessionStorage.getItem(ssKeySuppressNextSessionRefreshLock) !==
+            "true"
         ) {
             return false;
         }
