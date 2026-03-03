@@ -115,16 +115,7 @@ jobs:
                   AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
                   AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-              run: |
-                  node - <<'NODE'
-                  const fs = require('fs');
-                  const path = 'rust/apps/ensu/src-tauri/tauri.conf.json';
-                  const config = JSON.parse(fs.readFileSync(path, 'utf8'));
-                  config.bundle = config.bundle || {};
-                  config.bundle.windows = config.bundle.windows || {};
-                  config.bundle.windows.signCommand = `trusted-signing-cli -e ${process.env.AZURE_ENDPOINT} -a ${process.env.AZURE_CODE_SIGNING_NAME} -c ${process.env.AZURE_CERT_PROFILE_NAME} -d Ensu "%1"`;
-                  fs.writeFileSync(path, JSON.stringify(config, null, 2));
-                  NODE
+              run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
 
             - name: Enable updater artifacts for release builds
               if: env.HAS_UPDATER_CONFIG == 'true'
@@ -132,34 +123,24 @@ jobs:
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
                   ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+              run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
+
+            - name: Ensure ENSU Tauri signing key is configured
+              shell: bash
+              env:
+                  ENSU_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
               run: |
-                  node - <<'NODE'
-                  const fs = require('fs');
-                  const path = 'rust/apps/ensu/src-tauri/tauri.conf.json';
-                  const config = JSON.parse(fs.readFileSync(path, 'utf8'));
-                  const endpoint = (process.env.ENSU_TAURI_UPDATER_ENDPOINT || 'https://ente.io/release-info/ensu-desktop.json').trim();
-
-                  if (!process.env.ENSU_TAURI_UPDATER_PUBKEY) {
-                    throw new Error('ENSU_TAURI_UPDATER_PUBKEY is empty');
-                  }
-
-                  config.bundle = config.bundle || {};
-                  config.bundle.createUpdaterArtifacts = true;
-                  config.plugins = config.plugins || {};
-                  config.plugins.updater = {
-                    pubkey: process.env.ENSU_TAURI_UPDATER_PUBKEY,
-                    endpoints: [endpoint],
-                  };
-
-                  fs.writeFileSync(path, JSON.stringify(config, null, 2));
-                  NODE
+                  if [ -z "${ENSU_TAURI_SIGNING_PRIVATE_KEY}" ]; then
+                      echo "::error::Missing ENSU_TAURI_SIGNING_PRIVATE_KEY secret"
+                      exit 1
+                  fi
 
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY != '' && secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_SIGNING_PRIVATE_KEY != '' && secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
-                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD != '' && secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD != '' && secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
+                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
@@ -179,6 +160,7 @@ jobs:
                   releaseBody: "Ensu release assets: Linux/macOS/Windows desktop + Android APK."
                   releaseDraft: true
                   prerelease: false
+                  # Keep release assets only on the draft GitHub release (no duplicate Actions artifacts).
                   uploadWorkflowArtifacts: false
                   uploadUpdaterJson: false
                   uploadUpdaterSignatures: true
@@ -205,119 +187,8 @@ jobs:
                   RELEASE_TAG: ${{ env.RELEASE_TAG }}
                   ENSU_UPDATER_VERSION: ${{ env.ENSU_UPDATER_VERSION }}
                   ENSU_UPDATER_URL_PREFIX: ${{ vars.ENSU_UPDATER_URL_PREFIX }}
-              run: |
-                  node <<'NODE'
-                  const fs = require('node:fs');
-
-                  (async () => {
-                  const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
-                  const repo = process.env.GH_REPO;
-                  const tag = process.env.RELEASE_TAG;
-                  const version = process.env.ENSU_UPDATER_VERSION;
-
-                  if (!token) throw new Error('Missing GH_TOKEN/GITHUB_TOKEN');
-                  if (!repo) throw new Error('Missing GH_REPO');
-                  if (!tag) throw new Error('Missing RELEASE_TAG');
-                  if (!version) throw new Error('Missing ENSU_UPDATER_VERSION');
-
-                  const apiHeaders = {
-                    Authorization: `token ${token}`,
-                    Accept: 'application/vnd.github+json',
-                  };
-
-                  const releaseRes = await fetch(`https://api.github.com/repos/${repo}/releases/tags/${tag}`, {
-                    headers: apiHeaders,
-                  });
-                  if (!releaseRes.ok) {
-                    throw new Error(`Failed to fetch release: ${releaseRes.status} ${releaseRes.statusText}`);
-                  }
-                  const release = await releaseRes.json();
-                  const assets = release.assets || [];
-                  const assetByName = new Map(assets.map((asset) => [asset.name, asset]));
-                  const bundleAssets = assets.filter((asset) => !asset.name.endsWith('.sig'));
-
-                  const findAsset = (patterns) => {
-                    for (const pattern of patterns) {
-                      const match = bundleAssets.find((asset) => pattern.test(asset.name));
-                      if (match) return match;
-                    }
-                    return undefined;
-                  };
-
-                  const fetchSignature = async (signatureAsset) => {
-                    const signatureRes = await fetch(signatureAsset.url, {
-                      headers: {
-                        Authorization: `token ${token}`,
-                        Accept: 'application/octet-stream',
-                      },
-                    });
-                    if (!signatureRes.ok) {
-                      throw new Error(`Failed to fetch ${signatureAsset.name}: ${signatureRes.status} ${signatureRes.statusText}`);
-                    }
-                    return (await signatureRes.text()).trim();
-                  };
-
-                  const urlPrefix = (process.env.ENSU_UPDATER_URL_PREFIX || `https://github.com/${repo}/releases/download/${tag}`).replace(/\/$/, '');
-                  const platforms = {};
-
-                  const addPlatform = async (key, asset) => {
-                    if (!asset || platforms[key]) return;
-                    const signatureAsset = assetByName.get(`${asset.name}.sig`);
-                    if (!signatureAsset) return;
-                    platforms[key] = {
-                      url: `${urlPrefix}/${asset.name}`,
-                      signature: await fetchSignature(signatureAsset),
-                    };
-                  };
-
-                  const linuxX64 = findAsset([
-                    /(?:amd64|x86_64)\.AppImage$/i,
-                    /(?:amd64|x86_64)\.deb$/i,
-                    /x86_64\.rpm$/i,
-                  ]);
-                  const linuxAarch64 = findAsset([
-                    /(?:aarch64|arm64)\.AppImage$/i,
-                    /(?:aarch64|arm64)\.deb$/i,
-                    /aarch64\.rpm$/i,
-                  ]);
-                  const windowsX64 = findAsset([
-                    /x64-setup(?:-machine)?\.exe$/i,
-                    /x64.*\.exe$/i,
-                    /x64.*\.msi$/i,
-                  ]);
-                  const darwinX64 = findAsset([
-                    /(?:x64|x86_64)\.app\.tar\.gz$/i,
-                    /universal\.app\.tar\.gz$/i,
-                  ]);
-                  const darwinAarch64 = findAsset([
-                    /(?:aarch64|arm64)\.app\.tar\.gz$/i,
-                    /universal\.app\.tar\.gz$/i,
-                  ]);
-
-                  await addPlatform('linux-x86_64', linuxX64);
-                  await addPlatform('linux-aarch64', linuxAarch64);
-                  await addPlatform('windows-x86_64', windowsX64);
-                  await addPlatform('darwin-x86_64', darwinX64);
-                  await addPlatform('darwin-aarch64', darwinAarch64);
-
-                  if (Object.keys(platforms).length === 0) {
-                    throw new Error('No updater platforms found from release assets');
-                  }
-
-                  const latest = {
-                    version,
-                    notes: '',
-                    pub_date: new Date().toISOString(),
-                    platforms,
-                  };
-
-                  fs.writeFileSync('/tmp/ensu-latest.json', JSON.stringify(latest, null, 2));
-                  console.log(`Generated /tmp/ensu-latest.json with platforms: ${Object.keys(platforms).join(', ')}`);
-                  })().catch((error) => {
-                    console.error(error);
-                    process.exit(1);
-                  });
-                  NODE
+                  ENSU_UPDATER_LATEST_JSON_PATH: /tmp/ensu-latest.json
+              run: node rust/apps/ensu/scripts/ci-generate-updater-latest-json.mjs
 
             - name: Upload latest.json to GitHub release
               shell: bash

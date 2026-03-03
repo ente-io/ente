@@ -15,3 +15,10 @@ declare module "@tauri-apps/plugin-fs" {
     export function remove(path: string): Promise<void>;
     export function rename(oldPath: string, newPath: string): Promise<void>;
 }
+
+declare module "@tauri-apps/plugin-dialog" {
+    export function open(
+        options?: Record<string, unknown>,
+    ): Promise<string | string[] | null>;
+    export function save(options?: Record<string, unknown>): Promise<string | null>;
+}
