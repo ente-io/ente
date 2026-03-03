@@ -33,7 +33,6 @@ jobs:
         runs-on: ${{ matrix.platform.os }}
         env:
             HAS_WINDOWS_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.AZURE_ENDPOINT != '' && secrets.AZURE_CODE_SIGNING_NAME != '' && secrets.AZURE_CERT_PROFILE_NAME != '' }}
-            HAS_UPDATER_CONFIG: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY != '' }}
 
         steps:
             - name: Set release tag
@@ -118,7 +117,6 @@ jobs:
               run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
 
             - name: Enable updater artifacts for release builds
-              if: env.HAS_UPDATER_CONFIG == 'true'
               shell: bash
               env:
                   ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
@@ -160,10 +158,9 @@ jobs:
                   releaseBody: "Ensu release assets: Linux/macOS/Windows desktop + Android APK."
                   releaseDraft: true
                   prerelease: false
-                  # Keep release assets only on the draft GitHub release (no duplicate Actions artifacts).
-                  uploadWorkflowArtifacts: false
-                  uploadUpdaterJson: false
-                  uploadUpdaterSignatures: true
+                  includeDebug: false
+                  includeRelease: true
+                  includeUpdaterJson: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
 
