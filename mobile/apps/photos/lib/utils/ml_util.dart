@@ -52,6 +52,7 @@ class FileMLInstruction {
   final int? offlineFileKey;
   bool shouldRunFaces;
   bool shouldRunClip;
+  bool shouldRunPets;
   FileDataEntity? existingRemoteFileML;
 
   FileMLInstruction({
@@ -60,9 +61,9 @@ class FileMLInstruction {
     this.offlineFileKey,
     required this.shouldRunFaces,
     required this.shouldRunClip,
+    this.shouldRunPets = false,
   });
-  // Returns true if the file should be indexed for either faces or clip
-  bool get pendingML => shouldRunFaces || shouldRunClip;
+  bool get pendingML => shouldRunFaces || shouldRunClip || shouldRunPets;
   bool get isOffline => mode == MLMode.offline;
   int get fileKey => isOffline ? offlineFileKey! : file.uploadedFileID!;
 }
@@ -75,7 +76,11 @@ Future<IndexStatus> getIndexStatus() async {
     final int indexableFiles = await _getIndexableFileCount(mode: mode);
     final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
     final int clipIndexedFiles = await mlDataDB.getClipIndexedFileCount();
-    final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
+    int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
+    if (flagService.petEnabled) {
+      final int petIndexedFiles = await mlDataDB.getPetIndexedFileCount();
+      indexedFiles = math.min(indexedFiles, petIndexedFiles);
+    }
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
     final showPendingFiles = math.max(indexableFiles - indexedFiles, 0);
@@ -104,6 +109,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
+  final bool petEnabled = flagService.petEnabled;
+  final Map<int, int> petIndexedFileIDs =
+      petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFiledIDs = {};
 
   final Set<int> filesWithFDStatus = await mlDataDB.getFileIDsWithFDData();
@@ -132,7 +140,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (!shouldRunFaces && !shouldRunClip) {
+    final shouldRunPets = petEnabled &&
+        _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
+    if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
     }
     final instruction = FileMLInstruction(
@@ -140,6 +150,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       mode: MLMode.online,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
+      shouldRunPets: shouldRunPets,
     );
     if ((enteFile.localID ?? '').isEmpty) {
       filesWithoutLocalID.add(instruction);
@@ -162,7 +173,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (!shouldRunFaces && !shouldRunClip) {
+    final shouldRunPets = petEnabled &&
+        _shouldRunIndexing(enteFile, petIndexedFileIDs, petMlVersion);
+    if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
     }
     final instruction = FileMLInstruction(
@@ -170,6 +183,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       mode: MLMode.online,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
+      shouldRunPets: shouldRunPets,
     );
     hiddenFilesToIndex.add(instruction);
   }
@@ -210,6 +224,9 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
+  final bool petEnabled = flagService.petEnabled;
+  final Map<int, int> petIndexedFileIDs =
+      petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFileIDs = {};
 
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
@@ -253,7 +270,13 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
       clipIndexedFileIDs,
       clipMlVersion,
     );
-    if (!shouldRunFaces && !shouldRunClip) {
+    final shouldRunPets = petEnabled &&
+        _shouldRunIndexingWithFileId(
+          localIntId,
+          petIndexedFileIDs,
+          petMlVersion,
+        );
+    if (!shouldRunFaces && !shouldRunClip && !shouldRunPets) {
       continue;
     }
     instructions.add(
@@ -263,6 +286,7 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
         offlineFileKey: localIntId,
         shouldRunFaces: shouldRunFaces,
         shouldRunClip: shouldRunClip,
+        shouldRunPets: shouldRunPets,
       ),
     );
   }
