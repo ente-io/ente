@@ -73,6 +73,18 @@ Enable 2FA in `Settings > Security` on mobile or desktop apps.
 
 Learn more about [Passkeys](/photos/features/account/passkeys).
 
+### App lock
+
+Protect the Ente Photos app with an additional lock screen.
+
+- Choose **Device lock**, **PIN lock**, or **Password lock**
+- Configure **Auto lock** to lock the app automatically after a chosen delay
+- Enable **Hide content** in the mobile app to hide app previews in the app switcher
+
+Open `Settings > Security > App lock` on mobile, or `Settings > Account > App lock` on desktop/web.
+
+Learn more in the [App lock guide](/photos/features/account/security/app-lock).
+
 ### End-to-end encryption
 
 Ente uses end-to-end encryption, which means:
@@ -275,6 +287,7 @@ Learn more in the [Legacy guide](/photos/features/account/legacy/).
 ## Related topics
 
 - [Passkeys](/photos/features/account/passkeys) - Use passkeys for two-factor authentication
+- [App lock](/photos/features/account/security/app-lock) - Add a lock screen for the Ente Photos app
 - [Family Plans](/photos/features/account/family-plans) - Share storage with family members
 - [Referral Program](/photos/features/account/referral-program/) - Earn free storage by inviting friends
 - [Legacy](/photos/features/account/legacy/) - Designate trusted contacts for account recovery
