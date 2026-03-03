@@ -300,5 +300,5 @@ jobs:
                   nodetail: true
                   title: "🤖 Internal release available for Ensu"
                   description: |
-                      ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})) · [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}) · [Play Store](https://play.google.com/store/apps/details?id=io.ente.ensu)
+                      ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})) · [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
                   color: 0xFDCE13
