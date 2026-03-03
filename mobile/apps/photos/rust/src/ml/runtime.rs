@@ -158,8 +158,14 @@ impl LazySession {
         self.session = None;
         #[cfg(target_os = "android")]
         unsafe {
+            unsafe extern "C" {
+                unsafe fn dlsym(
+                    handle: *mut core::ffi::c_void,
+                    symbol: *const core::ffi::c_char,
+                ) -> *mut core::ffi::c_void;
+            }
             let name = b"malloc_trim\0";
-            let sym = libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast());
+            let sym = dlsym(core::ptr::null_mut(), name.as_ptr().cast());
             if !sym.is_null() {
                 let f: unsafe extern "C" fn(usize) -> i32 = core::mem::transmute(sym);
                 f(0);
