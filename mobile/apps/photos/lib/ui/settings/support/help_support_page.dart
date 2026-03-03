@@ -112,10 +112,10 @@ class HelpSupportPage extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          await sendLogs(
-                            context,
-                            AppLocalizations.of(context).reportBug,
-                            bugsEmail,
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ReportIssuePage(),
+                            ),
                           );
                         },
                       ),
