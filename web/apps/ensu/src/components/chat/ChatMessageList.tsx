@@ -116,7 +116,7 @@ const AiSafetyFooter = memo(() => {
                 width: "100%",
             }}
         >
-            Ensu can make mistakes. Verify key details before acting.
+            Ensu can make mistakes. Double-check key details.
         </Typography>
     );
 });
