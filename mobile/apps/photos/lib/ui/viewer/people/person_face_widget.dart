@@ -9,6 +9,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ml/db.dart';
 import 'package:photos/db/offline_files_db.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/ml/face/face.dart';
 import 'package:photos/models/ml/face/person.dart';
 import 'package:photos/service_locator.dart' show flagService, isOfflineMode;
@@ -266,6 +267,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     if (face == null || sourceFile == null) {
       _logger.fine(
         'person_face_thumbnail_upgrade_skipped reason=missing_face_or_file person=${widget.personId} cluster=${widget.clusterID}',
+      );
+      return;
+    }
+    if (sourceFile.fileType == FileType.video) {
+      _logger.fine(
+        'person_face_thumbnail_upgrade_skipped reason=video_source person=${widget.personId} cluster=${widget.clusterID}',
       );
       return;
     }
