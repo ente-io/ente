@@ -111,30 +111,39 @@ jobs:
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
               shell: bash
               run: |
-                  TRUSTED_SIGNING_CLI_PATH=$(where.exe trusted-signing-cli | tr -d '\r' | head -n1 || true)
-                  if [ -z "$TRUSTED_SIGNING_CLI_PATH" ]; then
-                      echo "::error::trusted-signing-cli not found on PATH"
-                      exit 1
+                  TRUSTED_SIGNING_CLI_UNIX="$HOME/.cargo/bin/trusted-signing-cli.exe"
+                  if [ ! -f "$TRUSTED_SIGNING_CLI_UNIX" ]; then
+                      TRUSTED_SIGNING_CLI_FALLBACK=$(where.exe trusted-signing-cli 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$TRUSTED_SIGNING_CLI_FALLBACK" ]; then
+                          TRUSTED_SIGNING_CLI_PATH="$TRUSTED_SIGNING_CLI_FALLBACK"
+                      else
+                          echo "::error::trusted-signing-cli binary not found"
+                          exit 1
+                      fi
+                  else
+                      TRUSTED_SIGNING_CLI_PATH=$(cygpath -w "$TRUSTED_SIGNING_CLI_UNIX")
                   fi
 
-                  AZ_PATH=$(where.exe az | tr -d '\r' | head -n1 || true)
+                  AZ_PATH=$(where.exe az 2>/dev/null | tr -d '\r' | head -n1 || true)
                   if [ -z "$AZ_PATH" ]; then
-                      echo "::error::az CLI not found on runner"
-                      exit 1
+                      echo "::warning::az not found on PATH; relying on trusted-signing-cli default AZURE_CLI_PATH"
                   fi
 
-                  SIGNTOOL_PATH=$(where.exe signtool | tr -d '\r' | head -n1 || true)
+                  SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r' || true)
                   if [ -z "$SIGNTOOL_PATH" ]; then
-                      echo "::error::signtool not found on runner"
-                      exit 1
+                      echo "::warning::signtool not auto-detected; relying on trusted-signing-cli default SIGNTOOL_PATH"
                   fi
 
                   echo "TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH" >> $GITHUB_ENV
-                  echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
-                  echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
+                  if [ -n "$AZ_PATH" ]; then
+                      echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
+                      echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
+                  fi
+                  if [ -n "$SIGNTOOL_PATH" ]; then
+                      echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
+                      echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
+                  fi
                   echo "Resolved TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH"
-                  echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
-                  echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
 
             - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
@@ -162,14 +171,22 @@ jobs:
                   AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
                   SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               run: |
-                  "${TRUSTED_SIGNING_CLI_PATH}" \
-                    -e "${AZURE_ENDPOINT}" \
-                    -a "${AZURE_CODE_SIGNING_NAME}" \
-                    -c "${AZURE_CERT_PROFILE_NAME}" \
-                    --azure-cli-path "${AZURE_CLI_PATH}" \
-                    --sign-tool-path "${SIGNTOOL_PATH}" \
-                    --ignore-unsupported true \
-                    rust/apps/ensu/package.json
+                  cmd=(
+                    "${TRUSTED_SIGNING_CLI_PATH}"
+                    -e "${AZURE_ENDPOINT}"
+                    -a "${AZURE_CODE_SIGNING_NAME}"
+                    -c "${AZURE_CERT_PROFILE_NAME}"
+                  )
+
+                  if [ -n "${AZURE_CLI_PATH}" ]; then
+                    cmd+=(--azure-cli-path "${AZURE_CLI_PATH}")
+                  fi
+                  if [ -n "${SIGNTOOL_PATH}" ]; then
+                    cmd+=(--sign-tool-path "${SIGNTOOL_PATH}")
+                  fi
+
+                  cmd+=(--ignore-unsupported true rust/apps/ensu/package.json)
+                  "${cmd[@]}"
 
             - name: Enable updater artifacts for release builds
               shell: bash
