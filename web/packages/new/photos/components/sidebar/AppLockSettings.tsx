@@ -390,6 +390,16 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         };
     }, []);
 
+    useEffect(() => {
+        if (!open) return;
+
+        queueFocus(
+            () =>
+                (step === "enter" ? inputRefs : confirmInputRefs).current[0]?.focus(),
+            50,
+        );
+    }, [open, step, queueFocus]);
+
     const resetState = useCallback(() => {
         setStep("enter");
         setPin(["", "", "", ""]);
@@ -462,8 +472,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (pin.some((d) => !d)) return;
         setStep("confirm");
-        queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
-    }, [pin, queueFocus]);
+    }, [pin]);
 
     /**
      * If Back is pressed in the confirmation step, reset the
@@ -473,10 +482,11 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         setStep("enter");
         setConfirmPin(["", "", "", ""]);
         setError("");
-        queueFocus(() => inputRefs.current[0]?.focus(), 50);
-    }, [queueFocus]);
+    }, []);
 
     const handleConfirm = useCallback(async () => {
+        if (confirmPin.some((d) => !d)) return;
+
         const pinStr = pin.join("");
         const confirmStr = confirmPin.join("");
         if (pinStr !== confirmStr) {
@@ -496,6 +506,18 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
             queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
         }
     }, [pin, confirmPin, onComplete, queueFocus, resetState]);
+
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            if (step === "enter") {
+                handleNext();
+                return;
+            }
+            void handleConfirm();
+        },
+        [step, handleNext, handleConfirm],
+    );
 
     const renderPinInputs = (
         values: string[],
@@ -550,7 +572,11 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                 "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
             }}
         >
-            <Stack sx={{ gap: 1.5, py: 0 }}>
+            <Stack
+                component="form"
+                onSubmit={(e: React.FormEvent) => handleSubmit(e)}
+                sx={{ gap: 1.5, py: 0 }}
+            >
                 {step === "enter" ? (
                     <>
                         <Typography
@@ -562,8 +588,8 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                         <FocusVisibleButton
                             fullWidth
                             color="accent"
+                            type="submit"
                             disabled={pin.some((d) => !d)}
-                            onClick={handleNext}
                         >
                             {t("next")}
                         </FocusVisibleButton>
@@ -596,14 +622,15 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
+                                type="submit"
                                 disabled={confirmPin.some((d) => !d)}
-                                onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
                             </FocusVisibleButton>
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
+                                type="button"
                                 onClick={handleBack}
                             >
                                 {t("go_back")}
@@ -651,10 +678,16 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     }, []);
 
     useEffect(() => {
-        if (open) {
-            queueFocus(() => passwordInputRef.current?.focus(), 300);
-        }
-    }, [open, queueFocus]);
+        if (!open) return;
+
+        queueFocus(
+            () =>
+                (step === "enter"
+                    ? passwordInputRef.current
+                    : confirmPasswordInputRef.current)?.focus(),
+            50,
+        );
+    }, [open, step, queueFocus]);
 
     const resetState = useCallback(() => {
         setStep("enter");
@@ -673,20 +706,19 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (!password) return;
         setStep("confirm");
-        queueFocus(() => confirmPasswordInputRef.current?.focus(), 300);
-    }, [password, queueFocus]);
+    }, [password]);
 
     const handleBack = useCallback(() => {
         setStep("enter");
         setConfirmPassword("");
         setError("");
-        queueFocus(() => passwordInputRef.current?.focus(), 300);
-    }, [queueFocus]);
+    }, []);
 
     const handleConfirm = useCallback(async () => {
         if (password !== confirmPassword) {
             setError(t("app_lock_password_mismatch"));
             setConfirmPassword("");
+            queueFocus(() => confirmPasswordInputRef.current?.focus(), 50);
             return;
         }
         try {
@@ -697,9 +729,21 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
             log.error("Failed to set up password app lock", e);
             setError(t("generic_error"));
             setConfirmPassword("");
-            queueFocus(() => confirmPasswordInputRef.current?.focus(), 300);
+            queueFocus(() => confirmPasswordInputRef.current?.focus(), 50);
         }
     }, [password, confirmPassword, onComplete, queueFocus, resetState]);
+
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            if (step === "enter") {
+                handleNext();
+                return;
+            }
+            void handleConfirm();
+        },
+        [step, handleNext, handleConfirm],
+    );
 
     return (
         <TitledMiniDialog
@@ -711,11 +755,16 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                 "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
             }}
         >
-            <Stack sx={{ gap: 2, py: 1 }}>
+            <Stack
+                component="form"
+                onSubmit={(e: React.FormEvent) => handleSubmit(e)}
+                sx={{ gap: 2, py: 1 }}
+            >
                 {step === "enter" ? (
                     <>
                         <TextField
                             fullWidth
+                            inputRef={passwordInputRef}
                             label={t("app_lock_enter_password")}
                             type={showPassword ? "text" : "password"}
                             value={password}
@@ -724,7 +773,6 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: { ref: passwordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -740,8 +788,8 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                         <FocusVisibleButton
                             fullWidth
                             color="accent"
+                            type="submit"
                             disabled={!password}
-                            onClick={handleNext}
                         >
                             {t("next")}
                         </FocusVisibleButton>
@@ -750,6 +798,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                     <>
                         <TextField
                             fullWidth
+                            inputRef={confirmPasswordInputRef}
                             label={t("app_lock_confirm_password")}
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
@@ -760,7 +809,6 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: { ref: confirmPasswordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -779,14 +827,15 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
+                                type="submit"
                                 disabled={!confirmPassword}
-                                onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
                             </FocusVisibleButton>
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
+                                type="button"
                                 onClick={handleBack}
                             >
                                 {t("go_back")}
