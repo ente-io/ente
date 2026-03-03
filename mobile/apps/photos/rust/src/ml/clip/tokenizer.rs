@@ -6,6 +6,7 @@ use std::{
 
 use html_escape::decode_html_entities;
 use once_cell::sync::Lazy;
+use plsfix::fix_text;
 use regex::Regex;
 
 use crate::ml::error::{MlError, MlResult};
@@ -15,10 +16,9 @@ const BPE_MERGES_END_EXCLUSIVE: usize = 49152 - 256 - 2 + 1;
 
 static TOKEN_PATTERN: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
-        // Keep this expression behaviorally aligned with Dart's RegExp in
-        // clip_text_tokenizer.dart. Dart does not support \p{L}/\p{N} here,
-        // so those sequences are treated literally.
-        r"(?i)<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-zA-Z]+|[0-9]+|[^\sp{L}p{N}]+",
+        // Keep this aligned with MobileCLIP's Python tokenizer path
+        // (open_clip SimpleTokenizer), including Unicode token classes.
+        r"(?i)<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[\p{L}]+|[\p{N}]|[^\s\p{L}\p{N}]+",
     )
     .expect("valid clip tokenizer regex")
 });
@@ -252,7 +252,8 @@ impl ClipTextTokenizer {
 }
 
 fn basic_clean(text: &str) -> String {
-    let decoded_once = decode_html_entities(text).to_string();
+    let fixed = fix_text(text, None);
+    let decoded_once = decode_html_entities(&fixed).to_string();
     let decoded_twice = decode_html_entities(&decoded_once).to_string();
     decoded_twice.trim().to_string()
 }
@@ -322,4 +323,46 @@ fn bytes_to_unicode() -> MlResult<(HashMap<u8, String>, Vec<String>)> {
     }
 
     Ok((byte_encoder, ds))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{TOKEN_PATTERN, basic_clean, whitespace_clean};
+
+    fn cleaned_tokens(text: &str) -> Vec<String> {
+        let clean_text = whitespace_clean(&basic_clean(text)).to_lowercase();
+        TOKEN_PATTERN
+            .find_iter(&clean_text)
+            .map(|matched| matched.as_str().to_string())
+            .collect()
+    }
+
+    #[test]
+    fn basic_clean_matches_ftfy_style_repairs() {
+        assert_eq!(basic_clean(" âœ” No problems "), "✔ No problems");
+        assert_eq!(basic_clean("Tom &amp;amp; Jerry"), "Tom & Jerry");
+    }
+
+    #[test]
+    fn token_pattern_matches_mobileclip_python_behavior() {
+        assert_eq!(
+            cleaned_tokens("İstanbul"),
+            vec![
+                "i".to_string(),
+                "\u{307}".to_string(),
+                "stanbul".to_string(),
+            ],
+        );
+        assert_eq!(cleaned_tokens("ſtyle"), vec!["ſtyle".to_string()]);
+        assert_eq!(cleaned_tokens("Kelvin"), vec!["kelvin".to_string()]);
+        assert_eq!(
+            cleaned_tokens("1234"),
+            vec![
+                "1".to_string(),
+                "2".to_string(),
+                "3".to_string(),
+                "4".to_string(),
+            ],
+        );
+    }
 }
