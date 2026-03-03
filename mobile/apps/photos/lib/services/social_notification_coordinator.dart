@@ -14,7 +14,6 @@ import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/feed_item.dart';
 import 'package:photos/models/social/reaction.dart';
 import 'package:photos/models/social/social_data_provider.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/language_service.dart';
@@ -124,9 +123,6 @@ class SocialNotificationCoordinator {
       sharedPhotosAndAlbumsNotificationsEnabled:
           sharedPhotosAndAlbumsNotificationsEnabled,
     )) {
-      return;
-    }
-    if (!flagService.isSocialEnabled) {
       return;
     }
     final userID = Configuration.instance.getUserID();
