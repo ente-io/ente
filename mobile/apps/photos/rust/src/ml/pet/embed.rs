@@ -59,7 +59,7 @@ pub fn run_pet_face_embedding(
     let (shape, output) = onnx::run_f32(
         session,
         input,
-        vec![
+        [
             aligned_faces.len() as i64,
             FACE_EMBED_CHANNELS,
             FACE_EMBED_INPUT_SIZE,
@@ -117,7 +117,7 @@ pub fn run_pet_body_embedding(
         let (_shape, output) = onnx::run_f32(
             session,
             input,
-            vec![
+            [
                 1,
                 BODY_EMBED_CHANNELS,
                 BODY_EMBED_INPUT_SIZE,

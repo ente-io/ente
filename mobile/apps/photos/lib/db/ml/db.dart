@@ -621,7 +621,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   @override
   Future<List<DBPetFace>?> getPetFacesForFileID(int fileUploadID) async {
     final db = await asyncDB;
-    final String query = '''
+    const String query = '''
       SELECT * FROM $petFacesTable
       WHERE $fileIDColumn = ?
     ''';
@@ -638,7 +638,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   @override
   Future<List<DBPetBody>?> getPetBodiesForFileID(int fileUploadID) async {
     final db = await asyncDB;
-    final String query = '''
+    const String query = '''
       SELECT * FROM $petBodiesTable
       WHERE $fileIDColumn = ?
     ''';

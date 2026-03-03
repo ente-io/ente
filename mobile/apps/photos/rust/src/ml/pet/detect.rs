@@ -37,7 +37,7 @@ pub fn run_pet_face_detection(
     let (output_shape, output_data) = onnx::run_f32(
         pet_face_detection,
         input,
-        vec![1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
+        [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
 
     // Row format: [x, y, w, h, obj_conf, lx, ly, rx, ry, nx, ny, cls_conf...]
@@ -137,7 +137,7 @@ pub fn run_pet_body_detection(
     let (_output_shape, output_data) = onnx::run_f32(
         body_detection,
         input,
-        vec![1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
+        [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
 
     // YOLOv5 output format: [x, y, w, h, obj_conf, cls0, cls1, ..., cls79]

@@ -231,7 +231,7 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             } else {
                 let t = std::time::Instant::now();
                 let (aligned, mut face_results) =
-                    run_face_alignment(req.file_id, &decoded, &detections)?;
+                    run_face_alignment(req.file_id, &decoded, detections)?;
                 ml_log(&format!("file={} face alignment: {} faces in {:?} rss={}MB", req.file_id, face_results.len(), t.elapsed(), vm_rss_kb() / 1024));
                 let t = std::time::Instant::now();
                 run_face_embedding(runtime, &aligned, &mut face_results)?;
@@ -251,7 +251,7 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             runtime.unload_clip_session();
             ml_log(&format!("file={} clip session unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
             Some(RustClipResult {
-                embedding: clip.embedding.into_iter().map(|v| v as f64).collect(),
+                embedding: clip.embedding,
             })
         } else {
             None

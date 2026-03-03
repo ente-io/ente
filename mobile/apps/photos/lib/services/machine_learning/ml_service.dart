@@ -276,7 +276,7 @@ class MLService {
           fetchEmbeddingsAndInstructions(
         fileDownloadMlLimit,
         mode: mode,
-        forceAll: debugPetOnlyMode || flagService.petEnabled,
+        forceAll: debugPetOnlyMode,
       );
 
       int fileAnalyzedCount = 0;
