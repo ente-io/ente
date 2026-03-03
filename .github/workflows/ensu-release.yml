@@ -262,21 +262,21 @@ jobs:
                       ./gradlew :app-ui:assembleRelease
                   fi
 
-            - name: Collect Android artifacts (signed)
+            - name: Prepare Android APK for GitHub release
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
                   cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/${{ env.RELEASE_TAG }}.apk
-                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
-                      cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/${{ env.RELEASE_TAG }}.aab
-                  fi
 
-            - name: Upload Android artifacts
+            - name: Upload Android APK to draft GitHub release
               if: env.HAS_ANDROID_SIGNING == 'true'
-              uses: actions/upload-artifact@v4
+              uses: ncipollo/release-action@v1
               with:
-                  name: ensu-android-artifacts
-                  path: mobile/native/android/apps/ensu/artifacts/*
+                  tag: ${{ env.RELEASE_TAG }}
+                  artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.RELEASE_TAG }}.apk
+                  allowUpdates: true
+                  draft: true
+                  updateOnlyUnreleased: true
 
             - name: Upload AAB to PlayStore
               if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
