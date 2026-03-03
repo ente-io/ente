@@ -35,7 +35,7 @@ const _kExpectedMobileClipPythonTokenPrefixes = <String, List<int>>{
     324,
     49407,
   ],
-  "multiple    spaces\\tand\\nlines": [
+  "multiple    spaces\tand\nlines": [
     49406,
     76,
     84,
@@ -51,13 +51,9 @@ const _kExpectedMobileClipPythonTokenPrefixes = <String, List<int>>{
     66,
     68,
     338,
-    315,
-    83,
     64,
     77,
     323,
-    315,
-    77,
     75,
     72,
     77,
@@ -279,6 +275,20 @@ void main() {
       );
       expect(rustTokens.length, _kClipTotalTokens);
     }
+
+    final whitespaceVariant = await rust_ml.tokenizeClipTextRust(
+      text: "multiple    spaces\tand\nlines",
+      vocabPath: vocabPath,
+    );
+    final normalizedWhitespace = await rust_ml.tokenizeClipTextRust(
+      text: "multiple spaces and lines",
+      vocabPath: vocabPath,
+    );
+    expect(
+      whitespaceVariant.toList(growable: false),
+      normalizedWhitespace.toList(growable: false),
+      reason: "Expected tab/newline runs to normalize to single spaces",
+    );
   });
 }
 

@@ -82,12 +82,13 @@ impl ClipTextTokenizer {
         let (byte_encoder, byte_encoder_values) = bytes_to_unicode()?;
 
         let split = vocabulary.split('\n').collect::<Vec<_>>();
-        let merges_end = split.len().min(BPE_MERGES_END_EXCLUSIVE);
-        let merges_slice = if split.len() > 1 {
-            &split[1..merges_end]
-        } else {
-            &[][..]
-        };
+        if split.len() < BPE_MERGES_END_EXCLUSIVE {
+            return Err(MlError::Runtime(format!(
+                "invalid clip vocab: expected at least {BPE_MERGES_END_EXCLUSIVE} lines, got {}",
+                split.len()
+            )));
+        }
+        let merges_slice = &split[1..BPE_MERGES_END_EXCLUSIVE];
 
         let mut merges = Vec::<(String, String)>::new();
         for merge in merges_slice {
@@ -327,7 +328,7 @@ fn bytes_to_unicode() -> MlResult<(HashMap<u8, String>, Vec<String>)> {
 
 #[cfg(test)]
 mod tests {
-    use super::{TOKEN_PATTERN, basic_clean, whitespace_clean};
+    use super::{ClipTextTokenizer, TOKEN_PATTERN, basic_clean, whitespace_clean};
 
     fn cleaned_tokens(text: &str) -> Vec<String> {
         let clean_text = whitespace_clean(&basic_clean(text)).to_lowercase();
@@ -363,6 +364,19 @@ mod tests {
                 "3".to_string(),
                 "4".to_string(),
             ],
+        );
+    }
+
+    #[test]
+    fn rejects_incomplete_bpe_vocabulary_file() {
+        let truncated_vocab = "#version: 0.2\na b";
+        let err = match ClipTextTokenizer::from_vocabulary(truncated_vocab) {
+            Ok(_) => panic!("expected incomplete vocab to fail"),
+            Err(err) => err,
+        };
+        assert!(
+            err.to_string().contains("invalid clip vocab"),
+            "unexpected error: {err}",
         );
     }
 }
