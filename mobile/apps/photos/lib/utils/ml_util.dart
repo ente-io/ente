@@ -669,6 +669,7 @@ Future<MLResult> analyzeImageRust(Map args) async {
       faceDetection: faceDetectionModelPath ?? "",
       faceEmbedding: faceEmbeddingModelPath ?? "",
       clipImage: clipImageModelPath ?? "",
+      clipText: "",
       petFaceDetection: petFaceDetectionModelPath ?? "",
       petFaceEmbeddingDog: petFaceEmbeddingDogModelPath ?? "",
       petFaceEmbeddingCat: petFaceEmbeddingCatModelPath ?? "",

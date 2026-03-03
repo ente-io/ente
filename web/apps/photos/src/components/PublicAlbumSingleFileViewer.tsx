@@ -24,6 +24,7 @@ import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
+import { createPSRegisterElementIconHTML } from "ente-gallery/components/viewer/icons";
 import { downloadManager } from "ente-gallery/services/download";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
@@ -47,6 +48,21 @@ interface PublicAlbumSingleFileViewerProps {
 }
 
 const bodyClassName = "ente-public-single-file-viewer";
+interface LivePhotoControlsState {
+    playAvailable: boolean;
+    muteAvailable: boolean;
+    isPlayOff: boolean;
+    isMuteOff: boolean;
+}
+
+const inlineFileViewerIconPath = (name: "live" | "vol") =>
+    createPSRegisterElementIconHTML(name).inner.replace(
+        /\s+id="pswp__icn-[^"]+"/g,
+        "",
+    );
+
+const liveIconPath = inlineFileViewerIconPath("live");
+const volumeIconPath = inlineFileViewerIconPath("vol");
 
 /**
  * A dedicated public-album single-file viewer mode with a bespoke header/menu.
@@ -72,19 +88,47 @@ export const PublicAlbumSingleFileViewer: React.FC<
     const [isPhotoSwipeUIVisible, setIsPhotoSwipeUIVisible] = useState(true);
     const [isPhotoSwipeContentLoading, setIsPhotoSwipeContentLoading] =
         useState(false);
+    const isLivePhotoFile = file.metadata.fileType === FileType.livePhoto;
+    const [livePhotoControls, setLivePhotoControls] =
+        useState<LivePhotoControlsState>({
+            playAvailable: false,
+            muteAvailable: false,
+            isPlayOff: true,
+            isMuteOff: true,
+        });
     const needsThumbnailPrime =
         file.metadata.fileType === FileType.image ||
         file.metadata.fileType === FileType.livePhoto;
     const needsOriginalPrime = needsThumbnailPrime;
+    const [viewerFile, setViewerFile] = useState(file);
     const [primedFileID, setPrimedFileID] = useState<number | undefined>(() =>
         needsThumbnailPrime ? undefined : file.id,
     );
     const isViewerPrimed = !needsThumbnailPrime || primedFileID === file.id;
+    const viewerFiles = useMemo(() => [viewerFile], [viewerFile]);
 
     useEffect(() => {
         document.body.classList.add(bodyClassName);
         return () => document.body.classList.remove(bodyClassName);
     }, []);
+
+    useEffect(() => {
+        if (
+            file.id !== viewerFile.id ||
+            file.collectionID !== viewerFile.collectionID ||
+            file.updationTime !== viewerFile.updationTime
+        ) {
+            setViewerFile(file);
+        }
+    }, [
+        file,
+        file.collectionID,
+        file.id,
+        file.updationTime,
+        viewerFile.collectionID,
+        viewerFile.id,
+        viewerFile.updationTime,
+    ]);
 
     useEffect(() => {
         let classObserver: MutationObserver | undefined;
@@ -165,6 +209,99 @@ export const PublicAlbumSingleFileViewer: React.FC<
             preloaderObserver?.disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        if (!isLivePhotoFile) {
+            setLivePhotoControls({
+                playAvailable: false,
+                muteAvailable: false,
+                isPlayOff: true,
+                isMuteOff: true,
+            });
+            return;
+        }
+
+        let playButtonObserver: MutationObserver | undefined;
+        let muteButtonObserver: MutationObserver | undefined;
+        let playButton: HTMLButtonElement | null = null;
+        let muteButton: HTMLButtonElement | null = null;
+
+        const updateLivePhotoControls = () => {
+            const nextState: LivePhotoControlsState = {
+                playAvailable:
+                    !!playButton &&
+                    !playButton.classList.contains("pswp__hidden"),
+                muteAvailable:
+                    !!muteButton &&
+                    !muteButton.classList.contains("pswp__hidden"),
+                isPlayOff: playButton?.classList.contains("pswp-ente-off")
+                    ? true
+                    : false,
+                isMuteOff: muteButton?.classList.contains("pswp-ente-off")
+                    ? true
+                    : false,
+            };
+
+            setLivePhotoControls((prev) =>
+                prev.playAvailable === nextState.playAvailable &&
+                prev.muteAvailable === nextState.muteAvailable &&
+                prev.isPlayOff === nextState.isPlayOff &&
+                prev.isMuteOff === nextState.isMuteOff
+                    ? prev
+                    : nextState,
+            );
+        };
+
+        const observeButtonClassChanges = () => {
+            const nextPlayButton = document.querySelector<HTMLButtonElement>(
+                ".pswp .pswp__button--live",
+            );
+            if (nextPlayButton !== playButton) {
+                playButtonObserver?.disconnect();
+                playButtonObserver = undefined;
+                playButton = nextPlayButton;
+                if (playButton) {
+                    playButtonObserver = new MutationObserver(
+                        updateLivePhotoControls,
+                    );
+                    playButtonObserver.observe(playButton, {
+                        attributes: true,
+                        attributeFilter: ["class"],
+                    });
+                }
+            }
+
+            const nextMuteButton = document.querySelector<HTMLButtonElement>(
+                ".pswp .pswp__button--vol",
+            );
+            if (nextMuteButton !== muteButton) {
+                muteButtonObserver?.disconnect();
+                muteButtonObserver = undefined;
+                muteButton = nextMuteButton;
+                if (muteButton) {
+                    muteButtonObserver = new MutationObserver(
+                        updateLivePhotoControls,
+                    );
+                    muteButtonObserver.observe(muteButton, {
+                        attributes: true,
+                        attributeFilter: ["class"],
+                    });
+                }
+            }
+
+            updateLivePhotoControls();
+        };
+
+        const treeObserver = new MutationObserver(observeButtonClassChanges);
+        treeObserver.observe(document.body, { childList: true, subtree: true });
+        observeButtonClassChanges();
+
+        return () => {
+            treeObserver.disconnect();
+            playButtonObserver?.disconnect();
+            muteButtonObserver?.disconnect();
+        };
+    }, [isLivePhotoFile]);
 
     useEffect(() => {
         if (!needsThumbnailPrime) {
@@ -303,6 +440,22 @@ export const PublicAlbumSingleFileViewer: React.FC<
         window.location.href = getEnteURL();
     }, []);
 
+    const handleToggleLivePhotoPlay = useCallback(() => {
+        document
+            .querySelector<HTMLButtonElement>(
+                ".pswp .pswp__button--live:not(.pswp__hidden)",
+            )
+            ?.click();
+    }, []);
+
+    const handleToggleLivePhotoMute = useCallback(() => {
+        document
+            .querySelector<HTMLButtonElement>(
+                ".pswp .pswp__button--vol:not(.pswp__hidden)",
+            )
+            ?.click();
+    }, []);
+
     const topControlsVisible = isViewerPrimed && isPhotoSwipeUIVisible;
 
     useEffect(() => {
@@ -329,6 +482,10 @@ export const PublicAlbumSingleFileViewer: React.FC<
                         { display: "none !important" },
                     [`body.${bodyClassName} .pswp-ente-public-album .pswp__button--download`]:
                         { display: "none !important" },
+                    [`body.${bodyClassName} .pswp-ente-public-album .pswp__button--live`]:
+                        { display: "none !important" },
+                    [`body.${bodyClassName} .pswp-ente-public-album .pswp__button--vol`]:
+                        { display: "none !important" },
                     [`body.${bodyClassName} .pswp-ente-public-album .pswp__preloader`]:
                         { display: "none !important" },
                 }}
@@ -336,7 +493,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
             <FileViewer
                 open
                 onClose={handleViewerClose}
-                files={[file]}
+                files={viewerFiles}
                 initialIndex={0}
                 disableEscapeClose
                 disableDownload={!enableDownload}
@@ -405,7 +562,7 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                 >
                                     <EnteLogo height={15} />
                                 </Box>
-                                {isPhotoSwipeContentLoading && (
+                                {isPhotoSwipeContentLoading ? (
                                     <CircularProgress
                                         size={16}
                                         thickness={5}
@@ -413,6 +570,65 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                             color: "rgb(255 255 255 / 0.85)",
                                         }}
                                     />
+                                ) : (
+                                    isLivePhotoFile && (
+                                        <Stack
+                                            direction="row"
+                                            alignItems="center"
+                                            spacing={0.5}
+                                        >
+                                            <FileViewerStyleButton
+                                                onClick={
+                                                    handleToggleLivePhotoPlay
+                                                }
+                                                disabled={
+                                                    !livePhotoControls.playAvailable
+                                                }
+                                                aria-label={t("live")}
+                                                className={
+                                                    livePhotoControls.isPlayOff
+                                                        ? "pswp-ente-off"
+                                                        : undefined
+                                                }
+                                            >
+                                                <svg
+                                                    viewBox="0 0 32 32"
+                                                    width="32"
+                                                    height="32"
+                                                    fill="currentColor"
+                                                    aria-hidden="true"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: liveIconPath,
+                                                    }}
+                                                />
+                                            </FileViewerStyleButton>
+                                            <FileViewerStyleButton
+                                                onClick={
+                                                    handleToggleLivePhotoMute
+                                                }
+                                                disabled={
+                                                    !livePhotoControls.muteAvailable
+                                                }
+                                                aria-label={t("audio")}
+                                                className={
+                                                    livePhotoControls.isMuteOff
+                                                        ? "pswp-ente-off"
+                                                        : undefined
+                                                }
+                                            >
+                                                <svg
+                                                    viewBox="0 0 32 32"
+                                                    width="32"
+                                                    height="32"
+                                                    fill="currentColor"
+                                                    aria-hidden="true"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: volumeIconPath,
+                                                    }}
+                                                />
+                                            </FileViewerStyleButton>
+                                        </Stack>
+                                    )
                                 )}
                             </Stack>
                             <Stack
@@ -447,6 +663,9 @@ export const PublicAlbumSingleFileViewer: React.FC<
                                     aria-label={t("more")}
                                     sx={{
                                         color: "white",
+                                        width: 40,
+                                        height: 40,
+                                        p: 0.75,
                                         bgcolor: "rgba(0, 0, 0, 0.4)",
                                         "&:hover": {
                                             bgcolor: "rgba(0, 0, 0, 0.55)",
@@ -572,6 +791,44 @@ const MoreMenuItem = styled(MenuItem)(
 const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
+
+const FileViewerStyleButton = styled("button")`
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.85;
+    -webkit-appearance: none;
+    -webkit-touch-callout: none;
+
+    &:hover,
+    &:active,
+    &:focus {
+        transition: none;
+        opacity: 1;
+    }
+
+    svg {
+        display: block;
+        fill: white;
+    }
+
+    &.pswp-ente-off svg {
+        fill: rgb(255 255 255 / 0.6);
+    }
+
+    &:disabled {
+        opacity: 0.3;
+        cursor: default;
+    }
+`;
 
 /**
  * Return an "image/png" blob derived from the given source URL.

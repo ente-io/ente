@@ -152,7 +152,7 @@ const createWasmAdapter = (wasm: EnteWasmModule): EnteCryptoAdapter => {
 };
 
 const createTauriAdapter = async (): Promise<EnteCryptoAdapter> => {
-    const { invoke } = (await import("@tauri-apps/api/tauri")) as {
+    const { invoke } = (await import("@tauri-apps/api/core")) as {
         invoke: <T>(
             command: string,
             args?: Record<string, unknown>,

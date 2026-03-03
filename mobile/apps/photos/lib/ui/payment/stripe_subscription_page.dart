@@ -150,7 +150,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             ? null
             : Text(
                 widget.isOnboarding
-                    ? AppLocalizations.of(context).selectYourPlan
+                    ? AppLocalizations.of(context).chooseYourPlan
                     : AppLocalizations.of(context).subscription,
                 style: textTheme.largeBold,
               ),

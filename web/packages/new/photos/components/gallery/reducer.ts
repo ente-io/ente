@@ -619,7 +619,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     collectionFiles,
-                    hiddenFileIDs,
+                    hiddenCollectionIDs,
                 ),
                 emailByUserID: constructUserIDToEmailMap(user, collections),
                 shareSuggestionEmails: createShareSuggestionEmails(
@@ -732,7 +732,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionNameByID: createCollectionNameByID(collections),
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     state.collectionFiles,
-                    hiddenFileIDs,
+                    hiddenCollectionIDs,
                 ),
                 emailByUserID: constructUserIDToEmailMap(
                     state.user!,
@@ -1303,10 +1303,10 @@ const deriveFavoriteFileIDs = (
  */
 const deriveFileNormalCollectionIDs = (
     collectionFiles: GalleryState["collectionFiles"],
-    hiddenFileIDs: GalleryState["hiddenFileIDs"],
+    hiddenCollectionIDs: GalleryState["hiddenCollectionIDs"],
 ) =>
     createFileCollectionIDs(
-        collectionFiles.filter((f) => !hiddenFileIDs.has(f.id)),
+        collectionFiles.filter((f) => !hiddenCollectionIDs.has(f.collectionID)),
     );
 
 /**
@@ -1817,7 +1817,7 @@ const stateForUpdatedCollectionFiles = (
         ),
         fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
             collectionFiles,
-            hiddenFileIDs,
+            state.hiddenCollectionIDs,
         ),
         normalCollectionSummaries: deriveNormalCollectionSummaries(
             state.collections.filter(

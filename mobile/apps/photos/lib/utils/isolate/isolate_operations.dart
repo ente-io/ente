@@ -1,4 +1,4 @@
-import 'dart:typed_data' show Uint8List, Float32List;
+import 'dart:typed_data' show Float32List, Uint8List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
@@ -204,8 +204,42 @@ Future<dynamic> isolateFunction(
 
     /// MLComputer
     case IsolateOperation.runClipText:
-      final textEmbedding = await ClipTextEncoder.predict(args);
-      return List<double>.from(textEmbedding, growable: false);
+      final useRustMl = args["useRustMl"] as bool? ?? false;
+      if (!useRustMl) {
+        final textEmbedding = await ClipTextEncoder.predict(args);
+        return List<double>.from(textEmbedding, growable: false);
+      }
+
+      await _ensureRustLoaded();
+      final text = args["text"] as String;
+      final clipTextModelPath = args["clipTextModelPath"] as String?;
+      if (clipTextModelPath == null || clipTextModelPath.trim().isEmpty) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextModelPath",
+        );
+      }
+
+      final clipTextVocabPath = args["clipTextVocabPath"] as String?;
+      if (clipTextVocabPath == null || clipTextVocabPath.trim().isEmpty) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
+        );
+      }
+
+      final result = await rust_ml.runClipTextRust(
+        req: rust_ml.RunClipTextRequest(
+          text: text,
+          modelPath: clipTextModelPath,
+          vocabPath: clipTextVocabPath,
+          providerPolicy: rust_ml.RustExecutionProviderPolicy(
+            preferCoreml: args["preferCoreml"] as bool? ?? true,
+            preferNnapi: args["preferNnapi"] as bool? ?? true,
+            preferXnnpack: args["preferXnnpack"] as bool? ?? false,
+            allowCpuFallback: args["allowCpuFallback"] as bool? ?? true,
+          ),
+        ),
+      );
+      return List<double>.from(result.embedding, growable: false);
 
     /// MLComputer
     case IsolateOperation.computeBulkSimilarities:
@@ -292,6 +326,7 @@ Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
     faceDetection: (args["faceDetectionModelPath"] as String?) ?? "",
     faceEmbedding: (args["faceEmbeddingModelPath"] as String?) ?? "",
     clipImage: (args["clipImageModelPath"] as String?) ?? "",
+    clipText: (args["clipTextModelPath"] as String?) ?? "",
     petFaceDetection: (args["petFaceDetectionModelPath"] as String?) ?? "",
     petFaceEmbeddingDog:
         (args["petFaceEmbeddingDogModelPath"] as String?) ?? "",
@@ -362,6 +397,7 @@ String _runtimeConfigCacheKey(
     modelPaths.faceDetection,
     modelPaths.faceEmbedding,
     modelPaths.clipImage,
+    modelPaths.clipText,
     providerPolicy.preferCoreml,
     providerPolicy.preferNnapi,
     providerPolicy.preferXnnpack,
