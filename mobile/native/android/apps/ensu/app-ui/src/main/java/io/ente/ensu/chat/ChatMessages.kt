@@ -295,6 +295,12 @@ internal fun MessageList(
             }
         }
 
+        if (messages.isNotEmpty()) {
+            item(key = "ai-safety-footer") {
+                AiSafetyFooter()
+            }
+        }
+
         item(key = "bottom") {
             Spacer(modifier = Modifier.height(1.dp))
         }
@@ -329,6 +335,19 @@ private fun EmptyState(
             }
         }
     }
+}
+
+@Composable
+private fun AiSafetyFooter() {
+    Text(
+        text = "Ensu can make mistakes. Please verify important details before acting on any response.",
+        style = EnsuTypography.small,
+        color = EnsuColor.textMuted(),
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = EnsuSpacing.sm.dp)
+    )
 }
 
 @Composable

@@ -106,6 +106,22 @@ const AttachmentCard = memo(({ attachment, onClick }: AttachmentCardProps) => {
     );
 });
 
+const AiSafetyFooter = memo(() => {
+    return (
+        <Typography
+            variant="small"
+            sx={{
+                color: "text.muted",
+                textAlign: "center",
+                width: "100%",
+            }}
+        >
+            Ensu can make mistakes. Please verify important details before
+            acting on any response.
+        </Typography>
+    );
+});
+
 interface MessageRowProps {
     message: ChatMessage;
     branchSwitchers: Record<string, BranchSwitcher>;
@@ -696,6 +712,7 @@ export const ChatMessageList = memo(
                                 {renderMessage(index, message)}
                             </React.Fragment>
                         ))}
+                        <AiSafetyFooter />
                     </Stack>
                 )}
             </Box>
