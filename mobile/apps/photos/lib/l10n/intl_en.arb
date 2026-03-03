@@ -32,6 +32,7 @@
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
+  "createAccountTitle": "Create an account",
   "createNewAccount": "Create new account",
   "password": "Password",
   "confirmPassword": "Confirm password",
