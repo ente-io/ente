@@ -167,6 +167,8 @@ class FeedDataProvider {
 
     // Aggregate shared photos (files added by others to user's collections)
     if (includeSharedPhotos) {
+      final sharedFeedCutoffTime =
+          kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
       final sharedCollectionsContext =
           _SharedCollectionsContext.fromCollections(
         CollectionsService.instance.getCollectionsForUI(
@@ -182,6 +184,7 @@ class FeedDataProvider {
         collectionNames: sharedCollectionsContext.collectionNames,
         incomingCollectionSharedAtByID:
             sharedCollectionsContext.incomingCollectionSharedAtByID,
+        sharedFeedCutoffTime: sharedFeedCutoffTime,
       );
 
       feedItems.addAll(
@@ -190,6 +193,7 @@ class FeedDataProvider {
           sharedCollectionsContext.collectionNames,
           initialSharedFileIDsByCollection:
               sharedPhotoFeedResult.initialSharedFileIDsByCollection,
+          sharedFeedCutoffTime: sharedFeedCutoffTime,
         ),
       );
 
@@ -455,10 +459,8 @@ class FeedDataProvider {
     int limit = 50,
     required Map<int, String> collectionNames,
     required Map<int, int> incomingCollectionSharedAtByID,
+    required int sharedFeedCutoffTime,
   }) async {
-    final sharedPhotoFeedCutoffTime =
-        kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
-
     final hiddenCollectionIds =
         CollectionsService.instance.getHiddenCollectionIds();
 
@@ -474,7 +476,7 @@ class FeedDataProvider {
         currentUserID: userID,
         limit: _kSharedPhotoFetchPageSize,
         offset: page * _kSharedPhotoFetchPageSize,
-        addedTimeAfterOrEqualTo: sharedPhotoFeedCutoffTime,
+        addedTimeAfterOrEqualTo: sharedFeedCutoffTime,
       );
       if (pageFiles.isEmpty) {
         break;
@@ -617,9 +619,12 @@ class FeedDataProvider {
     List<Collection> incomingSharedCollections,
     Map<int, String> collectionNames, {
     required Map<int, List<int>> initialSharedFileIDsByCollection,
+    required int sharedFeedCutoffTime,
   }) {
     return incomingSharedCollections
-        .where((collection) => (collection.sharedAt ?? 0) > 0)
+        .where(
+          (collection) => (collection.sharedAt ?? 0) > sharedFeedCutoffTime,
+        )
         .map((collection) {
           final ownerID = collection.owner.id;
           if (ownerID == null) {
