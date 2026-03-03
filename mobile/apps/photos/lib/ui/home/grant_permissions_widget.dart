@@ -238,10 +238,16 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _showPermissionDeniedDialog() async {
+    final title = widget.startWithoutAccount
+        ? context.l10n.grantPermission
+        : context.l10n.allowPermTitle;
+    final message = widget.startWithoutAccount
+        ? context.l10n.grantPermissionDesc
+        : context.l10n.allowPermBody;
     await showAlertBottomSheet(
       context,
-      title: context.l10n.allowPermTitle,
-      message: context.l10n.allowPermBody,
+      title: title,
+      message: message,
       assetPath: 'assets/ducky_smart_feature.png',
       buttons: [
         ButtonWidgetV2(
