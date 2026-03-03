@@ -15,6 +15,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -27,7 +28,8 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
-import "package:photos/ui/viewer/file/qr_code_overlay_button.dart";
+import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
+import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
 import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -130,6 +132,8 @@ class _BodyState extends State<_Body> {
   bool isGuestView = false;
   bool swipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  QrCodeDetectionHelper? _qrHelper;
+  Timer? _longPressTimer;
 
   @override
   void initState() {
@@ -145,11 +149,15 @@ class _BodyState extends State<_Body> {
         swipeLocked = event.swipeLocked;
       });
     });
+    if (flagService.qrFeatureEnabled) {
+      _qrHelper = QrCodeDetectionHelper();
+    }
 
     // Update shared collection state after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      _qrHelper?.evaluateFile(_files![_selectedIndexNotifier.value]);
       widget.config.onPageReady?.call(context);
     });
   }
@@ -159,6 +167,8 @@ class _BodyState extends State<_Body> {
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _selectedIndexNotifier.dispose();
+    _longPressTimer?.cancel();
+    _qrHelper?.dispose();
     super.dispose();
 
     SystemChrome.setSystemUIOverlayStyle(
@@ -256,21 +266,6 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
-              if (flagService.qrFeatureEnabled)
-                ValueListenableBuilder(
-                  valueListenable: _selectedIndexNotifier,
-                  builder: (BuildContext context, int selectedIndex, _) {
-                    return widget.config.mode == DetailPageMode.minimalistic
-                        ? const SizedBox.shrink()
-                        : QrCodeOverlayButton(
-                            file: _files![selectedIndex],
-                            enableFullScreenNotifier:
-                                InheritedDetailPageState.of(context)
-                                    .enableFullScreenNotifier,
-                            isGuestView: isGuestView,
-                          );
-                  },
-                ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
@@ -367,13 +362,30 @@ class _BodyState extends State<_Body> {
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
-        return GestureDetector(
-          onTap: () {
-            file.fileType != FileType.video
-                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
-                : null;
+        return Listener(
+          onPointerDown: (_) {
+            _longPressTimer?.cancel();
+            _longPressTimer = Timer(
+              const Duration(milliseconds: 500),
+              () => _onLongPress(context, file),
+            );
           },
-          child: fileContent,
+          onPointerUp: (_) => _longPressTimer?.cancel(),
+          onPointerCancel: (_) => _longPressTimer?.cancel(),
+          onPointerMove: (event) {
+            if (event.delta.distance > 5) {
+              _longPressTimer?.cancel();
+            }
+          },
+          child: GestureDetector(
+            onTap: () {
+              file.fileType != FileType.video
+                  ? InheritedDetailPageState.of(context)
+                      .toggleFullScreenByUser()
+                  : null;
+            },
+            child: fileContent,
+          ),
         );
       },
       onPageChanged: (index) {
@@ -390,6 +402,7 @@ class _BodyState extends State<_Body> {
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _updateSharedCollectionState(_files![index]);
+        _qrHelper?.evaluateFile(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -515,6 +528,20 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
+  }
+
+  Future<void> _onLongPress(BuildContext context, EnteFile file) async {
+    if (file.fileType != FileType.image) return;
+    if (widget.config.mode == DetailPageMode.minimalistic) return;
+    if (isGuestView) return;
+    if (file is TrashFile) return;
+
+    final content = _qrHelper?.qrContentNotifier.value;
+    if (content == null || content.isEmpty) return;
+
+    await HapticFeedback.lightImpact();
+    if (!mounted) return;
+    await showQrCodeContentSheet(context, content: content);
   }
 
   Future<void> _updateSharedCollectionState(EnteFile file) async {
