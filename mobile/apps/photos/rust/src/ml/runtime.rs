@@ -54,6 +54,7 @@ pub struct ModelPaths {
     pub face_detection: String,
     pub face_embedding: String,
     pub clip_image: String,
+    pub clip_text: String,
     pub pet_face_detection: String,
     pub pet_face_embedding_dog: String,
     pub pet_face_embedding_cat: String,
@@ -104,6 +105,7 @@ pub struct MlRuntime {
     face_detection: LazySession,
     face_embedding: LazySession,
     clip_image: LazySession,
+    clip_text: LazySession,
     pet_face_detection: LazySession,
     pet_face_embedding_dog: LazySession,
     pet_face_embedding_cat: LazySession,
@@ -134,6 +136,7 @@ fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
         face_detection: LazySession::new(config.model_paths.face_detection.clone(), p.clone()),
         face_embedding: LazySession::new(config.model_paths.face_embedding.clone(), p.clone()),
         clip_image: LazySession::new(config.model_paths.clip_image.clone(), p.clone()),
+        clip_text: LazySession::new(config.model_paths.clip_text.clone(), p.clone()),
         pet_face_detection: LazySession::new(config.model_paths.pet_face_detection.clone(), pet_policy.clone()),
         pet_face_embedding_dog: LazySession::new(config.model_paths.pet_face_embedding_dog.clone(), pet_policy.clone()),
         pet_face_embedding_cat: LazySession::new(config.model_paths.pet_face_embedding_cat.clone(), pet_policy.clone()),
@@ -159,6 +162,12 @@ impl MlRuntime {
     pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
         self.clip_image.get_mut(
             "missing model path: clipImageModelPath is required when runClip is true",
+        )
+    }
+
+    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.clip_text.get_mut(
+            "missing model path: clipTextModelPath is required when running clip text",
         )
     }
 
@@ -227,14 +236,7 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     Ok(())
 }
 
-pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, func: F) -> MlResult<R>
-where
-    F: FnMut(&mut MlRuntime) -> MlResult<R>,
-{
-    with_runtime_mut_inner(config, func)
-}
-
-fn with_runtime_mut_inner<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
+pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
 where
     F: FnMut(&mut MlRuntime) -> MlResult<R>,
 {

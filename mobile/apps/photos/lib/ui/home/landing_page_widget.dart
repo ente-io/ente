@@ -455,7 +455,7 @@ class FeatureItemWidget extends StatelessWidget {
       children: [
         Image.asset(
           assetPath,
-          height: 160,
+          height: 200,
         ),
         const Padding(padding: EdgeInsets.all(16)),
         Column(
