@@ -95,6 +95,10 @@ export const sidebar = [
                                 link: "/photos/features/backup-and-sync/",
                             },
                             {
+                                text: "Local gallery",
+                                link: "/photos/features/local-gallery",
+                            },
+                            {
                                 text: "Watch folders",
                                 link: "/photos/features/backup-and-sync/watch-folders",
                             },
@@ -270,6 +274,10 @@ export const sidebar = [
                     {
                         text: "Backup and Sync",
                         link: "/photos/faq/backup-and-sync",
+                    },
+                    {
+                        text: "Local Gallery",
+                        link: "/photos/faq/local-gallery",
                     },
                     {
                         text: "Metadata and Editing",
