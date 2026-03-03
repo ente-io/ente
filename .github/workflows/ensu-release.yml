@@ -121,12 +121,17 @@ jobs:
                   tagName: ${{ env.RELEASE_TAG }}
                   releaseName: "Ensu Desktop ${{ env.RELEASE_TAG }}"
                   releaseBody: |
-                      Desktop release for Ensu
+                      Ensu release
+
+                      **Version:** ${{ env.RELEASE_TAG }}
+                      **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+                      **Download:** [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
 
                       **Platforms:**
                       - Linux (AppImage, deb)
                       - macOS (dmg, app)
                       - Windows (msi, exe)
+                      - Android (apk)
 
                       Download the appropriate file for your platform below.
                   releaseDraft: true
