@@ -68,7 +68,6 @@ import "package:photos/ui/home/home_bottom_nav_bar.dart";
 import "package:photos/ui/home/home_gallery_widget.dart";
 import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
@@ -929,11 +928,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ? const NeverScrollableScrollPhysics()
                       : const BouncingScrollPhysics(),
                   children: [
-                    _showShowBackupHook
-                        ? const StartBackupHookWidget(
-                            headerWidget: HeaderWidget(),
-                          )
-                        : child!,
+                    child!,
                     UserCollectionsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
                     _searchTab,
@@ -1244,7 +1239,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     _collectionsSyncTriggered = true;
-    CollectionsService.instance.sync().then((_) {
+    CollectionsService.instance.sync().whenComplete(() {
       if (mounted) {
         setState(() {});
       }

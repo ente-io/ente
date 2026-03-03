@@ -179,8 +179,14 @@ interface MasonryLayoutItem {
 
 interface MasonryLayout {
     items: MasonryLayoutItem[];
-    columns: MasonryLayoutItem[][];
+    rows: MasonryLayoutItem[][];
     totalHeight: number;
+}
+
+interface MasonrySourceItem {
+    file: EnteFile;
+    fileIndex: number;
+    aspectRatio: number;
 }
 
 interface Dimensions {
@@ -357,9 +363,6 @@ export const FileList: React.FC<FileListProps> = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const [masonryScrollTop, setMasonryScrollTop] = useState(0);
     const [masonryIsScrolling, setMasonryIsScrolling] = useState(false);
-    const [masonryDimensionsByFileID, setMasonryDimensionsByFileID] = useState<
-        Map<number, Dimensions>
-    >(new Map());
     const masonryScrollIdleTimeoutRef = useRef<
         ReturnType<typeof setTimeout> | undefined
     >(undefined);
@@ -1026,114 +1029,130 @@ export const FileList: React.FC<FileListProps> = ({
         [onScroll, onVisibleDateChange, items],
     );
 
-    useEffect(() => {
-        if (!shouldUseMasonry) {
-            setMasonryDimensionsByFileID(new Map());
-            return;
-        }
-
-        const validFileIDs = new Set(annotatedFiles.map(({ file }) => file.id));
-        setMasonryDimensionsByFileID((prev) => {
-            if (prev.size === 0) return prev;
-            const next = new Map(prev);
-            for (const fileID of next.keys()) {
-                if (!validFileIDs.has(fileID)) next.delete(fileID);
-            }
-            return next.size === prev.size ? prev : next;
-        });
-    }, [annotatedFiles, shouldUseMasonry]);
-
-    const updateMasonryDimensions = useCallback(
-        (fileID: number, dimensions: Dimensions) => {
-            if (dimensions.width <= 0 || dimensions.height <= 0) return;
-            setMasonryDimensionsByFileID((prev) => {
-                const existing = prev.get(fileID);
-                if (
-                    existing &&
-                    existing.width === dimensions.width &&
-                    existing.height === dimensions.height
-                ) {
-                    return prev;
-                }
-                const next = new Map(prev);
-                next.set(fileID, dimensions);
-                return next;
-            });
-        },
-        [],
-    );
-
-    const masonryColumns = useMemo(
-        () => preferredMasonryColumns(layoutParams.containerWidth),
+    const masonryTargetRowHeight = useMemo(
+        () => preferredMasonryRowHeight(layoutParams.containerWidth),
         [layoutParams.containerWidth],
     );
     const masonryInnerWidth = useMemo(
         () => Math.max(0, width - 2 * layoutParams.paddingInline),
         [layoutParams.paddingInline, width],
     );
-    const masonryItemWidth = useMemo(() => {
-        if (masonryColumns < 1) return 0;
-        return (
-            (masonryInnerWidth - (masonryColumns - 1) * layoutParams.gap) /
-            masonryColumns
-        );
-    }, [layoutParams.gap, masonryColumns, masonryInnerWidth]);
     const masonryLayout = useMemo<MasonryLayout>(() => {
         if (
             !shouldUseMasonry ||
-            masonryItemWidth <= 0 ||
+            masonryTargetRowHeight <= 0 ||
+            masonryInnerWidth <= 0 ||
             !annotatedFiles.length
         ) {
-            return { items: [], columns: [], totalHeight: 0 };
+            return { items: [], rows: [], totalHeight: 0 };
         }
 
-        const columnHeights = Array.from({ length: masonryColumns }, () => 0);
-        const columns = Array.from(
-            { length: masonryColumns },
-            () => new Array<MasonryLayoutItem>(),
-        );
+        const rows = new Array<MasonryLayoutItem[]>();
         const items: MasonryLayoutItem[] = [];
+        const masonrySourceItems = new Array<MasonrySourceItem>();
+        let rowTop = 0;
+        let currentRow = new Array<MasonrySourceItem>();
+        let currentRowAspectRatio = 0;
+        const useAdaptiveMobileRows = shouldUseAdaptiveMobileMasonryRows(
+            layoutParams.containerWidth,
+        );
+
+        const placeCurrentRow = (fitToWidth: boolean) => {
+            if (!currentRow.length || currentRowAspectRatio <= 0) return;
+            const totalGapWidth = (currentRow.length - 1) * layoutParams.gap;
+            const maxContentWidth = Math.max(
+                1,
+                masonryInnerWidth - totalGapWidth,
+            );
+            const naturalRowHeight = Math.max(
+                1,
+                maxContentWidth / currentRowAspectRatio,
+            );
+            const rowHeight = fitToWidth
+                ? naturalRowHeight
+                : Math.min(masonryTargetRowHeight, naturalRowHeight);
+            const row = new Array<MasonryLayoutItem>();
+            let left = 0;
+
+            for (const { file, fileIndex, aspectRatio } of currentRow) {
+                const itemWidth = Math.max(1, rowHeight * aspectRatio);
+                const item = {
+                    file,
+                    fileIndex,
+                    top: rowTop,
+                    bottom: rowTop + rowHeight,
+                    left,
+                    width: itemWidth,
+                    height: rowHeight,
+                } satisfies MasonryLayoutItem;
+                items.push(item);
+                row.push(item);
+                left += itemWidth + layoutParams.gap;
+            }
+
+            rows.push(row);
+            rowTop += rowHeight + layoutParams.gap;
+            currentRow = [];
+            currentRowAspectRatio = 0;
+        };
 
         for (const [fileIndex, { file }] of annotatedFiles.entries()) {
-            const dimensions = fileMasonryDimensions(
-                file,
-                masonryDimensionsByFileID.get(file.id),
+            const dimensions = fileMasonryDimensions(file);
+            const aspectRatio = Math.max(
+                0.1,
+                dimensions.width / dimensions.height,
             );
-            const itemHeight = Math.max(
-                1,
-                (masonryItemWidth * dimensions.height) / dimensions.width,
-            );
-            const targetColumn = shortestColumnIndex(columnHeights);
-            const top = columnHeights[targetColumn]!;
-            const bottom = top + itemHeight;
-            const left = targetColumn * (masonryItemWidth + layoutParams.gap);
-
-            const item = {
-                file,
-                fileIndex,
-                top,
-                bottom,
-                left,
-                width: masonryItemWidth,
-                height: itemHeight,
-            } satisfies MasonryLayoutItem;
-            items.push(item);
-            columns[targetColumn]!.push(item);
-
-            columnHeights[targetColumn] = top + itemHeight + layoutParams.gap;
+            masonrySourceItems.push({ file, fileIndex, aspectRatio });
         }
 
-        const totalHeight = Math.max(
-            0,
-            Math.max(...columnHeights) - layoutParams.gap,
-        );
-        return { items, columns, totalHeight };
+        if (useAdaptiveMobileRows) {
+            let sourceIndex = 0;
+            let rowIndex = 0;
+            while (sourceIndex < masonrySourceItems.length) {
+                const desiredCount = preferredMobileMasonryRowItemCount(
+                    masonrySourceItems,
+                    sourceIndex,
+                    rowIndex,
+                );
+                const boundedCount = Math.max(
+                    1,
+                    Math.min(
+                        desiredCount,
+                        masonrySourceItems.length - sourceIndex,
+                    ),
+                );
+                for (let i = 0; i < boundedCount; i += 1) {
+                    const sourceItem = masonrySourceItems[sourceIndex + i]!;
+                    currentRow.push(sourceItem);
+                    currentRowAspectRatio += sourceItem.aspectRatio;
+                }
+                placeCurrentRow(true);
+                sourceIndex += boundedCount;
+                rowIndex += 1;
+            }
+        } else {
+            for (const sourceItem of masonrySourceItems) {
+                currentRow.push(sourceItem);
+                currentRowAspectRatio += sourceItem.aspectRatio;
+
+                const rowWidthAtTargetHeight =
+                    currentRowAspectRatio * masonryTargetRowHeight +
+                    (currentRow.length - 1) * layoutParams.gap;
+                if (rowWidthAtTargetHeight >= masonryInnerWidth) {
+                    placeCurrentRow(true);
+                }
+            }
+            placeCurrentRow(false);
+        }
+
+        const totalHeight = Math.max(0, rowTop - layoutParams.gap);
+        return { items, rows, totalHeight };
     }, [
         annotatedFiles,
+        masonryInnerWidth,
+        layoutParams.containerWidth,
         layoutParams.gap,
-        masonryColumns,
-        masonryDimensionsByFileID,
-        masonryItemWidth,
+        masonryTargetRowHeight,
         shouldUseMasonry,
     ]);
     const masonryHeaderHeight = header?.height ?? 0;
@@ -1147,11 +1166,22 @@ export const FileList: React.FC<FileListProps> = ({
         const minTop = masonryViewportTop - masonryOverscan;
         const maxTop = masonryViewportBottom + masonryOverscan;
         const visible = new Array<MasonryLayoutItem>();
+        const startRowIndex = firstVisibleMasonryRowIndex(
+            masonryLayout.rows,
+            minTop,
+        );
 
-        for (const column of masonryLayout.columns) {
-            const startIndex = firstVisibleIndexForColumn(column, minTop);
-            for (let i = startIndex; i < column.length; i += 1) {
-                const item = column[i]!;
+        for (
+            let rowIndex = startRowIndex;
+            rowIndex < masonryLayout.rows.length;
+            rowIndex += 1
+        ) {
+            const row = masonryLayout.rows[rowIndex]!;
+            if (!row.length) continue;
+            if (row[0]!.top > maxTop) break;
+            const startIndex = firstVisibleIndexForMasonryTrack(row, minTop);
+            for (let i = startIndex; i < row.length; i += 1) {
+                const item = row[i]!;
                 if (item.top > maxTop) break;
                 visible.push(item);
             }
@@ -1159,7 +1189,7 @@ export const FileList: React.FC<FileListProps> = ({
 
         return visible;
     }, [
-        masonryLayout.columns,
+        masonryLayout.rows,
         masonryOverscan,
         masonryViewportBottom,
         masonryViewportTop,
@@ -1282,9 +1312,6 @@ export const FileList: React.FC<FileListProps> = ({
                                 ? (e) => handleContextMenu(e, file, fileIndex)
                                 : undefined
                         }
-                        onImageDimensions={(dimensions) =>
-                            updateMasonryDimensions(file.id, dimensions)
-                        }
                         isMasonry
                         style={{ width: "100%", height: "100%" }}
                     />
@@ -1311,7 +1338,6 @@ export const FileList: React.FC<FileListProps> = ({
             rangeStartIndex,
             selected,
             suppressSelectionUI,
-            updateMasonryDimensions,
             user,
         ],
     );
@@ -1476,22 +1502,15 @@ const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
         new Array<FileListAnnotatedFile[]>(),
     );
 
-const shortestColumnIndex = (columnHeights: number[]) =>
-    columnHeights.reduce(
-        (minColumn, height, index) =>
-            height < columnHeights[minColumn]! ? index : minColumn,
-        0,
-    );
-
-const firstVisibleIndexForColumn = (
-    column: MasonryLayoutItem[],
+const firstVisibleIndexForMasonryTrack = (
+    track: MasonryLayoutItem[],
     minTop: number,
 ) => {
     let low = 0;
-    let high = column.length;
+    let high = track.length;
     while (low < high) {
         const mid = Math.floor((low + high) / 2);
-        if (column[mid]!.bottom < minTop) {
+        if (track[mid]!.bottom < minTop) {
             low = mid + 1;
         } else {
             high = mid;
@@ -1500,11 +1519,29 @@ const firstVisibleIndexForColumn = (
     return low;
 };
 
-const fileMasonryDimensions = (
-    file: EnteFile,
-    inferredDimensions?: Dimensions,
+const firstVisibleMasonryRowIndex = (
+    rows: MasonryLayoutItem[][],
+    minTop: number,
 ) => {
-    if (inferredDimensions) return inferredDimensions;
+    let low = 0;
+    let high = rows.length;
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        const row = rows[mid]!;
+        const rowBottom = row.length ? row[row.length - 1]!.bottom : -Infinity;
+        if (rowBottom < minTop) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    return low;
+};
+
+const fileMasonryDimensions = (file: EnteFile) => {
+    if (shouldUseSquareMasonryDimensions(file)) {
+        return { width: 1, height: 1 };
+    }
 
     const width = file.pubMagicMetadata?.data.w;
     const height = file.pubMagicMetadata?.data.h;
@@ -1512,21 +1549,55 @@ const fileMasonryDimensions = (
         return { width, height };
     }
 
-    if (file.metadata.fileType === FileType.video) {
-        return { width: 16, height: 9 };
-    }
-
-    return { width: 4, height: 3 };
+    return { width: 1, height: 1 };
 };
+
+const shouldUseSquareMasonryDimensions = (file: EnteFile) =>
+    file.metadata.fileType === FileType.video ||
+    file.metadata.fileType === FileType.livePhoto;
 
 const masonryScrollIdleMs = 120;
 
-const preferredMasonryColumns = (containerWidth: number) => {
-    if (containerWidth < 560) return 2;
-    if (containerWidth < 900) return 3;
-    if (containerWidth < 1280) return 4;
-    if (containerWidth < 1800) return 5;
-    return 6;
+const preferredMasonryRowHeight = (containerWidth: number) => {
+    if (containerWidth < 560) return 210;
+    if (containerWidth < 900) return 250;
+    if (containerWidth < 1280) return 300;
+    if (containerWidth < 1800) return 345;
+    return 385;
+};
+
+const shouldUseAdaptiveMobileMasonryRows = (containerWidth: number) =>
+    containerWidth < 560;
+
+const preferredMobileMasonryRowItemCount = (
+    sourceItems: MasonrySourceItem[],
+    startIndex: number,
+    rowIndex: number,
+) => {
+    const first = sourceItems[startIndex];
+    const second = sourceItems[startIndex + 1];
+    const third = sourceItems[startIndex + 2];
+    if (!first || !second) return 1;
+
+    const firstRatio = first.aspectRatio;
+    const secondRatio = second.aspectRatio;
+    if (firstRatio >= 1.25) return 1;
+
+    const firstIsPortrait = firstRatio < 0.9;
+    const secondIsPortrait = secondRatio < 0.9;
+    const thirdIsPortrait = !!third && third.aspectRatio < 0.9;
+
+    // Occasionally show one tall portrait in a row to mimic the mobile collage feel.
+    if (firstRatio <= 0.62 && rowIndex % 4 === 1) return 1;
+
+    if (firstIsPortrait && secondIsPortrait && third && thirdIsPortrait) {
+        return rowIndex % 3 === 0 ? 3 : 2;
+    }
+    if (firstIsPortrait && secondIsPortrait) return 2;
+
+    if (firstRatio + secondRatio >= 1.6) return 2;
+    if (third && firstRatio + secondRatio + third.aspectRatio >= 1.9) return 3;
+    return 2;
 };
 
 /**

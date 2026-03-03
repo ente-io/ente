@@ -55,6 +55,7 @@ class CollectionService {
 
   static const String _firstSyncCompletedPrefKey = 'first_sync_completed';
   late SharedPreferences _prefs;
+  Future<void>? _defaultSetupInFlight;
 
   CollectionService._privateConstructor();
 
@@ -394,13 +395,7 @@ class CollectionService {
 
     // ignore: unawaited_futures
     sync().then((_) {
-      if (Configuration.instance.getKey() != null) {
-        setupDefaultCollections();
-      } else {
-        _logger.warning(
-          "Skipping default collections setup - master key not yet available",
-        );
-      }
+      ensureDefaultCollections();
     }).catchError((error) {
       if (error is UnauthorizedError) {
         _logger.info("Session expired, triggering logout");
@@ -771,6 +766,34 @@ class CollectionService {
     }
   }
 
+  Future<void> ensureDefaultCollections() async {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      _logger.warning(
+        "Skipping default collections setup - account not configured",
+      );
+      return;
+    }
+
+    if (!hasCompletedFirstSync()) {
+      _logger.info(
+        "Skipping default collections setup - first sync not completed yet",
+      );
+      return;
+    }
+
+    final inFlight = _defaultSetupInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+
+    final setupFuture = Future<void>.sync(setupDefaultCollections);
+    _defaultSetupInFlight = setupFuture.whenComplete(() {
+      _defaultSetupInFlight = null;
+    });
+    await _defaultSetupInFlight;
+  }
+
   Future<Collection> _getOrCreateDocumentsCollection() async {
     final collections = await getCollections();
     for (final collection in collections) {
@@ -936,6 +959,7 @@ class CollectionService {
 
   void clearCache() {
     _collectionIDToCollections.clear();
+    _defaultSetupInFlight = null;
   }
 
   // Methods for managing collection cache

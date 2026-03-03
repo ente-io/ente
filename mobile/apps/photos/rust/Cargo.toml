@@ -25,7 +25,10 @@ thiserror = "2.0.11"
 [target.'cfg(target_os = "ios")'.dependencies]
 ort = { version = "=2.0.0-rc.4", default-features = false, features = [
     "ndarray",
-    "coreml",
+    # Temporarily disabled to avoid iOS duplicate ObjC class collisions
+    # when both Dart ONNXRuntime and Rust ONNXRuntime are linked.
+    # Re-enable once we move to a single shared ORT runtime.
+    # "coreml",
     "xnnpack",
 ] }
 

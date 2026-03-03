@@ -16,8 +16,7 @@ Answers to common questions about sharing items and collections in Ente Locker.
 3. Open the collection and tap the share button
 4. Select **Share with Ente user**
 5. Enter your family member's Ente email address
-6. Choose permissions (Viewer or Collaborator)
-7. Tap **Share**
+6. Tap **Share**
 
 Your family member will receive the shared collection in their Locker app.
 
@@ -63,10 +62,9 @@ Not directly. To share an individual item with another Ente user:
 Alternatively, create a [public link](/locker/features/sharing/public-links) for
 the item that anyone can access in a browser.
 
-### Can viewers add items to shared content? {#locker-viewer-edit}
+### Can shared users add items to shared content? {#locker-viewer-edit}
 
-No. Viewers can only view content. To allow adding items, share with
-Collaborator permissions instead.
+No. Shared collections are view-only. Only the owner can add or modify items.
 
 ### Can I see who has access to my shared content? {#locker-access-tracking}
 
@@ -79,8 +77,8 @@ When you delete a collection you've shared with others:
 
 - **If you're the owner**: The collection is removed from all shared users'
   accounts. They lose access to the items.
-- **If you're a viewer/collaborator**: You remove yourself from the shared
-  collection. Other users and the owner retain access.
+- **If you're a viewer**: You remove yourself from the shared collection. Other
+  users and the owner retain access.
 
 Items in a deleted shared collection follow the same rules as regular
 collections - you can choose to keep or delete the items when deleting the
@@ -89,8 +87,8 @@ collection.
 ### What happens to shared items if the owner deletes their account? {#locker-owner-deletes-account}
 
 If an account owner deletes their Ente account, all their shared collections
-become inaccessible to shared users. Collaborators and viewers lose access to
-all content shared by that user.
+become inaccessible to shared users. Viewers lose access to all content shared
+by that user.
 
 If you need continued access to shared content, consider:
 

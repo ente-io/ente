@@ -2,10 +2,13 @@ import {
     ArrowRight01Icon,
     Bug01Icon,
     Cancel01Icon,
+    File01Icon,
+    InformationCircleIcon,
     Key01Icon,
-    Login01Icon,
     Settings01Icon,
     SlidersHorizontalIcon,
+    Upload01Icon,
+    ViewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -166,497 +169,628 @@ export const ChatDialogs = memo(
         showDevSettings,
         closeDevSettings,
         modelGateStatus,
-    }: ChatDialogsProps) => (
-        <>
-            <Dialog
-                open={showSettingsModal}
-                onClose={closeSettingsModal}
-                maxWidth="xs"
-                fullWidth
-                slotProps={{
-                    paper: {
-                        sx: [
-                            dialogPaperSx,
-                            {
-                                maxHeight:
-                                    "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
-                                display: "flex",
-                                flexDirection: "column",
-                            },
-                        ],
-                    },
-                }}
-            >
-                <DialogTitle
-                    sx={[
-                        dialogTitleSx,
-                        {
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 1,
-                            pr: 1,
-                        },
-                    ]}
-                >
-                    <Box component="span">Settings</Box>
-                    <IconButton
-                        aria-label="Close settings"
-                        onClick={closeSettingsModal}
-                        sx={actionButtonSx}
-                    >
-                        <HugeiconsIcon
-                            icon={Cancel01Icon}
-                            {...smallIconProps}
-                        />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent sx={{ flex: 1, overflowY: "auto" }}>
-                    <Stack sx={{ gap: 2 }}>
-                        {isLoggedIn && (
-                            <Box
-                                sx={{
-                                    px: 2,
-                                    py: 1.5,
-                                    borderRadius: 2,
-                                    border: "1px solid",
-                                    borderColor: "divider",
-                                    bgcolor: "background.default",
-                                }}
-                            >
-                                <Typography
-                                    variant="mini"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    Signed in as
-                                </Typography>
-                                <Typography variant="small">
-                                    {signedInEmail ?? ""}
-                                </Typography>
-                            </Box>
-                        )}
+    }: ChatDialogsProps) => {
+        const openExternalUrl = async (url: string) => {
+            const hasTauriBridge =
+                typeof window !== "undefined" &&
+                (Boolean((window as any).__TAURI__) ||
+                    Boolean((window as any).__TAURI_IPC__));
 
-                        <Stack sx={{ gap: 1 }}>
-                            <ListItemButton
-                                onClick={() => {
-                                    closeSettingsModal();
-                                    void saveLogs();
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <HugeiconsIcon
-                                    icon={Bug01Icon}
-                                    {...compactIconProps}
-                                />
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Save logs
-                                </Typography>
-                            </ListItemButton>
+            if (isTauriRuntime || hasTauriBridge) {
+                try {
+                    const { open } = await import("@tauri-apps/api/shell");
+                    await open(url);
+                    return;
+                } catch {
+                    // fall through to browser open fallback
+                }
+            }
 
-                            {isLoggedIn && (
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeSettingsModal();
-                                        openPasskeysFromChat();
-                                    }}
-                                    sx={settingsItemSx}
-                                >
-                                    <HugeiconsIcon
-                                        icon={Key01Icon}
-                                        {...compactIconProps}
-                                    />
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1 }}
-                                    >
-                                        Passkeys
-                                    </Typography>
-                                </ListItemButton>
-                            )}
+            if (typeof window !== "undefined") {
+                const popup = window.open(url, "_blank", "noopener,noreferrer");
+                if (!popup) {
+                    window.location.href = url;
+                }
+            }
+        };
 
-                            {isLoggedIn && (
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeSettingsModal();
-                                        handleLogout();
-                                    }}
-                                    sx={[
-                                        settingsItemSx,
-                                        { color: "critical.main" },
-                                    ]}
-                                >
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1, fontWeight: 600 }}
-                                    >
-                                        Sign Out
-                                    </Typography>
-                                </ListItemButton>
-                            )}
-
-                            {!isLoggedIn && (
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeSettingsModal();
-                                        openLoginFromChat();
-                                    }}
-                                    sx={settingsItemSx}
-                                >
-                                    <HugeiconsIcon
-                                        icon={Login01Icon}
-                                        {...compactIconProps}
-                                    />
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1, fontWeight: 600 }}
-                                    >
-                                        Sign In to Backup
-                                    </Typography>
-                                </ListItemButton>
-                            )}
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
-
-            {developerSettingsEnabled && modelSettingsEnabled && (
+        return (
+            <>
                 <Dialog
-                    open={showDeveloperMenu}
-                    onClose={closeDeveloperMenu}
-                    fullScreen={isSmall}
+                    open={showSettingsModal}
+                    onClose={closeSettingsModal}
                     maxWidth="xs"
                     fullWidth
-                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                    slotProps={{
+                        paper: {
+                            sx: [
+                                dialogPaperSx,
+                                {
+                                    maxHeight:
+                                        "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                },
+                            ],
+                        },
+                    }}
                 >
-                    <DialogTitle sx={dialogTitleSx}>
-                        Developer Settings
+                    <DialogTitle
+                        sx={[
+                            dialogTitleSx,
+                            {
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: 1,
+                                pr: 1,
+                            },
+                        ]}
+                    >
+                        <Box component="span">Settings</Box>
+                        <IconButton
+                            aria-label="Close settings"
+                            onClick={closeSettingsModal}
+                            sx={actionButtonSx}
+                        >
+                            <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                {...smallIconProps}
+                            />
+                        </IconButton>
                     </DialogTitle>
-                    <DialogContent>
-                        <Stack sx={{ gap: 1 }}>
-                            {modelSettingsEnabled && (
+                    <DialogContent sx={{ flex: 1, overflowY: "auto" }}>
+                        <Stack sx={{ gap: 2 }}>
+                            {isLoggedIn && (
+                                <Box
+                                    sx={{
+                                        px: 2,
+                                        py: 1.5,
+                                        borderRadius: 2,
+                                        border: "1px solid",
+                                        borderColor: "divider",
+                                        bgcolor: "background.default",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Signed in as
+                                    </Typography>
+                                    <Typography variant="small">
+                                        {signedInEmail ?? ""}
+                                    </Typography>
+                                </Box>
+                            )}
+
+                            <Stack sx={{ gap: 1 }}>
                                 <ListItemButton
                                     onClick={() => {
-                                        closeDeveloperMenu();
-                                        openModelSettings();
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.io/blog/ensu/",
+                                        );
                                     }}
                                     sx={settingsItemSx}
                                 >
                                     <HugeiconsIcon
-                                        icon={Settings01Icon}
+                                        icon={InformationCircleIcon}
                                         {...compactIconProps}
                                     />
                                     <Typography
                                         variant="small"
                                         sx={{ flex: 1 }}
                                     >
-                                        Model settings
+                                        About
                                     </Typography>
                                     <HugeiconsIcon
                                         icon={ArrowRight01Icon}
                                         {...smallIconProps}
                                     />
                                 </ListItemButton>
-                            )}
-                            <ListItemButton
-                                onClick={() => {
-                                    closeDeveloperMenu();
-                                    openDevSettings();
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <HugeiconsIcon
-                                    icon={SlidersHorizontalIcon}
-                                    {...compactIconProps}
-                                />
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Server endpoint
-                                </Typography>
-                                <HugeiconsIcon
-                                    icon={ArrowRight01Icon}
-                                    {...smallIconProps}
-                                />
-                            </ListItemButton>
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void saveLogs();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Bug01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Save logs
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+
+                                {isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openPasskeysFromChat();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Key01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Passkeys
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                {!isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openLoginFromChat();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Upload01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1, fontWeight: 600 }}
+                                        >
+                                            Sign In to Backup
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                {isLoggedIn && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            handleLogout();
+                                        }}
+                                        sx={[
+                                            settingsItemSx,
+                                            { color: "critical.main" },
+                                        ]}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Cancel01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1, fontWeight: 600 }}
+                                        >
+                                            Sign Out
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.io/privacy",
+                                        );
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={ViewIcon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Privacy Policy
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        void openExternalUrl(
+                                            "https://ente.io/terms",
+                                        );
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={File01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Terms of Service
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            </Stack>
                         </Stack>
                     </DialogContent>
-                    <DialogActions sx={{ px: 3, pb: 3 }}>
-                        <Button
-                            onClick={closeDeveloperMenu}
-                            color="secondary"
-                            fullWidth
-                        >
-                            Close
-                        </Button>
-                    </DialogActions>
                 </Dialog>
-            )}
 
-            <Dialog
-                open={Boolean(deleteSessionId)}
-                onClose={handleCancelDeleteSession}
-                fullScreen={isSmall}
-                maxWidth="xs"
-                fullWidth
-                slotProps={{ paper: { sx: dialogPaperSx } }}
-            >
-                <DialogTitle sx={dialogTitleSx}>Delete chat?</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body" sx={{ color: "text.muted" }}>
-                        Delete {deleteSessionLabel}? This cannot be undone.
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Button
-                        onClick={handleCancelDeleteSession}
-                        color="secondary"
+                {developerSettingsEnabled && modelSettingsEnabled && (
+                    <Dialog
+                        open={showDeveloperMenu}
+                        onClose={closeDeveloperMenu}
+                        fullScreen={isSmall}
+                        maxWidth="xs"
+                        fullWidth
+                        slotProps={{ paper: { sx: dialogPaperSx } }}
                     >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="critical"
-                        onClick={() => void handleConfirmDeleteSession()}
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        <DialogTitle sx={dialogTitleSx}>
+                            Developer Settings
+                        </DialogTitle>
+                        <DialogContent>
+                            <Stack sx={{ gap: 1 }}>
+                                {modelSettingsEnabled && (
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeDeveloperMenu();
+                                            openModelSettings();
+                                        }}
+                                        sx={settingsItemSx}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Settings01Icon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            Model settings
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                )}
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeDeveloperMenu();
+                                        openDevSettings();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={SlidersHorizontalIcon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Server endpoint
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            </Stack>
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, pb: 3 }}>
+                            <Button
+                                onClick={closeDeveloperMenu}
+                                color="secondary"
+                                fullWidth
+                            >
+                                Close
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                )}
 
-            {modelSettingsEnabled && (
                 <Dialog
-                    open={showModelSettings}
-                    onClose={closeModelSettings}
+                    open={Boolean(deleteSessionId)}
+                    onClose={handleCancelDeleteSession}
                     fullScreen={isSmall}
-                    maxWidth="sm"
+                    maxWidth="xs"
                     fullWidth
                     slotProps={{ paper: { sx: dialogPaperSx } }}
                 >
-                    <DialogTitle sx={dialogTitleSx}>Model Settings</DialogTitle>
+                    <DialogTitle sx={dialogTitleSx}>Delete chat?</DialogTitle>
                     <DialogContent>
-                        <Stack sx={{ gap: 3 }}>
-                            <Stack sx={{ gap: 0.5 }}>
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted" }}
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            Delete {deleteSessionLabel}? This cannot be undone.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Button
+                            onClick={handleCancelDeleteSession}
+                            color="secondary"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="critical"
+                            onClick={() => void handleConfirmDeleteSession()}
+                        >
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {modelSettingsEnabled && (
+                    <Dialog
+                        open={showModelSettings}
+                        onClose={closeModelSettings}
+                        fullScreen={isSmall}
+                        maxWidth="sm"
+                        fullWidth
+                        slotProps={{ paper: { sx: dialogPaperSx } }}
+                    >
+                        <DialogTitle sx={dialogTitleSx}>
+                            Model Settings
+                        </DialogTitle>
+                        <DialogContent>
+                            <Stack sx={{ gap: 3 }}>
+                                <Stack sx={{ gap: 0.5 }}>
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Selected model
+                                    </Typography>
+                                    <Typography variant="body">
+                                        {useCustomModel
+                                            ? "Custom model"
+                                            : defaultModelName}
+                                    </Typography>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{
+                                            color: loadedModelName
+                                                ? "success.main"
+                                                : "text.muted",
+                                        }}
+                                    >
+                                        {loadedModelName
+                                            ? `Loaded: ${loadedModelName}`
+                                            : "Not loaded"}
+                                    </Typography>
+                                </Stack>
+
+                                <Divider />
+
+                                <Stack sx={{ gap: 1.5 }}>
+                                    <Typography variant="small">
+                                        Custom Hugging Face model
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        label="Direct .gguf file URL"
+                                        placeholder="https://huggingface.co/..."
+                                        value={modelUrl}
+                                        onChange={(event) =>
+                                            setModelUrl(event.target.value)
+                                        }
+                                        error={!!modelUrlError}
+                                        helperText={modelUrlError ?? " "}
+                                    />
+                                    {allowMmproj && (
+                                        <TextField
+                                            fullWidth
+                                            label="mmproj .gguf file URL"
+                                            placeholder="(optional for multimodal)"
+                                            value={mmprojUrl}
+                                            onChange={(event) =>
+                                                setMmprojUrl(event.target.value)
+                                            }
+                                            error={!!mmprojError}
+                                            helperText={mmprojError ?? " "}
+                                        />
+                                    )}
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Suggested models:
+                                    </Typography>
+                                    <Stack sx={{ gap: 1 }}>
+                                        {suggestedModels.map((model) => (
+                                            <Box
+                                                key={model.name}
+                                                sx={{
+                                                    border: "1px solid",
+                                                    borderColor: "divider",
+                                                    borderRadius: 2,
+                                                    p: 1.5,
+                                                }}
+                                            >
+                                                <Stack
+                                                    direction="row"
+                                                    sx={{
+                                                        gap: 1,
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    <Box sx={{ flex: 1 }}>
+                                                        <Typography variant="small">
+                                                            {model.name}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="mini"
+                                                            sx={{
+                                                                color: "text.muted",
+                                                            }}
+                                                        >
+                                                            {isTauriRuntime &&
+                                                            model.mmproj
+                                                                ? "+ mmproj"
+                                                                : ""}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Button
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleFillSuggestion(
+                                                                model.url,
+                                                                model.mmproj,
+                                                            )
+                                                        }
+                                                    >
+                                                        Fill
+                                                    </Button>
+                                                </Stack>
+                                            </Box>
+                                        ))}
+                                    </Stack>
+                                </Stack>
+
+                                <Divider />
+
+                                <Stack sx={{ gap: 1.5 }}>
+                                    <Typography variant="small">
+                                        Custom limits (optional)
+                                    </Typography>
+                                    <Stack direction="row" sx={{ gap: 1.5 }}>
+                                        <TextField
+                                            fullWidth
+                                            label="Context length"
+                                            placeholder="8192"
+                                            value={contextLength}
+                                            onChange={(event) =>
+                                                setContextLength(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            error={!!contextError}
+                                            helperText={contextError ?? " "}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Max output"
+                                            placeholder="2048"
+                                            value={maxTokens}
+                                            onChange={(event) =>
+                                                setMaxTokens(event.target.value)
+                                            }
+                                            error={!!maxTokensError}
+                                            helperText={maxTokensError ?? " "}
+                                        />
+                                    </Stack>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Leave blank to use model defaults
+                                    </Typography>
+                                </Stack>
+                            </Stack>
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, pb: 3 }}>
+                            <Stack sx={{ width: "100%", gap: 1.5 }}>
+                                <Button
+                                    variant="contained"
+                                    color="accent"
+                                    disabled={
+                                        isSavingModel ||
+                                        modelGateStatus === "downloading"
+                                    }
+                                    onClick={handleSaveModel}
                                 >
-                                    Selected model
-                                </Typography>
-                                <Typography variant="body">
-                                    {useCustomModel
-                                        ? "Custom model"
-                                        : defaultModelName}
-                                </Typography>
+                                    Use Custom Model
+                                </Button>
+                                <Button
+                                    onClick={handleUseDefaultModel}
+                                    color="secondary"
+                                >
+                                    Use Default Model
+                                </Button>
                                 <Typography
                                     variant="mini"
                                     sx={{
-                                        color: loadedModelName
-                                            ? "success.main"
-                                            : "text.muted",
+                                        color: "text.muted",
+                                        textAlign: "center",
                                     }}
                                 >
-                                    {loadedModelName
-                                        ? `Loaded: ${loadedModelName}`
-                                        : "Not loaded"}
+                                    Changes require re-downloading the model.
                                 </Typography>
                             </Stack>
+                        </DialogActions>
+                    </Dialog>
+                )}
 
-                            <Divider />
-
-                            <Stack sx={{ gap: 1.5 }}>
-                                <Typography variant="small">
-                                    Custom Hugging Face model
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    label="Direct .gguf file URL"
-                                    placeholder="https://huggingface.co/..."
-                                    value={modelUrl}
-                                    onChange={(event) =>
-                                        setModelUrl(event.target.value)
-                                    }
-                                    error={!!modelUrlError}
-                                    helperText={modelUrlError ?? " "}
-                                />
-                                {allowMmproj && (
-                                    <TextField
-                                        fullWidth
-                                        label="mmproj .gguf file URL"
-                                        placeholder="(optional for multimodal)"
-                                        value={mmprojUrl}
-                                        onChange={(event) =>
-                                            setMmprojUrl(event.target.value)
-                                        }
-                                        error={!!mmprojError}
-                                        helperText={mmprojError ?? " "}
-                                    />
-                                )}
-                                <Typography
-                                    variant="mini"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    Suggested models:
-                                </Typography>
-                                <Stack sx={{ gap: 1 }}>
-                                    {suggestedModels.map((model) => (
-                                        <Box
-                                            key={model.name}
-                                            sx={{
-                                                border: "1px solid",
-                                                borderColor: "divider",
-                                                borderRadius: 2,
-                                                p: 1.5,
-                                            }}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                sx={{
-                                                    gap: 1,
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                <Box sx={{ flex: 1 }}>
-                                                    <Typography variant="small">
-                                                        {model.name}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="mini"
-                                                        sx={{
-                                                            color: "text.muted",
-                                                        }}
-                                                    >
-                                                        {isTauriRuntime &&
-                                                        model.mmproj
-                                                            ? "+ mmproj"
-                                                            : ""}
-                                                    </Typography>
-                                                </Box>
-                                                <Button
-                                                    size="small"
-                                                    onClick={() =>
-                                                        handleFillSuggestion(
-                                                            model.url,
-                                                            model.mmproj,
-                                                        )
-                                                    }
-                                                >
-                                                    Fill
-                                                </Button>
-                                            </Stack>
-                                        </Box>
-                                    ))}
-                                </Stack>
-                            </Stack>
-
-                            <Divider />
-
-                            <Stack sx={{ gap: 1.5 }}>
-                                <Typography variant="small">
-                                    Custom limits (optional)
-                                </Typography>
-                                <Stack direction="row" sx={{ gap: 1.5 }}>
-                                    <TextField
-                                        fullWidth
-                                        label="Context length"
-                                        placeholder="8192"
-                                        value={contextLength}
-                                        onChange={(event) =>
-                                            setContextLength(event.target.value)
-                                        }
-                                        error={!!contextError}
-                                        helperText={contextError ?? " "}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="Max output"
-                                        placeholder="2048"
-                                        value={maxTokens}
-                                        onChange={(event) =>
-                                            setMaxTokens(event.target.value)
-                                        }
-                                        error={!!maxTokensError}
-                                        helperText={maxTokensError ?? " "}
-                                    />
-                                </Stack>
-                                <Typography
-                                    variant="mini"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    Leave blank to use model defaults
-                                </Typography>
-                            </Stack>
-                        </Stack>
-                    </DialogContent>
-                    <DialogActions sx={{ px: 3, pb: 3 }}>
-                        <Stack sx={{ width: "100%", gap: 1.5 }}>
-                            <Button
-                                variant="contained"
-                                color="accent"
-                                disabled={
-                                    isSavingModel ||
-                                    modelGateStatus === "downloading"
-                                }
-                                onClick={handleSaveModel}
-                            >
-                                Use Custom Model
-                            </Button>
-                            <Button
-                                onClick={handleUseDefaultModel}
-                                color="secondary"
-                            >
-                                Use Default Model
-                            </Button>
-                            <Typography
-                                variant="mini"
-                                sx={{
-                                    color: "text.muted",
-                                    textAlign: "center",
-                                }}
-                            >
-                                Changes require re-downloading the model.
-                            </Typography>
-                        </Stack>
-                    </DialogActions>
-                </Dialog>
-            )}
-
-            <Notification
-                open={syncNotificationOpen}
-                onClose={() => setSyncNotificationOpen(false)}
-                attributes={syncNotification}
-                horizontal={isSmall ? "left" : "right"}
-                vertical="bottom"
-                sx={{
-                    width: "fit-content",
-                    maxWidth: "min(360px, 100vw)",
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    bottom: { xs: 96, md: 24 },
-                    "& .MuiButtonBase-root": {
-                        padding: "4px 8px",
-                        borderRadius: "999px",
-                        minHeight: 0,
-                        bgcolor: "background.paper",
-                        color: "text.base",
+                <Notification
+                    open={syncNotificationOpen}
+                    onClose={() => setSyncNotificationOpen(false)}
+                    attributes={syncNotification}
+                    horizontal={isSmall ? "left" : "right"}
+                    vertical="bottom"
+                    sx={{
+                        width: "fit-content",
+                        maxWidth: "min(360px, 100vw)",
+                        backgroundColor: "transparent",
                         boxShadow: "none",
-                    },
-                    "& .MuiStack-root": { gap: 1 },
-                    "& .MuiStack-root svg": { fontSize: "18px" },
-                    "& .MuiTypography-root": {
-                        fontSize: "13px",
-                        lineHeight: "18px",
-                    },
-                    "& .MuiIconButton-root": {
-                        padding: 0,
-                        bgcolor: "transparent",
-                    },
-                }}
-            />
-
-            {developerSettingsEnabled && (
-                <DevSettings
-                    open={showDevSettings}
-                    onClose={closeDevSettings}
+                        bottom: { xs: 96, md: 24 },
+                        "& .MuiButtonBase-root": {
+                            padding: "4px 8px",
+                            borderRadius: "999px",
+                            minHeight: 0,
+                            bgcolor: "background.paper",
+                            color: "text.base",
+                            boxShadow: "none",
+                        },
+                        "& .MuiStack-root": { gap: 1 },
+                        "& .MuiStack-root svg": { fontSize: "18px" },
+                        "& .MuiTypography-root": {
+                            fontSize: "13px",
+                            lineHeight: "18px",
+                        },
+                        "& .MuiIconButton-root": {
+                            padding: 0,
+                            bgcolor: "transparent",
+                        },
+                    }}
                 />
-            )}
-        </>
-    ),
+
+                {developerSettingsEnabled && (
+                    <DevSettings
+                        open={showDevSettings}
+                        onClose={closeDevSettings}
+                    />
+                )}
+            </>
+        );
+    },
 );

@@ -270,6 +270,59 @@ cleanup_resources() {
 
 trap cleanup_resources EXIT
 
+ensure_goldens_python_runtime_deps() {
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "Python golden generation requires uv, but uv is unavailable." >&2
+    return 1
+  fi
+
+  local venv_python="$UV_PROJECT_DIR/.venv/bin/python"
+  if [[ ! -x "$venv_python" ]]; then
+    echo "Initializing Python environment for parity goldens"
+    if ! uv run --project "$UV_PROJECT_DIR" --no-sync python -c "import sys" >/dev/null 2>&1; then
+      echo "Failed to initialize Python environment for parity goldens." >&2
+      return 1
+    fi
+  fi
+
+  local missing_modules=""
+  missing_modules="$(
+    "$venv_python" - <<'PY'
+import importlib.util
+
+required_modules = ("cv2", "onnxruntime", "requests", "numpy", "PIL", "pillow_heif")
+missing = [module for module in required_modules if importlib.util.find_spec(module) is None]
+print(" ".join(missing))
+PY
+  )"
+
+  if [[ -z "$missing_modules" ]]; then
+    return 0
+  fi
+
+  echo "Installing missing Python parity runtime dependencies (modules: $missing_modules)"
+  if ! uv pip install --python "$venv_python" opencv-python onnxruntime requests pillow-heif; then
+    echo "Failed to install Python parity runtime dependencies." >&2
+    return 1
+  fi
+
+  if ! "$venv_python" - <<'PY'
+import importlib.util
+import sys
+
+required_modules = ("cv2", "onnxruntime", "requests", "numpy", "PIL", "pillow_heif")
+missing = [module for module in required_modules if importlib.util.find_spec(module) is None]
+if missing:
+    print(f"Missing Python parity runtime modules after installation: {', '.join(missing)}", file=sys.stderr)
+    sys.exit(1)
+PY
+  then
+    return 1
+  fi
+
+  return 0
+}
+
 reserve_localhost_port() {
   python3 <<'PY'
 import socket
@@ -409,9 +462,12 @@ print(hashlib.sha256(sys.argv[1].encode("utf-8")).hexdigest())
 PY
 }
 
-preflight_platform_device_available() {
+platform_device_id() {
   local platform="$1"
-  python3 - "$platform" <<'PY'
+  local requested_device_id="${2:-}"
+  local selected
+  selected="$(
+    python3 - "$platform" "$requested_device_id" <<'PY'
 from __future__ import annotations
 
 import json
@@ -419,20 +475,37 @@ import subprocess
 import sys
 
 platform = sys.argv[1]
+requested_device_id = sys.argv[2]
 
-try:
-    raw = subprocess.check_output(
-        ["flutter", "devices", "--machine"],
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-except Exception:
+
+def command_output(command: list[str]) -> str | None:
+    try:
+        return subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
+    except Exception:
+        return None
+
+
+def command_json(command: list[str]) -> object | None:
+    output = command_output(command)
+    if output is None:
+        return None
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError:
+        return None
+
+raw = command_output(["flutter", "devices", "--machine"])
+if raw is None:
     sys.exit(2)
 
 try:
     devices = json.loads(raw)
 except json.JSONDecodeError:
     sys.exit(2)
+
+if not isinstance(devices, list):
+    sys.exit(2)
+
 
 def is_match(device: dict[str, object]) -> bool:
     target = str(device.get("targetPlatform", "")).lower()
@@ -443,51 +516,181 @@ def is_match(device: dict[str, object]) -> bool:
         return "ios" in target or "iphone" in name or "ipad" in name
     return False
 
-sys.exit(0 if any(is_match(device) for device in devices) else 1)
+
+def ios_simulator_metadata() -> dict[str, dict[str, object]]:
+    payload = command_json(["xcrun", "simctl", "list", "devices", "--json"])
+    if not isinstance(payload, dict):
+        return {}
+    devices_by_runtime = payload.get("devices", {})
+    if not isinstance(devices_by_runtime, dict):
+        return {}
+
+    metadata: dict[str, dict[str, object]] = {}
+    for simulator_list in devices_by_runtime.values():
+        if not isinstance(simulator_list, list):
+            continue
+        for simulator in simulator_list:
+            if not isinstance(simulator, dict):
+                continue
+            udid = str(simulator.get("udid", "")).strip()
+            if not udid:
+                continue
+            metadata[udid] = {
+                "is_available": bool(simulator.get("isAvailable", True)),
+                "is_booted": str(simulator.get("state", "")).strip().lower() == "booted",
+            }
+    return metadata
+
+
+def ios_physical_available_ids() -> set[str]:
+    payload = command_json(["xcrun", "xcdevice", "list"])
+    if not isinstance(payload, list):
+        return set()
+
+    available_ids: set[str] = set()
+    for device in payload:
+        if not isinstance(device, dict):
+            continue
+        if bool(device.get("simulator", False)):
+            continue
+        identifier = str(device.get("identifier", "")).strip()
+        if not identifier:
+            continue
+        if bool(device.get("available", False)):
+            available_ids.add(identifier)
+    return available_ids
+
+
+def android_device_states() -> dict[str, str]:
+    adb_output = command_output(["adb", "devices"])
+    if adb_output is None:
+        return {}
+
+    states: dict[str, str] = {}
+    for line in adb_output.splitlines()[1:]:
+        parts = line.strip().split()
+        if len(parts) >= 2:
+            states[parts[0]] = parts[1]
+    return states
+
+
+ios_simulators = ios_simulator_metadata() if platform == "ios" else {}
+ios_physical_ids = ios_physical_available_ids() if platform == "ios" else set()
+android_states = android_device_states() if platform == "android" else {}
+android_state_probe_attempted = platform == "android"
+
+candidates: list[tuple[tuple[int, str, int], str]] = []
+for index, device in enumerate(devices):
+    if not isinstance(device, dict):
+        continue
+    if not is_match(device):
+        continue
+    if not bool(device.get("isSupported", True)):
+        continue
+
+    identifier = str(device.get("id", "")).strip()
+    if not identifier:
+        continue
+
+    name = str(device.get("name", "")).strip().lower()
+    is_emulator = bool(device.get("emulator", False))
+
+    if platform == "ios":
+        if is_emulator:
+            simulator = ios_simulators.get(identifier)
+            if simulator is not None:
+                if not bool(simulator.get("is_available", True)):
+                    continue
+                score = 0 if bool(simulator.get("is_booted", False)) else 1
+            else:
+                # Keep flutter-visible simulators even when simctl metadata is unavailable.
+                score = 2
+        else:
+            if ios_physical_ids and identifier not in ios_physical_ids:
+                continue
+            score = 10
+    elif platform == "android":
+        if android_states:
+            if android_states.get(identifier) != "device":
+                continue
+        elif android_state_probe_attempted:
+            # adb unavailable/unreadable; keep flutter-visible devices as fallback.
+            pass
+
+        if is_emulator or identifier.startswith("emulator-"):
+            score = 0
+        else:
+            score = 1
+    else:
+        continue
+
+    candidates.append(((score, name, index), identifier))
+
+if requested_device_id:
+    for _, identifier in candidates:
+        if identifier == requested_device_id:
+            print(identifier)
+            sys.exit(0)
+    sys.exit(1)
+
+if not candidates:
+    sys.exit(1)
+
+candidates.sort(key=lambda item: item[0])
+print(candidates[0][1])
+sys.exit(0)
 PY
+  )"
+
+  if [[ -n "$selected" ]]; then
+    echo "$selected"
+    return 0
+  fi
+
+  return 1
+}
+
+preflight_platform_device_available() {
+  local platform="$1"
+  local device_lookup_exit=0
+  if platform_device_id "$platform" >/dev/null 2>&1; then
+    return 0
+  else
+    device_lookup_exit=$?
+  fi
+  case "$device_lookup_exit" in
+    1)
+      return 1
+      ;;
+    *)
+      return 2
+      ;;
+  esac
 }
 
 preflight_platform_device_id_available() {
   local platform="$1"
   local device_id="$2"
-  python3 - "$platform" "$device_id" <<'PY'
-from __future__ import annotations
+  local selected
+  local device_lookup_exit=0
+  if selected="$(platform_device_id "$platform" "$device_id" 2>/dev/null)"; then
+    :
+  else
+    device_lookup_exit=$?
+    case "$device_lookup_exit" in
+      1)
+        return 1
+        ;;
+      *)
+        return 2
+        ;;
+    esac
+  fi
 
-import json
-import subprocess
-import sys
-
-platform = sys.argv[1]
-device_id = sys.argv[2]
-
-try:
-    raw = subprocess.check_output(
-        ["flutter", "devices", "--machine"],
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-except Exception:
-    sys.exit(2)
-
-try:
-    devices = json.loads(raw)
-except json.JSONDecodeError:
-    sys.exit(2)
-
-def is_platform_match(device: dict[str, object]) -> bool:
-    target = str(device.get("targetPlatform", "")).lower()
-    name = str(device.get("name", "")).lower()
-    if platform == "android":
-        return "android" in target or "android" in name
-    if platform == "ios":
-        return "ios" in target or "iphone" in name or "ipad" in name
-    return False
-
-for device in devices:
-    if str(device.get("id", "")) == device_id and is_platform_match(device):
-        sys.exit(0)
-sys.exit(1)
-PY
+  if [[ "$selected" == "$device_id" ]]; then
+    return 0
+  fi
+  return 1
 }
 
 resolve_android_tool_path() {
@@ -1187,6 +1390,12 @@ if $has_mobile_platform; then
   fi
 fi
 
+echo "Ensuring Python runtime dependencies for goldens are available"
+if ! ensure_goldens_python_runtime_deps; then
+  echo "Python dependency preflight failed; parity output not generated." >&2
+  exit 1
+fi
+
 echo "Generating Python goldens"
 goldens_log="$LOG_DIR/generate_goldens.log"
 if $VERBOSE; then
@@ -1257,93 +1466,7 @@ run_desktop_runner() {
 
 platform_device_available() {
   local platform="$1"
-  python3 - "$platform" <<'PY'
-from __future__ import annotations
-
-import json
-import subprocess
-import sys
-
-platform = sys.argv[1]
-
-try:
-    raw = subprocess.check_output(
-        ["flutter", "devices", "--machine"],
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-except Exception:
-    sys.exit(2)
-
-try:
-    devices = json.loads(raw)
-except json.JSONDecodeError:
-    sys.exit(2)
-
-def is_match(device: dict[str, object]) -> bool:
-    target = str(device.get("targetPlatform", "")).lower()
-    name = str(device.get("name", "")).lower()
-    if platform == "android":
-        return "android" in target or "android" in name
-    if platform == "ios":
-        return "ios" in target or "iphone" in name or "ipad" in name
-    return False
-
-sys.exit(0 if any(is_match(device) for device in devices) else 1)
-PY
-}
-
-platform_device_id() {
-  local platform="$1"
-  local selected
-  selected="$(
-    python3 - "$platform" <<'PY'
-from __future__ import annotations
-
-import json
-import subprocess
-import sys
-
-platform = sys.argv[1]
-
-try:
-    raw = subprocess.check_output(
-        ["flutter", "devices", "--machine"],
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-except Exception:
-    sys.exit(2)
-
-try:
-    devices = json.loads(raw)
-except json.JSONDecodeError:
-    sys.exit(2)
-
-def is_match(device: dict[str, object]) -> bool:
-    target = str(device.get("targetPlatform", "")).lower()
-    name = str(device.get("name", "")).lower()
-    if platform == "android":
-        return "android" in target or "android" in name
-    if platform == "ios":
-        return "ios" in target or "iphone" in name or "ipad" in name
-    return False
-
-for device in devices:
-    if is_match(device):
-        print(device.get("id", ""))
-        sys.exit(0)
-
-sys.exit(1)
-PY
-  )"
-
-  if [[ -n "$selected" ]]; then
-    echo "$selected"
-    return 0
-  fi
-
-  return 1
+  preflight_platform_device_available "$platform"
 }
 
 run_mobile_runner() {

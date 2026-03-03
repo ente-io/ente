@@ -9,6 +9,7 @@ import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
 
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
@@ -35,6 +36,7 @@ class ClipVectorDB {
   // only have a single app-wide reference to the database
   Future<VectorDb>? _vectorDbFuture;
   Future<void>? _warmupFuture;
+  final Lock _writeLock = Lock();
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -110,13 +112,23 @@ class ClipVectorDB {
     _migrationDone = false;
   }
 
+  Future<void> _runWriteOperation(
+    Future<void> Function(VectorDb db) operation,
+  ) async {
+    final db = await _vectorDB;
+    await _writeLock.synchronized(() async {
+      await operation(db);
+    });
+  }
+
   Future<void> insertEmbedding({
     required int fileID,
     required List<double> embedding,
   }) async {
-    final db = await _vectorDB;
     try {
-      await db.addVector(key: BigInt.from(fileID), vector: embedding);
+      await _runWriteOperation((db) async {
+        await db.addVector(key: BigInt.from(fileID), vector: embedding);
+      });
     } catch (e, s) {
       _logger.severe("Error inserting embedding", e, s);
       rethrow;
@@ -127,10 +139,14 @@ class ClipVectorDB {
     required List<int> fileIDs,
     required List<Float32List> embeddings,
   }) async {
-    final db = await _vectorDB;
+    if (fileIDs.isEmpty || embeddings.isEmpty) {
+      return;
+    }
     final bigKeys = Uint64List.fromList(fileIDs);
     try {
-      await db.bulkAddVectors(keys: bigKeys, vectors: embeddings);
+      await _runWriteOperation((db) async {
+        await db.bulkAddVectors(keys: bigKeys, vectors: embeddings);
+      });
     } catch (e, s) {
       _logger.severe("Error bulk inserting embeddings", e, s);
       rethrow;
@@ -156,10 +172,15 @@ class ClipVectorDB {
   }
 
   Future<void> deleteEmbeddings(List<int> fileIDs) async {
-    final db = await _vectorDB;
+    if (fileIDs.isEmpty) {
+      return;
+    }
     try {
-      final deletedCount =
-          await db.bulkRemoveVectors(keys: Uint64List.fromList(fileIDs));
+      BigInt deletedCount = BigInt.zero;
+      await _runWriteOperation((db) async {
+        deletedCount =
+            await db.bulkRemoveVectors(keys: Uint64List.fromList(fileIDs));
+      });
       _logger.info(
         "Deleted $deletedCount embeddings, from ${fileIDs.length} keys",
       );
@@ -171,9 +192,10 @@ class ClipVectorDB {
 
   Future<void> deleteAllEmbeddings() async {
     await invalidateMigrationState();
-    final db = await _vectorDB;
     try {
-      await db.resetIndex();
+      await _runWriteOperation((db) async {
+        await db.resetIndex();
+      });
     } catch (e, s) {
       _logger.severe("Error deleting all embeddings", e, s);
       rethrow;
@@ -388,9 +410,11 @@ class ClipVectorDB {
     await invalidateMigrationState();
     final db = await _vectorDB;
     try {
-      await db.deleteIndex();
-      _vectorDbFuture = null;
-      _warmupFuture = null;
+      await _writeLock.synchronized(() async {
+        await db.deleteIndex();
+        _vectorDbFuture = null;
+        _warmupFuture = null;
+      });
     } catch (e, s) {
       _logger.severe("Error deleting index", e, s);
       rethrow;
@@ -398,22 +422,24 @@ class ClipVectorDB {
   }
 
   Future<void> deleteIndexFile() async {
-    try {
-      final documentsDirectory = await getApplicationDocumentsDirectory();
-      final String dbPath = join(documentsDirectory.path, _databaseName);
-      _logger.info("Delete index file: DB path " + dbPath);
-      final file = File(dbPath);
-      if (await file.exists()) {
-        await file.delete();
+    await _writeLock.synchronized(() async {
+      try {
+        final documentsDirectory = await getApplicationDocumentsDirectory();
+        final String dbPath = join(documentsDirectory.path, _databaseName);
+        _logger.info("Delete index file: DB path " + dbPath);
+        final file = File(dbPath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        _logger.info("Deleted index file on disk");
+        _vectorDbFuture = null;
+        _warmupFuture = null;
+        await invalidateMigrationState();
+      } catch (e, s) {
+        _logger.severe("Error deleting index file on disk", e, s);
+        rethrow;
       }
-      _logger.info("Deleted index file on disk");
-      _vectorDbFuture = null;
-      _warmupFuture = null;
-      await invalidateMigrationState();
-    } catch (e, s) {
-      _logger.severe("Error deleting index file on disk", e, s);
-      rethrow;
-    }
+    });
   }
 }
 

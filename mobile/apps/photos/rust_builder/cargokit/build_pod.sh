@@ -43,23 +43,45 @@ if [[ -n "$PODS_ROOT" ]] && [[ -d "$PODS_ROOT/onnxruntime-c/onnxruntime.xcframew
   ORT_XCFWK_LOCATION="$PODS_ROOT/onnxruntime-c/onnxruntime.xcframework"
   export ORT_IOS_XCFWK_LOCATION="$ORT_XCFWK_LOCATION"
 
-  # ort-sys currently does not handle x86_64 iOS simulator triples for
-  # ORT_IOS_XCFWK_LOCATION, so provide ORT_LIB_LOCATION with a thin archive.
-  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]] && [[ "$CARGOKIT_DARWIN_ARCHS" == "x86_64" ]]; then
-    ORT_SIM_LIB="$ORT_XCFWK_LOCATION/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime"
-    if [[ -f "$ORT_SIM_LIB" ]]; then
-      ORT_LIB_TEMP_DIR="$TARGET_TEMP_DIR/ort_sys_sim_x86_64"
-      mkdir -p "$ORT_LIB_TEMP_DIR"
-      lipo -thin x86_64 "$ORT_SIM_LIB" -output "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
-      export ORT_LIB_LOCATION="$ORT_LIB_TEMP_DIR"
-
-      # Link the simulator clang runtime; ort-sys links the device variant for
-      # x86_64-apple-ios, which misses simulator-only symbols.
-      CLANG_RESOURCE_DIR="$(xcrun clang --print-resource-dir 2>/dev/null || true)"
-      if [[ -n "$CLANG_RESOURCE_DIR" ]] && [[ -d "$CLANG_RESOURCE_DIR/lib/darwin" ]]; then
-        export RUSTFLAGS="${RUSTFLAGS} -L native=${CLANG_RESOURCE_DIR}/lib/darwin -l clang_rt.iossim"
-      fi
+  # ort-sys 2.0.0-rc.4 (used in this repo) only respects ORT_LIB_LOCATION.
+  # Build a per-target static archive named libonnxruntime.a so it can link
+  # against ONNX Runtime from the CocoaPods xcframework.
+  ORT_ARCHIVE_SOURCE=""
+  ORT_ARCHIVE_ARCH=""
+  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphoneos" ]]; then
+    ORT_ARCHIVE_SOURCE="$ORT_XCFWK_LOCATION/ios-arm64/onnxruntime.framework/onnxruntime"
+    ORT_ARCHIVE_ARCH="arm64"
+  elif [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]]; then
+    ORT_ARCHIVE_SOURCE="$ORT_XCFWK_LOCATION/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime"
+    if [[ "$CARGOKIT_DARWIN_ARCHS" == "x86_64" ]]; then
+      ORT_ARCHIVE_ARCH="x86_64"
+    elif [[ "$CARGOKIT_DARWIN_ARCHS" == "arm64" ]]; then
+      ORT_ARCHIVE_ARCH="arm64"
     fi
+  fi
+
+  if [[ -n "$ORT_ARCHIVE_SOURCE" ]] && [[ -f "$ORT_ARCHIVE_SOURCE" ]]; then
+    ORT_LIB_TEMP_DIR="$TARGET_TEMP_DIR/ort_sys_${CARGOKIT_DARWIN_PLATFORM_NAME}_${CARGOKIT_DARWIN_ARCHS// /_}"
+    mkdir -p "$ORT_LIB_TEMP_DIR"
+    if [[ -n "$ORT_ARCHIVE_ARCH" ]]; then
+      lipo -thin "$ORT_ARCHIVE_ARCH" "$ORT_ARCHIVE_SOURCE" -output "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
+    else
+      cp "$ORT_ARCHIVE_SOURCE" "$ORT_LIB_TEMP_DIR/libonnxruntime.a"
+    fi
+    export ORT_LIB_LOCATION="$ORT_LIB_TEMP_DIR"
+  fi
+
+  # ONNX Runtime archives can reference availability helpers from clang runtime.
+  # Explicitly link the platform-appropriate clang runtime for Rust linking.
+  CLANG_RUNTIME_LIB=""
+  if [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphoneos" ]]; then
+    CLANG_RUNTIME_LIB="clang_rt.ios"
+  elif [[ "$CARGOKIT_DARWIN_PLATFORM_NAME" == "iphonesimulator" ]]; then
+    CLANG_RUNTIME_LIB="clang_rt.iossim"
+  fi
+  CLANG_RESOURCE_DIR="$(xcrun clang --print-resource-dir 2>/dev/null || true)"
+  if [[ -n "$CLANG_RUNTIME_LIB" ]] && [[ -n "$CLANG_RESOURCE_DIR" ]] && [[ -d "$CLANG_RESOURCE_DIR/lib/darwin" ]]; then
+    export RUSTFLAGS="${RUSTFLAGS} -L native=${CLANG_RESOURCE_DIR}/lib/darwin -l ${CLANG_RUNTIME_LIB}"
   fi
 fi
 

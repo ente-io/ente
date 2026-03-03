@@ -663,7 +663,7 @@ class _SettingsBody extends StatelessWidget {
     EnteColorScheme colorScheme,
   ) {
     return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).support,
+      title: AppLocalizations.of(context).helpAndSupport,
       leadingIconWidget: _buildIconWidget(
         HugeIcons.strokeRoundedHelpCircle,
         colorScheme,

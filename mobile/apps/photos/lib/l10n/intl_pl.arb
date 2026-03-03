@@ -9,6 +9,7 @@
   "cancel": "Anuluj",
   "verify": "Zweryfikuj",
   "invalidEmailAddress": "Nieprawidłowy adres e-mail",
+  "validEmailAddress": "Prawidłowy adres e-mail",
   "enterValidEmail": "Prosimy podać prawidłowy adres e-mail.",
   "deleteAccount": "Usuń konto",
   "deleteAccountWarning": "Spowoduje to usunięcie Twojego konta Ente Auth, Ente Zdjęcia i Ente Locker.",
@@ -59,6 +60,7 @@
   "incorrectRecoveryKeyBody": "Kod jest nieprawidłowy",
   "forgotPassword": "Nie pamiętam hasła",
   "enterYourRecoveryKey": "Wprowadź swój klucz odzyskiwania",
+  "noRecoveryKey": "Zapomniałeś klucz odzyskiwania?",
   "sorry": "Przepraszamy",
   "noRecoveryKeyNoDecryption": "Ze względu na charakter naszego protokołu szyfrowania end-to-end, dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania",
   "verifyEmail": "Zweryfikuj adres e-mail",
@@ -66,6 +68,7 @@
   "checkInboxAndSpamFolder": "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację",
   "tapToEnterCode": "Stuknij, aby wprowadzić kod",
   "resendEmail": "Wyślij e-mail ponownie",
+  "resendCode": "Wyślij ponownie kod",
   "weHaveSendEmailTo": "Wysłaliśmy wiadomość na adres <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
@@ -87,6 +90,10 @@
   "weakStrength": "Słabe",
   "strongStrength": "Silne",
   "moderateStrength": "Umiarkowane",
+  "strongPassword": "Silne hasło",
+  "passwordRequirements": "Użyj 9+ znaków, wielkiej litery i znaku specjalnego",
+  "passwordsMatch": "Hasła się zgadzają",
+  "passwordsDontMatch": "Hasła nie są identyczne",
   "passwordStrength": "Siła hasła: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -116,6 +123,7 @@
   "changeEmail": "Zmień adres e-mail",
   "enterYourPassword": "Wprowadź hasło",
   "welcomeBack": "Witaj ponownie!",
+  "readyToBackupSubtitle": "Twoje zdjęcia zostaną zsynchronizowane w tle. Pierwsza kopia zapasowa może zająć trochę czasu.",
   "contactSupport": "Skontaktuj się z pomocą techniczną",
   "locationPickerTip": "Możesz również dodać lokalizację wyśrodkowaną na zdjęciu z ekranu informacji o zdjęciu",
   "@locationPickerTip": {
@@ -129,8 +137,10 @@
   "verifyPassword": "Zweryfikuj hasło",
   "recoveryKey": "Klucz odzyskiwania",
   "recoveryKeyOnForgotPassword": "Jeśli zapomnisz hasła, jedynym sposobem odzyskania danych jest ten klucz.",
+  "recoveryKeySaveDescription": "Zapisz ten klucz w bezpiecznym miejscu.",
   "doThisLater": "Spróbuj później",
   "saveKey": "Zapisz klucz",
+  "shareKey": "Udostępnij klucz",
   "recoveryKeyCopiedToClipboard": "Klucz odzyskiwania został skopiowany do schowka",
   "recoverAccount": "Odzyskaj konto",
   "recover": "Odzyskaj",
@@ -151,6 +161,7 @@
   "copypasteThisCodentoYourAuthenticatorApp": "Kopiuj, wklej ten kod\ndo swojej aplikacji uwierzytelniającej",
   "tapToCopy": "naciśnij aby skopiować",
   "scanThisBarcodeWithnyourAuthenticatorApp": "Zeskanuj ten kod kreskowy używając\nswojej aplikacji uwierzytelniającej",
+  "twoFAVerification": "Weryfikacja 2FA",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Wprowadź 6-cyfrowy kod z\nTwojej aplikacji uwierzytelniającej",
   "confirm": "Potwierdź",
   "setupComplete": "Konfiguracja ukończona",
@@ -304,9 +315,13 @@
   "enterCodeDescription": "Wprowadź kod dostarczony przez znajomego, aby uzyskać bezpłatne miejsce dla was obojga",
   "apply": "Zastosuj",
   "failedToApplyCode": "Nie udało się zastosować kodu",
+  "invalidReferralCode": "Nieprawidłowy kod",
   "enterReferralCode": "Wprowadź kod polecenia",
   "codeAppliedPageTitle": "Kod został zastosowany",
+  "changeYourReferralCode": "Zmień swój kod",
   "change": "Zmień",
+  "saveCode": "Zapisz kod",
+  "referralCodeHint": "Możesz zmienić ten kod do 3 razy",
   "unavailableReferralCode": "Przepraszamy, ten kod jest niedostępny.",
   "codeChangeLimitReached": "Przepraszamy, osiągnięto limit zmian kodu.",
   "onlyFamilyAdminCanChangeCode": "Skontaktuj się z {familyAdminEmail}, aby zmienić swój kod.",
@@ -315,14 +330,23 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB zdobyte!",
   "details": "Szczegóły",
   "claimMore": "Zdobądź więcej!",
+  "earnMoreSpace": "Zdobądź więcej miejsca!",
   "theyAlsoGetXGb": "Oni również otrzymują {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB za każdym razem, gdy ktoś zarejestruje się w płatnym planie i użyje twojego kodu",
   "claimFreeStorage": "Odbierz bezpłatną przestrzeń dyskową",
   "inviteYourFriends": "Zaproś znajomych",
+  "earnFreeStorage": "Zdobywaj bezpłatną przestrzeń dyskową",
+  "shareCodeEarnStorage": "Udostępnij swój kod, zdobądź bezpłatną przestrzeń dyskową.",
+  "youBothGet": "Oboje otrzymacie",
   "failedToFetchReferralDetails": "Nie można pobrać szczegółów polecenia. Spróbuj ponownie później.",
+  "referralStep1": "1. Dostosuj i udostępniaj swój kod.",
+  "referralStep2": "2. Oni rejestrują się do Ente, używając Twojego kodu.",
+  "referralStep3": "3. {storageInGB}GB za darmo dla nich + {storageInGB}GB za darmo dla Ciebie, gdy ulepszą swoje konto.",
   "referralsAreCurrentlyPaused": "Wysyłanie poleceń jest obecnie wstrzymane",
+  "youCanAtMaxDoubleYourStorage": "Maksymalnie możesz podwoić swoją przestrzeń dyskową",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Twoja rodzina odebrała {storageAmountInGb} GB do tej pory} false {Odebrałeś {storageAmountInGb} GB do tej pory} other {Odebrałeś {storageAmountInGb} GB do tej pory!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -346,6 +370,11 @@
   "freeStorageClaimed": "Bezpłatna pamięć, którą odebrano",
   "freeStorageUsable": "Darmowa pamięć użyteczna",
   "usableReferralStorageInfo": "Użyteczna przestrzeń dyskowa jest ograniczona przez Twój obecny plan. Nadmiar zadeklarowanej przestrzeni dyskowej stanie się automatycznie użyteczny po uaktualnieniu planu.",
+  "referralStats": "Statystyki poleceń",
+  "usedYourCode": "użyto Twojego kodu",
+  "claimedByYou": "odebrane przez Ciebie",
+  "earned": "zdobyte",
+  "usable": "dostępne",
   "removeFromAlbumTitle": "Usunąć z albumu?",
   "removeFromAlbum": "Usuń z albumu",
   "itemsWillBeRemovedFromAlbum": "Wybrane elementy zostaną usunięte z tego albumu",
@@ -358,6 +387,7 @@
   "subscribeToChangeLinkSetting": "Potrzebujesz płatnej subskrypcji, aby zmienić to ustawienie linku.",
   "subscribe": "Subskrybuj",
   "canOnlyRemoveFilesOwnedByYou": "Można usuwać tylko pliki należące do Ciebie",
+  "cannotMoveToSharedAlbums": "Nie można przenieść do udostępnionych albumów",
   "deleteSharedAlbum": "Usunąć udostępniony album?",
   "deleteAlbum": "Usuń album",
   "deleteAlbumDialog": "Usunąć również zdjęcia (i wideo) znajdujące się w tym albumie ze <bold>wszystkich</bold> innych albumów, których są częścią?",
@@ -631,6 +661,7 @@
   "reportBug": "Zgłoś błąd",
   "suggestFeatures": "Zaproponuj funkcje",
   "support": "Wsparcie techniczne",
+  "appearance": "Wygląd",
   "theme": "Motyw",
   "lightTheme": "Jasny",
   "darkTheme": "Ciemny",
@@ -728,6 +759,11 @@
   "youAreOnAFamilyPlan": "Jesteś w planie rodzinnym!",
   "contactFamilyAdmin": "Prosimy skontaktować się z <green>{familyAdminEmail}</green>, by zarzadząć swoją subskrypcją",
   "leaveFamily": "Opuść rodzinę",
+  "youAreOnAFamilyPlanSubtitle": "Jesteś w planie rodzinnym.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Czy jesteś pewien/pewna, że chcesz opuścić plan rodzinny?",
   "leave": "Wyjdź",
   "rateTheApp": "Oceń aplikację",
@@ -1060,7 +1096,6 @@
   "didYouKnow": "Czy wiedziałeś/aś?",
   "loadingMessage": "Wczytywanie Twoich zdjęć...",
   "loadMessage1": "Możesz udostępnić swoją subskrypcję swojej rodzinie",
-  "loadMessage2": "Do tej pory zachowaliśmy ponad 200 milionów wspomnień",
   "loadMessage3": "Przechowujemy 3 kopie Twoich danych, jedną w podziemnym schronie",
   "loadMessage4": "Wszystkie nasze aplikacje są otwarto źródłowe",
   "loadMessage5": "Nasz kod źródłowy i kryptografia zostały poddane zewnętrznemu audytowi",
@@ -1209,6 +1244,10 @@
   "noImagesWithLocation": "Brak zdjęć z lokalizacją",
   "unpinAlbum": "Odepnij album",
   "pinAlbum": "Przypnij album",
+  "pinToTop": "Przypnij na górze",
+  "unpin": "Odepnij",
+  "unpinPerson": "Odepnij osobę",
+  "visibility": "Widoczność",
   "create": "Utwórz",
   "viewAll": "Pokaż wszystkie",
   "nothingSharedWithYouYet": "Nic Ci jeszcze nie udostępniono",
@@ -1401,9 +1440,31 @@
   "loadingYourPhotos": "Wczytywanie Twoich zdjęć...",
   "processingImport": "Przetwarzanie {folderName}...",
   "personName": "Nazwa osoby",
+  "addPerson": "Dodaj osobę",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Dodaj do osoby",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "noFacesDetectedTapToAdd": "Nie wykryto twarzy, naciśnij, aby dodać.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
   "addNewPerson": "Dodaj nową osobę",
   "addNameOrMerge": "Dodaj nazwę lub scal",
   "mergeWithExisting": "Scal z istniejącym",
+  "mergeWithPersonTitle": "Połączyć z {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nowa osoba",
   "addName": "Dodaj nazwę",
   "add": "Dodaj",
@@ -1872,5 +1933,24 @@
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
   "deletingDash": "Usuwanie - ",
-  "grantPermission": "Przyznaj uprawnienie"
+  "grantPermission": "Przyznaj uprawnienie",
+  "offlineEnableBackupDesc": "Zarejestruj się, aby zachować swoje wspomnienia z Ente.",
+  "offlineEnableBackupAction": "Rozpocznij z 10 GB ZA DARMO",
+  "offlineSettingsBannerTitle": "Nie możemy zobaczyć Twoich zdjęć. Nigdy.",
+  "alreadyHaveAnAccount": "Posiadasz już konto?",
+  "loginToEnte": "Zaloguj się do Ente",
+  "privateAndSecureBackups": "Prywatne i bezpieczne kopie zapasowe",
+  "mlProgressBannerDescription": "Twoje zdjęcia są przetwarzane na urządzeniu w celu wykrycia twarzy, obiektów i innych.",
+  "mlProgressBannerStatus": "{indexed} z {total} przetworzonych zdjęć",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "signUp": "Zarejestruj się"
 }

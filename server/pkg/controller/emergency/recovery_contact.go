@@ -27,7 +27,8 @@ func (c *Controller) StartRecovery(ctx *gin.Context,
 		log.WithField("userID", actorUserID).WithField("req", req).
 			Warn("No need to send email")
 	} else {
-		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusInitiated, nil)
+		recoveryNoticeInDays := int64(contact.NoticePeriodInHrs / 24)
+		go c.sendRecoveryNotification(ctx, req.UserID, req.EmergencyContactID, ente.RecoveryStatusInitiated, &recoveryNoticeInDays)
 	}
 	if err != nil {
 		return stacktrace.Propagate(err, "")

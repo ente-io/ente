@@ -3,8 +3,14 @@ use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
 
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 const FAST_SEARCH_STEP_COUNTS: [usize; 5] = [200, 500, 2000, 5000, 10000];
+static INDEX_SAVE_TEMP_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+type SearchMatch = (Vec<u64>, Vec<f32>);
+type BulkSearchMatch = (Vec<Vec<u64>>, Vec<Vec<f32>>);
+type BulkSearchByKeyMatch = (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>);
 
 #[frb(opaque)]
 pub struct VectorDB {
@@ -14,9 +20,14 @@ pub struct VectorDB {
 
 impl VectorDB {
     #[frb(sync)]
-    pub fn new(file_path: &str, dimensions: usize) -> Self {
+    pub fn new(file_path: &str, dimensions: usize) -> Result<Self, String> {
         let path = PathBuf::from(file_path);
-        let file_exists = path.try_exists().unwrap_or(false);
+        let file_exists = path.try_exists().map_err(|e| {
+            format!(
+                "Failed to check index file existence at {}: {e}",
+                path.display()
+            )
+        })?;
 
         let mut options = IndexOptions::default();
         options.dimensions = dimensions;
@@ -26,10 +37,10 @@ impl VectorDB {
         options.expansion_add = 0; // auto
         options.expansion_search = 0; // auto
 
-        let index = Index::new(&options).expect("Failed to create index");
+        let index = Index::new(&options).map_err(|e| format!("Failed to create index: {e}"))?;
         index
             .reserve(1000)
-            .expect("Failed to reserve space in index");
+            .map_err(|e| format!("Failed to reserve space in index: {e}"))?;
 
         let db = Self { index, path };
 
@@ -39,111 +50,135 @@ impl VectorDB {
             // - view() creates a read-only memory-mapped view (immutable)
             // - load() loads the index into RAM for read/write operations (mutable)
             // Using view() causes "Can't add to an immutable index" error
-            db.index.load(file_path).expect("Failed to load index");
+            db.index
+                .load(file_path)
+                .map_err(|e| format!("Failed to load index from {file_path}: {e}"))?;
         } else {
             println!("Creating new index.");
-            db.save_index();
+            db.save_index()?;
         }
-        db
+        Ok(db)
     }
 
-    fn save_index(&self) {
+    fn save_index(&self) -> Result<(), String> {
         // Ensure directory exists
         if let Some(parent) = self.path.parent() {
-            std::fs::create_dir_all(parent).expect("Failed to create directory");
+            std::fs::create_dir_all(parent).map_err(|e| {
+                format!(
+                    "Failed to create index parent directory {}: {e}",
+                    parent.display()
+                )
+            })?;
         }
 
         // Use atomic write: save to temp file first, then rename
-        let temp_path = self.path.with_extension("tmp");
-        let temp_path_str = temp_path.to_str().expect("Invalid temp path");
+        // Use a unique temp path per save so concurrent saves can never race
+        // by clobbering the same temporary file.
+        let save_sequence = INDEX_SAVE_TEMP_COUNTER.fetch_add(1, Ordering::Relaxed);
+        let temp_path =
+            self.path
+                .with_extension(format!("tmp.{}.{}", std::process::id(), save_sequence));
+        let temp_path_str = temp_path
+            .to_str()
+            .ok_or_else(|| format!("Invalid temp path: {}", temp_path.display()))?;
 
         // Save to temporary file
-        match self.index.save(temp_path_str) {
-            Ok(_) => {
-                // Atomic rename - guaranteed atomic on iOS/Android
-                // This will atomically replace the existing file
-                // The rename ensures we never have a partially written file,
-                // even if the app is suspended or crashes
-                match std::fs::rename(&temp_path, &self.path) {
-                    Ok(_) => {
-                        println!("Successfully saved index atomically");
-                    }
-                    Err(e) => {
-                        println!("Failed to rename temp index file: {:?}", e);
-                        // Try to clean up temp file
-                        let _ = std::fs::remove_file(&temp_path);
-                        panic!("Failed to atomically save index: {:?}", e);
-                    }
-                }
-            }
-            Err(e) => {
-                println!("Failed to save index to temp file: {:?}", e);
-                // Try to clean up temp file if it exists
-                let _ = std::fs::remove_file(&temp_path);
-                panic!("Failed to save index: {:?}", e);
-            }
+        self.index.save(temp_path_str).map_err(|e| {
+            let _ = std::fs::remove_file(&temp_path);
+            format!(
+                "Failed to save index to temp file {}: {e}",
+                temp_path.display()
+            )
+        })?;
+
+        // Atomic rename - guaranteed atomic on iOS/Android
+        // This will atomically replace the existing file
+        // The rename ensures we never have a partially written file,
+        // even if the app is suspended or crashes
+        if let Err(e) = std::fs::rename(&temp_path, &self.path) {
+            let _ = std::fs::remove_file(&temp_path);
+            return Err(format!(
+                "Failed to atomically save index (rename {} -> {}): {e}",
+                temp_path.display(),
+                self.path.display()
+            ));
         }
+
+        println!("Successfully saved index atomically");
+        Ok(())
     }
 
-    fn ensure_capacity(&self, margin: usize) {
+    fn ensure_capacity(&self, margin: usize) -> Result<(), String> {
         let current_size = self.index.size();
         let capacity = self.index.capacity();
         if current_size + margin + 1000 >= capacity {
             self.index
                 .reserve(current_size + margin)
-                .expect("Failed to reserve space in index");
+                .map_err(|e| format!("Failed to reserve space in index: {e}"))?;
         }
+        Ok(())
     }
 
-    pub fn add_vector(&self, key: u64, vector: &[f32]) {
+    pub fn add_vector(&mut self, key: u64, vector: &[f32]) -> Result<(), String> {
         if self.contains_vector(key) {
-            self.remove_vector(key);
+            self.index
+                .remove(key)
+                .map_err(|e| format!("Failed to remove existing vector for key {key}: {e}"))?;
         } else {
-            self.ensure_capacity(1);
+            self.ensure_capacity(1)?;
         }
-        self.index.add(key, vector).expect("Failed to add vector");
-        self.save_index();
+        self.index
+            .add(key, vector)
+            .map_err(|e| format!("Failed to add vector for key {key}: {e}"))?;
+        self.save_index()
     }
 
-    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &[Vec<f32>]) {
-        self.ensure_capacity(keys.len());
+    pub fn bulk_add_vectors(&mut self, keys: Vec<u64>, vectors: &[Vec<f32>]) -> Result<(), String> {
+        self.ensure_capacity(keys.len())?;
         for (key, vector) in keys.iter().zip(vectors.iter()) {
             if self.contains_vector(*key) {
-                self.remove_vector(*key);
+                self.index.remove(*key).map_err(|e| {
+                    format!("Failed to remove existing vector for key {key} before bulk add: {e}")
+                })?;
             }
             self.index
                 .add(*key, vector)
-                .expect("Failed to (bulk) add vector");
+                .map_err(|e| format!("Failed to bulk add vector for key {key}: {e}"))?;
         }
-        self.save_index();
+        self.save_index()
     }
 
-    pub fn search_vectors(&self, query: &[f32], count: usize, exact: bool) -> (Vec<u64>, Vec<f32>) {
+    pub fn search_vectors(
+        &self,
+        query: &[f32],
+        count: usize,
+        exact: bool,
+    ) -> Result<SearchMatch, String> {
         let matches = if exact {
             self.index
                 .exact_search(query, count)
-                .expect("Failed to exact search vectors")
+                .map_err(|e| format!("Failed to exact search vectors: {e}"))?
         } else {
             self.index
                 .search(query, count)
-                .expect("Failed to search vectors")
+                .map_err(|e| format!("Failed to search vectors: {e}"))?
         };
-        (matches.keys, matches.distances)
+        Ok((matches.keys, matches.distances))
     }
 
     pub fn approx_search_vectors_within_similarity(
         &self,
         query: &[f32],
         minimum_similarity: f32,
-    ) -> (Vec<u64>, Vec<f32>) {
+    ) -> Result<SearchMatch, String> {
         let index_size = self.index.size();
         if index_size == 0 || !minimum_similarity.is_finite() {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         let max_distance = 1.0_f32 - minimum_similarity;
         if !max_distance.is_finite() || max_distance < 0.0 {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         self.fast_search_vectors_within_distance(query, max_distance)
@@ -155,27 +190,31 @@ impl VectorDB {
         allowed_keys: &[u64],
         count: usize,
         max_distance: f32,
-    ) -> (Vec<u64>, Vec<f32>) {
+    ) -> Result<SearchMatch, String> {
         let index_size = self.index.size();
         if index_size == 0 || count == 0 || allowed_keys.is_empty() {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
         if !max_distance.is_finite() || max_distance < 0.0 {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
         let search_count = count.min(allowed.len()).min(index_size);
         if search_count == 0 {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         let matches = self
             .index
             .filtered_search(query, search_count, |key| allowed.contains(&key))
-            .expect("Failed to run filtered vector search");
+            .map_err(|e| format!("Failed to run filtered vector search: {e}"))?;
 
-        Self::truncate_sorted_matches_within_distance(matches.keys, matches.distances, max_distance)
+        Ok(Self::truncate_sorted_matches_within_distance(
+            matches.keys,
+            matches.distances,
+            max_distance,
+        ))
     }
 
     pub fn bulk_approx_filtered_search_vectors_within_distance(
@@ -184,10 +223,10 @@ impl VectorDB {
         allowed_keys: &[u64],
         count: usize,
         max_distance: f32,
-    ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
+    ) -> Result<BulkSearchMatch, String> {
         let query_count = queries.len();
         if query_count == 0 {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         let empty_aligned_results = || {
@@ -199,16 +238,16 @@ impl VectorDB {
 
         let index_size = self.index.size();
         if index_size == 0 || count == 0 || allowed_keys.is_empty() {
-            return empty_aligned_results();
+            return Ok(empty_aligned_results());
         }
         if !max_distance.is_finite() || max_distance < 0.0 {
-            return empty_aligned_results();
+            return Ok(empty_aligned_results());
         }
 
         let allowed = allowed_keys.iter().copied().collect::<HashSet<u64>>();
         let search_count = count.min(allowed.len()).min(index_size);
         if search_count == 0 {
-            return empty_aligned_results();
+            return Ok(empty_aligned_results());
         }
 
         let mut all_keys = Vec::with_capacity(query_count);
@@ -218,7 +257,7 @@ impl VectorDB {
             let matches = self
                 .index
                 .filtered_search(query, search_count, |key| allowed.contains(&key))
-                .expect("Failed to run filtered vector search");
+                .map_err(|e| format!("Failed to run filtered vector search: {e}"))?;
 
             let (keys, distances) = Self::truncate_sorted_matches_within_distance(
                 matches.keys,
@@ -229,17 +268,17 @@ impl VectorDB {
             all_distances.push(distances);
         }
 
-        (all_keys, all_distances)
+        Ok((all_keys, all_distances))
     }
 
     fn fast_search_vectors_within_distance(
         &self,
         query: &[f32],
         max_distance: f32,
-    ) -> (Vec<u64>, Vec<f32>) {
+    ) -> Result<SearchMatch, String> {
         let index_size = self.index.size();
         if index_size == 0 {
-            return (Vec::new(), Vec::new());
+            return Ok((Vec::new(), Vec::new()));
         }
 
         let mut previous_count = 0_usize;
@@ -253,7 +292,7 @@ impl VectorDB {
             let matches = self
                 .index
                 .search(query, count)
-                .expect("Failed to search vectors");
+                .map_err(|e| format!("Failed to search vectors: {e}"))?;
 
             let should_expand = count < index_size
                 && matches
@@ -265,33 +304,33 @@ impl VectorDB {
                 continue;
             }
 
-            return Self::truncate_sorted_matches_within_distance(
+            return Ok(Self::truncate_sorted_matches_within_distance(
                 matches.keys,
                 matches.distances,
                 max_distance,
-            );
+            ));
         }
 
         if previous_count < index_size {
             let matches = self
                 .index
                 .search(query, index_size)
-                .expect("Failed to search vectors");
-            return Self::truncate_sorted_matches_within_distance(
+                .map_err(|e| format!("Failed to search vectors: {e}"))?;
+            return Ok(Self::truncate_sorted_matches_within_distance(
                 matches.keys,
                 matches.distances,
                 max_distance,
-            );
+            ));
         }
 
-        (Vec::new(), Vec::new())
+        Ok((Vec::new(), Vec::new()))
     }
 
     fn truncate_sorted_matches_within_distance(
         mut keys: Vec<u64>,
         mut distances: Vec<f32>,
         max_distance: f32,
-    ) -> (Vec<u64>, Vec<f32>) {
+    ) -> SearchMatch {
         let aligned_len = keys.len().min(distances.len());
         keys.truncate(aligned_len);
         distances.truncate(aligned_len);
@@ -307,16 +346,16 @@ impl VectorDB {
         queries: &Vec<Vec<f32>>,
         count: usize,
         exact: bool,
-    ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
+    ) -> Result<BulkSearchMatch, String> {
         let mut keys = Vec::new();
         let mut distances = Vec::new();
 
         for query in queries {
-            let (keys_result, distances_result) = self.search_vectors(query, count, exact);
+            let (keys_result, distances_result) = self.search_vectors(query, count, exact)?;
             keys.push(keys_result);
             distances.push(distances_result);
         }
-        (keys, distances)
+        Ok((keys, distances))
     }
 
     pub fn bulk_search_keys(
@@ -324,7 +363,7 @@ impl VectorDB {
         potential_keys: &Vec<u64>,
         count: usize,
         exact: bool,
-    ) -> (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>) {
+    ) -> Result<BulkSearchByKeyMatch, String> {
         let dimensions = self.index.dimensions();
         let mut embedding_data = vec![0.0f32; potential_keys.len() * dimensions];
         let mut contained_keys = Vec::with_capacity(potential_keys.len());
@@ -339,7 +378,7 @@ impl VectorDB {
 
                 self.index
                     .get(*key, embedding_slice)
-                    .expect("Failed to get vector");
+                    .map_err(|e| format!("Failed to get vector for key {key}: {e}"))?;
                 contained_keys.push(*key);
                 actual_query_count += 1;
             }
@@ -355,12 +394,12 @@ impl VectorDB {
             let start_idx = i * dimensions;
             let end_idx = start_idx + dimensions;
             let query_slice = &embedding_data[start_idx..end_idx];
-            let (keys_result, distances_result) = self.search_vectors(query_slice, count, exact);
+            let (keys_result, distances_result) = self.search_vectors(query_slice, count, exact)?;
             closeby_keys[i] = keys_result;
             distances[i] = distances_result;
         }
 
-        (contained_keys, closeby_keys, distances)
+        Ok((contained_keys, closeby_keys, distances))
     }
 
     /// Check if a vector with the given key exists in the index.
@@ -369,55 +408,62 @@ impl VectorDB {
         self.index.contains(key)
     }
 
-    pub fn get_vector(&self, key: u64) -> Vec<f32> {
+    pub fn get_vector(&self, key: u64) -> Result<Vec<f32>, String> {
         let mut vector: Vec<f32> = vec![0.0; self.index.dimensions()];
         self.index
             .get(key, &mut vector)
-            .expect("Failed to get vector");
-        vector
+            .map_err(|e| format!("Failed to get vector for key {key}: {e}"))?;
+        Ok(vector)
     }
 
-    pub fn bulk_get_vectors(&self, keys: Vec<u64>) -> Vec<Vec<f32>> {
+    pub fn bulk_get_vectors(&self, keys: Vec<u64>) -> Result<Vec<Vec<f32>>, String> {
         let mut vectors = Vec::new();
         for key in keys {
-            let vector = self.get_vector(key);
+            let vector = self.get_vector(key)?;
             vectors.push(vector);
         }
-        vectors
+        Ok(vectors)
     }
 
-    pub fn remove_vector(&self, key: u64) -> usize {
-        let removed_count = self.index.remove(key).expect("Failed to remove vector");
-        self.save_index();
-        removed_count
+    pub fn remove_vector(&mut self, key: u64) -> Result<usize, String> {
+        let removed_count = self
+            .index
+            .remove(key)
+            .map_err(|e| format!("Failed to remove vector for key {key}: {e}"))?;
+        self.save_index()?;
+        Ok(removed_count)
     }
 
-    pub fn bulk_remove_vectors(&self, keys: Vec<u64>) -> usize {
+    pub fn bulk_remove_vectors(&mut self, keys: Vec<u64>) -> Result<usize, String> {
         let mut removed_count = 0;
         for key in keys {
             removed_count += self
                 .index
                 .remove(key)
-                .expect("Failed to (bulk) remove vector");
+                .map_err(|e| format!("Failed to bulk remove vector for key {key}: {e}"))?;
         }
-        self.save_index();
-        removed_count
+        self.save_index()?;
+        Ok(removed_count)
     }
 
-    pub fn reset_index(&self) {
-        self.index.reset().expect("Failed to reset index");
+    pub fn reset_index(&mut self) -> Result<(), String> {
+        self.index
+            .reset()
+            .map_err(|e| format!("Failed to reset index: {e}"))?;
         self.index
             .reserve(1000)
-            .expect("Failed to reserve space in index");
-        self.save_index();
+            .map_err(|e| format!("Failed to reserve space in index after reset: {e}"))?;
+        self.save_index()
     }
 
-    pub fn delete_index(self) {
+    pub fn delete_index(self) -> Result<(), String> {
         if self.path.exists() {
-            std::fs::remove_file(&self.path).expect("Failed to delete index file");
+            std::fs::remove_file(&self.path)
+                .map_err(|e| format!("Failed to delete index file {}: {e}", self.path.display()))?;
         } else {
             println!("Index file does not exist.");
         }
+        Ok(())
     }
 
     pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize, usize, usize) {

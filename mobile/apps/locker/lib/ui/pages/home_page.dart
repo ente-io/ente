@@ -522,7 +522,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           CollectionService.instance.hasCompletedFirstSync();
       if (collections.isEmpty && hasCompletedFirstSync) {
         _logger.info("No collections found after sync, setting up defaults");
-        await CollectionService.instance.setupDefaultCollections();
+        await CollectionService.instance.ensureDefaultCollections();
         // Reload collections after setup
         collections = await CollectionService.instance.getCollections();
         await _loadRecentFiles(collections);

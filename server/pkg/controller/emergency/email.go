@@ -145,6 +145,9 @@ func (c *Controller) createRecoveryEmailData(legacyUser, trustedUser ente.User, 
 
 	switch newStatus {
 	case ente.RecoveryStatusInitiated:
+		if _, ok := templateData["DaysLeft"]; !ok {
+			templateData["DaysLeft"] = int64(30)
+		}
 		emailDatas = append(emailDatas, emailData{
 			title:        "Ente account recovery initiated",
 			templateName: RecoveryStartedTemplate,

@@ -8,6 +8,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/user_details_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -146,6 +147,25 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         onTap: () async => _onAppLockTap(context),
                       ),
                       const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).crashReporting,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedBug02,
+                        ),
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => SuperLogging.shouldReportCrashes(),
+                          onChanged: () async {
+                            await SuperLogging.setShouldReportCrashes(
+                              !SuperLogging.shouldReportCrashes(),
+                            );
+                            if (mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
+                      ),
+                      if (showAccountSecurity) const SizedBox(height: 8),
                       if (showAccountSecurity)
                         MenuItemWidgetNew(
                           title: AppLocalizations.of(context).activeSessions,

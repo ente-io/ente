@@ -28,6 +28,7 @@ import {
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import { ensureLocalUser } from "ente-accounts/services/user";
+import { isDesktop } from "ente-base/app";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
@@ -39,6 +40,7 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { subscribeMainWindowFocus } from "ente-base/electron";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -98,6 +100,7 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
+import { reauthenticateWithAppLock } from "ente-new/photos/services/app-lock";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     addToCollection,
@@ -330,7 +333,7 @@ const Page: React.FC = () => {
         undefined,
     );
 
-    const authenticateUser = useCallback(
+    const authenticateUserWithPasswordModal = useCallback(
         () =>
             new Promise<void>((resolve, reject) => {
                 onAuthenticateCallback.current = resolve;
@@ -339,6 +342,15 @@ const Page: React.FC = () => {
             }),
         [],
     );
+
+    const authenticateUser = useCallback(async () => {
+        if (!isDesktop) return authenticateUserWithPasswordModal();
+
+        const didAuthenticateWithAppLock = await reauthenticateWithAppLock();
+        if (didAuthenticateWithAppLock) return;
+
+        return authenticateUserWithPasswordModal();
+    }, [authenticateUserWithPasswordModal]);
 
     const handleCloseAuthenticateUser = useCallback(() => {
         authenticateUserVisibilityProps.onClose();
@@ -480,6 +492,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         const electron = globalThis.electron;
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
+        let unsubscribeMainWindowFocus: (() => void) | undefined;
 
         void (async () => {
             if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
@@ -573,7 +586,7 @@ const Page: React.FC = () => {
             );
 
             if (electron) {
-                electron.onMainWindowFocus(() => {
+                unsubscribeMainWindowFocus = subscribeMainWindowFocus(() => {
                     remotePull({ silent: true });
                     void watcher.checkAccessibility();
                 });
@@ -583,7 +596,7 @@ const Page: React.FC = () => {
 
         return () => {
             clearInterval(syncIntervalID);
-            if (electron) electron.onMainWindowFocus(undefined);
+            unsubscribeMainWindowFocus?.();
         };
     }, []);
 
