@@ -102,65 +102,6 @@ jobs:
               shell: bash
               run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
-            - name: Install trusted-signing-cli (Windows only)
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              run: cargo install --locked trusted-signing-cli
-
-            - name: Resolve Windows signing tool paths
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              run: |
-                  AZ_PATH=$(where.exe az | tr -d '\r' | head -n1 || true)
-                  if [ -z "$AZ_PATH" ]; then
-                      echo "::error::az CLI not found on runner"
-                      exit 1
-                  fi
-
-                  SIGNTOOL_PATH=$(where.exe signtool | tr -d '\r' | head -n1 || true)
-                  if [ -z "$SIGNTOOL_PATH" ]; then
-                      echo "::error::signtool not found on runner"
-                      exit 1
-                  fi
-
-                  echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
-                  echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
-                  echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
-                  echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
-
-            - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              env:
-                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
-                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
-              run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
-
-            - name: Validate Azure Trusted Signing CLI setup (Windows only)
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              env:
-                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
-                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
-              run: |
-                  trusted-signing-cli \
-                    -e "${AZURE_ENDPOINT}" \
-                    -a "${AZURE_CODE_SIGNING_NAME}" \
-                    -c "${AZURE_CERT_PROFILE_NAME}" \
-                    --azure-cli-path "${AZURE_CLI_PATH}" \
-                    --sign-tool-path "${SIGNTOOL_PATH}" \
-                    --ignore-unsupported true \
-                    rust/apps/ensu/package.json
-
             - name: Enable updater artifacts for release builds
               shell: bash
               env:
@@ -196,8 +137,6 @@ jobs:
                   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
                   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
-                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}
@@ -209,6 +148,52 @@ jobs:
                   includeRelease: true
                   includeUpdaterJson: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
+
+            - name: Locate Windows signing artifacts
+              id: windows-signing-artifacts
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  ARTIFACT_DIR="${{ github.workspace }}/rust/apps/ensu/src-tauri/target/${{ matrix.platform.rust-target }}/release/bundle"
+                  mapfile -t SIGN_FILES < <(find "$ARTIFACT_DIR" -type f \( -name "*.exe" -o -name "*.msi" \))
+
+                  if [ "${#SIGN_FILES[@]}" -eq 0 ]; then
+                      echo "No Windows executable/MSI artifacts found for signing"
+                      exit 1
+                  fi
+
+                  {
+                    echo "files<<EOF"
+                    for file in "${SIGN_FILES[@]}"; do
+                      echo "$file"
+                    done
+                    echo "EOF"
+                  } >> "$GITHUB_OUTPUT"
+
+            - name: Sign files with Trusted Signing
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              uses: azure/trusted-signing-action@v0
+              with:
+                azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                files: ${{ steps.windows-signing-artifacts.outputs.files }}
+                file-digest: SHA256
+                timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                timestamp-digest: SHA256
+
+            - name: Upload signed Windows artifacts to draft GitHub release
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  artifacts: ${{ steps.windows-signing-artifacts.outputs.files }}
+                  allowUpdates: true
+                  draft: true
+                  updateOnlyUnreleased: true
 
 
     build-android:
