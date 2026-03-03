@@ -84,6 +84,22 @@ const deleteClusterSummaryTable = 'DELETE FROM $clusterSummaryTable';
 
 /// End Cluster Summary Table Fields & Schema Queries
 
+/// Cluster Centroid Vector ID Mapping Table Fields & Schema Queries
+const clusterCentroidVectorIdMappingTable = 'cluster_centroid_vector_id_map';
+const clusterCentroidVectorIdColumn = 'cluster_vector_id';
+
+const createClusterCentroidVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $clusterCentroidVectorIdMappingTable (
+  $clusterCentroidVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $clusterIDColumn TEXT NOT NULL UNIQUE
+);
+''';
+
+const deleteClusterCentroidVectorIdMappingTable =
+    'DELETE FROM $clusterCentroidVectorIdMappingTable';
+
+/// End Cluster Centroid Vector ID Mapping Table Fields & Schema Queries
+
 /// notPersonFeedback Table Fields & Schema Queries
 const notPersonFeedback = 'not_person_feedback';
 
@@ -154,3 +170,15 @@ CREATE TABLE IF NOT EXISTS $textEmbeddingsCacheTable (
 ''';
 
 const deleteTextEmbeddingsCacheTable = 'DELETE FROM $textEmbeddingsCacheTable';
+
+// ## OFFLINE FILE KEY MAP TABLE
+const offlineFileKeyMapTable = 'offline_file_key_map';
+const offlineFileKeyLocalIdColumn = 'local_id';
+const offlineFileKeyIntIdColumn = 'local_int_id';
+
+const createOfflineFileKeyMapTable = '''
+CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
+  $offlineFileKeyIntIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $offlineFileKeyLocalIdColumn TEXT NOT NULL UNIQUE
+);
+''';

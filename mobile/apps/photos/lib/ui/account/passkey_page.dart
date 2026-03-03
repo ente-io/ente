@@ -11,9 +11,12 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/two_factor_authentication_page.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:url_launcher/url_launcher_string.dart';
@@ -70,16 +73,17 @@ class _PasskeyPageState extends State<PasskeyPage> {
       showToast(context, context.l10n.passKeyPendingVerification);
       return;
     } on PassKeySessionExpiredError {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.loginSessionExpired,
-        context.l10n.loginSessionExpiredDetails,
+        title: context.l10n.loginSessionExpired,
+        message: context.l10n.loginSessionExpiredDetails,
+        assetPath: 'assets/warning-green.png',
       );
       Navigator.of(context).pop();
       return;
     } catch (e, s) {
       _logger.severe("failed to check status", e, s);
-      showGenericErrorDialog(context: context, error: e).ignore();
+      showGenericErrorBottomSheet(context: context, error: e).ignore();
       return;
     }
     await UserService.instance.onPassKeyVerified(context, response);
@@ -125,7 +129,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       }
     } catch (e, s) {
       _logger.severe('passKey: failed to handle deeplink', e, s);
-      showGenericErrorDialog(context: context, error: e).ignore();
+      showGenericErrorBottomSheet(context: context, error: e).ignore();
     }
   }
 
@@ -143,56 +147,73 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
-        title: Text(
-          l10n.passkeyAuthTitle,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
+        title: Text(
+          AppLocalizations.of(context).passkey,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(),
+      body: _getBody(colorScheme, textTheme),
     );
   }
 
-  Widget _getBody() {
-    return Center(
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Spacer(),
             Text(
               context.l10n.waitingForVerification,
-              style: const TextStyle(
-                height: 1.4,
-                fontSize: 16,
-              ),
+              style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ButtonWidget(
-              buttonType: ButtonType.primary,
+            const Spacer(),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
               labelText: context.l10n.tryAgain,
               onTap: () => launchPasskey(),
             ),
             const SizedBox(height: 16),
-            ButtonWidget(
-              buttonType: ButtonType.secondary,
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.secondary,
               labelText: context.l10n.checkStatus,
+              shouldSurfaceExecutionStates: true,
               onTap: () async {
                 try {
                   await checkStatus();
                 } catch (e) {
-                  debugPrint('failed to check status %e');
-                  showGenericErrorDialog(context: context, error: e).ignore();
+                  debugPrint('failed to check status $e');
+                  showGenericErrorBottomSheet(context: context, error: e)
+                      .ignore();
                 }
               },
-              shouldSurfaceExecutionStates: true,
             ),
-            const Padding(padding: EdgeInsets.all(30)),
-            if (widget.totp2FASessionID.isNotEmpty)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
+            if (widget.totp2FASessionID.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.link,
+                labelText: context.l10n.loginWithTOTP,
+                buttonSize: ButtonSizeV2.small,
+                onTap: () async {
+                  // ignore: unawaited_futures
                   routeToPage(
                     context,
                     TwoFactorAuthenticationPage(
@@ -200,41 +221,23 @@ class _PasskeyPageState extends State<PasskeyPage> {
                     ),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Center(
-                    child: Text(
-                      context.l10n.loginWithTOTP,
-                      style: const TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
               ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
+            ],
+            const SizedBox(height: 12),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.link,
+              labelText: context.l10n.recoverAccount,
+              buttonSize: ButtonSizeV2.small,
+              onTap: () async {
+                // ignore: unawaited_futures
                 UserService.instance.recoverTwoFactor(
                   context,
                   widget.sessionID,
                   TwoFactorType.passkey,
                 );
               },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                child: Center(
-                  child: Text(
-                    context.l10n.recoverAccount,
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

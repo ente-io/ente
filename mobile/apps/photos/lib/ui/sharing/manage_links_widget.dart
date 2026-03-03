@@ -7,8 +7,8 @@ import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/core/errors.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -28,6 +28,7 @@ import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/public_link_layout_util.dart';
 import "package:photos/utils/share_util.dart";
 
 class ManageSharedLinkWidget extends StatefulWidget {
@@ -50,16 +51,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     super.initState();
   }
 
-  String _getLayoutDisplayName(String layout, BuildContext context) {
-    switch (layout.toLowerCase()) {
-      case 'grouped':
-        return AppLocalizations.of(context).layoutGrouped;
-      case 'continuous':
-        return AppLocalizations.of(context).layoutContinuous;
+  String _getLayoutDisplayName(String? layout, BuildContext context) {
+    final normalizedLayout = normalizePublicLinkLayout(layout);
+    switch (normalizedLayout) {
+      case 'masonry':
+        return AppLocalizations.of(context).layoutMasonry;
       case 'trip':
         return AppLocalizations.of(context).layoutTrip;
-      default:
+      case 'grouped':
         return AppLocalizations.of(context).layoutGrouped;
+      default:
+        return AppLocalizations.of(context).layoutMasonry;
     }
   }
 
@@ -99,7 +101,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).albumLayout,
                       subTitle: _getLayoutDisplayName(
-                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
+                        widget.collection!.pubMagicMetadata.layout ?? "masonry",
                         context,
                       ),
                     ),
@@ -391,7 +393,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         await shareAlbumLink(
                           context,
-                          widget.collection!,
                           urlValue,
                           sendLinkButtonKey,
                         );
@@ -419,7 +420,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             return QrCodeDialog(
                               data: urlValue,
                               title: widget.collection!.displayName,
-                              accentColor: enteColorScheme.primary500,
+                              accentColor: const Color(0xFF08C225),
                               shareFileName:
                                   'ente_qr_${widget.collection!.displayName}.png',
                               shareText:
@@ -432,7 +433,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 text: 'ente',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
                                 ),
                               ),
                             );

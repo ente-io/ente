@@ -518,9 +518,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download file: $e", e, stackTrace);
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToDownloadOrDecrypt,
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -542,9 +542,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download files: $e", e, stackTrace);
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToDownloadOrDecrypt,
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -678,9 +678,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           'Failed add-to operation: $e',
         );
 
-        showToast(
-          context,
-          context.l10n.failedToUpdateFile(e.toString()),
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -849,9 +849,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       _logger.severe('Failed to restore files: $e', e, stackTrace);
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToRestoreFiles,
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }
@@ -901,9 +901,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       _logger.severe('Failed to delete files from trash: $e', e, stackTrace);
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToDeleteFiles,
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     }

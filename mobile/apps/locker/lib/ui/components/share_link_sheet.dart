@@ -187,7 +187,10 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         await dialog.hide();
 
         if (context.mounted) {
-          showToast(context, '${l10n.failedToDeleteShareLink}: $e');
+          await showGenericErrorBottomSheet(
+            context: context,
+            error: e,
+          );
         }
       }
     }

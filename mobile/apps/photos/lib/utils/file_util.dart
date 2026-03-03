@@ -36,11 +36,16 @@ Future<File?> getFile(
   EnteFile file, {
   bool liveVideo = false,
   bool isOrigin = false,
+  bool forGalleryDownload = false,
 } // only relevant for live photos
     ) async {
   try {
     if (file.isRemoteFile) {
-      return getFileFromServer(file, liveVideo: liveVideo);
+      return getFileFromServer(
+        file,
+        liveVideo: liveVideo,
+        forGalleryDownload: forGalleryDownload,
+      );
     } else {
       final String key = file.tag + liveVideo.toString() + isOrigin.toString();
       final cachedFile = FileLruCache.get(key);
@@ -61,6 +66,9 @@ Future<File?> getFile(
     }
   } catch (e, s) {
     _logger.warning("Failed to get file", e, s);
+    if (forGalleryDownload) {
+      rethrow;
+    }
     return null;
   }
 }
@@ -134,6 +142,7 @@ Future<File?> getFileFromServer(
   EnteFile file, {
   ProgressCallback? progressCallback,
   bool liveVideo = false, // only needed in case of live photos
+  bool forGalleryDownload = false,
 }) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
@@ -160,6 +169,7 @@ Future<File?> getFileFromServer(
           _progressCallbacks[downloadID]?.call(count, total);
         },
         needLiveVideo: liveVideo,
+        forGalleryDownload: forGalleryDownload,
       );
     } else {
       downloadFuture = _downloadAndCache(
@@ -168,12 +178,20 @@ Future<File?> getFileFromServer(
         progressCallback: (count, total) {
           _progressCallbacks[downloadID]?.call(count, total);
         },
+        forGalleryDownload: forGalleryDownload,
       );
     }
     // ignore: unawaited_futures
-    downloadFuture.then((downloadedFile) async {
-      completer.complete(downloadedFile);
-      await _fileDownloadsInProgress.remove(downloadID);
+    downloadFuture.then((downloadedFile) {
+      if (!completer.isCompleted) {
+        completer.complete(downloadedFile);
+      }
+    }).catchError((error, stackTrace) {
+      if (!completer.isCompleted) {
+        completer.completeError(error, stackTrace);
+      }
+    }).whenComplete(() {
+      _fileDownloadsInProgress.remove(downloadID);
       _progressCallbacks.remove(downloadID);
     });
   }
@@ -195,12 +213,16 @@ Future<File?> _getLivePhotoFromServer(
   EnteFile file, {
   ProgressCallback? progressCallback,
   required bool needLiveVideo,
+  bool forGalleryDownload = false,
 }) async {
   final downloadID = file.uploadedFileID!;
   try {
     if (!_livePhotoDownloadsTracker.containsKey(downloadID)) {
-      _livePhotoDownloadsTracker[downloadID] =
-          _downloadLivePhoto(file, progressCallback: progressCallback);
+      _livePhotoDownloadsTracker[downloadID] = _downloadLivePhoto(
+        file,
+        progressCallback: progressCallback,
+        forGalleryDownload: forGalleryDownload,
+      );
     }
     final livePhoto = await _livePhotoDownloadsTracker[file.uploadedFileID];
     await _livePhotoDownloadsTracker.remove(downloadID);
@@ -211,6 +233,9 @@ Future<File?> _getLivePhotoFromServer(
   } catch (e, s) {
     _logger.warning("live photo get failed", e, s);
     await _livePhotoDownloadsTracker.remove(downloadID);
+    if (forGalleryDownload) {
+      rethrow;
+    }
     return null;
   }
 }
@@ -218,9 +243,14 @@ Future<File?> _getLivePhotoFromServer(
 Future<_LivePhoto?> _downloadLivePhoto(
   EnteFile file, {
   ProgressCallback? progressCallback,
+  bool forGalleryDownload = false,
 }) async {
-  return downloadAndDecrypt(file, progressCallback: progressCallback)
-      .then((decryptedFile) async {
+  return downloadAndDecrypt(
+    file,
+    progressCallback: progressCallback,
+    forceResumableDownload: forGalleryDownload,
+    throwOnFailure: forGalleryDownload,
+  ).then((decryptedFile) async {
     if (decryptedFile == null) {
       return null;
     }
@@ -298,9 +328,14 @@ Future<File?> _downloadAndCache(
   EnteFile file,
   BaseCacheManager cacheManager, {
   required ProgressCallback progressCallback,
+  bool forGalleryDownload = false,
 }) async {
-  return downloadAndDecrypt(file, progressCallback: progressCallback)
-      .then((decryptedFile) async {
+  return downloadAndDecrypt(
+    file,
+    progressCallback: progressCallback,
+    forceResumableDownload: forGalleryDownload,
+    throwOnFailure: forGalleryDownload,
+  ).then((decryptedFile) async {
     if (decryptedFile == null) {
       return null;
     }

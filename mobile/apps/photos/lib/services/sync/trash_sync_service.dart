@@ -2,7 +2,6 @@ import 'dart:async';
 import "dart:convert";
 import "dart:math";
 
-import 'package:dio/dio.dart';
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +12,8 @@ import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/events/trash_updated_event.dart';
-import 'package:photos/models/api/collection/trash_item_request.dart';
+import 'package:photos/gateways/trash/models/trash_item_request.dart';
+import "package:photos/gateways/trash/trash_gateway.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
@@ -29,9 +29,9 @@ class TrashSyncService {
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
   late SharedPreferences _prefs;
-  final Dio _enteDio;
+  final TrashGateway _gateway;
 
-  TrashSyncService(this._prefs, this._enteDio) {
+  TrashSyncService(this._prefs, this._gateway) {
     _logger.info("TrashSyncService constructor");
   }
 
@@ -140,32 +140,23 @@ class TrashSyncService {
         }
       }
     }
-    final requestData = <String, dynamic>{};
     final batchedItems = uniqueItems.chunks(batchSize);
     for (final batch in batchedItems) {
-      requestData["items"] = [];
-      for (final item in batch) {
-        requestData["items"].add(item.toJson());
-      }
-      await _trashFiles(requestData);
+      final items = batch.map((item) => item.toJson()).toList();
+      await _trashFiles(items);
     }
   }
 
   Future<TrashDiff> getTrashFilesDiff(int sinceTime) async {
     try {
-      final response = await _enteDio.get(
-        "/trash/v2/diff",
-        queryParameters: {
-          "sinceTime": sinceTime,
-        },
-      );
+      final responseData = await _gateway.getDiff(sinceTime);
       int latestUpdatedAtTime = 0;
       final trashedFiles = <TrashFile>[];
       final deletedUploadIDs = <int>[];
       final restoredFiles = <TrashFile>[];
 
-      final diff = response.data["diff"] as List;
-      final bool hasMore = response.data["hasMore"] as bool;
+      final diff = responseData["diff"] as List;
+      final bool hasMore = responseData["hasMore"] as bool;
       final startTime = DateTime.now();
       for (final item in diff) {
         final trash = TrashFile();
@@ -248,29 +239,16 @@ class TrashSyncService {
     }
   }
 
-  Future<Response<dynamic>> _trashFiles(
-    Map<String, dynamic> requestData,
-  ) async {
-    return _enteDio.post(
-      "/files/trash",
-      data: requestData,
-    );
+  Future<void> _trashFiles(List<Map<String, dynamic>> items) async {
+    await _gateway.trashFiles(items);
   }
 
   Future<void> deleteFromTrash(List<EnteFile> files) async {
-    final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID!).toSet().toList();
     final batchedFileIDs = uniqueFileIds.chunks(batchSize);
     for (final batch in batchedFileIDs) {
-      params["fileIDs"] = [];
-      for (final fileID in batch) {
-        params["fileIDs"].add(fileID);
-      }
       try {
-        await _enteDio.post(
-          "/trash/delete",
-          data: params,
-        );
+        await _gateway.deleteFiles(batch);
         await _trashDB.delete(batch);
         Bus.instance.fire(TrashUpdatedEvent());
       } catch (e, s) {
@@ -283,13 +261,8 @@ class TrashSyncService {
   }
 
   Future<void> emptyTrash() async {
-    final params = <String, dynamic>{};
-    params["lastUpdatedAt"] = _getSyncTime();
     try {
-      await _enteDio.post(
-        "/trash/empty",
-        data: params,
-      );
+      await _gateway.emptyTrash(_getSyncTime());
       await _trashDB.clearTable();
       unawaited(syncTrash());
       Bus.instance.fire(TrashUpdatedEvent());

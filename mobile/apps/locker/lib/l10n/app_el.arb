@@ -20,47 +20,195 @@
   "pleaseWait": "Παρακαλώ περιμένετε...",
   "downloading": "Λήψη...",
   "downloadingProgress": "Λήψη... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "Η λήψη απέτυχε",
   "failedToDownloadOrDecrypt": "Αποτυχία λήψης στοιχείου",
   "errorOpeningFile": "Σφάλμα κατά το άνοιγμα του στοιχείου",
   "errorOpeningFileMessage": "Σφάλμα κατά το άνοιγμα του στοιχείου: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Δεν ήταν δυνατό το άνοιγμα του στοιχείου: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes}λ πριν",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours}ω πριν",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Χθες",
   "daysAgo": "{days}η πριν",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Η συλλογή μετονομάστηκε επιτυχώς",
   "failedToRenameCollection": "Αποτυχία μετονομασίας συλλογής: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Αυτή η συλλογή δεν μπορεί να διαγραφεί",
   "collectionCannotBeEdited": "Αυτή η συλλογή δεν μπορεί να επεξεργαστεί",
   "collectionCannotBeShared": "Αυτή η συλλογή δεν μπορεί να κοινοποιηθεί",
   "deleteCollection": "Διαγραφή συλλογής",
   "deleteCollectionConfirmation": "Είστε σίγουροι ότι θέλετε να διαγράψετε \"{collectionName}\";",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "Ακύρωση",
   "collectionDeletedSuccessfully": "Η συλλογή διαγράφηκε επιτυχώς",
   "failedToDeleteCollection": "Αποτυχία διαγραφής συλλογής: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Συλλογές",
   "retry": "Προσπάθησε ξανά",
   "failedToSyncTrash": "Αποτυχία συγχρονισμού κάδου: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Παρακαλώ επιλέξτε τουλάχιστον μία συλλογή",
   "unknownItemType": "Άγνωστος τύπος στοιχείου",
   "fileDeletedSuccessfully": "Το στοιχείο διαγράφηκε επιτυχώς",
   "failedToDeleteFile": "Αποτυχία διαγραφής στοιχείου: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Το στοιχείο ενημερώθηκε επιτυχώς!",
   "failedToUpdateFile": "Αποτυχία ενημέρωσης στοιχείου: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Δεν έγιναν αλλαγές",
   "noCollectionsAvailableForRestore": "Δεν υπάρχουν διαθέσιμες συλλογές για επαναφορά",
   "trashClearedSuccessfully": "Ο κάδος εκκαθαρίστηκε επιτυχώς",
   "failedToClearTrash": "Αποτυχία εκκαθάρισης κάδου: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Κάδος απορριμμάτων",
   "deletedPermanently": "Το \"{fileName}\" διαγράφηκε οριστικά",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "Αποτυχία επαναφοράς του \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Δημιουργία νέας συλλογής",
   "create": "Δημιουργία",
   "renameCollection": "Μετονομασία συλλογής",
   "save": "Αποθήκευση",
   "deleteFile": "Διαγραφή στοιχείου",
   "deleteFileConfirmation": "Είστε σίγουροι ότι θέλετε να διαγράψετε \"{fileName}\";",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Δεν βρέθηκαν συλλογές",
   "createYourFirstCollection": "Δημιουργήστε την πρώτη σας συλλογή για να ξεκινήσετε",
   "createCollection": "Δημιουργία συλλογής",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Κάντε κλικ στο κουμπί + για να ξεκινήσετε",
   "uploadDocument": "Ανέβασμα εγγράφου",
   "items": "{count} στοιχεία",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{κανένα στοιχείο} =1{1 στοιχείο} other{{count} στοιχεία}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Δημιουργία συλλογής",
   "uploadDocumentTooltip": "Ανέβασμα εγγράφου",
   "restore": "Επαναφορά",
   "restoreFile": "Επαναφορά {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Δεν υπάρχουν διαθέσιμες συλλογές",
   "emptyTrash": "Εκκαθάριση κάδου",
   "emptyTrashTooltip": "Εκκαθάριση κάδου",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Δεν βρέθηκαν αποτελέσματα",
   "searchEmptyDescription": "Δοκιμάστε να αναζητήσετε κάτι άλλο.",
   "searchEverywhereTitle": "Αναζήτηση παντού για \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Αναζήτηση σε όλες τις συλλογές και τα αρχεία.",
   "noCollectionsFoundForQuery": "Δεν βρέθηκαν συλλογές για \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Χωρίς Κατηγορία",
   "syncingTrash": "Συγχρονισμός κάδου...",
   "restoring": "Επαναφορά...",
   "restoredFileToCollection": "Το \"{fileName}\" επαναφέρθηκε στη \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Εκκαθάριση κάδου...",
   "trashIsEmpty": "Ο κάδος είναι άδειος",
   "share": "Κοινοποίηση",
@@ -157,15 +363,12 @@
   "reportABug": "Αναφορά Σφάλματος",
   "reportBug": "Αναφορά σφάλματος",
   "logsDialogBodyLocker": "Αυτό θα στείλει αρχεία καταγραφής για να μας βοηθήσει να διορθώσουμε το πρόβλημά σας.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Κοινωνικά δίκτυα",
   "rateUsOnStore": "Αξιολογήστε μας στο {storeName}",
-  "blog": "Blog",
   "merchandise": "Κατάστημα",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Πληροφορίες",
   "saveInformation": "Αποθήκευση πληροφοριών",
   "saveToLocker": "Αποθήκευση στο Locker",
@@ -179,8 +382,17 @@
   "accountCredentials": "Μυστικό",
   "accountCredentialsDescription": "Διατηρήστε διαπιστευτήρια λογαριασμών.",
   "editSecret": "Επεξεργασία μυστικού",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Επεξεργασία τοποθεσίας",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Επεξεργασία σημείωσης",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Επαφή έκτακτης ανάγκης",
   "emergencyContactDescription": "Διατηρήστε στοιχεία επικοινωνίας για σημαντικά άτομα σε περιπτώσεις κρίσης.",
   "noteName": "Τίτλος",
@@ -259,6 +471,14 @@
   "expiredLinkInfo": "Αυτός ο σύνδεσμος έχει λήξει. Επιλέξτε νέα ώρα λήξης ή απενεργοποιήστε τη λήξη συνδέσμου.",
   "linkExpiresOn": "Ο σύνδεσμος θα λήξει στις {expiryTime}",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Ο σύνδεσμος έληξε",
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
@@ -273,7 +493,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "Οι συνεργάτες μπορούν να προσθέσουν στοιχεία στην κοινή συλλογή.",
   "enterEmail": "Εισάγετε ηλεκτρονική διεύθυνση",
   "viewersSuccessfullyAdded": "{count, plural, =0{Προστέθηκαν 0 θεατές} =1{Προστέθηκε 1 θεατής} other{Προστέθηκαν {count} θεατές}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0{Προστέθηκαν 0 συνεργάτες} =1{Προστέθηκε 1 συνεργάτης} other{Προστέθηκαν {count} συνεργάτες}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, one {}=0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
   "addCollaborators": "{count, plural, one {}=0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Πατήστε παρατεταμένα ένα email για να επιβεβαιώσετε την κρυπτογράφηση από άκρη σε άκρη.",
@@ -291,6 +529,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Κάποιος που μοιράζεται άλμπουμ με εσάς θα πρέπει να δει τον ίδιο κωδικό στη συσκευή του.",
   "howToViewShareeVerificationID": "Παρακαλώ ζητήστε από τον άλλο χρήστη να πιέσει παρατεταμένα τη διεύθυνση ηλεκτρονικού ταχυδρομείου του στην οθόνη ρυθμίσεων και βεβαιωθείτε ότι οι κωδικοί και στις δύο συσκευές ταιριάζουν.",
   "thisIsPersonVerificationId": "Αυτός είναι ο κωδικός επαλήθευσης του {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "Κωδικός επαλήθευσης",
   "verifyEmailID": "Επαλήθευση {email}",
   "emailNoEnteAccount": "Το {email} δεν έχει λογαριασμό Ente.\n\nΣτείλτε τους πρόσκληση για να μοιραστείτε στοιχεία.",
@@ -303,6 +549,15 @@
   "yesConvertToViewer": "Ναι, μετατροπή σε θεατή",
   "changePermissions": "Αλλαγή δικαιωμάτων",
   "cannotAddMoreFilesAfterBecomingViewer": "Ο/Η {name} δεν θα μπορεί πλέον να προσθέτει στοιχεία στη συλλογή αφού γίνει θεατής.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Αφαίρεση;",
   "removeParticipantBody": "Ο/Η {userEmail} θα αφαιρεθεί από αυτή την κοινή συλλογή\n\nΤα στοιχεία που προστέθηκαν από αυτόν/αυτήν θα αφαιρεθούν επίσης από τη συλλογή",
   "yesRemove": "Ναι, αφαίρεση",
@@ -311,10 +566,27 @@
   "collaborator": "Συνεργάτης",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Οι συνεργάτες μπορούν να προσθέσουν στοιχεία στην κοινή συλλογή.",
   "albumParticipantsCount": "{count, plural, =0{Χωρίς συμμετέχοντες} =1{1 συμμετέχων} other{{count} συμμετέχοντες}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Προσθήκη περισσότερων",
   "you": "Εσείς",
   "albumOwner": "Κάτοχος",
   "typeOfCollectionTypeIsNotSupportedForRename": "Ο τύπος συλλογής {collectionType} δεν υποστηρίζεται για μετονομασία",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Αποχώρηση από συλλογή",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Τα στοιχεία που προστέθηκαν από εσάς θα αφαιρεθούν από τη συλλογή",
   "leaveSharedCollection": "Αποχώρηση από κοινή συλλογή;",
@@ -324,20 +596,79 @@
   "authToManageLegacy": "Παρακαλώ πραγματοποιήστε έλεγχο ταυτότητας για να διαχειριστείτε τις έμπιστες επαφές σας",
   "uploadError": "Σφάλμα ανεβάσματος",
   "uploadStorageLimitErrorTitle": "Το όριο αποθήκευσης επιτεύχθηκε",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "Ο αποθηκευτικός σας χώρος εξαντλήθηκε. Ελευθερώστε χώρο για να συνεχίσετε το ανέβασμα.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Το όριο αρχείων επιτεύχθηκε",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Έχετε φτάσει το όριο αρχείων. Αναβαθμίστε σε πληρωμένο πλάνο για περισσότερο χώρο.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "Η ενέργεια απέτυχε. Έχετε φτάσει το όριο αρχείων.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "Το αρχείο είναι πολύ μεγάλο",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Αυτό το αρχείο είναι μεγαλύτερο από το μέγιστο υποστηριζόμενο μέγεθος ανεβάσματος των 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Δοκιμάστε να προσαρμόσετε την αναζήτησή σας",
   "noFilesFoundForQuery": "Δεν βρέθηκαν στοιχεία για \"{query}\"",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Αποεπιλογή όλων",
   "selectAll": "Επιλογή όλων",
   "unnamedCollection": "Ανώνυμη συλλογή",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "Ανεβάστηκαν {completed}/{total} στοιχεία...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "Ανεβάστηκαν {completed}/{total} στοιχεία... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Δεν υπάρχουν διαθέσιμες συλλογές",
   "createCollectionButton": "Δημιουργία συλλογής",
   "collectionButtonLabel": "Συλλογή",
@@ -352,6 +683,15 @@
   "saveDocument": "Αποθήκευση εγγράφου",
   "uploadFiles": "Ανέβασμα στοιχείων",
   "filesSelected": "{count, plural, =0{Κανένα στοιχείο επιλεγμένο} =1{1 στοιχείο επιλεγμένο} other{{count} στοιχεία επιλεγμένα}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Προσθήκη σε συλλογή",
   "newCollection": "Νέα συλλογή",
   "title": "Τίτλος",
@@ -360,11 +700,50 @@
   "backToView": "Επιστροφή στην προβολή",
   "back": "Πίσω",
   "failedToLoadCollections": "Αποτυχία φόρτωσης συλλογών: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Πληροφορίες",
   "recordSavedToMultipleCollections": "Η εγγραφή αποθηκεύτηκε σε {count, plural, =1{1 συλλογή} other{{count} συλλογές}} επιτυχώς",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "Το {fieldName} αντιγράφηκε στο πρόχειρο",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "{count, plural, =1{1 αποτέλεσμα} other{{count} αποτελέσματα}} για \"{query}\"",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Συνδεθείτε στον λογαριασμό σας Ente",
   "unlockLockerNewUserTitle": "Εγγραφείτε στο Ente για να χρησιμοποιήσετε το Locker",
   "unlockLockerNewUserBody": "Το Locker είναι προς το παρόν διαθέσιμο μόνο για υπάρχοντες χρήστες του Ente. Μπορείτε να δημιουργήσετε λογαριασμό στο Ente Photos για να χρησιμοποιήσετε το Locker.",
@@ -374,7 +753,6 @@
   "featureSaveImportant": "Αποθηκεύστε σημαντικά έγγραφα και διαπιστευτήρια",
   "featurePassAutomatically": "Μεταβιβάστε τα αυτόματα σε περιπτώσεις έκτακτης ανάγκης",
   "featureShareAnytime": "Μοιραστείτε τα οποιαδήποτε στιγμή",
-  "emailIdLabel": "Email",
   "emailIdHint": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
   "loginPasswordLabel": "Κωδικός πρόσβασης",
   "loginPasswordHint": "Εισάγετε τον κωδικό πρόσβασής σας",
@@ -399,13 +777,60 @@
   "yesDeleteCollection": "Ναι, διαγραφή συλλογής",
   "yesDeleteFile": "Ναι, διαγραφή στοιχείου",
   "deleteCollectionDialogBody": "Η \"{collectionName}\" θα διαγραφεί οριστικά.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 συλλογή} other{{count} συλλογές}} θα διαγραφούν οριστικά.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 στοιχείο} other{{count} στοιχεία}} θα διαγραφούν οριστικά.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "Διαγραφή στοιχείων και από παντού",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Ναι, διαγραφή {count, plural, =1{συλλογής} other{συλλογών}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Ναι, διαγραφή {count, plural, =1{στοιχείου} other{στοιχείων}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Χρήση",
-  "fileCount": "{used} / {max}",
   "important": "Σημαντικό",
   "unimportant": "Μη σημαντικό",
   "removingFromImportant": "Αφαίρεση από τα σημαντικά...",
@@ -413,9 +838,36 @@
   "fileMarkedAsImportant": "Το στοιχείο σημάνθηκε ως σημαντικό",
   "fileRemovedFromImportant": "Το στοιχείο αφαιρέθηκε από τα σημαντικά",
   "filesMarkedAsImportant": "{count, plural, =1{1 στοιχείο σημάνθηκε ως σημαντικό} other{{count} στοιχεία σημάνθηκαν ως σημαντικά}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Όλα τα στοιχεία είναι ήδη σημαντικά",
   "failedToMarkFilesAsImportant": "Αποτυχία σήμανσης στοιχείων ως σημαντικά: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Αποτυχία ενημέρωσης κατάστασης σημαντικότητας: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Συγνώμη",
   "subscribe": "Εγγραφείτε",
   "sharedWith": "Κοινοποιήθηκε με",

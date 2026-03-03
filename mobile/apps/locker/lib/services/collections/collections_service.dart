@@ -15,17 +15,18 @@ import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
-import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
 import "package:locker/services/collections/models/files_split.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
+import "package:locker/services/db/locker_db.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/utils/crypto_helper.dart";
 import 'package:logging/logging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionService {
   static final CollectionService instance =
@@ -48,19 +49,24 @@ class CollectionService {
   final _logger = Logger("CollectionService");
 
   late CollectionApiClient _apiClient;
-  late CollectionDB _db;
+  late LockerDB _db;
 
   final _collectionIDToCollections = <int, Collection>{};
 
+  static const String _firstSyncCompletedPrefKey = 'first_sync_completed';
+  late SharedPreferences _prefs;
+  Future<void>? _defaultSetupInFlight;
+
   CollectionService._privateConstructor();
 
-  Future<void> init() async {
-    _db = CollectionDB.instance;
+  Future<void> init(SharedPreferences preferences) async {
+    _db = LockerDB.instance;
     _apiClient = CollectionApiClient.instance;
+    _prefs = preferences;
 
-    Bus.instance.on<SignedInEvent>().listen((event) {
+    Bus.instance.on<SignedInEvent>().listen((event) async {
       _logger.info("User signed in, starting initial sync.");
-      _init();
+      await _init();
     });
 
     if (Configuration.instance.hasConfiguredAccount()) {
@@ -69,9 +75,19 @@ class CollectionService {
   }
 
   Future<void> sync() async {
+    final previousSyncTime = _db.getSyncTime();
+    final shouldCheckFirstSyncCompletion = previousSyncTime == 0;
+
     final updatedCollections =
-        await CollectionApiClient.instance.getCollections(_db.getSyncTime());
+        await CollectionApiClient.instance.getCollections(previousSyncTime);
     if (updatedCollections.isEmpty) {
+      if (shouldCheckFirstSyncCompletion) {
+        final didMarkFirstSync = await _setFirstSyncCompleted();
+        if (didMarkFirstSync) {
+          Bus.instance
+              .fire(CollectionsUpdatedEvent('first_sync_complete_empty'));
+        }
+      }
       _logger.info("No collections to sync.");
       return;
     }
@@ -81,6 +97,9 @@ class CollectionService {
       _collectionIDToCollections[collection.id] = collection;
     }
     await _db.setSyncTime(updatedCollections.last.updationTime);
+    if (shouldCheckFirstSyncCompletion) {
+      await _setFirstSyncCompleted();
+    }
 
     final List<Future> fileFutures = [];
     for (final collection in updatedCollections) {
@@ -120,8 +139,25 @@ class CollectionService {
   }
 
   bool hasCompletedFirstSync() {
-    return Configuration.instance.hasConfiguredAccount() &&
-        _db.getSyncTime() > 0;
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      return false;
+    }
+    if (_db.getSyncTime() > 0) {
+      return true;
+    }
+    return _hasCompletedFirstSyncInPrefs();
+  }
+
+  Future<bool> _setFirstSyncCompleted() async {
+    if (_hasCompletedFirstSyncInPrefs()) {
+      return false;
+    }
+    await _prefs.setBool(_firstSyncCompletedPrefKey, true);
+    return true;
+  }
+
+  bool _hasCompletedFirstSyncInPrefs() {
+    return _prefs.getBool(_firstSyncCompletedPrefKey) ?? false;
   }
 
   Future<Collection> createCollection(
@@ -260,11 +296,7 @@ class CollectionService {
     }
   }
 
-  /// Removes orphaned files that exist in files table but have no collection mappings.
-  /// This is a one-time cleanup for files deleted from trash before the fix was applied.
-  ///
-  /// This migration fix can be removed after a year or so (around Nov 2026)
-  /// once all users have had the corrected trash deletion logic applied.
+  /// Removes orphaned files that exist in files but have no collection mappings.
   Future<void> cleanupOrphanedFiles() async {
     try {
       await _db.cleanupOrphanedFiles();
@@ -363,13 +395,7 @@ class CollectionService {
 
     // ignore: unawaited_futures
     sync().then((_) {
-      if (Configuration.instance.getKey() != null) {
-        setupDefaultCollections();
-      } else {
-        _logger.warning(
-          "Skipping default collections setup - master key not yet available",
-        );
-      }
+      ensureDefaultCollections();
     }).catchError((error) {
       if (error is UnauthorizedError) {
         _logger.info("Session expired, triggering logout");
@@ -740,6 +766,34 @@ class CollectionService {
     }
   }
 
+  Future<void> ensureDefaultCollections() async {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      _logger.warning(
+        "Skipping default collections setup - account not configured",
+      );
+      return;
+    }
+
+    if (!hasCompletedFirstSync()) {
+      _logger.info(
+        "Skipping default collections setup - first sync not completed yet",
+      );
+      return;
+    }
+
+    final inFlight = _defaultSetupInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+
+    final setupFuture = Future<void>.sync(setupDefaultCollections);
+    _defaultSetupInFlight = setupFuture.whenComplete(() {
+      _defaultSetupInFlight = null;
+    });
+    await _defaultSetupInFlight;
+  }
+
   Future<Collection> _getOrCreateDocumentsCollection() async {
     final collections = await getCollections();
     for (final collection in collections) {
@@ -905,6 +959,7 @@ class CollectionService {
 
   void clearCache() {
     _collectionIDToCollections.clear();
+    _defaultSetupInFlight = null;
   }
 
   // Methods for managing collection cache

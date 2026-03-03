@@ -179,7 +179,7 @@ class _InfoMapState extends State<InfoMap> {
   @override
   void initState() {
     super.initState();
-    _hasEnabledMap = flagService.mapEnabled;
+    _hasEnabledMap = mapEnabled;
     _fileLat = widget.file.location!.latitude!;
     _fileLng = widget.file.location!.longitude!;
 
@@ -300,7 +300,7 @@ class _InfoMapState extends State<InfoMap> {
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () async {
                                   try {
-                                    await flagService.setMapEnabled(true);
+                                    await setMapEnabled(true);
                                     setState(() {
                                       _hasEnabledMap = true;
                                     });

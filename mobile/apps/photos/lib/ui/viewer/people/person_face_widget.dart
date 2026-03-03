@@ -5,9 +5,11 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -57,6 +59,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     with AutomaticKeepAliveClientMixin {
   Future<Uint8List?>? faceCropFuture;
   EnteFile? fileForFaceCrop;
+  int? _faceCropFileId;
   String? _personName;
   bool _showingFallback = false;
   bool _fallbackEverUsed = false;
@@ -74,14 +77,14 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
 
   @override
   void dispose() {
-    if (fileForFaceCrop != null) {
+    if (_faceCropFileId != null) {
       checkStopTryingToGenerateFaceThumbnails(
-        fileForFaceCrop!.uploadedFileID!,
+        _faceCropFileId!,
         useFullFile: widget.useFullFile,
       );
       if (_fallbackEverUsed) {
         checkStopTryingToGenerateFaceThumbnails(
-          fileForFaceCrop!.uploadedFileID!,
+          _faceCropFileId!,
           useFullFile: false,
         );
       }
@@ -211,7 +214,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       if (tryInMemoryCachedCrop != null) return tryInMemoryCachedCrop;
       String? fixedFaceID;
       PersonEntity? personEntity;
-      if (isPerson) {
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      if (isPerson && !isOfflineMode) {
         personEntity = await PersonService.instance.getPerson(widget.personId!);
         if (personEntity == null) {
           _logger.severe(
@@ -224,70 +229,147 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       }
       fixedFaceID ??=
           await checkUsedFaceIDForPersonOrClusterId(personOrClusterId);
-      final hiddenFileIDs = await SearchService.instance
-          .getHiddenFiles()
-          .then((onValue) => onValue.map((e) => e.uploadedFileID));
+
       EnteFile? fileForFaceCrop;
-      if (fixedFaceID != null) {
-        final fileID = getFileIdFromFaceId<int>(fixedFaceID);
-        final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
-        if (fileInDB == null) {
-          _logger.severe(
-            "File with ID $fileID not found in DB, cannot get cover face.",
-          );
-          await checkRemoveCachedFaceIDForPersonOrClusterId(
-            personOrClusterId,
-          );
-        } else if (hiddenFileIDs.contains(fileInDB.uploadedFileID)) {
-          _logger.info(
-            "File with ID $fileID is hidden, skipping it for face crop.",
-          );
-          await checkRemoveCachedFaceIDForPersonOrClusterId(
-            personOrClusterId,
-          );
-        } else {
-          fileForFaceCrop = fileInDB;
-        }
-      }
-      if (fileForFaceCrop == null) {
-        final List<String> allFaces = isPerson
-            ? await MLDataDB.instance
-                .getFaceIDsForPersonOrderedByScore(widget.personId!)
-            : await MLDataDB.instance
-                .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
-        for (final faceID in allFaces) {
-          final fileID = getFileIdFromFaceId<int>(faceID);
-          if (hiddenFileIDs.contains(fileID)) {
-            _logger.info(
-              "File with ID $fileID is hidden, skipping it for face crop.",
-            );
-            continue;
+      if (isOfflineMode) {
+        final allFiles = await SearchService.instance.getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
           }
-          fileForFaceCrop = await FilesDB.instance.getAnyUploadedFile(fileID);
-          if (fileForFaceCrop != null) {
-            _logger.info(
-              "Using file ID $fileID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+        }
+        if (fixedFaceID != null) {
+          final localIntId = getFileIdFromFaceId<int>(fixedFaceID);
+          final localId =
+              await OfflineFilesDB.instance.getLocalIdForIntId(localIntId);
+          if (localId == null) {
+            await checkRemoveCachedFaceIDForPersonOrClusterId(
+              personOrClusterId,
             );
-            fixedFaceID = faceID;
-            break;
+          } else {
+            fileForFaceCrop = localIdToFile[localId];
+            if (fileForFaceCrop == null) {
+              await checkRemoveCachedFaceIDForPersonOrClusterId(
+                personOrClusterId,
+              );
+            }
           }
         }
         if (fileForFaceCrop == null) {
+          final List<String> allFaces = isPerson
+              ? await mlDataDB
+                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
+              : await mlDataDB
+                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+          final localIntIds = allFaces
+              .map((faceID) => getFileIdFromFaceId<int>(faceID))
+              .toSet();
+          final localIdMap =
+              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+          for (final faceID in allFaces) {
+            final localIntId = getFileIdFromFaceId<int>(faceID);
+            final localId = localIdMap[localIntId];
+            final candidate = localId != null ? localIdToFile[localId] : null;
+            if (candidate != null) {
+              fileForFaceCrop = candidate;
+              fixedFaceID = faceID;
+              break;
+            }
+          }
+          if (fileForFaceCrop == null) {
+            _logger.severe(
+              "No suitable local file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+            );
+            return null;
+          }
+        }
+      } else {
+        final hiddenFileIDs = await SearchService.instance
+            .getHiddenFiles()
+            .then((onValue) => onValue.map((e) => e.uploadedFileID));
+        if (fixedFaceID != null) {
+          final fileID = getFileIdFromFaceId<int>(fixedFaceID);
+          final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
+          if (fileInDB == null) {
+            _logger.severe(
+              "File with ID $fileID not found in DB, cannot get cover face.",
+            );
+            await checkRemoveCachedFaceIDForPersonOrClusterId(
+              personOrClusterId,
+            );
+          } else if (hiddenFileIDs.contains(fileInDB.uploadedFileID)) {
+            _logger.info(
+              "File with ID $fileID is hidden, skipping it for face crop.",
+            );
+            await checkRemoveCachedFaceIDForPersonOrClusterId(
+              personOrClusterId,
+            );
+          } else {
+            fileForFaceCrop = fileInDB;
+          }
+        }
+        if (fileForFaceCrop == null) {
+          final List<String> allFaces = isPerson
+              ? await mlDataDB
+                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
+              : await mlDataDB
+                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+          for (final faceID in allFaces) {
+            final fileID = getFileIdFromFaceId<int>(faceID);
+            if (hiddenFileIDs.contains(fileID)) {
+              _logger.info(
+                "File with ID $fileID is hidden, skipping it for face crop.",
+              );
+              continue;
+            }
+            fileForFaceCrop = await FilesDB.instance.getAnyUploadedFile(fileID);
+            if (fileForFaceCrop != null) {
+              _logger.info(
+                "Using file ID $fileID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+              );
+              fixedFaceID = faceID;
+              break;
+            }
+          }
+          if (fileForFaceCrop == null) {
+            _logger.severe(
+              "No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+            );
+            return null;
+          }
+        }
+      }
+      int? recentFileID;
+      if (isOfflineMode) {
+        final localId = fileForFaceCrop.localID;
+        if (localId == null || localId.isEmpty) {
           _logger.severe(
-            "No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+            "Missing local ID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
           );
           return null;
         }
+        recentFileID =
+            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+      } else {
+        recentFileID = fileForFaceCrop.uploadedFileID;
       }
-      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
-        recentFileID: fileForFaceCrop.uploadedFileID!,
+      if (recentFileID == null) {
+        _logger.severe(
+          "Missing file id for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
+        );
+        return null;
+      }
+      final Face? face = await mlDataDB.getCoverFaceForPerson(
+        recentFileID: recentFileID,
         avatarFaceId: fixedFaceID,
         personID: widget.personId,
         clusterID: widget.clusterID,
       );
       if (face == null) {
         _logger.severe(
-          "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
+          "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID",
         );
         await checkRemoveCachedFaceIDForPersonOrClusterId(
           personOrClusterId,
@@ -302,10 +384,11 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         useTempCache: false,
       );
       this.fileForFaceCrop = fileForFaceCrop;
+      _faceCropFileId = recentFileID;
       final result = cropMap?[face.faceID];
       if (result == null) {
         _logger.severe(
-          "Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
+          "Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID",
         );
       }
       return result;

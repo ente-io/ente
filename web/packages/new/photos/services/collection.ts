@@ -7,6 +7,7 @@ import {
     encryptBox,
     generateKey,
 } from "ente-base/crypto";
+import { haveWindow } from "ente-base/env";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -66,6 +67,30 @@ const favoritesCollectionName = "Favorites";
  */
 export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
+
+/**
+ * Create a new quick link collection on remote, and return its local
+ * representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name to use for the new quick link collection.
+ */
+export const createQuickLinkCollection = (name: string) =>
+    createCollection(name, "album", {
+        subType: CollectionSubType.quicklink,
+        visibility: ItemVisibility.visible,
+    });
+
+/**
+ * Create a new hidden album on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param albumName The name to use for the new hidden album.
+ */
+export const createHiddenAlbum = (albumName: string) =>
+    createCollection(albumName, "album", { visibility: ItemVisibility.hidden });
 
 /**
  * Create a new collection on remote, and return its local representation.
@@ -476,9 +501,14 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
 /**
  * Return all hidden collections that are present in our local database.
  */
-export const savedHiddenCollections = (): Promise<Collection[]> =>
+export const savedHiddenCollections = (
+    currentUserID?: number,
+): Promise<Collection[]> =>
     savedCollections().then(
-        (cs) => splitByPredicate(cs, isHiddenCollection)[0],
+        (cs) =>
+            splitByPredicate(cs, (c) =>
+                isHiddenCollection(c, currentUserID),
+            )[0],
     );
 
 /**
@@ -1077,6 +1107,24 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
+ * Change the cover photo of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose cover we want to change.
+ *
+ * @param coverID The file ID to set as the cover.
+ *
+ * Pass `0` to reset to the default cover.
+ */
+export const updateCollectionCover = async (
+    collection: Collection,
+    coverID: number,
+) => updateCollectionPublicMagicMetadata(collection, { coverID });
+
+/**
  * Change the layout type of a collection on remote.
  *
  * Remote only, does not modify local state.
@@ -1085,7 +1133,7 @@ export const updateCollectionSortOrder = async (
  *
  * @param collection The collection whose layout we want to change.
  *
- * @param layout The layout type ("grouped", "continuous", "trip").
+ * @param layout The layout type ("masonry", "grouped", "continuous", "trip").
  */
 export const updateCollectionLayout = async (
     collection: Collection,
@@ -1340,9 +1388,24 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
  *
  * Hidden collections are those that have their visibility set to hidden for
  * the current user (owner or sharee).
+ *
+ * In one instance, the isHiddenCollection function is called outside of a window, like
+ * for the people tab's review suggestions, this function was trigged from a worker.
+ * In that case, since the worker has no access to the localStorage, we need to pass the currentUserID
+ * explicitly.
  */
-export const isHiddenCollection = (collection: Collection) => {
-    const userID = ensureLocalUser().id;
+export const isHiddenCollection = (
+    collection: Collection,
+    currentUserID?: number,
+) => {
+    const userID =
+        currentUserID ?? (haveWindow() ? ensureLocalUser().id : undefined);
+
+    if (userID === undefined) {
+        throw new Error(
+            "isHiddenCollection: currentUserID is required outside window context",
+        );
+    }
     if (collection.owner.id == userID) {
         return (
             collection.magicMetadata?.data.visibility == ItemVisibility.hidden

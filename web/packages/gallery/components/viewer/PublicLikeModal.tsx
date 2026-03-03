@@ -129,13 +129,23 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                     </TitleSection>
 
                     <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
-                        <AnonymousButton
-                            variant="outlined"
-                            fullWidth
-                            onClick={onLikeAnonymously}
-                        >
-                            {t("like_anonymously")}
-                        </AnonymousButton>
+                        {enableJoin ? (
+                            <AnonymousButton
+                                variant="outlined"
+                                fullWidth
+                                onClick={onLikeAnonymously}
+                            >
+                                {t("like_anonymously")}
+                            </AnonymousButton>
+                        ) : (
+                            <SignInButton
+                                variant="contained"
+                                fullWidth
+                                onClick={onLikeAnonymously}
+                            >
+                                {t("like_anonymously")}
+                            </SignInButton>
+                        )}
                         {enableJoin && (
                             <SignInButton
                                 variant="contained"

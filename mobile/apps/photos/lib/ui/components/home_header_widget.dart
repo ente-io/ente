@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/ui/common/backup_flow_helper.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 
@@ -13,6 +14,8 @@ class HomeHeaderWidget extends StatefulWidget {
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    final showAddAlbumAction =
+        !isOfflineMode || permissionService.hasGrantedLimitedPermissions();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -32,11 +35,13 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           duration: const Duration(milliseconds: 250),
           child: widget.centerWidget,
         ),
-        IconButtonWidget(
-          icon: Icons.add_photo_alternate_outlined,
-          iconButtonType: IconButtonType.primary,
-          onTap: () async => handleFullPermissionBackupFlow(context),
-        ),
+        showAddAlbumAction
+            ? IconButtonWidget(
+                icon: Icons.add_photo_alternate_outlined,
+                iconButtonType: IconButtonType.primary,
+                onTap: () async => handleFullPermissionBackupFlow(context),
+              )
+            : const SizedBox(width: 48, height: 48),
       ],
     );
   }

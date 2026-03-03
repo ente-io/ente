@@ -48,7 +48,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
 
   Future<void> initVariables() async {
     _changeMemoriesSettings = Debouncer(const Duration(milliseconds: 2500));
-    isMLEnabled = flagService.hasGrantedMLConsent;
+    isMLEnabled = hasGrantedMLConsent;
     isYearlyMemoriesEnabled =
         MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
     isSmartMemoriesEnabled =

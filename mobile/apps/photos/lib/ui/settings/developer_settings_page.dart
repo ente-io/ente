@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -48,8 +51,16 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             const SizedBox(height: 40),
             GradientButton(
               onTap: () async {
-                final url = _urlController.text;
+                final url = _urlController.text.trim();
                 _logger.info("Entered endpoint: $url");
+                final modeToggleMessage =
+                    await _maybeToggleOfflineModeOption(url);
+                if (modeToggleMessage != null) {
+                  Bus.instance.fire(AppModeChangedEvent());
+                  showToast(context, modeToggleMessage);
+                  Navigator.of(context).pop();
+                  return;
+                }
                 try {
                   final uri = Uri.parse(url);
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
@@ -91,6 +102,19 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       }
     } catch (e) {
       throw Exception('Error occurred: $e');
+    }
+  }
+
+  Future<String?> _maybeToggleOfflineModeOption(String input) async {
+    switch (input) {
+      case "offline":
+        await localSettings.setShowOfflineModeOption(true);
+        return "Offline mode option enabled";
+      case "online":
+        await localSettings.setShowOfflineModeOption(false);
+        return "Offline mode option disabled";
+      default:
+        return null;
     }
   }
 }

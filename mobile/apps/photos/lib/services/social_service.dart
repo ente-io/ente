@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:nanoid/nanoid.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/models/social/api_responses.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 
 /// Service for social features (comments and reactions).
@@ -17,7 +16,6 @@ class SocialService {
   static final instance = SocialService._();
 
   final _logger = Logger('SocialService');
-  final _enteDio = NetworkClient.instance.enteDio;
 
   static const _commentIDLength = 21;
   static const _reactionIDLength = 21;
@@ -61,28 +59,14 @@ class SocialService {
     String? id,
   }) async {
     final commentID = id ?? generateCommentID();
-
-    final data = <String, dynamic>{
-      'id': commentID,
-      'collectionID': collectionID,
-      'cipher': cipher,
-      'nonce': nonce,
-    };
-
-    if (fileID != null) {
-      data['fileID'] = fileID;
-    }
-    if (parentCommentID != null) {
-      data['parentCommentID'] = parentCommentID;
-    }
-
-    try {
-      final response = await _enteDio.post('/comments', data: data);
-      return response.data['id'] as String;
-    } on DioException catch (e) {
-      _logger.severe('Failed to create comment', e);
-      rethrow;
-    }
+    return socialGateway.createComment(
+      id: commentID,
+      collectionID: collectionID,
+      cipher: cipher,
+      nonce: nonce,
+      fileID: fileID,
+      parentCommentID: parentCommentID,
+    );
   }
 
   /// Updates an existing comment.
@@ -95,25 +79,16 @@ class SocialService {
     required String cipher,
     required String nonce,
   }) async {
-    try {
-      await _enteDio.put(
-        '/comments/$commentID',
-        data: {'cipher': cipher, 'nonce': nonce},
-      );
-    } on DioException catch (e) {
-      _logger.severe('Failed to update comment $commentID', e);
-      rethrow;
-    }
+    return socialGateway.updateComment(
+      commentID: commentID,
+      cipher: cipher,
+      nonce: nonce,
+    );
   }
 
   /// Deletes a comment (soft delete on server).
   Future<void> deleteComment(String commentID) async {
-    try {
-      await _enteDio.delete('/comments/$commentID');
-    } on DioException catch (e) {
-      _logger.severe('Failed to delete comment $commentID', e);
-      rethrow;
-    }
+    return socialGateway.deleteComment(commentID);
   }
 
   /// Fetches comments diff for a collection.
@@ -130,35 +105,12 @@ class SocialService {
     int? limit,
     int? fileID,
   }) async {
-    final queryParams = <String, dynamic>{
-      'collectionID': collectionID,
-    };
-
-    if (sinceTime != null) {
-      queryParams['sinceTime'] = sinceTime;
-    }
-    if (limit != null) {
-      queryParams['limit'] = limit;
-    }
-    if (fileID != null) {
-      queryParams['fileID'] = fileID;
-    }
-
-    try {
-      final response = await _enteDio.get(
-        '/comments/diff',
-        queryParameters: queryParams,
-      );
-      return CommentsDiffResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      _logger.severe(
-        'Failed to fetch comments diff for collection $collectionID',
-        e,
-      );
-      rethrow;
-    }
+    return socialGateway.fetchCommentsDiff(
+      collectionID: collectionID,
+      sinceTime: sinceTime,
+      limit: limit,
+      fileID: fileID,
+    );
   }
 
   // ============ Reactions API ============
@@ -182,38 +134,19 @@ class SocialService {
     String? id,
   }) async {
     final reactionID = id ?? generateReactionID();
-
-    final data = <String, dynamic>{
-      'id': reactionID,
-      'collectionID': collectionID,
-      'cipher': cipher,
-      'nonce': nonce,
-    };
-
-    if (fileID != null) {
-      data['fileID'] = fileID;
-    }
-    if (commentID != null) {
-      data['commentID'] = commentID;
-    }
-
-    try {
-      final response = await _enteDio.put('/reactions', data: data);
-      return response.data['id'] as String;
-    } on DioException catch (e) {
-      _logger.severe('Failed to upsert reaction', e);
-      rethrow;
-    }
+    return socialGateway.upsertReaction(
+      id: reactionID,
+      collectionID: collectionID,
+      cipher: cipher,
+      nonce: nonce,
+      fileID: fileID,
+      commentID: commentID,
+    );
   }
 
   /// Deletes a reaction (soft delete on server).
   Future<void> deleteReaction(String reactionID) async {
-    try {
-      await _enteDio.delete('/reactions/$reactionID');
-    } on DioException catch (e) {
-      _logger.severe('Failed to delete reaction $reactionID', e);
-      rethrow;
-    }
+    return socialGateway.deleteReaction(reactionID);
   }
 
   /// Fetches reactions diff for a collection.
@@ -232,77 +165,32 @@ class SocialService {
     int? fileID,
     String? commentID,
   }) async {
-    final queryParams = <String, dynamic>{
-      'collectionID': collectionID,
-    };
-
-    if (sinceTime != null) {
-      queryParams['sinceTime'] = sinceTime;
-    }
-    if (limit != null) {
-      queryParams['limit'] = limit;
-    }
-    if (fileID != null) {
-      queryParams['fileID'] = fileID;
-    }
-    if (commentID != null) {
-      queryParams['commentID'] = commentID;
-    }
-
-    try {
-      final response = await _enteDio.get(
-        '/reactions/diff',
-        queryParameters: queryParams,
-      );
-      return ReactionsDiffResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      _logger.severe(
-        'Failed to fetch reactions diff for collection $collectionID',
-        e,
-      );
-      rethrow;
-    }
+    return socialGateway.fetchReactionsDiff(
+      collectionID: collectionID,
+      sinceTime: sinceTime,
+      limit: limit,
+      fileID: fileID,
+      commentID: commentID,
+    );
   }
 
   // ============ Latest Updates API ============
 
-  /// Fetches latest update timestamps for all collections accessible to the user.
+  /// Fetches latest update timestamps for all collections accessible to the
+  /// user.
   ///
-  /// Returns per-collection timestamps for comments, reactions, and anonymous profiles.
-  /// Use this to determine which collections need syncing.
+  /// Returns per-collection timestamps for comments, reactions, and anonymous
+  /// profiles. Use this to determine which collections need syncing.
   Future<LatestUpdatesResponse> fetchLatestUpdates() async {
-    try {
-      final response = await _enteDio.get('/comments-reactions/updated-at');
-      return LatestUpdatesResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      _logger.severe('Failed to fetch latest updates', e);
-      rethrow;
-    }
+    return socialGateway.fetchLatestUpdates();
   }
 
   /// Fetches anonymous profiles for a collection.
   ///
-  /// Returns encrypted profile data that needs to be decrypted with the collection key.
+  /// Returns encrypted profile data that needs to be decrypted with the
+  /// collection key.
   Future<AnonProfilesResponse> fetchAnonProfiles(int collectionID) async {
-    try {
-      final response = await _enteDio.get(
-        '/social/anon-profiles',
-        queryParameters: {'collectionID': collectionID},
-      );
-      return AnonProfilesResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      _logger.severe(
-        'Failed to fetch anon profiles for collection $collectionID',
-        e,
-      );
-      rethrow;
-    }
+    return socialGateway.fetchAnonProfiles(collectionID);
   }
 
   // ============ Unified/Social API ============
@@ -323,57 +211,20 @@ class SocialService {
     int? limit,
     int? fileID,
   }) async {
-    final queryParams = <String, dynamic>{
-      'collectionID': collectionID,
-    };
-
-    if (commentsSinceTime != null) {
-      queryParams['commentsSinceTime'] = commentsSinceTime;
-    }
-    if (reactionsSinceTime != null) {
-      queryParams['reactionsSinceTime'] = reactionsSinceTime;
-    }
-    if (limit != null) {
-      queryParams['limit'] = limit;
-    }
-    if (fileID != null) {
-      queryParams['fileID'] = fileID;
-    }
-
-    try {
-      final response = await _enteDio.get(
-        '/social/diff',
-        queryParameters: queryParams,
-      );
-      return SocialDiffResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      _logger.severe(
-        'Failed to fetch social diff for collection $collectionID',
-        e,
-      );
-      rethrow;
-    }
+    return socialGateway.fetchSocialDiff(
+      collectionID: collectionID,
+      commentsSinceTime: commentsSinceTime,
+      reactionsSinceTime: reactionsSinceTime,
+      limit: limit,
+      fileID: fileID,
+    );
   }
 
   /// Fetches comment and reaction counts for all collections.
   ///
   /// Returns a map of collectionID -> count
   Future<Map<int, int>> fetchCounts() async {
-    try {
-      final response = await _enteDio.get('/comments-reactions/counts');
-      final countsData = response.data['counts'] as Map<String, dynamic>?;
-      if (countsData == null) {
-        return {};
-      }
-      return countsData.map(
-        (key, value) => MapEntry(int.parse(key), value as int),
-      );
-    } on DioException catch (e) {
-      _logger.severe('Failed to fetch counts', e);
-      rethrow;
-    }
+    return socialGateway.fetchCounts();
   }
 
   // ============ Encryption/Decryption ============

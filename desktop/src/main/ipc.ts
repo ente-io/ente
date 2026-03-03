@@ -28,6 +28,10 @@ import {
 } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import {
+    getNativeDeviceLockCapability,
+    promptDeviceLock,
+} from "./services/device-lock";
+import {
     openDirectory,
     openLogDirectory,
     selectDirectory,
@@ -127,6 +131,24 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("isAutoLaunchEnabled", () => autoLauncher.isEnabled());
 
     ipcMain.handle("toggleAutoLaunch", () => autoLauncher.toggleAutoLaunch());
+
+    // - Desktop app lock (native device authentication)
+    //
+    // These handlers are the main-process bridge for the desktop app lock flow:
+    // the renderer asks about native auth capability/support, then requests a
+    // native unlock prompt when the user needs to unlock the app.
+
+    // Returns richer capability details (for example, available prompt type)
+    // so the UI can decide which app-lock option to show.
+    ipcMain.handle("getNativeDeviceLockCapability", () =>
+        getNativeDeviceLockCapability(),
+    );
+
+    // Triggers the macOS-native Touch ID prompt and returns the auth result
+    // back to the renderer. Other platforms currently return false.
+    ipcMain.handle("promptDeviceLock", (_, reason: string) =>
+        promptDeviceLock(reason),
+    );
 
     // - App update
 

@@ -1286,7 +1286,10 @@ Future<void> _openRitualAlbum(BuildContext context, Ritual ritual) async {
   if (!context.mounted) return;
   await routeToPage(
     context,
-    CollectionPage(CollectionWithThumbnail(collection, thumbnail)),
+    CollectionPage(
+      CollectionWithThumbnail(collection, thumbnail),
+      hasVerifiedLock: collection.isHidden(),
+    ),
   );
 }
 
@@ -1318,7 +1321,10 @@ Future<void> _openRitualAlbumAndFile(
   if (!context.mounted) return;
   routeToPage(
     context,
-    CollectionPage(CollectionWithThumbnail(collection, thumbnail)),
+    CollectionPage(
+      CollectionWithThumbnail(collection, thumbnail),
+      hasVerifiedLock: collection.isHidden(),
+    ),
   ).ignore();
 
   final files = await FilesDB.instance.getAllFilesCollection(collection.id);

@@ -43,7 +43,11 @@ it with Ente.
     ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
     You'll see two options:
-    - **Select folder (recommended): If you have multiple ZIP files, extract them all into one folder first, then select that folder. This ensures proper metadata matching ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).**
+    - **Select folder (recommended): If you have multiple ZIP files, extract
+      them all into one parent folder first, then select that parent folder.
+      Keep subfolders as-is (do not flatten everything into one giant folder).
+      This ensures proper metadata matching
+      ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).**
     - **Select zips**: Choose your ZIP files directly without extracting. Convenient but may not properly match metadata if files are split across ZIPs.
 
         ![Google Takeout Selection](google-photos-6.webp)
@@ -66,7 +70,8 @@ it with Ente.
 
 In case your uploads get interrupted, just drag and drop the folder or files again. Ente will automatically ignore already backed up files and upload just the rest.
 
-If you run into any issues during this migration, please reach out to
+If you run into any issues during this migration, please check out our
+[Migration FAQ](/photos/faq/migration#importing-from-google-photos) page or reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
 
 > [!TIP]

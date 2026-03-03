@@ -249,7 +249,7 @@ Learn more in the [Storage optimization guide](/photos/features/albums-and-organ
 
 Earn free storage by inviting friends:
 
-- Share your referral code from `Settings > General > Referrals`
+- Share your referral code from `Settings > Referrals`
 - When friends upgrade to a paid plan, both of you get **10 GB free**
 - Maximum earned storage equals your plan size (double your storage)
 - Earned storage lasts as long as your subscription is active

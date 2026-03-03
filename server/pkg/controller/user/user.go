@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -235,6 +236,19 @@ func (c *UserController) GetTwoFactorStatus(userID int64) (bool, error) {
 }
 
 func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, true)
+}
+
+func (c *UserController) HandleAutomatedAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) (*ente.DeleteAccountResponse, error) {
+	return c.handleAccountDeletion(ctx, userID, logger, false)
+}
+
+func (c *UserController) handleAccountDeletion(
+	ctx context.Context,
+	userID int64,
+	logger *logrus.Entry,
+	sendDeletionEmail bool,
+) (*ente.DeleteAccountResponse, error) {
 	isSubscriptionCancelled, err := c.BillingController.HandleAccountDeletion(ctx, userID, logger)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -267,7 +281,12 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 	email := user.Email
 	// See also: Do not block on mailing list errors
 	go func() {
-		_ = c.MailingListsController.Unsubscribe(email)
+		if err := c.MailingListsController.Unsubscribe(email); err != nil {
+			logger.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list unsubscribe failed")
+		}
 	}()
 
 	logger.Info("mark user as deleted")
@@ -282,7 +301,9 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	if sendDeletionEmail {
+		go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
+	}
 
 	return &ente.DeleteAccountResponse{
 		IsSubscriptionCancelled: isSubscriptionCancelled,
@@ -426,7 +447,12 @@ func (c *UserController) createUser(email string, source *string) (int64, ente.S
 	// perform these actions async, and ignore errors that happen with them (a
 	// notification will be sent to Discord for those).
 	go func() {
-		_ = c.MailingListsController.Subscribe(email)
+		if err := c.MailingListsController.Subscribe(email); err != nil {
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"user_id": userID,
+				"email":   email,
+			}).Error("mailing list subscribe failed")
+		}
 	}()
 	return userID, subscription, nil
 }

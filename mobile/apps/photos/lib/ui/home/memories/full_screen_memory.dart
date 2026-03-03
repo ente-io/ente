@@ -613,8 +613,9 @@ class BottomIcons extends StatelessWidget {
           ),
         ];
 
-        if (currentFile.ownerID == null ||
-            (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
+        final isOwner = currentFile.ownerID == null ||
+            (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID;
+        if (isOwner) {
           rowChildren.addAll([
             IconButton(
               icon: Icon(
@@ -640,11 +641,15 @@ class BottomIcons extends StatelessWidget {
                 fullScreenState?._toggleAnimation(pause: false);
               },
             ),
-            SizedBox(
-              height: 32,
-              child: FavoriteWidget(currentFile),
-            ),
           ]);
+          if (!isOfflineMode) {
+            rowChildren.add(
+              SizedBox(
+                height: 32,
+                child: FavoriteWidget(currentFile),
+              ),
+            );
+          }
         }
         rowChildren.add(
           IconButton(

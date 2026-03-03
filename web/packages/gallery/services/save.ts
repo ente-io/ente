@@ -1,4 +1,5 @@
 import { assertionFailed } from "ente-base/assert";
+import { suppressMainWindowBlurForTrustedPrompt } from "ente-base/electron";
 import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -154,6 +155,7 @@ const downloadAndSave = async (
 
     let downloadDirPath: string | undefined;
     if (electron) {
+        suppressMainWindowBlurForTrustedPrompt();
         downloadDirPath = await electron.selectDirectory();
         if (!downloadDirPath) {
             // The user cancelled on the directory selection dialog.
@@ -420,9 +422,14 @@ class ZipBatcher {
                 this.currentFileCount === 1
                     ? "1 file"
                     : `${this.currentFileCount} files`;
-            const zipName = this.includePartNumber
-                ? `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`
-                : `${this.baseName} - ${fileLabel}.zip`;
+            const baseName = this.baseName.trim();
+            const nameBase = this.includePartNumber
+                ? `${baseName} Part ${this.batchIndex}`
+                : baseName;
+            const zipName =
+                baseName.toLowerCase() === fileLabel.toLowerCase()
+                    ? `${nameBase}.zip`
+                    : `${nameBase} - ${fileLabel}.zip`;
 
             const url = URL.createObjectURL(zipBlob);
             saveAsFileAndRevokeObjectURL(url, zipName);

@@ -148,6 +148,10 @@ Since Ente uses end-to-end encryption, we cannot reset your password without you
 
 **Never skip this step!** Without your recovery key, losing your password means permanently losing access to your photos.
 
+### Can the recovery key be changed? {#change-recovery-key}
+
+No, the recovery key cannot be changed or rotated. If you suspect your recovery key has been compromised, we recommend creating a new account and migrating your data.
+
 ### How do I reset my password if I lost it? {#reset-password}
 
 On the login page:

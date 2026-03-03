@@ -10,6 +10,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.90.0"
 
 permissions:
     contents: write
@@ -72,6 +73,11 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
@@ -90,7 +96,7 @@ jobs:
 
             - name: Build independent APK
               run: |
-                flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
+                flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent --target-platform android-arm,android-arm64
                 mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"

@@ -196,9 +196,9 @@ The Uncategorized section shows all photos that aren't in any other album you ow
 
 For detailed guides, see [Hide](/photos/features/albums-and-organization/hide) and [Archive](/photos/features/albums-and-organization/archive).
 
-### Can I hide photos that are shared with me? {#hide-shared}
+### Can I hide albums or photos that are shared with me? {#hide-shared}
 
-No, you cannot hide photos or albums that are shared with you by other users. However, you can archive shared albums to remove them from your timeline. The "Hide" feature only works on content that you own.
+You can hide an album shared with you, but you can't hide an individual photo shared with you since hiding of individual files only works for files you own.
 
 ### Do archived photos appear in search results? {#archive-search}
 

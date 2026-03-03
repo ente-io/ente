@@ -2,17 +2,20 @@ import "dart:convert";
 
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
+import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
@@ -148,10 +151,23 @@ class _AdvancedSharingBottomSheetState
                             );
                             if (isDownloadEnabled) {
                               // ignore: unawaited_futures
-                              showErrorDialog(
+                              showAlertBottomSheet(
                                 context,
-                                context.l10n.disableDownloadWarningTitle,
-                                context.l10n.disableDownloadWarningBody,
+                                title: context.l10n.disableDownloadWarningTitle,
+                                message: context.l10n.disableDownloadWarningBody,
+                                assetPath: "assets/warning-grey.png",
+                                buttons: [
+                                  GradientButton(
+                                    text: context.l10n.contactSupport,
+                                    onTap: () async {
+                                      await sendLogs(
+                                        context,
+                                        "support@ente.io",
+                                        postShare: () {},
+                                      );
+                                    },
+                                  ),
+                                ],
                               );
                             }
                           },

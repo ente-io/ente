@@ -33,10 +33,14 @@ class AppLifecycleService {
 
   void onAppInBackground(String reason) {
     _logger.info("App in background $reason");
-    _preferences.setInt(
-      keyLastAppOpenTime,
-      DateTime.now().microsecondsSinceEpoch,
-    );
+    if (isForeground) {
+      _preferences.setInt(
+        keyLastAppOpenTime,
+        DateTime.now().microsecondsSinceEpoch,
+      );
+    } else {
+      _logger.info("App already in background, skipping open time update");
+    }
     isForeground = false;
   }
 

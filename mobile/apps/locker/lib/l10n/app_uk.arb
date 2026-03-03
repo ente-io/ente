@@ -20,47 +20,195 @@
   "pleaseWait": "Будь ласка, зачекайте...",
   "downloading": "Завантаження...",
   "downloadingProgress": "Завантаження... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "Не вдалося завантажити",
   "failedToDownloadOrDecrypt": "Не вдалося завантажити елемент",
   "errorOpeningFile": "Помилка відкриття елемента",
   "errorOpeningFileMessage": "Помилка відкриття елемента: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Не вдалося відкрити елемент: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes} хв тому",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours} год тому",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Вчора",
   "daysAgo": "{days} дн тому",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Колекцію успішно перейменовано",
   "failedToRenameCollection": "Не вдалося перейменувати колекцію: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Цю колекцію не можна видалити",
   "collectionCannotBeEdited": "Цю колекцію не можна редагувати",
   "collectionCannotBeShared": "Цю колекцію не можна поширити",
   "deleteCollection": "Видалити колекцію",
   "deleteCollectionConfirmation": "Ви впевнені, що хочете видалити \"{collectionName}\"?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "Скасувати",
   "collectionDeletedSuccessfully": "Колекцію успішно видалено",
   "failedToDeleteCollection": "Не вдалося видалити колекцію: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Колекції",
   "retry": "Повторити",
   "failedToSyncTrash": "Не вдалося синхронізувати кошик: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Будь ласка, виберіть хоча б одну колекцію",
   "unknownItemType": "Невідомий тип елемента",
   "fileDeletedSuccessfully": "Елемент успішно видалено",
   "failedToDeleteFile": "Не вдалося видалити елемент: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Елемент успішно оновлено!",
   "failedToUpdateFile": "Не вдалося оновити елемент: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Змін не внесено",
   "noCollectionsAvailableForRestore": "Немає колекцій для відновлення",
   "trashClearedSuccessfully": "Кошик успішно очищено",
   "failedToClearTrash": "Не вдалося очистити кошик: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Смітник",
   "deletedPermanently": "\"{fileName}\" остаточно видалено",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "Не вдалося відновити \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Створити нову колекцію",
   "create": "Створити",
   "renameCollection": "Перейменувати колекцію",
   "save": "Зберегти",
   "deleteFile": "Видалити елемент",
   "deleteFileConfirmation": "Ви впевнені, що хочете видалити \"{fileName}\"?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Колекцій не знайдено",
   "createYourFirstCollection": "Створіть свою першу колекцію, щоб почати",
   "createCollection": "Створити колекцію",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Натисніть кнопку +, щоб почати",
   "uploadDocument": "Завантажити документ",
   "items": "{count} елементів",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{немає елементів} =1{1 елемент} few{{count} елементи} many{{count} елементів} other{{count} елементів}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Створити колекцію",
   "uploadDocumentTooltip": "Завантажити документ",
   "restore": "Відновити",
   "restoreFile": "Відновити {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Немає доступних колекцій",
   "emptyTrash": "Очистити кошик",
   "emptyTrashTooltip": "Очистити кошик",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Збігів не знайдено",
   "searchEmptyDescription": "Спробуйте пошукати щось інше.",
   "searchEverywhereTitle": "Шукати скрізь \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Шукати в усіх колекціях і файлах.",
   "noCollectionsFoundForQuery": "Колекцій для \"{query}\" не знайдено",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Без категорії",
   "syncingTrash": "Синхронізація кошика...",
   "restoring": "Відновлення...",
   "restoredFileToCollection": "\"{fileName}\" відновлено до \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Очищення кошика...",
   "trashIsEmpty": "Кошик порожній",
   "share": "Поділитися",
@@ -157,15 +363,13 @@
   "reportABug": "Повідомити про помилку",
   "reportBug": "Повідомити про помилку",
   "logsDialogBodyLocker": "Це надішле журнали, щоб допомогти нам вирішити вашу проблему.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Соцмережі",
   "rateUsOnStore": "Оцініть нас в {storeName}",
   "blog": "Блог",
   "merchandise": "Товари",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Інформація",
   "saveInformation": "Зберегти інформацію",
   "saveToLocker": "Зберегти в Locker",
@@ -179,8 +383,17 @@
   "accountCredentials": "Секретний ключ",
   "accountCredentialsDescription": "Зберігайте облікові дані.",
   "editSecret": "Редагувати секрет",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Змінити розташування",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Редагувати нотатку",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Екстрений контакт",
   "emergencyContactDescription": "Зберігайте контактну інформацію ключових людей у кризових ситуаціях.",
   "noteName": "Заголовок",
@@ -259,6 +472,14 @@
   "expiredLinkInfo": "Термін дії цього посилання минув. Будь ласка, виберіть новий час терміну дії або вимкніть це посилання.",
   "linkExpiresOn": "Посилання закінчується через {expiryTime}",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Поділитися з конкретними людьми} =1 {Поділитися з 1 особою} other {Поділитися з {numberOfPeople} людьми}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Посилання прострочено",
   "publicLinkEnabled": "Публічне посилання увімкнено",
   "shareALink": "Поділитися посиланням",
@@ -273,7 +494,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "Співавтори можуть додавати елементи до спільної колекції.",
   "enterEmail": "Введіть поштову адресу",
   "viewersSuccessfullyAdded": "{count, plural, =0{Додано 0 переглядачів} =1{Додано 1 переглядача} few{Додано {count} переглядачі} many{Додано {count} переглядачів} other{Додано {count} переглядачів}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0{Додано 0 співавторів} =1{Додано 1 співавтора} few{Додано {count} співавтори} many{Додано {count} співавторів} other{Додано {count} співавторів}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0{Додати переглядача} =1{Додати переглядача} other{Додати переглядачів}}",
   "addCollaborators": "{count, plural, =0{Додати співавтора} =1{Додати співавтора} other{Додати співавторів}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Довго утримуйте поштову адресу, щоб перевірити наскрізне шифрування.",
@@ -291,6 +530,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Той, хто ділиться з вами альбомами, повинен бачити той самий ідентифікатор на своєму пристрої.",
   "howToViewShareeVerificationID": "Попросіть їх довго утримувати палець на свій поштовій адресі на екрані налаштувань і переконайтеся, що ідентифікатори на обох пристроях збігаються.",
   "thisIsPersonVerificationId": "Це ідентифікатор підтвердження пошти {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "Ідентифікатор підтвердження",
   "verifyEmailID": "Підтвердити {email}",
   "emailNoEnteAccount": "{email} не має облікового запису Ente.\n\nНадішліть їм запрошення, щоб поділитися елементами.",
@@ -303,6 +550,15 @@
   "yesConvertToViewer": "Так, перетворити в глядача",
   "changePermissions": "Змінити дозволи",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} більше не зможе додавати елементи до колекції після того, як стане переглядачем.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Видалити?",
   "removeParticipantBody": "{userEmail} буде видалено з цієї спільної колекції\n\nБудь-які елементи, додані ними, також будуть видалені з колекції",
   "yesRemove": "Так, видалити",
@@ -311,10 +567,27 @@
   "collaborator": "Співавтор",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Співавтори можуть додавати елементи до спільної колекції.",
   "albumParticipantsCount": "{count, plural, =0 {Немає учасників} =1 {1 учасник} other {{count} учасників}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Додати більше",
   "you": "Ви",
   "albumOwner": "Власник",
   "typeOfCollectionTypeIsNotSupportedForRename": "Тип колекції {collectionType} не підтримує перейменування",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Покинути колекцію",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Елементи, додані вами, будуть видалені з колекції",
   "leaveSharedCollection": "Покинути спільну колекцію?",
@@ -324,20 +597,79 @@
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
   "uploadError": "Помилка завантаження",
   "uploadStorageLimitErrorTitle": "Досягнуто ліміту сховища",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "У вас закінчилося місце для зберігання. Звільніть місце, щоб продовжити завантаження.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Досягнуто ліміту файлів",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Ви досягли ліміту файлів. Перейдіть на платний план, щоб отримати більше сховища.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "Дія не вдалася. Ви досягли ліміту файлів.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "Файл занадто великий",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Цей файл перевищує максимальний підтримуваний розмір завантаження 10 ГБ.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Спробуйте змінити пошуковий запит",
   "noFilesFoundForQuery": "Елементів для \"{query}\" не знайдено",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Зняти виділення",
   "selectAll": "Обрати все",
   "unnamedCollection": "Колекція без назви",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "Завантажено {completed}/{total} елементів...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "Завантажено {completed}/{total} елементів... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Немає доступних колекцій",
   "createCollectionButton": "Створити колекцію",
   "collectionButtonLabel": "Колекція",
@@ -352,6 +684,15 @@
   "saveDocument": "Зберегти документ",
   "uploadFiles": "Завантажити елементи",
   "filesSelected": "{count, plural, =0{Елементів не вибрано} =1{1 елемент вибрано} few{{count} елементи вибрано} many{{count} елементів вибрано} other{{count} елементів вибрано}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Додати до колекції",
   "newCollection": "Нова колекція",
   "title": "Заголовок",
@@ -360,11 +701,50 @@
   "backToView": "Повернутися до перегляду",
   "back": "Назад",
   "failedToLoadCollections": "Не вдалося завантажити колекції: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Інформація",
   "recordSavedToMultipleCollections": "Запис успішно збережено до {count, plural, =1{1 колекції} few{{count} колекцій} many{{count} колекцій} other{{count} колекцій}}",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "{fieldName} скопійовано в буфер обміну",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "{count, plural, =1{1 результат} few{{count} результати} many{{count} результатів} other{{count} результатів}} для \"{query}\"",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Увійдіть до свого облікового запису Ente",
   "unlockLockerNewUserTitle": "Приєднуйтесь до Ente, щоб використовувати Locker",
   "unlockLockerNewUserBody": "Locker наразі доступний лише для існуючих користувачів Ente. Ви можете створити обліковий запис у Ente Photos, щоб використовувати Locker.",
@@ -399,13 +779,60 @@
   "yesDeleteCollection": "Так, видалити колекцію",
   "yesDeleteFile": "Так, видалити елемент",
   "deleteCollectionDialogBody": "\"{collectionName}\" буде остаточно видалено.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 колекція} few{{count} колекції} many{{count} колекцій} other{{count} колекцій}} буде остаточно видалено.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 елемент} few{{count} елементи} many{{count} елементів} other{{count} елементів}} буде остаточно видалено.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "Також видалити елементи звідусіль",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Так, видалити {count, plural, =1{колекцію} few{колекції} many{колекцій} other{колекцій}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Так, видалити {count, plural, =1{елемент} few{елементи} many{елементів} other{елементів}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Використання",
-  "fileCount": "{used} / {max}",
   "important": "Важливе",
   "unimportant": "Неважливе",
   "removingFromImportant": "Видалення з важливого...",
@@ -413,9 +840,36 @@
   "fileMarkedAsImportant": "Елемент позначено як важливий",
   "fileRemovedFromImportant": "Елемент видалено з важливого",
   "filesMarkedAsImportant": "{count, plural, =1{1 елемент позначено як важливий} few{{count} елементи позначено як важливі} many{{count} елементів позначено як важливі} other{{count} елементів позначено як важливі}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Усі елементи вже позначені як важливі",
   "failedToMarkFilesAsImportant": "Не вдалося позначити елементи як важливі: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Не вдалося оновити статус важливості: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Пробачте",
   "subscribe": "Передплачувати",
   "sharedWith": "Поділено з",

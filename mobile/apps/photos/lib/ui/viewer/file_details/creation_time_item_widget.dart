@@ -22,10 +22,7 @@ class CreationTimeItem extends StatefulWidget {
 class _CreationTimeItemState extends State<CreationTimeItem> {
   @override
   Widget build(BuildContext context) {
-    final dateTime = DateTime.fromMicrosecondsSinceEpoch(
-      widget.file.creationTime!,
-      isUtc: true,
-    ).toLocal();
+    final dateTime = _dateTimeForDisplay(widget.file);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -39,7 +36,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
             .format(dateTime),
         subtitleSection: Future.value([
           Text(
-            getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+            getTimeIn12hrFormat(dateTime),
             style: getEnteTextTheme(context).miniMuted,
           ),
         ]),
@@ -65,5 +62,24 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       widget.file.creationTime = newDate.microsecondsSinceEpoch;
       setState(() {});
     }
+  }
+
+  DateTime _dateTimeForDisplay(EnteFile file) {
+    final editedTime = file.pubMagicMetadata?.editedTime;
+    if (editedTime != null && editedTime != 0) {
+      return DateTime.fromMicrosecondsSinceEpoch(editedTime, isUtc: true)
+          .toLocal();
+    }
+
+    final dateTime = file.pubMagicMetadata?.dateTime;
+    if (dateTime != null && dateTime.isNotEmpty) {
+      final parsedDateTime = DateTime.tryParse(dateTime);
+      if (parsedDateTime != null) return parsedDateTime;
+    }
+
+    return DateTime.fromMicrosecondsSinceEpoch(
+      file.creationTime!,
+      isUtc: true,
+    ).toLocal();
   }
 }

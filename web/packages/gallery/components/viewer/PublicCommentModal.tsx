@@ -141,13 +141,23 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                     </TitleSection>
 
                     <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
-                        <AnonymousButton
-                            variant="outlined"
-                            fullWidth
-                            onClick={onCommentAnonymously}
-                        >
-                            {t("comment_anonymously")}
-                        </AnonymousButton>
+                        {enableJoin ? (
+                            <AnonymousButton
+                                variant="outlined"
+                                fullWidth
+                                onClick={onCommentAnonymously}
+                            >
+                                {t("comment_anonymously")}
+                            </AnonymousButton>
+                        ) : (
+                            <SignInButton
+                                variant="contained"
+                                fullWidth
+                                onClick={onCommentAnonymously}
+                            >
+                                {t("comment_anonymously")}
+                            </SignInButton>
+                        )}
                         {enableJoin && (
                             <SignInButton
                                 variant="contained"

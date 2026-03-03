@@ -8,11 +8,13 @@ import "package:hugeicons/hugeicons.dart";
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/two_factor_status_change_event.dart";
+import "package:photos/events/user_details_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/user_details.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/passkey_service.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -35,24 +37,24 @@ class SecuritySettingsPage extends StatefulWidget {
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   final _config = Configuration.instance;
-  late StreamSubscription<TwoFactorStatusChangeEvent>
-      _twoFactorStatusChangeEvent;
+  late StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
   final Logger _logger = Logger("SecuritySettingsPage");
 
   @override
   void initState() {
     super.initState();
-    _twoFactorStatusChangeEvent =
-        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) async {
+    _userDetailsChangedEvent =
+        Bus.instance.on<UserDetailsChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
     });
+    _refreshSecurityDetails().ignore();
   }
 
   @override
   void dispose() {
-    _twoFactorStatusChangeEvent.cancel();
+    _userDetailsChangedEvent.cancel();
     super.dispose();
   }
 
@@ -61,6 +63,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final showAccountSecurity =
+        _config.hasConfiguredAccount() && !isOfflineMode;
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -92,7 +96,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      if (_config.hasConfiguredAccount()) ...[
+                      if (showAccountSecurity) ...[
                         MenuItemWidgetNew(
                           title: AppLocalizations.of(context).twofactor,
                           leadingIconWidget: _buildIconWidget(
@@ -144,16 +148,36 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                       ),
                       const SizedBox(height: 8),
                       MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).activeSessions,
+                        title: AppLocalizations.of(context).crashReporting,
                         leadingIconWidget: _buildIconWidget(
                           context,
-                          HugeIcons.strokeRoundedComputerPhoneSync,
+                          HugeIcons.strokeRoundedBug02,
                         ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
-                        onTap: () async => _onActiveSessionsTap(context),
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => SuperLogging.shouldReportCrashes(),
+                          onChanged: () async {
+                            await SuperLogging.setShouldReportCrashes(
+                              !SuperLogging.shouldReportCrashes(),
+                            );
+                            if (mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
                       ),
+                      if (showAccountSecurity) const SizedBox(height: 8),
+                      if (showAccountSecurity)
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).activeSessions,
+                          leadingIconWidget: _buildIconWidget(
+                            context,
+                            HugeIcons.strokeRoundedComputerPhoneSync,
+                          ),
+                          trailingIcon: Icons.chevron_right_outlined,
+                          trailingIconIsMuted: true,
+                          showOnlyLoadingState: true,
+                          onTap: () async => _onActiveSessionsTap(context),
+                        ),
                     ],
                   ),
                 ),
@@ -172,6 +196,20 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       color: colorScheme.menuItemIconStroke,
       size: 20,
     );
+  }
+
+  Future<void> _refreshSecurityDetails() async {
+    if (!_config.hasConfiguredAccount() || isOfflineMode) {
+      return;
+    }
+    try {
+      await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      _logger.warning("failed to refresh security details", e, s);
+    }
   }
 
   Future<void> _onTwoFactorToggle(BuildContext context) async {

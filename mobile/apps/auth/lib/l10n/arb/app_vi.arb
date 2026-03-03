@@ -7,8 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sao lưu an toàn mã 2FA của bạn",
+  "featureBackupCodes": "Sao lưu và đồng bộ\nmã hóa đầu cuối",
+  "featureSearchEtc": "Tìm, Gắn thẻ, Chia sẻ,\nMã tiếp theo và nhiều hơn nữa",
+  "featureOpenSource": "Mã nguồn mở và\nđược chẩn đoán bởi các chuyên gia bảo mật",
+  "signUp": "Đăng ký",
   "onBoardingGetStarted": "Bắt đầu",
+  "setupFirstAccount": "Thiết lập tài khoản\nđầu tiên của bạn",
+  "allTabEmptyHint": "Chưa có gì ở đây. Nhấn + để thêm mã hoặc mở Thùng rác để khôi phục mã.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Quét mã QR",
+  "qrCode": "Mã QR",
+  "qr": "QR",
   "importEnterSetupKey": "Nhập khóa thiết lập",
   "importAccountPageTitle": "Nhập chi tiết tài khoản",
   "secretCanNotBeEmpty": "Không được để trống khóa bí mật",
@@ -75,7 +86,7 @@
     }
   },
   "contactSupport": "Liên hệ hỗ trợ",
-  "rateUsOnStore": "Đánh giá chúng tôi trên {storeName}",
+  "rateUsOnStore": "Xếp hạng trên {storeName}",
   "blog": "Blog",
   "merchandise": "Vật phẩm",
   "verifyPassword": "Xác minh mật khẩu",
@@ -99,6 +110,7 @@
   "importTypeEnteEncrypted": "Ente Auth",
   "passwordForDecryptingExport": "Mật khẩu để giải mã tệp xuất",
   "passwordEmptyError": "Mật khẩu không thể để trống",
+  "passwordTooShort": "Mật khẩu tối thiểu 8 ký tự.",
   "importFromApp": "Nhập mã từ {appName}",
   "importGoogleAuthGuide": "Xuất dữ liệu tài khoản Google Authenticator của bạn thành mã QR bằng tùy chọn \"Chuyển tài khoản\". Sau đó, dùng thiết bị khác quét mã QR.",
   "importSelectJsonFile": "Chọn tệp JSON",
@@ -137,6 +149,7 @@
   "existingUser": "Đã có tài khoản",
   "newUser": "Mới dùng Ente",
   "delete": "Xóa",
+  "addTag": "Thêm thẻ",
   "enterYourPasswordHint": "Nhập mật khẩu của bạn",
   "forgotPassword": "Quên mật khẩu",
   "oops": "Ốii!",
@@ -299,6 +312,7 @@
   "checking": "Đang kiểm tra...",
   "youAreOnTheLatestVersion": "Bạn đang sử dụng phiên bản mới nhất",
   "warning": "Cảnh báo",
+  "note": "Ghi chú",
   "exportWarningDesc": "Tệp xuất chứa thông tin nhạy cảm. Hãy lưu trữ tệp này một cách an toàn.",
   "iUnderStand": "Tôi hiểu",
   "@iUnderStand": {
@@ -367,12 +381,14 @@
   "useOffline": "Sử dụng mà không sao lưu",
   "signInToBackup": "Đăng nhập để sao lưu mã của bạn",
   "singIn": "Đăng nhập",
+  "sigInBackupReminder": "Ente sẽ tự động sao lưu mã sau khi đăng nhập.\n\nChúng tôi vẫn khuyên bạn nên xuất mã để sao lưu thêm.",
   "offlineModeWarning": "Bạn đã chọn tiếp tục mà không sao lưu. Vui lòng sao lưu thủ công để đảm bảo mã của bạn được an toàn.",
   "showLargeIcons": "Hiện biểu tượng lớn",
   "compactMode": "Chế độ thu gọn",
   "shouldHideCode": "Ẩn mã",
   "doubleTapToViewHiddenCode": "Bạn có thể nhấn đúp vào một mục để xem mã",
   "focusOnSearchBar": "Mở tìm kiếm khi khởi động ứng dụng",
+  "minimizeToTrayOnClose": "Thu nhỏ xuống khay khi đóng",
   "confirmUpdatingkey": "Bạn có chắc muốn cập nhật khóa bí mật không?",
   "minimizeAppOnCopy": "Thu nhỏ khi sao chép",
   "editCodeAuthMessage": "Xác thực để sửa mã",
@@ -509,6 +525,7 @@
   "dropReviewAndroid": "Đánh giá ngay trên Play Store",
   "supportEnte": "Hỗ trợ <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Tặng sao trên GitHub",
+  "free10GB": "10GB miễn phí với <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Đăng nhập bằng tài khoản Ente Auth",
   "freeStorageOffer": "Giảm 10% <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Dùng mã \"AUTH\" để giảm 10% năm đầu tiên",
@@ -523,5 +540,91 @@
   "errorInvalidQRCodeBody": "Mã QR đã quét không phải là mã 2FA tài khoản hợp lệ.",
   "errorNoQRCode": "Không tìm thấy mã QR",
   "errorGenericTitle": "Xảy ra lỗi",
-  "errorGenericBody": "Đã xảy ra lỗi trong lúc nhập."
+  "errorGenericBody": "Đã xảy ra lỗi trong lúc nhập.",
+  "localBackupSettingsTitle": "Sao lưu trên thiết bị",
+  "localBackupSidebarTitle": "Sao lưu trên thiết bị",
+  "enableAutomaticBackups": "Sao lưu tự động",
+  "backupDescription": "Thao tác này sẽ tự động sao lưu dữ liệu của bạn vào một nơi trên thiết bị. Các bản sao lưu sẽ được cập nhật mỗi khi bạn thêm, chỉnh sửa hoặc xóa các mục",
+  "localBackupDailyManualCopy": "Tạo một bản sao lưu trên thiết bị mỗi ngày khi bạn mở ứng dụng. Sử dụng \"Sao lưu ngay\" để thực hiện sao lưu thủ công. Các bản sao lưu được lưu giữ tối đa 5 tệp.",
+  "currentLocation": "Nơi sao lưu hiện tại:",
+  "securityNotice": "Thông báo an toàn",
+  "backupSecurityNotice": "Bản sao lưu được mã hóa này chứa các khóa xác thực hai bước (2FA) của bạn. Nếu bị mất, bạn có thể không khôi phục được tài khoản của mình. Hãy giữ gìn nó cẩn thận!",
+  "locationUpdatedAndBackupCreated": "Vị trí đã được cập nhật và bản sao lưu ban đầu đã được tạo!",
+  "initialBackupCreated": "Bản sao lưu ban đầu đã được tạo!",
+  "backupCreated": "Bản sao lưu đã được tạo!",
+  "noDefaultBackupFolder": "Không thể tạo thư mục sao lưu mặc định.",
+  "backupLocationChoiceDescription": "Bạn muốn lưu bản sao lưu của mình ở đâu?",
+  "chooseBackupLocation": "Chọn nơi sao lưu",
+  "loadDefaultLocation": "Đang tải vị trí mặc định...",
+  "couldNotDetermineLocation": "Không thể xác định vị trí...",
+  "saveBackup": "Lưu bản sao lưu",
+  "updateBackupPassword": "Cập nhật mật khẩu sao lưu",
+  "setBackupPassword": "Đặt mật khẩu sao lưu",
+  "createBackupNow": "Sao lưu ngay",
+  "clearBackupFolder": "Xóa thư mục sao lưu",
+  "clearBackupPassword": "Xóa mật khẩu sao lưu",
+  "selectBackupFolder": "Chọn thư mục sao lưu",
+  "setBackupFolder": "Đặt thư mục sao lưu",
+  "backupFolderLabel": "Thư mục sao lưu:",
+  "backupPasswordHint": "Bản sao lưu của bạn sẽ được mã hóa bằng mật khẩu này.",
+  "authToUpdateBackupPassword": "Xác thực để cập nhật mật khẩu sao lưu",
+  "authToSetBackupPassword": "Xác thực để đặt mật khẩu sao lưu",
+  "backupPasswordCleared": "Đã xóa mật khẩu sao lưu",
+  "enableBackupsIosInstruction": "Để bật tính năng sao lưu trên iOS, hãy chọn một thư mục trong ứng dụng Tệp (ví dụ: \"Trên iPhone của tôi\").",
+  "currentBackupFolder": "Thư mục sao lưu hiện tại:",
+  "selectFolder": "Chọn thư mục",
+  "selectFolderToContinue": "Chọn một thư mục để tiếp tục",
+  "iosOnMyDeviceNotSupported": "Bạn không thể sử dụng trực tiếp mục \"Trên iPhone của tôi\". Vui lòng chọn hoặc tạo một thư mục bên trong mục đó.",
+  "done": "Xong",
+  "addNew": "Thêm mới",
+  "selected": "đã chọn",
+  "moveMultipleToTrashMessage": "Bạn có chắc muốn di chuyển {count} mục vào thùng rác?",
+  "nSelected": "{count, plural, =1{1 đã chọn} other{{count} đã chọn}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{Đã ghim 1 mục} other{Đã ghim {count} mục}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{Đã bỏ ghim 1 mục} other{Đã bỏ ghim {count} mục}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterPasswordToAegisVault": "Nhập mật khẩu của kho Aegis",
+  "submit": "Áp dụng",
+  "failedToDecryptAegisVault": "Không thể giải mã kho Aegis",
+  "pleaseCheckPasswordAndTryAgain": "Vui lòng kiểm tra mật khẩu và thử lại.",
+  "enterPasswordToDecrypt2FASBackup": "Nhập mật khẩu để giải mã bản sao lưu 2FAS",
+  "failedToDecrypt2FASExport": "Không thể giải mã tệp xuất 2FAS",
+  "chooseIcon": "Chọn biểu tượng",
+  "customOrder": "Tùy chỉnh thứ tự",
+  "selectAnOption": "Chọn một tùy chọn",
+  "todaysLogs": "Nhật ký hôm nay",
+  "appIcon": "Biểu tượng ứng dụng",
+  "importAndOTPGuide": "Xuất bản sao lưu của bạn từ andOTP bằng tùy chọn \"Sao lưu\" trong Cài đặt.\n\nNếu bản sao lưu của bạn được mã hóa, bạn sẽ cần nhập mật khẩu sao lưu để giải mã.",
+  "enterPasswordToDecryptAndOTP": "Nhập mật khẩu để giải mã bản sao lưu andOTP",
+  "failedToDecryptAndOTPBackup": "Không thể giải mã bản sao lưu andOTP",
+  "notSupportedForHOTP": "Không hỗ trợ HOTP"
 }

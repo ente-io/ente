@@ -1,10 +1,12 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:ente_events/event_bus.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/core/errors.dart';
@@ -282,6 +284,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           context.l10n.uploadStorageLimitErrorBody,
         );
       }
+    } on NoActiveSubscriptionError {
+      if (mounted) {
+        await _showUploadErrorSheet(
+          context.l10n.uploadSubscriptionExpiredErrorTitle,
+          context.l10n.uploadSubscriptionExpiredErrorBody,
+        );
+      }
     } on FileLimitReachedError {
       if (mounted) {
         showToast(
@@ -291,20 +300,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       }
     } catch (e) {
       if (mounted) {
-        final errorDetails = () {
-          if (e is DioException) {
-            final responseData = e.response?.data;
-            if (responseData != null) {
-              return responseData.toString();
-            }
-            return e.message ?? e.toString();
-          }
-          return e.toString();
-        }();
-
-        showToast(
-          context,
-          '${context.l10n.failedToSaveRecord}: $errorDetails',
+        await showGenericErrorBottomSheet(
+          context: context,
+          error: e,
         );
       }
     } finally {
@@ -502,6 +500,28 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     });
   }
 
+  Future<void> _showUploadErrorSheet(String title, String message) async {
+    await showAlertBottomSheet(
+      context,
+      title: title,
+      message: message,
+      assetPath: "assets/warning-grey.png",
+      isDismissible: true,
+      buttons: [
+        GradientButton(
+          text: context.l10n.contactSupport,
+          onTap: () async {
+            await sendEmail(
+              context,
+              to: "support@ente.io",
+              body: message,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   void _toggleMode() {
     setState(() {
       _currentMode = _currentMode == InfoPageMode.view
@@ -667,7 +687,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                   FocusScope.of(context).unfocus();
                 }
               : null,
-          behavior: HitTestBehavior.opaque,
+          behavior: HitTestBehavior.translucent,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Form(

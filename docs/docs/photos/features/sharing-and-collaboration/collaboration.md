@@ -149,7 +149,7 @@ Collect links are public links with the "Allow adding photos" option enabled. An
 
 1. Open the album you want to use for collecting photos
 2. Tap the Share icon in the top right corner
-3. Select "Collect photos"
+3. Select "Collect photos: Create collaborative link"
 4. Tap "Copy link"
 5. Share the link with anyone you want to collect photos from
 
@@ -162,6 +162,8 @@ Collect links are public links with the "Allow adding photos" option enabled. An
 5. Share the link with others
 
 Anyone with the link can view existing photos and add their own through their web browser. They can also download photos if you haven't disabled downloads.
+
+If a public link has been enabled for the album previously, it can be turned into a collect link via "Manage link" > Enable "Allow adding photos".
 
 ### Storage for collected photos
 
