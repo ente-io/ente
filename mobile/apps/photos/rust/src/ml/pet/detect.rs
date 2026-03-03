@@ -130,7 +130,7 @@ pub fn run_pet_face_detection(
 /// Run pet body detection using YOLOv5n model.
 ///
 /// Filters detections by COCO class 15 (cat) or 16 (dog).
-/// Returns the best detection per species class found.
+/// Returns all qualifying detections after NMS.
 ///
 /// This mirrors `pet_pipeline/detection.py` `BodyDetector.detect()`.
 pub fn run_pet_body_detection(
