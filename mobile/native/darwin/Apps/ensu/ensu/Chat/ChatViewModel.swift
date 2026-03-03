@@ -476,6 +476,9 @@ final class ChatViewModel: ObservableObject {
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
+    private var sharedModelReadyTask: Task<Void, Error>?
+    private var sharedModelReadyTaskId: UUID?
+    private var sharedModelReadyTargetId: String?
     private var stopRequested = false
     private var activeGenerationId: UUID?
     private var activeGenerationSessionId: UUID?
@@ -1167,6 +1170,51 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    private func clearSharedModelReadyTask() {
+        sharedModelReadyTask = nil
+        sharedModelReadyTaskId = nil
+        sharedModelReadyTargetId = nil
+    }
+
+    private func ensureModelReadyShared(target: InferenceModelTarget) async throws {
+        if let existingTask = sharedModelReadyTask, sharedModelReadyTargetId == target.id {
+            try await existingTask.value
+            return
+        }
+
+        if let existingTask = sharedModelReadyTask, sharedModelReadyTargetId != target.id {
+            existingTask.cancel()
+            provider.cancelDownload()
+            clearSharedModelReadyTask()
+        }
+
+        let taskId = UUID()
+        let task = Task {
+            try await provider.ensureModelReady(target: target) { progress in
+                Task { @MainActor in
+                    self.handleProgress(progress)
+                }
+            }
+        }
+
+        sharedModelReadyTask = task
+        sharedModelReadyTaskId = taskId
+        sharedModelReadyTargetId = target.id
+
+        do {
+            try await task.value
+        } catch {
+            if sharedModelReadyTaskId == taskId {
+                clearSharedModelReadyTask()
+            }
+            throw error
+        }
+
+        if sharedModelReadyTaskId == taskId {
+            clearSharedModelReadyTask()
+        }
+    }
+
     func startModelDownload(userInitiated: Bool = true) {
         guard !isDownloading && !isGenerating else { return }
         if userInitiated {
@@ -1188,11 +1236,7 @@ final class ChatViewModel: ObservableObject {
         modelDownloadTask?.cancel()
         modelDownloadTask = Task {
             do {
-                try await provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if isCancellation(error) {
                     return
@@ -1229,11 +1273,7 @@ final class ChatViewModel: ObservableObject {
         modelDownloadTask = Task { [weak self] in
             guard let self else { return }
             do {
-                try await self.provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if self.isCancellation(error) {
                     return
@@ -1255,6 +1295,8 @@ final class ChatViewModel: ObservableObject {
         resetGenerationState(stopRequested: true)
         modelDownloadTask?.cancel()
         modelDownloadTask = nil
+        sharedModelReadyTask?.cancel()
+        clearSharedModelReadyTask()
         provider.cancelDownload()
         if modelDownloadLoggedStart {
             logger.info("Model download cancelled")
@@ -1367,14 +1409,12 @@ final class ChatViewModel: ObservableObject {
 
         generationTask = Task {
             do {
-                try await provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        guard self.activeGenerationId == generationId else { return }
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if isCancellation(error) {
+                    self.sharedModelReadyTask?.cancel()
+                    self.provider.cancelDownload()
+                    self.clearSharedModelReadyTask()
                     if self.activeGenerationId == generationId {
                         isGenerating = false
                         isDownloading = false
