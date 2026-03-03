@@ -43,6 +43,7 @@ jobs:
                   else
                       echo "RELEASE_TAG=ensu-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
                   fi
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Checkout code
               uses: actions/checkout@v4
@@ -123,8 +124,7 @@ jobs:
                   releaseBody: |
                       Ensu release
 
-                      **Version:** ${{ env.RELEASE_TAG }}
-                      **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+                      **Version:** ${{ env.RELEASE_TAG }} (${{ env.SHORT_SHA }})
                       **Download:** [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
 
                       **Platforms:**
@@ -209,6 +209,7 @@ jobs:
                   else
                       echo "RELEASE_TAG=ensu-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
                   fi
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Setup JDK 17
               uses: actions/setup-java@v4
