@@ -269,7 +269,7 @@ struct MessageListView: View {
     }
 
     private var aiSafetyFooter: some View {
-        Text("Ensu can make mistakes. Please verify important details before acting on any response.")
+        Text("Ensu can make mistakes. Verify key details before acting.")
             .font(EnsuTypography.small)
             .foregroundStyle(EnsuColor.textMuted)
             .multilineTextAlignment(.center)
