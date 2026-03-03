@@ -7,8 +7,6 @@
  * logout escape hatch.
  */
 
-import { Logout05Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -244,6 +242,8 @@ const ENTE_GREEN = "#08C225";
 const ENTE_GREEN_HOVER = "#07A820";
 const APP_LOCK_MODAL_WIDTH = 408;
 const APP_LOCK_MODAL_CONTENT_WIDTH = APP_LOCK_MODAL_WIDTH - 32;
+const LOGOUT_MODAL_WIDTH = 368;
+const LOGOUT_MODAL_CONTENT_WIDTH = LOGOUT_MODAL_WIDTH - 32;
 
 const titleTextSx = (theme: Theme) => ({
     fontWeight: 600,
@@ -387,13 +387,56 @@ const LockIllustration: React.FC = () => (
     />
 );
 
+const LogoutIllustration: React.FC = () => (
+    <svg
+        width="126"
+        height="121"
+        viewBox="0 0 126 121"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+    >
+        <circle
+            cx="67"
+            cy="52"
+            r="34"
+            fill={ENTE_GREEN}
+            stroke="#232323"
+            strokeWidth="5.73358"
+        />
+        <g
+            transform="translate(67 52) scale(1.18) translate(-12 -12)"
+            stroke="white"
+            fill="none"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M7.86907 4C4.97674 5.49689 3 8.51664 3 11.9981C3 16.9686 7.02944 20.9981 12 20.9981C16.9706 20.9981 21 16.9686 21 11.9981C21 8.51664 19.0233 5.49689 16.1309 4" />
+            <path d="M12 3V10" />
+        </g>
+        <path
+            d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
+            fill={ENTE_GREEN}
+        />
+        <path
+            d="M119.579 91.9746C111.591 92.7003 105.114 97.1692 103.689 103.722C105.114 97.1692 101.077 90.4145 94.1117 86.438C102.099 85.7122 108.576 81.2434 110.001 74.6902C108.576 81.2434 112.613 87.9981 119.579 91.9746Z"
+            fill={ENTE_GREEN}
+        />
+        <path
+            d="M112.728 9.21189C108.334 9.91374 104.912 12.6353 104.37 16.3181C104.912 12.6353 102.421 9.04853 98.4114 7.10627C102.806 6.40442 106.228 3.68284 106.77 7.55054e-05C106.228 3.68284 108.719 7.26962 112.728 9.21189Z"
+            fill={ENTE_GREEN}
+        />
+    </svg>
+);
+
 const AppLockCard: React.FC<
-    React.PropsWithChildren<{ closeAction?: React.ReactNode }>
-> = ({ children, closeAction }) => (
+    React.PropsWithChildren<{ closeAction?: React.ReactNode; width?: number }>
+> = ({ children, closeAction, width = APP_LOCK_MODAL_WIDTH }) => (
     <Paper
         elevation={0}
         sx={(theme) => ({
-            width: APP_LOCK_MODAL_WIDTH,
+            width,
             maxWidth: "calc(100% - 32px)",
             borderRadius: "28px",
             backgroundColor: "#fff",
@@ -1092,45 +1135,23 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
     onConfirm,
     onCancel,
 }) => (
-    <AppLockCard
-        closeAction={
-            <IconButton
-                aria-label={t("close")}
-                onClick={onCancel}
-                sx={(theme) => ({
-                    backgroundColor: "#FAFAFA",
-                    color: "#000",
-                    p: 1.25,
-                    "&:hover": { backgroundColor: "#F0F0F0" },
-                    ...theme.applyStyles("dark", {
-                        backgroundColor: "rgba(255, 255, 255, 0.12)",
-                        color: "#fff",
-                        "&:hover": {
-                            backgroundColor: "rgba(255, 255, 255, 0.16)",
-                        },
-                    }),
-                })}
-            >
-                <CloseIcon sx={{ fontSize: 20 }} />
-            </IconButton>
-        }
-    >
+    <AppLockCard width={LOGOUT_MODAL_WIDTH}>
         <Stack
-            spacing={2}
+            spacing={0}
             useFlexGap
             alignItems="center"
-            justifyContent="center"
-            sx={{ maxWidth: APP_LOCK_MODAL_CONTENT_WIDTH, width: "100%" }}
+            sx={{ maxWidth: LOGOUT_MODAL_CONTENT_WIDTH, width: "100%" }}
         >
             <Box
                 sx={{
-                    mb: 1,
+                    mt: 1,
+                    mb: 1.5,
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
                 }}
             >
-                <HugeiconsIcon icon={Logout05Icon} size={42} color="#08C225" />
+                <LogoutIllustration />
             </Box>
 
             <Box
@@ -1140,18 +1161,11 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
                     alignItems: "center",
                     gap: "9px",
                     textAlign: "center",
-                    mb: 2,
+                    mb: 4,
                 }}
             >
                 <Typography sx={titleTextSx}>{t("logout")}</Typography>
-                <Typography
-                    sx={(theme) => ({
-                        ...subtitleTextSx(theme),
-                        maxWidth: 240,
-                    })}
-                >
-                    {t("logout_message")}
-                </Typography>
+                <Typography sx={subtitleTextSx}>{t("logout_message")}</Typography>
             </Box>
 
             <Stack spacing={1.5} sx={{ width: "100%" }}>
