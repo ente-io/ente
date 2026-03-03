@@ -8,8 +8,8 @@ import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/components/banners/banner_action_button.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
 
 class NameFaceBanner extends StatefulWidget {
   const NameFaceBanner({super.key});
@@ -119,7 +119,10 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LandingPageWidget(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },
