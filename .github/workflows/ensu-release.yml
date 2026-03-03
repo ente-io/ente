@@ -122,9 +122,7 @@ jobs:
                   tagName: ${{ env.RELEASE_TAG }}
                   releaseName: "Ensu Desktop ${{ env.RELEASE_TAG }}"
                   releaseBody: |
-                      Ensu release
-
-                      ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})) · [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
+                      Desktop release for Ensu
 
                       **Platforms:**
                       - Linux (AppImage, deb)
