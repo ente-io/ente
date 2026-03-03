@@ -83,6 +83,7 @@ class AppLockModuleState {
 let _state: AppLockModuleState | undefined;
 let _bruteForceStateHydration = Promise.resolve();
 let _bruteForceStateHydrationGeneration = 0;
+let _wasReauthenticationCancelled = false;
 
 const appLockState = () => {
     _state ??= new AppLockModuleState();
@@ -562,6 +563,7 @@ const resetBruteForceState = async () => {
 
 const unlockLocally = () => {
     const snapshot = appLockState().snapshot;
+    const wasReauthentication = snapshot.lockScreenMode === "reauthenticate";
     setSnapshot({
         ...snapshot,
         lockScreenMode: "lock",
@@ -569,6 +571,26 @@ const unlockLocally = () => {
         invalidAttemptCount: 0,
         cooldownExpiresAt: 0,
     });
+    if (wasReauthentication) {
+        _wasReauthenticationCancelled = false;
+    }
+    stopBruteForceStateHydration();
+};
+
+/**
+ * Cancel an in-progress explicit reauthentication prompt.
+ *
+ * This only dismisses the reauthentication lock screen, allowing callers of
+ * {@link reauthenticateWithAppLock} to fall back to alternate auth flows.
+ */
+export const cancelReauthentication = () => {
+    const snapshot = appLockState().snapshot;
+    if (!snapshot.isLocked || snapshot.lockScreenMode !== "reauthenticate") {
+        return;
+    }
+
+    _wasReauthenticationCancelled = true;
+    setSnapshot({ ...snapshot, lockScreenMode: "lock", isLocked: false });
     stopBruteForceStateHydration();
 };
 
@@ -857,12 +879,20 @@ export const attemptUnlock = async (input: string): Promise<UnlockResult> => {
 /**
  * Perform an explicit reauthentication using app lock.
  *
- * Returns `true` when app lock was successfully used for reauthentication.
- * Returns `false` when app lock is unavailable or cannot be started, so callers
- * can fall back to an alternate flow (for example, master password prompt).
+ * - `"authenticated"` when app lock reauthentication succeeds.
+ * - `"cancelled"` when the user dismisses the reauthentication prompt.
+ * - `"fallback"` when app lock is unavailable or cannot be started, so callers
+ *   can use an alternate auth flow (for example, master password prompt).
  */
-export const reauthenticateWithAppLock = async (): Promise<boolean> => {
+export type ReauthenticateWithAppLockResult =
+    | "authenticated"
+    | "cancelled"
+    | "fallback";
+
+export const reauthenticateWithAppLock =
+    async (): Promise<ReauthenticateWithAppLockResult> => {
     try {
+        _wasReauthenticationCancelled = false;
         const snapshot = appLockSnapshot();
         let canUseAppLock = snapshot.enabled && snapshot.lockType !== "none";
         if (canUseAppLock && snapshot.lockType === "device") {
@@ -871,25 +901,30 @@ export const reauthenticateWithAppLock = async (): Promise<boolean> => {
             const capability = await resolveDeviceLockCapability();
             canUseAppLock = capability.usable;
         }
-        if (!canUseAppLock) return false;
+        if (!canUseAppLock) return "fallback";
 
-        return await new Promise<boolean>((resolve) => {
+        return await new Promise<ReauthenticateWithAppLockResult>((resolve) => {
             const unsubscribe = appLockSubscribe(() => {
                 if (!appLockSnapshot().isLocked) {
                     unsubscribe();
-                    resolve(true);
+                    const wasAuthenticated =
+                        !_wasReauthenticationCancelled;
+                    _wasReauthenticationCancelled = false;
+                    resolve(
+                        wasAuthenticated ? "authenticated" : "cancelled",
+                    );
                 }
             });
 
             lock("reauthenticate");
             if (!appLockSnapshot().isLocked) {
                 unsubscribe();
-                resolve(false);
+                resolve("fallback");
             }
         });
     } catch (e) {
         log.error("Failed to start app lock reauthentication", e);
-        return false;
+        return "fallback";
     }
 };
 
@@ -922,6 +957,7 @@ export const logoutAppLock = async () => {
     ]);
 
     stopBruteForceStateHydration();
+    _wasReauthenticationCancelled = false;
     _state = undefined;
 };
 

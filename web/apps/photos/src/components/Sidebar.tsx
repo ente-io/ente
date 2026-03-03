@@ -1006,9 +1006,9 @@ const Account: React.FC<AccountProps> = ({
 
     const handleRecoveryKey = useCallback(async () => {
         if (isDesktop) {
-            const didAuthenticateWithAppLock =
-                await reauthenticateWithAppLock();
-            if (!didAuthenticateWithAppLock) await onAuthenticateUser();
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
         } else {
             await onAuthenticateUser();
         }
@@ -1025,9 +1025,9 @@ const Account: React.FC<AccountProps> = ({
 
     const handleActiveSessions = useCallback(async () => {
         if (isDesktop) {
-            const didAuthenticateWithAppLock =
-                await reauthenticateWithAppLock();
-            if (!didAuthenticateWithAppLock) await onAuthenticateUser();
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
         } else {
             await onAuthenticateUser();
         }
