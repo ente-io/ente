@@ -12,7 +12,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/ml/face/face.dart';
 import 'package:photos/models/ml/face/person.dart';
 import 'package:photos/service_locator.dart' show flagService, isOfflineMode;
-import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
 import 'package:photos/services/search_service.dart';
@@ -22,6 +21,7 @@ import 'package:photos/utils/face/face_thumbnail_cache.dart';
 import 'package:photos/utils/face/face_thumbnail_quality.dart';
 
 final _logger = Logger('PersonFaceWidget');
+const _kMinUnnamedClusterSizeForProgressiveUpgrade = 5;
 
 class PersonFaceWidget extends StatefulWidget {
   final String? personId;
@@ -388,7 +388,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     }
     final cachedFileCount = _clusterToFileCountCache.get(clusterID);
     if (cachedFileCount != null) {
-      return cachedFileCount < kMinimumClusterSizeSearchResult;
+      return cachedFileCount < _kMinUnnamedClusterSizeForProgressiveUpgrade;
     }
 
     final mlDataDB =
@@ -397,7 +397,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         .getFileIDsOfClusterID(clusterID)
         .then((fileIDs) => fileIDs.length);
     _clusterToFileCountCache.put(clusterID, fileCount);
-    return fileCount < kMinimumClusterSizeSearchResult;
+    return fileCount < _kMinUnnamedClusterSizeForProgressiveUpgrade;
   }
 
   Future<Uint8List?> _getFaceCrop({
