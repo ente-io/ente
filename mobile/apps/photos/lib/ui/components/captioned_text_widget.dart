@@ -24,12 +24,13 @@ class CaptionedTextWidget extends StatelessWidget {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
 
-    final capitalized = title.capitalizeFirst();
+    final titleForDisplay =
+        title.contains("@") ? title : title.capitalizeFirst();
 
     final List<Widget> children = [
       Flexible(
         child: Text(
-          capitalized,
+          titleForDisplay,
           style: textStyle ??
               (makeTextBold
                   ? enteTextTheme.bodyBold.copyWith(color: textColor)

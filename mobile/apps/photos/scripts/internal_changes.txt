@@ -1,11 +1,12 @@
-- Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
-- Ashil: Social notification improvements
-- Laurens: Notifications for comments and likes
-- Neeraj: Fix incorrect thumbnail for local files
-- Neeraj: QOL: Parse duration & always show video indicator/duration 
-- Ashil: QOL: Option to remove hidden files from outside of hidden
-- Neeraj: Show on device albums in search result
-- Ashil: Scroll to parent comment on tapping it in reply bubble
-- Ashil: QOL: Support for hiding incoming shared albums
-- Prateek: (i) Always enable video streaming
-- Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
+- Setal,Ashil: Improve Help & Support section in settings
+- Laurens: (I) Internal toggle to let ML run uninterrupted
+- Laurens: (I) Generate and compress face thumbnails in rust
+- Laurens: (I) Use rust indexing ML pipeline for internal users
+- Neeraj: Improve public album link 429/device-limit error handling
+- Neeraj: File details: hide timezone in creation time and prefer editedTime over public metadata dateTime, falling back to creationTime
+- Neeraj: Fix video playback for Motion photo with two videos
+- Ashil: Enable sentence capitalization for comment input field
+- Ashil: Fix files uploaded by sharing from outside of Ente missing in map
+- Laurens: (I) Use vectorDB for more accurate suggestions in the people overview
+- Laurens: (I) Use cloudflare worker for upload for internal users
+- Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates

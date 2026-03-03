@@ -97,6 +97,7 @@ export type FileListWithViewerProps = {
     FileListProps,
     | "mode"
     | "modePlus"
+    | "layout"
     | "header"
     | "footer"
     | "disableGrouping"
@@ -112,6 +113,7 @@ export type FileListWithViewerProps = {
     | "onContextMenuOpenChange"
     | "showAddPersonAction"
     | "showEditLocationAction"
+    | "suppressSelectionUI"
 > &
     Pick<
         FileViewerProps,
@@ -127,6 +129,7 @@ export type FileListWithViewerProps = {
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
+        | "onSendLink"
         | "onSelectCollection"
         | "onSelectPerson"
         | "publicAlbumsCredentials"
@@ -144,6 +147,7 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    layout,
     header,
     footer,
     user,
@@ -165,6 +169,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onContextMenuOpenChange,
     showAddPersonAction,
     showEditLocationAction,
+    suppressSelectionUI,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -179,6 +184,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onAddSaveGroup,
     onToggleFavorite,
     onFileVisibilityUpdate,
+    onSendLink,
     onMarkTempDeleted,
     onSelectCollection,
     onSelectPerson,
@@ -344,6 +350,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
+                            layout,
                             header: headerWithMap,
                             footer,
                             user,
@@ -363,6 +370,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             onContextMenuOpenChange,
                             showAddPersonAction,
                             showEditLocationAction,
+                            suppressSelectionUI,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -393,6 +401,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
+                    onSendLink,
                     onSelectCollection,
                     onSelectPerson,
                     publicAlbumsCredentials,

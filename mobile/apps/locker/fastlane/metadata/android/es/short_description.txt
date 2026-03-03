@@ -1,0 +1,1 @@
+Ente Locker: almacena documentos con cifrado de extremo a extremo

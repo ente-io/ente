@@ -9,6 +9,7 @@
   "cancel": "Отменить",
   "verify": "Подтвердить",
   "invalidEmailAddress": "Недействительный адрес электронной почты",
+  "validEmailAddress": "Действительный адрес электронной почты",
   "enterValidEmail": "Пожалуйста, введите действительный адрес электронной почты.",
   "deleteAccount": "Удалить аккаунт",
   "deleteAccountWarning": "Это приведет к удалению ваших учетных записей Ente Auth, Ente Photos и Ente Locker.",
@@ -59,7 +60,7 @@
   "incorrectRecoveryKeyBody": "Введённый вами ключ восстановления неверен",
   "forgotPassword": "Забыл пароль",
   "enterYourRecoveryKey": "Введите ваш ключ восстановления",
-  "noRecoveryKey": "Нет ключа восстановления?",
+  "noRecoveryKey": "Забыли ключ восстановления?",
   "sorry": "Извините",
   "noRecoveryKeyNoDecryption": "Из-за особенностей нашего протокола сквозного шифрования ваши данные не могут быть расшифрованы без пароля или ключа восстановления",
   "verifyEmail": "Подтвердить электронную почту",
@@ -67,9 +68,21 @@
   "checkInboxAndSpamFolder": "Пожалуйста, проверьте ваш почтовый ящик (и спам) для завершения верификации",
   "tapToEnterCode": "Нажмите, чтобы ввести код",
   "resendEmail": "Отправить письмо повторно",
+  "resendCode": "Отправить код еще раз",
   "weHaveSendEmailTo": "Мы отправили письмо на <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "weHaveSentCodeTo": "Мы отправили код на {email}",
+  "@weHaveSentCodeTo": {
+    "description": "Text to indicate that we have sent a verification code to the user's email",
     "placeholders": {
       "email": {
         "description": "The email address of the user",
@@ -88,6 +101,10 @@
   "weakStrength": "Низкая",
   "strongStrength": "Высокая",
   "moderateStrength": "Средняя",
+  "strongPassword": "Надежный пароль",
+  "passwordRequirements": "Используйте минимум 9 символов, включая заглавную букву, цифру и специальный символ",
+  "passwordsMatch": "Пароли совпадают",
+  "passwordsDontMatch": "Пароли не совпадают",
   "passwordStrength": "Надёжность пароля: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -130,9 +147,10 @@
   "verifyPassword": "Подтвердить пароль",
   "recoveryKey": "Ключ восстановления",
   "recoveryKeyOnForgotPassword": "Если вы забудете пароль, единственный способ восстановить ваши данные — это использовать этот ключ.",
-  "recoveryKeySaveDescription": "Мы не храним этот ключ. Пожалуйста, сохраните этот ключ из 24 слов в безопасном месте.",
+  "recoveryKeySaveDescription": "Пожалуйста, сохраните этот ключ в безопасном месте.",
   "doThisLater": "Сделать это позже",
   "saveKey": "Сохранить ключ",
+  "shareKey": "Поделиться ключом",
   "recoveryKeyCopiedToClipboard": "Ключ восстановления скопирован в буфер обмена",
   "recoverAccount": "Восстановить аккаунт",
   "recover": "Восстановить",
@@ -152,7 +170,8 @@
   "codeCopiedToClipboard": "Код скопирован в буфер обмена",
   "copypasteThisCodentoYourAuthenticatorApp": "Скопируйте этот код\nв ваше приложение для аутентификации",
   "tapToCopy": "нажмите, чтобы скопировать",
-  "scanThisBarcodeWithnyourAuthenticatorApp": "Отсканируйте этот штрих-код\nс помощью вашего приложения для аутентификации",
+  "scanThisBarcodeWithnyourAuthenticatorApp": "Отсканируйте этот QR-код\nс помощью вашего приложения для аутентификации",
+  "twoFAVerification": "Двухфакторная аутентификация",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Введите 6-значный код из\nвашего приложения для аутентификации",
   "confirm": "Подтвердить",
   "setupComplete": "Настройка завершена",
@@ -166,12 +185,17 @@
   "invalidRecoveryKey": "Введённый вами ключ восстановления недействителен. Убедитесь, что он содержит 24 слова, и проверьте правописание каждого из них.\n\nЕсли вы ввели старый код восстановления, убедитесь, что он состоит из 64 символов, и проверьте каждый из них.",
   "invalidKey": "Недействительный ключ",
   "tryAgain": "Попробовать снова",
-  "viewRecoveryKey": "Увидеть ключ восстановления",
+  "viewRecoveryKey": "Посмотреть ключ восстановления",
   "confirmRecoveryKey": "Подтвердить ключ восстановления",
   "recoveryKeyVerifyReason": "Ваш ключ восстановления — единственный способ восстановить ваши фото, если вы забудете пароль. Вы можете найти ключ восстановления в разделе «Настройки» → «Аккаунт».\n\nПожалуйста, введите ваш ключ восстановления здесь, чтобы убедиться, что вы сохранили его правильно.",
   "confirmYourRecoveryKey": "Подтвердите ваш ключ восстановления",
   "addViewer": "Добавить зрителя",
   "addCollaborator": "Добавить соавтора",
+  "admin": "Администратор",
+  "admins": "Администраторы",
+  "addAdmin": "Добавить администратора",
+  "addMoreAdmins": "Добавить ещё администратора",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Администраторы и соавторы могут добавлять фотографии, управлять существующими фотографиями и менять состав участников.",
   "addANewEmail": "Добавьте новую электронную почту",
   "orPickAnExistingOne": "Или выберите существующую",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Соавторы могут добавлять фото и видео в общий альбом.",
@@ -203,6 +227,7 @@
   },
   "allowJoiningAlbum": "Разрешить объединение альбомов",
   "allowAddPhotosDescription": "Разрешить людям с этой ссылкой добавлять фото в общий альбом.",
+  "enableComment": "Комментарии и реакции",
   "passwordLock": "Защита паролем",
   "canNotOpenTitle": "Не удаётся открыть этот альбом",
   "canNotOpenBody": "Извините, этот альбом не может быть открыт в приложении.",
@@ -258,6 +283,7 @@
   "shareWithNonenteUsers": "Поделиться с пользователями, не использующими Ente",
   "createPublicLink": "Создать публичную ссылку",
   "sendLink": "Отправить ссылку",
+  "qrCode": "QR-код",
   "sendQrCode": "Отправить QR-код",
   "copyLink": "Скопировать ссылку",
   "copyEmbedHtml": "Скопируйте HTML-код для вставки",
@@ -299,9 +325,13 @@
   "enterCodeDescription": "Введите код, предоставленный вашим другом, чтобы вы оба могли получить бесплатное хранилище",
   "apply": "Применить",
   "failedToApplyCode": "Не удалось применить код",
+  "invalidReferralCode": "Неверный код",
   "enterReferralCode": "Введите реферальный код",
   "codeAppliedPageTitle": "Код применён",
+  "changeYourReferralCode": "Изменить код",
   "change": "Изменить",
+  "saveCode": "Сохранить код",
+  "referralCodeHint": "Вы можете изменить этот код не более 3 раз",
   "unavailableReferralCode": "Извините, этот код недоступен.",
   "codeChangeLimitReached": "Извините, вы достигли лимита изменений кода.",
   "onlyFamilyAdminCanChangeCode": "Пожалуйста, свяжитесь с {familyAdminEmail} для изменения кода.",
@@ -310,17 +340,26 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} ГБ получено!",
   "details": "Подробности",
   "claimMore": "Получите больше!",
+  "earnMoreSpace": "Получите больше места!",
   "theyAlsoGetXGb": "Они тоже получат {storageAmountInGB} ГБ",
+  "referralStorageForBoth": "{storageAmountInGB} ГБ для них + {storageAmountInGB} ГБ для вас при переходе на платный тариф.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ каждый раз, когда кто-то подписывается на платный тариф и применяет ваш код",
-  "shareTextReferralCode": "Реферальный код Ente: {referralCode} \n\nПримените его в разделе «Настройки» → «Общие» → «Рефералы», чтобы получить {referralStorageInGB} ГБ бесплатно после подписки на платный тариф\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos — это безопасное и защищённое хранилище для ваших фотографий\n* Скачайте Ente Photos — https://ente.io/app\n* Создайте аккаунт\n* Примените реферальный код {referralCode} в Настройки -> Рефералы -> Применить код\n* Получите {referralStorageInGB} ГБ бесплатно при переходе на платный тариф",
   "claimFreeStorage": "Получить бесплатное хранилище",
   "inviteYourFriends": "Пригласите своих друзей",
+  "earnFreeStorage": "Заработайте бесплатное место в хранилище",
+  "shareCodeEarnStorage": "Поделитесь вашим кодом, получите место в хранилище.",
+  "youBothGet": "Вы оба получите",
+  "free": "бесплатно",
   "failedToFetchReferralDetails": "Не удалось получить данные о рефералах. Пожалуйста, попробуйте позже.",
-  "referralStep2": "2. Они подписываются на платный тариф",
-  "referralStep3": "3. Вы оба получаете {storageInGB} ГБ* бесплатно",
+  "referralStep1": "1. Настройте код и поделитесь им.",
+  "referralStep2": "2. Они регистрируются в Ente, используя ваш код.",
+  "referralStep3": "3. {storageInGB} ГБ для них + {storageInGB} ГБ для вас при переходе на платный тариф.",
   "referralsAreCurrentlyPaused": "Реферальная программа временно приостановлена",
+  "youCanAtMaxDoubleYourStorage": "Вы можете увеличить хранилище максимум в два раза",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша семья получила {storageAmountInGb} ГБ на данный момент} false {Вы получили {storageAmountInGb} ГБ на данный момент} other {Вы получили {storageAmountInGb} ГБ на данный момент!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -344,16 +383,26 @@
   "freeStorageClaimed": "Полученное бесплатное хранилище",
   "freeStorageUsable": "Доступное бесплатное хранилище",
   "usableReferralStorageInfo": "Доступное хранилище ограничено вашим текущим тарифом. Избыточное полученное хранилище автоматически станет доступным при улучшении тарифа.",
+  "referralStats": "Статистика рефералов",
+  "usedYourCode": "использовали ваш код",
+  "claimedByYou": "доступно",
+  "earned": "получено",
+  "usable": "использовано",
+  "referralStorageInfo": "Рефералы от платных подписчиков получают бонусное хранилище.\n\nВы можете использовать хранилище в пределах лимита вашего тарифа. Обновите тариф, чтобы воспользоваться оставшимся накопленным хранилищем.",
   "removeFromAlbumTitle": "Удалить из альбома?",
   "removeFromAlbum": "Удалить из альбома",
   "itemsWillBeRemovedFromAlbum": "Выбранные элементы будут удалены из этого альбома",
+  "removeShareItemsWarning": "Выбранные фотографии будут недоступны для просмотра любому зрителю этого альбома, кроме владельцев фотографий.",
   "addingToFavorites": "Добавление в избранное...",
   "removingFromFavorites": "Удаление из избранного...",
   "sorryCouldNotAddToFavorites": "Извините, не удалось добавить в избранное!",
   "sorryCouldNotRemoveFromFavorites": "Извините, не удалось удалить из избранного!",
   "subscribeToEnableSharing": "Вам нужна активная платная подписка, чтобы включить общий доступ.",
+  "subscribeToChangeLinkSetting": "Вам нужна платная подписка, чтобы изменить эту ссылку.",
   "subscribe": "Подписаться",
   "canOnlyRemoveFilesOwnedByYou": "Можно удалять только файлы, принадлежащие вам",
+  "cannotMoveToSharedAlbums": "Нельзя переместить в общие альбомы",
+  "cannotMoveToSharedAlbumsMessage": "Элементы могут быть только добавлены в общие альбомы, а не перемещены. Хотите добавить вместо этого?",
   "deleteSharedAlbum": "Удалить общий альбом?",
   "deleteAlbum": "Удалить альбом",
   "deleteAlbumDialog": "Также удалить фото (и видео), находящиеся в этом альбоме, из <bold>всех</bold> других альбомов, частью которых они являются?",
@@ -446,6 +495,10 @@
   "mlConsentPrivacy": "Пожалуйста, нажмите здесь для получения подробностей об этой функции в нашей политике конфиденциальности",
   "mlConsentConfirmation": "Я понимаю и хочу включить машинное обучение",
   "magicSearch": "Магический поиск",
+  "magic": "Магия",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Откройте для себя",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -473,10 +526,29 @@
   "pendingItems": "Элементы в очереди",
   "clearIndexes": "Удалить индексы",
   "selectFoldersForBackup": "Выберите папки для резервного копирования",
+  "selectFolders": "Выберите папки",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Выбранные папки будут зашифрованы и сохранены в резервной копии",
   "unselectAll": "Отменить выбор",
   "selectAll": "Выбрать все",
   "skip": "Пропустить",
+  "chooseBackupModeHeader": "Выберите, как Ente делать резервное копирование ваших фотографий",
+  "startWithLatestPhotos": "Начните с последних фотографий",
+  "backingUpLastSevenDaysPhotos": "Резервное копирование фотографий за последние 7 дней",
+  "backupOnlyNewPhotos": "Резервное копирование только новых фото",
+  "backupOnlyNewPhotosAllFoldersSelected": "Сейчас все папки выбраны для резервного копирования.\n\nВы можете продолжить или обновить выбранные папки.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "В настоящее время ни одна папка не выбрана для резервного копирования.\n\nВы можете продолжить или обновить выбранные папки.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "В настоящее время ни одна папка не выбрана для резервного копирования.\n\nПожалуйста, выберите папки, чтобы продолжить.",
+  "backupOnlyNewPhotosWarningBody": "В настоящее время вы резервируете фотографии с {formattedDate}. Пожалуйста, обновите настройки, чтобы сделать резервное копирование всех фотографий.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Обновить настройки",
   "updatingFolderSelection": "Обновление выбора папок...",
   "itemCount": "{count, plural, one{{count} элемент} other{{count} элементов}}",
   "deleteItemCount": "{count, plural, =1 {Удалить {count} элемент} other {Удалить {count} элементов}}",
@@ -538,12 +610,21 @@
   "backup": "Резервное копирование",
   "freeUpDeviceSpace": "Освободить место на устройстве",
   "freeUpDeviceSpaceDesc": "Освободите место на устройстве, удалив файлы, которые уже сохранены в резервной копии.",
+  "freeUpDeviceSpaceDescICloud": "Файлы в общих альбомах iCloud нельзя очистить.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ Всё чисто",
   "noDeviceThatCanBeDeleted": "На этом устройстве нет файлов, которые можно удалить",
   "removeDuplicates": "Удалить дубликаты",
   "removeDuplicatesDesc": "Проверьте и удалите файлы, которые являются точными дубликатами.",
   "viewLargeFiles": "Большие файлы",
   "viewLargeFilesDesc": "Узнайте, какие файлы занимают больше всего места.",
+  "deleteSuggestions": "Удалить предложенное",
+  "deleteSuggestionsDesc": "Просмотрите файлы, которые были предложены для удаления.",
+  "rejectSuggestions": "Отклонить предложения",
+  "noDeleteSuggestion": "Нет предложений для удаления",
+  "youHaveNoFileSuggestedForDeletion": "У вас нет файлов, которые были предложены для удаления",
   "noDuplicates": "✨ Дубликатов нет",
   "youveNoDuplicateFilesThatCanBeCleared": "У вас нет дубликатов файлов, которые можно удалить",
   "success": "Успех",
@@ -582,6 +663,8 @@
   "notifications": "Уведомления",
   "sharedPhotoNotifications": "Новые общие фото",
   "sharedPhotoNotificationsExplanation": "Получать уведомления, когда кто-то добавляет фото в общий альбом, в котором вы состоите",
+  "socialNotifications": "Отметки \"Нравится\" и комментарии",
+  "socialNotificationsExplanation": "Получать уведомления об отметке \"Нравится\" на ваших фотографиях и комментариях в альбомах, в которых вы участвуете",
   "advanced": "Расширенные",
   "general": "Общие",
   "security": "Безопасность",
@@ -610,6 +693,7 @@
   "reportBug": "Сообщить об ошибке",
   "suggestFeatures": "Предложить идею",
   "support": "Поддержка",
+  "appearance": "Оформление",
   "theme": "Тема",
   "lightTheme": "Светлая",
   "darkTheme": "Тёмная",
@@ -719,17 +803,12 @@
   "openSettings": "Открыть настройки",
   "selectMorePhotos": "Выбрать больше фото",
   "existingUser": "Существующий пользователь",
-  "privateBackups": "Защищённые резервные копии",
-  "forYourMemories": "для ваших воспоминаний",
-  "endtoendEncryptedByDefault": "Сквозное шифрование по умолчанию",
-  "safelyStored": "Надёжно сохранены",
-  "atAFalloutShelter": "в бункере",
-  "designedToOutlive": "Создано на века",
-  "available": "Доступно",
-  "everywhere": "везде",
-  "androidIosWebDesktop": "Android, iOS, браузер, компьютер",
-  "mobileWebDesktop": "Смартфон, браузер, компьютер",
   "newToEnte": "Впервые в Ente",
+  "createAnEnteAccount": "Создать аккаунт Ente",
+  "continueWithoutAccount": "Продолжить без аккаунта",
+  "loginToExistingAccount": "Вход в существующий аккаунт",
+  "shareTheMoment": "Поделиться моментом",
+  "letFriendsAndFamilyReact": "Дайте друзьям и семье возможность оставлять реакции и комментарии к вашим фотографиям.",
   "pleaseLoginAgain": "Пожалуйста, войдите снова",
   "autoLogoutMessage": "Из-за технического сбоя вы были выведены из системы. Приносим извинения за неудобства.",
   "yourSubscriptionHasExpired": "Срок действия вашей подписки истёк",
@@ -745,7 +824,6 @@
   "couldNotBackUpTryLater": "Нам не удалось создать резервную копию ваших данных.\nМы повторим попытку позже.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente может шифровать и сохранять файлы, только если вы предоставите к ним доступ",
   "pleaseGrantPermissions": "Пожалуйста, предоставьте разрешения",
-  "grantPermission": "Предоставить разрешение",
   "privateSharing": "Защищённый обмен",
   "shareOnlyWithThePeopleYouWant": "Делитесь только с теми, с кем хотите",
   "usePublicLinksForPeopleNotOnEnte": "Используйте публичные ссылки для людей, не использующих Ente",
@@ -767,6 +845,7 @@
   "name": "Имя",
   "newest": "Недавние",
   "lastUpdated": "Последнее обновление",
+  "updated": "Обновлено",
   "deleteEmptyAlbums": "Удалить пустые альбомы",
   "deleteEmptyAlbumsWithQuestionMark": "Удалить пустые альбомы?",
   "deleteAlbumsDialogBody": "Это удалит все пустые альбомы. Это может быть полезно, если вы хотите навести порядок в списке альбомов.",
@@ -865,6 +944,8 @@
   "sortAlbumsBy": "Сортировать по",
   "sortNewestFirst": "Сначала новые",
   "sortOldestFirst": "Сначала старые",
+  "sortAToZ": "А-Я",
+  "sortZToA": "Я-А",
   "rename": "Переименовать",
   "leaveSharedAlbum": "Покинуть общий альбом?",
   "leaveAlbum": "Покинуть альбом",
@@ -881,6 +962,7 @@
   "clickOnTheOverflowMenu": "• Нажмите на меню дополнительных действий",
   "click": "• Нажмите",
   "nothingToSeeHere": "Здесь ничего нет! 👀",
+  "selectFoldersToBackup": "<action>Выберите папки</action> для просмотра и\nрезервного копирования в Ente.",
   "unarchiveAlbum": "Извлечь альбом из архива",
   "archiveAlbum": "Архивировать альбом",
   "calculating": "Подсчёт...",
@@ -1050,7 +1132,6 @@
   "didYouKnow": "Знаете ли вы?",
   "loadingMessage": "Загрузка ваших фото...",
   "loadMessage1": "Вы можете поделиться подпиской с вашей семьёй",
-  "loadMessage2": "На сегодняшний день мы сохранили более 200 миллионов воспоминаний",
   "loadMessage3": "Мы храним 3 копии ваших данных, одну из них — в бункере",
   "loadMessage4": "Все наши приложения имеют открытый исходный код",
   "loadMessage5": "Наш исходный код и криптография прошли внешний аудит",
@@ -1059,6 +1140,46 @@
   "loadMessage8": "На web.ente.io есть удобный загрузчик",
   "loadMessage9": "Мы используем Xchacha20Poly1305 для безопасного шифрования ваших данных",
   "photoDescriptions": "Описания фото",
+  "searchResultFileName": "Имя файла",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Описание",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Тип",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Расширение файла",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Человек",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Общий",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Загружено пользователем",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Производитель камеры",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Модель камеры",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Файлы",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Типы и названия файлов",
   "location": "Местоположение",
   "moments": "Моменты",
@@ -1118,6 +1239,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "Свободно {freeAmount} {storageUnit}",
+  "appVersion": "Версия {versionValue}",
   "verifyIDLabel": "Подтвердить",
   "fileInfoAddDescHint": "Добавить описание...",
   "editLocationTagTitle": "Изменить местоположение",
@@ -1200,10 +1322,14 @@
   "unpinAlbum": "Открепить альбом",
   "pinAlbum": "Закрепить альбом",
   "pin": "Прикрепить",
+  "pinPerson": "Закрепить человека",
   "pinToTop": "Закрепить сверху",
   "unpin": "Открепить",
+  "unpinPerson": "Открепить человека",
   "visibility": "Видимость",
   "hideFromMemories": "Скрыть из воспоминаний",
+  "showInMemories": "Показывать в воспоминаниях",
+  "showIgnored": "Показать игнорируемых",
   "create": "Создать",
   "viewAll": "Посмотреть все",
   "nothingSharedWithYouYet": "С вами пока ничем не поделились",
@@ -1222,7 +1348,7 @@
   "moveToHiddenAlbum": "Переместить в скрытый альбом",
   "fileTypes": "Типы файлов",
   "deleteConfirmDialogBody": "Этот аккаунт связан с другими приложениями Ente, если вы их используете. Все загруженные данные во всех приложениях Ente будут поставлены в очередь на удаление, а ваш аккаунт будет удален навсегда.",
-  "hearUsWhereTitle": "Как вы узнали об Ente? (необязательно)",
+  "hearUsWhereTitle": "Как вы узнали о Ente?",
   "hearUsExplanation": "Мы не отслеживаем установки приложений. Нам поможет, если скажете, как вы нас нашли!",
   "viewAddOnButton": "Посмотреть дополнения",
   "addOns": "Дополнения",
@@ -1315,6 +1441,8 @@
   "enterDateOfBirth": "Дата рождения (необязательно)",
   "birthday": "День рождения",
   "removePersonLabel": "Удалить метку человека",
+  "removePersonTag": "Удалить метку человека",
+  "areYouSureRemoveThisPersonTag": "Вы уверены, что хотите удалить этот тег человека?",
   "autoPairDesc": "Автоподключение работает только с устройствами, поддерживающими Chromecast.",
   "manualPairDesc": "Подключение с PIN-кодом работает с любым устройством, на котором вы хотите просматривать альбом.",
   "connectToDevice": "Подключиться к устройству",
@@ -1366,6 +1494,7 @@
   "enterPin": "Введите PIN-код",
   "setNewPin": "Установите новый PIN-код",
   "appLock": "Блокировка приложения",
+  "lockScreenType": "Тип блокировки",
   "noSystemLockFound": "Системная блокировка не найдена",
   "tapToUnlock": "Нажмите для разблокировки",
   "tooManyIncorrectAttempts": "Слишком много неудачных попыток",
@@ -1394,14 +1523,83 @@
   "localSyncErrorMessage": "Похоже, что-то пошло не так: синхронизация фото занимает больше времени, чем ожидалось. Пожалуйста, обратитесь в поддержку",
   "showPerson": "Показать человека",
   "sort": "Сортировать",
+  "recent": "Недавние",
   "mostRecent": "Самые последние",
   "mostRelevant": "Самые актуальные",
   "loadingYourPhotos": "Загрузка ваших фото...",
   "processingImport": "Обработка {folderName}...",
   "personName": "Имя человека",
+  "addPerson": "Добавить человека",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Добавить нового человека",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Пожалуйста, сначала укажите человека в разделе \"Люди\"",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Только загруженные файлы могут быть добавлены к человеку",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Лица не обнаружены, нажмите, чтобы добавить.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Добавлен 1 файл к {personName}} other {Добавлено {count} файлов к {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 файл уже связан с {personName}} other {{count} файлов уже связано с {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Добавить нового человека",
   "addNameOrMerge": "Добавить имя или объединить",
   "mergeWithExisting": "Объединить с существующим",
+  "mergeWithPersonTitle": "Объединить с {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Все фотографии из обеих групп лиц будут объединены под {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Новый человек",
   "addName": "Добавить имя",
   "add": "Добавить",
@@ -1446,6 +1644,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Администраторов не добавлено} =1 {1 администратор успешно добавлен} other {{count} администраторов успешно добавлено}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Добавить администратора} =1 {Добавить администратора} other {Добавить администраторов}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Администраторы могут управлять фотографиями и участниками.",
+  "suggestDeletion": "Предложить удалить",
+  "suggestDeletionDescription": "Выбранные фотографии будут удалены из этого альбома. Владельцы фото также получат предложение для просмотра и удаления фотографий.",
+  "deleteSuggestionSent": "Предложение для удаления отправлено",
   "accountIsAlreadyConfigured": "Аккаунт уже настроен.",
   "sessionIdMismatch": "Несоответствие ID сессии",
   "@sessionIdMismatch": {
@@ -1560,7 +1782,6 @@
   "legacyPageDesc2": "Доверенные контакты могут начать восстановление аккаунта. Если не отменить это в течение 30 дней, то они смогут сбросить пароль и получить доступ.",
   "legacyAccounts": "Наследуемые аккаунты",
   "trustedContacts": "Доверенные контакты",
-  "addTrustedContact": "Добавить доверенный контакт",
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашему аккаунту",
   "rejectRecovery": "Отклонить восстановление",
@@ -1783,7 +2004,7 @@
   "areThey": "Они ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Сохранить как другого человека",
-  "showLessFaces": "Показывать меньше лиц",
+  "showLessFaces": "Показать меньше лиц",
   "showMoreFaces": "Показывать больше лиц",
   "ignore": "Игнорировать",
   "merge": "Объединить",
@@ -1795,6 +2016,10 @@
   "areYouSureYouWantToMergeThem": "Вы уверены, что хотите их объединить?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Все неназванные группы будут объединены в выбранного человека. Это можно отменить в обзоре истории предложений для данного человека.",
   "yesIgnore": "Да, игнорировать",
+  "areYouSureYouWantToShowThisPersonInPeopleSectionAgain": "Вы уверены, что хотите снова показать этого человека в разделе \"Люди\"?",
+  "areYouSureYouWantToShowThesePeopleInPeopleSectionAgain": "Вы уверены, что хотите снова показать этих людей в разделе \"Люди\"?",
+  "yesShowPerson": "Да, показать человека",
+  "yesShowPeople": "Да, показать людей",
   "same": "Такой же",
   "different": "Разные",
   "sameperson": "Тот же человек?",
@@ -1804,6 +2029,10 @@
   "thisMonth": "В этом месяце",
   "thisYear": "В этом году",
   "groupBy": "Группировать по",
+  "groupByDay": "Дню",
+  "groupByWeek": "Неделя",
+  "groupByMonth": "Месяц",
+  "groupByYear": "Год",
   "faceThumbnailGenerationFailed": "Не удалось создать миниатюры лиц",
   "fileAnalysisFailed": "Не удалось проанализировать файл",
   "editAutoAddPeople": "Редактировать автоматическое добавление людей",
@@ -1949,6 +2178,7 @@
     }
   },
   "size": "Размер",
+  "closest": "Ближайший",
   "similarity": "Сходство",
   "analyzingPhotosLocally": "Анализ ваших фотографий на устройстве...",
   "lookingForVisualSimilarities": "Поиск по визуальному сходству...",
@@ -2068,27 +2298,315 @@
   },
   "playfulKids": "Игра детей",
   "coastalCliffs": "Скалы у моря",
-  "cLTitle1": "Редизайн",
-  "cLDesc1Item1": "Редизайн экрана настроек",
-  "cLDesc1Item2": "Строка поиска перемещена наверх",
-  "cLDesc1Item3": "Редизайн страницы результатов поиска",
-  "cLTitle2": "Улучшения",
-  "cLDesc2Item1": "Поиск в настройках",
-  "cLDesc2Item2": "Ускоренная загрузка вкладки поиска",
-  "cLDesc2Item3": "Поиск в разделах обнаружение, местоположение, тип файла",
-  "cLDesc2Item4": "Администраторы и владельцы альбомов могут удалять комментарии",
-  "cLDesc2Item5": "Масштабирование щипком для видео",
-  "cLDesc2Item6": "Просмотр всех игнорируемых людей",
-  "cLDesc2Item7": "Улучшенный процесс объединения",
-  "cLDesc2Item8": "Поиск и пользовательская сортировка на странице людей",
-  "cLDesc2Item9": "Согласованная сортировка контактов",
-  "cLDesc2Item10": "Превью изображений для неподдерживаемых форматов",
-  "cLDesc2Item11": "Обмен фото и касание для замены в создателе коллажей",
-  "cLDesc2Item12": "Улучшение производительности панели информации о файле",
-  "cLTitle3": "Исправления ошибок",
-  "cLDesc3Item1": "Исправлена пауза музыки при открытии приложения",
-  "cLDesc3Item2": "Исправлена проблема выделения свайпом на устройствах Samsung S",
-  "cLDesc3Item3": "Исправлена проблема экрана загрузки после восстановления резервной копии",
-  "cLDesc3Item4": "Исправлены проблемы галереи на планшетах и в альбомном режиме",
-  "cLDesc3Item5": "Исправлена проблема обновления страницы без категории после перемещения"
+  "ritualsTitle": "Ритуалы",
+  "ritualAddTooltip": "Добавить ритуал",
+  "ritualActivityHeading": "Активность",
+  "ritualDefaultHeatmapTitle": "Фотографировать каждый день",
+  "ritualUntitled": "Ритуал без названия",
+  "ritualShareUnavailable": "Не удалось поделиться. Пожалуйста, попробуйте еще раз.",
+  "ritualNotificationMessage": "Сделать фото сейчас",
+  "ritualCameraNotFound": "Не найдено камер на этом устройстве.",
+  "ritualCameraStartError": "Не удалось запустить камеру. Пожалуйста, проверьте разрешения.",
+  "ritualCaptureError": "Не удалось сфотографировать. Пожалуйста, попробуйте еще раз.",
+  "ritualPhotoLimit": "Вы можете добавить до {maxPhotos, plural, one {# фото.}  other {# фотографий.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Сначала сделайте хотя бы одну фотографию.",
+  "ritualAlbumMissing": "Альбом ритуала отсутствует. Отредактируйте ритуал, чтобы установить альбом.",
+  "ritualAddedToAlbum": "Добавлено в альбом",
+  "ritualAddedToAlbumWithName": "Добавлено в {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Не удалось добавить фотографии в альбом: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Назад к ритуалам",
+  "ritualNoPhotosYet": "Пока нет фото",
+  "ritualSetAlbumToLaunchCamera": "Установите альбом для этого ритуала, чтобы запустить камеру.",
+  "ritualDefaultCameraTitle": "Сделать снимок",
+  "ritualBadgeMessage7": "7 дней прошло! Постоянность выглядит хорошо. Продолжайте!",
+  "ritualBadgeMessage14": "14 дней! Ваш ритуал становиться привычкой. Невероятно!",
+  "ritualBadgeMessage30": "30 дней подряд! Легендарная последовательность!",
+  "ritualBadgeMessageDefault": "Вы в ударе!",
+  "ritualBadgeNewTitle": "Новое достижение",
+  "ritualBadgePreparing": "Подготовка...",
+  "ritualStreaksLabel": "Рекорды",
+  "ritualCreateYourOwn": "Создайте свой собственный ритуал",
+  "ritualGetDailyReminders": "Получайте ежедневные напоминания",
+  "ritualAlbumNotSet": "Альбом не установлен",
+  "ritualOpenCameraTooltip": "Открыть камеру ритуала",
+  "ritualEditorLabel": "Редактор ритуала",
+  "ritualNew": "Создать новый ритуал",
+  "ritualCreateNewTitle": "Создать новый ритуал",
+  "ritualEdit": "Изменить ритуал",
+  "ritualEnterPrompt": "Введите название ритуала",
+  "ritualEnterDescription": "Пожалуйста, введите описание",
+  "ritualChooseDaysLabel": "Выберите дни для ритуала",
+  "ritualDayLabel": "День",
+  "ritualNotificationsOffHint": "Уведомления отключены. Нажмите день, чтобы включить.",
+  "ritualTimeLabel": "Время",
+  "ritualAlbumLabel": "Альбом",
+  "ritualSave": "Сохранить ритуал",
+  "ritualCreateAction": "Создать ритуал",
+  "ritualUpdate": "Обновить ритуал",
+  "ritualSelectAlbumTitle": "Выбрать альбом",
+  "ritualChooseAlbumLabel": "Выбрать альбом",
+  "ritualSendReminderLabel": "Отправить напоминание",
+  "ritualSearchOrCreate": "Искать или создать новый",
+  "ritualNoAlbumsYet": "Пока нет альбомов",
+  "ritualNoMatchingAlbums": "Нет подходящих альбомов",
+  "ritualCreateAlbumWithName": "Создать \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Создать новый",
+  "ritualAlbumSelectionPlaceholder": "Выбрать альбом",
+  "ritualPickEmojiTitle": "Выбрать эмодзи",
+  "ritualCustomKeyboardLabel": "Пользовательский (системная клавиатура)",
+  "ritualEmojiKeyboardHint": "Нажмите, чтобы открыть клавиатуру эмодзи",
+  "ritualEmojiUseAction": "Использовать",
+  "ritualSearchEmpty": "Создайте ритуал, чтобы поддерживать свою привычку фотографировать.",
+  "feed": "Лента",
+  "newCommentNotificationTitle": "Вы получили комментарий",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Вы получили \"Нравится\"",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
+  "likedYourPhoto": "Понравилось ваше фото",
+  "likedAPhoto": "Понравилось фото",
+  "likedYourVideo": "Понравилось ваше видео",
+  "commentedOnYourPhoto": "Прокомментировал(а) ваше фото",
+  "commentedOnAPhoto": "Прокомментировал(а) фото",
+  "commentedOnYourVideo": "Прокомментировал(а) ваше видео",
+  "commentedOnAVideo": "Прокомментировал(а) видео",
+  "repliedToYourComment": "Ответил(а) на ваш комментарий",
+  "repliedToAComment": "Ответил(а) на комментарий",
+  "likedYourComment": "Понравился ваш комментарий",
+  "likedAComment": "Понравился комментарий",
+  "likedYourReply": "Понравился ваш ответ",
+  "likedAReply": "Понравился ответ",
+  "addedAMemoryTo": "Добавлено воспоминание в {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Добавлено {count} воспоминание в {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "and1Other": "и еще один",
+  "andXOthers": "и {count} других",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Активности пока нет",
+  "like": "Нравится",
+  "comments": "Комментарии",
+  "commentHint": "Скажите что-нибудь приятное!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Ответить",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Вы уверены?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Удалить комментарий",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Ваш комментарий \"{comment}\" будет удален навсегда",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 Нравится} other{{count} Нравится}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Пока нет отметок \"Нравится\"",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Не удалось загрузить отметки \"Нравится\"",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Не удалось обновить отметки \"Нравится\"",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Не удалось поставить отметку \"Нравится\" в одном альбоме} other{Не удалось поставить отметку \"Нравится\" в {count} альбомах}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Не удалось загрузить альбомы",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural,=1{1 альбом}other{{count} альбомов}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Поставить отметку \"Нравится\" на всё",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Выберите альбом, чтобы поставить отметку \"Нравится\" на это видео",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Выберите альбом, чтобы поставить отметку \"Нравится\" на это фото",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Не удалось поставить отметку \"Нравиться\" на этот комментарий",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Не удалось удалить комментарий",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(удалено)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Отвечает вам",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Ответ {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Комментариев нет} =1 {1 комментарий} other{{count} комментариев}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchSettings": "Настройки поиска",
+  "suggestions": "Предложения",
+  "cleanupHiddenFiles": "Очистить скрытые файлы",
+  "cleanupHiddenFilesDescription": "Некоторые файлы в скрытых альбомах все еще существуют в нескрытых альбомах, что делает их видимыми за пределами скрытого раздела. Очистка удалит их из нескрытых альбомов.",
+  "cleanupComplete": "Очистка завершена",
+  "deleteHiddenFilesFromDevice": "Удалить скрытые файлы с устройства",
+  "deleteHiddenFilesFromDeviceDescription": "Удалить локальные копии скрытых файлов с устройства",
+  "deleteOnDeviceFiles": "Удалить на устройстве",
+  "noHiddenFilesOnDevice": "Нет скрытых файлов на устройстве",
+  "welcome": "Добро пожаловать",
+  "grantGalleryPermissionDesc": "Предоставьте разрешение для доступа к фотографиям и организации их с использованием распознавания лиц.\n\nВся обработка происходит на вашем устройстве.",
+  "grantPermission": "Предоставить разрешение",
+  "privateAI": "Частный ИИ",
+  "privateAIDescription": "Ente использует ИИ на устройстве для анализа ваших фотографий на наличие лиц, объектов, мест и текста. Эти данные используются для таких функций, как распознавание лиц и умный поиск. Все обрабатывается и хранится локально на вашем устройстве — ничего не загружается на наши серверы.",
+  "byAgreeing": "Продолжая, вы соглашаетесь с <terms>условиями обслуживания</terms> и <policy>политикой конфиденциальности</policy>.",
+  "moreThanJustAGallery": "Больше, чем просто галерея.",
+  "encryptedBackupDescription": "Зашифрованное резервное копирование, умный поиск, ссылки для обмена и плавная синхронизация на всех ваших устройствах.",
+  "getStarted": "Начать",
+  "unlockSmartFeatures": "Разблокировать умные функции",
+  "enableOnDeviceMLDescription": "Включите машинное обучение на устройстве для поиска по лицам, местам и другим критериям. Ваши фотографии никогда не покидают ваше устройство.",
+  "offlineEnableSharingTitle": "Обмен начинается здесь",
+  "offlineEnableSharingDesc": "Зарегистрируйтесь, чтобы делиться фотографиями со всеми — даже с теми, кто не использует Ente",
+  "offlineEnableBackupTitle": "Альбомы, которые будут загружены, появятся здесь",
+  "offlineEnableBackupDesc": "Зарегистрируйтесь, чтобы сохранить свои воспоминания с Ente.",
+  "offlineEnableBackupAction": "Начните с 10 ГБ БЕСПЛАТНО",
+  "offlineSettingsBannerTitle": "Мы никогда не сможем видеть ваши фотографии. Никогда.",
+  "offlineSettingsBannerDesc": "Шифрование с нулевым разглашением означает, что ваши воспоминания остаются только вашими.",
+  "alreadyHaveAnAccount": "Уже есть аккаунт?",
+  "loginToEnte": "Войти в Ente",
+  "searchAndDiscover": "Искать и открывать",
+  "searchAndDiscoverDesc": "Ищите фотографии по тексту или заново открывайте старые воспоминания с помощью машинного обучения на устройстве",
+  "shareYourMemories": "Делитесь своими воспоминаниями",
+  "shareYourMemoriesDesc": "Делитесь своими альбомами, создавайте ссылки, собирайте фотографии и оставляйте комментарии",
+  "privateAndSecureBackups": "Частные и безопасные резервные копии",
+  "privateAndSecureBackupsDesc": "Сквозное шифрование, тройная репликация, открытый исходный код и независимый аудит",
+  "mlProgressBannerTitle": "Подождите немного!",
+  "mlProgressBannerDescription": "Ваши фотографии обрабатываются на устройстве для обнаружения лиц, объектов и другого.",
+  "mlProgressBannerStatus": "{indexed} из {total} фотографий обработано",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineFacesBannerTitle": "Хотите сохранить эти лица?",
+  "offlineFacesBannerSubtitle": "Зарегистрируйтесь, чтобы помечать людей и легко находить их позже.",
+  "offlineNameFaceBannerTitle": "Назовите это лицо",
+  "offlineNameFaceBannerSubtitle": "Зарегистрируйтесь, чтобы пометить их и легко находить их фотографии позже.",
+  "signUp": "Зарегистрироваться"
 }

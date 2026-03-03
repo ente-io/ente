@@ -18,7 +18,7 @@ import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
-import "package:photos/gateways/cast_gw.dart";
+import "package:photos/gateways/cast/cast_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/button_result.dart";
@@ -785,6 +785,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (files == null || files.isEmpty) {
       return;
     }
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles(files);
+      } catch (e, s) {
+        _logger.severe("Failed to download album", e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final totalFiles = files.length;
     final dialog = createProgressDialog(
       context,

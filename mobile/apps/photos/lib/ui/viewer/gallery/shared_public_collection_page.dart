@@ -30,6 +30,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart"
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/public_link_layout_util.dart";
 
 class SharedPublicCollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -116,18 +117,13 @@ class _SharedPublicCollectionPageState
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
 
-    // Determine groupType based on collection layout
-    GroupType groupType;
-    final layout = widget.c.collection.pubMagicMetadata.layout ?? "grouped";
-    switch (layout) {
-      case "continuous":
-        groupType = GroupType.none;
-        break;
-      case "grouped":
-      default:
-        groupType = GroupType.day;
-        break;
-    }
+    // Determine groupType based on collection layout.
+    // masonry/continuous (or unset) map to non-grouped rendering.
+    final normalizedLayout = normalizePublicLinkLayout(
+      widget.c.collection.pubMagicMetadata.layout,
+    );
+    final GroupType groupType =
+        normalizedLayout == "masonry" ? GroupType.none : GroupType.day;
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {

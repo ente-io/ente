@@ -4,9 +4,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:log_viewer/log_viewer.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/emergency/emergency_page.dart";
-import "package:photos/events/opened_settings_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
@@ -14,6 +12,8 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/login_page.dart";
+import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
@@ -50,8 +50,6 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Bus.instance.fire(OpenedSettingsEvent());
-
     return Scaffold(
       body: SettingsStateContainer(
         child: _SettingsBody(emailNotifier: emailNotifier),
@@ -89,11 +87,22 @@ class _SettingsBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleBar(context, colorScheme),
-                const SizedBox(height: 16),
-                _buildEmailHeader(context, colorScheme, textTheme),
-                const SizedBox(height: 16),
+                if (hasLoggedIn)
+                  _buildEmailHeaderSection(context, colorScheme, textTheme)
+                else
+                  const SizedBox(height: 8),
                 if (showLoginEntry) ...[
-                  _buildLoginCard(context, colorScheme),
+                  OfflineSettingsBanner(
+                    onGetStarted: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LandingPageWidget(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildOfflineLoginCard(context, colorScheme),
                   const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isOfflineMode) ...[
@@ -232,6 +241,30 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
+  Widget _buildEmailHeaderSection(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return AnimatedBuilder(
+      animation: emailNotifier,
+      builder: (BuildContext context, Widget? child) {
+        final email = emailNotifier.value ?? "";
+        if (email.isEmpty) {
+          return const SizedBox(height: 8);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            _buildEmailHeader(context, colorScheme, textTheme),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildIconWidget(
     List<List<dynamic>> icon,
     EnteColorScheme colorScheme, {
@@ -261,23 +294,6 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginCard(BuildContext context, EnteColorScheme colorScheme) {
-    final title =
-        "${AppLocalizations.of(context).existingUser} / ${AppLocalizations.of(context).newToEnte}";
-    return MenuItemWidgetNew(
-      title: title,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedUser,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const LandingPageWidget());
-      },
-    );
-  }
-
   Widget _buildBackupCard(BuildContext context, EnteColorScheme colorScheme) {
     return MenuItemWidgetNew(
       title: AppLocalizations.of(context).backup,
@@ -289,6 +305,36 @@ class _SettingsBody extends StatelessWidget {
       trailingIconIsMuted: true,
       onTap: () async {
         await routeToPage(context, const BackupSettingsPage());
+      },
+    );
+  }
+
+  Widget _buildOfflineLoginCard(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+  ) {
+    return MenuItemWidgetNew(
+      title: AppLocalizations.of(context).alreadyHaveAnAccount,
+      subText: AppLocalizations.of(context).loginToEnte,
+      leadingIconWidget: _buildIconWidget(
+        HugeIcons.strokeRoundedLogin01,
+        colorScheme,
+      ),
+      trailingWidget: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: colorScheme.greenBase,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.arrow_forward_rounded,
+          color: contentReverseLight,
+          size: 20,
+        ),
+      ),
+      onTap: () async {
+        await routeToPage(context, const LoginPage());
       },
     );
   }
@@ -617,7 +663,7 @@ class _SettingsBody extends StatelessWidget {
     EnteColorScheme colorScheme,
   ) {
     return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).support,
+      title: AppLocalizations.of(context).helpAndSupport,
       leadingIconWidget: _buildIconWidget(
         HugeIcons.strokeRoundedHelpCircle,
         colorScheme,

@@ -12,9 +12,9 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/gateways/trash/models/trash_item_request.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/models/api/collection/trash_item_request.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/freeable_space_info.dart";
@@ -59,7 +59,7 @@ Future<void> deleteFilesFromEverywhere(
       hasLocalOnlyFiles = true;
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid) {
+  if (hasLocalOnlyFiles && Platform.isAndroid && !isOfflineMode) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return;
@@ -219,7 +219,7 @@ Future<void> deleteFilesOnDeviceOnly(
       localOnlyIDs.add(file.localID);
     }
   }
-  if (hasLocalOnlyFiles && Platform.isAndroid) {
+  if (hasLocalOnlyFiles && Platform.isAndroid && !isOfflineMode) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
       return;
@@ -424,7 +424,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
         await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
     for (final file in files) {
       if (!(await _localFileExist(file))) {
-        _logger.warning("Already deleted " + file.toString());
+        _logger.warning("Already deleted ${file.tag}");
         alreadyDeletedIDs.add(file.localID!);
       } else if (file.localID!.startsWith(sharedMediaIdentifier)) {
         localSharedMediaIDs.add(file.localID!);
@@ -611,12 +611,15 @@ Future<List<String>> deleteLocalFilesInBatches(
     final ids = localIDs
         .getRange(index, min(localIDs.length, index + batchSize))
         .toList();
-    _logger.info("Trying to delete " + ids.toString());
+    _logger.info("Trying to delete ${ids.length} files");
+    final int countBefore = deletedIDs.length;
     try {
       deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
-      _logger.info("Deleted " + ids.toString());
+      _logger.info(
+        "Deleted ${deletedIDs.length - countBefore} of ${ids.length} files",
+      );
     } catch (e, s) {
-      _logger.severe("Could not delete batch " + ids.toString(), e, s);
+      _logger.severe("Could not delete batch of ${ids.length} files", e, s);
       for (final id in ids) {
         try {
           deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
@@ -740,6 +743,20 @@ Future<void> showDeleteSheet(
       context,
       AppLocalizations.of(context).cannotDeleteSharedFiles,
     );
+    return;
+  }
+  if (isOfflineMode) {
+    final offlineDeletableFiles =
+        deletableFiles.where((file) => file.localID != null).toList();
+    if (offlineDeletableFiles.isEmpty) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noDeviceThatCanBeDeleted,
+      );
+      return;
+    }
+    await deleteFilesOnDeviceOnly(context, offlineDeletableFiles);
+    selectedFiles.unSelectAll(offlineDeletableFiles.toSet());
     return;
   }
   final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);

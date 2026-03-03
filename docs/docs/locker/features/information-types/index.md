@@ -10,34 +10,34 @@ All types are end-to-end encrypted.
 
 ## Available types
 
-### Documents
+### Document
 
 Upload and store files securely including PDFs, images, and scans. Keep
 important documents like passports, contracts, receipts, and certificates
 encrypted and accessible.
 
-Learn more about [Documents](/locker/features/information-types/documents).
+Learn more about [Document](/locker/features/information-types/documents).
 
-### Personal Notes
+### Note
 
 Store free-form text securely. Use for sensitive notes, private thoughts,
 secure reminders, or any text you want to keep encrypted.
 
-Learn more about [Personal Notes](/locker/features/information-types/personal-notes).
+Learn more about [Note](/locker/features/information-types/personal-notes).
 
-### Account Credentials
+### Secret
 
 Store login information including usernames and passwords. Keep your account
 details in one secure location.
 
-Learn more about [Account Credentials](/locker/features/information-types/account-credentials).
+Learn more about [Secret](/locker/features/information-types/account-credentials).
 
-### Physical Records
+### Thing
 
 Track where your physical documents are stored. Record locations for passports,
 birth certificates, property deeds, and other important papers.
 
-Learn more about [Physical Records](/locker/features/information-types/physical-records).
+Learn more about [Thing](/locker/features/information-types/physical-records).
 
 ## Common features
 

@@ -12,6 +12,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/services/update_service.dart";
 import "package:locker/ui/settings/pages/about_page.dart";
 import "package:locker/ui/settings/pages/account_settings_page.dart";
 import "package:locker/ui/settings/pages/general_settings_page.dart";
@@ -175,6 +176,12 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         category: l10n.aboutUs,
         page: const AboutPage(),
       ),
+      if (UpdateService.instance.isIndependent())
+        _SearchableSetting(
+          title: l10n.checkForUpdates,
+          category: l10n.aboutUs,
+          page: const AboutPage(),
+        ),
       if (hasLoggedIn)
         _SearchableSetting(
           title: l10n.logout,

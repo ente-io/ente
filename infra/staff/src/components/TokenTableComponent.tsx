@@ -164,7 +164,7 @@ const TokensTableComponent: React.FC = () => {
                                 <TableCell>
                                     {formatDate(token.lastUsedTime)}
                                 </TableCell>
-                                <TableCell>{token.ua}</TableCell>
+                                <TableCell>{token.ua || "-"}</TableCell>
                                 <TableCell>{token.app}</TableCell>
                                 <TableCell>
                                     <span

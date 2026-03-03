@@ -73,6 +73,7 @@ import {
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { ShapeIcon } from "ente-new/photos/components/icons/ShapeIcon";
+import { AppLockSettings } from "ente-new/photos/components/sidebar/AppLockSettings";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
 import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
@@ -82,6 +83,7 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
+import { reauthenticateWithAppLock } from "ente-new/photos/services/app-lock";
 import {
     PseudoCollectionID,
     type CollectionSummaries,
@@ -290,6 +292,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         [setWatchFolderView],
     );
 
+    const handleShowExport = useCallback(() => {
+        if (!isDesktop) {
+            showMiniDialog(downloadAppDialogAttributes());
+            return;
+        }
+
+        void (async () => {
+            try {
+                await onAuthenticateUser();
+                onShowExport();
+            } catch {
+                // User cancelled reauthentication.
+            }
+        })();
+    }, [onAuthenticateUser, onShowExport, showMiniDialog]);
+
     const performSidebarAction = useCallback(
         async (actionID: SidebarActionID) =>
             performSidebarRegistryAction(actionID, {
@@ -300,7 +318,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 showPreferences,
                 showHelp,
                 showFreeUpSpace,
-                onShowExport,
+                onShowExport: handleShowExport,
                 onLogout: handleLogout,
                 onShowWatchFolder: handleOpenWatchFolder,
                 pseudoIDs: {
@@ -328,7 +346,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClose,
             onShowCollectionSummary,
             onShowPlanSelector,
-            onShowExport,
+            handleShowExport,
             showAccount,
             showFreeUpSpace,
             showHelp,
@@ -376,7 +394,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <UtilitySection
                     onCloseSidebar={onClose}
                     {...{
-                        onShowExport,
+                        onShowExport: handleShowExport,
                         onAuthenticateUser,
                         showAccount,
                         accountVisibilityProps,
@@ -831,13 +849,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     pendingFreeUpSpaceAction,
     onFreeUpSpaceActionHandled,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-
-    const handleExport = () =>
-        isDesktop
-            ? onShowExport()
-            : showMiniDialog(downloadAppDialogAttributes());
-
     return (
         <>
             <RowButton
@@ -875,7 +886,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                         <RowButtonEndActivityIndicator />
                     )
                 }
-                onClick={handleExport}
+                onClick={onShowExport}
             />
             <Help
                 {...helpVisibilityProps}
@@ -995,7 +1006,13 @@ const Account: React.FC<AccountProps> = ({
     }, [onRootClose]);
 
     const handleActiveSessions = useCallback(async () => {
-        await onAuthenticateUser();
+        if (isDesktop) {
+            const didAuthenticateWithAppLock =
+                await reauthenticateWithAppLock();
+            if (!didAuthenticateWithAppLock) await onAuthenticateUser();
+        } else {
+            await onAuthenticateUser();
+        }
         showSessions();
     }, [onAuthenticateUser, showSessions]);
 
@@ -1070,6 +1087,12 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
+                {isDesktop && (
+                    <DesktopAppLockSettings
+                        onAuthenticateUser={onAuthenticateUser}
+                        onRootClose={onRootClose}
+                    />
+                )}
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}
@@ -1106,6 +1129,26 @@ const Account: React.FC<AccountProps> = ({
                 {...{ onAuthenticateUser }}
             />
         </TitledNestedSidebarDrawer>
+    );
+};
+
+const DesktopAppLockSettings: React.FC<
+    Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
+> = ({ onAuthenticateUser, onRootClose }) => {
+    const { show, props } = useModalVisibility();
+
+    const handleOpen = useCallback(async () => {
+        await onAuthenticateUser();
+        show();
+    }, [onAuthenticateUser, show]);
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton label={t("app_lock")} onClick={handleOpen} />
+            </RowButtonGroup>
+            <AppLockSettings {...props} onRootClose={onRootClose} />
+        </>
     );
 };
 
@@ -1288,6 +1331,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Français";
         case "de-DE":
             return "Deutsch";
+        case "ca-ES":
+            return "Català";
         case "zh-CN":
             return "中文";
         case "nl-NL":

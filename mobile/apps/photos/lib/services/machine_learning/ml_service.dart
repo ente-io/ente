@@ -56,6 +56,13 @@ class MLService {
       _isRunningML || memoriesCacheService.isUpdatingMemories;
 
   static const _kForceClusteringFaceCount = 8000;
+  static const _kForceClusteringFaceCountOffline = 100;
+  int _forceClusteringFaceCountForMode(MLMode mode) {
+    return mode == MLMode.offline
+        ? _kForceClusteringFaceCountOffline
+        : _kForceClusteringFaceCount;
+  }
+
   MLDataDB get _mlDataDB =>
       isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
 
@@ -71,7 +78,10 @@ class MLService {
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      unawaited(_maybePredownloadLocalModels());
+      return;
+    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
@@ -115,7 +125,28 @@ class MLService {
     });
 
     _isInitialized = true;
+    unawaited(_maybePredownloadLocalModels());
     _logger.info('init done');
+  }
+
+  Future<void> _maybePredownloadLocalModels() async {
+    if (!hasGrantedMLConsent) {
+      return;
+    }
+    if (!localSettings.isMLLocalIndexingEnabled) {
+      _logger.info(
+        "Skipping ML model predownload because local indexing is disabled",
+      );
+      return;
+    }
+    if (MLIndexingIsolate.instance.areModelsDownloaded) {
+      return;
+    }
+    try {
+      await MLIndexingIsolate.instance.ensureDownloadedModels();
+    } catch (e, s) {
+      _logger.warning("Failed to predownload local ML models", e, s);
+    }
   }
 
   bool canFetch() {
@@ -155,7 +186,7 @@ class MLService {
 
       final int unclusteredFacesCount =
           await mlDataDB.getUnclusteredFaceCount();
-      if (unclusteredFacesCount > _kForceClusteringFaceCount) {
+      if (unclusteredFacesCount > _forceClusteringFaceCountForMode(mode)) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
         );
@@ -229,9 +260,13 @@ class MLService {
   Future<void> fetchAndIndexAllImages({required MLMode mode}) async {
     if (!_canRunMLFunction(function: "Indexing")) return;
 
+    bool rustRuntimePrepared = false;
     try {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
+      if (localSettings.isMLLocalIndexingEnabled) {
+        await MLIndexingIsolate.instance.ensureDownloadedModels();
+      }
       final Stream<List<FileMLInstruction>> instructionStream =
           fetchEmbeddingsAndInstructions(fileDownloadMlLimit, mode: mode);
 
@@ -247,15 +282,24 @@ class MLService {
           break stream;
         }
         if (!localSettings.isMLLocalIndexingEnabled) {
+          if (rustRuntimePrepared) {
+            await MLIndexingIsolate.instance.releaseRustRuntime();
+            rustRuntimePrepared = false;
+          }
           await MLIndexingIsolate.instance.cleanupLocalIndexingModels();
           continue;
-        } else if (!await canUseHighBandwidth()) {
+        } else if (!(isOfflineMode || await canUseHighBandwidth())) {
           _logger.info(
-            'stopping indexing because user is not connected to wifi',
+            'stopping indexing because user is not connected to wifi and in online mode',
           );
           break stream;
         } else {
           await MLIndexingIsolate.instance.ensureDownloadedModels();
+          if ((flagService.useRustForML || isOfflineMode) &&
+              !rustRuntimePrepared) {
+            await MLIndexingIsolate.instance.prepareRustRuntime();
+            rustRuntimePrepared = true;
+          }
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
@@ -289,6 +333,7 @@ class MLService {
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
+      await MLIndexingIsolate.instance.releaseRustRuntime();
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }

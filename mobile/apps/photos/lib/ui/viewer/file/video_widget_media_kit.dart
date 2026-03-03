@@ -27,7 +27,6 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
     as common;
-import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 
@@ -85,7 +84,6 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _transformationController.addListener(_onZoomChanged);
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -198,7 +196,6 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     }
     player.dispose();
     _captionUpdatedSubscription.cancel();
-    _transformationController.removeListener(_onZoomChanged);
     _transformationController.dispose();
     if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
       EnteWakeLockService.instance.updateWakeLock(
@@ -214,32 +211,29 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     super.dispose();
   }
 
-  void _onZoomChanged() {
-    final scale = _transformationController.value.getMaxScaleOnAxis();
-    final isZoomed = scale > kZoomThreshold;
-    if (_isZooming != isZoomed) {
+  void _onInteractionLockChanged(bool shouldLock) {
+    if (_isZooming != shouldLock) {
       setState(() {
-        _isZooming = isZoomed;
+        _isZooming = shouldLock;
       });
-      widget.shouldDisableScroll?.call(isZoomed);
     }
+    widget.shouldDisableScroll?.call(shouldLock);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // Keep recognizer out of the arena during multi-touch/zoom to avoid
+      // it stealing pinch gestures with predominantly vertical movement.
       onVerticalDragUpdate: _isGuestView || _isZooming
           ? null
-          : (d) => {
-                if (d.delta.dy > dragSensitivity)
-                  {
-                    Navigator.of(context).pop(),
-                  }
-                else if (d.delta.dy < (dragSensitivity * -1))
-                  {
-                    showDetailsSheet(context, widget.file),
-                  },
-              },
+          : (d) {
+              if (d.delta.dy > dragSensitivity) {
+                Navigator.of(context).pop();
+              } else if (d.delta.dy < (dragSensitivity * -1)) {
+                showDetailsSheet(context, widget.file);
+              }
+            },
       child: Center(
         child: controller != null
             ? common.VideoWidget(
@@ -247,7 +241,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
                 controller!,
                 widget.playbackCallback,
                 transformationController: _transformationController,
-                shouldDisableScroll: widget.shouldDisableScroll,
+                onInteractionLockChanged: _onInteractionLockChanged,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,

@@ -85,7 +85,7 @@ Jump to a category:
 ### Hide vs Archive
 
 - [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
-- [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
+- [Can I hide albums or photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
 - [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
 - [How do I hide photos in Ente?](/photos/faq/albums-and-organization#how-to-hide)
 - [How do I archive photos in Ente?](/photos/faq/albums-and-organization#how-to-archive)
@@ -400,6 +400,7 @@ Jump to a category:
 
 - [Why does my desktop app crash during large uploads?](/photos/faq/troubleshooting#desktop-large-uploads)
 - [Why are my photo thumbnails missing or incorrect?](/photos/faq/troubleshooting#thumbnails)
+- [Why is ML stuck on Windows (or models never download)?](/photos/faq/troubleshooting#windows-ml-stuck)
 - [Why aren't my watch folders syncing?](/photos/faq/troubleshooting#watch-folders-troubleshooting)
 - [Can I upload from a network drive (NAS)?](/photos/faq/troubleshooting#nas)
 - [Can I safely close the desktop app while it's uploading?](/photos/faq/troubleshooting#close-during-upload)

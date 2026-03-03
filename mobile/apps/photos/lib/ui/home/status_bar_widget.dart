@@ -22,7 +22,7 @@ import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
-import "package:photos/ui/settings/ml/enable_ml_consent.dart";
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 
 const double kContainerHeight = 36;
 
@@ -148,7 +148,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   onTap: () async => {
                     await routeToPage(
                       context,
-                      const EnableMachineLearningConsent(),
+                      const MachineLearningSettingsPage(),
                       forceCustomPageRoute: true,
                     ),
                   },

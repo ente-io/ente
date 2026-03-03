@@ -14,6 +14,7 @@ import 'package:photos/services/local_authentication_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -27,6 +28,12 @@ class VerifyRecoveryPage extends StatefulWidget {
 class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   final _recoveryKey = TextEditingController();
   final Logger _logger = Logger((_VerifyRecoveryPageState).toString());
+
+  @override
+  void dispose() {
+    _recoveryKey.dispose();
+    super.dispose();
+  }
 
   void _verifyRecoveryKey() async {
     final dialog = createProgressDialog(
@@ -46,24 +53,25 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         } catch (e) {
           await dialog.hide();
           if (e is DioException && e.type == DioExceptionType.connectionError) {
-            await showErrorDialog(
+            await showAlertBottomSheet(
               context,
-              AppLocalizations.of(context).noInternetConnection,
-              AppLocalizations.of(context)
+              title: AppLocalizations.of(context).noInternetConnection,
+              message: AppLocalizations.of(context)
                   .pleaseCheckYourInternetConnectionAndTryAgain,
+              assetPath: 'assets/warning-green.png',
             );
           } else {
-            await showGenericErrorDialog(context: context, error: e);
+            await showGenericErrorBottomSheet(context: context, error: e);
           }
           return;
         }
         Bus.instance.fire(NotificationEvent());
         await dialog.hide();
-        // todo: change this as per figma once the component is ready
-        await showErrorDialog(
+        await showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).recoveryKeyVerified,
-          AppLocalizations.of(context).recoveryKeySuccessBody,
+          title: AppLocalizations.of(context).recoveryKeyVerified,
+          message: AppLocalizations.of(context).recoveryKeySuccessBody,
+          assetPath: 'assets/warning-green.png',
         );
         Navigator.of(context).pop();
       } else {
@@ -105,14 +113,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           RecoveryKeyPage(
             recoveryKey,
             AppLocalizations.of(context).ok,
-            showAppBar: true,
+            isOnboarding: false,
             onDone: () {
               Navigator.of(context).pop();
             },
           ),
         );
       } catch (e) {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
         return;
       }
     }

@@ -69,6 +69,20 @@ export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
 
 /**
+ * Create a new quick link collection on remote, and return its local
+ * representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name to use for the new quick link collection.
+ */
+export const createQuickLinkCollection = (name: string) =>
+    createCollection(name, "album", {
+        subType: CollectionSubType.quicklink,
+        visibility: ItemVisibility.visible,
+    });
+
+/**
  * Create a new hidden album on remote, and return its local representation.
  *
  * Remote only, does not modify local state.
@@ -1093,6 +1107,24 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
+ * Change the cover photo of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose cover we want to change.
+ *
+ * @param coverID The file ID to set as the cover.
+ *
+ * Pass `0` to reset to the default cover.
+ */
+export const updateCollectionCover = async (
+    collection: Collection,
+    coverID: number,
+) => updateCollectionPublicMagicMetadata(collection, { coverID });
+
+/**
  * Change the layout type of a collection on remote.
  *
  * Remote only, does not modify local state.
@@ -1101,7 +1133,7 @@ export const updateCollectionSortOrder = async (
  *
  * @param collection The collection whose layout we want to change.
  *
- * @param layout The layout type ("grouped", "continuous", "trip").
+ * @param layout The layout type ("masonry", "grouped", "continuous", "trip").
  */
 export const updateCollectionLayout = async (
     collection: Collection,

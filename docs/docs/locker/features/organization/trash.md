@@ -18,7 +18,7 @@ deleted items.
 
 ## Deleting an item
 
-1. Open the item you want to delete
+1. Long press on the item you want to delete
 2. Tap the menu icon
 3. Select **Delete**
 4. Confirm the deletion

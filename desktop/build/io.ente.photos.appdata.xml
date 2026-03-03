@@ -33,8 +33,8 @@
   </screenshots>
 
   <branding>
-    <color type="primary" scheme_preference="light">#1db954</color>
-    <color type="primary" scheme_preference="dark">#1db954</color>
+    <color type="primary" scheme_preference="light">#f2f5f8</color>
+    <color type="primary" scheme_preference="dark">#1f2937</color>
   </branding>
 
   <releases>

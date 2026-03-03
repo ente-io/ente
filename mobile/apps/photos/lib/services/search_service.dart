@@ -75,13 +75,16 @@ class SearchService {
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
   late final mlDataDB = MLDataDB.instance;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
   SearchService._privateConstructor();
 
   static final SearchService instance = SearchService._privateConstructor();
 
   void init() {
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localPhotosUpdatedSubscription?.cancel();
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
       _cachedFilesForSearch = null;

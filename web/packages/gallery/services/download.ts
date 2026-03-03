@@ -256,7 +256,15 @@ class DownloadManager {
             this.thumbnailURLPromises.set(file.id, url);
         }
 
-        let thumb = await this.thumbnailURLPromises.get(file.id);
+        let thumb: string | undefined;
+        try {
+            thumb = await this.thumbnailURLPromises.get(file.id);
+        } catch (e) {
+            // Do not cache a failed promise; allow follow-up calls to retry.
+            this.thumbnailURLPromises.delete(file.id);
+            throw e;
+        }
+
         if (cachedOnly) return thumb;
 
         if (!thumb) {

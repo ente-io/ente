@@ -27,15 +27,25 @@ enum PeopleSortKey {
   lastUpdated,
 }
 
+/// Bit positions for offline-related boolean flags stored as a single integer.
+/// IMPORTANT: Never reorder or remove values. Only append new values at the end.
+enum OfflineFlag {
+  mlConsent,
+  mapEnabled,
+  getStartedBannerDismissed,
+  facesBannerDismissed,
+  nameFaceBannerDismissed,
+  seenMLEnablingBanner,
+  mlProgressBannerDismissed,
+  offlineSettingsBannerDismissed,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
-  static const _kOfflineMLConsent = "ls.offline_ml_consent";
   static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
-  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
-  static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
@@ -61,6 +71,8 @@ class LocalSettings {
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
+  static const _kCFUploadProxyEnabled = "ls.cf_upload_proxy_enabled";
+  static const _kSharedPhotoFeedCutoffTime = "ls.shared_photo_feed_cutoff_time";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _kAppLockEnabled = "ls.app_lock_enabled";
@@ -69,14 +81,34 @@ class LocalSettings {
   static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
   static const _kDefaultClusteringDistanceOverride =
       "ml_debug.default_clustering_distance";
+  static const _kRunMLDuringInteractionOverride =
+      "ml_debug.run_ml_during_interaction";
   static const _kAppMode = "ls.app_mode";
-  static const _kAppModeEnvKey = "app_mode";
+  static const _kShowOfflineModeOption = "ls.show_offline_mode_option";
+
+  static const _kOfflineFlags = "ls.offline_flags";
+  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
 
   final SharedPreferences _prefs;
 
   AppMode? _cachedAppMode;
 
   LocalSettings(this._prefs);
+
+  bool _getFlag(OfflineFlag flag) {
+    final bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    return (bitmap & (1 << flag.index)) != 0;
+  }
+
+  Future<void> _setFlag(OfflineFlag flag, bool value) {
+    var bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    if (value) {
+      bitmap |= (1 << flag.index);
+    } else {
+      bitmap &= ~(1 << flag.index);
+    }
+    return _prefs.setInt(_kOfflineFlags, bitmap);
+  }
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0];
@@ -207,16 +239,16 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get offlineMLConsent => _prefs.getBool(_kOfflineMLConsent) ?? false;
+  bool get offlineMLConsent => _getFlag(OfflineFlag.mlConsent);
 
-  Future<void> setOfflineMLConsent(bool value) async {
-    await _prefs.setBool(_kOfflineMLConsent, value);
-  }
+  Future<void> setOfflineMLConsent(bool value) =>
+      _setFlag(OfflineFlag.mlConsent, value);
 
-  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? false;
+  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? true;
 
   Future<void> setOfflineMapEnabled(bool value) async {
     await _prefs.setBool(_kOfflineMapEnabled, value);
+    await _setFlag(OfflineFlag.mapEnabled, value);
   }
 
   bool get isMLLocalIndexingEnabled {
@@ -249,6 +281,13 @@ class LocalSettings {
       return;
     }
     await _prefs.setDouble(_kDefaultClusteringDistanceOverride, value);
+  }
+
+  bool get runMLDuringInteractionOverride =>
+      _prefs.getBool(_kRunMLDuringInteractionOverride) ?? false;
+
+  Future<void> setRunMLDuringInteractionOverride(bool value) async {
+    await _prefs.setBool(_kRunMLDuringInteractionOverride, value);
   }
 
   Future<bool> setSmartMemories(bool value) async {
@@ -291,10 +330,9 @@ class LocalSettings {
   }
 
   bool get hasSeenMLEnablingBanner =>
-      _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
-  Future<void> setHasSeenMLEnablingBanner() async {
-    await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
-  }
+      _getFlag(OfflineFlag.seenMLEnablingBanner);
+  Future<void> setHasSeenMLEnablingBanner() =>
+      _setFlag(OfflineFlag.seenMLEnablingBanner, true);
 
   bool hasSeenMemoryLane(String personId) {
     final seenIds = _prefs.getStringList(_memoryLaneSeenKey);
@@ -378,6 +416,25 @@ class LocalSettings {
     await _prefs.setBool(_kInternalUserDisabled, value);
   }
 
+  bool get isCFUploadProxyEnabled =>
+      _prefs.getBool(_kCFUploadProxyEnabled) ?? true;
+
+  Future<void> setCFUploadProxyEnabled(bool value) async {
+    await _prefs.setBool(_kCFUploadProxyEnabled, value);
+  }
+
+  int getOrCreateSharedPhotoFeedCutoffTime() {
+    final existingCutoff = _prefs.getInt(_kSharedPhotoFeedCutoffTime);
+    if (existingCutoff != null) {
+      return existingCutoff;
+    }
+
+    // files.added_time is stored in microseconds since epoch.
+    final cutoff = DateTime.now().microsecondsSinceEpoch;
+    _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
+    return cutoff;
+  }
+
   int wrapped2025ResumeIndex() {
     return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
   }
@@ -416,14 +473,51 @@ class LocalSettings {
       return _cachedAppMode!;
     }
 
-    const envValue =
-        String.fromEnvironment(_kAppModeEnvKey, defaultValue: "online");
-    _cachedAppMode = envValue == "offline" ? AppMode.offline : AppMode.online;
+    _cachedAppMode = AppMode.online;
     return _cachedAppMode!;
   }
+
+  bool get isAppModeSet => _prefs.containsKey(_kAppMode);
 
   Future<void> setAppMode(AppMode mode) async {
     await _prefs.setInt(_kAppMode, mode.index);
     _cachedAppMode = mode;
   }
+
+  bool get showOfflineModeOption =>
+      _prefs.getBool(_kShowOfflineModeOption) ?? true;
+
+  Future<void> setShowOfflineModeOption(bool value) async {
+    await _prefs.setBool(_kShowOfflineModeOption, value);
+  }
+
+  bool get isOfflineGetStartedBannerDismissed =>
+      _getFlag(OfflineFlag.getStartedBannerDismissed);
+
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.getStartedBannerDismissed, value);
+
+  bool get isMLProgressBannerDismissed =>
+      _getFlag(OfflineFlag.mlProgressBannerDismissed);
+
+  Future<void> setMLProgressBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.mlProgressBannerDismissed, value);
+
+  bool get isOfflineFacesBannerDismissed =>
+      _getFlag(OfflineFlag.facesBannerDismissed);
+
+  Future<void> setOfflineFacesBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.facesBannerDismissed, value);
+
+  bool get isOfflineNameFaceBannerDismissed =>
+      _getFlag(OfflineFlag.nameFaceBannerDismissed);
+
+  Future<void> setOfflineNameFaceBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.nameFaceBannerDismissed, value);
+
+  bool get isOfflineSettingsBannerDismissed =>
+      _getFlag(OfflineFlag.offlineSettingsBannerDismissed);
+
+  Future<void> setOfflineSettingsBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.offlineSettingsBannerDismissed, value);
 }

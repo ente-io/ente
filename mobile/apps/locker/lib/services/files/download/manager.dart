@@ -52,7 +52,7 @@ class DownloadManager {
 
     // Get or create task
     final existingTask = _tasks[fileId];
-    final task = existingTask ??
+    var task = existingTask ??
         DownloadTask(
           id: fileId,
           filename: filename,
@@ -67,19 +67,17 @@ class DownloadManager {
       // ensure that the file exists
       final filePath = task.filePath;
       if (filePath == null || !(await File(filePath).exists())) {
-        // If the file doesn't exist, mark the task as error
         _logger.warning(
-          'File not found for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
+          'Completed file missing for ${task.filename}; restarting download '
+          '(${task.bytesDownloaded}/${task.totalBytes} bytes)',
         );
-        final updatedTask = task.copyWith(
-          status: DownloadStatus.error,
-          error: 'File not found',
+        task = task.copyWith(
+          status: DownloadStatus.pending,
+          bytesDownloaded: 0,
+          error: null,
           filePath: null,
         );
-        _updateTask(updatedTask);
-        final result = DownloadResult(updatedTask, false);
-        completer.complete(result);
-        return result;
+        _updateTask(task);
       } else {
         _logger.info(
           'Download already completed for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',

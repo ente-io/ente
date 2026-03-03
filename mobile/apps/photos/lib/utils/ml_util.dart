@@ -1,8 +1,9 @@
-import "dart:io" show File, Platform;
+import "dart:io" show Directory, File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -12,16 +13,20 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/src/rust/api/ml_indexing_api.dart" as rust_ml;
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -75,7 +80,7 @@ Future<IndexStatus> getIndexStatus() async {
     final showPendingFiles = math.max(indexableFiles - indexedFiles, 0);
     final hasWifiEnabled = await canUseHighBandwidth();
     _logger.info(
-      "Shown IndexStatus: indexedFiles: $showIndexedFiles, pendingFiles: $showPendingFiles, hasWifiEnabled: $hasWifiEnabled. Real values: indexedFiles: $indexedFiles (faces: $facesIndexedFiles, clip: $clipIndexedFiles), indexableFiles: $indexableFiles",
+      "Shown IndexStatus: indexedFiles: $showIndexedFiles, pendingFiles: $showPendingFiles, hasWifiEnabled: $hasWifiEnabled, ifOffline: $isOfflineMode. Real values: indexedFiles: $indexedFiles (faces: $facesIndexedFiles, clip: $clipIndexedFiles), indexableFiles: $indexableFiles",
     );
     return IndexStatus(showIndexedFiles, showPendingFiles, hasWifiEnabled);
   } catch (e, s) {
@@ -587,5 +592,217 @@ Future<MLResult> analyzeImageStatic(Map args) async {
   } catch (e, s) {
     _logger.severe("Could not analyze image", e, s);
     rethrow;
+  }
+}
+
+Future<MLResult> analyzeImageRust(Map args) async {
+  try {
+    final int enteFileID = args["enteFileID"] as int;
+    final String imagePath = args["filePath"] as String;
+    final bool runFaces = args["runFaces"] as bool;
+    final bool runClip = args["runClip"] as bool;
+    final String? faceDetectionModelPath =
+        args["faceDetectionModelPath"] as String?;
+    final String? faceEmbeddingModelPath =
+        args["faceEmbeddingModelPath"] as String?;
+    final String? clipImageModelPath = args["clipImageModelPath"] as String?;
+    final bool preferCoreml = args["preferCoreml"] as bool? ?? true;
+    final bool preferNnapi = args["preferNnapi"] as bool? ?? true;
+    final bool preferXnnpack = args["preferXnnpack"] as bool? ?? false;
+    final bool allowCpuFallback = args["allowCpuFallback"] as bool? ?? true;
+
+    bool isMissingModelPath(String? path) =>
+        path == null || path.trim().isEmpty;
+    final missingModelPaths = <String>[];
+    if (runFaces) {
+      if (isMissingModelPath(faceDetectionModelPath)) {
+        missingModelPaths.add("faceDetectionModelPath");
+      }
+      if (isMissingModelPath(faceEmbeddingModelPath)) {
+        missingModelPaths.add("faceEmbeddingModelPath");
+      }
+    }
+    if (runClip && isMissingModelPath(clipImageModelPath)) {
+      missingModelPaths.add("clipImageModelPath");
+    }
+    if (missingModelPaths.isNotEmpty) {
+      throw Exception(
+        "RustMLMissingModelPath: Missing required model paths: ${missingModelPaths.join(', ')}",
+      );
+    }
+
+    final modelPaths = rust_ml.RustModelPaths(
+      faceDetection: faceDetectionModelPath ?? "",
+      faceEmbedding: faceEmbeddingModelPath ?? "",
+      clipImage: clipImageModelPath ?? "",
+    );
+    final providerPolicy = rust_ml.RustExecutionProviderPolicy(
+      preferCoreml: preferCoreml,
+      preferNnapi: preferNnapi,
+      preferXnnpack: preferXnnpack,
+      allowCpuFallback: allowCpuFallback,
+    );
+
+    Future<rust_ml.AnalyzeImageResult> runRustAnalyzeForPath(
+      String analyzePath,
+    ) {
+      return rust_ml.analyzeImageRust(
+        req: rust_ml.AnalyzeImageRequest(
+          fileId: enteFileID,
+          imagePath: analyzePath,
+          runFaces: runFaces,
+          runClip: runClip,
+          modelPaths: modelPaths,
+          providerPolicy: providerPolicy,
+        ),
+      );
+    }
+
+    final fileFormat = getExtension(imagePath);
+    rust_ml.AnalyzeImageResult rustResult;
+    try {
+      rustResult = await runRustAnalyzeForPath(imagePath);
+    } catch (e, s) {
+      if (!_isRustDecodeIssue(e)) {
+        _logger.severe(
+          "Rust pipeline failed (non-decode) for fileID $enteFileID (format: $fileFormat)",
+          e,
+          s,
+        );
+        rethrow;
+      }
+
+      _logger.warning(
+        "Rust decode failed for fileID $enteFileID (format: $fileFormat), retrying with JPEG fallback",
+        e,
+        s,
+      );
+      final fallback =
+          await _createJpegDecodeFallbackFile(imagePath: imagePath);
+      if (fallback == null) {
+        _logger.severe(
+          "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
+          e,
+          s,
+        );
+        rethrow;
+      }
+
+      try {
+        rustResult = await runRustAnalyzeForPath(fallback.file.path);
+        _logger.info(
+          "Rust decode fallback succeeded for fileID $enteFileID (original format: $fileFormat)",
+        );
+      } catch (retryError, retryStack) {
+        _logger.severe(
+          "Rust decode fallback retry failed for fileID $enteFileID (original format: $fileFormat)",
+          retryError,
+          retryStack,
+        );
+        rethrow;
+      } finally {
+        await _cleanupDecodeFallback(fallback);
+      }
+    }
+
+    final result = MLResult.fromEnteFileID(enteFileID);
+    result.decodedImageSize = Dimensions(
+      width: rustResult.decodedImageSize.width,
+      height: rustResult.decodedImageSize.height,
+    );
+
+    if (runFaces) {
+      final rustFaces = rustResult.faces ?? const <rust_ml.RustFaceResult>[];
+      result.faces = rustFaces.map((face) {
+        final detection = FaceDetectionRelative(
+          score: face.detection.score,
+          box: face.detection.boxXyxy.toList(growable: false),
+          allKeypoints: face.detection.allKeypoints
+              .map((point) => point.toList(growable: false))
+              .toList(growable: false),
+        );
+        final alignment = AlignmentResult(
+          affineMatrix: face.alignment.affineMatrix
+              .map((row) => row.toList(growable: false))
+              .toList(growable: false),
+          center: face.alignment.center.toList(growable: false),
+          size: face.alignment.size,
+          rotation: face.alignment.rotation,
+        );
+        return FaceResult(
+          fileId: enteFileID,
+          faceId: face.faceId,
+          detection: detection,
+          blurValue: face.blurValue,
+          alignment: alignment,
+          embedding: face.embedding,
+        );
+      }).toList(growable: false);
+    }
+
+    if (runClip) {
+      final rustClip = rustResult.clip;
+      if (rustClip == null) {
+        throw Exception("RustMLMissingClipOutput: clip output was null");
+      }
+      result.clip = ClipResult(
+        fileID: enteFileID,
+        embedding: rustClip.embedding,
+      );
+    }
+
+    return result;
+  } catch (e, s) {
+    _logger.severe("Could not analyze image with Rust pipeline", e, s);
+    rethrow;
+  }
+}
+
+bool _isRustDecodeIssue(Object error) {
+  final message = error.toString().toLowerCase();
+  return message.contains("decode error");
+}
+
+class _DecodeFallbackFile {
+  final File file;
+  final Directory directory;
+
+  const _DecodeFallbackFile({
+    required this.file,
+    required this.directory,
+  });
+}
+
+Future<_DecodeFallbackFile?> _createJpegDecodeFallbackFile({
+  required String imagePath,
+}) async {
+  final convertedData = await FlutterImageCompress.compressWithFile(
+    imagePath,
+    format: CompressFormat.jpeg,
+    minWidth: 20000,
+    minHeight: 20000,
+  );
+  if (convertedData == null || convertedData.isEmpty) {
+    return null;
+  }
+
+  final tempDirectory = await Directory.systemTemp.createTemp(
+    "ente_ml_decode_fallback_",
+  );
+  final fallbackFile = File("${tempDirectory.path}/ml_decode_retry.jpg");
+  await fallbackFile.writeAsBytes(convertedData, flush: true);
+  return _DecodeFallbackFile(file: fallbackFile, directory: tempDirectory);
+}
+
+Future<void> _cleanupDecodeFallback(_DecodeFallbackFile fallback) async {
+  try {
+    if (await fallback.file.exists()) {
+      await fallback.file.delete();
+    }
+    if (await fallback.directory.exists()) {
+      await fallback.directory.delete(recursive: true);
+    }
+  } catch (e, s) {
+    _logger.warning("Could not cleanup decode fallback file", e, s);
   }
 }

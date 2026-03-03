@@ -1,7 +1,7 @@
 import "package:dio/dio.dart";
 import "package:flutter/foundation.dart";
-import "package:photos/gateways/storage_bonus_gw.dart";
-import "package:photos/models/api/storage_bonus/storage_bonus.dart";
+import "package:photos/gateways/storage_bonus/models/storage_bonus.dart";
+import "package:photos/gateways/storage_bonus/storage_bonus_gateway.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class StorageBonusService {

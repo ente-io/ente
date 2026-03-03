@@ -91,8 +91,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   final _logger = Logger("TextInputWidget");
   ExecutionState executionState = ExecutionState.idle;
   late final TextEditingController _textController;
+  late final bool _ownsTextController;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   late final ValueNotifier<bool> _obscureTextNotifier;
+  VoidCallback? _onChangeListener;
+  VoidCallback? _isEmptyListener;
 
   ///This is to pass if the TextInputWidget is in a dialog and an error is
   ///thrown in executing onSubmit by passing it as arg in Navigator.pop()
@@ -104,22 +107,25 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     super.initState();
     widget.submitNotifier?.addListener(_onSubmit);
     widget.cancelNotifier?.addListener(_onCancel);
+    _ownsTextController = widget.textEditingController == null;
     _textController = widget.textEditingController ?? TextEditingController();
 
     _setInitialValue();
 
     if (widget.onChange != null) {
-      _textController.addListener(() {
+      _onChangeListener = () {
         widget.onChange!.call(_textController.text);
-      });
+      };
+      _textController.addListener(_onChangeListener!);
     }
     _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
     _obscureTextNotifier.addListener(_safeRefresh);
 
     if (widget.isEmptyNotifier != null) {
-      _textController.addListener(() {
+      _isEmptyListener = () {
         widget.isEmptyNotifier!.value = _textController.text.isEmpty;
-      });
+      };
+      _textController.addListener(_isEmptyListener!);
     }
   }
 
@@ -127,9 +133,17 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   void dispose() {
     widget.submitNotifier?.removeListener(_onSubmit);
     widget.cancelNotifier?.removeListener(_onCancel);
+    _debouncer.cancelDebounceTimer();
+    if (_onChangeListener != null) {
+      _textController.removeListener(_onChangeListener!);
+    }
+    if (_isEmptyListener != null) {
+      _textController.removeListener(_isEmptyListener!);
+    }
     _obscureTextNotifier.dispose();
-    _textController.dispose();
-    widget.isEmptyNotifier?.dispose();
+    if (_ownsTextController) {
+      _textController.dispose();
+    }
     super.dispose();
   }
 

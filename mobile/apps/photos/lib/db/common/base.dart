@@ -2,14 +2,16 @@ import "package:flutter/foundation.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 mixin SqlDbBase {
-  static const _params = {};
+  static final Map<int, String> _params = <int, String>{};
 
   static String getParams(int count) {
-    if (!_params.containsKey(count)) {
-      final params = List.generate(count, (_) => "?").join(", ");
-      _params[count] = params;
+    if (count <= 0) {
+      throw ArgumentError.value(count, "count", "must be greater than 0");
     }
-    return _params[count]!;
+    return _params.putIfAbsent(
+      count,
+      () => List.filled(count, "?").join(", "),
+    );
   }
 
   Future<void> migrate(

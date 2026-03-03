@@ -35,7 +35,7 @@ Learn more about [Trash](/locker/features/organization/trash).
 
 The home screen provides quick access to your items:
 
-- **Recent**: Items you've recently viewed or edited
+- **Search**: Find items by title
 - **Collections**: Browse all your collections
 - **All items**: View everything in one list
 

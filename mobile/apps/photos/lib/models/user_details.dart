@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import "package:photos/models/api/billing/subscription.dart";
-import "package:photos/models/api/storage_bonus/bonus.dart";
+import "package:photos/gateways/billing/models/subscription.dart";
+import "package:photos/gateways/storage_bonus/models/bonus.dart";
 
 class UserDetails {
   final String email;

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/material.dart";
 import "package:latlong2/latlong.dart";
@@ -8,14 +7,15 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart' hide LatLng;
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network/network.dart';
 import "package:photos/db/device_files_db.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/gateways/files/files_gateway.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/freeable_space_info.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -23,13 +23,13 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 
 class FilesService {
-  late Dio _enteDio;
   late Logger _logger;
   late FilesDB _filesDB;
   late Configuration _config;
 
+  FilesGateway get _gateway => filesGateway;
+
   FilesService._privateConstructor() {
-    _enteDio = NetworkClient.instance.enteDio;
     _logger = Logger("FilesService");
     _filesDB = FilesDB.instance;
     _config = Configuration.instance;
@@ -39,13 +39,7 @@ class FilesService {
 
   Future<int> getFileSize(int uploadedFileID) async {
     try {
-      final response = await _enteDio.post(
-        "/files/size",
-        data: {
-          "fileIDs": [uploadedFileID],
-        },
-      );
-      return response.data["size"];
+      return await _gateway.getFilesSize([uploadedFileID]);
     } catch (e) {
       _logger.severe(e);
       rethrow;
@@ -143,11 +137,7 @@ class FilesService {
 
   Future<int> _getFileSize(List<int> fileIDs) async {
     try {
-      final response = await _enteDio.post(
-        "/files/size",
-        data: {"fileIDs": fileIDs},
-      );
-      return response.data["size"];
+      return await _gateway.getFilesSize(fileIDs);
     } catch (e) {
       _logger.severe(e);
       rethrow;
@@ -156,18 +146,7 @@ class FilesService {
 
   Future<Map<int, int>> getFilesSizeFromInfo(List<int> uploadedFileID) async {
     try {
-      final response = await _enteDio.post(
-        "/files/info",
-        data: {"fileIDs": uploadedFileID},
-      );
-      final Map<int, int> idToSize = {};
-      final List result = response.data["filesInfo"] as List;
-      for (var fileInfo in result) {
-        final int uploadedFileID = fileInfo["id"];
-        final int size = fileInfo["fileInfo"]["fileSize"];
-        idToSize[uploadedFileID] = size;
-      }
-      return idToSize;
+      return await _gateway.getFilesInfo(uploadedFileID);
     } catch (e, s) {
       _logger.severe("failed to fetch size from fileInfo", e, s);
       rethrow;

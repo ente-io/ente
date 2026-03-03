@@ -4,7 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:ente_base/typedefs.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/action_sheet_widget.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
+import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/buttons/models/button_result.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialog_widget.dart';
@@ -70,8 +72,8 @@ String parseErrorForUI(
         }
       }
     }
-    // return generic error if the user is not internal and the error is not in debug mode
-    if (!kDebugMode) {
+    // Only surface raw error details when explicitly allowed and in debug mode.
+    if (!surfaceError || !kDebugMode) {
       return genericError;
     }
     String errorInfo = "";
@@ -156,11 +158,32 @@ Future<ButtonResult?> showGenericErrorDialog({
         labelText: context.strings.contactSupport,
         buttonAction: ButtonAction.second,
         onTap: () async {
-          await sendLogs(
-            context,
-            "support@ente.io",
-            postShare: () {},
-          );
+          await sendLogs(context, "support@ente.io", postShare: () {});
+        },
+      ),
+    ],
+  );
+}
+
+Future<void> showGenericErrorBottomSheet({
+  required BuildContext context,
+  required Object? error,
+}) async {
+  final errorBody = parseErrorForUI(
+    context,
+    context.strings.itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    error: error,
+  );
+  await showAlertBottomSheet(
+    context,
+    title: context.strings.error,
+    message: errorBody,
+    assetPath: 'assets/warning-grey.png',
+    buttons: [
+      GradientButton(
+        text: context.strings.contactSupport,
+        onTap: () async {
+          await sendLogs(context, "support@ente.io", postShare: () {});
         },
       ),
     ],

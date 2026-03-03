@@ -24,6 +24,7 @@ import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
+import "package:photos/events/opened_settings_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/events/subscription_purchased_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
@@ -60,13 +61,13 @@ import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
 import "package:photos/ui/home/christmas/christmas_utils.dart";
 import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
+import "package:photos/ui/home/gallery_download_banner.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
 import "package:photos/ui/home/home_gallery_widget.dart";
 import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
@@ -88,7 +89,10 @@ import "package:receive_sharing_intent/receive_sharing_intent.dart";
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     super.key,
+    this.startWithoutAccount = false,
   });
+
+  final bool startWithoutAccount;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -97,9 +101,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
-  static final _settingsPage = SettingsPage(
-    emailNotifier: UserService.instance.emailValueNotifier,
-  );
 
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
@@ -135,6 +136,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
+  StreamSubscription<Uri?>? _authDeepLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
   late StreamSubscription<ChristmasBannerEvent>
@@ -352,8 +354,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
 
-      final Collection collection = await CollectionsService.instance
+      final Collection? collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+      if (collection == null) {
+        return;
+      }
 
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
@@ -535,6 +540,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription.cancel();
+    _authDeepLinkSubscription?.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _christmasBannerEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
@@ -713,6 +719,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          final isStartWithoutAccountFlow = widget.startWithoutAccount &&
+              !Configuration.instance.hasConfiguredAccount() &&
+              !localSettings.isAppModeSet;
+          if (isStartWithoutAccountFlow) {
+            Navigator.pop(context);
+            return;
+          }
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
               _selectedFiles.clearAll();
@@ -746,11 +759,18 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Drawer(
                     width: double.infinity,
                     shape: const RoundedRectangleBorder(),
-                    child: _settingsPage,
+                    child: SettingsPage(
+                      emailNotifier: UserService.instance.emailValueNotifier,
+                    ),
                   ),
                 )
               : null,
-          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
+          onDrawerChanged: (isOpened) {
+            isSettingsOpen = isOpened;
+            if (isOpened) {
+              Bus.instance.fire(OpenedSettingsEvent());
+            }
+          },
           body: Stack(
             children: [
               Builder(
@@ -806,10 +826,22 @@ class _HomeWidgetState extends State<HomeWidget> {
                         : colorScheme.backgroundElevated2;
                     final isSearchResults =
                         isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    final isOnLandingPage =
+                        !Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            !widget.startWithoutAccount;
+                    final isOnOnlineGrantPermissionScreen =
+                        Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode &&
+                            _shouldShowPermissionWidget();
                     return AppBar(
-                      backgroundColor: isSearchResults
-                          ? resultsBackground
-                          : colorScheme.backgroundBase,
+                      backgroundColor: isOnLandingPage
+                          ? colorScheme.greenBase
+                          : isSearchResults
+                              ? resultsBackground
+                              : isOnOnlineGrantPermissionScreen
+                                  ? colorScheme.backgroundColour
+                                  : colorScheme.backgroundBase,
                     );
                   },
                 );
@@ -826,11 +858,21 @@ class _HomeWidgetState extends State<HomeWidget> {
     final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      if (offlineMode) {
-        if (_shouldShowPermissionWidget()) {
-          return const GrantPermissionsWidget();
-        }
-      } else {
+      final shouldBootstrapOfflineEntryFlow =
+          widget.startWithoutAccount && !offlineMode;
+      final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
+      final canResumePersistedOfflineMode =
+          hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
+      final shouldUseOfflineEntryFlow =
+          widget.startWithoutAccount || canResumePersistedOfflineMode;
+
+      if (shouldBootstrapOfflineEntryFlow) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (shouldUseOfflineEntryFlow && _shouldShowPermissionWidget()) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (!shouldUseOfflineEntryFlow) {
         return const LandingPageWidget();
       }
     }
@@ -886,11 +928,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ? const NeverScrollableScrollPhysics()
                       : const BouncingScrollPhysics(),
                   children: [
-                    _showShowBackupHook
-                        ? const StartBackupHookWidget(
-                            headerWidget: HeaderWidget(),
-                          )
-                        : child!,
+                    child!,
                     UserCollectionsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
                     _searchTab,
@@ -946,10 +984,16 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return HomeBottomNavigationBar(
-                _selectedFiles,
-                _selectedAlbums,
-                selectedTabIndex: _selectedTabIndex,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (flagService.internalUser) const GalleryDownloadBanner(),
+                  HomeBottomNavigationBar(
+                    _selectedFiles,
+                    _selectedAlbums,
+                    selectedTabIndex: _selectedTabIndex,
+                  ),
+                ],
               );
             },
           ),
@@ -987,7 +1031,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    appLinks.uriLinkStream.listen(
+    _authDeepLinkSubscription = appLinks.uriLinkStream.listen(
       (link) {
         _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
@@ -1195,7 +1239,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     _collectionsSyncTriggered = true;
-    CollectionsService.instance.sync().then((_) {
+    CollectionsService.instance.sync().whenComplete(() {
       if (mounted) {
         setState(() {});
       }

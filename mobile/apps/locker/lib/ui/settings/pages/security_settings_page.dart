@@ -9,14 +9,16 @@ import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
-import "package:ente_ui/utils/toast_util.dart";
+import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/settings/widgets/settings_widget.dart";
 import "package:logging/logging.dart";
 
@@ -164,10 +166,19 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         );
       }
     } else {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        l10n.noSystemLockFound,
-        l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+        title: l10n.noSystemLockFound,
+        message: l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+        assetPath: "assets/warning-grey.png",
+        buttons: [
+          GradientButton(
+            text: context.l10n.contactSupport,
+            onTap: () async {
+              await sendLogs(context, "support@ente.io", postShare: () {});
+            },
+          ),
+        ],
       );
     }
   }
@@ -234,7 +245,10 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-      showToast(context, context.l10n.somethingWentWrong);
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: e,
+      );
     }
   }
 }

@@ -121,4 +121,17 @@ class SelectedFiles extends ChangeNotifier {
     files.retainAll(filesToRetain);
     notifyListeners();
   }
+
+  ///Replaces the current selection with [filesToSelect] in a single update.
+  void replaceSelection(Set<EnteFile> filesToSelect) {
+    final nonDummyFiles =
+        filesToSelect.where((file) => file is! DummyFile).toSet();
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(files);
+    files
+      ..clear()
+      ..addAll(nonDummyFiles);
+    lastSelectionOperationFiles.addAll(nonDummyFiles);
+    notifyListeners();
+  }
 }

@@ -108,9 +108,14 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   void _seekTo(double value) {
     _debouncer.run(() async {
+      final durationInMilliseconds = _effectiveDurationInMilliseconds();
+      if (durationInMilliseconds == null) {
+        return;
+      }
       unawaited(
-        widget.controller
-            .seekTo((Duration(seconds: (value * widget.duration!).round()))),
+        widget.controller.seekTo(
+          Duration(milliseconds: (value * durationInMilliseconds).round()),
+        ),
       );
     });
   }
@@ -122,21 +127,13 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       if (!mounted) {
         return;
       }
-      if (widget.duration != null || widget.duration! > 0) {
-        unawaited(
-          _animationController.animateTo(
-            (1 / widget.duration!),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      } else {
-        unawaited(
-          _animationController.animateTo(
-            0,
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
+      final nudge = _durationNudge();
+      unawaited(
+        _animationController.animateTo(
+          nudge,
+          duration: const Duration(seconds: 1),
+        ),
+      );
     });
   }
 
@@ -181,20 +178,37 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     final double fractionTarget =
         duration == null || duration <= 0 ? 0 : target / duration;
 
-    if (widget.duration != null) {
-      unawaited(
-        _animationController.animateTo(
-          fractionTarget + (1 / widget.duration!),
-          duration: const Duration(seconds: 1),
-        ),
-      );
-    } else {
-      unawaited(
-        _animationController.animateTo(
-          fractionTarget,
-          duration: const Duration(seconds: 1),
-        ),
-      );
+    final nudge = _durationNudge();
+    unawaited(
+      _animationController.animateTo(
+        (fractionTarget + nudge).clamp(0.0, 1.0),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  int? _effectiveDurationInMilliseconds() {
+    final controllerDurationInMilliseconds =
+        widget.controller.videoInfo?.durationInMilliseconds;
+    if (controllerDurationInMilliseconds != null &&
+        controllerDurationInMilliseconds > 0) {
+      return controllerDurationInMilliseconds;
     }
+    if (widget.duration != null && widget.duration! > 0) {
+      return widget.duration! * 1000;
+    }
+    return null;
+  }
+
+  double _durationNudge() {
+    final durationInMilliseconds = _effectiveDurationInMilliseconds();
+    if (durationInMilliseconds == null) {
+      return 0;
+    }
+    final durationInSeconds = durationInMilliseconds / 1000;
+    if (durationInSeconds <= 0) {
+      return 0;
+    }
+    return (1 / durationInSeconds).clamp(0.0, 1.0);
   }
 }

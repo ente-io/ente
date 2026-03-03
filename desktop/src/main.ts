@@ -438,6 +438,7 @@ const createMainWindow = () => {
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
     // in turn inform the renderer process.
     window.on("focus", () => window.webContents.send("mainWindowFocus"));
+    window.on("blur", () => window.webContents.send("mainWindowBlur"));
 
     return window;
 };

@@ -81,6 +81,7 @@ class ToShowMemory {
 
   final String? personID;
   final String? personName;
+  final bool? isUnnamedCluster;
   final bool? isBirthday;
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
@@ -110,6 +111,7 @@ class ToShowMemory {
     this.fileLocalIntIDs,
     this.personID,
     this.personName,
+    this.isUnnamedCluster,
     this.isBirthday,
     this.peopleMemoryType,
     this.clipMemoryType,
@@ -133,6 +135,7 @@ class ToShowMemory {
   }) {
     String? personID;
     String? personName;
+    bool? isUnnamedCluster;
     bool? isBirthday;
     PeopleMemoryType? peopleMemoryType;
     ClipMemoryType? clipMemoryType;
@@ -140,6 +143,7 @@ class ToShowMemory {
     if (memory is PeopleMemory) {
       personID = memory.personID;
       personName = memory.personName;
+      isUnnamedCluster = memory.isUnnamedCluster;
       isBirthday = memory.isBirthday;
       peopleMemoryType = memory.peopleMemoryType;
     } else if (memory is TripMemory) {
@@ -162,6 +166,7 @@ class ToShowMemory {
       fileLocalIntIDs: fileLocalIntIDs,
       personID: personID,
       personName: personName,
+      isUnnamedCluster: isUnnamedCluster,
       isBirthday: isBirthday,
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
@@ -184,6 +189,7 @@ class ToShowMemory {
       personID: json['personID'],
       isBirthday: json['isBirthday'],
       personName: json['personName'],
+      isUnnamedCluster: json['isUnnamedCluster'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
           : null,
@@ -212,6 +218,7 @@ class ToShowMemory {
       'personID': personID,
       'isBirthday': isBirthday,
       'personName': personName,
+      'isUnnamedCluster': isUnnamedCluster,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
       'location': location != null
