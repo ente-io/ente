@@ -12,7 +12,8 @@ class QrCodeDetectionHelper {
   final Logger _logger = Logger("QrCodeDetectionHelper");
   final EnteQr _enteQr = EnteQr();
 
-  final ValueNotifier<String?> qrContentNotifier = ValueNotifier<String?>(null);
+  final ValueNotifier<List<QrDetection>> qrDetectionsNotifier =
+      ValueNotifier<List<QrDetection>>(const []);
 
   int _requestId = 0;
   bool _disposed = false;
@@ -22,7 +23,7 @@ class QrCodeDetectionHelper {
     final int requestId = ++_requestId;
 
     if (!isEligible) {
-      qrContentNotifier.value = null;
+      qrDetectionsNotifier.value = const [];
       return;
     }
 
@@ -30,46 +31,41 @@ class QrCodeDetectionHelper {
     final _DetectionResult? cachedResult = _cache[cacheKey];
     if (cachedResult != null) {
       if (_disposed || requestId != _requestId) return;
-      qrContentNotifier.value = cachedResult.content;
+      qrDetectionsNotifier.value = cachedResult.detections;
       return;
     }
 
-    qrContentNotifier.value = null;
+    qrDetectionsNotifier.value = const [];
 
     try {
       final File? localFile = await getFile(file);
       if (_disposed || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        _cache[cacheKey] = const _DetectionResult(hasQr: false);
-        qrContentNotifier.value = null;
+        _cache[cacheKey] = const _DetectionResult(detections: []);
+        qrDetectionsNotifier.value = const [];
         return;
       }
 
-      bool hasQr = false;
-      String? qrContent;
+      List<QrDetection> detections = const [];
       try {
-        final result = await _enteQr.scanQrFromImage(localFile.path);
-        if (result.success && result.content != null) {
-          hasQr = true;
-          qrContent = result.content;
+        final result = await _enteQr.scanAllQrFromImage(localFile.path);
+        if (result.success && result.detections.isNotEmpty) {
+          detections = result.detections;
         }
       } catch (error, stackTrace) {
-        _logger.severe("Failed to scan QR code", error, stackTrace);
+        _logger.severe("Failed to scan QR codes", error, stackTrace);
       }
 
       if (_disposed || requestId != _requestId) return;
 
-      final detectionResult = _DetectionResult(
-        hasQr: hasQr,
-        content: hasQr ? qrContent : null,
-      );
+      final detectionResult = _DetectionResult(detections: detections);
       _cache[cacheKey] = detectionResult;
-      qrContentNotifier.value = detectionResult.content;
+      qrDetectionsNotifier.value = detectionResult.detections;
     } catch (error, stackTrace) {
       _logger.severe("QR code detection failed", error, stackTrace);
       if (_disposed || requestId != _requestId) return;
-      _cache[cacheKey] = const _DetectionResult(hasQr: false);
-      qrContentNotifier.value = null;
+      _cache[cacheKey] = const _DetectionResult(detections: []);
+      qrDetectionsNotifier.value = const [];
     }
   }
 
@@ -90,13 +86,12 @@ class QrCodeDetectionHelper {
 
   void dispose() {
     _disposed = true;
-    qrContentNotifier.dispose();
+    qrDetectionsNotifier.dispose();
   }
 }
 
 class _DetectionResult {
-  final bool hasQr;
-  final String? content;
+  final List<QrDetection> detections;
 
-  const _DetectionResult({required this.hasQr, this.content});
+  const _DetectionResult({required this.detections});
 }

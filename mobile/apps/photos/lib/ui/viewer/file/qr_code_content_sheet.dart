@@ -1,3 +1,4 @@
+import "package:ente_qr/ente_qr.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -9,19 +10,84 @@ import "package:url_launcher/url_launcher.dart";
 
 Future<void> showQrCodeContentSheet(
   BuildContext context, {
-  required String content,
+  required List<QrDetection> detections,
+  int initialIndex = 0,
 }) {
   return showBaseBottomSheet(
     context,
     title: AppLocalizations.of(context).qrCode,
-    child: _QrCodeContentBody(content: content),
+    child: detections.length == 1
+        ? _SingleQrContent(content: detections.first.content)
+        : _MultiQrContent(
+            detections: detections,
+            initialIndex: initialIndex,
+          ),
   );
 }
 
-class _QrCodeContentBody extends StatelessWidget {
+class _SingleQrContent extends StatelessWidget {
   final String content;
 
-  const _QrCodeContentBody({required this.content});
+  const _SingleQrContent({required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return _QrContentEntry(content: content);
+  }
+}
+
+class _MultiQrContent extends StatelessWidget {
+  final List<QrDetection> detections;
+  final int initialIndex;
+
+  const _MultiQrContent({
+    required this.detections,
+    required this.initialIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (int i = 0; i < detections.length; i++) ...[
+          if (i > 0) Divider(color: colorScheme.strokeFaint, height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary700,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  "${i + 1}",
+                  style: textTheme.mini.copyWith(color: Colors.white),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QrContentEntry(content: detections[i].content),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _QrContentEntry extends StatelessWidget {
+  final String content;
+
+  const _QrContentEntry({required this.content});
 
   @override
   Widget build(BuildContext context) {

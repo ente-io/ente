@@ -28,8 +28,8 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
-import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
+import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
 import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -133,7 +133,6 @@ class _BodyState extends State<_Body> {
   bool swipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   QrCodeDetectionHelper? _qrHelper;
-  Timer? _longPressTimer;
 
   @override
   void initState() {
@@ -167,7 +166,6 @@ class _BodyState extends State<_Body> {
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _selectedIndexNotifier.dispose();
-    _longPressTimer?.cancel();
     _qrHelper?.dispose();
     super.dispose();
 
@@ -266,6 +264,29 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
+              if (_qrHelper != null)
+                ValueListenableBuilder(
+                  valueListenable: _selectedIndexNotifier,
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    if (widget.config.mode == DetailPageMode.minimalistic ||
+                        isGuestView ||
+                        _files![selectedIndex] is TrashFile) {
+                      return const SizedBox.shrink();
+                    }
+                    return ValueListenableBuilder(
+                      valueListenable: _qrHelper!.qrDetectionsNotifier,
+                      builder: (context, detections, _) {
+                        return QrCodeHighlightOverlay(
+                          detections: detections,
+                          file: _files![selectedIndex],
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                        );
+                      },
+                    );
+                  },
+                ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
@@ -362,30 +383,13 @@ class _BodyState extends State<_Body> {
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
-        return Listener(
-          onPointerDown: (_) {
-            _longPressTimer?.cancel();
-            _longPressTimer = Timer(
-              const Duration(milliseconds: 500),
-              () => _onLongPress(context, file),
-            );
+        return GestureDetector(
+          onTap: () {
+            file.fileType != FileType.video
+                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
+                : null;
           },
-          onPointerUp: (_) => _longPressTimer?.cancel(),
-          onPointerCancel: (_) => _longPressTimer?.cancel(),
-          onPointerMove: (event) {
-            if (event.delta.distance > 5) {
-              _longPressTimer?.cancel();
-            }
-          },
-          child: GestureDetector(
-            onTap: () {
-              file.fileType != FileType.video
-                  ? InheritedDetailPageState.of(context)
-                      .toggleFullScreenByUser()
-                  : null;
-            },
-            child: fileContent,
-          ),
+          child: fileContent,
         );
       },
       onPageChanged: (index) {
@@ -528,20 +532,6 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
-  }
-
-  Future<void> _onLongPress(BuildContext context, EnteFile file) async {
-    if (file.fileType != FileType.image) return;
-    if (widget.config.mode == DetailPageMode.minimalistic) return;
-    if (isGuestView) return;
-    if (file is TrashFile) return;
-
-    final content = _qrHelper?.qrContentNotifier.value;
-    if (content == null || content.isEmpty) return;
-
-    await HapticFeedback.lightImpact();
-    if (!mounted) return;
-    await showQrCodeContentSheet(context, content: content);
   }
 
   Future<void> _updateSharedCollectionState(EnteFile file) async {

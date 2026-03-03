@@ -22,8 +22,19 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
         ])
         return
       }
-      
+
       scanQrCode(from: imagePath, result: result)
+    case "scanAllQrFromImage":
+      guard let args = call.arguments as? [String: Any],
+            let imagePath = args["imagePath"] as? String else {
+        result([
+          "success": false,
+          "error": "Image path is required"
+        ])
+        return
+      }
+
+      scanAllQrCodes(from: imagePath, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -71,6 +82,85 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
       result([
         "success": false,
         "error": "No QR code found in image"
+      ])
+    }
+  }
+
+  private func scanAllQrCodes(from imagePath: String, result: @escaping FlutterResult) {
+    guard let image = UIImage(contentsOfFile: imagePath) else {
+      result([
+        "success": false,
+        "error": "Unable to load image from path: \(imagePath)"
+      ])
+      return
+    }
+
+    guard let cgImage = image.cgImage else {
+      result([
+        "success": false,
+        "error": "Unable to get CGImage from UIImage"
+      ])
+      return
+    }
+
+    let detector = CIDetector(ofType: CIDetectorTypeQRCode,
+                             context: nil,
+                             options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+
+    guard let qrDetector = detector else {
+      result([
+        "success": false,
+        "error": "Unable to create QR code detector"
+      ])
+      return
+    }
+
+    let ciImage = CIImage(cgImage: cgImage)
+    let features = qrDetector.features(in: ciImage)
+
+    let imageWidth = CGFloat(cgImage.width)
+    let imageHeight = CGFloat(cgImage.height)
+
+    var detections: [[String: Any]] = []
+
+    for feature in features {
+      guard let qrFeature = feature as? CIQRCodeFeature,
+            let messageString = qrFeature.messageString else {
+        continue
+      }
+
+      // Core Image has origin at bottom-left with y-up.
+      // Convert to normalized [0,1] coords with origin top-left, y-down.
+      let minX = min(qrFeature.topLeft.x, qrFeature.bottomLeft.x)
+      let maxX = max(qrFeature.topRight.x, qrFeature.bottomRight.x)
+      // In CI coords, topLeft.y > bottomLeft.y (y goes up)
+      let minYci = min(qrFeature.bottomLeft.y, qrFeature.bottomRight.y)
+      let maxYci = max(qrFeature.topLeft.y, qrFeature.topRight.y)
+
+      // Flip y: top-left origin
+      let normX = minX / imageWidth
+      let normY = 1.0 - (maxYci / imageHeight)
+      let normW = (maxX - minX) / imageWidth
+      let normH = (maxYci - minYci) / imageHeight
+
+      detections.append([
+        "content": messageString,
+        "x": Double(normX),
+        "y": Double(normY),
+        "width": Double(normW),
+        "height": Double(normH),
+      ])
+    }
+
+    if detections.isEmpty {
+      result([
+        "success": false,
+        "error": "No QR code found in image"
+      ])
+    } else {
+      result([
+        "success": true,
+        "detections": detections
       ])
     }
   }
