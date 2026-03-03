@@ -17,9 +17,10 @@ class MLResult {
 
   Dimensions decodedImageSize;
 
-  bool get ranML => facesRan || clipRan;
+  bool get ranML => facesRan || clipRan || petsRan;
   bool get facesRan => faces != null;
   bool get clipRan => clip != null;
+  bool get petsRan => petFaces != null || detectedObjects != null;
 
   MLResult({
     this.fileId = -1,

@@ -701,6 +701,9 @@ class MLService {
           );
         }
       }
+      if (instruction.shouldRunPets) {
+        await mlDataDB.markPetIndexed(result.fileId, petMlVersion);
+      }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
@@ -728,6 +731,9 @@ class MLService {
           await SemanticSearchService.instance.storeEmptyClipImageResult(
             instruction.file,
           );
+        }
+        if (instruction.shouldRunPets) {
+          await mlDataDB.markPetIndexed(instruction.fileKey, petMlVersion);
         }
         return true;
       }

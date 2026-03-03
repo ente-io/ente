@@ -283,6 +283,12 @@ fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResu
             face_embedding: String::new(),
             clip_image: String::new(),
             clip_text: model_path,
+            pet_face_detection: String::new(),
+            pet_face_embedding_dog: String::new(),
+            pet_face_embedding_cat: String::new(),
+            pet_body_detection: String::new(),
+            pet_body_embedding_dog: String::new(),
+            pet_body_embedding_cat: String::new(),
         },
         provider_policy: to_provider_policy(&provider_policy),
     };

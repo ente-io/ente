@@ -105,6 +105,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetClusterSummaryTable,
     createPetFaceVectorIdMappingTable,
     createObjectVectorIdMappingTable,
+    createPetIndexedFilesTable,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -563,6 +564,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetClusterSummaryTable);
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deleteObjectVectorIdMappingTable);
+    await db.execute(deletePetIndexedFilesTable);
     for (final vdb in PetVectorDB.allInstances) {
       await vdb.deleteIndexFile();
     }
@@ -2339,6 +2341,46 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable WHERE $mlVersionColumn >= $minimumMlVersion';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     return maps.first['count'] as int;
+  }
+
+  @override
+  Future<Map<int, int>> petIndexedFileIds({
+    int minimumMlVersion = petMlVersion,
+  }) async {
+    final db = await asyncDB;
+    final String query = '''
+      SELECT $fileIDColumn, $mlVersionColumn
+      FROM $petIndexedFilesTable
+      WHERE $mlVersionColumn >= $minimumMlVersion
+    ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    final Map<int, int> result = {};
+    for (final map in maps) {
+      result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
+    }
+    return result;
+  }
+
+  @override
+  Future<int> getPetIndexedFileCount({
+    int minimumMlVersion = petMlVersion,
+  }) async {
+    final db = await asyncDB;
+    final String query =
+        'SELECT COUNT(*) as count FROM $petIndexedFilesTable WHERE $mlVersionColumn >= $minimumMlVersion';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.first['count'] as int;
+  }
+
+  @override
+  Future<void> markPetIndexed(int fileID, int mlVersion) async {
+    final db = await asyncDB;
+    await db.execute(
+      '''INSERT INTO $petIndexedFilesTable ($fileIDColumn, $mlVersionColumn)
+         VALUES (?, ?)
+         ON CONFLICT($fileIDColumn) DO UPDATE SET $mlVersionColumn = excluded.$mlVersionColumn''',
+      [fileID, mlVersion],
+    );
   }
 
   @override

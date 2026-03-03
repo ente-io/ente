@@ -88,7 +88,7 @@ class MLIndexingIsolate extends SuperIsolate {
         "useRustMl": useRustMl,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
-        "runPets": useRustMl && flagService.petEnabled,
+        "runPets": useRustMl && instruction.shouldRunPets,
         ...rustRuntimeArgs,
         "faceDetectionAddress": FaceDetectionService.instance.sessionAddress,
         "faceEmbeddingAddress": FaceEmbeddingService.instance.sessionAddress,
