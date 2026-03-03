@@ -40,9 +40,8 @@ pub fn run_pet_face_detection(
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
 
-    // Row format: [x, y, w, h, obj_conf, lx, ly, rx, ry, nx, ny, cls_conf...]
-    // For 2-class model (cat/dog): row_len = 4 + 1 + 6 + 2 = 13
-    // For 1-class model: row_len = 4 + 1 + 6 + 1 = 12
+    // Row format: [x, y, w, h, conf, lm_x1, lm_y1, lm_x2, lm_y2, lm_x3, lm_y3, class_id]
+    // row_len = 4 + 1 + 6 + 1 = 12
     // Use the output shape's last dimension to determine row length reliably.
     let row_len = if output_shape.len() >= 2 {
         *output_shape.last().unwrap() as usize
@@ -110,10 +109,18 @@ pub fn run_pet_face_detection(
             pad_top,
         );
 
+        // class_id at index 11: 0=dog, 1=cat
+        let class_id = if row_len >= 12 {
+            row[11] as u8
+        } else {
+            0
+        };
+
         detections.push(PetFaceDetection {
             score,
             box_xyxy,
             keypoints,
+            class_id,
         });
     }
 

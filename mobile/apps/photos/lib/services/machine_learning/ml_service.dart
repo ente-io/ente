@@ -782,6 +782,7 @@ class MLService {
         );
         final vectorIds = <int>[];
         final embeddings = <Float32List>[];
+        final insertedPetFaceIds = <String>[];
         for (final (dbFace, pfResult) in entry.value) {
           final vid = idMap[dbFace.petFaceId];
           if (vid == null) continue;
@@ -794,6 +795,7 @@ class MLService {
           }
           vectorIds.add(vid);
           embeddings.add(emb);
+          insertedPetFaceIds.add(dbFace.petFaceId);
         }
         if (vectorIds.isNotEmpty) {
           await vdb.bulkInsertEmbeddings(
@@ -801,7 +803,7 @@ class MLService {
             embeddings: embeddings,
           );
           final updateMap = Map.fromIterables(
-            entry.value.map((e) => e.$1.petFaceId),
+            insertedPetFaceIds,
             vectorIds,
           );
           await mlDataDB.updatePetFaceVectorIds(updateMap);
@@ -839,6 +841,7 @@ class MLService {
         );
         final vectorIds = <int>[];
         final embeddings = <Float32List>[];
+        final insertedPetBodyIds = <String>[];
         for (final (dbBody, pbResult) in entry.value) {
           final vid = idMap[dbBody.petBodyId];
           if (vid == null) continue;
@@ -851,6 +854,7 @@ class MLService {
           }
           vectorIds.add(vid);
           embeddings.add(emb);
+          insertedPetBodyIds.add(dbBody.petBodyId);
         }
         if (vectorIds.isNotEmpty) {
           await vdb.bulkInsertEmbeddings(
@@ -858,7 +862,7 @@ class MLService {
             embeddings: embeddings,
           );
           final updateMap = Map.fromIterables(
-            entry.value.map((e) => e.$1.petBodyId),
+            insertedPetBodyIds,
             vectorIds,
           );
           await mlDataDB.updatePetBodyVectorIds(updateMap);
