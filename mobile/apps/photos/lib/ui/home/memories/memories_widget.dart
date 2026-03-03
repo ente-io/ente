@@ -9,7 +9,8 @@ import "package:photos/events/memory_seen_event.dart";
 import 'package:photos/models/memories/memory.dart';
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/ui/components/shimmer_loading.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -80,27 +81,83 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       future: memoriesCacheService.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData) {
-          return SizedBox(
-            height: _memoryheight + 12 + 10,
-            child: const EnteLoadingWidget(),
-          );
-        } else {
-          if (snapshot.data!.isEmpty) return const SizedBox.shrink();
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 12,
-              ),
-              _buildMemories(snapshot.data!),
-              const SizedBox(height: 10),
-            ],
-          ).animate().fadeIn(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCirc,
-              );
+          return _buildMemoriesLoadingShimmer();
         }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 12,
+            ),
+            _buildMemories(snapshot.data!),
+            const SizedBox(height: 10),
+          ],
+        ).animate().fadeIn(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOutCirc,
+            );
       },
+    );
+  }
+
+  Widget _buildMemoriesLoadingShimmer() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final skeletonColor = isDark ? fillDarkestDark : fillDarkLight;
+    final shimmerBaseColor = isDark ? fillDarkerDark : fillDarkLight;
+    final highlightColor = isDark
+        ? fillDarkestDark
+        : contentLighterLight.withValues(
+            alpha: 0.5,
+          );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const itemCount = 4;
+            const horizontalPadding = MemoryCoverWidget.horizontalPadding;
+            final tileWidth =
+                ((constraints.maxWidth / itemCount) - (horizontalPadding * 2))
+                    .clamp(0.0, double.infinity);
+            final tileHeight = tileWidth / MemoryCoverWidget.aspectRatio;
+
+            return ShimmerLoading(
+              baseColor: shimmerBaseColor,
+              highlightColor: highlightColor,
+              duration: const Duration(milliseconds: 2000),
+              glowIntensity: 0.9,
+              child: SizedBox(
+                height: tileHeight + (MemoryCoverWidget.outerStrokeWidth * 2),
+                child: Row(
+                  children: List.generate(itemCount, (_) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
+                      child: SizedBox(
+                        width: tileWidth,
+                        height: tileHeight,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: skeletonColor,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 

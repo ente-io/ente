@@ -219,7 +219,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 12 : 11;
+    final maxResultCount = _isYearValid(query) ? 13 : 12;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -292,6 +292,12 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
         onResultsReceived(collectionResults);
+      },
+    );
+
+    _searchService.getDeviceCollectionSearchResults(query).then(
+      (deviceCollectionResults) {
+        onResultsReceived(deviceCollectionResults);
       },
     );
 

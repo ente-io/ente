@@ -103,6 +103,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   ValueNotifier<ExecutionState> executionStateNotifier = ValueNotifier(
     ExecutionState.idle,
   );
+  VoidCallback? _expandableControllerListener;
 
   Color? menuItemColor;
   late double borderRadius;
@@ -115,9 +116,10 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             ? widget.multipleBorderRadius
             : widget.singleBorderRadius;
     if (widget.expandableController != null) {
-      widget.expandableController!.addListener(() {
+      _expandableControllerListener = () {
         setState(() {});
-      });
+      };
+      widget.expandableController!.addListener(_expandableControllerListener!);
     }
     super.initState();
   }
@@ -137,8 +139,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   @override
   void dispose() {
     if (widget.expandableController != null) {
+      if (_expandableControllerListener != null) {
+        widget.expandableController!
+            .removeListener(_expandableControllerListener!);
+      }
       widget.expandableController!.dispose();
     }
+    _debouncer.cancelDebounceTimer();
     executionStateNotifier.dispose();
     super.dispose();
   }

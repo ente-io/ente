@@ -10,7 +10,6 @@ import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
@@ -18,16 +17,19 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
-import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
-import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
+
+const kShowUnnamedIgnoredPersonEventSource =
+    "_AppBarWidgetState._showPersonUnnamedDelete";
 
 class PeopleAppBar extends StatefulWidget {
   final GalleryType type;
@@ -58,6 +60,7 @@ enum PeoplePopupAction {
   setCover,
   pinPerson,
   hideFromMemories,
+  ignore,
   removeLabel,
   reviewSuggestions,
   unignore,
@@ -77,6 +80,19 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   late PersonEntity person;
   late StreamSubscription<PeopleChangedEvent> _peopleChangedEventSubscription;
 
+  String? _resolveAppBarTitle({
+    required PersonEntity sourcePerson,
+    required String? title,
+  }) {
+    if (sourcePerson.data.email == Configuration.instance.getEmail()) {
+      if (title == null) {
+        return context.l10n.me;
+      }
+      return context.l10n.accountOwnerPersonAppbarTitle(title: title);
+    }
+    return title;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -95,17 +111,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        if (person.data.email == Configuration.instance.getEmail()) {
-          // Don't know of any case where this will be null but just being safe
-          if (widget.title == null) {
-            _appBarTitle = "Me";
-          } else {
-            _appBarTitle = context.l10n
-                .accountOwnerPersonAppbarTitle(title: widget.title!);
-          }
-        } else {
-          _appBarTitle = widget.title;
-        }
+        _appBarTitle = _resolveAppBarTitle(
+          sourcePerson: person,
+          title: widget.title,
+        );
 
         _peopleChangedEventSubscription =
             Bus.instance.on<PeopleChangedEvent>().listen(
@@ -117,19 +126,31 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                     event.source == "reassignMe")) {
               person = event.person!;
 
-              if (person.data.email == Configuration.instance.getEmail()) {
-                _appBarTitle = context.l10n.accountOwnerPersonAppbarTitle(
-                  title: person.data.name,
-                );
-              } else {
-                _appBarTitle = person.data.name;
-              }
+              _appBarTitle = _resolveAppBarTitle(
+                sourcePerson: person,
+                title: person.data.name,
+              );
               setState(() {});
             }
           },
         );
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant PeopleAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title ||
+        oldWidget.person.remoteID != widget.person.remoteID ||
+        oldWidget.person.data.name != widget.person.data.name ||
+        oldWidget.person.data.email != widget.person.data.email) {
+      person = widget.person;
+      _appBarTitle = _resolveAppBarTitle(
+        sourcePerson: person,
+        title: widget.title,
+      );
+    }
   }
 
   @override
@@ -349,6 +370,21 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ),
             ),
           PopupMenuItem(
+            value: PeoplePopupAction.ignore,
+            child: Row(
+              children: [
+                const Icon(Icons.hide_image_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  AppLocalizations.of(context).ignore,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
             value: PeoplePopupAction.removeLabel,
             child: Row(
               children: [
@@ -369,6 +405,36 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       items.addAll(
         [
           PopupMenuItem(
+            value: PeoplePopupAction.rename,
+            child: Row(
+              children: [
+                const Icon(Icons.edit),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  AppLocalizations.of(context).edit,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: PeoplePopupAction.reviewSuggestions,
+            child: Row(
+              children: [
+                const Icon(Icons.search_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  AppLocalizations.of(context).review,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
             value: PeoplePopupAction.unignore,
             child: Row(
               children: [
@@ -376,7 +442,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(AppLocalizations.of(context).showPerson),
+                Text(
+                  AppLocalizations.of(context).showPerson,
+                  style: textTheme.bodyBold,
+                ),
               ],
             ),
           ),
@@ -413,6 +482,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await _togglePinState();
             } else if (value == PeoplePopupAction.hideFromMemories) {
               await _toggleHideFromMemories();
+            } else if (value == PeoplePopupAction.ignore) {
+              await _ignorePerson(context);
             } else if (value == PeoplePopupAction.unignore) {
               await _showPerson(context);
             } else if (value == PeoplePopupAction.removeLabel) {
@@ -489,43 +560,102 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     );
   }
 
-  Future<void> _showPerson(BuildContext context) async {
-    bool assignName = false;
-    await showChoiceDialog(
+  bool _isLegacyIgnoredName(String name) {
+    final normalizedName = name.trim().toLowerCase();
+    return normalizedName.isEmpty ||
+        normalizedName == "(ignored)" ||
+        normalizedName == "(hidden)";
+  }
+
+  Future<void> _ignorePerson(BuildContext context) async {
+    final result = await showChoiceDialog(
       context,
-      title:
-          "Are you sure you want to show this person in people section again?",
-      firstButtonLabel: "Yes, show person",
+      title: AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson,
+      body: AppLocalizations.of(context).thePersonWillNotBeDisplayed,
+      firstButtonLabel: AppLocalizations.of(context).yesIgnore,
       firstButtonOnTap: () async {
         try {
-          await PersonService.instance
-              .deletePerson(widget.person.remoteID, onlyMapping: false);
-          Bus.instance.fire(PeopleChangedEvent());
-          assignName = true;
+          final updatedPerson = await PersonService.instance.updateAttributes(
+            person.remoteID,
+            isHidden: true,
+          );
+          setState(() {
+            person = updatedPerson;
+          });
+          Bus.instance.fire(
+            PeopleChangedEvent(
+              type: PeopleEventType.saveOrEditPerson,
+              source: "_AppBarWidgetState._ignorePerson",
+              person: updatedPerson,
+            ),
+          );
         } catch (e, s) {
-          _logger.severe('Unignoring/showing and naming person failed', e, s);
-          // await showGenericErrorDialog(context: context, error: e);
+          _logger.severe('Ignoring/showing person failed', e, s);
+          rethrow;
         }
       },
     );
-    if (assignName) {
-      final result = await showAssignPersonAction(
-        context,
-        clusterID: widget.person.data.assigned.first.id,
-      );
-      Navigator.pop(context);
-      if (result != null) {
-        final person = result is (PersonEntity, EnteFile) ? result.$1 : result;
-        // ignore: unawaited_futures
-        routeToPage(
-          context,
-          PeoplePage(
-            person: person,
-            searchResult: null,
-          ),
-        );
-      }
+    if (!mounted || result?.action != ButtonAction.error) {
+      return;
     }
+    showShortToast(
+      context,
+      AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
+    );
+  }
+
+  Future<void> _showPerson(BuildContext context) async {
+    final isUnnamedIgnoredPerson = _isLegacyIgnoredName(person.data.name);
+    var shouldCloseDetailPage = false;
+    final result = await showChoiceDialog(
+      context,
+      title: AppLocalizations.of(
+        context,
+      ).areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+      firstButtonLabel: AppLocalizations.of(context).yesShowPerson,
+      isDismissible: false,
+      firstButtonOnTap: () async {
+        try {
+          if (isUnnamedIgnoredPerson) {
+            await PersonService.instance.deletePerson(person.remoteID);
+            Bus.instance.fire(
+              PeopleChangedEvent(
+                source: kShowUnnamedIgnoredPersonEventSource,
+                person: person,
+              ),
+            );
+            shouldCloseDetailPage = true;
+          } else {
+            final updatedPerson = await PersonService.instance.updateAttributes(
+              person.remoteID,
+              isHidden: false,
+            );
+            setState(() {
+              person = updatedPerson;
+              _appBarTitle = _resolveAppBarTitle(
+                sourcePerson: person,
+                title: person.data.name,
+              );
+            });
+            Bus.instance.fire(
+              PeopleChangedEvent(
+                type: PeopleEventType.saveOrEditPerson,
+                source: "_AppBarWidgetState._showPerson",
+                person: updatedPerson,
+              ),
+            );
+          }
+        } catch (e, s) {
+          _logger.severe('Unignoring/showing person failed', e, s);
+        }
+      },
+    );
+    if (!mounted ||
+        result?.action != ButtonAction.first ||
+        !shouldCloseDetailPage) {
+      return;
+    }
+    await Navigator.of(context).maybePop();
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {

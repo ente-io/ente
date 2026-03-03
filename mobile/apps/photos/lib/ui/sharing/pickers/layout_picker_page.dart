@@ -10,6 +10,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/public_link_layout_util.dart';
 import 'package:photos/utils/separators_util.dart';
 import 'package:tuple/tuple.dart';
 
@@ -98,14 +99,16 @@ class ItemsWidget extends StatefulWidget {
 class _ItemsWidgetState extends State<ItemsWidget> {
   late String currentLayout;
   late final List<Tuple2<String, String>> _layoutOptions = [
-    Tuple2(AppLocalizations.of(context).layoutGrouped, "grouped"),
-    Tuple2(AppLocalizations.of(context).layoutContinuous, "continuous"),
+    Tuple2(AppLocalizations.of(context).layoutMasonry, "masonry"),
     Tuple2(AppLocalizations.of(context).layoutTrip, "trip"),
+    Tuple2(AppLocalizations.of(context).layoutGrouped, "grouped"),
   ];
 
   @override
   void initState() {
-    currentLayout = widget.collection.pubMagicMetadata.layout ?? 'grouped';
+    currentLayout = normalizePublicLinkLayout(
+      widget.collection.pubMagicMetadata.layout,
+    );
     super.initState();
   }
 

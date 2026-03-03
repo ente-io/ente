@@ -5,7 +5,6 @@ import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/collage/collage_app_bar.dart";
@@ -38,7 +37,6 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
   WidgetsToImageController? _controller;
   bool _isSaving = false;
   VoidCallback? _clearSwapSelection;
-  late final bool _enableInternalLayouts = flagService.internalUser;
 
   void _onControllerReady(WidgetsToImageController controller) {
     setState(() {
@@ -125,7 +123,6 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[1],
           onControllerReady: _onControllerReady,
           onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
-          enableExtendedLayouts: _enableInternalLayouts,
         );
         break;
       case 3:
@@ -135,7 +132,6 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[2],
           onControllerReady: _onControllerReady,
           onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
-          enableExtendedLayouts: _enableInternalLayouts,
         );
         break;
       case 4:
@@ -146,7 +142,6 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[3],
           onControllerReady: _onControllerReady,
           onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
-          enableExtendedLayouts: _enableInternalLayouts,
         );
         break;
       case 5:

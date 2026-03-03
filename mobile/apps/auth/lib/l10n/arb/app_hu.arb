@@ -12,6 +12,7 @@
   "featureOpenSource": "Nyílt forráskódú és\nbiztonsági szakértők által auditált",
   "signUp": "Bejelentkezés",
   "onBoardingGetStarted": "Kezdjünk bele",
+  "setupFirstAccount": "Állítsd be az első fiókodat",
   "allTabEmptyHint": "Még nincs itt semmi. Koppints a + jelre kód hozzáadásához, vagy nyisd meg a Kukát egy visszaállításához.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -524,6 +525,7 @@
   "dropReviewAndroid": "Írj véleményt a Play Store-ban",
   "supportEnte": "Támogasd <bold-green>ente <bold-green>",
   "giveUsAStarOnGithub": "Adj nekünk egy csillagot a Githubon",
+  "free10GB": "10 GB ingyen <bold-green>ente <bold-green> Photos",
   "loginWithAuthAccount": "Jelentkezz be Auth fiókoddal",
   "freeStorageOffer": "10% kedvezmény itt <bold-green>ente<bold-green> photos",
   "freeStorageOfferDescription": "Használd az \"AUTH\" kódot, hogy 10% kedvezményt kapjon az első évben",
@@ -619,5 +621,10 @@
   "chooseIcon": "Válassz ikont",
   "customOrder": "Egyéni sorrend",
   "selectAnOption": "Válassz egy lehetőséget",
-  "todaysLogs": "Mai naplók"
+  "todaysLogs": "Mai naplók",
+  "appIcon": "Alkalmazásikon",
+  "importAndOTPGuide": "Exportáld a biztonsági mentésedet az andOTP-ből a Beállítások „Biztonsági mentés” opciójával.\n\nHa a biztonsági mentés titkosítva van, akkor a visszafejtéshez meg kell adnia a biztonsági mentés jelszavát.",
+  "enterPasswordToDecryptAndOTP": "Írd be a jelszót az andOTP biztonsági mentés visszafejtéséhez",
+  "failedToDecryptAndOTPBackup": "Nem sikerült visszafejteni az andOTP biztonsági mentést",
+  "notSupportedForHOTP": "Nem támogatott HOTP esetén"
 }

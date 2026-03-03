@@ -157,11 +157,12 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         );
 
         // Clear the context after successful join
-        // Note: If any error occurs above, this won't execute and context will be preserved for retry
         clearJoinAlbumContext();
 
         return collectionID;
     } catch (error) {
+        // Clear the context on failure to avoid repeated attempts
+        clearJoinAlbumContext();
         log.error("Failed to process pending album join", {
             collectionID: context.collectionID,
             error,

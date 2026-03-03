@@ -218,6 +218,12 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   @override
+  void dispose() {
+    _debouncer.cancelDebounceTimer();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {

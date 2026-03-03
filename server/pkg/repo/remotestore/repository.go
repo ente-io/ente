@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/lib/pq"
 
@@ -82,6 +83,19 @@ func (r *Repository) GetDomain(ctx context.Context, userID int64) (*string, erro
 	}
 	return &domain, nil
 
+}
+
+// GetEffectiveDomain returns the resolved custom domain for the user (family pointers resolved).
+func (r *Repository) GetEffectiveDomain(ctx context.Context, userID int64) (*string, error) {
+	domain, err := r.GetDomain(ctx, userID)
+	if err != nil || domain == nil || *domain == "" {
+		return domain, err
+	}
+	resolved, resolveErr := ente.ResolveCustomDomainValue(*domain)
+	if resolveErr != nil {
+		return nil, stacktrace.Propagate(resolveErr, "failed to resolve custom domain")
+	}
+	return &resolved, nil
 }
 
 // GetValue fetches and return the value for given user_id and key

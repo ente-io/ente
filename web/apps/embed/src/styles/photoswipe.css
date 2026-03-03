@@ -249,6 +249,19 @@
     }
 }
 
+.pswp-ente .pswp__caption-more {
+    color: white;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* When More link is present, don't use line-clamp since JS already truncated */
+.pswp-ente .pswp__caption p:has(.pswp__caption-more) {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+}
+
 /* Change the cursor on the thumbnail to the default arrow to indicate that it
    is not interactable (PhotoSwipe by default shows the zoom out icon). */
 .pswp-ente .pswp__img {

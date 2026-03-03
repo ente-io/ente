@@ -28,7 +28,7 @@ The map feature can be enabled or disabled in your app settings.
 
 **On mobile:**
 
-Open `Settings > General > Advanced` and use the toggle switch to turn the map feature on or off.
+Open `Settings` and use the toggle switch to turn the map feature on or off.
 
 **On desktop:**
 

@@ -12,6 +12,34 @@ export interface AppUpdate {
     version: string;
 }
 
+/**
+ * Native provider used for desktop app lock authentication.
+ *
+ * `touchid` means we can use the platform-native auth prompt.
+ * `none` means no supported native provider is currently available.
+ */
+export type NativeDeviceLockProvider = "touchid" | "none";
+
+/**
+ * Why native device lock is unavailable on this machine/session.
+ */
+export type NativeDeviceLockUnavailableReason =
+    | "unsupported-platform"
+    | "touchid-not-enrolled"
+    | "touchid-api-error";
+
+/**
+ * Capability metadata returned by main-process device-lock checks.
+ */
+export interface NativeDeviceLockCapability {
+    /** True when native auth can be prompted right now. */
+    available: boolean;
+    /** Which native provider backs authentication (if available). */
+    provider: NativeDeviceLockProvider;
+    /** Present when unavailable, with a machine-readable reason. */
+    reason?: NativeDeviceLockUnavailableReason;
+}
+
 export interface FolderWatch {
     collectionMapping: CollectionMapping;
     folderPath: string;

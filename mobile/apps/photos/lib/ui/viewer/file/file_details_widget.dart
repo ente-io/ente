@@ -8,6 +8,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/core/user_config.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -79,7 +80,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
-    _currentUserID = Configuration.instance.getUserID()!;
+    _currentUserID = Configuration.instance.getUserIDV2();
     hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
@@ -138,6 +139,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    hasLocationData.dispose();
     _videoMetadataNotifier.dispose();
     _peopleChangedEvent.cancel();
     super.dispose();
@@ -298,7 +300,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (flagService.hasGrantedMLConsent) {
+    if (hasGrantedMLConsent) {
       fileDetailsTiles.addAll([
         FacesItemWidget(file),
         const FileDetailsDivider(),
@@ -363,7 +365,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Future<void> _updateLocationFromExif(Location? locationDataFromExif) async {
     // If the file is not uploaded or the file is not owned by the current user
     // then we don't need to update the location.
-    if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
+    if (!widget.file.isUploaded || widget.file.ownerID == null) {
+      return;
+    }
+    if (widget.file.ownerID != _currentUserID) {
       return;
     }
     try {

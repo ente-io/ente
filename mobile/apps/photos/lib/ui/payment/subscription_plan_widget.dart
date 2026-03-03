@@ -1,14 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:ente_pure_utils/ente_pure_utils.dart';
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import "package:flutter/scheduler.dart";
-import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class SubscriptionPlanWidget extends StatefulWidget {
+class SubscriptionPlanWidget extends StatelessWidget {
   const SubscriptionPlanWidget({
     super.key,
     required this.storage,
@@ -27,106 +25,141 @@ class SubscriptionPlanWidget extends StatefulWidget {
   final bool isOnboarding;
 
   @override
-  State<SubscriptionPlanWidget> createState() => _SubscriptionPlanWidgetState();
-}
-
-class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
-  late final PlatformDispatcher _platformDispatcher;
-
-  @override
-  void initState() {
-    super.initState();
-    _platformDispatcher = SchedulerBinding.instance.platformDispatcher;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final brightness = _platformDispatcher.platformBrightness;
-    final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
-    final String storageValue = numAndUnit.$1.toString();
-    final String storageUnit = numAndUnit.$2;
+    final colorScheme = getEnteColorScheme(context);
+    final numAndUnit = convertBytesToNumberAndUnit(storage);
+    int storageValueInUnit = numAndUnit.$1;
+    String storageUnit = numAndUnit.$2.toUpperCase();
+    if (storageUnit == "TB") {
+      storageValueInUnit = storageValueInUnit * 1000;
+      storageUnit = "GB";
+    }
+    final String storageValue = storageValueInUnit.toString();
+    final bool isSelected = isActive;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundElevated2Light,
-          borderRadius: BorderRadius.circular(8),
-          border: widget.isActive
-              ? Border.all(
-                  color: getEnteColorScheme(context).primary700,
-                  width: brightness == Brightness.dark ? 1.5 : 1,
-                  strokeAlign: BorderSide.strokeAlignInside,
-                )
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              offset: const Offset(0, 4),
-              blurRadius: 4,
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: 24,
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            constraints: const BoxConstraints(minHeight: 72),
+            decoration: BoxDecoration(
+              color: isSelected ? colorScheme.greenLight : colorScheme.fill,
+              borderRadius: BorderRadius.circular(20),
+              border: isSelected
+                  ? Border.all(color: colorScheme.greenBase, width: 2)
+                  : null,
             ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            widget.isActive && !widget.isOnboarding
-                ? Positioned(
-                    top: 0,
-                    right: 0,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(8),
-                      ),
-                      child: Image.asset(
-                        "assets/active_subscription.png",
-                      ),
-                    ),
-                  )
-                : widget.isPopular
-                    ? ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                        ),
-                        child: Image.asset(
-                          "assets/popular_subscription.png",
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: storageValue,
-                          style: const TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w600,
-                            color: textBaseLight,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: colorScheme.contentDarker,
+                            fontFamily: "Nunito",
+                            fontWeight: FontWeight.w900,
                           ),
-                        ),
-                        WidgetSpan(
-                          child: Transform.translate(
-                            offset: const Offset(2, -16),
-                            child: Text(
-                              storageUnit,
-                              style: getEnteTextTheme(context).h3.copyWith(
-                                    color: textMutedLight,
-                                  ),
+                          children: [
+                            TextSpan(
+                              text: storageValue,
+                              style: const TextStyle(
+                                fontSize: 36,
+                                height: 28 / 36,
+                                letterSpacing: -1.8,
+                              ),
                             ),
-                          ),
+                            const TextSpan(
+                              text: " ",
+                              style: TextStyle(
+                                fontSize: 24,
+                                height: 28 / 24,
+                                letterSpacing: -0.96,
+                              ),
+                            ),
+                            TextSpan(
+                              text: storageUnit.isEmpty
+                                  ? ""
+                                  : storageUnit.substring(0, 1),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 28 / 16,
+                                letterSpacing: -0.64,
+                              ),
+                            ),
+                            TextSpan(
+                              text: storageUnit.length > 1
+                                  ? storageUnit.substring(1)
+                                  : "",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 28 / 16,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                        textAlign: TextAlign.left,
+                        textHeightBehavior: const TextHeightBehavior(
+                          applyHeightToFirstAscent: false,
+                          applyHeightToLastDescent: false,
+                        ),
+                      ),
                     ),
                   ),
-                  _Price(price: widget.price, period: widget.period),
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _Price(
+                        price: price,
+                        period: period,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          if (isPopular)
+            Positioned(
+              right: -8,
+              top: -4,
+              child: Transform.rotate(
+                angle: 8 * math.pi / 180,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.greenBase,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  child: const Text(
+                    "Most popular",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: "Nunito",
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      height: 20 / 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -135,30 +168,50 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
 class _Price extends StatelessWidget {
   final String price;
   final String period;
-  const _Price({required this.price, required this.period});
+
+  const _Price({
+    required this.price,
+    required this.period,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     if (price.isEmpty) {
       return Text(
         "Free",
-        style: textTheme.largeBold.copyWith(color: textBaseLight),
+        style: textTheme.bodyBold.copyWith(
+          color: colorScheme.contentDarker,
+          fontFamily: "Inter",
+          fontSize: 16,
+          height: 28 / 16,
+        ),
       );
     }
+
     if (period == "month") {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            price + ' / ' + AppLocalizations.of(context).month,
-            style: textTheme.largeBold.copyWith(color: textBaseLight),
-          )
-              .animate(delay: const Duration(milliseconds: 100))
-              .fadeIn(duration: const Duration(milliseconds: 250)),
-        ],
+      return Text.rich(
+        TextSpan(
+          style: textTheme.largeBold.copyWith(
+            color: colorScheme.contentDarker,
+            height: 1.1,
+          ),
+          children: [
+            TextSpan(text: price),
+            TextSpan(
+              text: "/${AppLocalizations.of(context).month}",
+              style: textTheme.small.copyWith(
+                color: colorScheme.contentLight,
+              ),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.end,
       );
-    } else if (period == "year") {
+    }
+
+    if (period == "year") {
       final currencySymbol = price[0];
       final priceWithoutCurrency = price.substring(1);
       final priceDouble = double.parse(priceWithoutCurrency);
@@ -172,38 +225,59 @@ class _Price extends StatelessWidget {
 
       final bool isPlayStore = updateService.isPlayStoreFlavor();
       return Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isPlayStore)
-            Text(
-              currencySymbol +
-                  pricePerMonthString +
-                  ' / ' +
-                  AppLocalizations.of(context).month,
-              style: textTheme.largeBold.copyWith(color: textBaseLight),
+            Text.rich(
+              TextSpan(
+                style: textTheme.largeBold.copyWith(
+                  color: colorScheme.contentDarker,
+                  height: 1.1,
+                ),
+                children: [
+                  TextSpan(text: price),
+                  TextSpan(
+                    text: "/${AppLocalizations.of(context).yearShort}",
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.contentLight,
+                    ),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.end,
             ),
           if (isPlayStore)
             Text(
-              price + " / " + AppLocalizations.of(context).yearShort,
-              style: textTheme.small.copyWith(color: textFaintLight),
+              "$currencySymbol$pricePerMonthString / ${AppLocalizations.of(context).month}",
+              style: textTheme.tiny.copyWith(color: colorScheme.contentLight),
+              textAlign: TextAlign.end,
             ),
           if (!isPlayStore)
             Text(
-              currencySymbol +
-                  pricePerMonthString +
-                  ' / ' +
-                  AppLocalizations.of(context).month,
-              style: textTheme.largeBold.copyWith(color: textBaseLight),
+              "$currencySymbol$pricePerMonthString / ${AppLocalizations.of(context).month}",
+              style: textTheme.largeBold.copyWith(
+                color: colorScheme.contentDarker,
+              ),
+              textAlign: TextAlign.end,
             ),
           if (!isPlayStore)
-            Text(
-              price + " / " + AppLocalizations.of(context).yearShort,
-              style: textTheme.small.copyWith(color: textFaintLight),
+            Text.rich(
+              TextSpan(
+                style: textTheme.tiny.copyWith(
+                  color: colorScheme.contentLight,
+                ),
+                children: [
+                  TextSpan(text: price),
+                  TextSpan(
+                    text: "/${AppLocalizations.of(context).yearShort}",
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.end,
             ),
         ],
-      )
-          .animate(delay: const Duration(milliseconds: 100))
-          .fadeIn(duration: const Duration(milliseconds: 250));
+      );
     } else {
       assert(false, "Invalid period: $period");
       return const Text("");

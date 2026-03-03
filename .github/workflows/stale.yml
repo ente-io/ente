@@ -1,0 +1,31 @@
+name: Stale PRs
+
+on:
+    schedule:
+        - cron: "0 3 * * *"
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+
+jobs:
+    stale:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Mark and close stale pull requests
+              uses: actions/stale@v9
+              with:
+                  days-before-pr-stale: 30
+                  days-before-pr-close: 7
+                  days-before-issue-stale: -1
+                  days-before-issue-close: -1
+                  stale-pr-message: >
+                      This pull request has been automatically marked as stale
+                      because it has had no activity for 30 days. It will be
+                      closed in 7 days if there is no further activity.
+                  close-pr-message: >
+                      This pull request has been automatically closed because it
+                      remained stale for 7 days with no activity. Reopen it if
+                      you want to continue working on it.

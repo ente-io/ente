@@ -8,7 +8,6 @@ import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -263,16 +262,11 @@ void shareSelected(
 
 Future<void> shareAlbumLink(
   BuildContext context,
-  Collection collection,
   String url,
   GlobalKey key,
 ) async {
-  final description =
-      'Check out, comment and react on photos from "${collection.displayName}" privately with Ente\'s end to end encryption';
-
   await shareLinkWithDescription(
     url,
-    description: description,
     context: context,
     key: key,
   );

@@ -74,6 +74,7 @@ func TestFlagKey_IsValidValue(t *testing.T) {
 		// ✅ Valid custom domain values
 		{"valid custom domain", CustomDomain, "example.com", false},
 		{"valid subdomain", CustomDomain, "sub.example.com", false},
+		{"valid family custom domain pointer", CustomDomain, "_123:example.com", false},
 
 		// ❌ Invalid custom domain values
 		{"empty custom domain", CustomDomain, "", false}, // Allowed as empty
@@ -81,6 +82,8 @@ func TestFlagKey_IsValidValue(t *testing.T) {
 		{"custom domain with invalid format", CustomDomain, "exa$mple.com", true},
 		{"custom domain with leading space", CustomDomain, " example.com", true},
 		{"custom domain with trailing space", CustomDomain, "example.com ", true},
+		{"invalid family custom domain pointer missing admin", CustomDomain, "_:example.com", true},
+		{"invalid family custom domain pointer invalid domain", CustomDomain, "_123:exa$mple.com", true},
 	}
 
 	for _, tt := range tests {

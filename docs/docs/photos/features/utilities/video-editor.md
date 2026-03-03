@@ -53,9 +53,9 @@ Useful for correcting videos captured in the wrong orientation.
 1. Open any video in your library
 2. Tap the overflow menu (⋮) and select **Edit**
 3. The video editor opens with three action buttons at the bottom:
-   - **Trim** - Adjust video length
-   - **Crop** - Change video dimensions
-   - **Rotate** - Change video orientation
+    - **Trim** - Adjust video length
+    - **Crop** - Change video dimensions
+    - **Rotate** - Change video orientation
 4. Make your edits using one or more tools
 5. Tap **Save copy** to create the edited version
 
@@ -64,9 +64,9 @@ Useful for correcting videos captured in the wrong orientation.
 - Ente creates a new video file with your edits applied
 - The original video remains unchanged
 - The new video preserves:
-  - Creation time from the original
-  - Location data (if available)
-  - Collection/album membership
+    - Creation time from the original
+    - Location data (if available)
+    - Collection/album membership
 - The edited video automatically syncs to your account
 - Both videos appear in your library
 
@@ -88,16 +88,16 @@ The preview shows exactly how your edited video will look, including all applied
 Ente uses two export methods to ensure compatibility across devices:
 
 1. **Native export** (default)
-   - **iOS**: Uses AVFoundation with HighestQuality preset or Passthrough (no re-encoding for simple trims)
-   - **Android**: Uses Media3 Transformer with H.264 encoding
-   - Faster performance and better quality preservation
-   - Hardware-accelerated on supported devices
-   - **Output**: MP4 with H.264 video, maintains original quality when possible
+    - **iOS**: Uses AVFoundation with HighestQuality preset or Passthrough (no re-encoding for simple trims)
+    - **Android**: Uses Media3 Transformer with H.264 encoding
+    - Faster performance and better quality preservation
+    - Hardware-accelerated on supported devices
+    - **Output**: MP4 with H.264 video, maintains original quality when possible
 
 2. **FFmpeg fallback**
-   - Automatically used if native export fails
-   - Cross-platform software-based encoding
-   - **Output**: MP4 with H.264 video (libx264), AAC audio
+    - Automatically used if native export fails
+    - Cross-platform software-based encoding
+    - **Output**: MP4 with H.264 video (libx264), AAC audio
 
 The app automatically switches between methods to ensure your edits can be saved successfully.
 

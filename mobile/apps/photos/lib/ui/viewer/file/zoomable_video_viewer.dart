@@ -16,13 +16,13 @@ const double kZoomThreshold = 1.01;
 /// parent PageView's scrolling.
 class ZoomableVideoViewer extends StatefulWidget {
   final TransformationController transformationController;
-  final Function(bool)? shouldDisableScroll;
+  final ValueChanged<bool>? onInteractionLockChanged;
   final Widget child;
 
   const ZoomableVideoViewer({
     super.key,
     required this.transformationController,
-    this.shouldDisableScroll,
+    this.onInteractionLockChanged,
     required this.child,
   });
 
@@ -32,31 +32,59 @@ class ZoomableVideoViewer extends StatefulWidget {
 
 class _ZoomableVideoViewerState extends State<ZoomableVideoViewer> {
   int _activePointers = 0;
+  bool _isInteractionLocked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.transformationController.addListener(_onTransformationChanged);
+    _updateInteractionLockState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ZoomableVideoViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.transformationController != widget.transformationController) {
+      oldWidget.transformationController
+          .removeListener(_onTransformationChanged);
+      widget.transformationController.addListener(_onTransformationChanged);
+      _updateInteractionLockState();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.transformationController.removeListener(_onTransformationChanged);
+    super.dispose();
+  }
+
+  void _onTransformationChanged() {
+    _updateInteractionLockState();
+  }
 
   void _onPointerDown(PointerDownEvent _) {
     _activePointers++;
-    if (_activePointers >= 2) {
-      widget.shouldDisableScroll?.call(true);
-    }
+    _updateInteractionLockState();
   }
 
   void _onPointerUp(PointerUpEvent _) {
     _activePointers = (_activePointers - 1).clamp(0, 99);
-    _maybeReenableScroll();
+    _updateInteractionLockState();
   }
 
   void _onPointerCancel(PointerCancelEvent _) {
     _activePointers = (_activePointers - 1).clamp(0, 99);
-    _maybeReenableScroll();
+    _updateInteractionLockState();
   }
 
-  void _maybeReenableScroll() {
-    if (_activePointers < 2) {
-      final scale = widget.transformationController.value.getMaxScaleOnAxis();
-      if (scale <= kZoomThreshold) {
-        widget.shouldDisableScroll?.call(false);
-      }
+  void _updateInteractionLockState() {
+    final scale = widget.transformationController.value.getMaxScaleOnAxis();
+    final shouldLock = _activePointers >= 2 || scale > kZoomThreshold;
+    if (_isInteractionLocked == shouldLock) {
+      return;
     }
+    _isInteractionLocked = shouldLock;
+    widget.onInteractionLockChanged?.call(shouldLock);
   }
 
   @override

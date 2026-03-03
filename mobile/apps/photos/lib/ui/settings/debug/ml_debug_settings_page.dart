@@ -4,6 +4,8 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
+import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -19,6 +21,7 @@ import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/ml_util.dart";
 
 class MLDebugSettingsPage extends StatefulWidget {
   const MLDebugSettingsPage({super.key});
@@ -112,6 +115,8 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
                     children: [
                       _buildMLControlsCard(context),
                       const SizedBox(height: 8),
+                      _buildVectorDbMigrationCard(context),
+                      const SizedBox(height: 8),
                       _buildThresholdsCard(context),
                       const SizedBox(height: 8),
                       _buildMLActionsCard(context),
@@ -139,7 +144,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             HugeIcons.strokeRoundedAiBrain01,
           ),
           trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.hasGrantedMLConsent,
+            value: () => hasGrantedMLConsent,
             onChanged: _onMLConsentChanged,
           ),
         ),
@@ -174,6 +179,17 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           trailingWidget: ToggleSwitchWidget(
             value: () => !MLService.instance.debugIndexingDisabled,
             onChanged: _onAutoIndexingChanged,
+          ),
+        ),
+        MenuItemWidgetNew(
+          title: "Run ML on interactions",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedPlay,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.runMLDuringInteractionOverride,
+            onChanged: _onRunMLDuringInteractionChanged,
           ),
         ),
       ],
@@ -244,6 +260,104 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           onTap: () async => _onSyncPersonMappings(context),
         ),
       ],
+    );
+  }
+
+  Widget _buildVectorDbMigrationCard(BuildContext context) {
+    return FutureBuilder<({bool clipDone, bool clusterCentroidDone})>(
+      future: _getVectorDbMigrationStatus(),
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        return SettingsGroupedCard(
+          children: [
+            MenuItemWidgetNew(
+              title: "Clip vector DB migration",
+              leadingIconWidget: _buildIconWidget(
+                context,
+                HugeIcons.strokeRoundedAiSearch,
+              ),
+              trailingWidget: _buildMigrationStatusWidget(
+                context,
+                isDone: status?.clipDone,
+                hasError: snapshot.hasError,
+              ),
+            ),
+            MenuItemWidgetNew(
+              title: "Cluster centroid migration",
+              leadingIconWidget: _buildIconWidget(
+                context,
+                HugeIcons.strokeRoundedUserMultiple,
+              ),
+              trailingWidget: _buildMigrationStatusWidget(
+                context,
+                isDone: status?.clusterCentroidDone,
+                hasError: snapshot.hasError,
+              ),
+            ),
+            MenuItemWidgetNew(
+              title: "Refresh migration status",
+              leadingIconWidget: _buildIconWidget(
+                context,
+                HugeIcons.strokeRoundedReload,
+              ),
+              trailingIcon: Icons.chevron_right_outlined,
+              trailingIconIsMuted: true,
+              onTap: () async {
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMigrationStatusWidget(
+    BuildContext context, {
+    required bool? isDone,
+    required bool hasError,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final String label;
+    final Color color;
+
+    if (hasError) {
+      label = "Error";
+      color = colorScheme.warning500;
+    } else if (isDone == null) {
+      label = "Loading";
+      color = colorScheme.textMuted;
+    } else if (isDone) {
+      label = "Done";
+      color = colorScheme.greenBase;
+    } else {
+      label = "Pending";
+      color = colorScheme.warning500;
+    }
+
+    return Text(
+      label,
+      style: textTheme.miniBold.copyWith(color: color),
+    );
+  }
+
+  Future<({bool clipDone, bool clusterCentroidDone})>
+      _getVectorDbMigrationStatus() async {
+    final clipVectorDB =
+        isOfflineMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
+    final clusterCentroidVectorDB = isOfflineMode
+        ? ClusterCentroidVectorDB.offlineInstance
+        : ClusterCentroidVectorDB.instance;
+    final migrationStatus = await Future.wait<bool>([
+      clipVectorDB.checkIfMigrationDone(),
+      clusterCentroidVectorDB.checkIfMigrationDone(),
+    ]);
+    return (
+      clipDone: migrationStatus[0],
+      clusterCentroidDone: migrationStatus[1],
     );
   }
 
@@ -484,6 +598,16 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           trailingIconIsMuted: true,
           onTap: () async => _onResetAllLocalClip(context),
         ),
+        MenuItemWidgetNew(
+          title: "Reset USearch index",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiSearch,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onResetUsearchIndex(context),
+        ),
       ],
     );
   }
@@ -499,9 +623,9 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
 
   Future<void> _onMLConsentChanged() async {
     try {
-      final oldMlConsent = flagService.hasGrantedMLConsent;
+      final oldMlConsent = hasGrantedMLConsent;
       final mlConsent = !oldMlConsent;
-      await flagService.setMLConsent(mlConsent);
+      await setMLConsent(mlConsent);
       logger.info('ML consent turned ${mlConsent ? 'on' : 'off'}');
       if (!mlConsent) {
         MLService.instance.pauseIndexingAndClustering();
@@ -572,6 +696,24 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
     }
   }
 
+  Future<void> _onRunMLDuringInteractionChanged() async {
+    try {
+      final enabled = !localSettings.runMLDuringInteractionOverride;
+      await computeController.setMLDebugInteractionOverride(turnOn: enabled);
+      logger.info(
+        'run ML during interaction is turned ${enabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('run ML during interaction toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
   Future<void> _onTriggerRunML(BuildContext context) async {
     try {
       MLService.instance.debugIndexingDisabled = false;
@@ -586,7 +728,11 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<void> _onTriggerRunIndexing(BuildContext context) async {
     try {
       MLService.instance.debugIndexingDisabled = false;
-      unawaited(MLService.instance.fetchAndIndexAllImages());
+      unawaited(
+        MLService.instance.fetchAndIndexAllImages(
+          mode: isOfflineMode ? MLMode.offline : MLMode.online,
+        ),
+      );
       showShortToast(context, "Indexing started");
     } catch (e, s) {
       logger.warning('indexing failed ', e, s);
@@ -740,6 +886,31 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('drop clip embeddings failed ', e, s);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+  }
+
+  Future<void> _onResetUsearchIndex(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure?",
+      body:
+          "This will delete the USearch index and clear the migration flag. The app will rebuild it when needed.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          final vectorDB = isOfflineMode
+              ? ClipVectorDB.offlineInstance
+              : ClipVectorDB.instance;
+          await vectorDB.deleteIndexFile();
+          showShortToast(context, "Done");
+          if (mounted) {
+            setState(() {});
+          }
+        } catch (e, s) {
+          logger.warning('reset usearch index failed ', e, s);
           await showGenericErrorDialog(context: context, error: e);
         }
       },

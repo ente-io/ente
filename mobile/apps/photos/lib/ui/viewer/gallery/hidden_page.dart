@@ -18,6 +18,8 @@ import "package:photos/ui/collections/album/horizontal_list.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/cleanup_hidden_files_widget.dart";
+import "package:photos/ui/viewer/gallery/cleanup_hidden_from_device_widget.dart";
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -44,6 +46,8 @@ class HiddenPage extends StatefulWidget {
 class _HiddenPageState extends State<HiddenPage> {
   int? _defaultHiddenCollectionId;
   final _hiddenCollectionsExcludingDefault = <Collection>[];
+  bool _hasFilesNeedingCleanup = false;
+  bool _hasHiddenFilesOnDevice = false;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
 
@@ -55,8 +59,32 @@ class _HiddenPageState extends State<HiddenPage> {
       setState(() {
         getHiddenCollections();
       });
+      _checkForCleanupNeeded();
+      _checkForDeviceCleanupNeeded();
     });
     getHiddenCollections();
+    _checkForCleanupNeeded();
+    _checkForDeviceCleanupNeeded();
+  }
+
+  Future<void> _checkForCleanupNeeded() async {
+    final hasCleanup =
+        await CollectionsService.instance.hasFilesNeedingHiddenCleanup();
+    if (mounted && hasCleanup != _hasFilesNeedingCleanup) {
+      setState(() {
+        _hasFilesNeedingCleanup = hasCleanup;
+      });
+    }
+  }
+
+  Future<void> _checkForDeviceCleanupNeeded() async {
+    final hasDeviceFiles =
+        await CollectionsService.instance.hasHiddenFilesOnDevice();
+    if (mounted && hasDeviceFiles != _hasHiddenFilesOnDevice) {
+      setState(() {
+        _hasHiddenFilesOnDevice = hasDeviceFiles;
+      });
+    }
   }
 
   getHiddenCollections() {
@@ -128,22 +156,56 @@ class _HiddenPageState extends State<HiddenPage> {
       emptyState: _hiddenCollectionsExcludingDefault.isEmpty
           ? const EmptyHiddenWidget()
           : const SizedBox.shrink(),
-      header: AlbumHorizontalList(
-        () async {
-          return _hiddenCollectionsExcludingDefault;
-        },
-        hasVerifiedLock: true,
-        onViewAllTapped: () async {
-          await routeToPage(
-            context,
-            CollectionListPage(
-              _hiddenCollectionsExcludingDefault,
-              sectionType: UISectionType.hiddenCollections,
-              appTitle: Text(AppLocalizations.of(context).hidden),
-              tag: "hidden",
+      header: Column(
+        children: [
+          RepaintBoundary(
+            child: AnimatedCrossFade(
+              firstCurve: Curves.easeInOutQuart,
+              secondCurve: Curves.easeInOutQuart,
+              sizeCurve: Curves.easeInOutQuart,
+              firstChild: CleanupHiddenFilesWidget(
+                onCleanupComplete: () => _checkForCleanupNeeded(),
+              ),
+              secondChild: const SizedBox(width: double.infinity),
+              crossFadeState: _hasFilesNeedingCleanup
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 750),
             ),
-          );
-        },
+          ),
+          RepaintBoundary(
+            child: AnimatedCrossFade(
+              firstCurve: Curves.easeInOutQuart,
+              secondCurve: Curves.easeInOutQuart,
+              sizeCurve: Curves.easeInOutQuart,
+              firstChild: CleanupHiddenFromDeviceWidget(
+                onCleanupComplete: () => _checkForDeviceCleanupNeeded(),
+              ),
+              secondChild: const SizedBox(width: double.infinity),
+              crossFadeState: _hasHiddenFilesOnDevice
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 750),
+            ),
+          ),
+          AlbumHorizontalList(
+            () async {
+              return _hiddenCollectionsExcludingDefault;
+            },
+            hasVerifiedLock: true,
+            onViewAllTapped: () async {
+              await routeToPage(
+                context,
+                CollectionListPage(
+                  _hiddenCollectionsExcludingDefault,
+                  sectionType: UISectionType.hiddenCollections,
+                  appTitle: Text(AppLocalizations.of(context).hidden),
+                  tag: "hidden",
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
     return GalleryBoundariesProvider(

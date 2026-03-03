@@ -31,7 +31,10 @@ import {
     LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import { createAlbum } from "ente-new/photos/services/collection";
+import {
+    createAlbum,
+    createHiddenAlbum,
+} from "ente-new/photos/services/collection";
 import type {
     CollectionsSortBy,
     CollectionSummary,
@@ -96,7 +99,9 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 
         void (async () => {
             try {
-                const newAlbum = await createAlbum(albumName);
+                const newAlbum = isInHiddenSection
+                    ? await createHiddenAlbum(albumName)
+                    : await createAlbum(albumName);
                 await onRemotePull();
 
                 // Show custom toast with both buttons

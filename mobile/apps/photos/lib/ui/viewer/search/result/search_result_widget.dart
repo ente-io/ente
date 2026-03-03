@@ -157,6 +157,8 @@ class SearchResultWidget extends StatelessWidget {
         return localizations.searchResultCameraMake;
       case ResultType.cameraModel:
         return localizations.searchResultCameraModel;
+      case ResultType.deviceCollection:
+        return localizations.onDevice;
       case ResultType.collection:
       case ResultType.year:
       case ResultType.month:

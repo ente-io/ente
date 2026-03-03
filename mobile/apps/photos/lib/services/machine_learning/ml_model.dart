@@ -3,6 +3,7 @@ import "dart:io" show File, Platform;
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/onnx_env.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/network_util.dart";
@@ -46,7 +47,7 @@ abstract class MlModel {
     if (await RemoteAssetsService.instance.hasAsset(modelRemotePath)) {
       return await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
     } else {
-      if (await canUseHighBandwidth()) {
+      if (isOfflineMode || await canUseHighBandwidth()) {
         return await downloadModel();
       } else {
         logger.warning(

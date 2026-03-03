@@ -12,6 +12,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.90.0"
     RUSTFLAGS: -D warnings
 
 permissions:
@@ -102,6 +103,12 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt,clippy
 
             - name: Cache Rust dependencies
               uses: actions/cache@v4
@@ -234,6 +241,19 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt,clippy
+
             - name: Cache Rust dependencies
               uses: actions/cache@v4
               with:
@@ -302,6 +322,13 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              if: needs.detect-changes.outputs.lint_photos == 'true'
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt,clippy
 
             - name: Cache Rust dependencies
               uses: actions/cache@v4

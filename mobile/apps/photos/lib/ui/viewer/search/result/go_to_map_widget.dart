@@ -14,9 +14,9 @@ class GoToMap extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        if (!flagService.mapEnabled) {
+        if (!mapEnabled) {
           try {
-            await flagService.setMapEnabled(true);
+            await setMapEnabled(true);
           } catch (e) {
             showShortToast(
               context,

@@ -542,6 +542,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsOfServicesTitle => 'Terms';
 
   @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get checkingForUpdates => 'Checking for updates...';
+
+  @override
+  String get unableToCheckForUpdatesRightNow =>
+      'Unable to check for updates right now';
+
+  @override
+  String get youAreOnTheLatestVersion => 'You are on the latest version';
+
+  @override
+  String get aNewVersionOfEnteLockerIsAvailable =>
+      'A new version of Ente Locker is available.';
+
+  @override
+  String get criticalUpdateAvailable => 'Critical update available';
+
+  @override
+  String get updateAvailable => 'Update available';
+
+  @override
+  String get downloadUpdate => 'Download update';
+
+  @override
   String get support => 'Support';
 
   @override
@@ -1165,6 +1191,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ve run out of storage space. Free up space to continue uploading.';
 
   @override
+  String get uploadSubscriptionExpiredErrorTitle => 'Subscription expired';
+
+  @override
+  String get uploadSubscriptionExpiredErrorBody =>
+      'Your Ente Photos subscription has expired. Renew your subscription to continue uploading.';
+
+  @override
   String get uploadFileCountLimitErrorTitle => 'File limit reached';
 
   @override
@@ -1764,4 +1797,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noResultsFound => 'No results found';
+
+  @override
+  String get viewActiveSessions => 'View active sessions';
+
+  @override
+  String get authToViewYourActiveSessions =>
+      'Please authenticate to view your active sessions';
 }

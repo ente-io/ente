@@ -711,10 +711,7 @@ class _InlineParentQuote extends StatelessWidget {
 
     if (onTap != null) {
       return GestureDetector(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap!();
-        },
+        onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: content,
       );

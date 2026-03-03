@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
-enum RitualDayThumbnailVariant { photo, empty, camera, future }
+enum RitualDayThumbnailVariant { photo, empty, camera, future, hidden }
 
 class RitualDayThumbnail extends StatelessWidget {
   const RitualDayThumbnail({
@@ -131,7 +132,37 @@ class _Tile extends StatelessWidget {
           borderColor: _futureBorder,
           fillColor: _futureFill,
         ),
+      RitualDayThumbnailVariant.hidden => _HiddenTile(
+          width: width,
+          height: height,
+        ),
     };
+  }
+}
+
+class _HiddenTile extends StatelessWidget {
+  const _HiddenTile({
+    required this.width,
+    required this.height,
+  });
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return _DottedTile(
+      width: width,
+      height: height,
+      borderColor: colorScheme.strokeFaint,
+      fillColor: colorScheme.fillFaint,
+      child: HugeIcon(
+        icon: HugeIcons.strokeRoundedSquareLock01,
+        size: 18,
+        color: colorScheme.textMuted,
+      ),
+    );
   }
 }
 

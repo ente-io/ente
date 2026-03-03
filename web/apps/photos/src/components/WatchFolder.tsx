@@ -27,7 +27,10 @@ import {
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { ensureElectron } from "ente-base/electron";
+import {
+    ensureElectron,
+    suppressMainWindowBlurForTrustedPrompt,
+} from "ente-base/electron";
 import { basename, dirname } from "ente-base/file-name";
 import type { CollectionMapping, FolderWatch } from "ente-base/types/ipc";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
@@ -117,6 +120,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         watcher.addWatch(folderPath, mapping).then((ws) => setWatches(ws));
 
     const addNewWatch = async () => {
+        suppressMainWindowBlurForTrustedPrompt();
         const dirPath = await ensureElectron().selectDirectory();
         if (dirPath) {
             await selectCollectionMappingAndAddWatch(dirPath);

@@ -22,13 +22,11 @@ class CollageWithFourItems extends StatefulWidget {
     this.fourth, {
     super.key,
     this.onControllerReady,
-    this.enableExtendedLayouts = false,
     this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third, fourth;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
-  final bool enableExtendedLayouts;
   final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
@@ -114,28 +112,26 @@ class _CollageWithFourItemsState extends State<CollageWithFourItems>
             });
           },
         ),
-        if (widget.enableExtendedLayouts)
-          CollageLayoutIconButton(
-            child: ThirdVariantIcon(
-              isActive: _variant == Variant.third,
-            ),
-            onTap: () {
-              setState(() {
-                _variant = Variant.third;
-              });
-            },
+        CollageLayoutIconButton(
+          child: ThirdVariantIcon(
+            isActive: _variant == Variant.third,
           ),
-        if (widget.enableExtendedLayouts)
-          CollageLayoutIconButton(
-            child: FourthVariantIcon(
-              isActive: _variant == Variant.fourth,
-            ),
-            onTap: () {
-              setState(() {
-                _variant = Variant.fourth;
-              });
-            },
+          onTap: () {
+            setState(() {
+              _variant = Variant.third;
+            });
+          },
+        ),
+        CollageLayoutIconButton(
+          child: FourthVariantIcon(
+            isActive: _variant == Variant.fourth,
           ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.fourth;
+            });
+          },
+        ),
       ],
     );
   }

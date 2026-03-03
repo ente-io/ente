@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:ente_events/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
-import 'package:locker/services/collections/collections_db.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/db/locker_db.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:logging/logging.dart';
 
@@ -14,7 +14,7 @@ class FavoritesService {
   late Configuration _config;
 
   late CollectionService _collectionService;
-  late CollectionDB _db;
+  late LockerDB _db;
   int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
   final Map<String, int> _cachedFavFileHashes = {};
@@ -30,7 +30,7 @@ class FavoritesService {
   Future<void> init() async {
     _config = Configuration.instance;
     _collectionService = CollectionService.instance;
-    _db = CollectionDB.instance;
+    _db = LockerDB.instance;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
       // When collections are updated, refresh our cache

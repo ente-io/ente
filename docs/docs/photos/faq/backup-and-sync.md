@@ -136,7 +136,7 @@ Ente tracks which files have been uploaded and won't upload them again, even if 
 
 **To force a re-upload of previously uploaded files:**
 
-You would need to use "Reset ignored files" in `Settings > Backup`. However, this is rarely needed and should be done carefully as it will re-upload all previously uploaded files.
+You would need to use "Reset ignored files" option seen when opening an 'On Device' album that is backed up. However, this is rarely needed and should be done carefully as it will re-upload all previously uploaded files.
 
 ### How does Ente handle duplicate files during backup? {#duplicate-handling}
 
@@ -230,6 +230,19 @@ Ente backs up a single primary full-resolution image from the Burst. Additional 
 ### Why do I see duplicate files in the iOS app when the same photo is in an iCloud Shared Album? {#icloud-shared-album-duplicates}
 
 iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
+
+### Why are 2 copies of the same photo seen, one synced and one unsynced (slashed cloud icon) during device migration? {#migration-duplicate-photos}
+
+During migration, Ente rechecks all local photos against what is already uploaded. While this scan is in progress, the same photo can appear twice:
+
+- One as synced (already uploaded)
+- One as unsynced (slashed cloud), representing the local copy being verified
+
+This is temporary. Once verification finishes, the duplicate view disappears and only the synced photo remains.
+
+### When I choose "Delete Both" on a photo, why do I still see it in my device's native gallery? {#delete-both-photo-still-visible}
+
+When you select "Delete Both", Ente deletes the copy stored in Ente as well as the copy stored on your device. However, if you have Google Photos backup or iCloud backup enabled, the cloud copy from those services will still be visible in your native gallery. That copy is managed by Google or Apple, not by Ente.
 
 ## Background Sync
 

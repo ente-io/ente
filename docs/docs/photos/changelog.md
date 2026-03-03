@@ -7,6 +7,59 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v1.3.10 (mobile) - Feb 2026
+
+- Notifications for likes and comments
+- Support for hidden rituals
+- Better upload reliability
+
+## v1.7.18 (desktop) - Feb 2026
+
+- Hide shared albums
+- Right click context menu for photos
+- Cleanup large files
+- Fix search bar losing focus on last backspace
+- Hide empty favorites album from albums bar
+- Cleanup uncategorized photos
+- Hide favorites from album selector dialogs
+- Show current album in album selector for upload flow
+- Sort albums when uploading, adding, moving photos
+- Select all memories in gallery and albums view
+- Edit location of photos and videos
+- More sorting options of albums lists
+- Improved UI for login and sign-up pages
+- Improved map view rendering logic
+- Upload directly to hidden albums
+
+## v1.3.7 (mobile) - Jan 2026
+
+- Settings screen redesign
+- Search within settings
+- Faster search tab loading
+- Search bar moved to top
+- Results screen redesign
+- Search within discovery, location, file type sections
+- Allow admin and album owner to delete comments
+- Pinch to zoom on video
+- View all ignored persons
+- Better merge flow
+- Search and custom sort on people page
+- Consistent sorting of contacts
+- Preview images for unsupported image formats
+- Swap photos and tap to replace in collage creator
+- Performance improvement on file info sheet
+- Fix for music pausing when opening the app
+- Fix for swipe to select issue on Samsung S devices
+- Fix for splash screen issue after backup restore
+- Fix for gallery issues on tablets and landscape mode
+- Fix for uncategorised page not updating after move
+
+## v1.3.0 (mobile) - Jan 2026
+
+- Likes and comments
+- Admin role for albums
+- Video streaming improvements
+
 ## v1.7.17 (desktop) - Dec 2025
 
 - Map view.
