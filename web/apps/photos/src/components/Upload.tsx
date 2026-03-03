@@ -60,10 +60,10 @@ import {
     savePublicCollectionUploaderName,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
-import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     createAlbum,
     createHiddenAlbum,

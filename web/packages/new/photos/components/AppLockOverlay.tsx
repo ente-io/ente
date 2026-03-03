@@ -33,9 +33,9 @@ import React, {
     useState,
 } from "react";
 import {
-    cancelReauthentication,
     attemptDeviceLockUnlock,
     attemptUnlock,
+    cancelReauthentication,
     type DeviceLockUnlockResult,
     type UnlockResult,
 } from "../services/app-lock";
@@ -120,9 +120,8 @@ export const AppLockOverlay: React.FC = () => {
                 slotProps={{
                     backdrop: {
                         sx: {
-                            backgroundColor: "rgba(0, 0, 0, 0.04)",
-                            backdropFilter: "blur(3px)",
-                            WebkitBackdropFilter: "blur(3px)",
+                            backgroundColor:
+                                "var(--mui-palette-backdrop-muted)",
                         },
                     },
                 }}
@@ -161,9 +160,12 @@ export const AppLockOverlay: React.FC = () => {
             aria-label={t("app_lock")}
             slotProps={{
                 backdrop: {
-                    sx: {
-                        backgroundColor: "#000",
-                    },
+                    sx: (theme) => ({
+                        backgroundColor: "secondary.main",
+                        ...theme.applyStyles("dark", {
+                            backgroundColor: "#000",
+                        }),
+                    }),
                 },
             }}
             sx={{ zIndex: "calc(var(--mui-zIndex-tooltip) + 1)" }}
@@ -246,9 +248,7 @@ const titleTextSx = (theme: Theme) => ({
     letterSpacing: "-0.48px",
     color: "#000",
     textAlign: "center" as const,
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 });
 
 const subtitleTextSx = (theme: Theme) => ({
@@ -258,9 +258,7 @@ const subtitleTextSx = (theme: Theme) => ({
     color: "#666",
     textAlign: "center" as const,
     maxWidth: 295,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.64)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.64)" }),
 });
 
 const primaryActionButtonSx = (theme: Theme) => ({
@@ -278,10 +276,7 @@ const primaryActionButtonSx = (theme: Theme) => ({
     textTransform: "none" as const,
     color: "#fff",
     boxShadow: "none",
-    "&:hover": {
-        backgroundColor: ENTE_GREEN_HOVER,
-        boxShadow: "none",
-    },
+    "&:hover": { backgroundColor: ENTE_GREEN_HOVER, boxShadow: "none" },
     "&.Mui-disabled": {
         backgroundColor: "rgba(0, 0, 0, 0.04)",
         color: "#999",
@@ -311,23 +306,15 @@ const secondaryActionButtonSx = (theme: Theme) => ({
     textTransform: "none" as const,
     color: "#333",
     boxShadow: "none",
-    "&:hover": {
-        backgroundColor: "#E8E8E8",
-        boxShadow: "none",
-    },
+    "&:hover": { backgroundColor: "#E8E8E8", boxShadow: "none" },
     ...theme.applyStyles("dark", {
         backgroundColor: "rgba(255, 255, 255, 0.08)",
         color: "rgba(255, 255, 255, 0.9)",
-        "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.12)",
-        },
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
     }),
 });
 
-const inputFieldSx = (
-    theme: Theme,
-    options?: { borderRadius?: number },
-) => ({
+const inputFieldSx = (theme: Theme, options?: { borderRadius?: number }) => ({
     borderRadius: options?.borderRadius ?? 12,
     "& .MuiInputBase-root": {
         // Enforce shape/height at InputBase level so variant-specific styles
@@ -340,13 +327,9 @@ const inputFieldSx = (
         height: 54,
         backgroundColor: "#FAFAFA",
         borderRadius: `${String(options?.borderRadius ?? 12)}px !important`,
-        "&::before": {
-            borderBottom: "1px solid #E0E0E0",
-        },
+        "&::before": { borderBottom: "1px solid #E0E0E0" },
         "&::after": { borderBottom: `2px solid ${ENTE_GREEN}` },
-        "&.Mui-error::after": {
-            borderBottomColor: theme.palette.error.main,
-        },
+        "&.Mui-error::after": { borderBottomColor: theme.palette.error.main },
         "&:hover:not(.Mui-disabled)::before": {
             borderBottom: "1px solid #BDBDBD",
         },
@@ -357,17 +340,12 @@ const inputFieldSx = (
         boxSizing: "border-box" as const,
         fontSize: 16,
         color: "#000",
-        "&::placeholder": {
-            color: "#999",
-            opacity: 1,
-        },
+        "&::placeholder": { color: "#999", opacity: 1 },
     },
     ...theme.applyStyles("dark", {
         "& .MuiInput-root": {
             backgroundColor: "rgba(255, 255, 255, 0.08)",
-            "&::before": {
-                borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
-            },
+            "&::before": { borderBottom: "1px solid rgba(255, 255, 255, 0.3)" },
             "&:hover:not(.Mui-disabled)::before": {
                 borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
             },
@@ -377,9 +355,7 @@ const inputFieldSx = (
         },
         "& .MuiInputBase-input": {
             color: "#fff",
-            "&::placeholder": {
-                color: "rgba(255, 255, 255, 0.5)",
-            },
+            "&::placeholder": { color: "rgba(255, 255, 255, 0.5)" },
         },
     }),
 });
@@ -411,11 +387,7 @@ const LockIllustration: React.FC = () => (
             width: 148,
             maxWidth: "100%",
             lineHeight: 0,
-            "& svg": {
-                display: "block",
-                width: "100%",
-                height: "auto",
-            },
+            "& svg": { display: "block", width: "100%", height: "auto" },
         }}
         dangerouslySetInnerHTML={{ __html: LOCK_ILLUSTRATION_SVG }}
     />
@@ -688,9 +660,7 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                         display: "flex",
                         justifyContent: "center",
                         width: "100%",
-                        "& > *": {
-                            transform: "translateY(-4px)",
-                        },
+                        "& > *": { transform: "translateY(-4px)" },
                     }}
                 >
                     <LockIllustration />
@@ -707,10 +677,12 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                     }}
                 >
                     <Typography sx={titleTextSx}>
-                        {isReauthentication ? t("authenticate") : t("app_locked")}
+                        {isReauthentication
+                            ? t("authenticate")
+                            : t("app_locked")}
                     </Typography>
                     <Typography sx={subtitleTextSx}>
-                        Enter your app lock pin to unlock
+                        {t("app_lock_enter_pin_to_unlock")}
                     </Typography>
                 </Box>
 
@@ -745,7 +717,10 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                                         textAlign: "center",
                                         WebkitTextSecurity: "disc",
                                     },
-                                    "aria-label": `PIN digit ${String(i + 1)}`,
+                                    "aria-label": t(
+                                        "app_lock_pin_digit_label",
+                                        { index: i + 1 },
+                                    ),
                                 },
                             }}
                             sx={(theme) => ({
@@ -770,10 +745,7 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                     onClick={() => {
                         void handleSubmit();
                     }}
-                    sx={(theme) => ({
-                        ...primaryActionButtonSx(theme),
-                        mt: 2,
-                    })}
+                    sx={(theme) => ({ ...primaryActionButtonSx(theme), mt: 2 })}
                 >
                     {loading ? (
                         <CircularProgress size={18} color="inherit" />
@@ -862,9 +834,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                         display: "flex",
                         justifyContent: "center",
                         width: "100%",
-                        "& > *": {
-                            transform: "translateY(-4px)",
-                        },
+                        "& > *": { transform: "translateY(-4px)" },
                     }}
                 >
                     <LockIllustration />
@@ -926,10 +896,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                     fullWidth
                     color="accent"
                     disabled={!password || loading}
-                    sx={(theme) => ({
-                        ...primaryActionButtonSx(theme),
-                        mt: 2,
-                    })}
+                    sx={(theme) => ({ ...primaryActionButtonSx(theme), mt: 2 })}
                 >
                     {isReauthentication ? t("authenticate") : t("unlock")}
                 </FocusVisibleButton>
@@ -987,9 +954,7 @@ const DeviceLockUnlockForm: React.FC<{
                         display: "flex",
                         justifyContent: "center",
                         width: "100%",
-                        "& > *": {
-                            transform: "translateY(-4px)",
-                        },
+                        "& > *": { transform: "translateY(-4px)" },
                     }}
                 >
                     <LockIllustration />
@@ -1006,7 +971,9 @@ const DeviceLockUnlockForm: React.FC<{
                     }}
                 >
                     <Typography sx={titleTextSx}>
-                        {isReauthentication ? t("authenticate") : t("app_locked")}
+                        {isReauthentication
+                            ? t("authenticate")
+                            : t("app_locked")}
                     </Typography>
                     <Typography sx={subtitleTextSx}>
                         {t("device_lock_login_instructions")}
@@ -1023,9 +990,7 @@ const DeviceLockUnlockForm: React.FC<{
                     sx={(theme) => ({
                         ...primaryActionButtonSx(theme),
                         backgroundColor: ENTE_GREEN,
-                        "&:hover": {
-                            backgroundColor: ENTE_GREEN_HOVER,
-                        },
+                        "&:hover": { backgroundColor: ENTE_GREEN_HOVER },
                         fontWeight: 600,
                         mt: 2,
                     })}
@@ -1172,9 +1137,7 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
-                    "& > *": {
-                        transform: "translateY(-4px)",
-                    },
+                    "& > *": { transform: "translateY(-4px)" },
                 }}
             >
                 <LockIllustration />
@@ -1191,7 +1154,9 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                 }}
             >
                 <Typography sx={titleTextSx}>{t("app_locked")}</Typography>
-                <Typography sx={subtitleTextSx}>Please try again in</Typography>
+                <Typography sx={subtitleTextSx}>
+                    {t("app_lock_please_try_again_in")}
+                </Typography>
             </Box>
 
             <Typography

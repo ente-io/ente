@@ -891,42 +891,47 @@ export type ReauthenticateWithAppLockResult =
 
 export const reauthenticateWithAppLock =
     async (): Promise<ReauthenticateWithAppLockResult> => {
-    try {
-        _wasReauthenticationCancelled = false;
-        const snapshot = appLockSnapshot();
-        let canUseAppLock = snapshot.enabled && snapshot.lockType !== "none";
-        if (canUseAppLock && snapshot.lockType === "device") {
-            // For device lock, ensure native auth is actually usable right now.
-            // If unavailable (e.g. Touch ID disabled), fall back to password flow.
-            const capability = await resolveDeviceLockCapability();
-            canUseAppLock = capability.usable;
-        }
-        if (!canUseAppLock) return "fallback";
-
-        return await new Promise<ReauthenticateWithAppLockResult>((resolve) => {
-            const unsubscribe = appLockSubscribe(() => {
-                if (!appLockSnapshot().isLocked) {
-                    unsubscribe();
-                    const wasAuthenticated =
-                        !_wasReauthenticationCancelled;
-                    _wasReauthenticationCancelled = false;
-                    resolve(
-                        wasAuthenticated ? "authenticated" : "cancelled",
-                    );
-                }
-            });
-
-            lock("reauthenticate");
-            if (!appLockSnapshot().isLocked) {
-                unsubscribe();
-                resolve("fallback");
+        try {
+            _wasReauthenticationCancelled = false;
+            const snapshot = appLockSnapshot();
+            let canUseAppLock =
+                snapshot.enabled && snapshot.lockType !== "none";
+            if (canUseAppLock && snapshot.lockType === "device") {
+                // For device lock, ensure native auth is actually usable right now.
+                // If unavailable (e.g. Touch ID disabled), fall back to password flow.
+                const capability = await resolveDeviceLockCapability();
+                canUseAppLock = capability.usable;
             }
-        });
-    } catch (e) {
-        log.error("Failed to start app lock reauthentication", e);
-        return "fallback";
-    }
-};
+            if (!canUseAppLock) return "fallback";
+
+            return await new Promise<ReauthenticateWithAppLockResult>(
+                (resolve) => {
+                    const unsubscribe = appLockSubscribe(() => {
+                        if (!appLockSnapshot().isLocked) {
+                            unsubscribe();
+                            const wasAuthenticated =
+                                !_wasReauthenticationCancelled;
+                            _wasReauthenticationCancelled = false;
+                            resolve(
+                                wasAuthenticated
+                                    ? "authenticated"
+                                    : "cancelled",
+                            );
+                        }
+                    });
+
+                    lock("reauthenticate");
+                    if (!appLockSnapshot().isLocked) {
+                        unsubscribe();
+                        resolve("fallback");
+                    }
+                },
+            );
+        } catch (e) {
+            log.error("Failed to start app lock reauthentication", e);
+            return "fallback";
+        }
+    };
 
 /**
  * Lock the app.
