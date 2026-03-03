@@ -20,11 +20,14 @@ const BODY_EMBED_CHANNELS: i64 = 3;
 /// Output: L2-normalized embedding vector (128-d for BYOL).
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_face()`.
+/// Run pet face embedding using each face's own `class_id` to select the model.
+///
+/// Faces are grouped by species and batched per model to avoid running the
+/// wrong embedding model on any detection.
 pub fn run_pet_face_embedding(
     runtime: &mut MlRuntime,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [PetFaceResult],
-    species: u8,
 ) -> MlResult<()> {
     if aligned_faces.is_empty() {
         return Ok(());
@@ -38,55 +41,75 @@ pub fn run_pet_face_embedding(
     }
 
     let per_face_len = (FACE_EMBED_INPUT_SIZE * FACE_EMBED_INPUT_SIZE * FACE_EMBED_CHANNELS) as usize;
-    let mut input = Vec::with_capacity(per_face_len * aligned_faces.len());
-    for aligned in aligned_faces {
-        if aligned.len() != per_face_len {
-            return Err(MlError::Preprocess(format!(
-                "aligned pet face tensor length {} does not match expected {}",
-                aligned.len(),
-                per_face_len
+
+    // Group indices by species (class_id from detection).
+    let mut dog_indices = Vec::new();
+    let mut cat_indices = Vec::new();
+    for (i, fr) in face_results.iter().enumerate() {
+        if fr.detection.class_id == 1 {
+            cat_indices.push(i);
+        } else {
+            dog_indices.push(i);
+        }
+    }
+
+    // Process each species batch.
+    for (species, indices) in [(0u8, &dog_indices), (1u8, &cat_indices)] {
+        if indices.is_empty() {
+            continue;
+        }
+
+        let mut input = Vec::with_capacity(per_face_len * indices.len());
+        for &idx in indices {
+            let aligned = &aligned_faces[idx];
+            if aligned.len() != per_face_len {
+                return Err(MlError::Preprocess(format!(
+                    "aligned pet face tensor length {} does not match expected {}",
+                    aligned.len(),
+                    per_face_len
+                )));
+            }
+            input.extend_from_slice(aligned);
+        }
+
+        let session = if species == 0 {
+            runtime.pet_face_embedding_dog_session_mut()?
+        } else {
+            runtime.pet_face_embedding_cat_session_mut()?
+        };
+
+        let (shape, output) = onnx::run_f32(
+            session,
+            input,
+            [
+                indices.len() as i64,
+                FACE_EMBED_CHANNELS,
+                FACE_EMBED_INPUT_SIZE,
+                FACE_EMBED_INPUT_SIZE,
+            ],
+        )?;
+
+        if shape.is_empty() {
+            return Err(MlError::Postprocess(
+                "pet face embedding output shape is empty".to_string(),
+            ));
+        }
+        let batch = shape[0] as usize;
+        if batch != indices.len() {
+            return Err(MlError::Postprocess(format!(
+                "pet face embedding batch mismatch: output={batch}, expected={}",
+                indices.len()
             )));
         }
-        input.extend_from_slice(aligned);
-    }
+        let embedding_size = output.len() / batch;
 
-    let session = if species == 0 {
-        runtime.pet_face_embedding_dog_session_mut()?
-    } else {
-        runtime.pet_face_embedding_cat_session_mut()?
-    };
-
-    let (shape, output) = onnx::run_f32(
-        session,
-        input,
-        [
-            aligned_faces.len() as i64,
-            FACE_EMBED_CHANNELS,
-            FACE_EMBED_INPUT_SIZE,
-            FACE_EMBED_INPUT_SIZE,
-        ],
-    )?;
-
-    if shape.is_empty() {
-        return Err(MlError::Postprocess(
-            "pet face embedding output shape is empty".to_string(),
-        ));
-    }
-    let batch = shape[0] as usize;
-    if batch != face_results.len() {
-        return Err(MlError::Postprocess(format!(
-            "pet face embedding batch mismatch: output={batch}, expected={}",
-            face_results.len()
-        )));
-    }
-    let embedding_size = output.len() / batch;
-
-    for (idx, face_result) in face_results.iter_mut().enumerate() {
-        let start = idx * embedding_size;
-        let mut embedding = output[start..(start + embedding_size)].to_vec();
-        normalize_embedding(&mut embedding);
-        face_result.face_embedding = embedding;
-        face_result.species = species;
+        for (batch_idx, &orig_idx) in indices.iter().enumerate() {
+            let start = batch_idx * embedding_size;
+            let mut embedding = output[start..(start + embedding_size)].to_vec();
+            normalize_embedding(&mut embedding);
+            face_results[orig_idx].face_embedding = embedding;
+            face_results[orig_idx].species = species;
+        }
     }
 
     Ok(())
@@ -94,24 +117,24 @@ pub fn run_pet_face_embedding(
 
 /// Run pet body embedding on cropped body regions.
 ///
-/// For each body detection, extracts a crop, preprocesses with ImageNet
-/// normalization, and runs through the species-specific body embedding model.
+/// Each body's own `coco_class` (16=dog, 15=cat) selects the embedding model,
+/// so mixed-species images get the correct model per detection.
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_body()`.
 pub fn run_pet_body_embedding(
     runtime: &mut MlRuntime,
     decoded: &DecodedImage,
     body_results: &mut [PetBodyResult],
-    species: u8,
 ) -> MlResult<()> {
     for body_result in body_results.iter_mut() {
         let (crop_data, crop_w, crop_h) = extract_crop(decoded, &body_result.detection.box_xyxy)?;
         let input = preprocess_pet_embedding(&crop_data, crop_w, crop_h)?;
 
-        let session = if species == 0 {
-            runtime.pet_body_embedding_dog_session_mut()?
-        } else {
+        // COCO class 15 = cat, 16 = dog
+        let session = if body_result.detection.coco_class == 15 {
             runtime.pet_body_embedding_cat_session_mut()?
+        } else {
+            runtime.pet_body_embedding_dog_session_mut()?
         };
 
         let (_shape, output) = onnx::run_f32(

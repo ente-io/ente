@@ -5,7 +5,7 @@ use crate::ml::{
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     pet::{
         align::run_pet_face_alignment,
-        detect::{detect_species, run_pet_body_detection, run_pet_face_detection},
+        detect::{run_pet_body_detection, run_pet_face_detection},
         embed::{run_pet_body_embedding, run_pet_face_embedding},
     },
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
@@ -268,8 +268,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             let body_detections = run_pet_body_detection(runtime, &decoded)?;
             ml_log(&format!("file={} pet body detection: {} bodies in {:?} rss={}MB", req.file_id, body_detections.len(), t.elapsed(), vm_rss_kb() / 1024));
 
-            let species = detect_species(&body_detections);
-
             runtime.unload_pet_detection_sessions();
             ml_log(&format!("file={} pet detection sessions unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
 
@@ -278,7 +276,7 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
                 let (aligned, mut pet_results) =
                     run_pet_face_alignment(req.file_id, &decoded, &pet_face_detections)?;
                 ml_log(&format!("file={} pet face aligned rss={}MB", req.file_id, vm_rss_kb() / 1024));
-                run_pet_face_embedding(runtime, &aligned, &mut pet_results, species)?;
+                run_pet_face_embedding(runtime, &aligned, &mut pet_results)?;
                 ml_log(&format!("file={} pet face embedding: {} faces in {:?} rss={}MB", req.file_id, pet_results.len(), t.elapsed(), vm_rss_kb() / 1024));
                 pet_results
             } else {
@@ -298,7 +296,7 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
                 .collect();
             if !body_results.is_empty() {
                 let t = std::time::Instant::now();
-                run_pet_body_embedding(runtime, &decoded, &mut body_results, species)?;
+                run_pet_body_embedding(runtime, &decoded, &mut body_results)?;
                 ml_log(&format!("file={} pet body embedding: {} bodies in {:?} rss={}MB", req.file_id, body_results.len(), t.elapsed(), vm_rss_kb() / 1024));
             }
 

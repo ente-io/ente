@@ -64,6 +64,8 @@ pub struct PetFaceDetection {
     pub box_xyxy: [f32; 4],
     /// 3 keypoints: [left_eye, right_eye, nose]
     pub keypoints: [[f32; 2]; 3],
+    /// 0 = dog, 1 = cat (from class scores in detector output)
+    pub class_id: u8,
 }
 
 #[derive(Clone, Debug)]
