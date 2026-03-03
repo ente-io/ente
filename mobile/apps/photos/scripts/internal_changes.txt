@@ -1,4 +1,8 @@
+<<<<<<< sorting_albums_dont_work_in_hidden_section
 - Ashil: Fix hidden albums sorting in Hidden section all-albums view
+=======
+- Setal,Ashil: Improve Help & Support section in settings
+>>>>>>> main
 - Laurens: (I) Internal toggle to let ML run uninterrupted
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users

@@ -56,31 +56,31 @@ pub struct RustDimensions {
 
 #[derive(Clone, Debug)]
 pub struct RustDetection {
-    pub score: f64,
-    pub box_xyxy: Vec<f64>,
-    pub all_keypoints: Vec<Vec<f64>>,
+    pub score: f32,
+    pub box_xyxy: Vec<f32>,
+    pub all_keypoints: Vec<Vec<f32>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct RustAlignmentResult {
-    pub affine_matrix: Vec<Vec<f64>>,
-    pub center: Vec<f64>,
-    pub size: f64,
-    pub rotation: f64,
+    pub affine_matrix: Vec<Vec<f32>>,
+    pub center: Vec<f32>,
+    pub size: f32,
+    pub rotation: f32,
 }
 
 #[derive(Clone, Debug)]
 pub struct RustFaceResult {
     pub detection: RustDetection,
-    pub blur_value: f64,
+    pub blur_value: f32,
     pub alignment: RustAlignmentResult,
-    pub embedding: Vec<f64>,
+    pub embedding: Vec<f32>,
     pub face_id: String,
 }
 
 #[derive(Clone, Debug)]
 pub struct RustClipResult {
-    pub embedding: Vec<f64>,
+    pub embedding: Vec<f32>,
 }
 
 #[derive(Clone, Debug)]
@@ -117,36 +117,40 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
         height: decoded.dimensions.height as i32,
     };
 
-    runtime::with_runtime_mut(&runtime_config, |runtime| {
-        let faces = if req.run_faces {
-            let detections = run_face_detection(runtime, &decoded)?;
-            if detections.is_empty() {
-                Some(Vec::new())
-            } else {
-                let (aligned, mut face_results) =
-                    run_face_alignment(req.file_id, &decoded, &detections)?;
-                run_face_embedding(runtime, &aligned, &mut face_results)?;
-                Some(face_results.into_iter().map(to_api_face_result).collect())
-            }
+    let faces = if req.run_faces {
+        let detections = runtime::with_runtime_mut(&runtime_config, |runtime| {
+            run_face_detection(runtime, &decoded)
+        })?;
+        if detections.is_empty() {
+            Some(Vec::new())
         } else {
-            None
-        };
+            let (aligned, mut face_results) =
+                run_face_alignment(req.file_id, &decoded, detections)?;
+            runtime::with_runtime_mut(&runtime_config, |runtime| {
+                run_face_embedding(runtime, &aligned, &mut face_results)
+            })?;
+            Some(face_results.into_iter().map(to_api_face_result).collect())
+        }
+    } else {
+        None
+    };
 
-        let clip = if req.run_clip {
-            let clip = run_clip_image(runtime, &decoded)?;
-            Some(RustClipResult {
-                embedding: clip.embedding.into_iter().map(|v| v as f64).collect(),
-            })
-        } else {
-            None
-        };
-
-        Ok(AnalyzeImageResult {
-            file_id: req.file_id,
-            decoded_image_size: dims.clone(),
-            faces,
-            clip,
+    let clip = if req.run_clip {
+        let clip = runtime::with_runtime_mut(&runtime_config, |runtime| {
+            run_clip_image(runtime, &decoded)
+        })?;
+        Some(RustClipResult {
+            embedding: clip.embedding,
         })
+    } else {
+        None
+    };
+
+    Ok(AnalyzeImageResult {
+        file_id: req.file_id,
+        decoded_image_size: dims,
+        faces,
+        clip,
     })
 }
 
@@ -200,38 +204,28 @@ fn to_provider_policy(policy: &RustExecutionProviderPolicy) -> ExecutionProvider
 fn to_api_face_result(result: crate::ml::types::FaceResult) -> RustFaceResult {
     RustFaceResult {
         detection: RustDetection {
-            score: result.detection.score as f64,
-            box_xyxy: result
-                .detection
-                .box_xyxy
-                .into_iter()
-                .map(|v| v as f64)
-                .collect(),
+            score: result.detection.score,
+            box_xyxy: result.detection.box_xyxy.into_iter().collect(),
             all_keypoints: result
                 .detection
                 .keypoints
                 .into_iter()
-                .map(|point| point.into_iter().map(|v| v as f64).collect())
+                .map(|point| point.into_iter().collect())
                 .collect(),
         },
-        blur_value: result.blur_value as f64,
+        blur_value: result.blur_value,
         alignment: RustAlignmentResult {
             affine_matrix: result
                 .alignment
                 .affine_matrix
                 .into_iter()
-                .map(|row| row.into_iter().map(|v| v as f64).collect())
+                .map(|row| row.into_iter().collect())
                 .collect(),
-            center: result
-                .alignment
-                .center
-                .into_iter()
-                .map(|v| v as f64)
-                .collect(),
-            size: result.alignment.size as f64,
-            rotation: result.alignment.rotation as f64,
+            center: result.alignment.center.into_iter().collect(),
+            size: result.alignment.size,
+            rotation: result.alignment.rotation,
         },
-        embedding: result.embedding.into_iter().map(|v| v as f64).collect(),
+        embedding: result.embedding,
         face_id: result.face_id,
     }
 }
