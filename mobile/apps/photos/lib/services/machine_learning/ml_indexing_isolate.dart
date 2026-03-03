@@ -30,7 +30,7 @@ class MLIndexingIsolate extends SuperIsolate {
   String get isolateName => "MLIndexingIsolate";
 
   @override
-  bool get shouldAutomaticDispose => false;
+  bool get shouldAutomaticDispose => true;
 
   bool get _shouldUseRustMl => flagService.useRustForML || isOfflineMode;
 

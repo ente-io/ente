@@ -10,7 +10,6 @@ import "package:photos/db/ml/clip_vector_db.dart" show VectorDbStats;
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/schema.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
-import "package:shared_preferences/shared_preferences.dart";
 
 /// Vector database for pet embeddings.
 ///
@@ -28,7 +27,6 @@ class PetVectorDB {
   static const int bodyDimension = 192;
 
   final String _databaseName;
-  final String _migrationKey;
   final BigInt _embeddingDimension;
 
   static Logger get logger => _logger;
@@ -36,7 +34,6 @@ class PetVectorDB {
   // Private constructor for named instances
   PetVectorDB._named(
     this._databaseName,
-    this._migrationKey,
     this._embeddingDimension,
   );
 
@@ -44,25 +41,21 @@ class PetVectorDB {
 
   static final dogFace = PetVectorDB._named(
     "ente.ml.vectordb.pet.dog_face.usearch",
-    "pet_vectordb_dog_face_migration",
     BigInt.from(faceDimension),
   );
 
   static final catFace = PetVectorDB._named(
     "ente.ml.vectordb.pet.cat_face.usearch",
-    "pet_vectordb_cat_face_migration",
     BigInt.from(faceDimension),
   );
 
   static final dogBody = PetVectorDB._named(
     "ente.ml.vectordb.pet.dog_body.usearch",
-    "pet_vectordb_dog_body_migration",
     BigInt.from(bodyDimension),
   );
 
   static final catBody = PetVectorDB._named(
     "ente.ml.vectordb.pet.cat_body.usearch",
-    "pet_vectordb_cat_body_migration",
     BigInt.from(bodyDimension),
   );
 
@@ -92,19 +85,10 @@ class PetVectorDB {
     return _vectorDbFuture!;
   }
 
-  bool? _migrationDone;
-
   Future<VectorDb> _initVectorDB() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String dbPath = join(documentsDirectory.path, _databaseName);
     _logger.info("Opening pet vectorDB: DB path $dbPath");
-    final indexFile = File(dbPath);
-    if (!await indexFile.exists() && await checkIfMigrationDone()) {
-      _logger.severe(
-        "Pet VectorDB file missing while migration is marked done. Invalidating.",
-      );
-      await invalidateMigrationState();
-    }
     late VectorDb vectorDB;
     try {
       vectorDB = VectorDb(
@@ -128,26 +112,6 @@ class PetVectorDB {
     final stats = await getIndexStats(vectorDB);
     _logger.info("Pet VectorDB opened with stats: ${stats.toString()}");
     return vectorDB;
-  }
-
-  Future<bool> checkIfMigrationDone() async {
-    if (_migrationDone != null) return _migrationDone!;
-    final prefs = await SharedPreferences.getInstance();
-    final done = prefs.getBool(_migrationKey) ?? false;
-    _migrationDone = done;
-    return done;
-  }
-
-  Future<void> setMigrationDone() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_migrationKey, true);
-    _migrationDone = true;
-  }
-
-  Future<void> invalidateMigrationState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_migrationKey, false);
-    _migrationDone = false;
   }
 
   // ── ID Mapping (pet_face_id string → integer for usearch) ──
@@ -196,13 +160,13 @@ class PetVectorDB {
     return result;
   }
 
-  /// Get or create integer vector IDs for body embeddings.
-  /// Uses [petBodyVectorIdMappingTable] — separate ID space from face embeddings.
-  Future<Map<String, int>> getPetBodyVectorIdMap(
-    Iterable<String> petBodyIds, {
+  /// Get or create integer vector IDs for body/object embeddings.
+  /// Uses [objectVectorIdMappingTable] — separate ID space from face embeddings.
+  Future<Map<String, int>> getObjectVectorIdMap(
+    Iterable<String> objectIds, {
     bool createIfMissing = false,
   }) async {
-    final uniqueIds = petBodyIds.toSet().toList(growable: false);
+    final uniqueIds = objectIds.toSet().toList(growable: false);
     if (uniqueIds.isEmpty) return {};
 
     final mlDataDB = MLDataDB.instance;
@@ -210,7 +174,7 @@ class PetVectorDB {
 
     if (createIfMissing) {
       const insertSql = '''
-        INSERT OR IGNORE INTO $petBodyVectorIdMappingTable ($petBodyIDColumn)
+        INSERT OR IGNORE INTO $objectVectorIdMappingTable ($objectIDColumn)
         VALUES (?)
       ''';
       final insertParams = <List<Object?>>[];
@@ -226,15 +190,15 @@ class PetVectorDB {
       final chunk = uniqueIds.sublist(i, min(i + chunkSize, uniqueIds.length));
       final rows = await db.getAll(
         '''
-          SELECT $petBodyIDColumn, $petBodyVectorIdColumn
-          FROM $petBodyVectorIdMappingTable
-          WHERE $petBodyIDColumn IN (${List.filled(chunk.length, '?').join(',')})
+          SELECT $objectIDColumn, $objectVectorIdColumn
+          FROM $objectVectorIdMappingTable
+          WHERE $objectIDColumn IN (${List.filled(chunk.length, '?').join(',')})
         ''',
         chunk,
       );
       for (final row in rows) {
-        result[row[petBodyIDColumn] as String] =
-            row[petBodyVectorIdColumn] as int;
+        result[row[objectIDColumn] as String] =
+            row[objectVectorIdColumn] as int;
       }
     }
     return result;
@@ -317,7 +281,6 @@ class PetVectorDB {
 
   /// Delete all embeddings and reset the index.
   Future<void> deleteAllEmbeddings() async {
-    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.resetIndex();
@@ -347,7 +310,6 @@ class PetVectorDB {
   }
 
   Future<void> deleteIndex() async {
-    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.deleteIndex();
@@ -368,7 +330,6 @@ class PetVectorDB {
         await file.delete();
       }
       _vectorDbFuture = null;
-      await invalidateMigrationState();
     } catch (e, s) {
       _logger.severe("Error deleting pet index file", e, s);
       rethrow;
