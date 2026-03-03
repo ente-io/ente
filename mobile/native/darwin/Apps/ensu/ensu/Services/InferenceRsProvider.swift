@@ -65,6 +65,14 @@ final class InferenceRsProvider {
         target: InferenceModelTarget,
         onProgress: @escaping (InferenceDownloadProgress) -> Void
     ) async throws {
+        try await ensureModelReady(target: target, onProgress: onProgress, allowRecovery: true)
+    }
+
+    private func ensureModelReady(
+        target: InferenceModelTarget,
+        onProgress: @escaping (InferenceDownloadProgress) -> Void,
+        allowRecovery: Bool
+    ) async throws {
         if currentModelId == target.id, modelHandle != nil, contextHandle != nil {
             return
         }
@@ -80,12 +88,22 @@ final class InferenceRsProvider {
         let mmprojPath = mmprojPathFor(target: target)
 
         var downloads: [DownloadTarget] = []
-        if !FileManager.default.fileExists(atPath: modelPath.path) {
+        let modelExistsAtStart = FileManager.default.fileExists(atPath: modelPath.path)
+        if shouldRedownloadExistingFile(at: modelPath) || !modelExistsAtStart {
+            if modelExistsAtStart {
+                try? FileManager.default.removeItem(at: modelPath)
+            }
             downloads.append(DownloadTarget(label: "Model", url: target.url, destination: modelPath))
         }
-        if let mmprojUrl = target.mmprojUrl, let mmprojPath,
-           !FileManager.default.fileExists(atPath: mmprojPath.path) {
-            downloads.append(DownloadTarget(label: "Mmproj", url: mmprojUrl, destination: mmprojPath))
+
+        if let mmprojUrl = target.mmprojUrl, let mmprojPath {
+            let mmprojExistsAtStart = FileManager.default.fileExists(atPath: mmprojPath.path)
+            if shouldRedownloadExistingFile(at: mmprojPath) || !mmprojExistsAtStart {
+                if mmprojExistsAtStart {
+                    try? FileManager.default.removeItem(at: mmprojPath)
+                }
+                downloads.append(DownloadTarget(label: "Mmproj", url: mmprojUrl, destination: mmprojPath))
+            }
         }
 
         if !downloads.isEmpty {
@@ -127,7 +145,17 @@ final class InferenceRsProvider {
         }
 
         onProgress(InferenceDownloadProgress(percent: 100, status: "Loading model..."))
-        try loadModelHandle(target: target, modelPath: modelPath)
+        do {
+            try loadModelHandle(target: target, modelPath: modelPath)
+        } catch {
+            if allowRecovery, downloads.isEmpty,
+               recoverFromCachedModelLoadFailure(modelPath: modelPath, mmprojPath: mmprojPath) {
+                onProgress(InferenceDownloadProgress(percent: 0, status: "Cached model looked invalid. Retrying download..."))
+                try await ensureModelReady(target: target, onProgress: onProgress, allowRecovery: false)
+                return
+            }
+            throw error
+        }
         onProgress(InferenceDownloadProgress(percent: 100, status: "Ready"))
     }
 
@@ -469,6 +497,28 @@ final class InferenceRsProvider {
     private func fileSize(_ url: URL) -> Int64 {
         let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
         return (attrs?[.size] as? NSNumber)?.int64Value ?? 0
+    }
+
+    private func shouldRedownloadExistingFile(at url: URL) -> Bool {
+        guard FileManager.default.fileExists(atPath: url.path) else { return false }
+        let size = fileSize(url)
+        if size <= 0 {
+            return true
+        }
+        return !looksLikeGguf(file: url)
+    }
+
+    private func recoverFromCachedModelLoadFailure(modelPath: URL, mmprojPath: URL?) -> Bool {
+        var removedAny = false
+        if FileManager.default.fileExists(atPath: modelPath.path) {
+            try? FileManager.default.removeItem(at: modelPath)
+            removedAny = true
+        }
+        if let mmprojPath, FileManager.default.fileExists(atPath: mmprojPath.path) {
+            try? FileManager.default.removeItem(at: mmprojPath)
+            removedAny = true
+        }
+        return removedAny
     }
 
     private struct DownloadTarget {
