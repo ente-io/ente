@@ -137,6 +137,8 @@ const lsKeyEnabled = "appLock.enabled";
 // Stores the selected app-lock method ("pin" | "password" | "device" | "none").
 const lsKeyAppLockMethod = "appLock.lockType";
 const lsKeyAutoLockTimeMs = "appLock.autoLockTimeMs";
+const ssKeySuppressNextSessionRefreshLock =
+    "appLock.suppressNextSessionRefreshLock";
 
 // -- KV DB keys (IndexedDB, async) --
 
@@ -178,6 +180,34 @@ export const shouldSuppressAutoLockOnBlur = () =>
  */
 export const clearAutoLockBlurSuppression = () => {
     clearMainWindowBlurSuppression();
+};
+
+/**
+ * Suppress one app-lock refresh cycle after a trusted app-initiated reload.
+ */
+export const suppressAppLockRefreshFromSessionForTrustedReload = () => {
+    try {
+        if (localStorage.getItem(lsKeyEnabled) !== "true") return;
+        sessionStorage.setItem(ssKeySuppressNextSessionRefreshLock, "true");
+    } catch {
+        // Ignore storage write errors; fallback to regular app-lock behavior.
+    }
+};
+
+const consumeAppLockRefreshSuppressionFromSession = () => {
+    try {
+        if (
+            sessionStorage.getItem(ssKeySuppressNextSessionRefreshLock) !== "true"
+        ) {
+            return false;
+        }
+
+        sessionStorage.removeItem(ssKeySuppressNextSessionRefreshLock);
+        return true;
+    } catch {
+        // Ignore storage read errors; fallback to regular app-lock behavior.
+        return false;
+    }
 };
 
 export type DeviceLockMode = "native";
@@ -549,7 +579,12 @@ const unlockLocally = () => {
  */
 export const refreshAppLockStateFromSession = () => {
     const config = readPersistedAppLockConfig();
-    const isLocked = config.enabled && haveMasterKeyInSession();
+    const shouldSuppressLockForTrustedReload =
+        consumeAppLockRefreshSuppressionFromSession();
+    const isLocked =
+        config.enabled &&
+        haveMasterKeyInSession() &&
+        !shouldSuppressLockForTrustedReload;
     setSnapshotFromPersistedConfig(config, isLocked);
 };
 

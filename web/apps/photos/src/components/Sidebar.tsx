@@ -83,7 +83,10 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import { reauthenticateWithAppLock } from "ente-new/photos/services/app-lock";
+import {
+    reauthenticateWithAppLock,
+    suppressAppLockRefreshFromSessionForTrustedReload,
+} from "ente-new/photos/services/app-lock";
 import {
     PseudoCollectionID,
     type CollectionSummaries,
@@ -1288,6 +1291,8 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
+        if (newLocale === locale) return;
+
         void setLocaleInUse(newLocale).then(() => {
             // [Note: Changing locale causes a full reload]
             //
@@ -1297,6 +1302,12 @@ const LanguageSelector = () => {
             // We also rely on this behaviour by caching various formatters in
             // module static variables that not get updated if the i18n.language
             // changes unless there is a full reload.
+            //
+            // Mark this as a trusted app-initiated reload so desktop app-lock
+            // setup does not force an immediate lock screen.
+            if (globalThis.electron) {
+                suppressAppLockRefreshFromSessionForTrustedReload();
+            }
             window.location.reload();
         });
     };
