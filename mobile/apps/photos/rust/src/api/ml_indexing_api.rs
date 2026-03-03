@@ -217,16 +217,11 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             req.file_id, dims.width, dims.height, t0.elapsed(),
             vm_rss_kb() / 1024, (vm_rss_kb() as i64 - rss0 as i64) / 1024
         ));
-        // Unload sessions between phases to keep peak native memory low.
-        // Each phase lazily loads only the sessions it needs; unloading
-        // after each phase ensures we never hold all models simultaneously.
-
         let faces = if req.run_faces {
             let t = std::time::Instant::now();
             let detections = run_face_detection(runtime, &decoded)?;
             ml_log(&format!("file={} face detection: {} faces in {:?} rss={}MB", req.file_id, detections.len(), t.elapsed(), vm_rss_kb() / 1024));
             if detections.is_empty() {
-                runtime.unload_face_sessions();
                 Some(Vec::new())
             } else {
                 let t = std::time::Instant::now();
@@ -236,8 +231,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
                 let t = std::time::Instant::now();
                 run_face_embedding(runtime, &aligned, &mut face_results)?;
                 ml_log(&format!("file={} face embedding done in {:?} rss={}MB", req.file_id, t.elapsed(), vm_rss_kb() / 1024));
-                runtime.unload_face_sessions();
-                ml_log(&format!("file={} face sessions unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
                 Some(face_results.into_iter().map(to_api_face_result).collect())
             }
         } else {
@@ -248,8 +241,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             let t = std::time::Instant::now();
             let clip = run_clip_image(runtime, &decoded)?;
             ml_log(&format!("file={} clip done in {:?} rss={}MB", req.file_id, t.elapsed(), vm_rss_kb() / 1024));
-            runtime.unload_clip_session();
-            ml_log(&format!("file={} clip session unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
             Some(RustClipResult {
                 embedding: clip.embedding,
             })
@@ -268,9 +259,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             let body_detections = run_pet_body_detection(runtime, &decoded)?;
             ml_log(&format!("file={} pet body detection: {} bodies in {:?} rss={}MB", req.file_id, body_detections.len(), t.elapsed(), vm_rss_kb() / 1024));
 
-            runtime.unload_pet_detection_sessions();
-            ml_log(&format!("file={} pet detection sessions unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
-
             let pet_face_results = if !pet_face_detections.is_empty() {
                 let t = std::time::Instant::now();
                 let (aligned, mut pet_results) =
@@ -282,9 +270,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             } else {
                 Vec::new()
             };
-
-            runtime.unload_pet_face_embedding_sessions();
-            ml_log(&format!("file={} pet face embed sessions unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
 
             let mut body_results: Vec<crate::ml::types::PetBodyResult> = body_detections
                 .into_iter()
@@ -303,9 +288,6 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             // Free decoded image RGB buffer (~36 MB) now that all processing is done.
             drop(decoded);
             ml_log(&format!("file={} decoded dropped rss={}MB", req.file_id, vm_rss_kb() / 1024));
-
-            runtime.unload_pet_body_embedding_sessions();
-            ml_log(&format!("file={} pet body embed sessions unloaded rss={}MB", req.file_id, vm_rss_kb() / 1024));
 
             (
                 Some(pet_face_results.into_iter().map(to_api_pet_face_result).collect()),
