@@ -119,7 +119,10 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const EmailEntryPage(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },
