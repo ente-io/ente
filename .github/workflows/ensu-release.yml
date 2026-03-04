@@ -162,37 +162,6 @@ jobs:
                   SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
 
-            - name: Validate Azure Trusted Signing CLI setup (Windows only)
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              env:
-                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-                  TRUSTED_SIGNING_CLI_PATH: ${{ env.TRUSTED_SIGNING_CLI_PATH }}
-                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
-                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
-              run: |
-                  cmd=(
-                    "${TRUSTED_SIGNING_CLI_PATH}"
-                    -e "${AZURE_ENDPOINT}"
-                    -a "${AZURE_CODE_SIGNING_NAME}"
-                    -c "${AZURE_CERT_PROFILE_NAME}"
-                  )
-
-                  if [ -n "${AZURE_CLI_PATH}" ]; then
-                    cmd+=(--azure-cli-path "${AZURE_CLI_PATH}")
-                  fi
-                  if [ -n "${SIGNTOOL_PATH}" ]; then
-                    cmd+=(--sign-tool-path "${SIGNTOOL_PATH}")
-                  fi
-
-                  cmd+=(--ignore-unsupported true rust/apps/ensu/package.json)
-                  "${cmd[@]}"
-
             - name: Enable updater artifacts for release builds
               shell: bash
               env:
@@ -228,6 +197,8 @@ jobs:
                   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
                   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}
