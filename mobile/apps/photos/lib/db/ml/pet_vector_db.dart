@@ -10,6 +10,7 @@ import "package:photos/db/ml/clip_vector_db.dart" show VectorDbStats;
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/schema.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
+import "package:synchronized/synchronized.dart";
 
 /// Vector database for pet embeddings.
 ///
@@ -79,6 +80,7 @@ class PetVectorDB {
   }
 
   Future<VectorDb>? _vectorDbFuture;
+  final Lock _writeLock = Lock();
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -206,14 +208,24 @@ class PetVectorDB {
 
   // ── Vector Operations ──
 
+  Future<void> _runWriteOperation(
+    Future<void> Function(VectorDb db) operation,
+  ) async {
+    final db = await _vectorDB;
+    await _writeLock.synchronized(() async {
+      await operation(db);
+    });
+  }
+
   /// Insert a single pet face embedding into the vector DB.
   Future<void> insertEmbedding({
     required int vectorId,
     required List<double> embedding,
   }) async {
-    final db = await _vectorDB;
     try {
-      await db.addVector(key: BigInt.from(vectorId), vector: embedding);
+      await _runWriteOperation((db) async {
+        await db.addVector(key: BigInt.from(vectorId), vector: embedding);
+      });
     } catch (e, s) {
       _logger.severe("Error inserting pet embedding", e, s);
       rethrow;
@@ -225,10 +237,14 @@ class PetVectorDB {
     required List<int> vectorIds,
     required List<Float32List> embeddings,
   }) async {
-    final db = await _vectorDB;
+    if (vectorIds.isEmpty || embeddings.isEmpty) {
+      return;
+    }
     final bigKeys = Uint64List.fromList(vectorIds);
     try {
-      await db.bulkAddVectors(keys: bigKeys, vectors: embeddings);
+      await _runWriteOperation((db) async {
+        await db.bulkAddVectors(keys: bigKeys, vectors: embeddings);
+      });
     } catch (e, s) {
       _logger.severe("Error bulk inserting pet embeddings", e, s);
       rethrow;
@@ -249,11 +265,18 @@ class PetVectorDB {
 
   /// Delete embeddings by their vector IDs.
   Future<void> deleteEmbeddings(List<int> vectorIds) async {
-    final db = await _vectorDB;
+    if (vectorIds.isEmpty) {
+      return;
+    }
     try {
-      final deletedCount =
-          await db.bulkRemoveVectors(keys: Uint64List.fromList(vectorIds));
-      _logger.info("Deleted $deletedCount pet embeddings");
+      BigInt deletedCount = BigInt.zero;
+      await _runWriteOperation((db) async {
+        deletedCount =
+            await db.bulkRemoveVectors(keys: Uint64List.fromList(vectorIds));
+      });
+      _logger.info(
+        "Deleted $deletedCount pet embeddings, from ${vectorIds.length} keys",
+      );
     } catch (e, s) {
       _logger.severe("Error deleting pet embeddings", e, s);
       rethrow;
@@ -281,9 +304,10 @@ class PetVectorDB {
 
   /// Delete all embeddings and reset the index.
   Future<void> deleteAllEmbeddings() async {
-    final db = await _vectorDB;
     try {
-      await db.resetIndex();
+      await _runWriteOperation((db) async {
+        await db.resetIndex();
+      });
     } catch (e, s) {
       _logger.severe("Error deleting all pet embeddings", e, s);
       rethrow;
@@ -312,8 +336,10 @@ class PetVectorDB {
   Future<void> deleteIndex() async {
     final db = await _vectorDB;
     try {
-      await db.deleteIndex();
-      _vectorDbFuture = null;
+      await _writeLock.synchronized(() async {
+        await db.deleteIndex();
+        _vectorDbFuture = null;
+      });
     } catch (e, s) {
       _logger.severe("Error deleting pet index", e, s);
       rethrow;
@@ -321,18 +347,20 @@ class PetVectorDB {
   }
 
   Future<void> deleteIndexFile() async {
-    try {
-      final documentsDirectory = await getApplicationDocumentsDirectory();
-      final String dbPath = join(documentsDirectory.path, _databaseName);
-      _logger.info("Delete pet index file: $dbPath");
-      final file = File(dbPath);
-      if (await file.exists()) {
-        await file.delete();
+    await _writeLock.synchronized(() async {
+      try {
+        final documentsDirectory = await getApplicationDocumentsDirectory();
+        final String dbPath = join(documentsDirectory.path, _databaseName);
+        _logger.info("Delete pet index file: $dbPath");
+        final file = File(dbPath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        _vectorDbFuture = null;
+      } catch (e, s) {
+        _logger.severe("Error deleting pet index file", e, s);
+        rethrow;
       }
-      _vectorDbFuture = null;
-    } catch (e, s) {
-      _logger.severe("Error deleting pet index file", e, s);
-      rethrow;
-    }
+    });
   }
 }
