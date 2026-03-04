@@ -13,7 +13,6 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
-  static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
 
@@ -75,7 +74,7 @@ class FlagService {
 
   bool get usearchForSearch => true;
 
-  bool get usearchForSuggestions => internalUser;
+  bool get usearchForSuggestions => true;
 
   String get castUrl => flags.castUrl;
 
@@ -98,9 +97,6 @@ class FlagService {
   bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
-
-  bool get isSocialEnabled =>
-      internalUser || _isServerFlagEnabled(_commentsFlag);
 
   bool get useRustForML => internalUser;
 

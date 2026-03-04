@@ -257,9 +257,8 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      // Add social icons (heart, comment) if file is in a shared collection
-      // and social features are enabled
-      if (isInSharedCollection && flagService.isSocialEnabled) {
+      // Add social icons (heart, comment) for files in shared collections.
+      if (isInSharedCollection) {
         children.add(_buildHeartIcon());
         children.add(_buildCommentIcon());
       }

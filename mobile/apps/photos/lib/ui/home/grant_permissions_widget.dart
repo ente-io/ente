@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/app_mode.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/l10n/l10n.dart";
@@ -201,6 +202,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
         await localSettings.setAppMode(AppMode.offline);
+        Bus.instance.fire(AppModeChangedEvent());
         await permissionService.onUpdatePermission(state);
         SyncService.instance.onPermissionGranted().ignore();
         Bus.instance.fire(PermissionGrantedEvent());

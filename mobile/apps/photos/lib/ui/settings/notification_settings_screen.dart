@@ -56,14 +56,14 @@ class NotificationSettingsScreen extends StatelessWidget {
                                 NotificationService.instance
                                     .hasGrantedPermissions() &&
                                 NotificationService.instance
-                                    .shouldShowNotificationsForSharedPhotos(),
+                                    .shouldShowNotificationsForSharedPhotosAndAlbums(),
                             onChanged: () async {
                               await NotificationService.instance
                                   .requestPermissions();
                               await NotificationService.instance
-                                  .setShouldShowNotificationsForSharedPhotos(
+                                  .setShouldShowNotificationsForSharedPhotosAndAlbums(
                                 !NotificationService.instance
-                                    .shouldShowNotificationsForSharedPhotos(),
+                                    .shouldShowNotificationsForSharedPhotosAndAlbums(),
                               );
                             },
                           ),

@@ -3,6 +3,8 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/social_db.dart";
+import "package:photos/models/collection/collection.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
@@ -27,6 +29,7 @@ class FeedDataProvider {
   static const _kSharedPhotoFetchMaxPages = 5;
   static const _kSharedPhotoFetchMaxRows =
       _kSharedPhotoFetchPageSize * _kSharedPhotoFetchMaxPages;
+  static const _kSharedCollectionPreviewFileLimit = 30;
   static const _kFeedItemsCacheTtlMs = 3000;
   Future<List<FeedItem>>? _inFlightFeedItemsFuture;
   String? _inFlightFeedItemsKey;
@@ -164,12 +167,36 @@ class FeedDataProvider {
 
     // Aggregate shared photos (files added by others to user's collections)
     if (includeSharedPhotos) {
+      final sharedFeedCutoffTime =
+          kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
+      final sharedCollectionsContext =
+          _SharedCollectionsContext.fromCollections(
+        CollectionsService.instance.getCollectionsForUI(
+          includedShared: true,
+          includeCollab: true,
+        ),
+        userID: userID,
+      );
+
+      final sharedPhotoFeedResult = await _getSharedPhotoFeedResult(
+        userID: userID,
+        limit: limit,
+        collectionNames: sharedCollectionsContext.collectionNames,
+        incomingCollectionSharedAtByID:
+            sharedCollectionsContext.incomingCollectionSharedAtByID,
+        sharedFeedCutoffTime: sharedFeedCutoffTime,
+      );
+
       feedItems.addAll(
-        await _getSharedPhotoFeedItems(
-          userID: userID,
-          limit: limit,
+        _getSharedCollectionFeedItems(
+          sharedCollectionsContext.incomingSharedCollections,
+          sharedCollectionsContext.collectionNames,
+          initialSharedFileIDsByCollection:
+              sharedPhotoFeedResult.initialSharedFileIDsByCollection,
         ),
       );
+
+      feedItems.addAll(sharedPhotoFeedResult.sharedPhotoFeedItems);
     }
 
     // Filter out items where the associated file doesn't exist or collection is hidden
@@ -426,28 +453,20 @@ class FeedDataProvider {
   /// Groups files added by others into session-like buckets using
   /// (collectionID, ownerID) + a short addedTime gap.
   /// Hidden collections are filtered downstream in _filterFeedItems.
-  Future<List<FeedItem>> _getSharedPhotoFeedItems({
+  Future<_SharedPhotoFeedResult> _getSharedPhotoFeedResult({
     required int userID,
     int limit = 50,
+    required Map<int, String> collectionNames,
+    required Map<int, int> incomingCollectionSharedAtByID,
+    required int sharedFeedCutoffTime,
   }) async {
-    final sharedPhotoFeedCutoffTime =
-        kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
-
-    // Build collection ID -> name map for display
-    final allCollections = CollectionsService.instance.getCollectionsForUI(
-      includedShared: true,
-      includeCollab: true,
-    );
     final hiddenCollectionIds =
         CollectionsService.instance.getHiddenCollectionIds();
-    final collectionNames = <int, String>{};
-    for (final c in allCollections) {
-      collectionNames[c.id] = c.displayName;
-    }
 
     final groupingState = _SharedPhotoGroupingState(
       sessionGapMicros: _kSharedPhotoSessionGapMicros,
     );
+    final initialSharedFileIDsByCollection = <int, List<int>>{};
     var retainedRows = 0;
     var oldestFetchedAddedTime = 0;
 
@@ -456,7 +475,7 @@ class FeedDataProvider {
         currentUserID: userID,
         limit: _kSharedPhotoFetchPageSize,
         offset: page * _kSharedPhotoFetchPageSize,
-        addedTimeAfterOrEqualTo: sharedPhotoFeedCutoffTime,
+        addedTimeAfterOrEqualTo: sharedFeedCutoffTime,
       );
       if (pageFiles.isEmpty) {
         break;
@@ -468,6 +487,21 @@ class FeedDataProvider {
         if (collectionID == null ||
             addedTime == null ||
             hiddenCollectionIds.contains(collectionID)) {
+          continue;
+        }
+        final incomingSharedAt = incomingCollectionSharedAtByID[collectionID];
+        if (incomingSharedAt != null && addedTime <= incomingSharedAt) {
+          final uploadedFileID = file.uploadedFileID;
+          if (uploadedFileID != null) {
+            _appendSharedCollectionPreviewFile(
+              initialSharedFileIDsByCollection,
+              collectionID: collectionID,
+              uploadedFileID: uploadedFileID,
+            );
+          }
+          continue;
+        }
+        if (file.uploaderName != null) {
           continue;
         }
         oldestFetchedAddedTime = addedTime;
@@ -491,7 +525,11 @@ class FeedDataProvider {
         final grouped = groupingState.buildSnapshotSorted();
         if (grouped.length < limit) {
           if (reachedEnd) {
-            return _toSharedPhotoFeedItems(grouped, collectionNames);
+            return _toSharedPhotoFeedResult(
+              grouped,
+              collectionNames,
+              initialSharedFileIDsByCollection,
+            );
           }
           continue;
         }
@@ -508,7 +546,11 @@ class FeedDataProvider {
         final topGroupsAreClosed = oldestFetchedAddedTime <
             (minOldestAddedTime - _kSharedPhotoSessionGapMicros);
         if (topGroupsAreClosed || reachedEnd) {
-          return _toSharedPhotoFeedItems(grouped, collectionNames);
+          return _toSharedPhotoFeedResult(
+            grouped,
+            collectionNames,
+            initialSharedFileIDsByCollection,
+          );
         }
       }
 
@@ -518,31 +560,87 @@ class FeedDataProvider {
     }
 
     if (retainedRows == 0) {
-      return [];
+      return _SharedPhotoFeedResult(
+        sharedPhotoFeedItems: const [],
+        initialSharedFileIDsByCollection: initialSharedFileIDsByCollection,
+      );
     }
 
     final grouped = groupingState.buildSnapshotSorted();
-    return _toSharedPhotoFeedItems(grouped, collectionNames);
+    return _toSharedPhotoFeedResult(
+      grouped,
+      collectionNames,
+      initialSharedFileIDsByCollection,
+    );
   }
 
-  List<FeedItem> _toSharedPhotoFeedItems(
+  _SharedPhotoFeedResult _toSharedPhotoFeedResult(
     List<_SharedPhotoGroup> groups,
     Map<int, String> collectionNames,
+    Map<int, List<int>> initialSharedFileIDsByCollection,
   ) {
-    return groups
-        .map(
-          (group) => FeedItem(
-            type: FeedItemType.sharedPhoto,
-            collectionID: group.collectionID,
-            fileID: group.sharedFileIDs.first,
-            actorUserIDs: [group.ownerID],
+    return _SharedPhotoFeedResult(
+      sharedPhotoFeedItems: groups
+          .map(
+            (group) => FeedItem(
+              type: FeedItemType.sharedPhoto,
+              collectionID: group.collectionID,
+              fileID: group.sharedFileIDs.first,
+              actorUserIDs: [group.ownerID],
+              actorAnonIDs: [null],
+              createdAt: group.createdAt,
+              isOwnedByCurrentUser: false,
+              sharedFileIDs: group.sharedFileIDs,
+              collectionName: collectionNames[group.collectionID],
+            ),
+          )
+          .toList(),
+      initialSharedFileIDsByCollection: initialSharedFileIDsByCollection,
+    );
+  }
+
+  void _appendSharedCollectionPreviewFile(
+    Map<int, List<int>> initialSharedFileIDsByCollection, {
+    required int collectionID,
+    required int uploadedFileID,
+  }) {
+    final previewFiles = initialSharedFileIDsByCollection.putIfAbsent(
+      collectionID,
+      () => <int>[],
+    );
+    if (previewFiles.length >= _kSharedCollectionPreviewFileLimit) {
+      return;
+    }
+    previewFiles.add(uploadedFileID);
+  }
+
+  List<FeedItem> _getSharedCollectionFeedItems(
+    List<Collection> incomingSharedCollections,
+    Map<int, String> collectionNames, {
+    required Map<int, List<int>> initialSharedFileIDsByCollection,
+  }) {
+    return incomingSharedCollections
+        .where((collection) => (collection.sharedAt ?? 0) > 0)
+        .map((collection) {
+          final ownerID = collection.owner.id;
+          if (ownerID == null) {
+            return null;
+          }
+          final sharedFileIDs = initialSharedFileIDsByCollection[collection.id];
+          return FeedItem(
+            type: FeedItemType.sharedCollection,
+            collectionID: collection.id,
+            fileID:
+                sharedFileIDs?.isNotEmpty == true ? sharedFileIDs!.first : null,
+            actorUserIDs: [ownerID],
             actorAnonIDs: [null],
-            createdAt: group.createdAt,
+            createdAt: collection.sharedAt!,
             isOwnedByCurrentUser: false,
-            sharedFileIDs: group.sharedFileIDs,
-            collectionName: collectionNames[group.collectionID],
-          ),
-        )
+            sharedFileIDs: sharedFileIDs,
+            collectionName: collectionNames[collection.id],
+          );
+        })
+        .whereType<FeedItem>()
         .toList();
   }
 
@@ -604,6 +702,55 @@ class FeedDataProvider {
     }
 
     return result;
+  }
+}
+
+class _SharedPhotoFeedResult {
+  final List<FeedItem> sharedPhotoFeedItems;
+  final Map<int, List<int>> initialSharedFileIDsByCollection;
+
+  const _SharedPhotoFeedResult({
+    required this.sharedPhotoFeedItems,
+    required this.initialSharedFileIDsByCollection,
+  });
+}
+
+class _SharedCollectionsContext {
+  final Map<int, String> collectionNames;
+  final List<Collection> incomingSharedCollections;
+  final Map<int, int> incomingCollectionSharedAtByID;
+
+  const _SharedCollectionsContext({
+    required this.collectionNames,
+    required this.incomingSharedCollections,
+    required this.incomingCollectionSharedAtByID,
+  });
+
+  factory _SharedCollectionsContext.fromCollections(
+    List<Collection> collections, {
+    required int userID,
+  }) {
+    final collectionNames = <int, String>{};
+    final incomingSharedCollections = <Collection>[];
+    final incomingCollectionSharedAtByID = <int, int>{};
+
+    for (final collection in collections) {
+      collectionNames[collection.id] = collection.displayName;
+      if (collection.isDeleted || collection.isOwner(userID)) {
+        continue;
+      }
+      incomingSharedCollections.add(collection);
+      final sharedAt = collection.sharedAt;
+      if (sharedAt != null && sharedAt > 0) {
+        incomingCollectionSharedAtByID[collection.id] = sharedAt;
+      }
+    }
+
+    return _SharedCollectionsContext(
+      collectionNames: collectionNames,
+      incomingSharedCollections: incomingSharedCollections,
+      incomingCollectionSharedAtByID: incomingCollectionSharedAtByID,
+    );
   }
 }
 

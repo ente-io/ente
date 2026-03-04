@@ -330,7 +330,7 @@ class SemanticSearchService {
     _logger.info("Initializing ClipText");
     try {
       if (delay) await Future.delayed(const Duration(seconds: 5));
-      await MLComputer.instance.runClipText("warm up text encoder");
+      await MLComputer.instance.warmUpClipTextEncoder();
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
