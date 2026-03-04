@@ -178,11 +178,12 @@ func (repo *UserRepository) GetActiveUsersByLastActivityBefore(beforeTime int64,
 				WHERE c.owner_id = u.user_id
 				ORDER BY c.updation_time DESC
 				LIMIT 1
-			) c ON TRUE
-			WHERE u.encrypted_email IS NOT NULL
-				AND u.user_id > $2
-		) candidate
-		WHERE candidate.last_activity <= $1
+				) c ON TRUE
+				WHERE u.encrypted_email IS NOT NULL
+					AND u.creation_time <= $1
+					AND u.user_id > $2
+			) candidate
+			WHERE candidate.last_activity <= $1
 		ORDER BY candidate.user_id
 		LIMIT $3`, beforeTime, afterUserID, limit)
 	if err != nil {
