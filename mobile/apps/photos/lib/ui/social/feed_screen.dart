@@ -103,6 +103,7 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _didHandleNavigationTarget = false;
   bool _isOpeningNavigationTarget = false;
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey _navigationTargetItemKey = GlobalKey();
 
   /// Map of collectionID -> (anonUserID -> displayName)
   Map<int, Map<String, String>> _anonDisplayNamesByCollection = {};
@@ -294,6 +295,7 @@ class _FeedScreenState extends State<FeedScreen> {
       final opened = await _openNavigationTarget(target);
       if (opened && mounted) {
         _didHandleNavigationTarget = true;
+        _pendingNavigationTarget = null;
       }
       _isOpeningNavigationTarget = false;
     });
@@ -301,6 +303,10 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<bool> _openNavigationTarget(FeedNavigationTarget target) async {
     if (!mounted) return false;
+    if (target.type == FeedItemType.sharedPhoto ||
+        target.type == FeedItemType.sharedCollection) {
+      return _focusFeedItemTarget(target);
+    }
     if (target.type == FeedItemType.photoLike) {
       final fileID = target.fileID;
       if (fileID == null) return false;
@@ -324,27 +330,6 @@ class _FeedScreenState extends State<FeedScreen> {
       );
       return true;
     }
-    if (target.type == FeedItemType.sharedPhoto ||
-        target.type == FeedItemType.sharedCollection) {
-      final jumpToFileID = _jumpFileIDForSharedCollection(
-        type: target.type,
-        fileID: target.fileID,
-      );
-      await _openSharedCollection(
-        FeedItem(
-          type: target.type,
-          collectionID: target.collectionID,
-          actorUserIDs: const [0],
-          actorAnonIDs: const [null],
-          createdAt: DateTime.now().microsecondsSinceEpoch,
-          isOwnedByCurrentUser: false,
-          sharedFileIDs: target.fileID != null ? [target.fileID!] : null,
-        ),
-        jumpToFileID: jumpToFileID,
-      );
-      return true;
-    }
-
     var fileID = target.fileID;
     if (fileID == null && target.commentID != null) {
       final comment =
@@ -381,6 +366,148 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
     );
     return true;
+  }
+
+  Future<bool> _focusFeedItemTarget(FeedNavigationTarget target) async {
+    if (target.type == FeedItemType.sharedPhoto && target.fileID == null) {
+      _logger.warning(
+        "Shared-photo notification target is missing fileID: $target",
+      );
+      return false;
+    }
+    var targetIndex = _findFeedItemIndexForTarget(target);
+    while (targetIndex == -1 && _hasMore) {
+      final previousLimit = _currentLimit;
+      await _loadMore();
+      if (!mounted || _currentLimit == previousLimit) {
+        break;
+      }
+      targetIndex = _findFeedItemIndexForTarget(target);
+    }
+
+    if (targetIndex == -1) {
+      _logger.warning("Could not find feed item for notification target");
+      return false;
+    }
+
+    return _scrollToFeedItemIndex(targetIndex);
+  }
+
+  int _findFeedItemIndexForTarget(FeedNavigationTarget target) {
+    return _feedItems.indexWhere(
+      (item) => _feedItemMatchesNavigationTarget(item, target),
+    );
+  }
+
+  bool _feedItemMatchesNavigationTarget(
+    FeedItem item,
+    FeedNavigationTarget target,
+  ) {
+    if (item.type != target.type || item.collectionID != target.collectionID) {
+      return false;
+    }
+
+    final targetCommentID = target.commentID;
+    if (targetCommentID != null && targetCommentID.isNotEmpty) {
+      return item.commentID == targetCommentID;
+    }
+
+    final targetFileID = target.fileID;
+    if (target.type == FeedItemType.sharedPhoto && targetFileID == null) {
+      return false;
+    }
+    if (targetFileID == null) {
+      return true;
+    }
+    if (item.fileID == targetFileID) {
+      return true;
+    }
+
+    final sharedFileIDs = item.sharedFileIDs;
+    if (sharedFileIDs != null && sharedFileIDs.contains(targetFileID)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _shouldUseNavigationTargetKey(FeedItem item) {
+    final target = _pendingNavigationTarget;
+    if (target == null ||
+        (target.type != FeedItemType.sharedPhoto &&
+            target.type != FeedItemType.sharedCollection)) {
+      return false;
+    }
+    if (target.type == FeedItemType.sharedPhoto && target.fileID == null) {
+      return false;
+    }
+    return _feedItemMatchesNavigationTarget(item, target);
+  }
+
+  Future<bool> _scrollToFeedItemIndex(int index) async {
+    if (!_scrollController.hasClients) {
+      return false;
+    }
+
+    // Allow newly loaded rows to be laid out before reading list metrics.
+    await Future<void>.delayed(Duration.zero);
+
+    for (var attempt = 0; attempt < 7; attempt++) {
+      if (!mounted || !_scrollController.hasClients) {
+        return false;
+      }
+
+      final targetContext = _navigationTargetItemKey.currentContext;
+      if (targetContext != null) {
+        await Scrollable.ensureVisible(
+          targetContext,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+        return true;
+      }
+
+      final position = _scrollController.position;
+      final maxExtent = position.maxScrollExtent;
+      if (maxExtent <= 0 || _feedItems.length <= 1 || index <= 0) {
+        await _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+        );
+      } else {
+        final estimatedOffset = (index / (_feedItems.length - 1)) * maxExtent;
+        final viewport = position.viewportDimension;
+        final sweepStep = viewport > 0 ? viewport * 0.75 : maxExtent * 0.2;
+        double nextOffset = estimatedOffset;
+
+        if (attempt > 0) {
+          final sweepRing = ((attempt + 1) ~/ 2).toDouble();
+          final direction = attempt.isOdd ? -1.0 : 1.0;
+          nextOffset += direction * sweepRing * sweepStep;
+        }
+
+        nextOffset = nextOffset.clamp(0.0, maxExtent);
+        if ((nextOffset - position.pixels).abs() < 1.0) {
+          final nudge = viewport > 0 ? viewport * 0.35 : maxExtent * 0.1;
+          final nudgeDirection = attempt.isOdd ? 1.0 : -1.0;
+          nextOffset = (nextOffset + (nudgeDirection * nudge)).clamp(
+            0.0,
+            maxExtent,
+          );
+        }
+
+        await _scrollController.animateTo(
+          nextOffset,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOut,
+        );
+      }
+
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+
+    return false;
   }
 
   @override
@@ -430,10 +557,13 @@ class _FeedScreenState extends State<FeedScreen> {
                       }
                       final item = _feedItems[index];
                       final isLastItem = index == _feedItems.length - 1;
+                      final key = _shouldUseNavigationTargetKey(item)
+                          ? _navigationTargetItemKey
+                          : ValueKey(
+                              '${item.type}_${item.fileID}_${item.commentID}_${item.createdAt}',
+                            );
                       return FeedItemWidget(
-                        key: ValueKey(
-                          '${item.type}_${item.fileID}_${item.commentID}_${item.createdAt}',
-                        ),
+                        key: key,
                         feedItem: item,
                         currentUserID: _currentUserID,
                         anonDisplayNames:

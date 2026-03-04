@@ -1,31 +1,19 @@
-import { useColorScheme, useTheme } from "@mui/material/styles";
+import { useColorScheme } from "@mui/material/styles";
+import { useEffect } from "react";
 import type { PasteResolvedMode } from "../theme/pasteThemeTokens";
 
-type PasteModePreference = "system" | "light" | "dark";
-
 interface UsePasteColorModeResult {
-    mode: PasteModePreference;
     resolvedMode: PasteResolvedMode;
-    setMode: (mode: PasteModePreference) => void;
 }
 
 export const usePasteColorMode = (): UsePasteColorModeResult => {
-    const { mode, systemMode, setMode } = useColorScheme();
-    const theme = useTheme();
+    const { systemMode, setMode } = useColorScheme();
 
-    const normalizedMode: PasteModePreference = mode ?? "system";
-    const themeMode: PasteResolvedMode =
-        theme.palette.mode === "light" ? "light" : "dark";
-    const resolvedMode: PasteResolvedMode =
-        normalizedMode === "system"
-            ? (systemMode ?? themeMode)
-            : normalizedMode;
+    useEffect(() => {
+        setMode("system");
+    }, [setMode]);
 
-    return {
-        mode: normalizedMode,
-        resolvedMode,
-        setMode: (nextMode) => {
-            setMode(nextMode);
-        },
-    };
+    const resolvedMode: PasteResolvedMode = systemMode ?? "dark";
+
+    return { resolvedMode };
 };
