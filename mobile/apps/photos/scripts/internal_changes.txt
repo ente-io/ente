@@ -1,3 +1,4 @@
+- Ashil: Route shared notifications to feed item in feed
 - Ashil: Show notifications for newly added photos to shared album
 - Ashil: Show feed item and notification for newly shared album
 - Laurens: (I) Clip text encoding in rust
