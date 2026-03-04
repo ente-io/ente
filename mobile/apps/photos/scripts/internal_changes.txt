@@ -8,6 +8,6 @@
 - Neeraj: Fix video playback for Motion photo with two videos
 - Ashil: Enable sentence capitalization for comment input field
 - Ashil: Fix files uploaded by sharing from outside of Ente missing in map
-- Laurens: (I) Use vectorDB for more accurate suggestions in the people overview
+- Laurens: Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
