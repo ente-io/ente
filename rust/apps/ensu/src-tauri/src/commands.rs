@@ -1183,6 +1183,109 @@ pub async fn chat_db_reset(state: State<'_, ChatDbState>, app: AppHandle) -> Res
     .map_err(|_| chat_db_thread_error())?
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LegacyLocalStorageData {
+    pub chat_store_json: Option<String>,
+    pub chat_key: Option<String>,
+}
+
+/// Read legacy chat data from old Tauri v1 WebKit localStorage on macOS.
+///
+/// The old WebView data lives under `~/Library/WebKit/<OldAppName>/`. We check
+/// known candidate directory names and return the chat store JSON and the old
+/// chat key if found.
+#[tauri::command]
+pub async fn read_legacy_localstorage() -> Result<LegacyLocalStorageData, ApiError> {
+    #[cfg(target_os = "macos")]
+    {
+        let home = dirs::home_dir().ok_or_else(|| ApiError::new("io", "No home directory"))?;
+        let webkit_dir = home.join("Library/WebKit");
+
+        let candidates = ["ensu-tauri", "Ensu", "ensu"];
+
+        for name in &candidates {
+            let ls_dir = webkit_dir.join(name).join("WebsiteData");
+            if !ls_dir.exists() {
+                continue;
+            }
+
+            if let Some(data) = find_legacy_chat_data(&ls_dir) {
+                return Ok(data);
+            }
+        }
+
+        Ok(LegacyLocalStorageData {
+            chat_store_json: None,
+            chat_key: None,
+        })
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(LegacyLocalStorageData {
+            chat_store_json: None,
+            chat_key: None,
+        })
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn find_legacy_chat_data(website_data_dir: &std::path::Path) -> Option<LegacyLocalStorageData> {
+    for entry in walkdir(website_data_dir) {
+        if entry.file_name().map_or(true, |n| n != "localstorage.sqlite3") {
+            continue;
+        }
+        if let Ok(conn) = rusqlite::Connection::open_with_flags(
+            &entry,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        ) {
+            let chat_store: Option<String> = conn
+                .query_row(
+                    "SELECT value FROM ItemTable WHERE key = 'ensu.chat.store.v1'",
+                    [],
+                    |row| row.get(0),
+                )
+                .ok()
+                .filter(|v: &String| !v.is_empty());
+
+            let chat_key: Option<String> = conn
+                .query_row(
+                    "SELECT value FROM ItemTable WHERE key = 'ensu.chatKey.local'",
+                    [],
+                    |row| row.get(0),
+                )
+                .ok()
+                .filter(|v: &String| !v.is_empty());
+
+            if chat_store.is_some() || chat_key.is_some() {
+                return Some(LegacyLocalStorageData {
+                    chat_store_json: chat_store,
+                    chat_key,
+                });
+            }
+        }
+    }
+    None
+}
+
+/// Simple recursive file listing (avoids adding the `walkdir` crate).
+#[cfg(target_os = "macos")]
+fn walkdir(dir: &std::path::Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                out.extend(walkdir(&path));
+            } else {
+                out.push(path);
+            }
+        }
+    }
+    out
+}
+
 #[tauri::command]
 pub async fn chat_sync(
     app: AppHandle,
