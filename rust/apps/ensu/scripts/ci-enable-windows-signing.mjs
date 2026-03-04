@@ -20,8 +20,24 @@ config.bundle = config.bundle || {};
 config.bundle.windows = config.bundle.windows || {};
 
 const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
-config.bundle.windows.signCommand = `${signerBinary} -v -e ${endpoint} -a ${accountName} -c ${profileName} -d Ensu "%1"`;
+config.bundle.windows.signCommand = {
+    cmd: signerBinary,
+    args: [
+        "-v",
+        "-e",
+        endpoint,
+        "-a",
+        accountName,
+        "-c",
+        profileName,
+        "-d",
+        "Ensu",
+        "%1",
+    ],
+};
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log(`Updated windows signCommand in ${configPath}`);
-console.log(`Windows signCommand: ${config.bundle.windows.signCommand}`);
+console.log(
+    `Windows signCommand: ${JSON.stringify(config.bundle.windows.signCommand)}`,
+);
