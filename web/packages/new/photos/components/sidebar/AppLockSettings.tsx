@@ -1,6 +1,6 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { DialogActions, Stack, TextField, Typography } from "@mui/material";
+import { Stack, TextField, Typography } from "@mui/material";
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
@@ -11,8 +11,8 @@ import {
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
@@ -51,8 +51,8 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const [isSettingDeviceLock, setIsSettingDeviceLock] = useState(false);
     // Controls whether the Device lock option should be shown after a compatibility check.
     const [showDeviceLockOption, setShowDeviceLockOption] = useState(false);
-    // For the auto-lock duration selection dialog.
-    const [autoLockDialogOpen, setAutoLockDialogOpen] = useState(false);
+    // For the auto-lock duration selection nested drawer.
+    const [autoLockOptionsOpen, setAutoLockOptionsOpen] = useState(false);
     // Cancel flag used to avoid state updates after unmount.
     const isDeviceLockOptionRequestCancelled = useRef(false);
     const { showMiniDialog } = useBaseContext();
@@ -82,10 +82,17 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         };
     }, []);
 
+    useEffect(() => {
+        if (!open) {
+            setAutoLockOptionsOpen(false);
+        }
+    }, [open]);
+
     /**
      * Close both levels of the nested drawer.
      */
     const handleRootClose = () => {
+        setAutoLockOptionsOpen(false);
         onClose();
         onRootClose();
     };
@@ -265,18 +272,19 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                         caption={autoLockLabel(
                                             state.autoLockTimeMs,
                                         )}
-                                        onClick={() =>
-                                            setAutoLockDialogOpen(true)
-                                        }
+                                        onClick={() => setAutoLockOptionsOpen(true)}
                                     />
                                 </RowButtonGroup>
-                                <RowButtonGroupHint>
-                                    {t("auto_lock_hint")}
-                                </RowButtonGroupHint>
                             </Stack>
                         </>
                     )}
                 </Stack>
+                <AutoLockOptionsDrawer
+                    open={autoLockOptionsOpen}
+                    onClose={() => setAutoLockOptionsOpen(false)}
+                    onRootClose={handleRootClose}
+                    currentValue={state.autoLockTimeMs}
+                />
             </TitledNestedSidebarDrawer>
 
             <PinSetupDialog
@@ -288,11 +296,6 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 open={passwordDialogOpen}
                 onClose={() => setPasswordDialogOpen(false)}
                 onComplete={handlePasswordSetupComplete}
-            />
-            <AutoLockDialog
-                open={autoLockDialogOpen}
-                onClose={() => setAutoLockDialogOpen(false)}
-                currentValue={state.autoLockTimeMs}
             />
         </>
     );
@@ -849,55 +852,78 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     );
 };
 
-// -- Auto-Lock Dialog --
+// -- Auto-lock nested drawer --
 
-interface AutoLockDialogProps {
-    open: boolean;
-    onClose: () => void;
+interface AutoLockOptionsDrawerProps extends NestedSidebarDrawerVisibilityProps {
     currentValue: number;
 }
 
-const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
+const AutoLockOptionsDrawer: React.FC<AutoLockOptionsDrawerProps> = ({
     open,
     onClose,
+    onRootClose,
     currentValue,
 }) => {
+    const [pendingAutoLockMs, setPendingAutoLockMs] = useState<number | null>(
+        null,
+    );
+
     const selectedMs = autoLockOptions.some((o) => o.ms === currentValue)
         ? currentValue
         : autoLockOptions[0]!.ms;
 
+    const setAutoLockTimeValue = useCallback(
+        (ms: number) => {
+            if (pendingAutoLockMs !== null || ms === currentValue) return;
+
+            setPendingAutoLockMs(ms);
+            void (async () => {
+                try {
+                    await Promise.resolve(setAutoLockTime(ms));
+                    setPendingAutoLockMs(null);
+                    onClose();
+                } finally {
+                    setPendingAutoLockMs((pending) =>
+                        pending === ms ? null : pending,
+                    );
+                }
+            })();
+        },
+        [pendingAutoLockMs, currentValue, onClose],
+    );
+
     return (
-        <TitledMiniDialog open={open} onClose={onClose} title={t("auto_lock")}>
-            <Stack sx={{ gap: 1.25, pt: 0.25, pb: 0.5, mt: -0.75 }}>
+        <TitledNestedSidebarDrawer
+            anchor="left"
+            {...{ open, onClose }}
+            onRootClose={onRootClose}
+            title={t("auto_lock")}
+        >
+            <Stack sx={{ py: "20px", px: "8px" }}>
                 <RowButtonGroup>
                     {autoLockOptions.map((option, index) => (
                         <React.Fragment key={option.ms}>
-                            {index > 0 && <RowButtonDivider />}
                             <RowButton
                                 label={t(option.labelKey)}
+                                disabled={pendingAutoLockMs !== null}
                                 endIcon={
-                                    selectedMs === option.ms ? (
+                                    pendingAutoLockMs === option.ms ? (
+                                        <RowButtonEndActivityIndicator />
+                                    ) : selectedMs === option.ms ? (
                                         <CheckIcon
                                             sx={{ color: "accent.main" }}
                                         />
                                     ) : undefined
                                 }
-                                onClick={() => setAutoLockTime(option.ms)}
+                                onClick={() => setAutoLockTimeValue(option.ms)}
                             />
+                            {index != autoLockOptions.length - 1 && (
+                                <RowButtonDivider />
+                            )}
                         </React.Fragment>
                     ))}
                 </RowButtonGroup>
             </Stack>
-            <DialogActions sx={{ px: 0, mx: "-16px", pt: 0.75, pb: 0 }}>
-                <FocusVisibleButton
-                    fullWidth
-                    color="accent"
-                    sx={{ minHeight: 48 }}
-                    onClick={onClose}
-                >
-                    {t("done")}
-                </FocusVisibleButton>
-            </DialogActions>
-        </TitledMiniDialog>
+        </TitledNestedSidebarDrawer>
     );
 };
