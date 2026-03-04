@@ -43,6 +43,8 @@ class SharedCollectionsTab extends StatefulWidget {
 class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     with AutomaticKeepAliveClientMixin {
   final Logger _logger = Logger("SharedCollectionGallery");
+  static const _sharedTabIndex = 2;
+  static const _feedPreviewStartupDelay = Duration(seconds: 5);
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
@@ -61,9 +63,13 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   // user has been in the tab for 500ms. This is to prevent loading widgets when
   // the user is just switching tabs quickly.
   final _canLoadDeferredWidgets = ValueNotifier<bool>(false);
+  final _canLoadFeedPreview = ValueNotifier<bool>(false);
   final _debouncerForDeferringLoad = Debouncer(
     const Duration(milliseconds: 500),
   );
+  Timer? _feedPreviewStartupTimer;
+  var _isOnSharedTab = false;
+  var _tabChangeSubscriptionCancelled = false;
 
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
@@ -99,27 +105,73 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         setState(() {});
       }
     });
+    _scheduleFeedPreviewFromSharedTabBuild();
 
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.selectedIndex == 2) {
-        _debouncerForDeferringLoad.run(() async {
-          _logger.info("Loading deferred widgets in shared collections tab");
-          if (mounted) {
-            _canLoadDeferredWidgets.value = true;
-            await _tabChangeEvent.cancel();
-            Future.delayed(
-              Duration.zero,
-              () => _debouncerForDeferringLoad.cancelDebounceTimer(),
-            );
-          }
-        });
+      _isOnSharedTab = event.selectedIndex == _sharedTabIndex;
+      if (_isOnSharedTab) {
+        _enableDeferredWidgetsAfterDwell();
+        _enableFeedPreviewImmediately();
       } else {
-        _debouncerForDeferringLoad.cancelDebounceTimer();
-        if (mounted) {
-          _canLoadDeferredWidgets.value = false;
+        if (!_canLoadDeferredWidgets.value) {
+          _debouncerForDeferringLoad.cancelDebounceTimer();
         }
       }
     });
+  }
+
+  void _enableDeferredWidgetsAfterDwell() {
+    if (_canLoadDeferredWidgets.value) {
+      return;
+    }
+    _debouncerForDeferringLoad.run(() async {
+      _logger.info("Loading deferred widgets in shared collections tab");
+      if (mounted) {
+        _canLoadDeferredWidgets.value = true;
+        _maybeCancelTabChangeListener();
+      }
+    });
+  }
+
+  void _scheduleFeedPreviewFromSharedTabBuild() {
+    if (_canLoadFeedPreview.value) {
+      return;
+    }
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = Timer(_feedPreviewStartupDelay, () {
+      if (!mounted || _canLoadFeedPreview.value) {
+        return;
+      }
+      _enableFeedPreview("shared-tab-build-delay-elapsed");
+    });
+  }
+
+  void _enableFeedPreviewImmediately() {
+    _enableFeedPreview("shared-tab-selected");
+  }
+
+  void _enableFeedPreview(String reason) {
+    if (_canLoadFeedPreview.value) {
+      return;
+    }
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = null;
+    _logger.info("Loading feed preview in shared collections tab ($reason)");
+    _canLoadFeedPreview.value = true;
+    _maybeCancelTabChangeListener();
+  }
+
+  void _maybeCancelTabChangeListener() {
+    if (!_canLoadDeferredWidgets.value || !_canLoadFeedPreview.value) {
+      return;
+    }
+    _debouncerForDeferringLoad.cancelDebounceTimer();
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = null;
+    if (!_tabChangeSubscriptionCancelled) {
+      _tabChangeSubscriptionCancelled = true;
+      unawaited(_tabChangeEvent.cancel());
+    }
   }
 
   @override
@@ -181,7 +233,14 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            if (flagService.isSocialEnabled) const FeedPreviewWidget(),
+            ValueListenableBuilder(
+              valueListenable: _canLoadFeedPreview,
+              builder: (context, canLoad, _) {
+                return canLoad
+                    ? const FeedPreviewWidget()
+                    : const SizedBox.shrink();
+              },
+            ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -463,8 +522,13 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();
     _debouncerForDeferringLoad.cancelDebounceTimer();
-    _tabChangeEvent.cancel();
+    _feedPreviewStartupTimer?.cancel();
+    if (!_tabChangeSubscriptionCancelled) {
+      _tabChangeSubscriptionCancelled = true;
+      unawaited(_tabChangeEvent.cancel());
+    }
     _canLoadDeferredWidgets.dispose();
+    _canLoadFeedPreview.dispose();
     super.dispose();
   }
 
