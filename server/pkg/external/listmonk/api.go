@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/ente-io/stacktrace"
@@ -22,6 +23,20 @@ type Credentials struct {
 	BaseURL  string
 	Username string
 	Password string
+}
+
+// Subscriber captures a listmonk subscriber record required by museum.
+type Subscriber struct {
+	Email   string
+	ListIDs []int
+}
+
+// SubscribersPage represents one paginated subscribers page from listmonk.
+type SubscribersPage struct {
+	Results []Subscriber
+	Total   int
+	Page    int
+	PerPage int
 }
 
 // GetSubscriberID returns subscriber id of the provided email address,
@@ -87,6 +102,153 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	id := subscriberResp.Data.Results[0].ID
 
 	return id, nil
+}
+
+// ListSubscribers returns one paginated subscribers page from listmonk.
+func ListSubscribers(endpoint string, username string, password string, page int, perPage int) (SubscribersPage, error) {
+	type subscriberResponse struct {
+		Data struct {
+			Results []map[string]json.RawMessage `json:"results"`
+			Total   int                          `json:"total"`
+			Page    int                          `json:"page"`
+			PerPage int                          `json:"per_page"`
+		} `json:"data"`
+	}
+
+	endpointURL, err := url.Parse(endpoint)
+	if err != nil {
+		return SubscribersPage{}, stacktrace.Propagate(err, "")
+	}
+
+	queryParams := endpointURL.Query()
+	queryParams.Set("page", strconv.Itoa(page))
+	queryParams.Set("per_page", strconv.Itoa(perPage))
+	endpointURL.RawQuery = queryParams.Encode()
+
+	req, err := http.NewRequest("GET", endpointURL.String(), nil)
+	if err != nil {
+		return SubscribersPage{}, stacktrace.Propagate(err, "")
+	}
+	req.SetBasicAuth(username, password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return SubscribersPage{}, stacktrace.Propagate(err, "")
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return SubscribersPage{}, stacktrace.Propagate(err, "")
+	}
+	if resp.StatusCode != http.StatusOK {
+		return SubscribersPage{}, stacktrace.Propagate(
+			fmt.Errorf("listmonk request failed with status %d: %s", resp.StatusCode, strings.TrimSpace(string(body))),
+			"",
+		)
+	}
+
+	var parsed subscriberResponse
+	if err := json.Unmarshal(body, &parsed); err != nil {
+		return SubscribersPage{}, stacktrace.Propagate(err, "")
+	}
+
+	results := make([]Subscriber, 0, len(parsed.Data.Results))
+	for _, row := range parsed.Data.Results {
+		subscriber, parseErr := parseSubscriber(row)
+		if parseErr != nil {
+			return SubscribersPage{}, stacktrace.Propagate(parseErr, "")
+		}
+		results = append(results, subscriber)
+	}
+
+	return SubscribersPage{
+		Results: results,
+		Total:   parsed.Data.Total,
+		Page:    parsed.Data.Page,
+		PerPage: parsed.Data.PerPage,
+	}, nil
+}
+
+func parseSubscriber(data map[string]json.RawMessage) (Subscriber, error) {
+	emailRaw, ok := data["email"]
+	if !ok {
+		return Subscriber{}, stacktrace.Propagate(errors.New("missing email in listmonk subscriber payload"), "")
+	}
+	var email string
+	if err := json.Unmarshal(emailRaw, &email); err != nil {
+		return Subscriber{}, stacktrace.Propagate(err, "failed to parse listmonk subscriber email")
+	}
+
+	var listIDs []int
+	if listsRaw, ok := data["lists"]; ok {
+		ids, err := decodeListIDs(listsRaw)
+		if err != nil {
+			return Subscriber{}, stacktrace.Propagate(err, "failed to parse listmonk subscriber lists")
+		}
+		listIDs = ids
+	} else if listIDsRaw, ok := data["list_ids"]; ok {
+		ids, err := decodeListIDs(listIDsRaw)
+		if err != nil {
+			return Subscriber{}, stacktrace.Propagate(err, "failed to parse listmonk subscriber list_ids")
+		}
+		listIDs = ids
+	}
+
+	return Subscriber{
+		Email:   email,
+		ListIDs: listIDs,
+	}, nil
+}
+
+func decodeListIDs(raw json.RawMessage) ([]int, error) {
+	type listWithID struct {
+		ID int `json:"id"`
+	}
+
+	if len(raw) == 0 || string(raw) == "null" {
+		return []int{}, nil
+	}
+
+	var directIntIDs []int
+	if err := json.Unmarshal(raw, &directIntIDs); err == nil {
+		return directIntIDs, nil
+	}
+
+	var objectIDs []listWithID
+	if err := json.Unmarshal(raw, &objectIDs); err == nil {
+		ids := make([]int, 0, len(objectIDs))
+		for _, item := range objectIDs {
+			ids = append(ids, item.ID)
+		}
+		return ids, nil
+	}
+
+	var generic []map[string]interface{}
+	if err := json.Unmarshal(raw, &generic); err == nil {
+		ids := make([]int, 0, len(generic))
+		for _, item := range generic {
+			value, ok := item["id"]
+			if !ok {
+				continue
+			}
+			switch typed := value.(type) {
+			case float64:
+				ids = append(ids, int(typed))
+			case int:
+				ids = append(ids, typed)
+			case string:
+				id, convErr := strconv.Atoi(typed)
+				if convErr == nil {
+					ids = append(ids, id)
+				}
+			}
+		}
+		return ids, nil
+	}
+
+	return nil, errors.New("unsupported list ids format")
 }
 
 // SendRequest sends a request to the specified Listmonk API endpoint
