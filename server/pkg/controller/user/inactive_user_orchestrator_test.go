@@ -135,6 +135,7 @@ func TestBuildInactiveUserRunSummary(t *testing.T) {
 	stats.SuccessByStage[inactivityEmailStageWarn1m] = 1
 	stats.FailureByStage[inactivityEmailStageWarn7d] = 4
 	stats.PreStageFailures = 2
+	stats.SkippedRolloutDomain = 1
 
 	summary := buildInactiveUserRunSummary(stats, 0)
 
@@ -145,6 +146,7 @@ func TestBuildInactiveUserRunSummary(t *testing.T) {
 		"success={warn_2m=2, warn_1m=1, warn_7d=0, warn_1d=0, confirm_13m=0}",
 		"failures={warn_2m=0, warn_1m=0, warn_7d=4, warn_1d=0, confirm_13m=0}",
 		"pre_stage_failures=2",
+		"skipped_rollout_domain=1",
 	}
 
 	for _, fragment := range mustContain {
