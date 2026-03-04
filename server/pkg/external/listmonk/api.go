@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -24,6 +25,8 @@ type Credentials struct {
 	Username string
 	Password string
 }
+
+const listmonkRequestTimeout = 60 * time.Second
 
 // Subscriber captures a listmonk subscriber record required by museum.
 type Subscriber struct {
@@ -74,7 +77,7 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	req.SetBasicAuth(username, password)
 
 	// Sending the HTTP request
-	client := &http.Client{}
+	client := &http.Client{Timeout: listmonkRequestTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, stacktrace.Propagate(err, "")
@@ -131,7 +134,7 @@ func ListSubscribers(endpoint string, username string, password string, page int
 	}
 	req.SetBasicAuth(username, password)
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: listmonkRequestTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return SubscribersPage{}, stacktrace.Propagate(err, "")
@@ -260,7 +263,7 @@ func SendRequest(method string, url string, data interface{}, username string, p
 		return stacktrace.Propagate(err, "")
 	}
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: listmonkRequestTimeout}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
