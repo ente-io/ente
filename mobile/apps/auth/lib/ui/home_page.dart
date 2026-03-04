@@ -1907,11 +1907,6 @@ class _HomePageState extends State<HomePage> {
     if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
-    if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
-      _logger.info("Ignoring potential event for same deeplink");
-      return;
-    }
-    lastScanTime = DateTime.now().millisecondsSinceEpoch;
     final lowerLink = link.toLowerCase();
     if (mounted && (lowerLink.startsWith("ente-auth://") || lowerLink.startsWith("enteauth://"))) {
       try {
@@ -1928,6 +1923,11 @@ class _HomePageState extends State<HomePage> {
         _logger.warning("Malformed ente-auth deep link: $link", e);
       }
     } else if (mounted && lowerLink.startsWith("otpauth://")) {
+      if (DateTime.now().millisecondsSinceEpoch - lastScanTime < 1000) {
+        _logger.info("Ignoring potential event for same deeplink");
+        return;
+      }
+      lastScanTime = DateTime.now().millisecondsSinceEpoch;
       try {
         final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
