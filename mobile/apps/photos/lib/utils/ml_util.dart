@@ -635,6 +635,7 @@ Future<MLResult> analyzeImageRust(Map args) async {
       faceDetection: faceDetectionModelPath ?? "",
       faceEmbedding: faceEmbeddingModelPath ?? "",
       clipImage: clipImageModelPath ?? "",
+      clipText: "",
     );
     final providerPolicy = rust_ml.RustExecutionProviderPolicy(
       preferCoreml: preferCoreml,

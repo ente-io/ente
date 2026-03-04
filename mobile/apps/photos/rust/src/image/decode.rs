@@ -1,13 +1,17 @@
 use std::{ffi::OsStr, fs::File, io::BufReader, path::Path, sync::Once};
 
 use exif::{In, Reader as ExifReader, Tag};
-use image::{DynamicImage, ImageReader, hooks::decoding_hook_registered};
+use image::{DynamicImage, ImageFormat, ImageReader, hooks::decoding_hook_registered};
 use libheic_rs::{
     DecodeGuardrails, exif_orientation_hint_from_path,
     image_integration::{
         apply_exif_orientation_dynamic, register_image_decoder_hooks_with_guardrails,
     },
     path_extension_is_heif,
+};
+use tiff::{
+    ColorType as TiffColorType,
+    decoder::{Decoder as TiffDecoder, DecodingResult as TiffDecodingResult},
 };
 
 use crate::ml::{
@@ -37,7 +41,123 @@ fn decode_with_image_crate(image_path: &str) -> MlResult<DynamicImage> {
         .map_err(|e| MlError::Decode(format!("failed to open image file '{image_path}': {e}")))?
         .with_guessed_format()
         .map_err(|e| MlError::Decode(format!("failed to guess image format: {e}")))?;
-    Ok(reader.decode()?)
+    let guessed_format = reader.format();
+
+    match reader.decode() {
+        Ok(decoded) => Ok(decoded),
+        Err(primary_error) if should_attempt_tiff_fallback(guessed_format) => {
+            eprintln!(
+                "[ml][decode] image crate TIFF decode failed for '{}': {}. Retrying with tiff crate fallback",
+                image_path, primary_error
+            );
+
+            match decode_with_tiff_crate(image_path) {
+                Ok(decoded) => Ok(decoded),
+                Err(MlError::Decode(fallback_error)) => Err(MlError::Decode(format!(
+                    "failed to decode TIFF with image crate: {primary_error}; fallback with tiff crate also failed: {fallback_error}"
+                ))),
+                Err(other) => Err(other),
+            }
+        }
+        Err(other) => Err(other.into()),
+    }
+}
+
+fn should_attempt_tiff_fallback(format: Option<ImageFormat>) -> bool {
+    matches!(format, Some(ImageFormat::Tiff))
+}
+
+fn decode_with_tiff_crate(image_path: &str) -> MlResult<DynamicImage> {
+    let file = File::open(image_path)
+        .map_err(|e| MlError::Decode(format!("failed to open TIFF file '{image_path}': {e}")))?;
+    let mut decoder = TiffDecoder::new(BufReader::new(file))
+        .map_err(|e| MlError::Decode(format!("failed to initialize TIFF decoder: {e}")))?;
+    let (width, height) = decoder
+        .dimensions()
+        .map_err(|e| MlError::Decode(format!("failed to read TIFF dimensions: {e}")))?;
+    let color_type = decoder
+        .colortype()
+        .map_err(|e| MlError::Decode(format!("failed to read TIFF color type: {e}")))?;
+    let decoded = decoder
+        .read_image()
+        .map_err(|e| MlError::Decode(format!("failed to decode TIFF image data: {e}")))?;
+
+    dynamic_image_from_tiff(image_path, width, height, color_type, decoded)
+}
+
+fn dynamic_image_from_tiff(
+    image_path: &str,
+    width: u32,
+    height: u32,
+    color_type: TiffColorType,
+    decoded: TiffDecodingResult,
+) -> MlResult<DynamicImage> {
+    match (color_type, decoded) {
+        (TiffColorType::Gray(8), TiffDecodingResult::U8(data)) => {
+            let image = image::GrayImage::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "Gray(8)"))?;
+            Ok(DynamicImage::ImageLuma8(image))
+        }
+        (TiffColorType::GrayA(8), TiffDecodingResult::U8(data)) => {
+            let image = image::GrayAlphaImage::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "GrayA(8)"))?;
+            Ok(DynamicImage::ImageLumaA8(image))
+        }
+        (TiffColorType::RGB(8), TiffDecodingResult::U8(data)) => {
+            let image = image::RgbImage::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "RGB(8)"))?;
+            Ok(DynamicImage::ImageRgb8(image))
+        }
+        (TiffColorType::RGBA(8), TiffDecodingResult::U8(data)) => {
+            let image = image::RgbaImage::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "RGBA(8)"))?;
+            Ok(DynamicImage::ImageRgba8(image))
+        }
+        (TiffColorType::Gray(16), TiffDecodingResult::U16(data)) => {
+            let image = image::ImageBuffer::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "Gray(16)"))?;
+            Ok(DynamicImage::ImageLuma16(image))
+        }
+        (TiffColorType::GrayA(16), TiffDecodingResult::U16(data)) => {
+            let image = image::ImageBuffer::from_raw(width, height, data).ok_or_else(|| {
+                tiff_buffer_mismatch_error(image_path, width, height, "GrayA(16)")
+            })?;
+            Ok(DynamicImage::ImageLumaA16(image))
+        }
+        (TiffColorType::RGB(16), TiffDecodingResult::U16(data)) => {
+            let image = image::ImageBuffer::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "RGB(16)"))?;
+            Ok(DynamicImage::ImageRgb16(image))
+        }
+        (TiffColorType::RGBA(16), TiffDecodingResult::U16(data)) => {
+            let image = image::ImageBuffer::from_raw(width, height, data)
+                .ok_or_else(|| tiff_buffer_mismatch_error(image_path, width, height, "RGBA(16)"))?;
+            Ok(DynamicImage::ImageRgba16(image))
+        }
+        (observed_color_type, observed_result_type) => Err(MlError::Decode(format!(
+            "unsupported TIFF pixel format for '{image_path}': color_type={observed_color_type:?}, sample_type={}",
+            tiff_result_type_name(&observed_result_type)
+        ))),
+    }
+}
+
+fn tiff_buffer_mismatch_error(
+    image_path: &str,
+    width: u32,
+    height: u32,
+    color_type: &str,
+) -> MlError {
+    MlError::Decode(format!(
+        "decoded TIFF buffer length does not match dimensions for '{image_path}': {width}x{height}, color_type={color_type}"
+    ))
+}
+
+fn tiff_result_type_name(result: &TiffDecodingResult) -> &'static str {
+    match result {
+        TiffDecodingResult::U8(_) => "u8",
+        TiffDecodingResult::U16(_) => "u16",
+        _ => "unsupported",
+    }
 }
 
 fn init_image_decoders() {
@@ -128,4 +248,24 @@ fn read_exif_orientation_from_path(image_path: &str) -> Option<u8> {
         .and_then(|field| field.value.get_uint(0))
         .and_then(|value| u8::try_from(value).ok())
         .filter(|value| (1..=8).contains(value))
+}
+
+#[cfg(test)]
+mod tests {
+    use image::ImageFormat;
+
+    use super::should_attempt_tiff_fallback;
+
+    #[test]
+    fn attempts_tiff_fallback_for_tiff_format() {
+        assert!(should_attempt_tiff_fallback(Some(ImageFormat::Tiff)));
+    }
+
+    #[test]
+    fn skips_tiff_fallback_for_non_tiff_formats() {
+        assert!(!should_attempt_tiff_fallback(None));
+        assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Jpeg)));
+        assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Png)));
+        assert!(!should_attempt_tiff_fallback(Some(ImageFormat::Avif)));
+    }
 }
