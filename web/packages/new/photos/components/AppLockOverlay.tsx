@@ -854,26 +854,6 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                         ))}
                     </Stack>
 
-                    <FocusVisibleButton
-                        fullWidth
-                        color="accent"
-                        disabled={fullPin.length !== 4 || loading}
-                        onClick={() => {
-                            void handleSubmit();
-                        }}
-                        sx={(theme) => ({
-                            ...primaryActionButtonSx(theme),
-                            mt: 2,
-                        })}
-                    >
-                        {loading ? (
-                            <CircularProgress size={18} color="inherit" />
-                        ) : isReauthentication ? (
-                            t("authenticate")
-                        ) : (
-                            t("unlock")
-                        )}
-                    </FocusVisibleButton>
                 </Stack>
             </AppLockCard>
 
