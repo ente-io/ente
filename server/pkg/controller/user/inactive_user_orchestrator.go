@@ -78,11 +78,69 @@ const (
 	inactivityEmailStageFinal  inactivityEmailStage = "confirm_13m"
 )
 
+var inactivityEmailStageOrder = []inactivityEmailStage{
+	inactivityEmailStageWarn2m,
+	inactivityEmailStageWarn1m,
+	inactivityEmailStageWarn7d,
+	inactivityEmailStageWarn1d,
+	inactivityEmailStageFinal,
+}
+
 type inactivityEmailStageConfig struct {
 	TemplateID   string
 	TemplateName string
 	Subject      string
 	IsFinal      bool
+}
+
+type inactiveUserRunStats struct {
+	ProcessedUsers   int
+	SentEmails       int
+	SuccessByStage   map[inactivityEmailStage]int
+	FailureByStage   map[inactivityEmailStage]int
+	PreStageFailures int
+}
+
+func newInactiveUserRunStats() inactiveUserRunStats {
+	successByStage := make(map[inactivityEmailStage]int, len(inactivityEmailStageOrder))
+	failureByStage := make(map[inactivityEmailStage]int, len(inactivityEmailStageOrder))
+	for _, stage := range inactivityEmailStageOrder {
+		successByStage[stage] = 0
+		failureByStage[stage] = 0
+	}
+	return inactiveUserRunStats{
+		SuccessByStage: successByStage,
+		FailureByStage: failureByStage,
+	}
+}
+
+func hasAnyStageSuccess(successByStage map[inactivityEmailStage]int) bool {
+	for _, stage := range inactivityEmailStageOrder {
+		if successByStage[stage] > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func formatStageCounts(counts map[inactivityEmailStage]int) string {
+	parts := make([]string, 0, len(inactivityEmailStageOrder))
+	for _, stage := range inactivityEmailStageOrder {
+		parts = append(parts, fmt.Sprintf("%s=%d", stage, counts[stage]))
+	}
+	return strings.Join(parts, ", ")
+}
+
+func buildInactiveUserRunSummary(stats inactiveUserRunStats, runAt int64) string {
+	return fmt.Sprintf(
+		"Inactive user run summary (%s): processed=%d sent=%d | success={%s} | failures={%s} | pre_stage_failures=%d",
+		stdtime.UnixMicro(runAt).UTC().Format(stdtime.RFC3339),
+		stats.ProcessedUsers,
+		stats.SentEmails,
+		formatStageCounts(stats.SuccessByStage),
+		formatStageCounts(stats.FailureByStage),
+		stats.PreStageFailures,
+	)
 }
 
 // InactiveUserOrchestrator sends inactivity warning emails and final account
@@ -125,8 +183,7 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 	now := time.Microseconds()
 	beforeTime := now - inactiveUserWarn2MonthsInMicroSeconds
 	var afterUserID int64
-	processedUsers := 0
-	sentEmails := 0
+	stats := newInactiveUserRunStats()
 
 	for {
 		candidates, err := c.UserRepo.GetActiveUsersByLastActivityBefore(beforeTime, afterUserID, inactiveUserDeletionBatchSize)
@@ -140,120 +197,134 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 
 		for _, candidate := range candidates {
 			afterUserID = candidate.UserID
-			processedUsers++
-			sent, err := c.processCandidate(candidate, now)
+			stats.ProcessedUsers++
+			stage, sent, err := c.processCandidate(candidate, now)
 			if err != nil {
+				if stage == inactivityEmailStageNone {
+					stats.PreStageFailures++
+				} else {
+					stats.FailureByStage[stage]++
+				}
 				log.WithError(err).WithField("user_id", candidate.UserID).Error("Failed to process inactive user candidate")
 				continue
 			}
 			if sent {
-				sentEmails++
+				stats.SentEmails++
+				stats.SuccessByStage[stage]++
 			}
 		}
 	}
 
 	log.WithFields(log.Fields{
-		"processed_users": processedUsers,
-		"sent_emails":     sentEmails,
+		"processed_users":     stats.ProcessedUsers,
+		"sent_emails":         stats.SentEmails,
+		"stage_success":       stats.SuccessByStage,
+		"stage_failures":      stats.FailureByStage,
+		"pre_stage_failures":  stats.PreStageFailures,
+		"has_stage_movements": hasAnyStageSuccess(stats.SuccessByStage),
 	}).Info("Completed inactive user processing")
+
+	if c.DiscordController != nil && hasAnyStageSuccess(stats.SuccessByStage) {
+		c.DiscordController.NotifyAdminAction(buildInactiveUserRunSummary(stats, now))
+	}
 }
 
-func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64) (bool, error) {
+func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64) (inactivityEmailStage, bool, error) {
 	stageHint, err := c.resolveNextStage(candidate.UserID, candidate.LastActivity, now)
 	if err != nil {
-		return false, err
+		return inactivityEmailStageNone, false, err
 	}
 	if stageHint == inactivityEmailStageNone {
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	user, err := c.UserRepo.Get(candidate.UserID)
 	if err != nil {
 		if errors.Is(err, ente.ErrUserDeleted) {
-			return false, nil
+			return inactivityEmailStageNone, false, nil
 		}
-		return false, err
+		return stageHint, false, err
 	}
 
 	if !isEnteDomainRolloutUser(user.Email) {
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	hasActivePaidEntitlement, err := c.hasActivePaidEntitlement(user.ID)
 	if err != nil {
-		return false, err
+		return stageHint, false, err
 	}
 	if hasActivePaidEntitlement {
 		log.WithField("user_id", user.ID).Info("Skipping inactive user processing because user has active paid entitlement")
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	lastActivity, found, err := c.UserRepo.GetLatestActivity(user.ID)
 	if err != nil {
-		return false, err
+		return stageHint, false, err
 	}
 	if !found {
 		// User is no longer active.
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	stage := stageHint
 	if lastActivity != candidate.LastActivity {
 		stage, err = c.resolveNextStage(user.ID, lastActivity, now)
 		if err != nil {
-			return false, err
+			return stageHint, false, err
 		}
 	}
 	if stage == inactivityEmailStageNone {
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	config := inactivityStageConfig(stage)
 	if config.TemplateID == "" {
-		return false, nil
+		return inactivityEmailStageNone, false, nil
 	}
 
 	if config.IsFinal {
 		if c.UserController == nil {
-			return false, fmt.Errorf("inactive user deletion requires user controller")
+			return stage, false, fmt.Errorf("inactive user deletion requires user controller")
 		}
 		hasActivePaidEntitlement, err := c.hasActivePaidEntitlement(user.ID)
 		if err != nil {
-			return false, err
+			return stage, false, err
 		}
 		if hasActivePaidEntitlement {
 			log.WithField("user_id", user.ID).Info("Skipping inactive user deletion because user has active paid entitlement")
-			return false, nil
+			return inactivityEmailStageNone, false, nil
 		}
 
 		// Re-check right before deletion to avoid deleting users who became active
 		// after earlier reads in long processing runs.
 		latestActivity, latestFound, err := c.UserRepo.GetLatestActivity(user.ID)
 		if err != nil {
-			return false, err
+			return stage, false, err
 		}
 		if !latestFound {
-			return false, nil
+			return inactivityEmailStageNone, false, nil
 		}
 		latestStage, err := c.resolveNextStage(user.ID, latestActivity, now)
 		if err != nil {
-			return false, err
+			return stage, false, err
 		}
 		if latestStage != inactivityEmailStageFinal {
 			log.WithField("user_id", user.ID).Info("Skipping inactive user deletion because user is no longer in final stage")
-			return false, nil
+			return inactivityEmailStageNone, false, nil
 		}
 		if c.EmergencyContactRepo != nil {
 			hasActiveLegacyContact, err := c.EmergencyContactRepo.HasActiveLegacyContact(context.Background(), user.ID)
 			if err != nil {
-				return false, err
+				return stage, false, err
 			}
 			if hasActiveLegacyContact {
 				c.DiscordController.NotifyAdminAction(
 					fmt.Sprintf("Inactive user %d (%s) deletion paused at %s due to active legacy contact",
 						user.ID, user.Email, stdtime.UnixMicro(now).UTC().Format(stdtime.RFC3339)))
 				log.WithField("user_id", user.ID).Info("Skipping inactive user deletion because user has active legacy contact configured")
-				return false, nil
+				return inactivityEmailStageNone, false, nil
 			}
 		}
 
@@ -262,7 +333,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 			"req_ctx": "inactive_account_deletion",
 		})
 		if _, err := c.UserController.HandleAutomatedAccountDeletion(context.Background(), user.ID, deleteLogger); err != nil {
-			return false, err
+			return stage, false, err
 		}
 	}
 
@@ -281,11 +352,11 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		templateData,
 		nil,
 	); err != nil {
-		return false, err
+		return stage, false, err
 	}
 
 	if err := c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, config.TemplateID); err != nil {
-		return false, err
+		return stage, false, err
 	}
 
 	log.WithFields(log.Fields{
@@ -301,7 +372,7 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 				user.ID, user.Email))
 	}
 
-	return true, nil
+	return stage, true, nil
 }
 
 func (c *InactiveUserOrchestrator) hasActivePaidEntitlement(userID int64) (bool, error) {
