@@ -113,7 +113,6 @@ jobs:
               run: |
                   CARGO_BIN_WIN=$(cygpath -w "$HOME/.cargo/bin")
                   echo "$CARGO_BIN_WIN" >> $GITHUB_PATH
-                  echo "Added $CARGO_BIN_WIN to PATH"
 
             - name: Resolve Windows signing tool paths
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
@@ -150,13 +149,10 @@ jobs:
                   echo "TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH" >> $GITHUB_ENV
                   if [ -n "$AZ_PATH" ]; then
                       echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
-                      echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
                   fi
                   if [ -n "$SIGNTOOL_PATH" ]; then
                       echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
-                      echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
                   fi
-                  echo "Resolved TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH"
 
             - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'

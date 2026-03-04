@@ -37,6 +37,3 @@ config.bundle.windows.signCommand = {
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log(`Updated windows signCommand in ${configPath}`);
-console.log(
-    `Windows signCommand: ${JSON.stringify(config.bundle.windows.signCommand)}`,
-);
