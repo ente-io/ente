@@ -1190,49 +1190,59 @@ pub struct LegacyLocalStorageData {
     pub chat_key: Option<String>,
 }
 
-/// Read legacy chat data from old Tauri v1 WebKit localStorage on macOS.
+/// Read legacy chat data from old Tauri v1 WebView localStorage.
 ///
-/// The old WebView data lives under `~/Library/WebKit/<OldAppName>/`. We check
-/// known candidate directory names and return the chat store JSON and the old
-/// chat key if found.
+/// The Tauri v1 → v2 migration changes the WebView data directory, so old
+/// localStorage is no longer visible to the current app. This command searches
+/// the old platform-specific locations for the data.
+///
+/// - **macOS**: `~/Library/WebKit/<OldAppName>/WebsiteData/.../localstorage.sqlite3`
+/// - **Linux**: `~/.local/share/<old-app-name>/.../localstorage.sqlite3`
+/// - **Windows**: Not yet supported (WebView2 uses LevelDB, not SQLite)
 #[tauri::command]
 pub async fn read_legacy_localstorage() -> Result<LegacyLocalStorageData, ApiError> {
+    let home = dirs::home_dir().ok_or_else(|| ApiError::new("io", "No home directory"))?;
+    let candidates = ["ensu-tauri", "Ensu", "ensu"];
+
+    // macOS: ~/Library/WebKit/<name>/WebsiteData/...
     #[cfg(target_os = "macos")]
     {
-        let home = dirs::home_dir().ok_or_else(|| ApiError::new("io", "No home directory"))?;
         let webkit_dir = home.join("Library/WebKit");
-
-        let candidates = ["ensu-tauri", "Ensu", "ensu"];
-
         for name in &candidates {
-            let ls_dir = webkit_dir.join(name).join("WebsiteData");
-            if !ls_dir.exists() {
-                continue;
-            }
-
-            if let Some(data) = find_legacy_chat_data(&ls_dir) {
-                return Ok(data);
+            let dir = webkit_dir.join(name).join("WebsiteData");
+            if dir.exists() {
+                if let Some(data) = find_legacy_chat_data(&dir) {
+                    return Ok(data);
+                }
             }
         }
-
-        Ok(LegacyLocalStorageData {
-            chat_store_json: None,
-            chat_key: None,
-        })
     }
 
-    #[cfg(not(target_os = "macos"))]
+    // Linux: ~/.local/share/<name>/... (WebKitGTK uses same SQLite format)
+    #[cfg(target_os = "linux")]
     {
-        Ok(LegacyLocalStorageData {
-            chat_store_json: None,
-            chat_key: None,
-        })
+        let data_home = std::env::var("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| home.join(".local/share"));
+        for name in &candidates {
+            let dir = data_home.join(name);
+            if dir.exists() {
+                if let Some(data) = find_legacy_chat_data(&dir) {
+                    return Ok(data);
+                }
+            }
+        }
     }
+
+    Ok(LegacyLocalStorageData {
+        chat_store_json: None,
+        chat_key: None,
+    })
 }
 
-#[cfg(target_os = "macos")]
-fn find_legacy_chat_data(website_data_dir: &std::path::Path) -> Option<LegacyLocalStorageData> {
-    for entry in walkdir(website_data_dir) {
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+fn find_legacy_chat_data(base_dir: &std::path::Path) -> Option<LegacyLocalStorageData> {
+    for entry in walkdir(base_dir) {
         if entry.file_name().map_or(true, |n| n != "localstorage.sqlite3") {
             continue;
         }
@@ -1270,7 +1280,7 @@ fn find_legacy_chat_data(website_data_dir: &std::path::Path) -> Option<LegacyLoc
 }
 
 /// Simple recursive file listing (avoids adding the `walkdir` crate).
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 fn walkdir(dir: &std::path::Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
     if let Ok(entries) = fs::read_dir(dir) {
