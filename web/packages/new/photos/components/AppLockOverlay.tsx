@@ -246,8 +246,6 @@ const SECONDARY_ACTION_BG_LIGHT = "#F2F2F2";
 const SECONDARY_ACTION_BG_HOVER_LIGHT = "#E8E8E8";
 const SECONDARY_ACTION_BG_DARK = "rgba(255, 255, 255, 0.08)";
 const SECONDARY_ACTION_BG_HOVER_DARK = "rgba(255, 255, 255, 0.12)";
-const ILLUSTRATION_RING_LIGHT = "#E7E7E7";
-const ILLUSTRATION_RING_DARK = "rgba(0, 0, 0, 0.05)";
 const ILLUSTRATION_ICON_LIGHT = "#111";
 const ILLUSTRATION_ICON_DARK = "#fff";
 const APP_LOCK_MODAL_WIDTH = 408;
@@ -347,11 +345,9 @@ const secondaryActionButtonSx = (theme: Theme) => ({
 
 const illustrationSvgSx = (theme: Theme) => ({
     "--app-lock-illustration-fill": SECONDARY_ACTION_BG_LIGHT,
-    "--app-lock-illustration-ring": ILLUSTRATION_RING_LIGHT,
     "--app-lock-illustration-icon": ILLUSTRATION_ICON_LIGHT,
     ...theme.applyStyles("dark", {
         "--app-lock-illustration-fill": SECONDARY_ACTION_BG_DARK,
-        "--app-lock-illustration-ring": ILLUSTRATION_RING_DARK,
         "--app-lock-illustration-icon": ILLUSTRATION_ICON_DARK,
     }),
 });
@@ -441,8 +437,6 @@ const LogoutIllustration: React.FC = () => {
                     cy="52"
                     r="34"
                     fill="var(--app-lock-illustration-fill)"
-                    stroke="var(--app-lock-illustration-ring)"
-                    strokeWidth="5.73358"
                 />
                 <g
                     transform="translate(67 52) scale(1.18) translate(-12 -12)"
@@ -476,8 +470,6 @@ const CooldownIllustration: React.FC = () => {
                     cy="52"
                     r="34"
                     fill="var(--app-lock-illustration-fill)"
-                    stroke="var(--app-lock-illustration-ring)"
-                    strokeWidth="5.73358"
                 />
                 <g
                     transform="translate(67 52) scale(1.18) translate(-12 -12)"
