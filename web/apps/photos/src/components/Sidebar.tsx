@@ -242,6 +242,14 @@ type FreeUpSpaceAction = Extract<
     "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
 >;
 
+const appLockReauthenticationCancelledMessage =
+    "app_lock_reauthentication_cancelled";
+
+const isReauthenticationCancellation = (error: unknown) =>
+    error == undefined ||
+    (error instanceof Error &&
+        error.message === appLockReauthenticationCancelledMessage);
+
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
@@ -1156,8 +1164,13 @@ const DesktopAppLockSettings: React.FC<
     const { show, props } = useModalVisibility();
 
     const handleOpen = useCallback(async () => {
-        await onAuthenticateUser();
-        show();
+        try {
+            await onAuthenticateUser();
+            show();
+        } catch (error) {
+            if (isReauthenticationCancellation(error)) return;
+            log.error("Failed to open app lock settings", error);
+        }
     }, [onAuthenticateUser, show]);
 
     return (
