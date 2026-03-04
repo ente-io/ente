@@ -23,7 +23,6 @@ const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
 config.bundle.windows.signCommand = {
     cmd: signerBinary,
     args: [
-        "-v",
         "-e",
         endpoint,
         "-a",
