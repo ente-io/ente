@@ -237,45 +237,63 @@ const withNativeDbRecovery = async <T>(
 
 const LEGACY_STORAGE_KEY = "ensu.chat.store.v1";
 
+interface LegacySession {
+    sessionUuid: string;
+    createdAt: number;
+    updatedAt: number;
+    encryptedData: string;
+    header: string;
+    isDeleted?: boolean;
+}
+
+interface LegacyMessage {
+    messageUuid: string;
+    sessionUuid: string;
+    parentMessageUuid?: string;
+    sender: "self" | "assistant";
+    createdAt: number;
+    encryptedData: string;
+    header: string;
+    isDeleted?: boolean;
+}
+
+interface LegacyStore {
+    sessions?: LegacySession[];
+    messages?: LegacyMessage[];
+}
+
+const parseLegacyStore = (): LegacyStore | undefined => {
+    const json = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!json) return undefined;
+    try {
+        return JSON.parse(json) as LegacyStore;
+    } catch {
+        return undefined;
+    }
+};
+
+const removeLegacyStore = () => {
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem("ensu.chat.branchSelections.v1");
+};
+
 /**
  * One-time migration from the old localStorage-based chat store (v0.1.5 and
- * earlier) into the current IndexedDB store. The encrypted payloads are
- * byte-compatible, so we can copy them directly without re-encrypting.
+ * earlier) into the current IndexedDB store (web-only fallback path). The
+ * encrypted payloads are byte-compatible, so we copy them directly.
  */
 const migrateFromLocalStorage = async (
     db: IDBPDatabase<ChatDbSchema>,
 ): Promise<void> => {
-    const json = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (!json) return;
+    const parsed = parseLegacyStore();
+    if (!parsed) return;
 
     try {
-        const parsed = JSON.parse(json) as {
-            sessions?: {
-                sessionUuid: string;
-                createdAt: number;
-                updatedAt: number;
-                encryptedData: string;
-                header: string;
-                isDeleted?: boolean;
-            }[];
-            messages?: {
-                messageUuid: string;
-                sessionUuid: string;
-                parentMessageUuid?: string;
-                sender: "self" | "assistant";
-                createdAt: number;
-                encryptedData: string;
-                header: string;
-                isDeleted?: boolean;
-            }[];
-        };
-
         const tx = db.transaction(["sessions", "messages"], "readwrite");
         const sessionStore = tx.objectStore("sessions");
         const messageStore = tx.objectStore("messages");
 
         for (const s of parsed.sessions ?? []) {
-            // Skip if already exists (in case of partial migration).
             if (await sessionStore.get(s.sessionUuid)) continue;
             await sessionStore.put({
                 sessionUuid: s.sessionUuid,
@@ -306,13 +324,10 @@ const migrateFromLocalStorage = async (
         }
 
         await tx.done;
-
-        // Migration succeeded — remove the old data.
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-        localStorage.removeItem("ensu.chat.branchSelections.v1");
+        removeLegacyStore();
         log.info(
             `Migrated ${(parsed.sessions ?? []).length} sessions and ` +
-                `${(parsed.messages ?? []).length} messages from localStorage`,
+                `${(parsed.messages ?? []).length} messages from localStorage to IndexedDB`,
         );
     } catch (error) {
         log.error("Failed to migrate chat data from localStorage", error);
@@ -407,7 +422,10 @@ const safeTitle = (value: unknown) =>
         ? sessionTitleFromText(value, "New chat")
         : "New chat";
 
-const decryptSessionTitle = async (session: StoredSession, chatKey: string) => {
+const decryptSessionTitle = async (
+    session: Pick<StoredSession, "encryptedData" | "header">,
+    chatKey: string,
+) => {
     try {
         const payload = (await decryptChatPayload(
             { encryptedData: session.encryptedData, header: session.header },
@@ -420,7 +438,10 @@ const decryptSessionTitle = async (session: StoredSession, chatKey: string) => {
     }
 };
 
-const decryptMessageText = async (message: StoredMessage, chatKey: string) => {
+const decryptMessageText = async (
+    message: Pick<StoredMessage, "encryptedData" | "header">,
+    chatKey: string,
+) => {
     try {
         const payload = (await decryptChatPayload(
             { encryptedData: message.encryptedData, header: message.header },
@@ -438,12 +459,6 @@ const serializeAttachments = async (
     chatKey: string,
 ): Promise<StoredAttachment[]> => {
     if (!attachments.length) return [];
-    if (!isTauriRuntime()) {
-        log.warn(
-            "Chat attachments are only supported in the desktop app; ignoring attachments on web.",
-        );
-        return [];
-    }
     return Promise.all(
         attachments.map(async (attachment) => ({
             id: attachment.id,
@@ -461,7 +476,7 @@ const deserializeAttachments = async (
     attachments: StoredAttachment[] | undefined,
     chatKey: string,
 ): Promise<ChatAttachment[]> => {
-    if (!attachments?.length || !isTauriRuntime()) return [];
+    if (!attachments?.length) return [];
 
     const localKey = cachedLocalChatKey();
 
@@ -532,6 +547,69 @@ const invokeChat = async <T>(
 ) => {
     const { invoke } = await import("@tauri-apps/api/core");
     return invoke<T>(command, args);
+};
+
+/**
+ * One-time migration from the old localStorage-based chat store (v0.1.5 and
+ * earlier) into the native Rust SQLite database used by the Tauri desktop app.
+ * Decrypts the old encrypted payloads and re-inserts them via the native
+ * commands (which handle their own encryption).
+ */
+export const migrateFromLocalStorageNative = async (
+    chatKey: string,
+): Promise<void> => {
+    const parsed = parseLegacyStore();
+    if (!parsed) return;
+
+    try {
+        const sessions = parsed.sessions ?? [];
+        const messages = parsed.messages ?? [];
+
+        for (const s of sessions) {
+            if (s.isDeleted) continue;
+            const title = await decryptSessionTitle(s, chatKey);
+            await invokeChat("chat_db_upsert_session", {
+                keyB64: chatKey,
+                input: {
+                    sessionUuid: s.sessionUuid,
+                    title,
+                    createdAt: s.createdAt,
+                    updatedAt: s.updatedAt,
+                    remoteId: null,
+                    needsSync: false,
+                    deletedAt: null,
+                },
+            });
+        }
+
+        for (const m of messages) {
+            if (m.isDeleted) continue;
+            const text = await decryptMessageText(m, chatKey);
+            await invokeChat("chat_db_insert_message_with_uuid", {
+                keyB64: chatKey,
+                input: {
+                    messageUuid: m.messageUuid,
+                    sessionUuid: m.sessionUuid,
+                    parentMessageUuid: m.parentMessageUuid ?? null,
+                    sender: m.sender,
+                    text,
+                    createdAt: m.createdAt,
+                    deletedAt: null,
+                    attachments: [],
+                },
+            });
+        }
+
+        removeLegacyStore();
+        log.info(
+            `Migrated ${sessions.length} sessions and ${messages.length} messages from localStorage to native DB`,
+        );
+    } catch (error) {
+        log.error(
+            "Failed to migrate chat data from localStorage to native DB",
+            error,
+        );
+    }
 };
 
 const listSessionsNative = async (chatKey: string): Promise<ChatSession[]> => {

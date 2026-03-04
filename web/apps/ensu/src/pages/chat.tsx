@@ -51,6 +51,7 @@ import {
     getBranchSelections,
     listMessages,
     listSessions,
+    migrateFromLocalStorageNative,
     readDecryptedAttachmentBytes,
     sessionTitleFromText,
     setBranchSelection,
@@ -864,6 +865,7 @@ const Page: React.FC = () => {
     const pendingDownloadProgressRef = useRef<DownloadProgress | null>(null);
     const downloadProgressTimerRef = useRef<number | null>(null);
     const refreshSessionsInFlightRef = useRef<Promise<void> | null>(null);
+    const legacyMigrationDoneRef = useRef(false);
     const refreshMessagesInFlightRef = useRef<{
         sessionId?: string;
         promise: Promise<void> | null;
@@ -1595,12 +1597,26 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (!chatKey) return;
-        if (isLoggedIn) {
-            void syncNow();
-            return;
-        }
-        void refreshSessions();
-    }, [chatKey, isLoggedIn, refreshSessions, syncNow]);
+
+        const run = async () => {
+            // One-time migration from localStorage (v0.1.5) to native DB.
+            if (isTauriRuntime && !legacyMigrationDoneRef.current) {
+                legacyMigrationDoneRef.current = true;
+                try {
+                    await migrateFromLocalStorageNative(chatKey);
+                } catch (error) {
+                    log.error("Legacy migration failed", error);
+                }
+            }
+
+            if (isLoggedIn) {
+                await syncNow();
+            } else {
+                await refreshSessions();
+            }
+        };
+        void run();
+    }, [chatKey, isLoggedIn, isTauriRuntime, refreshSessions, syncNow]);
 
     useEffect(() => {
         currentSessionIdRef.current = currentSessionId;
@@ -2661,7 +2677,16 @@ const Page: React.FC = () => {
                     const filePath = await join(dir, filename);
 
                     await writeFile(filePath, bytes);
-                    await open(filePath);
+                    // Tauri shell.open requires a URL matching the
+                    // configured regex. Normalise the path to a valid
+                    // file:// URL on all platforms (Windows paths lack a
+                    // leading slash and use backslashes).
+                    const asUrl = filePath.replace(/\\/g, "/");
+                    await open(
+                        asUrl.startsWith("/")
+                            ? `file://${asUrl}`
+                            : `file:///${asUrl}`,
+                    );
                     return;
                 }
 
