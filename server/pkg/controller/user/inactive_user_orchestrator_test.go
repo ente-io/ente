@@ -3,6 +3,8 @@ package user
 import (
 	"strings"
 	"testing"
+
+	"github.com/ente-io/museum/pkg/repo"
 )
 
 func TestNextInactivityEmailStage(t *testing.T) {
@@ -149,5 +151,34 @@ func TestBuildInactiveUserRunSummary(t *testing.T) {
 		if !strings.Contains(summary, fragment) {
 			t.Fatalf("summary missing fragment %q: %s", fragment, summary)
 		}
+	}
+}
+
+func TestProcessCandidateBatchRecoversPanics(t *testing.T) {
+	orchestrator := &InactiveUserOrchestrator{}
+	candidates := []repo.UserInactivityCandidate{
+		{
+			UserID:       42,
+			LastActivity: 0,
+		},
+	}
+
+	results := orchestrator.processCandidateBatch(candidates, 0, nil)
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+
+	result := results[0]
+	if result.UserID != 42 {
+		t.Fatalf("unexpected user id in result: %d", result.UserID)
+	}
+	if result.Sent {
+		t.Fatal("expected sent=false for panic recovery path")
+	}
+	if result.Stage != inactivityEmailStageNone {
+		t.Fatalf("expected stage none for panic recovery path, got %q", result.Stage)
+	}
+	if result.Err == nil {
+		t.Fatal("expected error result for panic recovery path")
 	}
 }

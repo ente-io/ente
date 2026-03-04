@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"strings"
+	"sync"
 	stdtime "time"
 
 	"github.com/ente-io/museum/ente"
@@ -21,6 +23,8 @@ const (
 	InactiveUserDeletionJobLock = "inactive_user_deletion_mail_lock"
 
 	inactiveUserDeletionBatchSize    = 500
+	inactiveUserWorkerCount          = 6
+	inactiveUserEmailInFlightLimit   = 4
 	inactiveUserDeletionFromName     = "Ente"
 	inactiveUserDeletionFromEmail    = "team@ente.io"
 	inactiveUserDeletionBaseTemplate = "ente_base.html"
@@ -99,6 +103,13 @@ type inactiveUserRunStats struct {
 	SuccessByStage   map[inactivityEmailStage]int
 	FailureByStage   map[inactivityEmailStage]int
 	PreStageFailures int
+}
+
+type inactiveCandidateResult struct {
+	UserID int64
+	Stage  inactivityEmailStage
+	Sent   bool
+	Err    error
 }
 
 func newInactiveUserRunStats() inactiveUserRunStats {
@@ -184,6 +195,7 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 	beforeTime := now - inactiveUserWarn2MonthsInMicroSeconds
 	var afterUserID int64
 	stats := newInactiveUserRunStats()
+	emailSemaphore := make(chan struct{}, inactiveUserEmailInFlightLimit)
 
 	for {
 		candidates, err := c.UserRepo.GetActiveUsersByLastActivityBefore(beforeTime, afterUserID, inactiveUserDeletionBatchSize)
@@ -195,22 +207,22 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 			break
 		}
 
-		for _, candidate := range candidates {
-			afterUserID = candidate.UserID
+		afterUserID = candidates[len(candidates)-1].UserID
+		results := c.processCandidateBatch(candidates, now, emailSemaphore)
+		for _, result := range results {
 			stats.ProcessedUsers++
-			stage, sent, err := c.processCandidate(candidate, now)
-			if err != nil {
-				if stage == inactivityEmailStageNone {
+			if result.Err != nil {
+				if result.Stage == inactivityEmailStageNone {
 					stats.PreStageFailures++
 				} else {
-					stats.FailureByStage[stage]++
+					stats.FailureByStage[result.Stage]++
 				}
-				log.WithError(err).WithField("user_id", candidate.UserID).Error("Failed to process inactive user candidate")
+				log.WithError(result.Err).WithField("user_id", result.UserID).Error("Failed to process inactive user candidate")
 				continue
 			}
-			if sent {
+			if result.Sent {
 				stats.SentEmails++
-				stats.SuccessByStage[stage]++
+				stats.SuccessByStage[result.Stage]++
 			}
 		}
 	}
@@ -229,7 +241,70 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 	}
 }
 
-func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64) (inactivityEmailStage, bool, error) {
+func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserInactivityCandidate, now int64, emailSemaphore chan struct{}) []inactiveCandidateResult {
+	if len(candidates) == 0 {
+		return nil
+	}
+
+	workerCount := inactiveUserWorkerCount
+	if len(candidates) < workerCount {
+		workerCount = len(candidates)
+	}
+
+	candidateCh := make(chan repo.UserInactivityCandidate, len(candidates))
+	resultCh := make(chan inactiveCandidateResult, len(candidates))
+	var wg sync.WaitGroup
+
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for candidate := range candidateCh {
+				func(candidate repo.UserInactivityCandidate) {
+					defer func() {
+						if recovered := recover(); recovered != nil {
+							log.WithFields(log.Fields{
+								"user_id": candidate.UserID,
+								"panic":   recovered,
+								"stack":   string(debug.Stack()),
+							}).Error("Recovered panic while processing inactive user candidate")
+							resultCh <- inactiveCandidateResult{
+								UserID: candidate.UserID,
+								Stage:  inactivityEmailStageNone,
+								Sent:   false,
+								Err:    fmt.Errorf("panic while processing inactive user candidate: %v", recovered),
+							}
+						}
+					}()
+
+					stage, sent, err := c.processCandidate(candidate, now, emailSemaphore)
+					resultCh <- inactiveCandidateResult{
+						UserID: candidate.UserID,
+						Stage:  stage,
+						Sent:   sent,
+						Err:    err,
+					}
+				}(candidate)
+			}
+		}()
+	}
+
+	for _, candidate := range candidates {
+		candidateCh <- candidate
+	}
+	close(candidateCh)
+
+	wg.Wait()
+	close(resultCh)
+
+	results := make([]inactiveCandidateResult, 0, len(candidates))
+	for result := range resultCh {
+		results = append(results, result)
+	}
+	return results
+}
+
+func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64, emailSemaphore chan struct{}) (inactivityEmailStage, bool, error) {
 	stageHint, err := c.resolveNextStage(candidate.UserID, candidate.LastActivity, now)
 	if err != nil {
 		return inactivityEmailStageNone, false, err
@@ -341,6 +416,12 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 	templateData := map[string]interface{}{
 		"Email":        user.Email,
 		"DeletionDate": deletionDate,
+	}
+	if emailSemaphore != nil {
+		emailSemaphore <- struct{}{}
+		defer func() {
+			<-emailSemaphore
+		}()
 	}
 	if err := emailUtil.SendTemplatedEmailV2(
 		[]string{user.Email},
