@@ -157,6 +157,9 @@ jobs:
                   AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
                   AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                   AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                  TRUSTED_SIGNING_CLI_PATH: ${{ env.TRUSTED_SIGNING_CLI_PATH }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
 
             - name: Enable updater artifacts for release builds
