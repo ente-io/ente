@@ -1,5 +1,10 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -15,11 +20,30 @@ class SaveFacesBanner extends StatefulWidget {
 
 class _SaveFacesBannerState extends State<SaveFacesBanner> {
   bool _dismissed = false;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _appModeChangedEvent.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    if (!isOfflineMode) return const SizedBox.shrink();
+    if (!(isOfflineMode && !Configuration.instance.hasConfiguredAccount())) {
+      return const SizedBox.shrink();
+    }
     if (localSettings.isOfflineFacesBannerDismissed) {
       return const SizedBox.shrink();
     }
@@ -95,7 +119,10 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const EmailEntryPage(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },
