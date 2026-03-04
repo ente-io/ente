@@ -3,30 +3,32 @@ package io.ente.photos.screensaver.ente
 import android.content.Context
 import java.io.File
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 
 class EnteImageCache(
     private val appContext: Context,
 ) {
 
     private val baseDir: File = File(appContext.cacheDir, "ente")
+    private val tokenDirCache = ConcurrentHashMap<String, File>()
 
     fun imageFile(accessToken: String, fileId: Long): File {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         return File(dir, "$fileId.img")
     }
 
     fun imageMetaFile(accessToken: String, fileId: Long): File {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         return File(dir, "$fileId.img.meta")
     }
 
     fun previewFile(accessToken: String, fileId: Long): File {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         return File(dir, "$fileId.preview")
     }
 
     fun previewMetaFile(accessToken: String, fileId: Long): File {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         return File(dir, "$fileId.preview.meta")
     }
 
@@ -45,13 +47,14 @@ class EnteImageCache(
     }
 
     fun clear(accessToken: String) {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         if (!dir.exists()) return
         runCatching { dir.deleteRecursively() }
+        tokenDirCache.remove(accessToken)
     }
 
     fun prune(accessToken: String, maxFiles: Int = 500) {
-        val dir = File(baseDir, sha256Hex(accessToken))
+        val dir = tokenDir(accessToken)
         if (!dir.exists() || !dir.isDirectory) return
 
         val files = dir.listFiles()?.filter { it.isFile && !it.name.endsWith(".meta") } ?: return
@@ -68,5 +71,11 @@ class EnteImageCache(
     private fun sha256Hex(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
         return digest.joinToString("") { b -> "%02x".format(b) }
+    }
+
+    private fun tokenDir(accessToken: String): File {
+        return tokenDirCache.getOrPut(accessToken) {
+            File(baseDir, sha256Hex(accessToken))
+        }
     }
 }

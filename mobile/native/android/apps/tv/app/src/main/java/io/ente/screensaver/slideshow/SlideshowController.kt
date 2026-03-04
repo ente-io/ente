@@ -33,6 +33,7 @@ class SlideshowController(
 ) {
 
     private var job: Job? = null
+    private val enteImageCache = EnteImageCache(context.applicationContext)
 
     fun start() {
         stop()
@@ -92,10 +93,9 @@ class SlideshowController(
 
         val kind = segments[0]
         val fileId = segments[1].toLongOrNull() ?: return false
-        val cache = EnteImageCache(context.applicationContext)
         val file = when (kind) {
-            "image" -> cache.imageFile(accessToken, fileId)
-            "thumb" -> cache.previewFile(accessToken, fileId)
+            "image" -> enteImageCache.imageFile(accessToken, fileId)
+            "thumb" -> enteImageCache.previewFile(accessToken, fileId)
             else -> return false
         }
 

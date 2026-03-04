@@ -250,7 +250,10 @@ class EntePublicAlbumRepository private constructor(
         ) {
             mutex.withLock {
                 cachedState = null
-                withContext(Dispatchers.IO) { storage.clear() }
+                withContext(Dispatchers.IO) {
+                    storage.clear()
+                    EnteImageCache(appContext).clear(existing.accessToken)
+                }
             }
             secureStore.clearAlbumPassword(existing.accessToken)
         }
@@ -352,12 +355,14 @@ class EntePublicAlbumRepository private constructor(
         if (state.files.isEmpty()) return emptyList()
 
         val limit = if (maxItems <= 0) Int.MAX_VALUE else maxItems
-        val ids = state.files.keys.asSequence().sorted().toList()
+        val allIds = state.files.keys.toList()
+        val sampledMode = limit < allIds.size
+        val scanOrder = if (sampledMode) allIds.shuffled() else allIds.sorted()
         val updatedFiles = LinkedHashMap(state.files)
         var updated = false
 
-        val uris = ArrayList<Uri>(minOf(limit, state.files.size))
-        for (id in ids) {
+        val selectedIds = ArrayList<Long>(minOf(limit, state.files.size))
+        for (id in scanOrder) {
             val record = updatedFiles[id] ?: continue
             if (record.fileType == -1) {
                 continue
@@ -387,8 +392,13 @@ class EntePublicAlbumRepository private constructor(
                 continue
             }
 
+            selectedIds.add(id)
+            if (selectedIds.size >= limit) break
+        }
+
+        val uris = ArrayList<Uri>(selectedIds.size)
+        for (id in selectedIds) {
             uris.add(Uri.parse("ente://${state.accessToken}/image/$id"))
-            if (uris.size >= limit) break
         }
 
         if (updated) {
@@ -401,6 +411,8 @@ class EntePublicAlbumRepository private constructor(
 
         if (uris.isEmpty() && updatedFiles.isNotEmpty()) {
             AppLog.error("Ente", "All files were filtered out (unsupported/decrypt failures?)")
+        } else if (sampledMode) {
+            AppLog.info("Ente", "Sampled ${uris.size} photos from ${allIds.size} total files")
         }
 
         return uris
