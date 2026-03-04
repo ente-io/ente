@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/email_entry_page.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class SharedEmptyOfflineStateWidget extends StatelessWidget {
   const SharedEmptyOfflineStateWidget({super.key});
@@ -9,6 +10,7 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final l10n = AppLocalizations.of(context);
 
     return Center(
@@ -26,54 +28,37 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
             ),
             Text(
               l10n.offlineEnableSharingTitle,
-              style: TextStyle(
+              style: textTheme.largeBold.copyWith(
                 fontFamily: "Nunito",
-                fontWeight: FontWeight.w900,
-                fontSize: 28,
-                letterSpacing: -1.0,
-                color: colorScheme.textBase,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                height: 24 / 18,
+                letterSpacing: -1,
+                color: colorScheme.content,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               l10n.offlineEnableSharingDesc,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: "Inter",
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                height: 20 / 14,
-                color: colorScheme.textMuted,
-              ),
+              style: textTheme.smallMuted,
             ),
-            const SizedBox(height: 24),
-            GestureDetector(
+            const SizedBox(height: 28),
+            BannerActionButton(
+              label: l10n.getStarted,
+              showTag: true,
+              stickTagToLightTheme: false,
+              variant: BannerActionButtonVariant.primary,
               onTap: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const EmailEntryPage(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },
-              child: Container(
-                height: 48,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                decoration: BoxDecoration(
-                  color: colorScheme.greenBase,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  l10n.offlineEnableBackupAction,
-                  style: const TextStyle(
-                    fontFamily: "Montserrat",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    height: 16 / 13,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ),
           ],
         ),

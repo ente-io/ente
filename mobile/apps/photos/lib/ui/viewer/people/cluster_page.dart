@@ -3,7 +3,9 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -69,7 +71,10 @@ class _ClusterPageState extends State<ClusterPage> {
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  late final StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   bool _isNamingBannerDismissed = false;
+  bool get _offlineUiMode =>
+      isOfflineMode && !Configuration.instance.hasConfiguredAccount();
 
   @override
   void initState() {
@@ -107,6 +112,11 @@ class _ClusterPageState extends State<ClusterPage> {
         }
       }
     });
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     kDebugMode
         ? ClusterFeedbackService.instance.debugLogClusterBlurValues(
             widget.clusterID,
@@ -119,6 +129,7 @@ class _ClusterPageState extends State<ClusterPage> {
   void dispose() {
     _filesUpdatedEvent.cancel();
     _peopleChangedEvent.cancel();
+    _appModeChangedEvent.cancel();
     if (ClusterFeedbackService.lastViewedClusterID == widget.clusterID) {
       ClusterFeedbackService.resetLastViewedClusterID();
     }
@@ -126,7 +137,7 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleSavePerson() async {
-    if (isOfflineMode) {
+    if (_offlineUiMode) {
       return;
     }
     if (widget.personID == null) {
@@ -155,7 +166,7 @@ class _ClusterPageState extends State<ClusterPage> {
   }
 
   Future<void> _handleMergePerson() async {
-    if (isOfflineMode) {
+    if (_offlineUiMode) {
       return;
     }
     final selection = await showMergeClustersToPersonPage(
@@ -223,10 +234,10 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
-      header: (isOfflineMode || widget.showNamingBanner) &&
+      header: (_offlineUiMode || widget.showNamingBanner) &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
-          ? isOfflineMode
+          ? _offlineUiMode
               ? const NameFaceBanner()
               : SavePersonBanner(
                   faceWidget: PersonFaceWidget(

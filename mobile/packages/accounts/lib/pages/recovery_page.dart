@@ -174,7 +174,10 @@ class _RecoveryPageState extends State<RecoveryPage> {
                                 GradientButton(
                                   text: context.strings.contactSupport,
                                   onTap: () async {
-                                    await openSupportPage("", null);
+                                    await sendEmail(
+                                      context,
+                                      to: "support@ente.io",
+                                    );
                                   },
                                 ),
                               ],

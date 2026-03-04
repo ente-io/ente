@@ -212,6 +212,10 @@ struct MessageListView: View {
                     inlineStreamingTextBubble
                         .id("streaming")
                 }
+
+                if !messages.isEmpty {
+                    aiSafetyFooter
+                }
             }
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
@@ -262,6 +266,15 @@ struct MessageListView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(EnsuColor.textPrimary)
+    }
+
+    private var aiSafetyFooter: some View {
+        Text("Ensu can make mistakes. Please double-check key details.")
+            .font(.system(size: 12, weight: .regular))
+            .foregroundStyle(EnsuColor.textMuted)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, EnsuSpacing.sm)
     }
 
     private var messageTransition: AnyTransition {
