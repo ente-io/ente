@@ -272,7 +272,9 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                         caption={autoLockLabel(
                                             state.autoLockTimeMs,
                                         )}
-                                        onClick={() => setAutoLockOptionsOpen(true)}
+                                        onClick={() =>
+                                            setAutoLockOptionsOpen(true)
+                                        }
                                     />
                                 </RowButtonGroup>
                             </Stack>
@@ -399,7 +401,10 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
 
         queueFocus(
             () =>
-                (step === "enter" ? inputRefs : confirmInputRefs).current[0]?.focus(),
+                (step === "enter"
+                    ? inputRefs
+                    : confirmInputRefs
+                ).current[0]?.focus(),
             50,
         );
     }, [open, step, queueFocus]);
@@ -688,7 +693,8 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
             () =>
                 (step === "enter"
                     ? passwordInputRef.current
-                    : confirmPasswordInputRef.current)?.focus(),
+                    : confirmPasswordInputRef.current
+                )?.focus(),
             50,
         );
     }, [open, step, queueFocus]);
@@ -854,7 +860,8 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
 
 // -- Auto-lock nested drawer --
 
-interface AutoLockOptionsDrawerProps extends NestedSidebarDrawerVisibilityProps {
+interface AutoLockOptionsDrawerProps
+    extends NestedSidebarDrawerVisibilityProps {
     currentValue: number;
 }
 
@@ -877,17 +884,14 @@ const AutoLockOptionsDrawer: React.FC<AutoLockOptionsDrawerProps> = ({
             if (pendingAutoLockMs !== null || ms === currentValue) return;
 
             setPendingAutoLockMs(ms);
-            void (async () => {
-                try {
-                    await Promise.resolve(setAutoLockTime(ms));
-                    setPendingAutoLockMs(null);
-                    onClose();
-                } finally {
-                    setPendingAutoLockMs((pending) =>
-                        pending === ms ? null : pending,
-                    );
-                }
-            })();
+            try {
+                setAutoLockTime(ms);
+                onClose();
+            } finally {
+                setPendingAutoLockMs((pending) =>
+                    pending === ms ? null : pending,
+                );
+            }
         },
         [pendingAutoLockMs, currentValue, onClose],
     );

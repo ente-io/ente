@@ -524,10 +524,7 @@ const resolveDeviceLockCapability = async (): Promise<DeviceLockCapability> => {
         return { usable: true, mode: "native" };
     }
 
-    return {
-        usable: false,
-        reason,
-    };
+    return { usable: false, reason };
 };
 
 /**
