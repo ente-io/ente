@@ -93,6 +93,7 @@ class _HomePageState extends State<HomePage> {
   List<String> tags = [];
   List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
+  StreamSubscription<String>? _deepLinkSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
   StreamSubscription<MultiSelectActionRequestedEvent>?
@@ -1191,6 +1192,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _deepLinkSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
     _multiSelectActionSubscription?.cancel();
@@ -1865,29 +1867,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  late final AppLinks _appLinks = AppLinks();
+
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
-    final appLinks = AppLinks();
+    bool hadInitialLink = false;
     try {
-      String? initialLink;
-      initialLink = await appLinks.getInitialLinkString();
-      // Parse the link and warn the user, if it is not correct,
-      // but keep in mind it could be `null`.
+      final initialLink = await _appLinks.getInitialLinkString();
       if (initialLink != null) {
         _handleDeeplink(context, initialLink);
-        return true;
+        hadInitialLink = true;
       } else {
         _logger.info("No initial link received.");
       }
     } on PlatformException {
-      // Handle exception by warning the user their action did not succeed
-      // return?
       _logger.severe("PlatformException thrown while getting initial link");
     }
 
-    // Attach a listener to the stream
+    // Always attach a listener for future deep links
     if (!kIsWeb && !Platform.isLinux) {
-      appLinks.stringLinkStream.listen(
+      _deepLinkSubscription = _appLinks.stringLinkStream.listen(
         (link) {
           _handleDeeplink(context, link);
         },
@@ -1896,7 +1895,7 @@ class _HomePageState extends State<HomePage> {
         },
       );
     }
-    return false;
+    return hadInitialLink;
   }
 
   int lastScanTime = DateTime.now().millisecondsSinceEpoch - 1000;
@@ -1913,7 +1912,18 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     lastScanTime = DateTime.now().millisecondsSinceEpoch;
-    if (mounted && link.toLowerCase().startsWith("otpauth://")) {
+    final lowerLink = link.toLowerCase();
+    if (mounted && (lowerLink.startsWith("ente-auth://") || lowerLink.startsWith("enteauth://"))) {
+      final uri = Uri.parse(link);
+      if (uri.host != "search") return;
+      final searchQuery = uri.queryParameters['query'];
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        _showSearchBox = true;
+        _textController.text = searchQuery;
+        _searchText = searchQuery;
+        _applyFilteringAndRefresh();
+      }
+    } else if (mounted && lowerLink.startsWith("otpauth://")) {
       try {
         final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
