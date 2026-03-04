@@ -22,6 +22,8 @@ class MemorySharesDB {
   static const _columnCreatedAt = 'created_at';
   static const _columnUpdatedAt = 'updated_at';
   static const _columnUrl = 'url';
+  static const _columnPreviewUploadedFileID = 'preview_uploaded_file_id';
+  static const _columnFileCount = 'file_count';
 
   MemorySharesDB._();
   static final MemorySharesDB instance = MemorySharesDB._();
@@ -57,7 +59,9 @@ class MemorySharesDB {
         $_columnIsDeleted INTEGER NOT NULL DEFAULT 0,
         $_columnCreatedAt INTEGER NOT NULL,
         $_columnUpdatedAt INTEGER,
-        $_columnUrl TEXT NOT NULL
+        $_columnUrl TEXT NOT NULL,
+        $_columnPreviewUploadedFileID INTEGER,
+        $_columnFileCount INTEGER
       )
     ''');
   }
@@ -119,6 +123,8 @@ class MemorySharesDB {
       _columnCreatedAt: share.createdAt,
       _columnUpdatedAt: share.updatedAt,
       _columnUrl: share.url,
+      _columnPreviewUploadedFileID: share.previewUploadedFileID,
+      _columnFileCount: share.fileCount,
     };
   }
 
@@ -135,6 +141,8 @@ class MemorySharesDB {
       createdAt: row[_columnCreatedAt] as int,
       updatedAt: row[_columnUpdatedAt] as int?,
       url: row[_columnUrl] as String,
+      previewUploadedFileID: row[_columnPreviewUploadedFileID] as int?,
+      fileCount: row[_columnFileCount] as int?,
     );
   }
 }
