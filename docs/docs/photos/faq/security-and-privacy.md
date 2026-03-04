@@ -167,7 +167,7 @@ Yes. You can protect the Ente Photos app with an additional lock screen.
 
 Open `Settings > Security > App lock` on mobile, or `Settings > Account > App lock` on desktop/web.
 
-Learn more in the [App lock guide](/photos/features/account/security/app-lock).
+Learn more in the [App lock guide](/photos/features/account/app-lock).
 
 ### Can I contact support using PGP? {#support-pgp}
 
