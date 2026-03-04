@@ -44,7 +44,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     with AutomaticKeepAliveClientMixin {
   final Logger _logger = Logger("SharedCollectionGallery");
   static const _sharedTabIndex = 2;
-  static const _feedPreviewLoadDelay = Duration(seconds: 1);
+  static const _feedPreviewStartupDelay = Duration(seconds: 5);
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
@@ -67,7 +67,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   final _debouncerForDeferringLoad = Debouncer(
     const Duration(milliseconds: 500),
   );
-  Timer? _feedPreviewDwellTimer;
+  Timer? _feedPreviewStartupTimer;
   var _isOnSharedTab = false;
   var _tabChangeSubscriptionCancelled = false;
 
@@ -105,19 +105,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         setState(() {});
       }
     });
+    _scheduleFeedPreviewFromSharedTabBuild();
 
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
       _isOnSharedTab = event.selectedIndex == _sharedTabIndex;
       if (_isOnSharedTab) {
         _enableDeferredWidgetsAfterDwell();
-        _enableFeedPreviewAfterDwell();
+        _enableFeedPreviewImmediately();
       } else {
         if (!_canLoadDeferredWidgets.value) {
           _debouncerForDeferringLoad.cancelDebounceTimer();
-        }
-        if (!_canLoadFeedPreview.value) {
-          _feedPreviewDwellTimer?.cancel();
-          _feedPreviewDwellTimer = null;
         }
       }
     });
@@ -136,19 +133,32 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     });
   }
 
-  void _enableFeedPreviewAfterDwell() {
+  void _scheduleFeedPreviewFromSharedTabBuild() {
     if (_canLoadFeedPreview.value) {
       return;
     }
-    _feedPreviewDwellTimer?.cancel();
-    _feedPreviewDwellTimer = Timer(_feedPreviewLoadDelay, () {
-      if (!mounted || !_isOnSharedTab || _canLoadFeedPreview.value) {
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = Timer(_feedPreviewStartupDelay, () {
+      if (!mounted || _canLoadFeedPreview.value) {
         return;
       }
-      _logger.info("Loading feed preview in shared collections tab");
-      _canLoadFeedPreview.value = true;
-      _maybeCancelTabChangeListener();
+      _enableFeedPreview("shared-tab-build-delay-elapsed");
     });
+  }
+
+  void _enableFeedPreviewImmediately() {
+    _enableFeedPreview("shared-tab-selected");
+  }
+
+  void _enableFeedPreview(String reason) {
+    if (_canLoadFeedPreview.value) {
+      return;
+    }
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = null;
+    _logger.info("Loading feed preview in shared collections tab ($reason)");
+    _canLoadFeedPreview.value = true;
+    _maybeCancelTabChangeListener();
   }
 
   void _maybeCancelTabChangeListener() {
@@ -156,8 +166,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
       return;
     }
     _debouncerForDeferringLoad.cancelDebounceTimer();
-    _feedPreviewDwellTimer?.cancel();
-    _feedPreviewDwellTimer = null;
+    _feedPreviewStartupTimer?.cancel();
+    _feedPreviewStartupTimer = null;
     if (!_tabChangeSubscriptionCancelled) {
       _tabChangeSubscriptionCancelled = true;
       unawaited(_tabChangeEvent.cancel());
@@ -512,7 +522,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();
     _debouncerForDeferringLoad.cancelDebounceTimer();
-    _feedPreviewDwellTimer?.cancel();
+    _feedPreviewStartupTimer?.cancel();
     if (!_tabChangeSubscriptionCancelled) {
       _tabChangeSubscriptionCancelled = true;
       unawaited(_tabChangeEvent.cancel());
