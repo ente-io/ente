@@ -163,20 +163,25 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
         )
       }
 
-      var bitmap = BitmapFactory.decodeFile(imagePath)
-      if (bitmap == null) {
+      val origBitmap = BitmapFactory.decodeFile(imagePath)
+      if (origBitmap == null) {
         return mapOf(
           "success" to false,
           "error" to "Unable to decode image file"
         )
       }
 
+      val origWidth = origBitmap.width.toDouble()
+      val origHeight = origBitmap.height.toDouble()
+      var bitmap = origBitmap
+
       for (i in 0..2) {
         if (i != 0) {
-          val newWidth = bitmap.width / (i * 2)
-          val newHeight = bitmap.height / (i * 2)
+          val newWidth = origBitmap.width / (i * 2)
+          val newHeight = origBitmap.height / (i * 2)
           if (newWidth > 0 && newHeight > 0) {
-            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+            if (bitmap !== origBitmap) bitmap.recycle()
+            bitmap = Bitmap.createScaledBitmap(origBitmap, newWidth, newHeight, true)
           }
         }
 
@@ -202,9 +207,6 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
           val detections = mutableListOf<Map<String, Any>>()
           val scaleX = if (i == 0) 1.0 else (i * 2).toDouble()
           val scaleY = if (i == 0) 1.0 else (i * 2).toDouble()
-          val origBitmap = BitmapFactory.decodeFile(imagePath)
-          val origWidth = origBitmap.width.toDouble()
-          val origHeight = origBitmap.height.toDouble()
 
           for (qrResult in results) {
             val points = qrResult.resultPoints
@@ -212,8 +214,8 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
 
             var minX = Float.MAX_VALUE
             var minY = Float.MAX_VALUE
-            var maxX = Float.MIN_VALUE
-            var maxY = Float.MIN_VALUE
+            var maxX = -Float.MAX_VALUE
+            var maxY = -Float.MAX_VALUE
 
             for (point in points) {
               if (point == null) continue
@@ -243,6 +245,8 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
           }
 
           if (detections.isNotEmpty()) {
+            if (bitmap !== origBitmap) bitmap.recycle()
+            origBitmap.recycle()
             return mapOf(
               "success" to true,
               "detections" to detections
@@ -252,6 +256,9 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
           continue
         }
       }
+
+      if (bitmap !== origBitmap) bitmap.recycle()
+      origBitmap.recycle()
 
       return mapOf(
         "success" to false,

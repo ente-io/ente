@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:ente_qr/ente_qr.dart";
@@ -9,6 +10,8 @@ import "package:photos/utils/file_util.dart";
 
 class QrCodeDetectionHelper {
   static final Map<String, _DetectionResult> _cache = {};
+  static const _debounceDuration = Duration(milliseconds: 500);
+
   final Logger _logger = Logger("QrCodeDetectionHelper");
   final EnteQr _enteQr = EnteQr();
 
@@ -17,8 +20,11 @@ class QrCodeDetectionHelper {
 
   int _requestId = 0;
   bool _disposed = false;
+  Timer? _debounceTimer;
 
   Future<void> evaluateFile(EnteFile file) async {
+    _debounceTimer?.cancel();
+
     final bool isEligible = _isFileEligible(file);
     final int requestId = ++_requestId;
 
@@ -27,6 +33,7 @@ class QrCodeDetectionHelper {
       return;
     }
 
+    // Return cached results immediately without debounce
     final String cacheKey = _cacheKey(file);
     final _DetectionResult? cachedResult = _cache[cacheKey];
     if (cachedResult != null) {
@@ -36,6 +43,19 @@ class QrCodeDetectionHelper {
     }
 
     qrDetectionsNotifier.value = const [];
+
+    // Debounce uncached scans so swiping doesn't trigger work
+    _debounceTimer = Timer(_debounceDuration, () {
+      _scanFile(file, cacheKey, requestId);
+    });
+  }
+
+  Future<void> _scanFile(
+    EnteFile file,
+    String cacheKey,
+    int requestId,
+  ) async {
+    if (_disposed || requestId != _requestId) return;
 
     try {
       final File? localFile = await getFile(file);
@@ -86,6 +106,7 @@ class QrCodeDetectionHelper {
 
   void dispose() {
     _disposed = true;
+    _debounceTimer?.cancel();
     qrDetectionsNotifier.dispose();
   }
 }

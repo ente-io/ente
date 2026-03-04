@@ -964,6 +964,8 @@
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
   "shareLink": "Share link",
+  "openLink": "Open link",
+  "pay": "Pay",
   "createCollage": "Create collage",
   "saveCollage": "Save collage",
   "collageSaved": "Collage saved to gallery",

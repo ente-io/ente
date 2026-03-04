@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import AVFoundation
 
 public class EnteQrPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -137,11 +136,19 @@ public class EnteQrPlugin: NSObject, FlutterPlugin {
       let minYci = min(qrFeature.bottomLeft.y, qrFeature.bottomRight.y)
       let maxYci = max(qrFeature.topLeft.y, qrFeature.topRight.y)
 
+      // Add padding around finder patterns (matching Android's 15%)
+      let padX = (maxX - minX) * 0.15
+      let padY = (maxYci - minYci) * 0.15
+      let paddedMinX = max(minX - padX, 0)
+      let paddedMaxX = min(maxX + padX, imageWidth)
+      let paddedMinYci = max(minYci - padY, 0)
+      let paddedMaxYci = min(maxYci + padY, imageHeight)
+
       // Flip y: top-left origin
-      let normX = minX / imageWidth
-      let normY = 1.0 - (maxYci / imageHeight)
-      let normW = (maxX - minX) / imageWidth
-      let normH = (maxYci - minYci) / imageHeight
+      let normX = paddedMinX / imageWidth
+      let normY = 1.0 - (paddedMaxYci / imageHeight)
+      let normW = (paddedMaxX - paddedMinX) / imageWidth
+      let normH = (paddedMaxYci - paddedMinYci) / imageHeight
 
       detections.append([
         "content": messageString,

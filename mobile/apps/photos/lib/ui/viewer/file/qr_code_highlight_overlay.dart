@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:ente_qr/ente_qr.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -56,7 +58,6 @@ class QrCodeHighlightOverlay extends StatelessWidget {
                 for (final detection in detections)
                   _QrTapRegion(
                     detection: detection,
-                    allDetections: detections,
                     offsetX: offsetX,
                     offsetY: offsetY,
                     displayWidth: displayWidth,
@@ -71,9 +72,8 @@ class QrCodeHighlightOverlay extends StatelessWidget {
   }
 }
 
-class _QrTapRegion extends StatelessWidget {
+class _QrTapRegion extends StatefulWidget {
   final QrDetection detection;
-  final List<QrDetection> allDetections;
   final double offsetX;
   final double offsetY;
   final double displayWidth;
@@ -81,7 +81,6 @@ class _QrTapRegion extends StatelessWidget {
 
   const _QrTapRegion({
     required this.detection,
-    required this.allDetections,
     required this.offsetX,
     required this.offsetY,
     required this.displayWidth,
@@ -89,33 +88,85 @@ class _QrTapRegion extends StatelessWidget {
   });
 
   @override
+  State<_QrTapRegion> createState() => _QrTapRegionState();
+}
+
+class _QrTapRegionState extends State<_QrTapRegion> {
+  static const _longPressDuration = Duration(milliseconds: 500);
+  static const _moveThreshold = 20.0;
+  Timer? _timer;
+  Offset? _downPosition;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _onLongPress() async {
+    await HapticFeedback.lightImpact();
+    final uri = Uri.tryParse(widget.detection.content);
+    final isUpi = uri != null && uri.scheme == "upi";
+    if (isUpi) {
+      try {
+        final launched =
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched && mounted) {
+          await showQrCodeContentSheet(
+            context,
+            detections: [widget.detection],
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          await showQrCodeContentSheet(
+            context,
+            detections: [widget.detection],
+          );
+        }
+      }
+    } else {
+      await showQrCodeContentSheet(
+        context,
+        detections: [widget.detection],
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final screenX = offsetX + detection.x * displayWidth;
-    final screenY = offsetY + detection.y * displayHeight;
-    final screenW = detection.width * displayWidth;
-    final screenH = detection.height * displayHeight;
+    final rawW = widget.detection.width * widget.displayWidth;
+    final rawH = widget.detection.height * widget.displayHeight;
+    const double minTapTarget = 48.0;
+    final screenW = rawW < minTapTarget ? minTapTarget : rawW;
+    final screenH = rawH < minTapTarget ? minTapTarget : rawH;
+    final screenX = widget.offsetX +
+        widget.detection.x * widget.displayWidth -
+        (screenW - rawW) / 2;
+    final screenY = widget.offsetY +
+        widget.detection.y * widget.displayHeight -
+        (screenH - rawH) / 2;
 
     return Positioned(
       left: screenX,
       top: screenY,
       width: screenW,
       height: screenH,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onLongPress: () {
-          HapticFeedback.lightImpact();
-          final uri = Uri.tryParse(detection.content);
-          final isUrl =
-              uri != null && (uri.scheme == "http" || uri.scheme == "https");
-          if (isUrl) {
-            launchUrl(uri);
-          } else {
-            showQrCodeContentSheet(
-              context,
-              detections: [detection],
-            );
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (event) {
+          _downPosition = event.position;
+          _timer?.cancel();
+          _timer = Timer(_longPressDuration, _onLongPress);
+        },
+        onPointerMove: (event) {
+          if (_downPosition != null &&
+              (event.position - _downPosition!).distance > _moveThreshold) {
+            _timer?.cancel();
           }
         },
+        onPointerUp: (_) => _timer?.cancel(),
+        onPointerCancel: (_) => _timer?.cancel(),
         child: const SizedBox.expand(),
       ),
     );
