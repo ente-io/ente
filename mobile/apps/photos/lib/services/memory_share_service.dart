@@ -42,9 +42,9 @@ class MemoryShareService {
     required String title,
     String? memoryId,
   }) async {
+    List<EnteFile> uploadedFiles = const [];
     try {
-      final uploadedFiles =
-          files.where((f) => f.uploadedFileID != null).toList();
+      uploadedFiles = files.where((f) => f.uploadedFileID != null).toList();
 
       if (uploadedFiles.isEmpty) {
         throw Exception("No uploaded files to share");
@@ -107,7 +107,29 @@ class MemoryShareService {
 
       return shareUrl;
     } catch (e, s) {
-      _logger.severe("Failed to create memory share", e, s);
+      if (e is DioException) {
+        final ownerIDs = uploadedFiles.map((f) => f.ownerID).toSet().toList();
+        final sampleFileIDs = uploadedFiles
+            .map((f) => f.uploadedFileID)
+            .whereType<int>()
+            .take(10)
+            .toList();
+        final distinctFileIDCount = uploadedFiles
+            .map((f) => f.uploadedFileID)
+            .whereType<int>()
+            .toSet()
+            .length;
+        _logger.severe(
+          "Failed to create memory share "
+          "(status: ${e.response?.statusCode}, data: ${e.response?.data}, "
+          "uploadedFiles: ${uploadedFiles.length}, ownerIDs: $ownerIDs, "
+          "distinctFileIDs: $distinctFileIDCount, sampleFileIDs: $sampleFileIDs)",
+          e,
+          s,
+        );
+      } else {
+        _logger.severe("Failed to create memory share", e, s);
+      }
       rethrow;
     }
   }
@@ -514,6 +536,51 @@ class MemoryShareService {
     } catch (e, s) {
       _logger.warning("Failed to build debug dummy memory files", e, s);
       return [];
+    }
+  }
+
+  Future<(String, int?)> createMemoryShareLinkData({
+    required List<Memory> memories,
+    required String title,
+    String? memoryId,
+  }) async {
+    try {
+      final shareUrl = await shareMemories(
+        memories: memories,
+        title: title,
+        memoryId: memoryId,
+      );
+      var memoryShare = await findMemoryShareByUrl(shareUrl);
+      if (memoryShare == null) {
+        await listMemoryShares();
+        memoryShare = await findMemoryShareByUrl(shareUrl);
+      }
+      return (shareUrl, memoryShare?.id);
+    } catch (e, s) {
+      _logger.severe("Failed to create memory share link data", e, s);
+      rethrow;
+    }
+  }
+
+  Future<MemoryShare?> findMemoryShareByUrl(String shareUrl) async {
+    try {
+      final shares = await getLocalMemoryShares();
+      final shareUri = Uri.parse(shareUrl);
+      final linkWithoutFragment = shareUri.replace(fragment: "").toString();
+      for (final share in shares) {
+        if (share.url == shareUrl) {
+          return share;
+        }
+        final shareUriWithoutFragment =
+            Uri.parse(share.url).replace(fragment: "").toString();
+        if (shareUriWithoutFragment == linkWithoutFragment) {
+          return share;
+        }
+      }
+      return null;
+    } catch (e, s) {
+      _logger.severe("Failed to find memory share by URL", e, s);
+      rethrow;
     }
   }
 
