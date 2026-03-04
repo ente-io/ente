@@ -7,6 +7,7 @@ const configPath =
 const endpoint = process.env.AZURE_ENDPOINT;
 const accountName = process.env.AZURE_CODE_SIGNING_NAME;
 const profileName = process.env.AZURE_CERT_PROFILE_NAME;
+const trustedSigningCliPath = process.env.TRUSTED_SIGNING_CLI_PATH?.trim();
 
 if (!endpoint || !accountName || !profileName) {
     throw new Error(
@@ -18,7 +19,21 @@ const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 config.bundle = config.bundle || {};
 config.bundle.windows = config.bundle.windows || {};
 
-config.bundle.windows.signCommand = `trusted-signing-cli -v -e ${endpoint} -a ${accountName} -c ${profileName} -d Ensu "%1"`;
+const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
+config.bundle.windows.signCommand = {
+    cmd: signerBinary,
+    args: [
+        "-e",
+        endpoint,
+        "-a",
+        accountName,
+        "-c",
+        profileName,
+        "-d",
+        "Ensu",
+        "%1",
+    ],
+};
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log(`Updated windows signCommand in ${configPath}`);

@@ -1,7 +1,9 @@
 import "dart:async";
 
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -109,19 +111,15 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     heroTag: widget.tag,
                     autoActivateSearch: widget.startInSearchMode,
                     onSearch: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                      refreshCollections();
+                      _searchQuery = value;
+                      unawaited(refreshCollections());
                     },
                     onSearchClosed: () {
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                      refreshCollections();
+                      _searchQuery = '';
+                      unawaited(refreshCollections());
                     },
                     actions: [
-                      _sortMenu(collections!),
+                      _sortMenu(),
                     ],
                   ),
                   CollectionsFlexiGridViewWidget(
@@ -148,7 +146,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     );
   }
 
-  Widget _sortMenu(List<Collection> collections) {
+  Widget _sortMenu() {
     final colorTheme = getEnteColorScheme(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     Widget sortOptionText(AlbumSortKey key) {
@@ -285,8 +283,49 @@ class _CollectionListPageState extends State<CollectionListPage> {
           )
           .toList();
     }
+    if (widget.sectionType == UISectionType.hiddenCollections) {
+      await _sortCollectionsByCurrentPreferences(collections!);
+    }
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Future<void> _sortCollectionsByCurrentPreferences(
+    List<Collection> collectionsToSort,
+  ) async {
+    if (collectionsToSort.length < 2) {
+      return;
+    }
+
+    final currentSortKey = localSettings.albumSortKey();
+    final currentSortDirection = localSettings.albumSortDirection();
+
+    Map<int, int>? collectionIDToNewestPhotoTime;
+    if (currentSortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+
+    collectionsToSort.sort((first, second) {
+      int comparison;
+      if (currentSortKey == AlbumSortKey.albumName) {
+        comparison = compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      } else if (currentSortKey == AlbumSortKey.newestPhoto) {
+        comparison =
+            (collectionIDToNewestPhotoTime?[second.id] ?? -1 * intMaxValue)
+                .compareTo(
+          collectionIDToNewestPhotoTime?[first.id] ?? -1 * intMaxValue,
+        );
+      } else {
+        comparison = second.updationTime.compareTo(first.updationTime);
+      }
+      return currentSortDirection == AlbumSortDirection.ascending
+          ? comparison
+          : -comparison;
+    });
   }
 }
