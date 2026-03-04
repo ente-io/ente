@@ -2821,6 +2821,7 @@
   "offlineSettingsBannerTitle": "We can't see your photos. Ever.",
   "offlineSettingsBannerDesc": "Zero-knowledge encryption means your memories stay yours.",
   "alreadyHaveAnAccount": "Already have an account?",
+  "dontHaveAnAccount": "Don't have an account?",
   "loginToEnte": "Login to Ente",
   "searchAndDiscover": "Search and Discover",
   "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",
@@ -2830,7 +2831,6 @@
   "privateAndSecureBackupsDesc": "End-to-end encrypted, independently audited and fully open source",
   "mlProgressBannerTitle": "Hang tight!",
   "mlProgressBannerDescription": "Your photos are getting processed on device to detect faces, objects and more.",
-  "mlProgressBannerPaused": "Paused",
   "mlProgressBannerStatus": "{indexed} out of {total} photos processed",
   "@mlProgressBannerStatus": {
     "placeholders": {

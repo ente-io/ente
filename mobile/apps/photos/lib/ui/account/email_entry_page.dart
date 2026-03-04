@@ -17,7 +17,14 @@ import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({super.key});
+  const EmailEntryPage({
+    super.key,
+    this.showReferralSourceField = true,
+    this.referralSource,
+  });
+
+  final bool showReferralSourceField;
+  final String? referralSource;
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -51,6 +58,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   void initState() {
     super.initState();
+    _referralSource = widget.referralSource?.trim() ?? '';
     final storedEmail = _config.getEmail();
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _email = storedEmail;
@@ -245,14 +253,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               );
             },
           ),
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).hearUsWhereTitle,
-            autoCorrect: false,
-            onChange: (value) {
-              _referralSource = value.trim();
-            },
-          ),
+          if (widget.showReferralSourceField) ...[
+            const SizedBox(height: 24),
+            TextInputWidgetV2(
+              label: AppLocalizations.of(context).hearUsWhereTitle,
+              autoCorrect: false,
+              onChange: (value) {
+                _referralSource = value.trim();
+              },
+            ),
+          ],
           const SizedBox(height: 16),
           _getTOSAgreement(colorScheme, textTheme),
           const SizedBox(height: 80),
