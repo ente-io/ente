@@ -1072,6 +1072,7 @@ const DeviceLockUnlockForm: React.FC<{
     const [error, setError] = useState<string>();
     const [loading, setLoading] = useState(false);
     const isUnlockInProgress = useRef(false);
+    const hasAutoTriggeredUnlock = useRef(false);
 
     const handleDeviceLockUnlock = useCallback(async () => {
         if (isUnlockInProgress.current) return;
@@ -1091,6 +1092,37 @@ const DeviceLockUnlockForm: React.FC<{
             isUnlockInProgress.current = false;
         }
     }, []);
+
+    useEffect(() => {
+        const maybeAutoTriggerUnlock = () => {
+            if (hasAutoTriggeredUnlock.current) return;
+            if (
+                typeof document == "undefined" ||
+                document.visibilityState !== "visible" ||
+                !document.hasFocus()
+            ) {
+                return;
+            }
+
+            hasAutoTriggeredUnlock.current = true;
+            void handleDeviceLockUnlock();
+        };
+
+        maybeAutoTriggerUnlock();
+        if (hasAutoTriggeredUnlock.current || typeof window == "undefined") {
+            return;
+        }
+
+        window.addEventListener("focus", maybeAutoTriggerUnlock);
+        document.addEventListener("visibilitychange", maybeAutoTriggerUnlock);
+        return () => {
+            window.removeEventListener("focus", maybeAutoTriggerUnlock);
+            document.removeEventListener(
+                "visibilitychange",
+                maybeAutoTriggerUnlock,
+            );
+        };
+    }, [handleDeviceLockUnlock]);
 
     return (
         <Stack spacing={0} useFlexGap alignItems="center">
