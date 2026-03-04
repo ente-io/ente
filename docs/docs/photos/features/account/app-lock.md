@@ -26,7 +26,7 @@ Choose from the following lock methods:
 
 On desktop, **Device lock** is currently available only on macOS.
 
-> Note: If you log out of Ente Photos, the device lock will be resetted.
+> Note: If you log out of Ente Photos, the device lock will be reset.
 
 ## Auto lock
 
