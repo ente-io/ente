@@ -17,6 +17,9 @@ enum FeedItemType {
 
   /// Photos shared by others to user's albums
   sharedPhoto,
+
+  /// Album shared with the current user
+  sharedCollection,
 }
 
 /// Represents an activity item in the user's feed.
@@ -51,8 +54,8 @@ class FeedItem {
   /// Only populated for [FeedItemType.sharedPhoto].
   final List<int>? sharedFileIDs;
 
-  /// Collection name for display in shared photo items.
-  /// Only populated for [FeedItemType.sharedPhoto].
+  /// Collection name for display in shared items.
+  /// Populated for [FeedItemType.sharedPhoto] and [FeedItemType.sharedCollection].
   final String? collectionName;
 
   const FeedItem({

@@ -1,3 +1,5 @@
+- Ashil: Show notifications for newly added photos to shared album
+- Ashil: Show feed item and notification for newly shared album
 - Laurens: (I) Clip text encoding in rust
 - Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Generate and compress face thumbnails in rust
