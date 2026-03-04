@@ -19,6 +19,7 @@ import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import "package:photos/events/background_upload_verification_event.dart";
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
@@ -38,6 +39,8 @@ import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync/background_upload_verification_service.dart';
+import 'package:photos/services/sync/ios26_background_upload_router.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
@@ -97,6 +100,9 @@ class FileUploader {
   bool _hasInitiatedForceUpload = false;
   late MultiPartUploader _multiPartUploader;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
+  StreamSubscription<BackgroundUploadVerificationEvent>?
+      _bgVerificationSubscription;
+  bool _isIOS26NativeStatePollInProgress = false;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -115,8 +121,9 @@ class FileUploader {
       _processType.toString(),
       currentTime,
     );
-    await _uploadLocks
-        .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
+    await _uploadLocks.releaseAllLocksAcquiredBefore(
+      currentTime - kSafeBufferForLockExpiry,
+    );
     if (!isBackground) {
       await _prefs.reload();
       final lastBGTaskHeartBeatTime =
@@ -136,6 +143,18 @@ class FileUploader {
       }
       // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
+      if (Platform.isIOS) {
+        if (_bgVerificationSubscription != null) {
+          await _bgVerificationSubscription!.cancel();
+        }
+        _bgVerificationSubscription = Bus.instance
+            .on<BackgroundUploadVerificationEvent>()
+            .listen((event) {
+          _onBackgroundVerificationEvent(event);
+        });
+        // ignore: unawaited_futures
+        BackgroundUploadVerificationService.instance.runPendingVerifications();
+      }
     }
     _multiPartUploader = MultiPartUploader(
       _dio, // legacy parameter, not used by MultiPartUploader
@@ -264,8 +283,10 @@ class FileUploader {
     });
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id)?.completer.completeError(reason);
-      _allBackups[id] = _allBackups[id]!
-          .copyWith(status: BackupItemStatus.retry, error: reason);
+      _allBackups[id] = _allBackups[id]!.copyWith(
+        status: BackupItemStatus.retry,
+        error: reason,
+      );
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _logger.info(
@@ -306,8 +327,9 @@ class FileUploader {
       if (pendingEntry != null) {
         pendingEntry.status = UploadStatus.inProgress;
         _allBackups[pendingEntry.file.localID!] =
-            _allBackups[pendingEntry.file.localID]!
-                .copyWith(status: BackupItemStatus.uploading);
+            _allBackups[pendingEntry.file.localID]!.copyWith(
+          status: BackupItemStatus.uploading,
+        );
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
@@ -337,21 +359,26 @@ class FileUploader {
         },
       );
       _queue.remove(localID)!.completer.complete(uploadedFile);
-      _allBackups[localID] =
-          _allBackups[localID]!.copyWith(status: BackupItemStatus.uploaded);
+      final status = Platform.isIOS && isProcessBg
+          ? BackupItemStatus.uploadedUnverified
+          : BackupItemStatus.uploaded;
+      _allBackups[localID] = _allBackups[localID]!.copyWith(status: status);
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
         _queue[localID]!.status = UploadStatus.inBackground;
-        _allBackups[localID] = _allBackups[localID]!
-            .copyWith(status: BackupItemStatus.inBackground);
+        _allBackups[localID] = _allBackups[localID]!.copyWith(
+          status: BackupItemStatus.inBackground,
+        );
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         return _queue[localID]!.completer.future;
       } else {
         _queue.remove(localID)!.completer.completeError(e);
-        _allBackups[localID] = _allBackups[localID]!
-            .copyWith(status: BackupItemStatus.retry, error: e);
+        _allBackups[localID] = _allBackups[localID]!.copyWith(
+          status: BackupItemStatus.retry,
+          error: e,
+        );
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         return null;
       }
@@ -366,9 +393,7 @@ class FileUploader {
 
   Future<void> removeStaleFiles() async {
     if (_hasInitiatedForceUpload) {
-      _logger.info(
-        "Force upload was initiated, skipping stale file cleanup",
-      );
+      _logger.info("Force upload was initiated, skipping stale file cleanup");
       return;
     }
     try {
@@ -414,8 +439,9 @@ class FileUploader {
           final Set<String> trackedSharedFilePaths = {};
           for (String localID in existingLocalFileIDs) {
             if (localID.contains(sharedMediaIdentifier)) {
-              trackedSharedFilePaths
-                  .add(getSharedMediaPathFromLocalID(localID));
+              trackedSharedFilePaths.add(
+                getSharedMediaPathFromLocalID(localID),
+              );
             }
           }
           for (final file in sharedFiles) {
@@ -522,9 +548,7 @@ class FileUploader {
       return file;
     }
     if (!CollectionsService.instance.allowUpload(collectionID)) {
-      _logger.warning(
-        'Upload not allowed for collection $collectionID',
-      );
+      _logger.warning('Upload not allowed for collection $collectionID');
       if (!file.isUploaded && file.generatedID != null) {
         _logger.info("Deleting file entry for " + file.toString());
         await FilesDB.instance.deleteByGeneratedID(file.generatedID!);
@@ -642,9 +666,7 @@ class FileUploader {
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
         if (updateWithDiffKey) {
-          throw MultiPartError(
-            'multiPart update resumed with differentKey',
-          );
+          throw MultiPartError('multiPart update resumed with differentKey');
         }
       } else if (encryptedFileExists) {
         // otherwise just delete the file for singlepart upload
@@ -657,8 +679,9 @@ class FileUploader {
       // Calculate the number of parts to determine if we need MD5
       // Use source length to estimate encrypted size for part count decision
       final estimatedEncSize = CryptoUtil.estimateEncryptedSize(sourceLength);
-      final estimatedCount =
-          _multiPartUploader.calculatePartCount(estimatedEncSize);
+      final estimatedCount = _multiPartUploader.calculatePartCount(
+        estimatedEncSize,
+      );
 
       FileEncryptResult? fileAttributes = multiPartFileEncResult;
       String? fileMd5;
@@ -700,16 +723,14 @@ class FileUploader {
       }
 
       final EncryptionResult encryptedThumbnailData =
-          await CryptoUtil.encryptChaCha(
-        thumbnailData!,
-        fileAttributes.key,
-      );
+          await CryptoUtil.encryptChaCha(thumbnailData!, fileAttributes.key);
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = File(encryptedThumbnailPath);
-      await encryptedThumbnailFile
-          .writeAsBytes(encryptedThumbnailData.encryptedData!);
+      await encryptedThumbnailFile.writeAsBytes(
+        encryptedThumbnailData.encryptedData!,
+      );
       encThumbSize = await encryptedThumbnailFile.length();
       String? thumbnailMd5;
       if (flagService.enableUploadV2) {
@@ -811,26 +832,32 @@ class FileUploader {
         mediaUploadData.exifData,
       );
       file.metadataVersion = EnteFile.kCurrentMetadataVersion;
-      final metadata =
-          await file.getMetadataForUpload(mediaUploadData, exifTime);
+      final metadata = await file.getMetadataForUpload(
+        mediaUploadData,
+        exifTime,
+      );
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key,
       );
       final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
-      final thumbnailDecryptionHeader =
-          CryptoUtil.bin2base64(encryptedThumbnailData.header!);
+      final thumbnailDecryptionHeader = CryptoUtil.bin2base64(
+        encryptedThumbnailData.header!,
+      );
       final encryptedMetadata = CryptoUtil.bin2base64(
         encryptedMetadataResult.encryptedData!,
       );
-      final metadataDecryptionHeader =
-          CryptoUtil.bin2base64(encryptedMetadataResult.header!);
+      final metadataDecryptionHeader = CryptoUtil.bin2base64(
+        encryptedMetadataResult.header!,
+      );
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
-      final stillLocked =
-          await _uploadLocks.isLocked(lockKey, _processType.toString());
+      final stillLocked = await _uploadLocks.isLocked(
+        lockKey,
+        _processType.toString(),
+      );
       if (!stillLocked) {
         _logger.warning('file ${file.tag} report paused is missing');
         throw LockFreedError();
@@ -866,12 +893,16 @@ class FileUploader {
           fileAttributes.key,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
-        final encryptedKey =
-            CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
-        final keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
-        final Map<String, dynamic> pubMetadata =
-            _buildPublicMagicData(mediaUploadData, exifTime);
+        final encryptedKey = CryptoUtil.bin2base64(
+          encryptedFileKeyData.encryptedData!,
+        );
+        final keyDecryptionNonce = CryptoUtil.bin2base64(
+          encryptedFileKeyData.nonce!,
+        );
+        final Map<String, dynamic> pubMetadata = _buildPublicMagicData(
+          mediaUploadData,
+          exifTime,
+        );
         MetadataRequest? pubMetadataRequest;
         if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
@@ -914,13 +945,18 @@ class FileUploader {
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 
       Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          [remoteFile],
-          source: "uploadCompleted",
-        ),
+        LocalPhotosUpdatedEvent([remoteFile], source: "uploadCompleted"),
       );
       _logger.info("File upload complete for " + remoteFile.toString());
       uploadCompleted = true;
+      if (Platform.isIOS && isProcessBg) {
+        await BackgroundUploadVerificationService.instance
+            .enqueueForVerification(
+          remoteFile,
+          expectedHash: mediaUploadData.hashData?.fileHash,
+          expectedZipHash: mediaUploadData.hashData?.zipHash,
+        );
+      }
       Bus.instance.fire(FileUploadedEvent(remoteFile));
       return remoteFile;
     } catch (e, s) {
@@ -1035,9 +1071,7 @@ class FileUploader {
     if (fileToUpload.uploadedFileID != null) {
       // ideally this should never happen, but because the code below this case
       // can do unexpected mapping, we are adding this additional check
-      _logger.severe(
-        'Critical: file is already uploaded, skipped mapping',
-      );
+      _logger.severe('Critical: file is already uploaded, skipped mapping');
       return Tuple2(false, fileToUpload);
     }
     final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
@@ -1133,9 +1167,7 @@ class FileUploader {
       return Tuple2(true, linkedFile);
     }
     final Set<String> matchLocalIDs = existingUploadedFiles
-        .where(
-          (e) => e.localID != null,
-        )
+        .where((e) => e.localID != null)
         .map((e) => e.localID!)
         .toSet();
     _logger.info(
@@ -1202,8 +1234,10 @@ class FileUploader {
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
-        _logger.warning('Storage limit exceeded fileSize $fileSize and '
-            'freeStorage $freeStorage');
+        _logger.warning(
+          'Storage limit exceeded fileSize $fileSize and '
+          'freeStorage $freeStorage',
+        );
         throw StorageLimitExceededError();
       }
       if (fileSize > kMaxFileSize10Gib) {
@@ -1300,8 +1334,9 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
         // retry when DioException contains no response/status code
-        _logger
-            .info("Upload file (${file.tag}) failed, will retry in 3 seconds");
+        _logger.info(
+          "Upload file (${file.tag}) failed, will retry in 3 seconds",
+        );
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -1362,8 +1397,9 @@ class FileUploader {
       if (statusCode == 426) {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
-        _logger
-            .info("Update file (${file.tag}) failed, will retry in 3 seconds");
+        _logger.info(
+          "Update file (${file.tag}) failed, will retry in 3 seconds",
+        );
         await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
@@ -1435,8 +1471,10 @@ class FileUploader {
   UploadURL _registerUploadURLUsage(UploadURL uploadURL) {
     // Atomic check-and-set to prevent race conditions in parallel uploads
     final now = DateTime.now();
-    final existingTimestamp =
-        _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+    final existingTimestamp = _usedUploadURLs.putIfAbsent(
+      uploadURL.url,
+      () => now,
+    );
 
     if (existingTimestamp != now) {
       throw DuplicateUploadURLError(
@@ -1522,9 +1560,7 @@ class FileUploader {
       await _dio.put(
         useUploadProxy ? "$kUploadProxyEndpoint/file-upload" : uploadURL.url,
         data: file.openRead(),
-        options: Options(
-          headers: headers,
-        ),
+        options: Options(headers: headers),
         onSendProgress: (sent, total) {
           bytesSent = sent;
         },
@@ -1581,15 +1617,29 @@ class FileUploader {
       );
       if (!isStillLocked) {
         final completer = _queue.remove(upload.key)?.completer;
-        final dbFile =
-            await FilesDB.instance.getFile(upload.value.file.generatedID!);
+        final dbFile = await FilesDB.instance.getFile(
+          upload.value.file.generatedID!,
+        );
         if (dbFile?.uploadedFileID != null) {
           _logger.info(
             "Background upload success detected ${upload.value.file.tag}",
           );
           completer?.complete(dbFile);
-          _allBackups[upload.key] = _allBackups[upload.key]!
-              .copyWith(status: BackupItemStatus.uploaded);
+          var uploadStatus = BackupItemStatus.uploaded;
+          if (Platform.isIOS) {
+            final hasPendingVerification =
+                await BackgroundUploadVerificationService.instance
+                    .hasPendingVerification(dbFile!.uploadedFileID!);
+            if (hasPendingVerification) {
+              uploadStatus = BackupItemStatus.uploadedUnverified;
+              // ignore: unawaited_futures
+              BackgroundUploadVerificationService.instance
+                  .runPendingVerifications();
+            }
+          }
+          _allBackups[upload.key] = _allBackups[upload.key]!.copyWith(
+            status: uploadStatus,
+          );
         } else {
           _logger.info(
             "Background upload failure detected ${upload.value.file.tag}",
@@ -1611,10 +1661,228 @@ class FileUploader {
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       }
     }
+    await _pollIOS26NativeUploadStatus();
     Future.delayed(kBlockedUploadsPollFrequency, () async {
       await _pollBackgroundUploadStatus();
     });
   }
+
+  Future<void> _pollIOS26NativeUploadStatus() async {
+    if (!Platform.isIOS || isProcessBg || _isIOS26NativeStatePollInProgress) {
+      return;
+    }
+    final router = IOS26BackgroundUploadRouter.instance;
+    if (!router.shouldUseNativePath) {
+      return;
+    }
+
+    _isIOS26NativeStatePollInProgress = true;
+    var hasUpdates = false;
+    try {
+      final statuses = await router.getUploadStates(limit: 300);
+      for (final nativeStatus in statuses) {
+        final localID = nativeStatus.localID;
+        final currentBackup = _allBackups[localID];
+        if (currentBackup == null) {
+          continue;
+        }
+        switch (nativeStatus.state) {
+          case IOS26NativeUploadState.queued:
+          case IOS26NativeUploadState.inProgress:
+            if (currentBackup.status != BackupItemStatus.inBackground &&
+                currentBackup.status != BackupItemStatus.uploaded &&
+                currentBackup.status != BackupItemStatus.uploadedUnverified) {
+              _allBackups[localID] = currentBackup.copyWith(
+                status: BackupItemStatus.inBackground,
+                clearError: true,
+              );
+              hasUpdates = true;
+            }
+            break;
+          case IOS26NativeUploadState.failed:
+            final uploadError = NativeBackgroundUploadError(
+              nativeStatus.errorMessage ?? "Native background upload failed",
+            );
+            final existingError = currentBackup.error;
+            final hasSameError = existingError is NativeBackgroundUploadError &&
+                existingError.message == uploadError.message;
+            if (currentBackup.status != BackupItemStatus.retry ||
+                !hasSameError) {
+              _allBackups[localID] = currentBackup.copyWith(
+                status: BackupItemStatus.retry,
+                error: uploadError,
+              );
+              hasUpdates = true;
+            }
+            break;
+          case IOS26NativeUploadState.uploaded:
+            final resolvedFile = await _resolveNativeUploadedFile(
+              nativeStatus,
+              currentBackup,
+            );
+            if (resolvedFile?.uploadedFileID == null) {
+              if (currentBackup.status != BackupItemStatus.inBackground) {
+                _allBackups[localID] = currentBackup.copyWith(
+                  status: BackupItemStatus.inBackground,
+                );
+                hasUpdates = true;
+              }
+              break;
+            }
+
+            final uploadedFile = resolvedFile!;
+            final uploadedFileID = uploadedFile.uploadedFileID!;
+            final verificationService =
+                BackgroundUploadVerificationService.instance;
+
+            final failedVerificationError = await verificationService
+                .getFailedVerificationError(uploadedFileID);
+            if ((failedVerificationError ?? "").isNotEmpty) {
+              final verificationError = BackgroundUploadVerificationError(
+                failedVerificationError!,
+              );
+              final existingError = currentBackup.error;
+              final hasSameError =
+                  existingError is BackgroundUploadVerificationError &&
+                      existingError.message == verificationError.message;
+              final isSameFile =
+                  currentBackup.file.generatedID == uploadedFile.generatedID &&
+                      currentBackup.file.uploadedFileID ==
+                          uploadedFile.uploadedFileID;
+              if (currentBackup.status != BackupItemStatus.verificationFailed ||
+                  !hasSameError ||
+                  !isSameFile) {
+                _allBackups[localID] = currentBackup.copyWith(
+                  file: uploadedFile,
+                  status: BackupItemStatus.verificationFailed,
+                  error: verificationError,
+                );
+                hasUpdates = true;
+              }
+              break;
+            }
+
+            var hasPendingVerification = await verificationService
+                .hasPendingVerification(uploadedFileID);
+            if (!hasPendingVerification) {
+              final hasVerificationRecord = await verificationService
+                  .hasVerificationRecord(uploadedFileID);
+              if (!hasVerificationRecord) {
+                await verificationService.enqueueForVerification(
+                  uploadedFile,
+                  expectedHash: null,
+                  expectedZipHash: null,
+                );
+                hasPendingVerification = true;
+              }
+            }
+
+            final nextStatus = hasPendingVerification
+                ? BackupItemStatus.uploadedUnverified
+                : BackupItemStatus.uploaded;
+            if (hasPendingVerification) {
+              unawaited(verificationService.runPendingVerifications());
+            }
+
+            final isSameFile =
+                currentBackup.file.generatedID == uploadedFile.generatedID &&
+                    currentBackup.file.uploadedFileID ==
+                        uploadedFile.uploadedFileID;
+            if (currentBackup.status != nextStatus ||
+                currentBackup.error != null ||
+                !isSameFile) {
+              _allBackups[localID] = currentBackup.copyWith(
+                file: uploadedFile,
+                status: nextStatus,
+                clearError: true,
+              );
+              hasUpdates = true;
+            }
+            break;
+        }
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to poll iOS26 native upload states", e, s);
+    } finally {
+      _isIOS26NativeStatePollInProgress = false;
+    }
+    if (hasUpdates) {
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    }
+  }
+
+  Future<EnteFile?> _resolveNativeUploadedFile(
+    IOS26NativeUploadStatus nativeStatus,
+    BackupItem fallbackBackup,
+  ) async {
+    final uploadedFileID = nativeStatus.uploadedFileID;
+    if (uploadedFileID != null) {
+      final uploadedFile = await FilesDB.instance.getAnyUploadedFile(
+        uploadedFileID,
+      );
+      if (uploadedFile != null) {
+        return uploadedFile;
+      }
+    }
+
+    final generatedID =
+        nativeStatus.generatedID ?? fallbackBackup.file.generatedID;
+    if (generatedID != null) {
+      final file = await FilesDB.instance.getFile(generatedID);
+      if (file != null) {
+        return file;
+      }
+    }
+
+    final localFiles = await FilesDB.instance.getLocalFiles([
+      nativeStatus.localID,
+    ]);
+    if (localFiles.isEmpty) {
+      return null;
+    }
+
+    EnteFile? selected;
+    for (final file in localFiles) {
+      if (file.collectionID == nativeStatus.collectionID) {
+        selected = file;
+        break;
+      }
+    }
+    selected ??= localFiles.first;
+    return selected;
+  }
+
+  void _onBackgroundVerificationEvent(BackgroundUploadVerificationEvent event) {
+    final localID = event.file.localID;
+    if (localID == null || !_allBackups.containsKey(localID)) {
+      return;
+    }
+    final currentItem = _allBackups[localID]!;
+    switch (event.outcome) {
+      case BackgroundUploadVerificationOutcome.verified:
+        _allBackups[localID] = currentItem.copyWith(
+          status: BackupItemStatus.uploaded,
+          clearError: true,
+        );
+        break;
+      case BackgroundUploadVerificationOutcome.failed:
+        _allBackups[localID] = currentItem.copyWith(
+          status: BackupItemStatus.verificationFailed,
+          error: event.error,
+        );
+        break;
+    }
+    Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+  }
+}
+
+class NativeBackgroundUploadError implements Exception {
+  final String message;
+
+  const NativeBackgroundUploadError(this.message);
+
+  @override
+  String toString() => message;
 }
 
 class FileUploadItem {
@@ -1633,7 +1901,4 @@ class FileUploadItem {
 
 enum UploadStatus { notStarted, inProgress, inBackground, completed }
 
-enum ProcessType {
-  background,
-  foreground,
-}
+enum ProcessType { background, foreground }

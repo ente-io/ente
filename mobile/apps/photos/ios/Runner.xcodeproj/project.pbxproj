@@ -7,17 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0856877A9F80F9E052DBFDB4 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		274DC65125920DD100F526A4 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 274DC65025920DD100F526A4 /* StoreKit.framework */; };
 		277218A0270F596900FFE3CC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2772189F270F596900FFE3CC /* GoogleService-Info.plist */; };
-		359D8BCF50FB143064FFC56F /* Pods_ShareExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D025F2F5A163F84B724D14D7 /* Pods_ShareExtension.framework */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		54D121F62F02675C00B8CC69 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 54D121EC2F02675C00B8CC69 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		7DDADC041B05F95B40A9CB86 /* IOS26CoreCryptoBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DBF92C80817763A5939570 /* IOS26CoreCryptoBridge.swift */; };
+		8E9DBF5B962E2F19855814AB /* IOS26BackgroundUploadExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3BEC00F8F5898BF48422CEF7 /* IOS26BackgroundUploadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A67B94D71E9BB6F4CCBF2E19 /* IOS26BackgroundUploadExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D41DE2ABD2EA4E5AB85FD455 /* IOS26BackgroundUploadExtension.swift */; };
 		CEE166242DD5E7820012CF61 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
 		CEE166252DD5E7820012CF61 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
 		CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -27,6 +28,7 @@
 		CEE6BE702D7AE7FD00E4048B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
 		CEE6BE712D7AE7FD00E4048B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
 		CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DA1397E9DB54344EC8397DDA /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D04633A56D32B960AA14732 /* Pods_Runner.framework */; };
 		DA6BE5E826B3BC8600656280 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
@@ -59,6 +61,13 @@
 			remoteGlobalIDString = CEE6BE6E2D7AE7FD00E4048B;
 			remoteInfo = EnteMemoryWidgetExtension;
 		};
+		D2A527A42DDCCCB6877AED06 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4E23AF6E22D3940E68930422;
+			remoteInfo = IOS26BackgroundUploadExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +81,7 @@
 				CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */,
 				CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */,
 				CEE166882DD5F6F30012CF61 /* EntePeopleWidgetExtension.appex in Embed Foundation Extensions */,
+				8E9DBF5B962E2F19855814AB /* IOS26BackgroundUploadExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,15 +104,19 @@
 		271BD99F270EE74F00D86E6F /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		274DC65025920DD100F526A4 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		2772189F270F596900FFE3CC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		337F25C59DF731ED2398FF48 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3438FE1F27588AE1FBD6EF41 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		53DBFBDBE805FC6E13E3F31E /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		3BEC00F8F5898BF48422CEF7 /* IOS26BackgroundUploadExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IOS26BackgroundUploadExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		54D121EC2F02675C00B8CC69 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		6A1E2DBA51995DADEC1ED952 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		6DACD83C2B755B0600BA9516 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		6DACD83E2B755B0600BA9516 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		713C75A3E0E73479B621F2F0 /* Pods-ShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		84F70F6D5177CF899373263F /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		8CE7DA776417EF8F260A80C3 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -110,10 +124,8 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		AAB2B37A8A7F46DD9D1734DF /* Pods-ShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
-		BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
-		C540B46EB90E9D7FDF10AC56 /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
+		9D04633A56D32B960AA14732 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF42A080E9E42BA781E9A3EF /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
 		CE93A9062D808893005CD942 /* EnteMemoryWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EnteAlbumWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE166362DD5E7950012CF61 /* EnteAlbumWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteAlbumWidgetExtension.entitlements; sourceTree = "<group>"; };
@@ -121,9 +133,11 @@
 		CEE1668E2DD5F70F0012CF61 /* EntePeopleWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EntePeopleWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EnteMemoryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE6BE822D7AE8C700E4048B /* EnteMemoryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtension.entitlements; sourceTree = "<group>"; };
-		D025F2F5A163F84B724D14D7 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D41DE2ABD2EA4E5AB85FD455 /* IOS26BackgroundUploadExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IOS26BackgroundUploadExtension.swift; sourceTree = "<group>"; };
+		D616650347356809374437F4 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		D8DBF92C80817763A5939570 /* IOS26CoreCryptoBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IOS26CoreCryptoBridge.swift; sourceTree = "<group>"; };
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
-		F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA0983EB241B0CF48E0A4314 /* IOS26BackgroundUploadExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = IOS26BackgroundUploadExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -213,7 +227,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				359D8BCF50FB143064FFC56F /* Pods_ShareExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,7 +235,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				274DC65125920DD100F526A4 /* StoreKit.framework in Frameworks */,
-				0856877A9F80F9E052DBFDB4 /* Pods_Runner.framework in Frameworks */,
+				DA1397E9DB54344EC8397DDA /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98C3BEF6C95BE438449F9C63 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +304,7 @@
 				97C146EF1CF9000F007C117D /* Products */,
 				AC6CA265BB505D982CB00391 /* Pods */,
 				C6A22658E77FF012720BEDDA /* Frameworks */,
+				D3F056AC043023E9066DC519 /* IOS26BackgroundUploadExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -295,6 +316,7 @@
 				CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */,
 				CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */,
 				54D121EC2F02675C00B8CC69 /* ShareExtension.appex */,
+				3BEC00F8F5898BF48422CEF7 /* IOS26BackgroundUploadExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -313,6 +335,7 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				D8DBF92C80817763A5939570 /* IOS26CoreCryptoBridge.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -327,12 +350,12 @@
 		AC6CA265BB505D982CB00391 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */,
-				BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */,
-				6A1E2DBA51995DADEC1ED952 /* Pods-Runner.profile.xcconfig */,
-				53DBFBDBE805FC6E13E3F31E /* Pods-ShareExtension.debug.xcconfig */,
-				C540B46EB90E9D7FDF10AC56 /* Pods-ShareExtension.release.xcconfig */,
-				AAB2B37A8A7F46DD9D1734DF /* Pods-ShareExtension.profile.xcconfig */,
+				3438FE1F27588AE1FBD6EF41 /* Pods-Runner.debug.xcconfig */,
+				8CE7DA776417EF8F260A80C3 /* Pods-Runner.release.xcconfig */,
+				D616650347356809374437F4 /* Pods-Runner.profile.xcconfig */,
+				84F70F6D5177CF899373263F /* Pods-ShareExtension.debug.xcconfig */,
+				BF42A080E9E42BA781E9A3EF /* Pods-ShareExtension.release.xcconfig */,
+				713C75A3E0E73479B621F2F0 /* Pods-ShareExtension.profile.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -341,22 +364,49 @@
 			isa = PBXGroup;
 			children = (
 				274DC65025920DD100F526A4 /* StoreKit.framework */,
-				F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */,
 				6DACD83C2B755B0600BA9516 /* WidgetKit.framework */,
 				6DACD83E2B755B0600BA9516 /* SwiftUI.framework */,
-				D025F2F5A163F84B724D14D7 /* Pods_ShareExtension.framework */,
+				9D04633A56D32B960AA14732 /* Pods_Runner.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D3F056AC043023E9066DC519 /* IOS26BackgroundUploadExtension */ = {
+			isa = PBXGroup;
+			children = (
+				D41DE2ABD2EA4E5AB85FD455 /* IOS26BackgroundUploadExtension.swift */,
+				337F25C59DF731ED2398FF48 /* Info.plist */,
+				EA0983EB241B0CF48E0A4314 /* IOS26BackgroundUploadExtension.entitlements */,
+			);
+			name = IOS26BackgroundUploadExtension;
+			path = IOS26BackgroundUploadExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4E23AF6E22D3940E68930422 /* IOS26BackgroundUploadExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 723B80EB7B62439C544960E7 /* Build configuration list for PBXNativeTarget "IOS26BackgroundUploadExtension" */;
+			buildPhases = (
+				0CD989DD6192502D715B05CE /* Sources */,
+				98C3BEF6C95BE438449F9C63 /* Frameworks */,
+				F680ABDE1CFE6730A2D6C714 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IOS26BackgroundUploadExtension;
+			productName = IOS26BackgroundUploadExtension;
+			productReference = 3BEC00F8F5898BF48422CEF7 /* IOS26BackgroundUploadExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		54D121EB2F02675C00B8CC69 /* ShareExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 54D121F82F02675C00B8CC69 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
 			buildPhases = (
-				78EE147696D91812EDEEE07E /* [CP] Check Pods Manifest.lock */,
+				9F4518664453E28D792B5BD4 /* [CP] Check Pods Manifest.lock */,
 				54D121E82F02675C00B8CC69 /* Sources */,
 				54D121E92F02675C00B8CC69 /* Frameworks */,
 				54D121EA2F02675C00B8CC69 /* Resources */,
@@ -377,7 +427,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
-				CA5A2D2FAC2FC326D78201AE /* [CP] Check Pods Manifest.lock */,
+				4CB0FAC7C65F99D707E10C25 /* [CP] Check Pods Manifest.lock */,
 				6DACD84B2B755B0800BA9516 /* Embed Foundation Extensions */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
@@ -385,8 +435,8 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				ABF2FD2FD606DC6DD54BD9AB /* [CP] Embed Pods Frameworks */,
-				E080004968DD9D575CBA67CD /* [CP] Copy Pods Resources */,
+				43E4E32C1DCFA4FE05D95712 /* [CP] Embed Pods Frameworks */,
+				F0BA20DB805255ABA5ECD590 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -395,6 +445,7 @@
 				CEE1662F2DD5E7830012CF61 /* PBXTargetDependency */,
 				CEE166872DD5F6F30012CF61 /* PBXTargetDependency */,
 				54D121F52F02675C00B8CC69 /* PBXTargetDependency */,
+				7D765F0CDA007C9F866861B9 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -507,6 +558,7 @@
 				CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */,
 				CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */,
 				54D121EB2F02675C00B8CC69 /* ShareExtension */,
+				4E23AF6E22D3940E68930422 /* IOS26BackgroundUploadExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -553,6 +605,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F680ABDE1CFE6730A2D6C714 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -572,44 +631,7 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 		};
-		78EE147696D91812EDEEE07E /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ShareExtension-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9740EEB61CF901F6004384FC /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-		};
-		ABF2FD2FD606DC6DD54BD9AB /* [CP] Embed Pods Frameworks */ = {
+		43E4E32C1DCFA4FE05D95712 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -823,7 +845,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CA5A2D2FAC2FC326D78201AE /* [CP] Check Pods Manifest.lock */ = {
+		4CB0FAC7C65F99D707E10C25 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -845,7 +867,44 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E080004968DD9D575CBA67CD /* [CP] Copy Pods Resources */ = {
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		9F4518664453E28D792B5BD4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ShareExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F0BA20DB805255ABA5ECD590 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -868,6 +927,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0CD989DD6192502D715B05CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A67B94D71E9BB6F4CCBF2E19 /* IOS26BackgroundUploadExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		54D121E82F02675C00B8CC69 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -881,6 +948,7 @@
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				7DDADC041B05F95B40A9CB86 /* IOS26CoreCryptoBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -912,6 +980,12 @@
 			isa = PBXTargetDependency;
 			target = 54D121EB2F02675C00B8CC69 /* ShareExtension */;
 			targetProxy = 54D121F42F02675C00B8CC69 /* PBXContainerItemProxy */;
+		};
+		7D765F0CDA007C9F866861B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = IOS26BackgroundUploadExtension;
+			target = 4E23AF6E22D3940E68930422 /* IOS26BackgroundUploadExtension */;
+			targetProxy = D2A527A42DDCCCB6877AED06 /* PBXContainerItemProxy */;
 		};
 		CEE1662F2DD5E7830012CF61 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -950,6 +1024,67 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0E626D7A8A6B04E538F5F165 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = IOS26BackgroundUploadExtension/IOS26BackgroundUploadExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IOS26BackgroundUploadExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ente Photos";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.11;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.IOS26BackgroundUploadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1720B7B9370AFF55BDDE84CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = IOS26BackgroundUploadExtension/IOS26BackgroundUploadExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IOS26BackgroundUploadExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ente Photos";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.11;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.IOS26BackgroundUploadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1023,6 +1158,7 @@
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -1052,7 +1188,7 @@
 		};
 		54D121F92F02675C00B8CC69 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 53DBFBDBE805FC6E13E3F31E /* Pods-ShareExtension.debug.xcconfig */;
+			baseConfigurationReference = 84F70F6D5177CF899373263F /* Pods-ShareExtension.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1063,10 +1199,11 @@
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11;
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
@@ -1079,7 +1216,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.11;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.ShareExtension;
@@ -1098,7 +1235,7 @@
 		};
 		54D121FA2F02675C00B8CC69 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C540B46EB90E9D7FDF10AC56 /* Pods-ShareExtension.release.xcconfig */;
+			baseConfigurationReference = BF42A080E9E42BA781E9A3EF /* Pods-ShareExtension.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1109,10 +1246,11 @@
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11;
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
@@ -1125,7 +1263,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.11;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1142,7 +1280,7 @@
 		};
 		54D121FB2F02675C00B8CC69 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AAB2B37A8A7F46DD9D1734DF /* Pods-ShareExtension.profile.xcconfig */;
+			baseConfigurationReference = 713C75A3E0E73479B621F2F0 /* Pods-ShareExtension.profile.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1153,10 +1291,11 @@
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11;
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
@@ -1169,7 +1308,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.11;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1181,6 +1320,37 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		9640D579AB4D258BC5A6F63A /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = IOS26BackgroundUploadExtension/IOS26BackgroundUploadExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IOS26BackgroundUploadExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ente Photos";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.11;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.IOS26BackgroundUploadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Profile;
 		};
@@ -1325,6 +1495,7 @@
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -1368,6 +1539,7 @@
 				CUSTOM_GROUP_ID = group.io.ente.frame.ShareExtension;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -1412,6 +1584,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
@@ -1454,6 +1627,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
@@ -1494,6 +1668,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
@@ -1534,6 +1709,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
@@ -1576,6 +1752,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
@@ -1616,6 +1793,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
@@ -1656,6 +1834,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
@@ -1698,6 +1877,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
@@ -1738,6 +1918,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
@@ -1770,6 +1951,16 @@
 				54D121F92F02675C00B8CC69 /* Debug */,
 				54D121FA2F02675C00B8CC69 /* Release */,
 				54D121FB2F02675C00B8CC69 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		723B80EB7B62439C544960E7 /* Build configuration list for PBXNativeTarget "IOS26BackgroundUploadExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1720B7B9370AFF55BDDE84CB /* Release */,
+				0E626D7A8A6B04E538F5F165 /* Debug */,
+				9640D579AB4D258BC5A6F63A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -3,5 +3,7 @@ enum BackupItemStatus {
   inQueue,
   retry,
   inBackground,
+  uploadedUnverified,
+  verificationFailed,
   uploaded,
 }

@@ -33,11 +33,17 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
+  # Local pod wrapper for rust/uniffi/core. Sources/XCFramework are generated
+  # during pod install via CoreUniFFI.podspec prepare_command.
+  pod 'CoreUniFFI', :path => './CoreUniFFI'
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
 
-  target 'ShareExtension' do
-    inherit! :search_paths
-  end
+target 'ShareExtension' do
+  use_frameworks!
+  use_modular_headers!
+  # Keep ShareExtension pod graph empty; it uses a local fallback implementation
+  # when receive_sharing_intent is not present.
 end
 
 post_install do |installer|
@@ -48,5 +54,39 @@ post_install do |installer|
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
     end
 
+  end
+
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.native_targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
+    aggregate_target.user_project.save
+  end
+end
+
+post_integrate do |_installer|
+  # ShareExtension intentionally has no pods linked directly. CocoaPods can
+  # still add Pods_ShareExtension.framework references, which then fail to
+  # resolve at link time. Remove those stale references after integration.
+  begin
+    user_project_path = File.join(__dir__, 'Runner.xcodeproj')
+    user_project = Xcodeproj::Project.open(user_project_path)
+    share_target = user_project.targets.find { |target| target.name == 'ShareExtension' }
+
+    if share_target
+      share_target.frameworks_build_phase.files
+        .select { |build_file| build_file.file_ref&.path == 'Pods_ShareExtension.framework' }
+        .each { |build_file| share_target.frameworks_build_phase.remove_build_file(build_file) }
+    end
+
+    user_project.files
+      .select { |file_ref| file_ref.path == 'Pods_ShareExtension.framework' }
+      .each(&:remove_from_project)
+
+    user_project.save
+  rescue => error
+    Pod::UI.warn("Failed to cleanup stale ShareExtension pod framework refs: #{error}")
   end
 end
