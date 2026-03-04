@@ -211,10 +211,6 @@ struct ChatView: View {
             Button("Trim history") {
                 viewModel.confirmOverflowTrim()
             }
-            Button("Increase context") {
-                viewModel.cancelOverflowDialog()
-                viewState.showModelSettings = true
-            }
             Button("Cancel", role: .cancel) {
                 viewModel.cancelOverflowDialog()
             }
