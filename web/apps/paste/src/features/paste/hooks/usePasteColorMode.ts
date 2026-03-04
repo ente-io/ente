@@ -15,7 +15,5 @@ export const usePasteColorMode = (): UsePasteColorModeResult => {
 
     const resolvedMode: PasteResolvedMode = systemMode ?? "dark";
 
-    return {
-        resolvedMode,
-    };
+    return { resolvedMode };
 };
