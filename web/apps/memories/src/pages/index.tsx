@@ -248,6 +248,8 @@ const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 48;
 const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 220;
 const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(100vw - ${DESKTOP_MEDIA_HORIZONTAL_PADDING_PX}px))`;
 const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(100vh - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
+const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-desktop.svg";
+const MOBILE_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-mobile.svg";
 
 const isInteractiveTapTarget = (target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
@@ -262,32 +264,6 @@ const progressFillAnimation = keyframes`
     from { width: 0%; }
     to { width: 100%; }
 `;
-
-const backgroundPatternSVG = `
-<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220' fill='none'>
-  <g stroke='rgba(255,255,255,0.22)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'>
-    <circle cx='36' cy='38' r='9'/>
-    <path d='M84 26c0-4 3-7 7-7h10c4 0 7 3 7 7v10c0 4-3 7-7 7H91c-4 0-7-3-7-7V26Z'/>
-    <path d='M149 23l14 8-14 8'/>
-    <path d='M154 31h30'/>
-    <path d='M33 97c0-10 8-18 18-18h12c10 0 18 8 18 18v3c0 10-8 18-18 18H51c-10 0-18-8-18-18v-3Z'/>
-    <path d='M48 98h0.01M58 98h0.01M68 98h0.01'/>
-    <path d='M132 90c3-5 10-5 13 0 3-5 10-5 13 0 3 5-2 10-13 17-11-7-16-12-13-17Z'/>
-    <path d='M178 92l5 6 8-2-4 7 5 6-8-2-4 7-1-8-8-2 7-4-1-8Z'/>
-    <circle cx='104' cy='148' r='14'/>
-    <path d='M98 146h12M100 154h8'/>
-    <path d='M162 142l6 8 10-2-6 8 6 8-10-2-6 8-1-10-10-2 9-5-1-11Z'/>
-    <path d='M33 178l8 8M41 178l-8 8'/>
-    <path d='M64 170c4-7 14-7 18 0 4-7 14-7 18 0 4 7-2 13-18 23-16-10-22-16-18-23Z'/>
-    <path d='M124 186c0-6 5-11 11-11h8c6 0 11 5 11 11v8c0 6-5 11-11 11h-8c-6 0-11-5-11-11v-8Z'/>
-    <path d='M178 184h24M182 176l16 16'/>
-  </g>
-</svg>
-`;
-
-const backgroundPattern = `url("data:image/svg+xml,${encodeURIComponent(
-    backgroundPatternSVG,
-)}")`;
 
 const MemoryViewer: React.FC<MemoryViewerProps> = ({
     files,
@@ -648,10 +624,14 @@ const BackgroundPattern = styled("div")({
     position: "absolute",
     inset: 0,
     backgroundColor: "#1f1f1f",
-    backgroundImage: backgroundPattern,
-    backgroundRepeat: "repeat",
-    backgroundSize: "220px 220px",
+    backgroundImage: `url(${DESKTOP_BACKGROUND_IMAGE_PATH})`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     zIndex: 1,
+    [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
+        backgroundImage: `url(${MOBILE_BACKGROUND_IMAGE_PATH})`,
+    },
 });
 
 const ContentContainer = styled("div")({
