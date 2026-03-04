@@ -73,18 +73,12 @@ export const sidebar = [
                                 link: "/photos/features/account/family-plans",
                             },
                             {
-                                text: "Security",
-                                collapsed: true,
-                                items: [
-                                    {
-                                        text: "Passkeys",
-                                        link: "/photos/features/account/passkeys",
-                                    },
-                                    {
-                                        text: "App lock",
-                                        link: "/photos/features/account/security/app-lock",
-                                    },
-                                ],
+                                text: "Passkeys",
+                                link: "/photos/features/account/passkeys",
+                            },
+                            {
+                                text: "App lock",
+                                link: "/photos/features/account/security/app-lock",
                             },
                             {
                                 text: "Referral program",

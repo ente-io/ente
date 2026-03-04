@@ -157,6 +157,18 @@ Yes, we recommend enabling 2FA for an additional layer of security. We support:
 
 You can set up 2FA in the settings of our mobile or desktop apps.
 
+### Can I use app lock to protect Ente Photos? {#app-lock}
+
+Yes. You can protect the Ente Photos app with an additional lock screen.
+
+- Choose **Device lock**, **PIN lock**, or **Password lock**
+- Configure **Auto lock** to lock the app automatically after a chosen delay
+- Enable **Hide content** in the mobile app to hide app previews in the app switcher
+
+Open `Settings > Security > App lock` on mobile, or `Settings > Account > App lock` on desktop/web.
+
+Learn more in the [App lock guide](/photos/features/account/security/app-lock).
+
 ### Can I contact support using PGP? {#support-pgp}
 
 Yes. You can send encrypted messages to [pgp@ente.io](mailto:pgp@ente.io). The
