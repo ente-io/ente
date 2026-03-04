@@ -1,9 +1,15 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
+import "package:photos/ui/account/email_entry_page.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class NameFaceBanner extends StatefulWidget {
   const NameFaceBanner({super.key});
@@ -14,16 +20,36 @@ class NameFaceBanner extends StatefulWidget {
 
 class _NameFaceBannerState extends State<NameFaceBanner> {
   bool _dismissed = false;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _appModeChangedEvent.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    if (!isOfflineMode) return const SizedBox.shrink();
+    if (!(isOfflineMode && !Configuration.instance.hasConfiguredAccount())) {
+      return const SizedBox.shrink();
+    }
     if (localSettings.isOfflineNameFaceBannerDismissed) {
       return const SizedBox.shrink();
     }
 
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final l10n = AppLocalizations.of(context);
 
     return Padding(
@@ -46,12 +72,12 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
                     child: Text(
                       l10n.offlineNameFaceBannerTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: textTheme.largeBold.copyWith(
                         fontFamily: "Nunito",
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        height: 20 / 16,
-                        letterSpacing: -1.0,
+                        fontSize: 20,
+                        height: 24 / 18,
+                        letterSpacing: -1,
                         color: colorScheme.textBase,
                       ),
                     ),
@@ -59,13 +85,19 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCancel01,
-                        color: colorScheme.contentLight,
-                        size: 18,
-                        strokeWidth: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
+                          color: colorScheme.contentLight,
+                          size: 18,
+                          strokeWidth: 2.5,
+                        ),
                       ),
                     ),
                   ),
@@ -73,50 +105,28 @@ class _NameFaceBannerState extends State<NameFaceBanner> {
               ),
             ),
             const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 l10n.offlineNameFaceBannerSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: "Inter",
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  height: 16 / 12,
-                  color: colorScheme.contentLight,
-                ),
+                style: textTheme.smallMuted,
               ),
             ),
             const SizedBox(height: 16),
-            GestureDetector(
+            BannerActionButton(
+              label: l10n.signUp,
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LandingPageWidget(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },
-              child: Container(
-                width: 140,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colorScheme.greenBase,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 18,
-                ),
-                child: Text(
-                  l10n.signUp,
-                  style: const TextStyle(
-                    fontFamily: "Montserrat",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                    height: 12 / 10,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              variant: BannerActionButtonVariant.primary,
             ),
           ],
         ),

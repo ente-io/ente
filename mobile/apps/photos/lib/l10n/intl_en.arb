@@ -32,6 +32,7 @@
   "entePhotosPerm": "Ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
+  "createAccountTitle": "Create an account",
   "createNewAccount": "Create new account",
   "password": "Password",
   "confirmPassword": "Confirm password",
@@ -668,8 +669,8 @@
   "familyPlans": "Family plans",
   "referrals": "Referrals",
   "notifications": "Notifications",
-  "sharedPhotoNotifications": "New shared photos",
-  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "sharedPhotoNotifications": "New shared photos and albums",
+  "sharedPhotoNotificationsExplanation": "Get notifications for new photos in shared albums you're in and for new albums shared with you.",
   "socialNotifications": "Likes and comments",
   "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
@@ -762,7 +763,7 @@
   "darkTheme": "Dark",
   "systemTheme": "System",
   "freeTrial": "Free trial",
-  "selectYourPlan": "Select your plan",
+  "chooseYourPlan": "Choose your plan",
   "enteSubscriptionPitch": "Ente preserves your memories, so they're always available to you, even if you lose your device.",
   "enteSubscriptionShareWithFamily": "Your family can be added to your plan as well.",
   "currentUsageIs": "Current usage is ",
@@ -831,6 +832,7 @@
   "appstoreSubscription": "AppStore subscription",
   "subAlreadyLinkedErrMessage": "Your {id} is already linked to another Ente account.\nIf you would like to use your {id} with this account, please contact our support''",
   "visitWebToManage": "Please visit web.ente.io to manage your subscription",
+  "managePaymentMethod": "Manage payment method",
   "couldNotUpdateSubscription": "Could not update subscription",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.io and we will be happy to help!",
   "paymentFailed": "Payment failed",
@@ -883,7 +885,7 @@
   "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
   "allowPermTitle": "Allow access to photos",
   "allowPermBody": "Please allow access to your photos from Settings so Ente can display and backup your library.",
-  "openSettings": "Open Settings",
+  "openSettings": "Open settings",
   "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
   "newToEnte": "New to Ente",
@@ -907,6 +909,7 @@
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente can encrypt and preserve files only if you grant access to them",
   "pleaseGrantPermissions": "Please grant permissions",
+  "grantPermissionDesc": "Please allow Ente to access your library so we can organize it with face recognition. All processing happens on your device.",
   "privateSharing": "Private sharing",
   "shareOnlyWithThePeopleYouWant": "Share only with the people you want",
   "usePublicLinksForPeopleNotOnEnte": "Use public links for people not on Ente",
@@ -2658,6 +2661,14 @@
       }
     }
   },
+  "sharedAlbumWithYou": "Shared {albumName} with you",
+  "@sharedAlbumWithYou": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {
@@ -2794,7 +2805,7 @@
   "deleteOnDeviceFiles": "Delete on device files",
   "noHiddenFilesOnDevice": "No hidden files on device",
   "welcome": "Welcome",
-  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition.\n\nAll processing happens on your device.",
+  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition. All processing happens on your device.",
   "grantPermission": "Grant permission",
   "privateAI": "Private AI",
   "privateAIDescription": "Ente uses on-device AI to analyze your photos for faces, objects, locations, and text. This data is used to power features like face recognition and smart search. Everything is processed and stored locally on your device — nothing is ever uploaded to our servers.",
@@ -2806,27 +2817,32 @@
   "enableOnDeviceMLDescription": "Enable on-device ML to search by faces, places, and more. Your photos never leave your device.",
   "offlineEnableSharingTitle": "Sharing starts here",
   "offlineEnableSharingDesc": "Sign up to share photos with everyone - even those not on Ente",
-  "offlineEnableBackupTitle": "Your backed-up albums will appear here",
+  "offlineEnableBackupTitle": "Backed-up albums will appear here",
   "offlineEnableBackupDesc": "Sign up to preserve your memories with Ente.",
+  "offlineEnableBackupTagLabel": "10 GB FREE!",
   "offlineEnableBackupAction": "Start with 10 GB FREE",
   "offlineSettingsBannerTitle": "We can't see your photos. Ever.",
   "offlineSettingsBannerDesc": "Zero-knowledge encryption means your memories stay yours.",
   "alreadyHaveAnAccount": "Already have an account?",
+  "dontHaveAnAccount": "Don't have an account?",
   "loginToEnte": "Login to Ente",
   "searchAndDiscover": "Search and Discover",
-  "searchAndDiscoverDesc": "Search photos with text or rediscover old memories with on-device ML",
+  "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",
   "shareYourMemories": "Share your Memories",
-  "shareYourMemoriesDesc": "Share your albums, create links, collect photos and drop a comment",
-  "privateAndSecureBackups": "Private and Secure Backups",
-  "privateAndSecureBackupsDesc": "End-to-End encrypted, triple replication, open source, and independently audited",
+  "shareYourMemoriesDesc": "Share albums, collect photos and gather comments with public links",
+  "privateAndSecureBackups": "Backup with Privacy",
+  "privateAndSecureBackupsDesc": "End-to-end encrypted, independently audited and fully open source",
   "mlProgressBannerTitle": "Hang tight!",
   "mlProgressBannerDescription": "Your photos are getting processed on device to detect faces, objects and more.",
-  "mlProgressBannerPaused": "Paused",
   "mlProgressBannerStatus": "{indexed} out of {total} photos processed",
   "@mlProgressBannerStatus": {
     "placeholders": {
-      "indexed": { "type": "String" },
-      "total": { "type": "String" }
+      "indexed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "offlineFacesBannerTitle": "Want to save these faces?",
