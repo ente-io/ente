@@ -313,12 +313,20 @@ func (c *InactiveUserOrchestrator) processCandidateBatch(candidates []repo.UserI
 }
 
 func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64, emailSemaphore chan struct{}) (inactivityEmailStage, bool, bool, error) {
+	stageHint, err := c.resolveNextStage(candidate.UserID, candidate.LastActivity, now)
+	if err != nil {
+		return inactivityEmailStageNone, false, false, err
+	}
+	if stageHint == inactivityEmailStageNone {
+		return inactivityEmailStageNone, false, false, nil
+	}
+
 	user, err := c.UserRepo.Get(candidate.UserID)
 	if err != nil {
 		if errors.Is(err, ente.ErrUserDeleted) {
 			return inactivityEmailStageNone, false, false, nil
 		}
-		return inactivityEmailStageNone, false, false, err
+		return stageHint, false, false, err
 	}
 
 	if !isEnteDomainRolloutUser(user.Email) {
@@ -327,18 +335,10 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 
 	hasActivePaidEntitlement, err := c.hasActivePaidEntitlement(user.ID)
 	if err != nil {
-		return inactivityEmailStageNone, false, false, err
+		return stageHint, false, false, err
 	}
 	if hasActivePaidEntitlement {
 		log.WithField("user_id", user.ID).Info("Skipping inactive user processing because user has active paid entitlement")
-		return inactivityEmailStageNone, false, false, nil
-	}
-
-	stageHint, err := c.resolveNextStage(candidate.UserID, candidate.LastActivity, now)
-	if err != nil {
-		return inactivityEmailStageNone, false, false, err
-	}
-	if stageHint == inactivityEmailStageNone {
 		return inactivityEmailStageNone, false, false, nil
 	}
 
