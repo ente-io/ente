@@ -51,6 +51,7 @@ import {
     getBranchSelections,
     listMessages,
     listSessions,
+    migrateToNativeDb,
     readDecryptedAttachmentBytes,
     sessionTitleFromText,
     setBranchSelection,
@@ -92,10 +93,6 @@ const formatTime = (timestamp: number) => {
     const hour12 = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}:${minute} ${period}`;
 };
-
-const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
-const OVERFLOW_SAFETY_TOKENS = 256;
-const DEFAULT_WEB_CONTEXT_SIZE = 4096;
 
 const loadingPhraseVerbs = [
     "Generating",
@@ -868,6 +865,7 @@ const Page: React.FC = () => {
     const pendingDownloadProgressRef = useRef<DownloadProgress | null>(null);
     const downloadProgressTimerRef = useRef<number | null>(null);
     const refreshSessionsInFlightRef = useRef<Promise<void> | null>(null);
+    const legacyMigrationDoneRef = useRef(false);
     const refreshMessagesInFlightRef = useRef<{
         sessionId?: string;
         promise: Promise<void> | null;
@@ -1210,37 +1208,17 @@ const Page: React.FC = () => {
                 contextLength?: string;
                 maxTokens?: string;
             };
-            const rawContextLength = parsed.contextLength ?? "";
-            const clampedContextLength =
-                !isTauriRuntime &&
-                rawContextLength &&
-                Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
-                    ? String(DEFAULT_WEB_CONTEXT_SIZE)
-                    : rawContextLength;
-            if (clampedContextLength !== rawContextLength) {
-                const nextSettings = {
-                    useCustomModel: !!parsed.useCustomModel,
-                    modelUrl: parsed.modelUrl ?? "",
-                    mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
-                    contextLength: clampedContextLength,
-                    maxTokens: parsed.maxTokens ?? "",
-                };
-                window.localStorage.setItem(
-                    "ensu.modelSettings",
-                    JSON.stringify(nextSettings),
-                );
-            }
             setUseCustomModel(
                 MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
             );
             setModelUrl(parsed.modelUrl ?? "");
             setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
-            setContextLength(clampedContextLength);
+            setContextLength(parsed.contextLength ?? "");
             setMaxTokens(parsed.maxTokens ?? "");
         } catch (error) {
             log.error("Failed to read model settings", error);
         }
-    }, [allowMmproj, isTauriRuntime]);
+    }, [allowMmproj]);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);
@@ -1619,12 +1597,26 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (!chatKey) return;
-        if (isLoggedIn) {
-            void syncNow();
-            return;
-        }
-        void refreshSessions();
-    }, [chatKey, isLoggedIn, refreshSessions, syncNow]);
+
+        const run = async () => {
+            // One-time migration from localStorage (v0.1.5) to native DB.
+            if (isTauriRuntime && !legacyMigrationDoneRef.current) {
+                legacyMigrationDoneRef.current = true;
+                try {
+                    await migrateToNativeDb(chatKey);
+                } catch (error) {
+                    log.error("Legacy migration failed", error);
+                }
+            }
+
+            if (isLoggedIn) {
+                await syncNow();
+            } else {
+                await refreshSessions();
+            }
+        };
+        void run();
+    }, [chatKey, isLoggedIn, isTauriRuntime, refreshSessions, syncNow]);
 
     useEffect(() => {
         currentSessionIdRef.current = currentSessionId;
@@ -1844,6 +1836,7 @@ const Page: React.FC = () => {
             });
         });
 
+        // Clean up blob URLs for attachments no longer displayed.
         setAttachmentPreviews((prev) => {
             const next = { ...prev };
             Object.keys(next).forEach((id) => {
@@ -1858,7 +1851,17 @@ const Page: React.FC = () => {
             attachmentPreviewUrlsRef.current = next;
             return next;
         });
-    }, [chatKey, displayMessages]);
+
+        // Load previews for persisted image attachments that don't have a
+        // blob URL yet (e.g. after reopening the app).
+        for (const message of displayMessages) {
+            for (const attachment of message.attachments ?? []) {
+                if (attachment.kind === "image") {
+                    loadAttachmentPreview(attachment, message.sessionUuid);
+                }
+            }
+        }
+    }, [chatKey, displayMessages, loadAttachmentPreview]);
 
     const showDrawerToggle = isSmall || drawerCollapsed;
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
@@ -1946,10 +1949,7 @@ const Page: React.FC = () => {
                     ? mmprojUrl.trim()
                     : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
-            maxTokens:
-                maxTokens && Number(maxTokens) > 0
-                    ? Number(maxTokens)
-                    : undefined,
+            maxTokens: maxTokens ? Number(maxTokens) : undefined,
         };
     }, [
         useCustomModel,
@@ -1966,34 +1966,25 @@ const Page: React.FC = () => {
     );
 
     const formatErrorMessage = useCallback((error: unknown) => {
-        const normalizeErrorMessage = (message: string) => {
-            if (
-                message.toLowerCase().includes("length out of range of buffer")
-            ) {
-                return "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.";
-            }
-            return message;
-        };
-
-        if (error instanceof Error) return normalizeErrorMessage(error.message);
-        if (typeof error === "string") return normalizeErrorMessage(error);
+        if (error instanceof Error) return error.message;
+        if (typeof error === "string") return error;
         if (error && typeof error === "object") {
             const maybeMessage = (error as { message?: unknown }).message;
             if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-                return normalizeErrorMessage(maybeMessage);
+                return maybeMessage;
             }
             if ("__wbg_ptr" in error) {
                 return "Model failed to start. Please refresh and try again.";
             }
             const text = String(error);
             if (text && text !== "[object Object]") {
-                return normalizeErrorMessage(text);
+                return text;
             }
         }
         try {
-            return normalizeErrorMessage(JSON.stringify(error));
+            return JSON.stringify(error);
         } catch {
-            return normalizeErrorMessage(String(error));
+            return String(error);
         }
     }, []);
 
@@ -2383,7 +2374,7 @@ const Page: React.FC = () => {
             path: ChatMessage[],
             promptText: string,
             contextSize: number,
-            maxTokensCount?: number,
+            maxTokensCount: number,
             stopAtMessageUuid?: string | null,
         ): Promise<LlmMessage[]> => {
             const candidates = slicePathUntil(path, stopAtMessageUuid);
@@ -2396,11 +2387,7 @@ const Page: React.FC = () => {
                     : candidates;
 
             const safetyMargin = 256;
-            let budget =
-                contextSize -
-                (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
-                safetyMargin;
-            budget -= approxTokens(buildChatSystemPrompt());
+            let budget = contextSize - maxTokensCount - safetyMargin;
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -2690,9 +2677,16 @@ const Page: React.FC = () => {
                     const filePath = await join(dir, filename);
 
                     await writeFile(filePath, bytes);
-
-                    const fileUrl = encodeURI(`file://${filePath}`);
-                    await open(fileUrl);
+                    // Tauri shell.open requires a URL matching the
+                    // configured regex. Normalise the path to a valid
+                    // file:// URL on all platforms (Windows paths lack a
+                    // leading slash and use backslashes).
+                    const asUrl = filePath.replace(/\\/g, "/");
+                    await open(
+                        asUrl.startsWith("/")
+                            ? `file://${asUrl}`
+                            : `file:///${asUrl}`,
+                    );
                     return;
                 }
 
@@ -2945,17 +2939,6 @@ const Page: React.FC = () => {
                     ...history,
                     { role: "user", content: promptText },
                 ];
-                const promptTokenEstimate = messages.reduce(
-                    (total, message) => total + approxTokens(message.content),
-                    0,
-                );
-                const inputBudget =
-                    contextSize - maxTokens - OVERFLOW_SAFETY_TOKENS;
-                if (promptTokenEstimate > inputBudget) {
-                    throw new Error(
-                        "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.",
-                    );
-                }
 
                 if (pendingCancelRef.current || stopRequestedRef.current) {
                     pendingCancelRef.current = false;
@@ -3381,38 +3364,27 @@ const Page: React.FC = () => {
     );
 
     const suggestedModels = useMemo(
-        () =>
-            isTauriRuntime
-                ? [
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 2B (Q8_0)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 4B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ]
-                : [
-                      {
-                          name: "LFM 2.5 VL 1.6B (Q4_0)",
-                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                          mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ],
-        [isTauriRuntime],
+        () => [
+            {
+                name: "LFM 2.5 VL 1.6B (Q4_0)",
+                url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+                mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+            },
+            {
+                name: "LFM 2.5 1.2B Instruct (Q4_0)",
+                url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF/resolve/main/LFM2.5-1.2B-Instruct-Q4_0.gguf",
+            },
+            {
+                name: "Qwen3-VL 2B Instruct (Q4_K_M)",
+                url: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
+                mmproj: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf",
+            },
+            {
+                name: "Llama 3.2 1B Instruct (Q4_K_M)",
+                url: "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+            },
+        ],
+        [],
     );
 
     const validateModelSettings = useCallback(() => {
