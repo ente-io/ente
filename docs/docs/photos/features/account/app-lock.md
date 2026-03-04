@@ -26,6 +26,8 @@ Choose from the following lock methods:
 
 On desktop, **Device lock** is currently available only on macOS.
 
+> Note: If you log out of Ente Photos, the device lock will be reset.
+
 ## Auto lock
 
 Configure **Auto lock** to choose when Ente Photos locks after being put in the background: Immediately, 5s, 15s, 1m, 5m, or 30m.

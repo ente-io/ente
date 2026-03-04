@@ -152,8 +152,8 @@ const kvKeyCooldownExpiresAt = "appLock.cooldownExpiresAt";
 
 // -- Device lock constants --
 
-const deviceLockEnablePromptReason = "Enable device lock for Ente";
-const deviceLockUnlockPromptReason = "Unlock Ente";
+const deviceLockEnablePromptReason = "enable device lock";
+const deviceLockUnlockPromptReason = "unlock";
 const maxInvalidUnlockAttempts = 10;
 const cooldownStartsAtAttempt = 5;
 const cooldownBaseSeconds = 30;
