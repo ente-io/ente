@@ -240,10 +240,28 @@ interface UnlockFormProps {
 
 const ENTE_GREEN = "#08C225";
 const ENTE_GREEN_HOVER = "#07A820";
+const DANGER_RED = "#E53935";
+const DANGER_RED_HOVER = "#D32F2F";
+const SECONDARY_ACTION_BG_LIGHT = "#F2F2F2";
+const SECONDARY_ACTION_BG_HOVER_LIGHT = "#E8E8E8";
+const SECONDARY_ACTION_BG_DARK = "rgba(255, 255, 255, 0.08)";
+const SECONDARY_ACTION_BG_HOVER_DARK = "rgba(255, 255, 255, 0.12)";
+const ILLUSTRATION_RING_LIGHT = "#E7E7E7";
+const ILLUSTRATION_RING_DARK = "rgba(0, 0, 0, 0.05)";
+const ILLUSTRATION_ICON_LIGHT = "#111";
+const ILLUSTRATION_ICON_DARK = "#fff";
 const APP_LOCK_MODAL_WIDTH = 408;
 const APP_LOCK_MODAL_CONTENT_WIDTH = APP_LOCK_MODAL_WIDTH - 32;
+const appLockModalContentSx = {
+    width: APP_LOCK_MODAL_CONTENT_WIDTH,
+    maxWidth: "100%",
+} as const;
 const LOGOUT_MODAL_WIDTH = 368;
 const LOGOUT_MODAL_CONTENT_WIDTH = LOGOUT_MODAL_WIDTH - 32;
+const logoutModalContentSx = {
+    width: LOGOUT_MODAL_CONTENT_WIDTH,
+    maxWidth: "100%",
+} as const;
 
 const titleTextSx = (theme: Theme) => ({
     fontWeight: 600,
@@ -295,6 +313,12 @@ const primaryActionButtonSx = (theme: Theme) => ({
     }),
 });
 
+const dangerActionButtonSx = (theme: Theme) => ({
+    ...primaryActionButtonSx(theme),
+    backgroundColor: DANGER_RED,
+    "&:hover": { backgroundColor: DANGER_RED_HOVER, boxShadow: "none" },
+});
+
 const secondaryActionButtonSx = (theme: Theme) => ({
     display: "flex",
     minHeight: 60,
@@ -303,31 +327,32 @@ const secondaryActionButtonSx = (theme: Theme) => ({
     alignItems: "center",
     gap: 1,
     borderRadius: "20px",
-    backgroundColor: "#F2F2F2",
+    backgroundColor: SECONDARY_ACTION_BG_LIGHT,
     fontSize: 16,
     fontWeight: 600,
     lineHeight: "20px",
     textTransform: "none" as const,
     color: "#333",
     boxShadow: "none",
-    "&:hover": { backgroundColor: "#E8E8E8", boxShadow: "none" },
+    "&:hover": {
+        backgroundColor: SECONDARY_ACTION_BG_HOVER_LIGHT,
+        boxShadow: "none",
+    },
     ...theme.applyStyles("dark", {
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        backgroundColor: SECONDARY_ACTION_BG_DARK,
         color: "rgba(255, 255, 255, 0.9)",
-        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
+        "&:hover": { backgroundColor: SECONDARY_ACTION_BG_HOVER_DARK },
     }),
 });
 
-const cooldownTimerButtonSx = (theme: Theme) => ({
-    ...secondaryActionButtonSx(theme),
-    width: "100%",
-    backgroundColor: "#232323",
-    color: "#fff",
-    "&:hover": { backgroundColor: "#232323", boxShadow: "none" },
+const illustrationSvgSx = (theme: Theme) => ({
+    "--app-lock-illustration-fill": SECONDARY_ACTION_BG_LIGHT,
+    "--app-lock-illustration-ring": ILLUSTRATION_RING_LIGHT,
+    "--app-lock-illustration-icon": ILLUSTRATION_ICON_LIGHT,
     ...theme.applyStyles("dark", {
-        backgroundColor: "#232323",
-        color: "#fff",
-        "&:hover": { backgroundColor: "#232323" },
+        "--app-lock-illustration-fill": SECONDARY_ACTION_BG_DARK,
+        "--app-lock-illustration-ring": ILLUSTRATION_RING_DARK,
+        "--app-lock-illustration-icon": ILLUSTRATION_ICON_DARK,
     }),
 });
 
@@ -400,93 +425,76 @@ const LockIllustration: React.FC = () => (
     />
 );
 
-const LogoutIllustration: React.FC = () => (
-    <svg
-        width="126"
-        height="121"
-        viewBox="0 0 126 121"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
-    >
-        <circle
-            cx="67"
-            cy="52"
-            r="34"
-            fill={ENTE_GREEN}
-            stroke="#232323"
-            strokeWidth="5.73358"
-        />
-        <g
-            transform="translate(67 52) scale(1.18) translate(-12 -12)"
-            stroke="white"
-            fill="none"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M7.86907 4C4.97674 5.49689 3 8.51664 3 11.9981C3 16.9686 7.02944 20.9981 12 20.9981C16.9706 20.9981 21 16.9686 21 11.9981C21 8.51664 19.0233 5.49689 16.1309 4" />
-            <path d="M12 3V10" />
-        </g>
-        <path
-            d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
-            fill={ENTE_GREEN}
-        />
-        <path
-            d="M119.579 91.9746C111.591 92.7003 105.114 97.1692 103.689 103.722C105.114 97.1692 101.077 90.4145 94.1117 86.438C102.099 85.7122 108.576 81.2434 110.001 74.6902C108.576 81.2434 112.613 87.9981 119.579 91.9746Z"
-            fill={ENTE_GREEN}
-        />
-        <path
-            d="M112.728 9.21189C108.334 9.91374 104.912 12.6353 104.37 16.3181C104.912 12.6353 102.421 9.04853 98.4114 7.10627C102.806 6.40442 106.228 3.68284 106.77 7.55054e-05C106.228 3.68284 108.719 7.26962 112.728 9.21189Z"
-            fill={ENTE_GREEN}
-        />
-    </svg>
-);
+const LogoutIllustration: React.FC = () => {
+    return (
+        <Box sx={illustrationSvgSx}>
+            <svg
+                width="126"
+                height="121"
+                viewBox="0 0 126 121"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+            >
+                <circle
+                    cx="67"
+                    cy="52"
+                    r="34"
+                    fill="var(--app-lock-illustration-fill)"
+                    stroke="var(--app-lock-illustration-ring)"
+                    strokeWidth="5.73358"
+                />
+                <g
+                    transform="translate(67 52) scale(1.18) translate(-12 -12)"
+                    stroke="var(--app-lock-illustration-icon)"
+                    fill="none"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M7.86907 4C4.97674 5.49689 3 8.51664 3 11.9981C3 16.9686 7.02944 20.9981 12 20.9981C16.9706 20.9981 21 16.9686 21 11.9981C21 8.51664 19.0233 5.49689 16.1309 4" />
+                    <path d="M12 3V10" />
+                </g>
+            </svg>
+        </Box>
+    );
+};
 
-const CooldownIllustration: React.FC = () => (
-    <svg
-        width="126"
-        height="121"
-        viewBox="0 0 126 121"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
-    >
-        <circle
-            cx="67"
-            cy="52"
-            r="34"
-            fill={ENTE_GREEN}
-            stroke="#232323"
-            strokeWidth="5.73358"
-        />
-        <g
-            transform="translate(67 52) scale(1.18) translate(-12 -12)"
-            stroke="white"
-            fill="none"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M4 3H20" />
-            <path d="M5.5 3V5.03039C5.5 6.27227 6.07682 7.4437 7.06116 8.20089L12 12L16.9388 8.20089C17.9232 7.44371 18.5 6.27227 18.5 5.03039V3" />
-            <path d="M5.5 21V18.9696C5.5 17.7277 6.07682 16.5563 7.06116 15.7991L12 12L16.9388 15.7991C17.9232 16.5563 18.5 17.7277 18.5 18.9696V21" />
-            <path d="M4 21H20" />
-        </g>
-        <path
-            d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
-            fill={ENTE_GREEN}
-        />
-        <path
-            d="M119.579 91.9746C111.591 92.7003 105.114 97.1692 103.689 103.722C105.114 97.1692 101.077 90.4145 94.1117 86.438C102.099 85.7122 108.576 81.2434 110.001 74.6902C108.576 81.2434 112.613 87.9981 119.579 91.9746Z"
-            fill={ENTE_GREEN}
-        />
-        <path
-            d="M112.728 9.21189C108.334 9.91374 104.912 12.6353 104.37 16.3181C104.912 12.6353 102.421 9.04853 98.4114 7.10627C102.806 6.40442 106.228 3.68284 106.77 7.55054e-05C106.228 3.68284 108.719 7.26962 112.728 9.21189Z"
-            fill={ENTE_GREEN}
-        />
-    </svg>
-);
+const CooldownIllustration: React.FC = () => {
+    return (
+        <Box sx={illustrationSvgSx}>
+            <svg
+                width="126"
+                height="121"
+                viewBox="0 0 126 121"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+            >
+                <circle
+                    cx="67"
+                    cy="52"
+                    r="34"
+                    fill="var(--app-lock-illustration-fill)"
+                    stroke="var(--app-lock-illustration-ring)"
+                    strokeWidth="5.73358"
+                />
+                <g
+                    transform="translate(67 52) scale(1.18) translate(-12 -12)"
+                    stroke="var(--app-lock-illustration-icon)"
+                    fill="none"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M12 22C6.47714 22 2.00003 17.5228 2.00003 12C2.00003 6.47715 6.47718 2 12 2C16.4777 2 20.2257 4.94289 21.5 9H19" />
+                    <path d="M12 8V12L14 14" />
+                    <path d="M21.9551 13C21.9848 12.6709 22 12.3373 22 12M15 22C15.3416 21.8876 15.6753 21.7564 16 21.6078M20.7906 17C20.9835 16.6284 21.1555 16.2433 21.305 15.8462M18.1925 20.2292C18.5369 19.9441 18.8631 19.6358 19.1688 19.3065" />
+                </g>
+            </svg>
+        </Box>
+    );
+};
 
 const AppLockCard: React.FC<
     React.PropsWithChildren<{ closeAction?: React.ReactNode; width?: number }>
@@ -494,8 +502,9 @@ const AppLockCard: React.FC<
     <Paper
         elevation={0}
         sx={(theme) => ({
-            width,
+            width: `${String(width)}px`,
             maxWidth: "calc(100% - 32px)",
+            boxSizing: "border-box",
             borderRadius: "28px",
             backgroundColor: "#fff",
             border: "1px solid #E0E0E0",
@@ -738,7 +747,7 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
 
     if (cooldownText) {
         return (
-            <AppLockCard closeAction={closeAction}>
+            <AppLockCard closeAction={closeAction} width={LOGOUT_MODAL_WIDTH}>
                 <CooldownScreen
                     remainingMs={cooldown.remainingMs}
                     cooldownText={cooldownText}
@@ -756,97 +765,101 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                     spacing={0}
                     useFlexGap
                     alignItems="center"
-                    sx={{ maxWidth: APP_LOCK_MODAL_CONTENT_WIDTH, width: "100%" }}
+                    sx={appLockModalContentSx}
                 >
-                <Box
-                    sx={{
-                        mt: -0.5,
-                        mb: 1.5,
-                        display: "flex",
-                        justifyContent: "center",
-                        width: "100%",
-                    }}
-                >
-                    <LockIllustration />
-                </Box>
-
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "9px",
-                        textAlign: "center",
-                        mb: 4,
-                    }}
-                >
-                    <Typography
-                        sx={(theme) => ({
-                            ...titleTextSx(theme),
-                            ...(isReauthentication ? {} : { mb: 0.5 }),
-                        })}
+                    <Box
+                        sx={{
+                            mt: -0.5,
+                            mb: 1.5,
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "100%",
+                        }}
                     >
-                        {isReauthentication
-                            ? t("authenticate")
-                            : t("app_locked")}
-                    </Typography>
-                    <Typography sx={subtitleTextSx}>
-                        {t("app_lock_enter_pin_to_unlock")}
-                    </Typography>
-                </Box>
+                        <LockIllustration />
+                    </Box>
 
-                <Stack
-                    direction="row"
-                    spacing={1.25}
-                    justifyContent="center"
-                    onClick={focusFirstEmptyPinInput}
-                    sx={{ mb: 0, width: "100%" }}
-                >
-                    {pin.map((digit, i) => (
-                        <TextField
-                            key={i}
-                            variant="standard"
-                            hiddenLabel
-                            autoFocus={i === 0}
-                            error={!!error}
-                            inputRef={(el: HTMLInputElement | null) => {
-                                inputRefs.current[i] = el;
-                            }}
-                            value={digit}
-                            onChange={(e) => handlePinChange(i, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(i, e)}
-                            disabled={loading}
-                            slotProps={{
-                                htmlInput: {
-                                    maxLength: 1,
-                                    inputMode: "numeric",
-                                    pattern: "[0-9]",
-                                    autoComplete: "off",
-                                    style: {
-                                        textAlign: "center",
-                                        WebkitTextSecurity: "disc",
-                                    },
-                                    "aria-label": t(
-                                        "app_lock_pin_digit_label",
-                                        { index: i + 1 },
-                                    ),
-                                },
-                            }}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "9px",
+                            textAlign: "center",
+                            mb: 4,
+                        }}
+                    >
+                        <Typography
                             sx={(theme) => ({
-                                ...inputFieldSx(theme, { borderRadius: 12 }),
-                                flex: 1,
-                                minWidth: 0,
-                                "& .MuiInputBase-input": {
-                                    padding: 0,
-                                    textAlign: "center",
-                                    height: "100%",
-                                    fontSize: 20,
-                                    fontWeight: 600,
-                                },
+                                ...titleTextSx(theme),
+                                ...(isReauthentication ? {} : { mb: 0.5 }),
                             })}
-                        />
-                    ))}
-                </Stack>
+                        >
+                            {isReauthentication
+                                ? t("authenticate")
+                                : t("app_locked")}
+                        </Typography>
+                        <Typography sx={subtitleTextSx}>
+                            {t("app_lock_enter_pin_to_unlock")}
+                        </Typography>
+                    </Box>
+
+                    <Stack
+                        direction="row"
+                        spacing={1.25}
+                        justifyContent="center"
+                        onClick={focusFirstEmptyPinInput}
+                        sx={{ mb: 0, width: "100%" }}
+                    >
+                        {pin.map((digit, i) => (
+                            <TextField
+                                key={i}
+                                variant="standard"
+                                hiddenLabel
+                                autoFocus={i === 0}
+                                error={!!error}
+                                inputRef={(el: HTMLInputElement | null) => {
+                                    inputRefs.current[i] = el;
+                                }}
+                                value={digit}
+                                onChange={(e) =>
+                                    handlePinChange(i, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDown(i, e)}
+                                disabled={loading}
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 1,
+                                        inputMode: "numeric",
+                                        pattern: "[0-9]",
+                                        autoComplete: "off",
+                                        style: {
+                                            textAlign: "center",
+                                            WebkitTextSecurity: "disc",
+                                        },
+                                        "aria-label": t(
+                                            "app_lock_pin_digit_label",
+                                            { index: i + 1 },
+                                        ),
+                                    },
+                                }}
+                                sx={(theme) => ({
+                                    ...inputFieldSx(theme, {
+                                        borderRadius: 12,
+                                    }),
+                                    flex: 1,
+                                    minWidth: 0,
+                                    "& .MuiInputBase-input": {
+                                        padding: 0,
+                                        textAlign: "center",
+                                        height: "100%",
+                                        fontSize: 20,
+                                        fontWeight: 600,
+                                    },
+                                })}
+                            />
+                        ))}
+                    </Stack>
 
                     <FocusVisibleButton
                         fullWidth
@@ -929,7 +942,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
 
     if (cooldownText) {
         return (
-            <AppLockCard closeAction={closeAction}>
+            <AppLockCard closeAction={closeAction} width={LOGOUT_MODAL_WIDTH}>
                 <CooldownScreen
                     remainingMs={cooldown.remainingMs}
                     cooldownText={cooldownText}
@@ -949,7 +962,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                     spacing={0}
                     useFlexGap
                     alignItems="center"
-                    sx={{ maxWidth: APP_LOCK_MODAL_CONTENT_WIDTH, width: "100%" }}
+                    sx={appLockModalContentSx}
                 >
                     <Box
                         sx={{
@@ -1013,7 +1026,9 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                                 endAdornment: (
                                     <ShowHidePasswordInputAdornment
                                         showPassword={showPassword}
-                                        onToggle={() => setShowPassword((s) => !s)}
+                                        onToggle={() =>
+                                            setShowPassword((s) => !s)
+                                        }
                                     />
                                 ),
                             },
@@ -1021,9 +1036,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                         sx={(theme) => ({
                             ...inputFieldSx(theme),
                             mt: 1,
-                            "& .MuiInputAdornment-positionEnd": {
-                                pr: 0.5,
-                            },
+                            "& .MuiInputAdornment-positionEnd": { pr: 0.5 },
                         })}
                     />
 
@@ -1086,7 +1099,7 @@ const DeviceLockUnlockForm: React.FC<{
                     spacing={0}
                     useFlexGap
                     alignItems="center"
-                    sx={{ maxWidth: APP_LOCK_MODAL_CONTENT_WIDTH, width: "100%" }}
+                    sx={appLockModalContentSx}
                 >
                     <Box
                         sx={{
@@ -1171,9 +1184,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, attemptCount }) => {
                     ...subtitleTextSx(theme),
                     color: "#E53935",
                     mt: 3,
-                    ...theme.applyStyles("dark", {
-                        color: "#FF6B6B",
-                    }),
+                    ...theme.applyStyles("dark", { color: "#FF6B6B" }),
                 })}
             >
                 {error}
@@ -1198,12 +1209,12 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
             spacing={0}
             useFlexGap
             alignItems="center"
-            sx={{ maxWidth: LOGOUT_MODAL_CONTENT_WIDTH, width: "100%" }}
+            sx={logoutModalContentSx}
         >
             <Box
                 sx={{
-                    mt: 1,
-                    mb: 1.5,
+                    mt: 0.5,
+                    mb: 1,
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
@@ -1223,7 +1234,9 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
                 }}
             >
                 <Typography sx={titleTextSx}>{t("logout")}</Typography>
-                <Typography sx={subtitleTextSx}>{t("logout_message")}</Typography>
+                <Typography sx={subtitleTextSx}>
+                    {t("logout_message")}
+                </Typography>
             </Box>
 
             <Stack spacing={1.5} sx={{ width: "100%" }}>
@@ -1237,7 +1250,7 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
                 <FocusVisibleButton
                     fullWidth
                     onClick={onConfirm}
-                    sx={primaryActionButtonSx}
+                    sx={dangerActionButtonSx}
                 >
                     {t("logout")}
                 </FocusVisibleButton>
@@ -1260,6 +1273,8 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
     onLogout,
 }) => {
     void remainingMs;
+    void attemptCount;
+    const retryDescriptionText = `${t("app_lock_please_try_again_in")}\u00A0${cooldownText}`;
 
     return (
         <Stack
@@ -1267,12 +1282,12 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
             useFlexGap
             alignItems="center"
             justifyContent="center"
-            sx={{ maxWidth: APP_LOCK_MODAL_CONTENT_WIDTH, width: "100%" }}
+            sx={logoutModalContentSx}
         >
             <Box
                 sx={{
-                    mt: 1,
-                    mb: 1.5,
+                    mt: 0.5,
+                    mb: 1,
                     display: "flex",
                     justifyContent: "center",
                     width: "100%",
@@ -1291,77 +1306,23 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                     mb: 3.5,
                 }}
             >
-                <Typography sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}>
+                <Typography
+                    sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}
+                >
                     {t("app_locked")}
                 </Typography>
                 <Typography
-                    sx={(theme) => ({
-                        ...subtitleTextSx(theme),
-                        mt: 0.5,
-                    })}
+                    sx={(theme) => ({ ...subtitleTextSx(theme), mt: 0.75 })}
                 >
-                    {t("wrong_unlock_code", {
-                        count: attemptCount,
-                    }).replace(
-                        `${String(attemptCount)} `,
-                        `${String(attemptCount)}\u00A0`,
-                    )}
+                    {retryDescriptionText}
                 </Typography>
             </Box>
 
             <FocusVisibleButton
                 fullWidth
-                onClick={() => undefined}
-                sx={cooldownTimerButtonSx}
-            >
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        justifyContent: "center",
-                        gap: 0.5,
-                        width: "100%",
-                        flexWrap: "wrap",
-                        "& .countdown-timer": {
-                            fontVariantNumeric: "tabular-nums",
-                        },
-                    }}
-                >
-                    <Typography
-                        component="span"
-                        sx={{
-                            fontSize: 14,
-                            lineHeight: "20px",
-                            fontWeight: 500,
-                            color: "inherit",
-                            opacity: 0.8,
-                        }}
-                    >
-                        {t("app_lock_please_try_again_in")}
-                    </Typography>
-                    <Typography
-                        component="span"
-                        className="countdown-timer"
-                        sx={{
-                            fontSize: 18,
-                            lineHeight: "22px",
-                            fontWeight: 600,
-                            color: "inherit",
-                        }}
-                    >
-                        {cooldownText}
-                    </Typography>
-                </Box>
-            </FocusVisibleButton>
-
-            <FocusVisibleButton
-                fullWidth
                 color="secondary"
                 onClick={onLogout}
-                sx={(theme) => ({
-                    ...secondaryActionButtonSx(theme),
-                    mt: 1.5,
-                })}
+                sx={(theme) => ({ ...dangerActionButtonSx(theme), mt: 1.5 })}
             >
                 {t("logout")}
             </FocusVisibleButton>
