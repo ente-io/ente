@@ -22,7 +22,7 @@ env:
 
 jobs:
     lint:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         defaults:
             run:
                 working-directory: rust/apps/ensu/src-tauri
@@ -42,15 +42,14 @@ jobs:
             - name: Install system dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
             - name: Fetch Rust dependencies
               run: cargo fetch
 
             - name: Patch llama.cpp mtmd sources
               shell: bash
-              working-directory: .
-              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
+              run: ../../../ensu/inference/tool/patch_llama_mtmd.sh
 
             - name: Ensure Tauri distDir exists for macro checks
               run: mkdir -p ../../../../web/apps/ensu/out

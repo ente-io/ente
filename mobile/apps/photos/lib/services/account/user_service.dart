@@ -1178,6 +1178,9 @@ class UserService {
     } else {
       await Configuration.instance.setToken(responseData["token"]);
     }
+
+    // Initialize shared feed cutoff at login; feed path keeps the same fallback.
+    localSettings.getOrCreateSharedPhotoFeedCutoffTime();
   }
 
   Future<void> setTwoFactor({

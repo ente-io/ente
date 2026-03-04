@@ -1,7 +1,6 @@
 package io.ente.ensu.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,32 +36,28 @@ import io.ente.ensu.utils.rememberEnsuHaptics
 internal fun OverflowDialog(
     state: OverflowDialogState,
     onTrim: () -> Unit,
-    onIncreaseContext: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val overflowMessage = "This conversation is too long for the model to process. Some older messages will be dropped to make room."
+
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(text = "Context limit reached", style = EnsuTypography.h3) },
+        title = { Text(text = "Conversation too long", style = EnsuTypography.h3) },
         text = {
             Text(
-                text = "Input uses ${state.inputTokens} tokens (budget ${state.inputBudget}). Trim history or increase context size?",
+                text = overflowMessage,
                 style = EnsuTypography.body,
                 color = EnsuColor.textPrimary()
             )
         },
         confirmButton = {
             TextButton(onClick = onTrim) {
-                Text(text = "Trim history", color = EnsuColor.textPrimary())
+                Text(text = "Continue", color = EnsuColor.textPrimary())
             }
         },
         dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                TextButton(onClick = onIncreaseContext) {
-                    Text(text = "Increase context", color = EnsuColor.textPrimary())
-                }
-                TextButton(onClick = onCancel) {
-                    Text(text = "Cancel", color = EnsuColor.textMuted())
-                }
+            TextButton(onClick = onCancel) {
+                Text(text = "Cancel", color = EnsuColor.textMuted())
             }
         },
         containerColor = EnsuColor.backgroundBase()

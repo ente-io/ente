@@ -136,8 +136,16 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     final l10n = AppLocalizations.of(context);
     final format = NumberFormat();
     final progress = total > 0 ? status.indexedItems.toDouble() / total : 0.0;
-    final showPausedPhase = _shouldShowPausedPhase(status);
     final showModelDownloadPhase = _shouldShowModelDownloadPhase(status);
+
+    final titleStyle = textTheme.largeBold.copyWith(
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      height: 24 / 18,
+      letterSpacing: -1,
+      color: colorScheme.greenBase,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -160,25 +168,23 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                 children: [
                   Text(
                     l10n.mlProgressBannerTitle,
-                    style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: colorScheme.greenBase,
-                    ),
+                    style: titleStyle,
                   ),
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
-                          color: colorScheme.textFaint,
-                          size: 20,
-                          strokeWidth: 2,
+                          color: colorScheme.contentDark,
+                          size: 18,
+                          strokeWidth: 2.5,
                         ),
                       ),
                     ),
@@ -188,51 +194,31 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
               const SizedBox(height: 8),
               Text(
                 l10n.mlProgressBannerDescription,
-                style: textTheme.miniMuted.copyWith(
-                  fontFamily: "Montserrat",
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textTheme.smallMuted,
               ),
               const SizedBox(height: 24),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2.5),
-                child: showPausedPhase
-                    ? LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 5,
-                        backgroundColor: colorScheme.fillFaint,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colorScheme.greenBase,
-                        ),
-                      )
-                    : showModelDownloadPhase
-                        ? LinearProgressIndicator(
-                            value: 0.0,
-                            minHeight: 5,
-                            backgroundColor: colorScheme.fillFaint,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              colorScheme.greenBase,
-                            ),
-                          )
-                        : _ShimmerProgressBar(
-                            progress: progress,
-                            backgroundColor: colorScheme.fillFaint,
-                            valueColor: colorScheme.greenBase,
-                          ),
+                child: LinearProgressIndicator(
+                  value: showModelDownloadPhase ? 0.0 : progress,
+                  minHeight: 5,
+                  backgroundColor: colorScheme.fillFaint,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.greenBase,
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  showPausedPhase
-                      ? l10n.mlProgressBannerPaused
-                      : showModelDownloadPhase
-                          ? l10n.loadingModel
-                          : l10n.mlProgressBannerStatus(
-                              indexed: format.format(status.indexedItems),
-                              total: format.format(total),
-                            ),
-                  style: textTheme.tinyMuted,
+                  showModelDownloadPhase
+                      ? l10n.loadingModel
+                      : l10n.mlProgressBannerStatus(
+                          indexed: format.format(status.indexedItems),
+                          total: format.format(total),
+                        ),
+                  style: textTheme.miniMuted,
                 ),
               ),
             ],
@@ -244,15 +230,9 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
 
   bool _shouldShowModelDownloadPhase(IndexStatus status) {
     if (!localSettings.isMLLocalIndexingEnabled) return false;
-    if (_shouldShowPausedPhase(status)) return false;
     if (status.indexedItems > 0) return false;
     if (status.pendingItems <= 0) return false;
     return !MLIndexingIsolate.instance.areModelsDownloaded;
-  }
-
-  bool _shouldShowPausedPhase(IndexStatus status) {
-    if (status.pendingItems <= 0) return false;
-    return !computeController.isDeviceHealthy;
   }
 
   void _onDismiss() {
@@ -261,128 +241,5 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     });
     _stopPolling();
     localSettings.setMLProgressBannerDismissed(true);
-  }
-}
-
-class _ShimmerProgressBar extends StatefulWidget {
-  final double progress;
-  final Color backgroundColor;
-  final Color valueColor;
-
-  const _ShimmerProgressBar({
-    required this.progress,
-    required this.backgroundColor,
-    required this.valueColor,
-  });
-
-  @override
-  State<_ShimmerProgressBar> createState() => _ShimmerProgressBarState();
-}
-
-class _ShimmerProgressBarState extends State<_ShimmerProgressBar>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1600),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final clampedProgress = widget.progress.clamp(0.0, 1.0).toDouble();
-    final displayProgress = clampedProgress > 0 ? clampedProgress : 0.08;
-
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final phase = Curves.easeInOutCubic.transform(_controller.value);
-        final pulseColor = Color.lerp(widget.valueColor, Colors.white, 0.55)!;
-
-        return SizedBox(
-          height: 5,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: widget.backgroundColor,
-              borderRadius: BorderRadius.circular(2.5),
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: displayProgress,
-                heightFactor: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2.5),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final pulseWidth =
-                          (constraints.maxWidth * 0.3).clamp(20.0, 52.0);
-                      final travelDistance =
-                          constraints.maxWidth + (pulseWidth * 2);
-                      final left = (travelDistance * phase) - pulseWidth;
-
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: widget.valueColor,
-                            ),
-                          ),
-                          Positioned(
-                            left: left,
-                            top: 0,
-                            bottom: 0,
-                            width: pulseWidth,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.transparent,
-                                    pulseColor.withValues(alpha: 0.18),
-                                    pulseColor.withValues(alpha: 0.5),
-                                    pulseColor.withValues(alpha: 0.18),
-                                    Colors.transparent,
-                                  ],
-                                  stops: const [0.0, 0.24, 0.5, 0.76, 1.0],
-                                ),
-                              ),
-                            ),
-                          ),
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.white.withValues(alpha: 0.07),
-                                  Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.03),
-                                ],
-                                stops: const [0.0, 0.56, 1.0],
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 }

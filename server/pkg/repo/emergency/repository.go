@@ -21,6 +21,25 @@ type ContactRow struct {
 	EncryptedKey       *string
 }
 
+// HasActiveLegacyContact returns true when the user has at least one accepted
+// legacy contact configured on their account.
+func (r *Repository) HasActiveLegacyContact(ctx context.Context, userID int64) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRowContext(ctx,
+		`SELECT EXISTS(
+			SELECT 1
+			FROM emergency_contact
+			WHERE user_id = $1 AND state = $2
+		)`,
+		userID,
+		ente.ContactAccepted,
+	).Scan(&exists)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "failed to check active legacy contact")
+	}
+	return exists, nil
+}
+
 func (r *Repository) AddEmergencyContact(ctx context.Context, userID int64, emergencyContactID int64, encKey string, noticeInHrs int) (bool, error) {
 	if userID == emergencyContactID {
 		return false, ente.NewBadRequestWithMessage("user cannot add themself as emergency contact")
