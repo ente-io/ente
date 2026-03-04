@@ -1914,14 +1914,18 @@ class _HomePageState extends State<HomePage> {
     lastScanTime = DateTime.now().millisecondsSinceEpoch;
     final lowerLink = link.toLowerCase();
     if (mounted && (lowerLink.startsWith("ente-auth://") || lowerLink.startsWith("enteauth://"))) {
-      final uri = Uri.parse(link);
-      if (uri.host != "search") return;
-      final searchQuery = uri.queryParameters['query'];
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        _showSearchBox = true;
-        _textController.text = searchQuery;
-        _searchText = searchQuery;
-        _applyFilteringAndRefresh();
+      try {
+        final uri = Uri.parse(link);
+        if (uri.host != "search") return;
+        final searchQuery = uri.queryParameters['query'];
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          _showSearchBox = true;
+          _textController.text = searchQuery;
+          _searchText = searchQuery;
+          _applyFilteringAndRefresh();
+        }
+      } catch (e) {
+        _logger.warning("Malformed ente-auth deep link: $link", e);
       }
     } else if (mounted && lowerLink.startsWith("otpauth://")) {
       try {
