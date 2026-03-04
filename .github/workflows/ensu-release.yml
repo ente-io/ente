@@ -107,6 +107,14 @@ jobs:
               shell: bash
               run: cargo install --locked trusted-signing-cli
 
+            - name: Add cargo bin to PATH (Windows only)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  CARGO_BIN_WIN=$(cygpath -w "$HOME/.cargo/bin")
+                  echo "$CARGO_BIN_WIN" >> $GITHUB_PATH
+                  echo "Added $CARGO_BIN_WIN to PATH"
+
             - name: Resolve Windows signing tool paths
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
               shell: bash
