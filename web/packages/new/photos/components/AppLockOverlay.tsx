@@ -1063,28 +1063,39 @@ const DeviceLockUnlockForm: React.FC<{
     closeAction?: React.ReactNode;
 }> = ({ isReauthentication, closeAction }) => {
     const [error, setError] = useState<string>();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [showManualUnlockButton, setShowManualUnlockButton] = useState(false);
     const isUnlockInProgress = useRef(false);
     const hasAutoTriggeredUnlock = useRef(false);
 
-    const handleDeviceLockUnlock = useCallback(async () => {
-        if (isUnlockInProgress.current) return;
-        isUnlockInProgress.current = true;
-        setLoading(true);
-        setError(undefined);
+    const handleDeviceLockUnlock = useCallback(
+        async (source: "auto" | "manual") => {
+            if (isUnlockInProgress.current) return;
+            isUnlockInProgress.current = true;
+            setLoading(true);
+            setError(undefined);
 
-        try {
-            const result: DeviceLockUnlockResult =
-                await attemptDeviceLockUnlock();
-            setError(deviceLockErrorText(result));
-        } catch (e) {
-            log.error("Device lock unlock attempt failed", e);
-            setError(t("generic_error"));
-        } finally {
-            setLoading(false);
-            isUnlockInProgress.current = false;
-        }
-    }, []);
+            try {
+                const result: DeviceLockUnlockResult =
+                    await attemptDeviceLockUnlock();
+                const nextError = deviceLockErrorText(result);
+                setError(nextError);
+                if (source === "auto" && nextError) {
+                    setShowManualUnlockButton(true);
+                }
+            } catch (e) {
+                log.error("Device lock unlock attempt failed", e);
+                setError(t("generic_error"));
+                if (source === "auto") {
+                    setShowManualUnlockButton(true);
+                }
+            } finally {
+                setLoading(false);
+                isUnlockInProgress.current = false;
+            }
+        },
+        [],
+    );
 
     useEffect(() => {
         const maybeAutoTriggerUnlock = () => {
@@ -1098,7 +1109,7 @@ const DeviceLockUnlockForm: React.FC<{
             }
 
             hasAutoTriggeredUnlock.current = true;
-            void handleDeviceLockUnlock();
+            void handleDeviceLockUnlock("auto");
         };
 
         maybeAutoTriggerUnlock();
@@ -1166,9 +1177,9 @@ const DeviceLockUnlockForm: React.FC<{
                     <FocusVisibleButton
                         fullWidth
                         color="accent"
-                        disabled={loading}
+                        disabled={loading || !showManualUnlockButton}
                         onClick={() => {
-                            void handleDeviceLockUnlock();
+                            void handleDeviceLockUnlock("manual");
                         }}
                         sx={(theme) => ({
                             ...primaryActionButtonSx(theme),
