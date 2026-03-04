@@ -159,6 +159,14 @@ func (c *InactiveUserOrchestrator) ProcessInactiveUsers() {
 }
 
 func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivityCandidate, now int64) (bool, error) {
+	stageHint, err := c.resolveNextStage(candidate.UserID, candidate.LastActivity, now)
+	if err != nil {
+		return false, err
+	}
+	if stageHint == inactivityEmailStageNone {
+		return false, nil
+	}
+
 	user, err := c.UserRepo.Get(candidate.UserID)
 	if err != nil {
 		if errors.Is(err, ente.ErrUserDeleted) {
@@ -189,9 +197,12 @@ func (c *InactiveUserOrchestrator) processCandidate(candidate repo.UserInactivit
 		return false, nil
 	}
 
-	stage, err := c.resolveNextStage(user.ID, lastActivity, now)
-	if err != nil {
-		return false, err
+	stage := stageHint
+	if lastActivity != candidate.LastActivity {
+		stage, err = c.resolveNextStage(user.ID, lastActivity, now)
+		if err != nil {
+			return false, err
+		}
 	}
 	if stage == inactivityEmailStageNone {
 		return false, nil
