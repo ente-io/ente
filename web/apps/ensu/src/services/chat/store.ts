@@ -235,6 +235,90 @@ const withNativeDbRecovery = async <T>(
     }
 };
 
+const LEGACY_STORAGE_KEY = "ensu.chat.store.v1";
+
+/**
+ * One-time migration from the old localStorage-based chat store (v0.1.5 and
+ * earlier) into the current IndexedDB store. The encrypted payloads are
+ * byte-compatible, so we can copy them directly without re-encrypting.
+ */
+const migrateFromLocalStorage = async (
+    db: IDBPDatabase<ChatDbSchema>,
+): Promise<void> => {
+    const json = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!json) return;
+
+    try {
+        const parsed = JSON.parse(json) as {
+            sessions?: {
+                sessionUuid: string;
+                createdAt: number;
+                updatedAt: number;
+                encryptedData: string;
+                header: string;
+                isDeleted?: boolean;
+            }[];
+            messages?: {
+                messageUuid: string;
+                sessionUuid: string;
+                parentMessageUuid?: string;
+                sender: "self" | "assistant";
+                createdAt: number;
+                encryptedData: string;
+                header: string;
+                isDeleted?: boolean;
+            }[];
+        };
+
+        const tx = db.transaction(["sessions", "messages"], "readwrite");
+        const sessionStore = tx.objectStore("sessions");
+        const messageStore = tx.objectStore("messages");
+
+        for (const s of parsed.sessions ?? []) {
+            // Skip if already exists (in case of partial migration).
+            if (await sessionStore.get(s.sessionUuid)) continue;
+            await sessionStore.put({
+                sessionUuid: s.sessionUuid,
+                createdAt: s.createdAt,
+                updatedAt: s.updatedAt,
+                encryptedData: s.encryptedData,
+                header: s.header,
+                remoteId: null,
+                needsSync: false,
+                deletedAt: s.isDeleted ? s.updatedAt : null,
+            });
+        }
+
+        for (const m of parsed.messages ?? []) {
+            if (await messageStore.get(m.messageUuid)) continue;
+            await messageStore.put({
+                messageUuid: m.messageUuid,
+                sessionUuid: m.sessionUuid,
+                parentMessageUuid: m.parentMessageUuid,
+                sender: m.sender,
+                createdAt: m.createdAt,
+                encryptedData: m.encryptedData,
+                header: m.header,
+                attachments: [],
+                remoteId: null,
+                deletedAt: m.isDeleted ? m.createdAt : null,
+            });
+        }
+
+        await tx.done;
+
+        // Migration succeeded — remove the old data.
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+        localStorage.removeItem("ensu.chat.branchSelections.v1");
+        log.info(
+            `Migrated ${(parsed.sessions ?? []).length} sessions and ` +
+                `${(parsed.messages ?? []).length} messages from localStorage`,
+        );
+    } catch (error) {
+        log.error("Failed to migrate chat data from localStorage", error);
+    }
+};
+
 let _chatDb: Promise<IDBPDatabase<ChatDbSchema>> | undefined;
 
 const openChatDb = async () => {
@@ -301,6 +385,8 @@ const openChatDb = async () => {
             _chatDb = undefined;
         },
     });
+
+    await migrateFromLocalStorage(db);
 
     return db;
 };
