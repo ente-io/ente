@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
@@ -165,7 +166,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       _isSending = true;
     });
 
-    final recipientEmail = supportEmail;
+    const recipientEmail = supportEmail;
     String? logsZipFilePath;
     String? logsLabel;
 

@@ -2813,6 +2813,7 @@
   "offlineSettingsBannerTitle": "We can't see your photos. Ever.",
   "offlineSettingsBannerDesc": "Zero-knowledge encryption means your memories stay yours.",
   "alreadyHaveAnAccount": "Already have an account?",
+  "dontHaveAnAccount": "Don't have an account?",
   "loginToEnte": "Login to Ente",
   "searchAndDiscover": "Search and Discover",
   "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",

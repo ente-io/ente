@@ -52,7 +52,10 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
               onTap: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const EmailEntryPage(),
+                    builder: (_) => const EmailEntryPage(
+                      showReferralSourceField: false,
+                      referralSource: "Offline",
+                    ),
                   ),
                 );
               },

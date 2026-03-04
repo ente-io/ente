@@ -5,7 +5,7 @@ import "testing"
 func TestNextInactivityEmailStage(t *testing.T) {
 	day := int64(24 * 60 * 60 * 1000 * 1000)
 	now := int64(500 * day)
-	lastActivity := now - inactiveUserWarn11MonthsInMicroSeconds
+	lastActivity := now - inactiveUserWarn2MonthsInMicroSeconds
 
 	tests := []struct {
 		name         string
@@ -15,76 +15,88 @@ func TestNextInactivityEmailStage(t *testing.T) {
 		want         inactivityEmailStage
 	}{
 		{
-			name:         "no stage before threshold",
-			lastActivity: now - inactiveUserWarn11MonthsInMicroSeconds + day,
+			name:         "no stage before 2 month threshold",
+			lastActivity: now - inactiveUserWarn2MonthsInMicroSeconds + day,
 			now:          now,
 			history:      map[string]int64{},
 			want:         inactivityEmailStageNone,
 		},
 		{
-			name:         "first stage at 11 months",
+			name:         "first stage at 2 months before deletion",
 			lastActivity: lastActivity,
 			now:          now,
 			history:      map[string]int64{},
-			want:         inactivityEmailStageWarn11m,
+			want:         inactivityEmailStageWarn2m,
 		},
 		{
 			name:         "second stage waits for replay gap",
 			lastActivity: lastActivity,
-			now:          now + inactiveUserGap11mTo12mMinus7d - day,
+			now:          now + inactiveUserGap2mTo1m - day,
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID: now,
+				InactiveUserDeletionWarn2mTemplateID: now,
 			},
 			want: inactivityEmailStageNone,
 		},
 		{
 			name:         "second stage after replay gap",
 			lastActivity: lastActivity,
-			now:          now + inactiveUserGap11mTo12mMinus7d,
+			now:          now + inactiveUserGap2mTo1m,
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID: now,
+				InactiveUserDeletionWarn2mTemplateID: now,
 			},
-			want: inactivityEmailStageWarn12m7d,
+			want: inactivityEmailStageWarn1m,
 		},
 		{
 			name:         "third stage after second stage gap",
 			lastActivity: lastActivity,
-			now:          now + inactiveUserGap12mMinus7dTo1d,
+			now:          now + inactiveUserGap1mTo7d,
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID:   now - 100,
-				InactiveUserDeletionWarn12m7dTemplateID: now,
+				InactiveUserDeletionWarn2mTemplateID: now - 100,
+				InactiveUserDeletionWarn1mTemplateID: now,
 			},
-			want: inactivityEmailStageWarn12m1d,
+			want: inactivityEmailStageWarn7d,
 		},
 		{
-			name:         "final stage after third stage gap",
+			name:         "fourth stage after third stage gap",
 			lastActivity: lastActivity,
-			now:          now + inactiveUserGap12mMinus1dTo12m,
+			now:          now + inactiveUserGap7dTo1d,
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID:   now - 100,
-				InactiveUserDeletionWarn12m7dTemplateID: now - 50,
-				InactiveUserDeletionWarn12m1dTemplateID: now,
+				InactiveUserDeletionWarn2mTemplateID: now - 100,
+				InactiveUserDeletionWarn1mTemplateID: now - 50,
+				InactiveUserDeletionWarn7dTemplateID: now,
+			},
+			want: inactivityEmailStageWarn1d,
+		},
+		{
+			name:         "final stage after fourth stage gap",
+			lastActivity: lastActivity,
+			now:          now + inactiveUserGap1dToFinal,
+			history: map[string]int64{
+				InactiveUserDeletionWarn2mTemplateID: now - 100,
+				InactiveUserDeletionWarn1mTemplateID: now - 50,
+				InactiveUserDeletionWarn7dTemplateID: now - 10,
+				InactiveUserDeletionWarn1dTemplateID: now,
 			},
 			want: inactivityEmailStageFinal,
 		},
 		{
-			name:         "stop after final stage in same cycle",
+			name:         "stop after final stage in same activity cycle",
 			lastActivity: lastActivity,
 			now:          now + (10 * day),
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID: now - 1000,
-				InactiveUserDeletionFinalTemplateID:   now - 100,
+				InactiveUserDeletionWarn2mTemplateID: now - 1000,
+				InactiveUserDeletionFinalTemplateID:  now - 100,
 			},
 			want: inactivityEmailStageNone,
 		},
 		{
-			name:         "activity reset starts new cycle",
-			lastActivity: now - inactiveUserWarn11MonthsInMicroSeconds,
+			name:         "activity reset starts a new cycle",
+			lastActivity: now - inactiveUserWarn2MonthsInMicroSeconds,
 			now:          now,
 			history: map[string]int64{
-				InactiveUserDeletionWarn11mTemplateID: now - inactiveUserWarn11MonthsInMicroSeconds - day,
+				InactiveUserDeletionWarn2mTemplateID: now - inactiveUserWarn2MonthsInMicroSeconds - day,
 			},
-			want: inactivityEmailStageWarn11m,
+			want: inactivityEmailStageWarn2m,
 		},
 	}
 

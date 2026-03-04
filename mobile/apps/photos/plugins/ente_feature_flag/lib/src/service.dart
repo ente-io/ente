@@ -75,7 +75,7 @@ class FlagService {
 
   bool get usearchForSearch => true;
 
-  bool get usearchForSuggestions => internalUser;
+  bool get usearchForSuggestions => true;
 
   String get castUrl => flags.castUrl;
 

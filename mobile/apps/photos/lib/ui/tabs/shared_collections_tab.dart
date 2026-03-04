@@ -4,8 +4,10 @@ import "dart:math";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/tab_changed_event.dart";
@@ -52,6 +54,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
@@ -97,6 +100,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
+    _appModeChangedEvent =
+        Bus.instance.on<AppModeChangedEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
 
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.selectedIndex == 2) {
@@ -123,15 +132,17 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final bool offlineUiMode =
+        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<SharedCollections>(
-      future: isOfflineMode
+      future: offlineUiMode
           ? Future.value(SharedCollections.empty())
           : Future.value(
               CollectionsService.instance.getSharedCollections(),
             ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          if (isOfflineMode) {
+          if (offlineUiMode) {
             return const SafeArea(
               child: SharedEmptyOfflineStateWidget(),
             );
@@ -634,6 +645,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
+    _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();
     _debouncerForDeferringLoad.cancelDebounceTimer();
     _tabChangeEvent.cancel();
