@@ -83,6 +83,7 @@ class AppLockModuleState {
 let _state: AppLockModuleState | undefined;
 let _bruteForceStateHydration = Promise.resolve();
 let _bruteForceStateHydrationGeneration = 0;
+let _wasReauthenticationCancelled = false;
 
 const appLockState = () => {
     _state ??= new AppLockModuleState();
@@ -137,6 +138,8 @@ const lsKeyEnabled = "appLock.enabled";
 // Stores the selected app-lock method ("pin" | "password" | "device" | "none").
 const lsKeyAppLockMethod = "appLock.lockType";
 const lsKeyAutoLockTimeMs = "appLock.autoLockTimeMs";
+const ssKeySuppressNextSessionRefreshLock =
+    "appLock.suppressNextSessionRefreshLock";
 
 // -- KV DB keys (IndexedDB, async) --
 
@@ -178,6 +181,35 @@ export const shouldSuppressAutoLockOnBlur = () =>
  */
 export const clearAutoLockBlurSuppression = () => {
     clearMainWindowBlurSuppression();
+};
+
+/**
+ * Suppress one app-lock refresh cycle after a trusted app-initiated reload.
+ */
+export const suppressAppLockRefreshFromSessionForTrustedReload = () => {
+    try {
+        if (localStorage.getItem(lsKeyEnabled) !== "true") return;
+        sessionStorage.setItem(ssKeySuppressNextSessionRefreshLock, "true");
+    } catch {
+        // Ignore storage write errors; fallback to regular app-lock behavior.
+    }
+};
+
+const consumeAppLockRefreshSuppressionFromSession = () => {
+    try {
+        if (
+            sessionStorage.getItem(ssKeySuppressNextSessionRefreshLock) !==
+            "true"
+        ) {
+            return false;
+        }
+
+        sessionStorage.removeItem(ssKeySuppressNextSessionRefreshLock);
+        return true;
+    } catch {
+        // Ignore storage read errors; fallback to regular app-lock behavior.
+        return false;
+    }
 };
 
 export type DeviceLockMode = "native";
@@ -473,6 +505,7 @@ const nativeCapabilityUnavailableReason = (
 ): NativeDeviceLockUnavailableReason => {
     switch (capability.reason) {
         case "touchid-not-enrolled":
+        case "touchid-temporarily-unavailable":
         case "touchid-api-error":
             return capability.reason;
         default:
@@ -484,10 +517,14 @@ const resolveDeviceLockCapability = async (): Promise<DeviceLockCapability> => {
     const nativeCapability = await nativeDeviceLockCapability();
     if (nativeCapability.available) return { usable: true, mode: "native" };
 
-    return {
-        usable: false,
-        reason: nativeCapabilityUnavailableReason(nativeCapability),
-    };
+    const reason = nativeCapabilityUnavailableReason(nativeCapability);
+    if (reason === "touchid-temporarily-unavailable") {
+        // Keep unlock/setup retryable on macOS even when capability checks are
+        // briefly inconclusive.
+        return { usable: true, mode: "native" };
+    }
+
+    return { usable: false, reason };
 };
 
 /**
@@ -531,6 +568,7 @@ const resetBruteForceState = async () => {
 
 const unlockLocally = () => {
     const snapshot = appLockState().snapshot;
+    const wasReauthentication = snapshot.lockScreenMode === "reauthenticate";
     setSnapshot({
         ...snapshot,
         lockScreenMode: "lock",
@@ -538,6 +576,26 @@ const unlockLocally = () => {
         invalidAttemptCount: 0,
         cooldownExpiresAt: 0,
     });
+    if (wasReauthentication) {
+        _wasReauthenticationCancelled = false;
+    }
+    stopBruteForceStateHydration();
+};
+
+/**
+ * Cancel an in-progress explicit reauthentication prompt.
+ *
+ * This only dismisses the reauthentication lock screen, allowing callers of
+ * {@link reauthenticateWithAppLock} to fall back to alternate auth flows.
+ */
+export const cancelReauthentication = () => {
+    const snapshot = appLockState().snapshot;
+    if (!snapshot.isLocked || snapshot.lockScreenMode !== "reauthenticate") {
+        return;
+    }
+
+    _wasReauthenticationCancelled = true;
+    setSnapshot({ ...snapshot, lockScreenMode: "lock", isLocked: false });
     stopBruteForceStateHydration();
 };
 
@@ -549,7 +607,12 @@ const unlockLocally = () => {
  */
 export const refreshAppLockStateFromSession = () => {
     const config = readPersistedAppLockConfig();
-    const isLocked = config.enabled && haveMasterKeyInSession();
+    const shouldSuppressLockForTrustedReload =
+        consumeAppLockRefreshSuppressionFromSession();
+    const isLocked =
+        config.enabled &&
+        haveMasterKeyInSession() &&
+        !shouldSuppressLockForTrustedReload;
     setSnapshotFromPersistedConfig(config, isLocked);
 };
 
@@ -821,41 +884,59 @@ export const attemptUnlock = async (input: string): Promise<UnlockResult> => {
 /**
  * Perform an explicit reauthentication using app lock.
  *
- * Returns `true` when app lock was successfully used for reauthentication.
- * Returns `false` when app lock is unavailable or cannot be started, so callers
- * can fall back to an alternate flow (for example, master password prompt).
+ * - `"authenticated"` when app lock reauthentication succeeds.
+ * - `"cancelled"` when the user dismisses the reauthentication prompt.
+ * - `"fallback"` when app lock is unavailable or cannot be started, so callers
+ *   can use an alternate auth flow (for example, master password prompt).
  */
-export const reauthenticateWithAppLock = async (): Promise<boolean> => {
-    try {
-        const snapshot = appLockSnapshot();
-        let canUseAppLock = snapshot.enabled && snapshot.lockType !== "none";
-        if (canUseAppLock && snapshot.lockType === "device") {
-            // For device lock, ensure native auth is actually usable right now.
-            // If unavailable (e.g. Touch ID disabled), fall back to password flow.
-            const capability = await resolveDeviceLockCapability();
-            canUseAppLock = capability.usable;
-        }
-        if (!canUseAppLock) return false;
+export type ReauthenticateWithAppLockResult =
+    | "authenticated"
+    | "cancelled"
+    | "fallback";
 
-        return await new Promise<boolean>((resolve) => {
-            const unsubscribe = appLockSubscribe(() => {
-                if (!appLockSnapshot().isLocked) {
-                    unsubscribe();
-                    resolve(true);
-                }
-            });
-
-            lock("reauthenticate");
-            if (!appLockSnapshot().isLocked) {
-                unsubscribe();
-                resolve(false);
+export const reauthenticateWithAppLock =
+    async (): Promise<ReauthenticateWithAppLockResult> => {
+        try {
+            _wasReauthenticationCancelled = false;
+            const snapshot = appLockSnapshot();
+            let canUseAppLock =
+                snapshot.enabled && snapshot.lockType !== "none";
+            if (canUseAppLock && snapshot.lockType === "device") {
+                // For device lock, ensure native auth is actually usable right now.
+                // If unavailable (e.g. Touch ID disabled), fall back to password flow.
+                const capability = await resolveDeviceLockCapability();
+                canUseAppLock = capability.usable;
             }
-        });
-    } catch (e) {
-        log.error("Failed to start app lock reauthentication", e);
-        return false;
-    }
-};
+            if (!canUseAppLock) return "fallback";
+
+            return await new Promise<ReauthenticateWithAppLockResult>(
+                (resolve) => {
+                    const unsubscribe = appLockSubscribe(() => {
+                        if (!appLockSnapshot().isLocked) {
+                            unsubscribe();
+                            const wasAuthenticated =
+                                !_wasReauthenticationCancelled;
+                            _wasReauthenticationCancelled = false;
+                            resolve(
+                                wasAuthenticated
+                                    ? "authenticated"
+                                    : "cancelled",
+                            );
+                        }
+                    });
+
+                    lock("reauthenticate");
+                    if (!appLockSnapshot().isLocked) {
+                        unsubscribe();
+                        resolve("fallback");
+                    }
+                },
+            );
+        } catch (e) {
+            log.error("Failed to start app lock reauthentication", e);
+            return "fallback";
+        }
+    };
 
 /**
  * Lock the app.
@@ -886,6 +967,7 @@ export const logoutAppLock = async () => {
     ]);
 
     stopBruteForceStateHydration();
+    _wasReauthenticationCancelled = false;
     _state = undefined;
 };
 
