@@ -303,7 +303,7 @@ class Collection {
       sharees,
       publicURLs,
       map['updationTime'],
-      sharedAt: _parseNullableInt(map['sharedAt'] ?? map['shared_at']),
+      sharedAt: _parseNullableInt(map['sharedAt']),
       isDeleted: map['isDeleted'] ?? false,
     );
   }
