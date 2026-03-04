@@ -281,10 +281,15 @@ const removeLegacyStore = () => {
  * One-time migration from the old localStorage-based chat store (v0.1.5 and
  * earlier) into the current IndexedDB store (web-only fallback path). The
  * encrypted payloads are byte-compatible, so we copy them directly.
+ *
+ * On Tauri, the native migration ({@link migrateFromLocalStorageNative}) is
+ * used instead — it needs the chatKey to decrypt and re-insert via the Rust
+ * backend, so it runs later from the UI layer.
  */
 const migrateFromLocalStorage = async (
     db: IDBPDatabase<ChatDbSchema>,
 ): Promise<void> => {
+    if (isTauriRuntime()) return;
     const parsed = parseLegacyStore();
     if (!parsed) return;
 
@@ -559,11 +564,17 @@ export const migrateFromLocalStorageNative = async (
     chatKey: string,
 ): Promise<void> => {
     const parsed = parseLegacyStore();
-    if (!parsed) return;
+    if (!parsed) {
+        log.info("No legacy localStorage chat data to migrate");
+        return;
+    }
 
     try {
         const sessions = parsed.sessions ?? [];
         const messages = parsed.messages ?? [];
+        log.info(
+            `Migrating legacy localStorage data: ${sessions.length} sessions, ${messages.length} messages`,
+        );
 
         for (const s of sessions) {
             if (s.isDeleted) continue;
@@ -620,6 +631,9 @@ const listSessionsNative = async (chatKey: string): Promise<ChatSession[]> => {
         );
 
         const activeSessions = sessions.filter((session) => !session.deletedAt);
+        log.info(
+            `Native sessions: ${sessions.length} total, ${activeSessions.length} active`,
+        );
 
         return activeSessions.map((session) => ({
             sessionUuid: session.sessionUuid,
