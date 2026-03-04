@@ -38,11 +38,11 @@ internal fun OverflowDialog(
     onTrim: () -> Unit,
     onCancel: () -> Unit
 ) {
-    val overflowMessage = "Input uses ${state.inputTokens} tokens (budget ${state.inputBudget}). Trim history to continue."
+    val overflowMessage = "This conversation is too long for the model to process. Some older messages will be dropped to make room."
 
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(text = "Context limit reached", style = EnsuTypography.h3) },
+        title = { Text(text = "Conversation too long", style = EnsuTypography.h3) },
         text = {
             Text(
                 text = overflowMessage,
@@ -52,7 +52,7 @@ internal fun OverflowDialog(
         },
         confirmButton = {
             TextButton(onClick = onTrim) {
-                Text(text = "Trim history", color = EnsuColor.textPrimary())
+                Text(text = "Continue", color = EnsuColor.textPrimary())
             }
         },
         dismissButton = {
