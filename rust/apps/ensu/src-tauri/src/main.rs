@@ -3,6 +3,7 @@
 use tauri::Manager;
 
 mod commands;
+mod migration;
 
 fn main() {
     tauri::Builder::default()
@@ -13,6 +14,13 @@ fn main() {
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
+            // Migrate legacy WebKit data from old Tauri v1 directories.
+            // The webview window has been created at this point (so the new
+            // WebKit data directory exists), but the event loop hasn't started
+            // yet (so no JS has accessed IndexedDB). This is the right time to
+            // copy old IndexedDB files so the frontend sees them seamlessly.
+            migration::migrate_legacy_webkit_data();
+
             // Show the main window after setup is complete
             if let Some(window) = app.get_webview_window("main") {
                 window.show().unwrap();

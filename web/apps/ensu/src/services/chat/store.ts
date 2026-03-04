@@ -555,33 +555,76 @@ const invokeChat = async <T>(
 };
 
 /**
- * One-time migration from the old localStorage-based chat store (v0.1.5 and
- * earlier) into the native Rust SQLite database used by the Tauri desktop app.
- * Decrypts the old encrypted payloads and re-inserts them via the native
- * commands (which handle their own encryption).
+ * One-time migration of chat data into the native Rust SQLite database.
+ *
+ * Data sources checked (first match wins):
+ * 1. Current localStorage `ensu.chat.store.v1` (v0.1.5 format)
+ * 2. IndexedDB `ensu.chat.db` (v0.1.8 format, may have been copied from an
+ *    old Tauri v1 WebKit directory by the Rust-side migration)
+ * 3. Old Tauri v1 WebKit localStorage via the `read_legacy_localstorage`
+ *    Rust command
  */
 interface LegacyLocalStorageData {
     chatStoreJson: string | null;
     chatKey: string | null;
 }
 
-/**
- * Try to find legacy chat store data from any available source:
- * 1. Current localStorage (same WebView data dir)
- * 2. Old Tauri v1 WebKit localStorage (different data dir on macOS)
- *
- * Returns the parsed store and the decryption key to use.
- */
-const findLegacyStoreData = async (
-    currentChatKey: string,
-): Promise<{ store: LegacyStore; decryptKey: string } | undefined> => {
-    // First check current localStorage.
-    const fromCurrent = parseLegacyStore();
-    if (fromCurrent) {
-        return { store: fromCurrent, decryptKey: currentChatKey };
+export const migrateToNativeDb = async (
+    chatKey: string,
+): Promise<void> => {
+    // Source 1: current localStorage (v0.1.5 format).
+    const fromLocalStorage = parseLegacyStore();
+    if (fromLocalStorage) {
+        log.info("Migrating legacy localStorage data to native DB");
+        await migrateLegacyStoreToNative(fromLocalStorage, chatKey, chatKey);
+        removeLegacyStore();
+        return;
     }
 
-    // Fall back to reading from old Tauri v1 WebKit data directory via Rust.
+    // Source 2: IndexedDB (may have been copied from old Tauri v1 dir).
+    const db = await chatDb();
+    const idbSessions = await db.getAll("sessions");
+    if (idbSessions.length > 0) {
+        // The old chatKey is needed to decrypt. Try reading it from the old
+        // Tauri v1 WebKit localStorage via Rust.
+        let decryptKey = chatKey;
+        try {
+            const legacy = await invokeChat<LegacyLocalStorageData>(
+                "read_legacy_localstorage",
+            );
+            if (legacy?.chatKey) {
+                decryptKey = legacy.chatKey;
+            }
+        } catch {
+            // Fall back to current key.
+        }
+
+        log.info(
+            `Migrating ${idbSessions.length} sessions from IndexedDB to native DB`,
+        );
+        const idbMessages = await db.getAll("messages");
+        await migrateIndexedDbToNative(
+            idbSessions,
+            idbMessages,
+            decryptKey,
+            chatKey,
+        );
+
+        // Clear migrated data from IndexedDB.
+        const tx = db.transaction(
+            ["sessions", "messages", "attachmentBytes"],
+            "readwrite",
+        );
+        await Promise.all([
+            tx.objectStore("sessions").clear(),
+            tx.objectStore("messages").clear(),
+            tx.objectStore("attachmentBytes").clear(),
+            tx.done,
+        ]);
+        return;
+    }
+
+    // Source 3: old Tauri v1 WebKit localStorage via Rust command.
     try {
         const data = await invokeChat<LegacyLocalStorageData>(
             "read_legacy_localstorage",
@@ -589,40 +632,32 @@ const findLegacyStoreData = async (
         if (data?.chatStoreJson) {
             log.info("Found legacy chat data in old Tauri v1 WebKit directory");
             const store = JSON.parse(data.chatStoreJson) as LegacyStore;
-            // Use the old chat key if available, otherwise fall back to current.
-            const decryptKey = data.chatKey ?? currentChatKey;
-            return { store, decryptKey };
+            const decryptKey = data.chatKey ?? chatKey;
+            await migrateLegacyStoreToNative(store, decryptKey, chatKey);
+            return;
         }
     } catch (error) {
         log.error("Failed to read legacy localStorage from Tauri v1", error);
     }
 
-    return undefined;
+    log.info("No legacy chat data to migrate");
 };
 
-export const migrateFromLocalStorageNative = async (
-    chatKey: string,
+/** Migrate a v0.1.5 legacy store (localStorage JSON) into the native DB. */
+const migrateLegacyStoreToNative = async (
+    parsed: LegacyStore,
+    decryptKey: string,
+    encryptKey: string,
 ): Promise<void> => {
-    const legacy = await findLegacyStoreData(chatKey);
-    if (!legacy) {
-        log.info("No legacy chat data to migrate");
-        return;
-    }
-
-    const { store: parsed, decryptKey } = legacy;
+    const sessions = parsed.sessions ?? [];
+    const messages = parsed.messages ?? [];
 
     try {
-        const sessions = parsed.sessions ?? [];
-        const messages = parsed.messages ?? [];
-        log.info(
-            `Migrating legacy data: ${sessions.length} sessions, ${messages.length} messages`,
-        );
-
         for (const s of sessions) {
             if (s.isDeleted) continue;
             const title = await decryptSessionTitle(s, decryptKey);
             await invokeChat("chat_db_upsert_session", {
-                keyB64: chatKey,
+                keyB64: encryptKey,
                 input: {
                     sessionUuid: s.sessionUuid,
                     title,
@@ -639,7 +674,7 @@ export const migrateFromLocalStorageNative = async (
             if (m.isDeleted) continue;
             const text = await decryptMessageText(m, decryptKey);
             await invokeChat("chat_db_insert_message_with_uuid", {
-                keyB64: chatKey,
+                keyB64: encryptKey,
                 input: {
                     messageUuid: m.messageUuid,
                     sessionUuid: m.sessionUuid,
@@ -653,13 +688,62 @@ export const migrateFromLocalStorageNative = async (
             });
         }
 
-        // Clean up current localStorage if it had the data.
-        removeLegacyStore();
         log.info(
             `Migrated ${sessions.length} sessions and ${messages.length} messages to native DB`,
         );
     } catch (error) {
-        log.error("Failed to migrate legacy chat data to native DB", error);
+        log.error("Failed to migrate legacy store to native DB", error);
+    }
+};
+
+/** Migrate IndexedDB sessions/messages into the native DB. */
+const migrateIndexedDbToNative = async (
+    sessions: StoredSession[],
+    messages: StoredMessage[],
+    decryptKey: string,
+    encryptKey: string,
+): Promise<void> => {
+    try {
+        for (const s of sessions) {
+            if (s.deletedAt) continue;
+            const title = await decryptSessionTitle(s, decryptKey);
+            await invokeChat("chat_db_upsert_session", {
+                keyB64: encryptKey,
+                input: {
+                    sessionUuid: s.sessionUuid,
+                    title,
+                    createdAt: s.createdAt,
+                    updatedAt: s.updatedAt,
+                    remoteId: null,
+                    needsSync: false,
+                    deletedAt: null,
+                },
+            });
+        }
+
+        for (const m of messages) {
+            if (m.deletedAt) continue;
+            const text = await decryptMessageText(m, decryptKey);
+            await invokeChat("chat_db_insert_message_with_uuid", {
+                keyB64: encryptKey,
+                input: {
+                    messageUuid: m.messageUuid,
+                    sessionUuid: m.sessionUuid,
+                    parentMessageUuid: m.parentMessageUuid ?? null,
+                    sender: m.sender,
+                    text,
+                    createdAt: m.createdAt,
+                    deletedAt: null,
+                    attachments: [],
+                },
+            });
+        }
+
+        log.info(
+            `Migrated ${sessions.length} sessions and ${messages.length} messages from IndexedDB to native DB`,
+        );
+    } catch (error) {
+        log.error("Failed to migrate IndexedDB to native DB", error);
     }
 };
 

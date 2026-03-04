@@ -51,7 +51,7 @@ import {
     getBranchSelections,
     listMessages,
     listSessions,
-    migrateFromLocalStorageNative,
+    migrateToNativeDb,
     readDecryptedAttachmentBytes,
     sessionTitleFromText,
     setBranchSelection,
@@ -1603,7 +1603,7 @@ const Page: React.FC = () => {
             if (isTauriRuntime && !legacyMigrationDoneRef.current) {
                 legacyMigrationDoneRef.current = true;
                 try {
-                    await migrateFromLocalStorageNative(chatKey);
+                    await migrateToNativeDb(chatKey);
                 } catch (error) {
                     log.error("Legacy migration failed", error);
                 }
