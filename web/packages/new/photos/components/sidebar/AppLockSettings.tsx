@@ -303,6 +303,7 @@ const deviceLockSetupErrorText = (result: SetupDeviceLockResult): string => {
 
     if (result.status === "not-supported") {
         switch (result.reason) {
+            case "touchid-temporarily-unavailable":
             case "touchid-api-error":
                 return t("device_lock_setup_failed");
             case "unsupported-platform":

@@ -617,6 +617,7 @@ const deviceLockErrorText = (result: DeviceLockUnlockResult) => {
 
     if (result.status === "not-supported") {
         switch (result.reason) {
+            case "touchid-temporarily-unavailable":
             case "touchid-api-error":
                 return t("device_lock_login_failed");
             case "unsupported-platform":
@@ -1335,7 +1336,7 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                     alignItems: "center",
                     gap: 0,
                     textAlign: "center",
-                    mb: 3.5,
+                    mb: 2.5,
                 }}
             >
                 <Typography

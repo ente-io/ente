@@ -505,6 +505,7 @@ const nativeCapabilityUnavailableReason = (
 ): NativeDeviceLockUnavailableReason => {
     switch (capability.reason) {
         case "touchid-not-enrolled":
+        case "touchid-temporarily-unavailable":
         case "touchid-api-error":
             return capability.reason;
         default:
@@ -516,9 +517,16 @@ const resolveDeviceLockCapability = async (): Promise<DeviceLockCapability> => {
     const nativeCapability = await nativeDeviceLockCapability();
     if (nativeCapability.available) return { usable: true, mode: "native" };
 
+    const reason = nativeCapabilityUnavailableReason(nativeCapability);
+    if (reason === "touchid-temporarily-unavailable") {
+        // Keep unlock/setup retryable on macOS even when capability checks are
+        // briefly inconclusive.
+        return { usable: true, mode: "native" };
+    }
+
     return {
         usable: false,
-        reason: nativeCapabilityUnavailableReason(nativeCapability),
+        reason,
     };
 };
 
