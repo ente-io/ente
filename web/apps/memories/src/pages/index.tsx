@@ -246,6 +246,7 @@ const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 280;
 const DESKTOP_MEDIA_MAX_WIDTH_PX = 1264;
 const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 48;
 const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 220;
+const MEDIA_SWITCH_TRANSITION_DURATION_MS = 220;
 const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(100vw - ${DESKTOP_MEDIA_HORIZONTAL_PADDING_PX}px))`;
 const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(100vh - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
 const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-desktop.svg";
@@ -263,6 +264,17 @@ const isInteractiveTapTarget = (target: EventTarget | null) => {
 const progressFillAnimation = keyframes`
     from { width: 0%; }
     to { width: 100%; }
+`;
+
+const mediaSwitchAnimation = keyframes`
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.992);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 `;
 
 const MemoryViewer: React.FC<MemoryViewerProps> = ({
@@ -367,38 +379,44 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         }
     };
 
-    const mobileVariant = useMemo(() => {
-        if (typeof mediaAspectRatio !== "number") return "portrait";
-        if (mediaAspectRatio > 1.1) return "landscape";
-        if (mediaAspectRatio < 0.9) return "portrait";
-        return "square";
-    }, [mediaAspectRatio]);
+    const resolvedMediaAspectRatio = useMemo(() => {
+        if (typeof mediaAspectRatio === "number" && mediaAspectRatio > 0) {
+            return mediaAspectRatio;
+        }
+
+        const width = currentFile.pubMagicMetadata?.data.w;
+        const height = currentFile.pubMagicMetadata?.data.h;
+        if (
+            typeof width === "number" &&
+            width > 0 &&
+            typeof height === "number" &&
+            height > 0
+        ) {
+            return width / height;
+        }
+
+        return undefined;
+    }, [currentFile, mediaAspectRatio]);
 
     const mobileFrameSize = useMemo(() => {
         const availableWidth = Math.max(220, viewport.width - 48);
-        const baseWidth = Math.min(326, availableWidth);
-        const ratioByVariant = {
-            landscape: 196 / 326,
-            portrait: 532 / 327,
-            square: 1,
-        } as const;
-        const ratio = ratioByVariant[mobileVariant];
-        let width = baseWidth;
-        let height = Math.round(baseWidth * ratio);
-
-        const reservedVerticalSpace = MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX;
-        const maxMediaHeight = Math.max(
+        const maxWidth = Math.min(326, availableWidth);
+        const maxHeight = Math.max(
             180,
-            viewport.height - reservedVerticalSpace,
+            viewport.height - MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX,
         );
-        if (height > maxMediaHeight) {
-            const scale = maxMediaHeight / height;
-            width = Math.round(width * scale);
-            height = Math.round(height * scale);
+        const ratio = resolvedMediaAspectRatio ?? 4 / 3;
+
+        let width = maxWidth;
+        let height = width / ratio;
+
+        if (height > maxHeight) {
+            height = maxHeight;
+            width = height * ratio;
         }
 
-        return { width, height };
-    }, [mobileVariant, viewport.height, viewport.width]);
+        return { width: Math.round(width), height: Math.round(height) };
+    }, [resolvedMediaAspectRatio, viewport.height, viewport.width]);
 
     const desktopFrameSize = useMemo(() => {
         const availableWidth = Math.max(
@@ -411,8 +429,8 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         );
         const maxWidth = Math.min(DESKTOP_MEDIA_MAX_WIDTH_PX, availableWidth);
         const ratio =
-            typeof mediaAspectRatio === "number" && mediaAspectRatio > 0
-                ? mediaAspectRatio
+            typeof resolvedMediaAspectRatio === "number"
+                ? resolvedMediaAspectRatio
                 : 4 / 3;
 
         let width = maxWidth;
@@ -424,14 +442,12 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         }
 
         return { width: Math.round(width), height: Math.round(height) };
-    }, [mediaAspectRatio, viewport.height, viewport.width]);
+    }, [resolvedMediaAspectRatio, viewport.height, viewport.width]);
 
     const mediaFrameStyle = isMobileLayout
         ? {
               width: `${mobileFrameSize.width}px`,
               height: `${mobileFrameSize.height}px`,
-              border: "3px solid #ffffff",
-              borderRadius: mobileVariant === "portrait" ? "16px" : "20px",
           }
         : {
               width: `${desktopFrameSize.width}px`,
@@ -559,34 +575,26 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     }
                 >
                     <MediaFrame style={mediaFrameStyle}>
-                        {isVideo ? (
-                            <VideoPlayer
-                                file={currentFile}
-                                onReady={handleFullLoad}
-                                onDuration={handleVideoDuration}
-                                onEnded={onNext}
-                                paused={paused}
-                                dateBadge={
-                                    isMobileLayout ? undefined : (
-                                        <EnteCornerBadge />
-                                    )
-                                }
-                                fillFrame
-                                onAspectRatio={handleMediaAspectRatio}
-                            />
-                        ) : (
-                            <PhotoImage
-                                file={currentFile}
-                                onFullLoad={handleFullLoad}
-                                dateBadge={
-                                    isMobileLayout ? undefined : (
-                                        <EnteCornerBadge />
-                                    )
-                                }
-                                fillFrame
-                                onAspectRatio={handleMediaAspectRatio}
-                            />
-                        )}
+                        <MediaSwitchLayer key={`memory-file-${currentIndex}`}>
+                            {isVideo ? (
+                                <VideoPlayer
+                                    file={currentFile}
+                                    onReady={handleFullLoad}
+                                    onDuration={handleVideoDuration}
+                                    onEnded={onNext}
+                                    paused={paused}
+                                    fillFrame
+                                    onAspectRatio={handleMediaAspectRatio}
+                                />
+                            ) : (
+                                <PhotoImage
+                                    file={currentFile}
+                                    onFullLoad={handleFullLoad}
+                                    fillFrame
+                                    onAspectRatio={handleMediaAspectRatio}
+                                />
+                            )}
+                        </MediaSwitchLayer>
                     </MediaFrame>
                 </PhotoContainer>
 
@@ -949,12 +957,18 @@ const MediaFrame = styled("div")({
     lineHeight: 0,
 });
 
+const MediaSwitchLayer = styled("div")({
+    width: "100%",
+    height: "100%",
+    animation: `${mediaSwitchAnimation} ${MEDIA_SWITCH_TRANSITION_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`,
+    willChange: "opacity, transform",
+});
+
 interface PhotoImageProps {
     file: EnteFile;
     onFullLoad?: () => void;
     fillFrame?: boolean;
     onAspectRatio?: (width: number, height: number) => void;
-    dateBadge?: React.ReactNode;
 }
 
 const PhotoImage: React.FC<PhotoImageProps> = ({
@@ -962,7 +976,6 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
     onFullLoad,
     fillFrame,
     onAspectRatio,
-    dateBadge,
 }) => {
     const [thumbnailURL, setThumbnailURL] = useState<string | undefined>(
         undefined,
@@ -1087,7 +1100,6 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
                     }}
                 />
             )}
-            {dateBadge}
         </Box>
     );
 };
@@ -1100,7 +1112,6 @@ interface VideoPlayerProps {
     paused?: boolean;
     fillFrame?: boolean;
     onAspectRatio?: (width: number, height: number) => void;
-    dateBadge?: React.ReactNode;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -1111,7 +1122,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     paused,
     fillFrame,
     onAspectRatio,
-    dateBadge,
 }) => {
     const [hlsData, setHlsData] = useState<HLSPlaylistData | undefined>(
         undefined,
@@ -1332,40 +1342,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     }}
                 />
             )}
-            {dateBadge}
         </Box>
     );
 };
-
-const EnteCornerBadge: React.FC = () => (
-    <Box
-        sx={{
-            position: "absolute",
-            top: "14px",
-            left: "14px",
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            backgroundColor: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 3,
-        }}
-    >
-        <img
-            src="/images/favicon.png"
-            alt="Ente"
-            draggable={false}
-            style={{
-                width: "18px",
-                height: "18px",
-                userSelect: "none",
-                pointerEvents: "none",
-            }}
-        />
-    </Box>
-);
 
 /**
  * Format a date in the style "12th jan, 2022".
