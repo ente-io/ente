@@ -853,7 +853,6 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({
                             />
                         ))}
                     </Stack>
-
                 </Stack>
             </AppLockCard>
 
