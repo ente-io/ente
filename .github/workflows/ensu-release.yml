@@ -124,9 +124,14 @@ jobs:
                       TRUSTED_SIGNING_CLI_PATH=$(cygpath -w "$TRUSTED_SIGNING_CLI_UNIX")
                   fi
 
-                  AZ_PATH=$(where.exe az 2>/dev/null | tr -d '\r' | head -n1 || true)
+                  AZ_PATH=$(where.exe az.cmd 2>/dev/null | tr -d '\r' | head -n1 || true)
                   if [ -z "$AZ_PATH" ]; then
-                      echo "::warning::az not found on PATH; relying on trusted-signing-cli default AZURE_CLI_PATH"
+                      AZ_PATH_FALLBACK=$(where.exe az 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$AZ_PATH_FALLBACK" ] && [ -f "${AZ_PATH_FALLBACK}.cmd" ]; then
+                          AZ_PATH="${AZ_PATH_FALLBACK}.cmd"
+                      else
+                          echo "::warning::az.cmd not found on PATH; relying on trusted-signing-cli default AZURE_CLI_PATH"
+                      fi
                   fi
 
                   SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r' || true)
