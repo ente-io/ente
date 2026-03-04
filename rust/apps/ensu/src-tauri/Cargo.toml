@@ -19,6 +19,8 @@ ensu-db = { path = "../../../ensu/db" }
 ensu-sync = { path = "../../../ensu/sync" }
 inference_rs = { path = "../../../ensu/inference" }
 uuid = { version = "1", features = ["v4"] }
+rusqlite = { version = "0.38", features = ["bundled"] }
+dirs = "6"
 
 [profile.release]
 opt-level = 3

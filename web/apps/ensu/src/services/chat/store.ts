@@ -560,25 +560,67 @@ const invokeChat = async <T>(
  * Decrypts the old encrypted payloads and re-inserts them via the native
  * commands (which handle their own encryption).
  */
+interface LegacyLocalStorageData {
+    chatStoreJson: string | null;
+    chatKey: string | null;
+}
+
+/**
+ * Try to find legacy chat store data from any available source:
+ * 1. Current localStorage (same WebView data dir)
+ * 2. Old Tauri v1 WebKit localStorage (different data dir on macOS)
+ *
+ * Returns the parsed store and the decryption key to use.
+ */
+const findLegacyStoreData = async (
+    currentChatKey: string,
+): Promise<{ store: LegacyStore; decryptKey: string } | undefined> => {
+    // First check current localStorage.
+    const fromCurrent = parseLegacyStore();
+    if (fromCurrent) {
+        return { store: fromCurrent, decryptKey: currentChatKey };
+    }
+
+    // Fall back to reading from old Tauri v1 WebKit data directory via Rust.
+    try {
+        const data = await invokeChat<LegacyLocalStorageData>(
+            "read_legacy_localstorage",
+        );
+        if (data?.chatStoreJson) {
+            log.info("Found legacy chat data in old Tauri v1 WebKit directory");
+            const store = JSON.parse(data.chatStoreJson) as LegacyStore;
+            // Use the old chat key if available, otherwise fall back to current.
+            const decryptKey = data.chatKey ?? currentChatKey;
+            return { store, decryptKey };
+        }
+    } catch (error) {
+        log.error("Failed to read legacy localStorage from Tauri v1", error);
+    }
+
+    return undefined;
+};
+
 export const migrateFromLocalStorageNative = async (
     chatKey: string,
 ): Promise<void> => {
-    const parsed = parseLegacyStore();
-    if (!parsed) {
-        log.info("No legacy localStorage chat data to migrate");
+    const legacy = await findLegacyStoreData(chatKey);
+    if (!legacy) {
+        log.info("No legacy chat data to migrate");
         return;
     }
+
+    const { store: parsed, decryptKey } = legacy;
 
     try {
         const sessions = parsed.sessions ?? [];
         const messages = parsed.messages ?? [];
         log.info(
-            `Migrating legacy localStorage data: ${sessions.length} sessions, ${messages.length} messages`,
+            `Migrating legacy data: ${sessions.length} sessions, ${messages.length} messages`,
         );
 
         for (const s of sessions) {
             if (s.isDeleted) continue;
-            const title = await decryptSessionTitle(s, chatKey);
+            const title = await decryptSessionTitle(s, decryptKey);
             await invokeChat("chat_db_upsert_session", {
                 keyB64: chatKey,
                 input: {
@@ -595,7 +637,7 @@ export const migrateFromLocalStorageNative = async (
 
         for (const m of messages) {
             if (m.isDeleted) continue;
-            const text = await decryptMessageText(m, chatKey);
+            const text = await decryptMessageText(m, decryptKey);
             await invokeChat("chat_db_insert_message_with_uuid", {
                 keyB64: chatKey,
                 input: {
@@ -611,15 +653,13 @@ export const migrateFromLocalStorageNative = async (
             });
         }
 
+        // Clean up current localStorage if it had the data.
         removeLegacyStore();
         log.info(
-            `Migrated ${sessions.length} sessions and ${messages.length} messages from localStorage to native DB`,
+            `Migrated ${sessions.length} sessions and ${messages.length} messages to native DB`,
         );
     } catch (error) {
-        log.error(
-            "Failed to migrate chat data from localStorage to native DB",
-            error,
-        );
+        log.error("Failed to migrate legacy chat data to native DB", error);
     }
 };
 
