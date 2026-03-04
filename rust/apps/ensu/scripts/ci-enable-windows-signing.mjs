@@ -17,7 +17,8 @@ if (!endpoint || !accountName || !profileName) {
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 config.bundle = config.bundle || {};
 config.bundle.windows = config.bundle.windows || {};
-config.bundle.windows.signCommand = `trusted-signing-cli -e ${endpoint} -a ${accountName} -c ${profileName} -d Ensu "%1"`;
+
+config.bundle.windows.signCommand = `trusted-signing-cli -v -e ${endpoint} -a ${accountName} -c ${profileName} -d Ensu "%1"`;
 
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log(`Updated windows signCommand in ${configPath}`);

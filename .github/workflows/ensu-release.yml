@@ -107,6 +107,49 @@ jobs:
               shell: bash
               run: cargo install --locked trusted-signing-cli
 
+            - name: Resolve Windows signing tool paths
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  TRUSTED_SIGNING_CLI_UNIX="$HOME/.cargo/bin/trusted-signing-cli.exe"
+                  if [ ! -f "$TRUSTED_SIGNING_CLI_UNIX" ]; then
+                      TRUSTED_SIGNING_CLI_FALLBACK=$(where.exe trusted-signing-cli 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$TRUSTED_SIGNING_CLI_FALLBACK" ]; then
+                          TRUSTED_SIGNING_CLI_PATH="$TRUSTED_SIGNING_CLI_FALLBACK"
+                      else
+                          echo "::error::trusted-signing-cli binary not found"
+                          exit 1
+                      fi
+                  else
+                      TRUSTED_SIGNING_CLI_PATH=$(cygpath -w "$TRUSTED_SIGNING_CLI_UNIX")
+                  fi
+
+                  AZ_PATH=$(where.exe az.cmd 2>/dev/null | tr -d '\r' | head -n1 || true)
+                  if [ -z "$AZ_PATH" ]; then
+                      AZ_PATH_FALLBACK=$(where.exe az 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$AZ_PATH_FALLBACK" ] && [ -f "${AZ_PATH_FALLBACK}.cmd" ]; then
+                          AZ_PATH="${AZ_PATH_FALLBACK}.cmd"
+                      else
+                          echo "::warning::az.cmd not found on PATH; relying on trusted-signing-cli default AZURE_CLI_PATH"
+                      fi
+                  fi
+
+                  SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r' || true)
+                  if [ -z "$SIGNTOOL_PATH" ]; then
+                      echo "::warning::signtool not auto-detected; relying on trusted-signing-cli default SIGNTOOL_PATH"
+                  fi
+
+                  echo "TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH" >> $GITHUB_ENV
+                  if [ -n "$AZ_PATH" ]; then
+                      echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
+                      echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
+                  fi
+                  if [ -n "$SIGNTOOL_PATH" ]; then
+                      echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
+                      echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
+                  fi
+                  echo "Resolved TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH"
+
             - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
               shell: bash
@@ -151,6 +194,8 @@ jobs:
                   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
                   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}
@@ -162,7 +207,6 @@ jobs:
                   includeRelease: true
                   includeUpdaterJson: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
-
 
     build-android:
         runs-on: ubuntu-24.04
