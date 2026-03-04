@@ -326,6 +326,10 @@ class _FeedScreenState extends State<FeedScreen> {
     }
     if (target.type == FeedItemType.sharedPhoto ||
         target.type == FeedItemType.sharedCollection) {
+      final jumpToFileID = _jumpFileIDForSharedCollection(
+        type: target.type,
+        fileID: target.fileID,
+      );
       await _openSharedCollection(
         FeedItem(
           type: target.type,
@@ -336,7 +340,7 @@ class _FeedScreenState extends State<FeedScreen> {
           isOwnedByCurrentUser: false,
           sharedFileIDs: target.fileID != null ? [target.fileID!] : null,
         ),
-        jumpToFileID: target.fileID,
+        jumpToFileID: jumpToFileID,
       );
       return true;
     }
@@ -439,10 +443,10 @@ class _FeedScreenState extends State<FeedScreen> {
                         onTap: () => _handleFeedItemTap(item),
                         onSharedHeaderTap: () => _openSharedCollection(
                           item,
-                          jumpToFileID: item.sharedFileIDs != null &&
-                                  item.sharedFileIDs!.isNotEmpty
-                              ? item.sharedFileIDs!.first
-                              : null,
+                          jumpToFileID: _jumpFileIDForSharedCollection(
+                            type: item.type,
+                            sharedFileIDs: item.sharedFileIDs,
+                          ),
                         ),
                         onSharedPhotoTap: (fileID) => _openSharedPhotos(
                           item,
@@ -550,6 +554,23 @@ class _FeedScreenState extends State<FeedScreen> {
         forceCustomPageRoute: true,
       ),
     );
+  }
+
+  int? _jumpFileIDForSharedCollection({
+    required FeedItemType type,
+    int? fileID,
+    List<int>? sharedFileIDs,
+  }) {
+    if (type != FeedItemType.sharedPhoto) {
+      return null;
+    }
+    if (fileID != null) {
+      return fileID;
+    }
+    if (sharedFileIDs == null || sharedFileIDs.isEmpty) {
+      return null;
+    }
+    return sharedFileIDs.first;
   }
 
   /// Opens the photo viewer for the feed item, then shows the comments sheet.
