@@ -29,6 +29,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps shared-feed header text/avatar area.
   final VoidCallback? onSharedHeaderTap;
 
+  /// Called when the user taps the +N extra-count badge in the shared grid.
+  final VoidCallback? onSharedExtraCountTap;
+
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
@@ -42,6 +45,7 @@ class FeedItemWidget extends StatelessWidget {
     this.onTap,
     this.onSharedPhotoTap,
     this.onSharedHeaderTap,
+    this.onSharedExtraCountTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -195,6 +199,7 @@ class FeedItemWidget extends StatelessWidget {
                 heroTagPrefix: heroTagPrefix,
                 onTap: onTap,
                 onPhotoTap: onSharedPhotoTap,
+                onExtraCountTap: onSharedExtraCountTap,
               ),
             ),
         ],

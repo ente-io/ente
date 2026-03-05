@@ -588,6 +588,13 @@ class _FeedScreenState extends State<FeedScreen> {
                           initialFileID: fileID,
                           heroTagPrefix: heroTagPrefix,
                         ),
+                        onSharedExtraCountTap: () => _openSharedCollection(
+                          item,
+                          jumpToFileID: _jumpFileIDForSharedCollection(
+                            type: item.type,
+                            sharedFileIDs: item.sharedFileIDs,
+                          ),
+                        ),
                       );
                     },
                   ),

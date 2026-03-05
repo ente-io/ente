@@ -26,6 +26,8 @@ class SharedPhotosGrid extends StatefulWidget {
   /// Called when user taps an individual photo thumbnail.
   final ValueChanged<int>? onPhotoTap;
 
+  /// Called when user taps the +N extra-count badge.
+  final VoidCallback? onExtraCountTap;
   /// Prefix used for Hero tags while opening shared photos.
   final String heroTagPrefix;
 
@@ -38,6 +40,7 @@ class SharedPhotosGrid extends StatefulWidget {
     required this.heroTagPrefix,
     this.onTap,
     this.onPhotoTap,
+    this.onExtraCountTap,
     this.gridSize = 300,
     super.key,
   });
@@ -287,25 +290,35 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildExtraCountOverlay(int extraCount) {
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0x99000000),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        '+$extraCount',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+
+    final tappableBadge = widget.onExtraCountTap == null
+        ? badge
+        : GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onExtraCountTap,
+            child: badge,
+          );
+
     return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
         padding: const EdgeInsets.all(6),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0x99000000),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Text(
-            '+$extraCount',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        child: tappableBadge,
       ),
     );
   }
