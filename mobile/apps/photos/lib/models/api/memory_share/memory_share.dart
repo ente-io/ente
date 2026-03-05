@@ -24,6 +24,8 @@ class MemoryShare {
   final int createdAt;
   final int? updatedAt;
   final String url;
+  final int? previewUploadedFileID;
+  final int? fileCount;
 
   MemoryShare({
     required this.id,
@@ -37,6 +39,8 @@ class MemoryShare {
     required this.createdAt,
     this.updatedAt,
     required this.url,
+    this.previewUploadedFileID,
+    this.fileCount,
   });
 
   factory MemoryShare.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,41 @@ class MemoryShare {
       createdAt: json['createdAt'] as int,
       updatedAt: json['updatedAt'] as int?,
       url: json['url'] as String,
+      previewUploadedFileID: json['previewUploadedFileID'] as int?,
+      fileCount: json['fileCount'] as int?,
+    );
+  }
+
+  MemoryShare copyWith({
+    int? id,
+    MemoryShareType? type,
+    String? metadataCipher,
+    String? metadataNonce,
+    String? encryptedKey,
+    String? keyDecryptionNonce,
+    String? accessToken,
+    bool? isDeleted,
+    int? createdAt,
+    int? updatedAt,
+    String? url,
+    int? previewUploadedFileID,
+    int? fileCount,
+  }) {
+    return MemoryShare(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      metadataCipher: metadataCipher ?? this.metadataCipher,
+      metadataNonce: metadataNonce ?? this.metadataNonce,
+      encryptedKey: encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce: keyDecryptionNonce ?? this.keyDecryptionNonce,
+      accessToken: accessToken ?? this.accessToken,
+      isDeleted: isDeleted ?? this.isDeleted,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      url: url ?? this.url,
+      previewUploadedFileID:
+          previewUploadedFileID ?? this.previewUploadedFileID,
+      fileCount: fileCount ?? this.fileCount,
     );
   }
 
@@ -68,6 +107,8 @@ class MemoryShare {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'url': url,
+      'previewUploadedFileID': previewUploadedFileID,
+      'fileCount': fileCount,
     };
   }
 }
