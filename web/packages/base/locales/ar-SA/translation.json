@@ -16,6 +16,7 @@
     "invalid_email_error": "أدخل بريدًا إلكترونيًا صالحًا",
     "required": "مطلوب",
     "email_not_registered": "البريد الإلكتروني غير مسجل",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "البريد الإلكتروني مسجل بالفعل",
     "email_sent": "تم إرسال رمز التحقق إلى <a>{{email}}</a>",
     "check_inbox_hint": "الرجاء التحقق من صندوق الوارد (والرسائل غير المرغوب فيها) لإكمال التحقق",

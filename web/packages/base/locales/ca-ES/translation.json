@@ -16,6 +16,7 @@
     "invalid_email_error": "Introduïu un correu electrònic vàlid",
     "required": "Obligatori",
     "email_not_registered": "Correu no registrat",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "Correu ja registrat",
     "email_sent": "Codi de verificació enviat a <a>{{email}}</a>",
     "check_inbox_hint": "Si us plau, revisa la teva bústia (i el correu brossa) per completar la verificació",

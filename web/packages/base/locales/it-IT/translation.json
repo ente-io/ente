@@ -16,6 +16,7 @@
     "invalid_email_error": "Inserisci un indirizzo email valido",
     "required": "Campo obbligatorio",
     "email_not_registered": "Email non registrata",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "Email già registrata",
     "email_sent": "Codice di verifica inviato a <a>{{email}}</a>",
     "check_inbox_hint": "Controlla la tua casella di posta (e lo spam) per completare la verifica",

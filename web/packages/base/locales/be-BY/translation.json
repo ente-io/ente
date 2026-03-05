@@ -16,6 +16,7 @@
     "invalid_email_error": "Увядзіце сапраўдны адрас электроннай пошты",
     "required": "Патрабуецца",
     "email_not_registered": "Электронная пошта не зарэгістравана",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "Электронная пошта ўжо зарэгістравана",
     "email_sent": "Код спраўджання адпраўлены на <a>{{email}}</a>",
     "check_inbox_hint": "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі",
