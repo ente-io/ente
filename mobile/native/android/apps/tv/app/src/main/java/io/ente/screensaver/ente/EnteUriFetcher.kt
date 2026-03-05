@@ -386,7 +386,7 @@ class EnteUriFetcher(
                 lastError = e
 
                 val retriable = isRetriableDownloadError(e)
-                val hasMoreAttempts = attemptIndex < retryDelaysMs.lastIndex
+                val hasMoreAttempts = attemptIndex < retryDelaysMs.size
                 val elapsed = System.currentTimeMillis() - attemptStartedAt
 
                 if (!retriable || !hasMoreAttempts) {

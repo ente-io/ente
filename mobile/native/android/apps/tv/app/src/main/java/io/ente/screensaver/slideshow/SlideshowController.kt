@@ -207,6 +207,8 @@ class SlideshowController(
             )
         }
         var lastShown: Uri? = null
+        var displayedUri: Uri? = null
+        var captionJob: Job? = null
         val failedUris = LinkedHashSet<Uri>()
 
         val intervalMs = settings.intervalMs.coerceAtLeast(1_000L)
@@ -376,6 +378,7 @@ class SlideshowController(
                 transitionMs = transitionMs,
             )
             if (ok) {
+                displayedUri = uri
                 consecutiveFailures = 0
                 failedUris.remove(uri)
                 if (!hasShownImage) {
@@ -387,9 +390,12 @@ class SlideshowController(
                     showingFailureMessage = false
                 }
                 
-                // Extract and display caption for Ente photos
+                // Keep caption updates in sync with the currently displayed image.
+                captionJob?.cancel()
+                captionJob = null
+
                 if (uri.scheme == "ente" && enteRepo != null) {
-                    scope.launch {
+                    captionJob = scope.launch {
                         try {
                             val accessToken = uri.host.orEmpty()
                             val segments = uri.pathSegments
@@ -397,12 +403,18 @@ class SlideshowController(
                                 val fileId = segments[1].toLongOrNull()
                                 if (fileId != null) {
                                     val caption = enteRepo.getCaption(accessToken, fileId)
-                                    slideshowView.setDescription(caption)
+                                    if (displayedUri == uri) {
+                                        slideshowView.setDescription(caption)
+                                    }
                                 }
                             }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
-                            AppLog.error("Slideshow", "Failed to get caption for ${uri.redactedForLog()}", e)
-                            slideshowView.setDescription(null)
+                            if (displayedUri == uri) {
+                                AppLog.error("Slideshow", "Failed to get caption for ${uri.redactedForLog()}", e)
+                                slideshowView.setDescription(null)
+                            }
                         }
                     }
                 } else {
@@ -438,5 +450,6 @@ class SlideshowController(
             index++
             delay(if (ok) intervalMs else 250L)
         }
+        captionJob?.cancel()
     }
 }

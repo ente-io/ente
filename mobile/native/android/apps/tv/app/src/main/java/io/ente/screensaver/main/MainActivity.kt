@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import io.ente.photos.screensaver.BuildConfig
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivityMainPreviewBinding
@@ -20,10 +21,12 @@ import io.ente.photos.screensaver.settings.SettingsActivity
 import io.ente.photos.screensaver.setup.SetupActivity
 import io.ente.photos.screensaver.slideshow.SlideshowController
 import io.ente.photos.screensaver.power.ScreenWakeLockManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,18 +51,22 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Check if album is configured
-        val repo = EntePublicAlbumRepository.get(this)
-        val isConfigured = runBlocking { repo.getConfig() != null }
+        setContentView(R.layout.activity_main)
 
-        if (isConfigured) {
-            showPreviewMode()
-        } else {
-            startActivity(
-                Intent(this, SetupActivity::class.java)
-                    .putExtra(SetupActivity.EXTRA_AUTO_RETURN_TO_PREVIEW, true),
-            )
-            finish()
+        val repo = EntePublicAlbumRepository.get(this)
+        scope.launch {
+            val isConfigured = withContext(Dispatchers.IO) { repo.getConfig() != null }
+            if (!isActive || isFinishing || isDestroyed) return@launch
+
+            if (isConfigured) {
+                showPreviewMode()
+            } else {
+                startActivity(
+                    Intent(this@MainActivity, SetupActivity::class.java)
+                        .putExtra(SetupActivity.EXTRA_AUTO_RETURN_TO_PREVIEW, true),
+                )
+                finish()
+            }
         }
     }
 
@@ -90,27 +97,33 @@ class MainActivity : AppCompatActivity() {
                 }
         }
         handler.postDelayed(hideHintRunnable!!, 6000)
+
+        startPreviewIfReady()
     }
 
     override fun onStart() {
         super.onStart()
+        startPreviewIfReady()
+    }
 
-        if (previewBinding != null) {
-            wakeLockManager?.acquire()
+    private fun startPreviewIfReady() {
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return
+        val localBinding = previewBinding ?: return
 
-            // Preview mode: start slideshow
-            scope.launch {
-                val settings = preferencesRepository?.get()
-                if (settings != null) {
-                    val needsPermission = settings.sourceType == PhotoSourceType.MEDIASTORE
-                    val hasPermission = MediaPermissions.hasReadImagesPermission(this@MainActivity)
-                    if (needsPermission && !hasPermission) {
-                        previewBinding?.slideshow?.showMessage(getString(R.string.missing_permission))
-                    } else {
-                        previewBinding?.slideshow?.showMessage(null)
-                    }
-                    slideshowController?.start()
+        wakeLockManager?.acquire()
+
+        // Preview mode: start slideshow
+        scope.launch {
+            val settings = preferencesRepository?.get()
+            if (settings != null) {
+                val needsPermission = settings.sourceType == PhotoSourceType.MEDIASTORE
+                val hasPermission = MediaPermissions.hasReadImagesPermission(this@MainActivity)
+                if (needsPermission && !hasPermission) {
+                    localBinding.slideshow.showMessage(getString(R.string.missing_permission))
+                } else {
+                    localBinding.slideshow.showMessage(null)
                 }
+                slideshowController?.start()
             }
         }
     }

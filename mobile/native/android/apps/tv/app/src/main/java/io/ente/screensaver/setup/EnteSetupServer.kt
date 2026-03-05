@@ -27,6 +27,11 @@ class EnteSetupServer(
         private const val PAIRING_MISMATCH_DELAY_MS = 300L
         private const val PAIRING_MISMATCH_WINDOW_MS = 60_000L
         private const val MAX_PAIRING_MISMATCHES = 20
+        private const val MAX_REQUEST_BODY_BYTES = 8 * 1024L
+        private const val MAX_ENCRYPTED_FIELD_CHARS = 8 * 1024
+        private const val MAX_URL_CHARS = 4096
+        private const val MAX_PASSWORD_CHARS = 1024
+        private const val MAX_CODE_CHARS = 32
     }
 
     private val repo = EntePublicAlbumRepository.get(appContext)
@@ -127,7 +132,7 @@ class EnteSetupServer(
     private fun serveSet(session: IHTTPSession): Response {
         return runCatching {
             val contentLength = session.headers["content-length"]?.toLongOrNull()
-            if (contentLength != null && contentLength > 8 * 1024L) {
+            if (contentLength == null || contentLength <= 0L || contentLength > MAX_REQUEST_BODY_BYTES) {
                 return@runCatching payloadTooLargeResponse()
             }
 
@@ -137,6 +142,10 @@ class EnteSetupServer(
             AppLog.info("Setup", "Setup request received")
             val encryptedPayload = session.parameters["payload"]?.firstOrNull().orEmpty().trim()
             val header = session.parameters["header"]?.firstOrNull().orEmpty().trim()
+            if (encryptedPayload.length > MAX_ENCRYPTED_FIELD_CHARS || header.length > MAX_ENCRYPTED_FIELD_CHARS) {
+                AppLog.error("Setup", "Encrypted setup fields too large")
+                return@runCatching payloadTooLargeResponse()
+            }
             if (encryptedPayload.isBlank() || header.isBlank()) {
                 AppLog.error("Setup", "Missing encrypted setup payload")
                 return@runCatching securePayloadInvalidResponse()
@@ -162,6 +171,14 @@ class EnteSetupServer(
 
             val url = payload.url.trim()
             val password = payload.password
+            if (
+                payload.code.length > MAX_CODE_CHARS ||
+                url.length > MAX_URL_CHARS ||
+                password.length > MAX_PASSWORD_CHARS
+            ) {
+                AppLog.error("Setup", "Setup payload field too large")
+                return@runCatching payloadTooLargeResponse()
+            }
             if (url.isBlank()) {
                 AppLog.error("Setup", "Missing album URL in setup request")
                 return@runCatching missingUrlResponse()
