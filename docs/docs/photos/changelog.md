@@ -30,7 +30,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Hide shared albums
 - Search in device albums
 
-## v1.7.20 (desktop) - Feb 2026
+## v1.7.21 (desktop) - Feb 2026
 
 - App lock
 - Masonry layout for public albums
