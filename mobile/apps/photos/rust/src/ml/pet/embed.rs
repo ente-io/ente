@@ -135,19 +135,26 @@ pub fn run_pet_body_embedding(
         (BODY_EMBED_INPUT_SIZE * BODY_EMBED_INPUT_SIZE * BODY_EMBED_CHANNELS) as usize;
 
     // Preprocess all crops and group by species.
+    // Skip detections whose crop is invalid (e.g. zero-area edge boxes)
+    // rather than aborting the whole image.
     let mut dog_indices = Vec::new();
     let mut cat_indices = Vec::new();
-    let mut preprocessed: Vec<Vec<f32>> = Vec::with_capacity(body_results.len());
+    let mut preprocessed: Vec<Option<Vec<f32>>> = Vec::with_capacity(body_results.len());
     for (i, body_result) in body_results.iter().enumerate() {
-        let (crop_data, crop_w, crop_h) =
-            extract_crop(decoded, &body_result.detection.box_xyxy)?;
-        let input = preprocess_pet_embedding(&crop_data, crop_w, crop_h)?;
-        preprocessed.push(input);
-        // COCO class 15 = cat, 16 = dog
-        if body_result.detection.coco_class == 15 {
-            cat_indices.push(i);
-        } else {
-            dog_indices.push(i);
+        let crop = extract_crop(decoded, &body_result.detection.box_xyxy)
+            .and_then(|(crop_data, crop_w, crop_h)| preprocess_pet_embedding(&crop_data, crop_w, crop_h));
+        match crop {
+            Ok(input) => {
+                preprocessed.push(Some(input));
+                if body_result.detection.coco_class == 15 {
+                    cat_indices.push(i);
+                } else {
+                    dog_indices.push(i);
+                }
+            }
+            Err(_) => {
+                preprocessed.push(None);
+            }
         }
     }
 
@@ -159,7 +166,7 @@ pub fn run_pet_body_embedding(
 
         let mut input = Vec::with_capacity(per_body_len * indices.len());
         for &idx in indices {
-            input.extend_from_slice(&preprocessed[idx]);
+            input.extend_from_slice(preprocessed[idx].as_ref().unwrap());
         }
 
         let session = if is_cat {
