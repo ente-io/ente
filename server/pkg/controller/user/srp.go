@@ -10,13 +10,13 @@ import (
 	"github.com/ente-io/go-srp"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	mathRand "math/rand"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -322,7 +322,7 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 }
 
 func fSrpAttributes(email string, hashKey []byte) (*ente.GetSRPAttributesResponse, error) {
-	email = strings.ToLower(strings.TrimSpace(email))
+	email = emailUtil.NormalizeEmail(email)
 	emailHasher := sha256.New()
 	emailHasher.Write([]byte("email-salt-purpose-and-uuid"))
 	emailHasher.Write([]byte(email))

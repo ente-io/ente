@@ -17,6 +17,8 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 /// Widget that displays a single feed item.
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
+  final String heroTagPrefix;
+  final bool enableThumbnailHero;
   final int currentUserID;
 
   /// Called when the user taps anywhere on the feed item.
@@ -28,6 +30,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps shared-feed header text/avatar area.
   final VoidCallback? onSharedHeaderTap;
 
+  /// Called when the user taps the +N extra-count badge in the shared grid.
+  final VoidCallback? onSharedExtraCountTap;
+
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
@@ -36,10 +41,13 @@ class FeedItemWidget extends StatelessWidget {
 
   const FeedItemWidget({
     required this.feedItem,
+    required this.heroTagPrefix,
+    this.enableThumbnailHero = true,
     required this.currentUserID,
     this.onTap,
     this.onSharedPhotoTap,
     this.onSharedHeaderTap,
+    this.onSharedExtraCountTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -113,6 +121,8 @@ class FeedItemWidget extends StatelessWidget {
               child: _FeedThumbnail(
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
+                enableHeroAnimation: enableThumbnailHero,
               ),
             )
           else
@@ -189,8 +199,10 @@ class FeedItemWidget extends StatelessWidget {
               child: SharedPhotosGrid(
                 fileIDs: feedItem.sharedFileIDs!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
                 onTap: onTap,
                 onPhotoTap: onSharedPhotoTap,
+                onExtraCountTap: onSharedExtraCountTap,
               ),
             ),
         ],
@@ -665,10 +677,14 @@ class _FeedTextContent extends StatelessWidget {
 class _FeedThumbnail extends StatefulWidget {
   final int fileID;
   final int collectionID;
+  final String heroTagPrefix;
+  final bool enableHeroAnimation;
 
   const _FeedThumbnail({
     required this.fileID,
     required this.collectionID,
+    required this.heroTagPrefix,
+    required this.enableHeroAnimation,
   });
 
   @override
@@ -739,7 +755,7 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       );
     }
 
-    return Container(
+    final thumbnail = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(9),
         border: Border.all(color: colorScheme.strokeFaint),
@@ -756,6 +772,15 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
           ),
         ),
       ),
+    );
+
+    if (!widget.enableHeroAnimation) {
+      return thumbnail;
+    }
+
+    return Hero(
+      tag: widget.heroTagPrefix + _file!.tag,
+      child: thumbnail,
     );
   }
 }
