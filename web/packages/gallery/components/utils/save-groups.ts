@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * An object that keeps track of progress of a user-initiated download of a set
@@ -161,28 +161,61 @@ export type UpdateSaveGroup = (
  */
 export type RemoveSaveGroup = (saveGroup: SaveGroup) => void;
 
+type SaveGroupsSubscriber = (saveGroups: SaveGroup[]) => void;
+
+let saveGroupsStore: SaveGroup[] = [];
+const saveGroupsSubscribers = new Set<SaveGroupsSubscriber>();
+
+const notifySaveGroupsSubscribers = () => {
+    for (const subscriber of saveGroupsSubscribers) {
+        subscriber(saveGroupsStore);
+    }
+};
+
+const subscribeToSaveGroups = (subscriber: SaveGroupsSubscriber) => {
+    saveGroupsSubscribers.add(subscriber);
+    return () => {
+        saveGroupsSubscribers.delete(subscriber);
+    };
+};
+
+const addSaveGroup: AddSaveGroup = (saveGroup) => {
+    const id = Math.random();
+    saveGroupsStore = [
+        ...saveGroupsStore,
+        { ...saveGroup, id, success: 0, failed: 0 },
+    ];
+    notifySaveGroupsSubscribers();
+
+    return (tx: (group: SaveGroup) => SaveGroup) => {
+        saveGroupsStore = saveGroupsStore.map((g) => (g.id == id ? tx(g) : g));
+        notifySaveGroupsSubscribers();
+    };
+};
+
+const removeSaveGroup: RemoveSaveGroup = ({ id }) => {
+    saveGroupsStore = saveGroupsStore.filter((g) => g.id != id);
+    notifySaveGroupsSubscribers();
+};
+
 /**
  * A custom React hook that manages a list of active {@link SaveGroup}s, and
  * provides functions to add and remove entries to the list.
  */
 export const useSaveGroups = () => {
-    const [saveGroups, setSaveGroups] = useState<SaveGroup[]>([]);
+    const saveGroups = useSyncExternalStore(
+        subscribeToSaveGroups,
+        () => saveGroupsStore,
+        () => saveGroupsStore,
+    );
 
-    const handleAddSaveGroup: AddSaveGroup = useCallback((saveGroup) => {
-        const id = Math.random();
-        setSaveGroups((groups) => [
-            ...groups,
-            { ...saveGroup, id, success: 0, failed: 0 },
-        ]);
-        return (tx: (group: SaveGroup) => SaveGroup) => {
-            setSaveGroups((groups) =>
-                groups.map((g) => (g.id == id ? tx(g) : g)),
-            );
-        };
-    }, []);
+    const handleAddSaveGroup: AddSaveGroup = useCallback(
+        (saveGroup) => addSaveGroup(saveGroup),
+        [],
+    );
 
     const handleRemoveSaveGroup: RemoveSaveGroup = useCallback(
-        ({ id }) => setSaveGroups((groups) => groups.filter((g) => g.id != id)),
+        (saveGroup) => removeSaveGroup(saveGroup),
         [],
     );
 
