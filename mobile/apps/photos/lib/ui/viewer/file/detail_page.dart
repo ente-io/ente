@@ -29,6 +29,7 @@ import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
+import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
 import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -282,6 +283,7 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
+              if (_qrHelper != null) const QrCodeDetectionOverlay(),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
