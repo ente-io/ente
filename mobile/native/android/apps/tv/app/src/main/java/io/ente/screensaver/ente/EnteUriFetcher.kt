@@ -26,8 +26,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import okio.FileSystem
-import okio.Path.Companion.toOkioPath
+import okio.Buffer
 
 class EnteUriFetcher(
     private val appContext: Context,
@@ -59,28 +58,44 @@ class EnteUriFetcher(
         val cacheLimit = settings.enteCacheLimit.coerceAtLeast(5)
 
         val imageCachedFile = cache.imageFile(accessToken, fileId)
+        val imageLegacyFile = cache.imageLegacyFile(accessToken, fileId)
         val imageMetaFile = cache.imageMetaFile(accessToken, fileId)
         val previewCachedFile = cache.previewFile(accessToken, fileId)
+        val previewLegacyFile = cache.previewLegacyFile(accessToken, fileId)
         val previewMetaFile = cache.previewMetaFile(accessToken, fileId)
 
         val cachedFile = if (useFullImage) imageCachedFile else previewCachedFile
+        val legacyFile = if (useFullImage) imageLegacyFile else previewLegacyFile
         val metaFile = if (useFullImage) imageMetaFile else previewMetaFile
+        if (!cachedFile.exists() || cachedFile.length() <= 0L) {
+            val migrated = cache.migrateLegacyFile(legacyFile, cachedFile)
+            if (migrated) {
+                AppLog.info("Ente", "Migrated legacy cached bytes for file $fileId to encrypted storage")
+            }
+        }
         val hasCachedFile = cachedFile.exists() && cachedFile.length() > 0
 
         return try {
             val record = repo.getFileRecord(accessToken, fileId)
             if (hasCachedFile) {
-                if (record == null) {
-                    AppLog.error("Ente", "Missing file record for cached file $fileId")
-                    touchCacheFile(cachedFile)
-                    return fileResult(cachedFile, DataSource.DISK, detectMimeFromFile(cachedFile))
-                }
-                if (!metaFile.exists() && record.updationTime > 0L) {
-                    cache.writeUpdateTime(metaFile, record.updationTime)
-                }
-                if (isCacheFresh(record, cachedFile, metaFile, cache)) {
-                    touchCacheFile(cachedFile)
-                    return fileResult(cachedFile, DataSource.DISK, detectMimeFromFile(cachedFile))
+                val cachedBytes = cache.readEncryptedBytes(cachedFile)
+                if (cachedBytes == null) {
+                    runCatching { cachedFile.delete() }
+                    runCatching { metaFile.delete() }
+                } else {
+                    val cachedMime = resolveMime(null, cachedBytes)
+                    if (record == null) {
+                        AppLog.error("Ente", "Missing file record for cached file $fileId")
+                        touchCacheFile(cachedFile)
+                        return bytesResult(cachedBytes, DataSource.DISK, cachedMime)
+                    }
+                    if (!metaFile.exists() && record.updationTime > 0L) {
+                        cache.writeUpdateTime(metaFile, record.updationTime)
+                    }
+                    if (isCacheFresh(record, cachedFile, metaFile, cache)) {
+                        touchCacheFile(cachedFile)
+                        return bytesResult(cachedBytes, DataSource.DISK, cachedMime)
+                    }
                 }
             }
 
@@ -155,13 +170,7 @@ class EnteUriFetcher(
             }
 
             withContext(Dispatchers.IO) {
-                cache.ensureDirs(cachedFile)
-                val tmp = File(cachedFile.parentFile, cachedFile.name + ".tmp")
-                tmp.writeBytes(processedBytes)
-                if (!tmp.renameTo(cachedFile)) {
-                    tmp.copyTo(cachedFile, overwrite = true)
-                    tmp.delete()
-                }
+                cache.writeEncryptedBytes(cachedFile, processedBytes)
                 if (resolvedRecord.updationTime > 0L) {
                     cache.writeUpdateTime(metaFile, resolvedRecord.updationTime)
                 }
@@ -174,29 +183,26 @@ class EnteUriFetcher(
                 "Stored ${if (useFullImage) "image" else "preview"} file $fileId in cache (${processedBytes.size} bytes, mime=${responseMimeType ?: "unknown"})",
             )
 
-            fileResult(cachedFile, DataSource.NETWORK, responseMimeType)
+            bytesResult(processedBytes, DataSource.NETWORK, responseMimeType)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
 
             val label = if (useFullImage) "image" else "preview"
             AppLog.error("Ente", "${label} load failed for file $fileId", e)
-            if (cachedFile.exists() && cachedFile.length() > 0) {
+            val cachedBytes = cache.readEncryptedBytes(cachedFile)
+            if (cachedBytes != null) {
                 AppLog.info("Ente", "Using cached $label for file $fileId after error")
                 touchCacheFile(cachedFile)
-                return fileResult(cachedFile, DataSource.DISK, detectMimeFromFile(cachedFile))
+                return bytesResult(cachedBytes, DataSource.DISK, resolveMime(null, cachedBytes))
             }
             AppLog.error("Ente", "No cached $label available for file $fileId after error")
             throw e
         }
     }
 
-    private fun fileResult(file: File, source: DataSource, mimeType: String? = null): FetchResult {
-        val imageSource = coil.decode.ImageSource(
-            file.toOkioPath(),
-            FileSystem.SYSTEM,
-            null,
-            null,
-        )
+    private fun bytesResult(bytes: ByteArray, source: DataSource, mimeType: String? = null): FetchResult {
+        val bufferedSource = Buffer().write(bytes)
+        val imageSource = coil.decode.ImageSource(bufferedSource, appContext)
         return SourceResult(
             source = imageSource,
             mimeType = mimeType,
@@ -459,10 +465,6 @@ class EnteUriFetcher(
 
     private fun resolveMime(maybeMime: String?, bytes: ByteArray): String? {
         return ImageFormatClassifier.resolveMime(maybeMime, bytes)
-    }
-
-    private fun detectMimeFromFile(file: File): String? {
-        return ImageFormatClassifier.detectMime(file)
     }
 
     private fun maybeTranscodeImage(

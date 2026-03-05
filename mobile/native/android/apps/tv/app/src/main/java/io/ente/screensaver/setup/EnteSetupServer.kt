@@ -30,12 +30,6 @@ class EnteSetupServer(
     }
 
     private val repo = EntePublicAlbumRepository.get(appContext)
-    private val encryptionKeyB64Url: String by lazy {
-        Base64.encodeToString(
-            encryptionKey,
-            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
-        )
-    }
 
     private val pairingMismatchLock = Any()
     private var pairingMismatchCount = 0
@@ -54,12 +48,11 @@ class EnteSetupServer(
             .ifBlank { "/" }
 
         return when {
-            session.method == Method.GET && path == "/" -> serveIndex(session)
+            session.method == Method.GET && path == "/" -> serveIndex()
             session.method == Method.GET && path.startsWith("/setup-crypto/") ->
                 serveSetupCryptoAsset(path.removePrefix("/setup-crypto/"))
             session.method == Method.POST && path == "/set" -> serveSet(session)
-            session.method == Method.POST && path == "/clear" -> serveClear(session)
-            path == "/set" || path == "/clear" -> {
+            path == "/set" -> {
                 newFixedLengthResponse(
                     Response.Status.METHOD_NOT_ALLOWED,
                     MIME_PLAINTEXT,
@@ -109,30 +102,11 @@ class EnteSetupServer(
         }
     }
 
-    private fun serveIndex(session: IHTTPSession): Response {
-        val providedCode = session.parameters["code"]?.firstOrNull()?.trim().orEmpty()
-        val codeMatches = providedCode.isNotBlank() && providedCode == pairingCode
-
-        val codeInput = if (codeMatches) {
-            "<input type=\"hidden\" name=\"code\" value=\"${escapeHtml(providedCode)}\" />"
-        } else {
-            """
-                <label for="code">${esc(R.string.setup_server_pairing_code_label)}</label>
-                <input name="code" id="code" placeholder="${esc(R.string.setup_server_pairing_code_placeholder)}" inputmode="numeric" />
-            """.trimIndent()
-        }
-
-        val codeHint = if (codeMatches) {
-            ""
-        } else {
-            "<p class=\"note\">${esc(R.string.setup_server_pairing_code_hint)}</p>"
-        }
-
+    private fun serveIndex(): Response {
         val body = """
             <div class="card">
               <h1>${esc(R.string.app_name)}</h1>
               <form method="post" action="/set" id="setup-form">
-                $codeInput
                 <input type="hidden" name="payload" id="payload" />
                 <input type="hidden" name="header" id="header" />
                 <label for="url">${esc(R.string.setup_server_public_album_label)}</label>
@@ -142,13 +116,12 @@ class EnteSetupServer(
                 <button type="submit">${esc(R.string.setup_server_save_button)}</button>
               </form>
             </div>
-            $codeHint
             <p class="note">${esc(R.string.setup_server_open_screen_note)}</p>
             ${secureSubmitScript()}
         """.trimIndent()
 
         val html = renderPage(s(R.string.setup_server_page_title), body)
-        return newFixedLengthResponse(Response.Status.OK, "text/html", html)
+        return htmlResponse(Response.Status.OK, html)
     }
 
     private fun serveSet(session: IHTTPSession): Response {
@@ -162,13 +135,6 @@ class EnteSetupServer(
             session.parseBody(files)
 
             AppLog.info("Setup", "Setup request received")
-            val code = session.parameters["code"]?.firstOrNull().orEmpty().trim()
-            if (code != pairingCode) {
-                AppLog.error("Setup", "Pairing code mismatch")
-                return@runCatching pairingCodeMismatchResponse()
-            }
-            resetPairingMismatchState()
-
             val encryptedPayload = session.parameters["payload"]?.firstOrNull().orEmpty().trim()
             val header = session.parameters["header"]?.firstOrNull().orEmpty().trim()
             if (encryptedPayload.isBlank() || header.isBlank()) {
@@ -176,11 +142,26 @@ class EnteSetupServer(
                 return@runCatching securePayloadInvalidResponse()
             }
 
-            val (url, password) = decryptSetupPayload(encryptedPayload, header) ?: run {
+            val hasPlaintextFields = listOf("code", "url", "password")
+                .any { session.parameters[it]?.firstOrNull()?.trim()?.isNotBlank() == true }
+            if (hasPlaintextFields) {
+                AppLog.error("Setup", "Rejected request containing plaintext setup fields")
+                return@runCatching securePayloadInvalidResponse()
+            }
+
+            val payload = decryptSetupPayload(encryptedPayload, header) ?: run {
                 AppLog.error("Setup", "Encrypted setup payload invalid")
                 return@runCatching securePayloadInvalidResponse()
             }
 
+            val codeValidationResponse = validatePairingCode(payload.code.trim())
+            if (codeValidationResponse != null) {
+                AppLog.error("Setup", "Pairing code rejected")
+                return@runCatching codeValidationResponse
+            }
+
+            val url = payload.url.trim()
+            val password = payload.password
             if (url.isBlank()) {
                 AppLog.error("Setup", "Missing album URL in setup request")
                 return@runCatching missingUrlResponse()
@@ -223,7 +204,7 @@ class EnteSetupServer(
                 }
             }
 
-            newFixedLengthResponse(Response.Status.OK, "text/html", html)
+            htmlResponse(Response.Status.OK, html)
         }.getOrElse { e ->
             newFixedLengthResponse(
                 Response.Status.INTERNAL_ERROR,
@@ -233,65 +214,53 @@ class EnteSetupServer(
         }
     }
 
-    private fun serveClear(session: IHTTPSession): Response {
-        return runCatching {
-            val contentLength = session.headers["content-length"]?.toLongOrNull()
-            if (contentLength != null && contentLength > 2 * 1024L) {
-                return@runCatching payloadTooLargeResponse()
-            }
+    private fun resetPairingMismatchStateLocked() {
+        pairingMismatchCount = 0
+        pairingMismatchWindowStartAtMs = 0L
+    }
 
-            val files = HashMap<String, String>()
-            session.parseBody(files)
-
-            val code = session.parameters["code"]?.firstOrNull().orEmpty().trim()
-            if (code != pairingCode) {
-                AppLog.error("Setup", "Pairing code mismatch")
-                return@runCatching pairingCodeMismatchResponse()
-            }
-            resetPairingMismatchState()
-
-            runBlocking { repo.clearConfig() }
-            AppLog.info("Setup", "Config cleared via setup page")
-            onConfigUpdated()
-            newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, s(R.string.setup_server_cleared_plaintext))
-        }.getOrElse { e ->
-            newFixedLengthResponse(
-                Response.Status.INTERNAL_ERROR,
-                MIME_PLAINTEXT,
-                s(R.string.setup_server_internal_error, e.message ?: s(R.string.setup_error_unknown_detail)),
-            )
+    private fun updatePairingMismatchWindowLocked(now: Long) {
+        if (pairingMismatchWindowStartAtMs == 0L) return
+        if (now - pairingMismatchWindowStartAtMs > PAIRING_MISMATCH_WINDOW_MS) {
+            resetPairingMismatchStateLocked()
         }
     }
 
-    private fun resetPairingMismatchState() {
+    private fun lockoutRemainingMsLocked(now: Long): Long? {
+        if (pairingMismatchWindowStartAtMs == 0L) return null
+        if (pairingMismatchCount < MAX_PAIRING_MISMATCHES) return null
+        val remainingMs = PAIRING_MISMATCH_WINDOW_MS - (now - pairingMismatchWindowStartAtMs)
+        return remainingMs.takeIf { it > 0L }
+    }
+
+    private fun validatePairingCode(code: String): Response? {
         synchronized(pairingMismatchLock) {
-            pairingMismatchCount = 0
-            pairingMismatchWindowStartAtMs = 0L
-        }
-    }
+            val now = System.currentTimeMillis()
+            updatePairingMismatchWindowLocked(now)
 
-    private fun pairingCodeMismatchResponse(): Response {
-        val now = System.currentTimeMillis()
-
-        val lockedOut = synchronized(pairingMismatchLock) {
-            if (
-                pairingMismatchWindowStartAtMs == 0L ||
-                now - pairingMismatchWindowStartAtMs > PAIRING_MISMATCH_WINDOW_MS
-            ) {
-                pairingMismatchWindowStartAtMs = now
-                pairingMismatchCount = 0
+            lockoutRemainingMsLocked(now)?.let { remainingMs ->
+                return tooManyAttemptsResponse(lockoutRemainingMs = remainingMs)
             }
 
+            if (code == pairingCode) {
+                resetPairingMismatchStateLocked()
+                return null
+            }
+
+            if (pairingMismatchWindowStartAtMs == 0L) {
+                pairingMismatchWindowStartAtMs = now
+            }
             pairingMismatchCount += 1
-            pairingMismatchCount >= MAX_PAIRING_MISMATCHES
-        }
+            runCatching { Thread.sleep(PAIRING_MISMATCH_DELAY_MS) }
 
-        runCatching { Thread.sleep(PAIRING_MISMATCH_DELAY_MS) }
-
-        return if (lockedOut) {
-            tooManyAttemptsResponse()
-        } else {
-            pairingCodeErrorResponse()
+            val afterDelayNow = System.currentTimeMillis()
+            updatePairingMismatchWindowLocked(afterDelayNow)
+            val remainingMs = lockoutRemainingMsLocked(afterDelayNow)
+            return if (remainingMs != null) {
+                tooManyAttemptsResponse(lockoutRemainingMs = remainingMs)
+            } else {
+                pairingCodeErrorResponse()
+            }
         }
     }
 
@@ -306,10 +275,11 @@ class EnteSetupServer(
                 </div>
             """.trimIndent(),
         )
-        return newFixedLengthResponse(Response.Status.PAYLOAD_TOO_LARGE, "text/html", html)
+        return htmlResponse(Response.Status.PAYLOAD_TOO_LARGE, html)
     }
 
-    private fun tooManyAttemptsResponse(): Response {
+    private fun tooManyAttemptsResponse(lockoutRemainingMs: Long = PAIRING_MISMATCH_WINDOW_MS): Response {
+        val retryAfterSeconds = ((lockoutRemainingMs + 999L) / 1000L).coerceAtLeast(1L)
         val html = renderPage(
             s(R.string.setup_server_too_many_attempts_title),
             """
@@ -320,8 +290,8 @@ class EnteSetupServer(
                 </div>
             """.trimIndent(),
         )
-        return newFixedLengthResponse(Response.Status.TOO_MANY_REQUESTS, "text/html", html).apply {
-            addHeader("Retry-After", (PAIRING_MISMATCH_WINDOW_MS / 1000L).toString())
+        return htmlResponse(Response.Status.TOO_MANY_REQUESTS, html).apply {
+            addHeader("Retry-After", retryAfterSeconds.toString())
         }
     }
 
@@ -336,7 +306,7 @@ class EnteSetupServer(
                 </div>
             """.trimIndent(),
         )
-        return newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/html", html)
+        return htmlResponse(Response.Status.UNAUTHORIZED, html)
     }
 
     private fun missingUrlResponse(): Response {
@@ -350,7 +320,7 @@ class EnteSetupServer(
                 </div>
             """.trimIndent(),
         )
-        return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/html", html)
+        return htmlResponse(Response.Status.BAD_REQUEST, html)
     }
 
     private fun securePayloadInvalidResponse(): Response {
@@ -364,10 +334,23 @@ class EnteSetupServer(
                 </div>
             """.trimIndent(),
         )
-        return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/html", html)
+        return htmlResponse(Response.Status.BAD_REQUEST, html)
     }
 
-    private fun decryptSetupPayload(payloadB64: String, headerB64: String): Pair<String, String>? {
+    private fun htmlResponse(status: Response.Status, html: String): Response {
+        return newFixedLengthResponse(status, "text/html", html).apply {
+            addHeader("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate")
+            addHeader("Pragma", "no-cache")
+        }
+    }
+
+    private data class SetupPayload(
+        val code: String,
+        val url: String,
+        val password: String,
+    )
+
+    private fun decryptSetupPayload(payloadB64: String, headerB64: String): SetupPayload? {
         val encryptedBytes = decodeBase64(payloadB64) ?: return null
 
         return runCatching {
@@ -377,7 +360,11 @@ class EnteSetupServer(
                 key = encryptionKey,
             )
             val payload = JSONObject(String(plaintextBytes, Charsets.UTF_8))
-            payload.optString("url").trim() to payload.optString("password")
+            SetupPayload(
+                code = payload.optString("code").trim(),
+                url = payload.optString("url").trim(),
+                password = payload.optString("password"),
+            )
         }.getOrNull()
     }
 
@@ -398,10 +385,10 @@ class EnteSetupServer(
                 const passwordInput = document.getElementById('password');
                 if (!form || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
 
-                const embeddedEk = '${escapeHtml(encryptionKeyB64Url)}';
                 const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
                 const hashParams = new URLSearchParams(hash);
-                const ek = embeddedEk || hashParams.get('ek');
+                const ek = (hashParams.get('ek') || '').trim();
+                const code = (hashParams.get('code') || '').trim();
 
                 const bytesToBase64 = (bytes) => {
                   let binary = '';
@@ -461,9 +448,9 @@ class EnteSetupServer(
                 };
 
                 form.addEventListener('submit', async (event) => {
-                  if (!ek) {
+                  if (!ek || !code) {
                     event.preventDefault();
-                    alert('Secure key missing. Please scan the QR code again from the TV.');
+                    alert('Pairing data missing. Please scan the QR code again from the TV.');
                     return;
                   }
 
@@ -480,6 +467,7 @@ class EnteSetupServer(
                     const keyB64 = bytesToBase64(keyBytes);
 
                     const plaintext = JSON.stringify({
+                      code: code,
                       url: urlInput.value || '',
                       password: passwordInput.value || ''
                     });

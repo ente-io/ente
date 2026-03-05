@@ -1,113 +1,135 @@
-name: "Photos TV Release"
+name: "Release (photos-tv)"
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - "tv-v*"
+    push:
+        tags:
+            - "tv-v*"
+    workflow_dispatch:
 
 env:
-  NDK_VERSION: "27.0.12077973"
+    NDK_VERSION: "27.0.12077973"
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  release:
-    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/tv-v') }}
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile/native/android/apps/tv
-    env:
-      SIGNING_KEY_B64: ${{ secrets.SIGNING_KEY_TV }}
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_TV }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_TV }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_TV }}
-      SIGNING_KEY_FILE: "tv-release.jks"
-      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_TV }}
-      PLAYSTORE_PACKAGE_NAME: "io.ente.photos.tv"
-      PLAYSTORE_TRACK: "internal"
+    build-android:
+        runs-on: ubuntu-24.04
+        env:
+            HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_TV != '' && secrets.SIGNING_STORE_PASSWORD_TV != '' && secrets.SIGNING_KEY_ALIAS_TV != '' && secrets.SIGNING_KEY_PASSWORD_TV != '' }}
+            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON_TV != '' }}
+            SHOULD_UPLOAD_PLAYSTORE: ${{ github.event_name != 'workflow_dispatch' && secrets.SERVICE_ACCOUNT_JSON_TV != '' }}
+            HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        defaults:
+            run:
+                working-directory: mobile/native/android/apps/tv
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+            - name: Set release tag
+              shell: bash
+              run: |
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+                      echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+                  else
+                      echo "RELEASE_TAG=tv-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
+                  fi
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Install NDK
-        run: |
-          echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
+            - name: Setup JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
 
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
+            - name: Install NDK
+              run: |
+                  echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+                  echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
 
-      - name: Setup signing keys
-        if: ${{ env.SIGNING_KEY_B64 != '' && env.SIGNING_KEY_ALIAS != '' && env.SIGNING_KEY_PASSWORD != '' && env.SIGNING_STORE_PASSWORD != '' }}
-        run: |
-          mkdir -p keystore
-          echo "$SIGNING_KEY_B64" | base64 -d > "keystore/$SIGNING_KEY_FILE"
-          cat > key.properties << EOF
-          storeFile=keystore/$SIGNING_KEY_FILE
-          storePassword=$SIGNING_STORE_PASSWORD
-          keyAlias=$SIGNING_KEY_ALIAS
-          keyPassword=$SIGNING_KEY_PASSWORD
-          EOF
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease
+            - name: Install cargo-ndk
+              run: cargo install cargo-ndk
 
-      - name: Build release AAB (when Play Store + signing secrets are present)
-        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' && env.SIGNING_KEY_B64 != '' && env.SIGNING_KEY_ALIAS != '' && env.SIGNING_KEY_PASSWORD != '' && env.SIGNING_STORE_PASSWORD != '' }}
-        run: ./gradlew bundleRelease
+            - name: Build Rust libraries
+              run: |
+                  ./gradlew buildEnteCore
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_HOME }}
+                  NDK_VERSION: ${{ env.NDK_VERSION }}
 
-      - name: Prepare release artifacts
-        id: artifacts
-        run: |
-          mkdir -p artifacts
-          APK_NAME="ente-tv-${{ github.ref_name }}.apk"
-          cp app/build/outputs/apk/release/app-release.apk "artifacts/$APK_NAME"
+            - name: Print Android release capabilities
+              run: |
+                  echo "HAS_ANDROID_SIGNING=${HAS_ANDROID_SIGNING}"
+                  echo "HAS_PLAYSTORE_SERVICE_ACCOUNT=${HAS_PLAYSTORE_SERVICE_ACCOUNT}"
+                  echo "SHOULD_UPLOAD_PLAYSTORE=${SHOULD_UPLOAD_PLAYSTORE}"
+                  echo "HAS_DISCORD_WEBHOOK=${HAS_DISCORD_WEBHOOK}"
 
-          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
-            AAB_NAME="ente-tv-${{ github.ref_name }}.aab"
-            cp app/build/outputs/bundle/release/app-release.aab "artifacts/$AAB_NAME"
-            echo "has_aab=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_aab=false" >> "$GITHUB_OUTPUT"
-          fi
+            - name: Setup signing keys
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: |
+                  KEYSTORE_PATH=$(pwd)/tv-release.keystore
+                  echo "${{ secrets.SIGNING_KEY_TV }}" | base64 -d > "$KEYSTORE_PATH"
+                  cat > key.properties << EOF_KEY_PROPERTIES
+                  storeFile=$KEYSTORE_PATH
+                  storePassword=${{ secrets.SIGNING_STORE_PASSWORD_TV }}
+                  keyAlias=${{ secrets.SIGNING_KEY_ALIAS_TV }}
+                  keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_TV }}
+                  EOF_KEY_PROPERTIES
 
-          sha256sum artifacts/* > artifacts/sha256sum
+            - name: Build signed Android artifacts
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: |
+                  if [ "${SHOULD_UPLOAD_PLAYSTORE}" = "true" ]; then
+                      ./gradlew :app:assembleRelease :app:bundleRelease
+                  else
+                      ./gradlew :app:assembleRelease
+                  fi
 
-      - name: Create draft GitHub release
-        if: ${{ startsWith(github.ref, 'refs/tags/tv-v') }}
-        uses: ncipollo/release-action@v1
-        with:
-          name: "tv-android-${{ github.ref_name }}"
-          artifacts: "mobile/native/android/apps/tv/artifacts/*"
-          draft: true
-          allowUpdates: true
-          updateOnlyUnreleased: true
+            - name: Prepare Android APK for GitHub release
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              run: |
+                  mkdir -p artifacts
+                  cp app/build/outputs/apk/release/app-release.apk artifacts/${{ env.RELEASE_TAG }}.apk
 
-      - name: Upload AAB to Play Store as draft
-        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' && steps.artifacts.outputs.has_aab == 'true' }}
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON }}
-          packageName: ${{ env.PLAYSTORE_PACKAGE_NAME }}
-          releaseFiles: mobile/native/android/apps/tv/app/build/outputs/bundle/release/app-release.aab
-          track: ${{ env.PLAYSTORE_TRACK }}
-          status: draft
+            - name: Upload Android APK to draft GitHub release
+              if: env.HAS_ANDROID_SIGNING == 'true'
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: ${{ env.RELEASE_TAG }}
+                  artifacts: mobile/native/android/apps/tv/artifacts/${{ env.RELEASE_TAG }}.apk
+                  allowUpdates: true
+                  draft: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload AAB to PlayStore
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true'
+              uses: r0adkll/upload-google-play@v1
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_TV }}
+                  packageName: io.ente.photos.tv
+                  releaseFiles: mobile/native/android/apps/tv/app/build/outputs/bundle/release/app-release.aab
+                  track: internal
+
+            - name: Notify Discord
+              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  nodetail: true
+                  title: "🤖 Internal release available for Photos TV"
+                  description: |
+                      ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})) · [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
+                  color: 0x08C225

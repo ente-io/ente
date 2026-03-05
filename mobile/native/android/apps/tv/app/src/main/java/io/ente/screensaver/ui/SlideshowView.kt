@@ -32,7 +32,6 @@ import com.squareup.picasso.Picasso
 import io.ente.photos.screensaver.databinding.ViewSlideshowBinding
 import io.ente.photos.screensaver.diagnostics.AppLog
 import io.ente.photos.screensaver.diagnostics.redactedForLog
-import io.ente.photos.screensaver.ente.EnteImageCache
 import io.ente.photos.screensaver.imageloading.ImageFormatClassifier
 import io.ente.photos.screensaver.prefs.FitMode
 import java.io.File
@@ -280,10 +279,14 @@ class SlideshowView @JvmOverloads constructor(
 
         hiddenImage.alpha = 0f
         val isFirstImage = visibleImage.drawable == null
+        val isEnteUri = uri.scheme == "ente"
         val initialUri = resolveFallbackUri(uri)
-        val format = detectFormat(initialUri, uri)
-        val loadPlan = loadPlanFor(format)
-        AppLog.info("Slideshow", "Load plan $loadPlan for ${uri.redactedForLog()} (family=${format.family})")
+        val format = if (isEnteUri) null else detectFormat(initialUri, uri)
+        val loadPlan = if (isEnteUri) LoadPlan.COIL_FIRST else loadPlanFor(format!!)
+        AppLog.info(
+            "Slideshow",
+            "Load plan $loadPlan for ${uri.redactedForLog()} (family=${format?.family ?: "ENTE_SECURE"})",
+        )
 
         fun finishSuccess() {
             if (!cont.isActive) return
@@ -334,7 +337,7 @@ class SlideshowView @JvmOverloads constructor(
 
         fun startCoil(onFailure: () -> Unit) {
             if (!cont.isActive) return
-            val loadUri = resolveFallbackUri(uri)
+            val loadUri = if (isEnteUri) uri else resolveFallbackUri(uri)
             val request = ImageRequest.Builder(context)
                 .data(loadUri)
                 .allowHardware(false)
@@ -356,7 +359,7 @@ class SlideshowView @JvmOverloads constructor(
         }
 
         fun startSpecial(onFailure: () -> Unit) {
-            val loadUri = resolveFallbackUri(uri)
+            val loadUri = if (isEnteUri) uri else resolveFallbackUri(uri)
             val dynamicFormat = detectFormat(loadUri, uri)
             val candidates = specialFormatsFor(dynamicFormat)
             if (candidates.isEmpty()) {
@@ -372,7 +375,7 @@ class SlideshowView @JvmOverloads constructor(
         }
 
         fun startJxl(onFailure: () -> Unit) {
-            val loadUri = resolveFallbackUri(uri)
+            val loadUri = if (isEnteUri) uri else resolveFallbackUri(uri)
             loadWithJxlDrawable(
                 uri = loadUri,
                 sourceUri = uri,
@@ -382,7 +385,7 @@ class SlideshowView @JvmOverloads constructor(
         }
 
         fun startGlidePicasso(onFailure: () -> Unit) {
-            val loadUri = resolveFallbackUri(uri)
+            val loadUri = if (isEnteUri) uri else resolveFallbackUri(uri)
             loadWithGlideThenPicasso(
                 uri = loadUri,
                 sourceUri = uri,
@@ -422,6 +425,10 @@ class SlideshowView @JvmOverloads constructor(
             LoadPlan.COIL_FIRST -> {
                 startCoil {
                     if (!cont.isActive) return@startCoil
+                    if (isEnteUri) {
+                        finishFailure()
+                        return@startCoil
+                    }
                     startSpecial {
                         if (!cont.isActive) return@startSpecial
                         startGlidePicasso { finishFailure() }
@@ -455,24 +462,8 @@ class SlideshowView @JvmOverloads constructor(
 
     private fun resolveFallbackUri(uri: Uri): Uri {
         if (uri.scheme != "ente") return uri
-        val cached = resolveEnteCacheFile(uri) ?: return uri
-        if (!cached.exists() || cached.length() <= 0L) return uri
-        return Uri.fromFile(cached)
-    }
-
-    private fun resolveEnteCacheFile(uri: Uri): File? {
-        val accessToken = uri.host.orEmpty()
-        val segments = uri.pathSegments
-        if (accessToken.isBlank() || segments.size < 2) return null
-
-        val kind = segments[0]
-        val fileId = segments[1].toLongOrNull() ?: return null
-        val cache = EnteImageCache(context.applicationContext)
-        return when (kind) {
-            "image" -> cache.imageFile(accessToken, fileId)
-            "thumb" -> cache.previewFile(accessToken, fileId)
-            else -> null
-        }
+        // Ente cache files are encrypted at rest and must be loaded via EnteUriFetcher.
+        return uri
     }
 
     private fun detectFormat(targetUri: Uri, sourceUri: Uri): ImageFormatClassifier.Result {

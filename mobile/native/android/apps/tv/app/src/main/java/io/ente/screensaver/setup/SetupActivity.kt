@@ -2,6 +2,7 @@ package io.ente.photos.screensaver.setup
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -29,6 +30,10 @@ class SetupActivity : AppCompatActivity() {
     private val secureRandom = SecureRandom()
     private val pairingCode: String = generatePairingCode()
     private val setupEncryptionKeyBytes: ByteArray = ByteArray(32).also { secureRandom.nextBytes(it) }
+    private val setupEncryptionKeyB64Url: String = Base64.encodeToString(
+        setupEncryptionKeyBytes,
+        Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+    )
 
     private var server: EnteSetupServer? = null
     private var activePort: Int? = null
@@ -134,7 +139,7 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "http://$address:$port/?code=$pairingCode"
+        return "http://$address:$port/#code=$pairingCode&ek=$setupEncryptionKeyB64Url"
     }
 
     override fun onStart() {

@@ -251,7 +251,7 @@ class EntePublicAlbumRepository private constructor(
             mutex.withLock {
                 cachedState = null
                 withContext(Dispatchers.IO) {
-                    storage.clear()
+                    storage.clear(existing.accessToken)
                     EnteImageCache(appContext).clear(existing.accessToken)
                 }
             }
@@ -274,9 +274,17 @@ class EntePublicAlbumRepository private constructor(
 
     suspend fun clearConfig() {
         val config = configRepo.get()
+        val imageCache = EnteImageCache(appContext)
         mutex.withLock {
             cachedState = null
-            withContext(Dispatchers.IO) { storage.clear() }
+            withContext(Dispatchers.IO) {
+                if (config?.accessToken != null) {
+                    storage.clear(config.accessToken)
+                    imageCache.clear(config.accessToken)
+                } else {
+                    storage.clearAll()
+                }
+            }
         }
         config?.accessToken?.let { secureStore.clearAlbumPassword(it) }
         configRepo.clear()
@@ -288,7 +296,7 @@ class EntePublicAlbumRepository private constructor(
         mutex.withLock {
             cachedState = null
             withContext(Dispatchers.IO) {
-                storage.clear()
+                storage.clear(config.accessToken)
                 EnteImageCache(appContext).clear(config.accessToken)
             }
         }
@@ -305,7 +313,6 @@ class EntePublicAlbumRepository private constructor(
             val hadInMemoryState = cachedState != null
             val existing = cachedState ?: withContext(Dispatchers.IO) { storage.load(config.accessToken) }
                 ?: EntePublicAlbumCacheStorage.CacheState(
-                    accessToken = config.accessToken,
                     lastSyncTime = 0,
                     files = emptyMap(),
                 )
@@ -340,7 +347,7 @@ class EntePublicAlbumRepository private constructor(
             }
 
             cachedState = updated
-            withContext(Dispatchers.IO) { storage.save(updated) }
+            withContext(Dispatchers.IO) { storage.save(config.accessToken, updated) }
             updated
         }
     }
@@ -398,14 +405,14 @@ class EntePublicAlbumRepository private constructor(
 
         val uris = ArrayList<Uri>(selectedIds.size)
         for (id in selectedIds) {
-            uris.add(Uri.parse("ente://${state.accessToken}/image/$id"))
+            uris.add(Uri.parse("ente://${config.accessToken}/image/$id"))
         }
 
         if (updated) {
             mutex.withLock {
                 val updatedState = state.copy(files = updatedFiles)
                 cachedState = updatedState
-                withContext(Dispatchers.IO) { storage.save(updatedState) }
+                withContext(Dispatchers.IO) { storage.save(config.accessToken, updatedState) }
             }
         }
 
@@ -558,7 +565,7 @@ class EntePublicAlbumRepository private constructor(
             val updatedState = state.copy(files = updatedFiles)
 
             cachedState = updatedState
-            withContext(Dispatchers.IO) { storage.save(updatedState) }
+            withContext(Dispatchers.IO) { storage.save(accessToken, updatedState) }
         }
     }
 
@@ -631,7 +638,6 @@ class EntePublicAlbumRepository private constructor(
         }
 
         return EntePublicAlbumCacheStorage.CacheState(
-            accessToken = config.accessToken,
             lastSyncTime = time,
             files = files,
         )
