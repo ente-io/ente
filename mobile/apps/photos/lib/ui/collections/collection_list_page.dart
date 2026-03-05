@@ -75,6 +75,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     _scrollController = ScrollController(
       initialScrollOffset: widget.initialScrollOffset ?? 0,
     );
+    unawaited(refreshCollections());
   }
 
   @override
