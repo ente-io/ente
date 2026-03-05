@@ -686,7 +686,7 @@ class MLService {
               objectId: obj.objectId,
               detection: jsonEncode(detectionObj.toJson()),
               bodyVectorId: -1,
-              species: obj.cocoClass,
+              species: obj.cocoClass == 15 ? 1 : 0,
               score: obj.score,
               imageHeight: result.decodedImageSize.height,
               imageWidth: result.decodedImageSize.width,
@@ -701,7 +701,7 @@ class MLService {
           );
         }
       }
-      if (instruction.shouldRunPets) {
+      if (instruction.shouldRunPets && rustPets) {
         await mlDataDB.markPetIndexed(result.fileId, petMlVersion);
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");

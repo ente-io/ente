@@ -1,6 +1,6 @@
-use std::sync::Mutex;
+use std::sync::RwLock;
 
-use once_cell::sync::Lazy;
+use once_cell::sync::{Lazy, OnceCell};
 use ort::Session;
 
 use crate::ml::{
@@ -69,11 +69,16 @@ pub struct MlRuntimeConfig {
     pub provider_policy: ExecutionProviderPolicy,
 }
 
+/// A lazily-initialized ONNX session that is thread-safe for concurrent reads.
+///
+/// `OnceLock` ensures the session is loaded exactly once (on first use) and
+/// then shared via `&Session` for concurrent inference — `ort::Session::run()`
+/// takes `&self` and is `Send + Sync`.
 #[derive(Debug)]
 struct LazySession {
     path: String,
     policy: ExecutionProviderPolicy,
-    session: Option<Session>,
+    session: OnceCell<Session>,
 }
 
 impl LazySession {
@@ -81,22 +86,23 @@ impl LazySession {
         Self {
             path,
             policy,
-            session: None,
+            session: OnceCell::new(),
         }
     }
 
-    fn get_mut(&mut self, error_msg: &str) -> MlResult<&mut Session> {
+    fn get(&self, error_msg: &str) -> MlResult<&Session> {
         if self.path.trim().is_empty() {
             return Err(MlError::InvalidRequest(error_msg.to_string()));
         }
-        if self.session.is_none() {
-            let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
-            rt_log(&format!("loading {model_name}"));
-            let t = std::time::Instant::now();
-            self.session = Some(onnx::build_session(&self.path, &self.policy)?);
-            rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
-        }
-        Ok(self.session.as_mut().unwrap())
+        self.session
+            .get_or_try_init(|| {
+                let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
+                rt_log(&format!("loading {model_name}"));
+                let t = std::time::Instant::now();
+                let s = onnx::build_session(&self.path, &self.policy)?;
+                rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
+                Ok(s)
+            })
     }
 }
 
@@ -120,7 +126,7 @@ struct RuntimeState {
     runtime: MlRuntime,
 }
 
-static GLOBAL_RUNTIME: Lazy<Mutex<Option<RuntimeState>>> = Lazy::new(|| Mutex::new(None));
+static GLOBAL_RUNTIME: Lazy<RwLock<Option<RuntimeState>>> = Lazy::new(|| RwLock::new(None));
 
 fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
     let p = &config.provider_policy;
@@ -147,68 +153,74 @@ fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
 }
 
 impl MlRuntime {
-    pub fn face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_detection.get_mut(
+    pub fn face_detection_session(&self) -> MlResult<&Session> {
+        self.face_detection.get(
             "missing model path: faceDetectionModelPath is required when runFaces is true",
         )
     }
 
-    pub fn face_embedding_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_embedding.get_mut(
+    pub fn face_embedding_session(&self) -> MlResult<&Session> {
+        self.face_embedding.get(
             "missing model path: faceEmbeddingModelPath is required when runFaces is true",
         )
     }
 
-    pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_image.get_mut(
+    pub fn clip_image_session(&self) -> MlResult<&Session> {
+        self.clip_image.get(
             "missing model path: clipImageModelPath is required when runClip is true",
         )
     }
 
-    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_text.get_mut(
+    pub fn clip_text_session(&self) -> MlResult<&Session> {
+        self.clip_text.get(
             "missing model path: clipTextModelPath is required when running clip text",
         )
     }
 
-    pub fn pet_face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.pet_face_detection.get_mut(
+    pub fn pet_face_detection_session(&self) -> MlResult<&Session> {
+        self.pet_face_detection.get(
             "missing model path: petFaceDetectionModelPath is required when runPets is true",
         )
     }
 
-    pub fn pet_face_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
+    pub fn pet_face_embedding_dog_session(&self) -> MlResult<&Session> {
         self.pet_face_embedding_dog
-            .get_mut("missing model path: petFaceEmbeddingDogModelPath is required")
+            .get("missing model path: petFaceEmbeddingDogModelPath is required")
     }
 
-    pub fn pet_face_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
+    pub fn pet_face_embedding_cat_session(&self) -> MlResult<&Session> {
         self.pet_face_embedding_cat
-            .get_mut("missing model path: petFaceEmbeddingCatModelPath is required")
+            .get("missing model path: petFaceEmbeddingCatModelPath is required")
     }
 
-    pub fn pet_body_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.pet_body_detection.get_mut(
+    pub fn pet_body_detection_session(&self) -> MlResult<&Session> {
+        self.pet_body_detection.get(
             "missing model path: petBodyDetectionModelPath is required when runPets is true",
         )
     }
 
-    pub fn pet_body_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
+    pub fn pet_body_embedding_dog_session(&self) -> MlResult<&Session> {
         self.pet_body_embedding_dog
-            .get_mut("missing model path: petBodyEmbeddingDogModelPath is required")
+            .get("missing model path: petBodyEmbeddingDogModelPath is required")
     }
 
-    pub fn pet_body_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
+    pub fn pet_body_embedding_cat_session(&self) -> MlResult<&Session> {
         self.pet_body_embedding_cat
-            .get_mut("missing model path: petBodyEmbeddingCatModelPath is required")
+            .get("missing model path: petBodyEmbeddingCatModelPath is required")
     }
 }
 
-fn lock_runtime() -> std::sync::MutexGuard<'static, Option<RuntimeState>> {
-    match GLOBAL_RUNTIME.lock() {
+fn read_runtime() -> std::sync::RwLockReadGuard<'static, Option<RuntimeState>> {
+    match GLOBAL_RUNTIME.read() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner(),
+    }
+}
+
+fn write_runtime() -> std::sync::RwLockWriteGuard<'static, Option<RuntimeState>> {
+    match GLOBAL_RUNTIME.write() {
         Ok(guard) => guard,
         Err(poisoned) => {
-            // Recover from a previous panic by clearing runtime state.
             let mut guard = poisoned.into_inner();
             *guard = None;
             guard
@@ -218,7 +230,7 @@ fn lock_runtime() -> std::sync::MutexGuard<'static, Option<RuntimeState>> {
 
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     let should_rebuild = {
-        let guard = lock_runtime();
+        let guard = read_runtime();
         match guard.as_ref() {
             Some(existing) => existing.config != *config,
             None => true,
@@ -227,7 +239,7 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
 
     if should_rebuild {
         let runtime = create_runtime(config);
-        let mut guard = lock_runtime();
+        let mut guard = write_runtime();
         *guard = Some(RuntimeState {
             config: config.clone(),
             runtime,
@@ -236,18 +248,23 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     Ok(())
 }
 
-pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
+/// Run a function with a shared (read) reference to the runtime.
+///
+/// Multiple callers can hold the read lock concurrently, so CLIP text
+/// queries no longer block on image indexing and vice versa. The write
+/// lock is only acquired during `ensure_runtime` to swap the config.
+pub fn with_runtime<F, R>(config: &MlRuntimeConfig, func: F) -> MlResult<R>
 where
-    F: FnMut(&mut MlRuntime) -> MlResult<R>,
+    F: Fn(&MlRuntime) -> MlResult<R>,
 {
     ensure_runtime(config)?;
 
     let first_result = {
-        let mut guard = lock_runtime();
+        let guard = read_runtime();
         let state = guard
-            .as_mut()
+            .as_ref()
             .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-        func(&mut state.runtime)
+        func(&state.runtime)
     };
 
     match first_result {
@@ -261,18 +278,16 @@ where
             rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
             ensure_runtime(&fallback_config)?;
             let retry_result = {
-                let mut guard = lock_runtime();
+                let guard = read_runtime();
                 let state = guard
-                    .as_mut()
+                    .as_ref()
                     .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-                func(&mut state.runtime)
+                func(&state.runtime)
             };
 
             if retry_result.is_ok() {
-                let mut guard = lock_runtime();
+                let mut guard = write_runtime();
                 if let Some(state) = guard.as_mut() {
-                    // Keep the recovered runtime hot for this requested config to avoid
-                    // repeatedly attempting the failing EP combination on every image.
                     state.config = config.clone();
                 }
             }
@@ -314,7 +329,7 @@ fn is_execution_provider_failure(error: &MlError) -> bool {
 }
 
 pub fn release_runtime() -> MlResult<()> {
-    let mut guard = lock_runtime();
+    let mut guard = write_runtime();
     *guard = None;
     Ok(())
 }

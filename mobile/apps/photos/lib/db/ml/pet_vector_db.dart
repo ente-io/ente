@@ -176,7 +176,7 @@ class PetVectorDB {
 
     if (createIfMissing) {
       const insertSql = '''
-        INSERT OR IGNORE INTO $objectVectorIdMappingTable ($objectIDColumn)
+        INSERT OR IGNORE INTO $objectVectorIdMappingTable ($detectedObjectIDColumn)
         VALUES (?)
       ''';
       final insertParams = <List<Object?>>[];
@@ -192,14 +192,14 @@ class PetVectorDB {
       final chunk = uniqueIds.sublist(i, min(i + chunkSize, uniqueIds.length));
       final rows = await db.getAll(
         '''
-          SELECT $objectIDColumn, $objectVectorIdColumn
+          SELECT $detectedObjectIDColumn, $objectVectorIdColumn
           FROM $objectVectorIdMappingTable
-          WHERE $objectIDColumn IN (${List.filled(chunk.length, '?').join(',')})
+          WHERE $detectedObjectIDColumn IN (${List.filled(chunk.length, '?').join(',')})
         ''',
         chunk,
       );
       for (final row in rows) {
-        result[row[objectIDColumn] as String] =
+        result[row[detectedObjectIDColumn] as String] =
             row[objectVectorIdColumn] as int;
       }
     }

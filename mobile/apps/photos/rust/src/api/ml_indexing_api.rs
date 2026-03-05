@@ -182,9 +182,7 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
         provider_policy: to_provider_policy(&req.provider_policy),
     };
 
-    runtime::with_runtime_mut(&runtime_config, |runtime| {
-        // Decode inside the lock so only one image is in memory at a time.
-        // Without this, all queued images decode simultaneously, wasting memory.
+    runtime::with_runtime(&runtime_config, |runtime| {
         let decoded = decode_image_from_path(&req.image_path)?;
         let dims = RustDimensions {
             width: decoded.dimensions.width as i32,
@@ -293,7 +291,7 @@ fn run_clip_text_rust_inner(req: RunClipTextRequest) -> MlResult<RunClipTextResu
         provider_policy: to_provider_policy(&provider_policy),
     };
 
-    runtime::with_runtime_mut(&runtime_config, move |runtime| {
+    runtime::with_runtime(&runtime_config, |runtime| {
         let clip = run_clip_text_query(runtime, &text, &vocab_path)?;
         Ok(RunClipTextResult {
             embedding: clip

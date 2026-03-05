@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
 
 // Shared column names
 const petFaceIDColumn = 'pet_face_id';
-const objectIDColumn = 'object_id';
+const detectedObjectIDColumn = 'object_id';
 const speciesColumn = 'species';
 const detectionColumn = 'detection';
 const faceVectorIdColumn = 'face_vector_id';
@@ -221,7 +221,7 @@ const detectedObjectsTable = 'detected_objects';
 const createDetectedObjectsTable =
     '''CREATE TABLE IF NOT EXISTS $detectedObjectsTable (
   $fileIDColumn INTEGER NOT NULL,
-  $objectIDColumn TEXT NOT NULL UNIQUE,
+  $detectedObjectIDColumn TEXT NOT NULL UNIQUE,
   $detectionColumn TEXT NOT NULL,
   $bodyVectorIdColumn INTEGER NOT NULL,
   $speciesColumn INTEGER NOT NULL,
@@ -230,7 +230,7 @@ const createDetectedObjectsTable =
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
   $petBodyEmbeddingColumn BLOB,
-  PRIMARY KEY($fileIDColumn, $objectIDColumn)
+  PRIMARY KEY($fileIDColumn, $detectedObjectIDColumn)
 );
 ''';
 
@@ -295,7 +295,7 @@ const objectVectorIdColumn = 'object_vector_id';
 const createObjectVectorIdMappingTable = '''
 CREATE TABLE IF NOT EXISTS $objectVectorIdMappingTable (
   $objectVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  $objectIDColumn TEXT NOT NULL UNIQUE
+  $detectedObjectIDColumn TEXT NOT NULL UNIQUE
 );
 ''';
 
