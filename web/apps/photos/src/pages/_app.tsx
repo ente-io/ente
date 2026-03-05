@@ -65,6 +65,9 @@ type MainContentProps = Pick<PhotosAppProps, "Component" | "pageProps"> & {
     isChangingRoute: boolean;
 };
 
+const shouldEnableAppLockForCurrentUser = () =>
+    process.env.NEXT_PUBLIC_ENABLE_APP_LOCK_FEATURE === "true";
+
 const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
@@ -238,6 +241,48 @@ const WebMainContent: React.FC<MainContentProps> = ({
 );
 
 const DesktopMainContent: React.FC<MainContentProps> = ({
+    Component,
+    pageProps,
+    isChangingRoute,
+}) =>
+    shouldEnableAppLockForCurrentUser() ? (
+        <DesktopMainContentWithAppLock
+            Component={Component}
+            pageProps={pageProps}
+            isChangingRoute={isChangingRoute}
+        />
+    ) : (
+        <DesktopMainContentWithoutAppLock
+            Component={Component}
+            pageProps={pageProps}
+            isChangingRoute={isChangingRoute}
+        />
+    );
+
+const DesktopMainContentWithoutAppLock: React.FC<MainContentProps> = ({
+    Component,
+    pageProps,
+    isChangingRoute,
+}) => {
+    const router = useRouter();
+    const { isReady, pathname, replace } = router;
+
+    useEffect(() => {
+        if (!isReady) return;
+        if (pathname === "/lock") {
+            void replace("/gallery");
+        }
+    }, [isReady, pathname, replace]);
+
+    return (
+        <>
+            {isChangingRoute && <TranslucentLoadingOverlay />}
+            <Component {...pageProps} />
+        </>
+    );
+};
+
+const DesktopMainContentWithAppLock: React.FC<MainContentProps> = ({
     Component,
     pageProps,
     isChangingRoute,

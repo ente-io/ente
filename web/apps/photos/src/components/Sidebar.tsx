@@ -245,6 +245,9 @@ type FreeUpSpaceAction = Extract<
 const appLockReauthenticationCancelledMessage =
     "app_lock_reauthentication_cancelled";
 
+const shouldRenderAppLockForCurrentUser = () =>
+    process.env.NEXT_PUBLIC_ENABLE_APP_LOCK_FEATURE === "true";
+
 const isReauthenticationCancellation = (error: unknown) =>
     error == undefined ||
     (error instanceof Error &&
@@ -1161,6 +1164,7 @@ const Account: React.FC<AccountProps> = ({
 const DesktopAppLockSettings: React.FC<
     Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
 > = ({ onAuthenticateUser, onRootClose }) => {
+    const shouldRenderAppLock = shouldRenderAppLockForCurrentUser();
     const { show, props } = useModalVisibility();
 
     const handleOpen = useCallback(async () => {
@@ -1172,6 +1176,8 @@ const DesktopAppLockSettings: React.FC<
             log.error("Failed to open app lock settings", error);
         }
     }, [onAuthenticateUser, show]);
+
+    if (!shouldRenderAppLock) return null;
 
     return (
         <>

@@ -33,7 +33,17 @@ import { useAppLockSnapshot } from "../utils/use-snapshot";
 
 type DeviceLockEnableOutcome = "success" | "cancelled" | "failed";
 
-export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+const shouldRenderAppLockForCurrentUser = () =>
+    process.env.NEXT_PUBLIC_ENABLE_APP_LOCK_FEATURE === "true";
+
+export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = (
+    props,
+) =>
+    shouldRenderAppLockForCurrentUser() ? (
+        <AppLockSettingsForAswin {...props} />
+    ) : null;
+
+const AppLockSettingsForAswin: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
