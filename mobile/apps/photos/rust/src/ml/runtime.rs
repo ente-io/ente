@@ -32,6 +32,7 @@ pub struct ModelPaths {
     pub face_detection: String,
     pub face_embedding: String,
     pub clip_image: String,
+    pub clip_text: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,70 +42,86 @@ pub struct MlRuntimeConfig {
 }
 
 #[derive(Debug)]
+struct ModelSession {
+    path: String,
+    // Per-model policy cache key. After CPU-only recovery we restore this key
+    // to the requested policy so failing EP combinations are not retried on
+    // every subsequent call.
+    policy_key: ExecutionProviderPolicy,
+    session: Session,
+}
+
+#[derive(Debug)]
 pub struct MlRuntime {
-    face_detection: Option<Session>,
-    face_embedding: Option<Session>,
-    clip_image: Option<Session>,
+    face_detection: Option<ModelSession>,
+    face_embedding: Option<ModelSession>,
+    clip_image: Option<ModelSession>,
+    clip_text: Option<ModelSession>,
 }
 
 #[derive(Debug)]
 struct RuntimeState {
-    config: MlRuntimeConfig,
     runtime: MlRuntime,
 }
 
 static GLOBAL_RUNTIME: Lazy<Mutex<Option<RuntimeState>>> = Lazy::new(|| Mutex::new(None));
 
-fn create_runtime(config: &MlRuntimeConfig) -> MlResult<MlRuntime> {
-    let face_detection =
-        build_optional_session(&config.model_paths.face_detection, &config.provider_policy)?;
-    let face_embedding =
-        build_optional_session(&config.model_paths.face_embedding, &config.provider_policy)?;
-    let clip_image =
-        build_optional_session(&config.model_paths.clip_image, &config.provider_policy)?;
-    Ok(MlRuntime {
-        face_detection,
-        face_embedding,
-        clip_image,
-    })
-}
-
-fn build_optional_session(
-    model_path: &str,
-    provider_policy: &ExecutionProviderPolicy,
-) -> MlResult<Option<Session>> {
-    if model_path.trim().is_empty() {
-        return Ok(None);
-    }
-    Ok(Some(onnx::build_session(model_path, provider_policy)?))
-}
-
 impl MlRuntime {
+    fn new() -> Self {
+        Self {
+            face_detection: None,
+            face_embedding: None,
+            clip_image: None,
+            clip_text: None,
+        }
+    }
+
     pub fn face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_detection.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: faceDetectionModelPath is required when runFaces is true"
-                    .to_string(),
-            )
-        })
+        self.face_detection
+            .as_mut()
+            .ok_or_else(|| {
+                MlError::InvalidRequest(
+                    "missing model path: faceDetectionModelPath is required when runFaces is true"
+                        .to_string(),
+                )
+            })
+            .map(|model| &mut model.session)
     }
 
     pub fn face_embedding_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_embedding.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: faceEmbeddingModelPath is required when runFaces is true"
-                    .to_string(),
-            )
-        })
+        self.face_embedding
+            .as_mut()
+            .ok_or_else(|| {
+                MlError::InvalidRequest(
+                    "missing model path: faceEmbeddingModelPath is required when runFaces is true"
+                        .to_string(),
+                )
+            })
+            .map(|model| &mut model.session)
     }
 
     pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_image.as_mut().ok_or_else(|| {
-            MlError::InvalidRequest(
-                "missing model path: clipImageModelPath is required when runClip is true"
-                    .to_string(),
-            )
-        })
+        self.clip_image
+            .as_mut()
+            .ok_or_else(|| {
+                MlError::InvalidRequest(
+                    "missing model path: clipImageModelPath is required when runClip is true"
+                        .to_string(),
+                )
+            })
+            .map(|model| &mut model.session)
+    }
+
+    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.clip_text
+            .as_mut()
+            .ok_or_else(|| {
+                MlError::InvalidRequest(
+                    "missing model path: clipTextModelPath is required when running clip text"
+                        .to_string(),
+                )
+            })
+            .map(|model| &mut model.session)
     }
 }
 
@@ -121,33 +138,21 @@ fn lock_runtime() -> std::sync::MutexGuard<'static, Option<RuntimeState>> {
 }
 
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
-    let should_rebuild = {
-        let guard = lock_runtime();
-        match guard.as_ref() {
-            Some(existing) => existing.config != *config,
-            None => true,
-        }
-    };
+    let mut guard = lock_runtime();
+    let state = guard.get_or_insert_with(|| RuntimeState {
+        runtime: MlRuntime::new(),
+    });
 
-    if should_rebuild {
-        let runtime = create_runtime(config)?;
-        let mut guard = lock_runtime();
-        *guard = Some(RuntimeState {
-            config: config.clone(),
-            runtime,
-        });
-    }
+    // Runtime config is additive:
+    // - Empty model path keeps current session as-is.
+    // - Non-empty model path loads/replaces only that model session.
+    // Provider policy is per-model (not global): each loaded/reloaded model
+    // caches the policy from the request that configured it.
+    apply_runtime_config(&mut state.runtime, config)?;
     Ok(())
 }
 
-pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, func: F) -> MlResult<R>
-where
-    F: FnMut(&mut MlRuntime) -> MlResult<R>,
-{
-    with_runtime_mut_inner(config, func)
-}
-
-fn with_runtime_mut_inner<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
+pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
 where
     F: FnMut(&mut MlRuntime) -> MlResult<R>,
 {
@@ -184,9 +189,9 @@ where
             if retry_result.is_ok() {
                 let mut guard = lock_runtime();
                 if let Some(state) = guard.as_mut() {
-                    // Keep the recovered runtime hot for this requested config to avoid
-                    // repeatedly attempting the failing EP combination on every image.
-                    state.config = config.clone();
+                    // Keep recovered sessions hot under the originally requested
+                    // policy key to avoid repeated EP retries per call.
+                    restore_requested_policy_keys(&mut state.runtime, config);
                 }
             }
 
@@ -230,4 +235,95 @@ pub fn release_runtime() -> MlResult<()> {
     let mut guard = lock_runtime();
     *guard = None;
     Ok(())
+}
+
+fn apply_runtime_config(runtime: &mut MlRuntime, config: &MlRuntimeConfig) -> MlResult<()> {
+    apply_model_update(
+        &mut runtime.face_detection,
+        &config.model_paths.face_detection,
+        &config.provider_policy,
+    )?;
+    apply_model_update(
+        &mut runtime.face_embedding,
+        &config.model_paths.face_embedding,
+        &config.provider_policy,
+    )?;
+    apply_model_update(
+        &mut runtime.clip_image,
+        &config.model_paths.clip_image,
+        &config.provider_policy,
+    )?;
+    apply_model_update(
+        &mut runtime.clip_text,
+        &config.model_paths.clip_text,
+        &config.provider_policy,
+    )?;
+    Ok(())
+}
+
+fn apply_model_update(
+    model: &mut Option<ModelSession>,
+    model_path: &str,
+    provider_policy: &ExecutionProviderPolicy,
+) -> MlResult<()> {
+    if model_path.trim().is_empty() {
+        return Ok(());
+    }
+
+    let should_reload = match model.as_ref() {
+        Some(existing) => existing.path != model_path || existing.policy_key != *provider_policy,
+        None => true,
+    };
+    if !should_reload {
+        return Ok(());
+    }
+
+    let session = onnx::build_session(model_path, provider_policy)?;
+    *model = Some(ModelSession {
+        path: model_path.to_string(),
+        policy_key: provider_policy.clone(),
+        session,
+    });
+    Ok(())
+}
+
+fn restore_requested_policy_keys(runtime: &mut MlRuntime, config: &MlRuntimeConfig) {
+    restore_model_policy_key(
+        &mut runtime.face_detection,
+        &config.model_paths.face_detection,
+        &config.provider_policy,
+    );
+    restore_model_policy_key(
+        &mut runtime.face_embedding,
+        &config.model_paths.face_embedding,
+        &config.provider_policy,
+    );
+    restore_model_policy_key(
+        &mut runtime.clip_image,
+        &config.model_paths.clip_image,
+        &config.provider_policy,
+    );
+    restore_model_policy_key(
+        &mut runtime.clip_text,
+        &config.model_paths.clip_text,
+        &config.provider_policy,
+    );
+}
+
+fn restore_model_policy_key(
+    model: &mut Option<ModelSession>,
+    model_path: &str,
+    requested_policy: &ExecutionProviderPolicy,
+) {
+    if model_path.trim().is_empty() {
+        return;
+    }
+
+    let Some(model) = model.as_mut() else {
+        return;
+    };
+
+    if model.path == model_path {
+        model.policy_key = requested_policy.clone();
+    }
 }
