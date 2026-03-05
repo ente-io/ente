@@ -96,7 +96,9 @@ class _QrContentEntry extends StatelessWidget {
             buttonType: ButtonTypeV2.primary,
             labelText: l10n.openLink,
             onTap: () async {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
+              try {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } catch (_) {}
             },
           ),
           const SizedBox(height: 8),
@@ -119,11 +121,11 @@ class _QrContentEntry extends StatelessWidget {
                   mode: LaunchMode.externalApplication,
                 );
                 if (!launched && context.mounted) {
-                  showShortToast(context, "No payment app found");
+                  showShortToast(context, l10n.noPaymentAppFound);
                 }
               } catch (_) {
                 if (context.mounted) {
-                  showShortToast(context, "No payment app found");
+                  showShortToast(context, l10n.noPaymentAppFound);
                 }
               }
             },

@@ -19,14 +19,12 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
 import java.util.*
+import java.util.concurrent.Executors
 
 /** EnteQrPlugin */
 class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  private val executor = Executors.newSingleThreadExecutor()
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ente_qr")
@@ -48,14 +46,15 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
           return
         }
 
-        try {
-          val qrResult = scanQrCode(imagePath)
-          result.success(qrResult)
-        } catch (e: Exception) {
-          result.success(mapOf(
-            "success" to false,
-            "error" to "Error scanning QR code: ${e.message}"
-          ))
+        executor.execute {
+          val qrResult = try {
+            scanQrCode(imagePath)
+          } catch (e: Exception) {
+            mapOf("success" to false, "error" to "Error scanning QR code: ${e.message}")
+          }
+          android.os.Handler(android.os.Looper.getMainLooper()).post {
+            result.success(qrResult)
+          }
         }
       }
       "scanAllQrFromImage" -> {
@@ -68,14 +67,15 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
           return
         }
 
-        try {
-          val qrResult = scanAllQrCodes(imagePath)
-          result.success(qrResult)
-        } catch (e: Exception) {
-          result.success(mapOf(
-            "success" to false,
-            "error" to "Error scanning QR codes: ${e.message}"
-          ))
+        executor.execute {
+          val qrResult = try {
+            scanAllQrCodes(imagePath)
+          } catch (e: Exception) {
+            mapOf("success" to false, "error" to "Error scanning QR codes: ${e.message}")
+          }
+          android.os.Handler(android.os.Looper.getMainLooper()).post {
+            result.success(qrResult)
+          }
         }
       }
       else -> {
@@ -154,26 +154,24 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun scanAllQrCodes(imagePath: String): Map<String, Any> {
+    val file = File(imagePath)
+    if (!file.exists()) {
+      return mapOf(
+        "success" to false,
+        "error" to "Image file not found: $imagePath"
+      )
+    }
+
+    val origBitmap = BitmapFactory.decodeFile(imagePath)
+      ?: return mapOf(
+        "success" to false,
+        "error" to "Unable to decode image file"
+      )
+
+    var bitmap = origBitmap
     try {
-      val file = File(imagePath)
-      if (!file.exists()) {
-        return mapOf(
-          "success" to false,
-          "error" to "Image file not found: $imagePath"
-        )
-      }
-
-      val origBitmap = BitmapFactory.decodeFile(imagePath)
-      if (origBitmap == null) {
-        return mapOf(
-          "success" to false,
-          "error" to "Unable to decode image file"
-        )
-      }
-
       val origWidth = origBitmap.width.toDouble()
       val origHeight = origBitmap.height.toDouble()
-      var bitmap = origBitmap
 
       for (i in 0..2) {
         if (i != 0) {
@@ -265,6 +263,8 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
         "error" to "No QR code found in image"
       )
     } catch (e: Exception) {
+      if (bitmap !== origBitmap) bitmap.recycle()
+      origBitmap.recycle()
       return mapOf(
         "success" to false,
         "error" to "Error scanning QR codes: ${e.message}"
