@@ -13,8 +13,10 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
+  static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
+  static const int _memoryShareLinkFlag = 1 << 4;
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -97,6 +99,12 @@ class FlagService {
   bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
+
+  bool get isSocialEnabled =>
+      internalUser || _isServerFlagEnabled(_commentsFlag);
+
+  bool get enableMemoryShareLink =>
+      internalUser || _isServerFlagEnabled(_memoryShareLinkFlag);
 
   bool get useRustForML => internalUser;
 
