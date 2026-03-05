@@ -7,6 +7,29 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v1.3.16 (mobile) - Feb 2026
+
+- Fix broken map view
+
+## v1.3.15 (mobile) - Feb 2026
+
+- Faster search and discovery
+- See shared photos in feed
+- Fix window controls hiding app UI on iPadOS
+- Ignore already named persons
+- Fix iOS video player crash
+- Fix pinch to zoom opening info sheet on video
+- Refresh security toggles with latest account state (2FA + email verification)
+- Fix file picker galleries getting clipped on wider screens
+- More collage layouts
+
+## v1.3.13 (mobile) - Feb 2026
+
+- Cleanup hidden files in non-hidden albums
+- Delete hidden files from device
+- Hide shared albums
+- Search in device albums
+- 
 ## v1.7.19 (desktop) - Feb 2026
 
 - App lock
