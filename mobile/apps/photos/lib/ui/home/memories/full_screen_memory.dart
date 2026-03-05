@@ -6,6 +6,7 @@ import "dart:ui";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
@@ -15,6 +16,7 @@ import "package:photos/events/resume_video_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -22,10 +24,12 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -429,6 +433,27 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 ),
                               ),
                             ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () async {
+                                final fullScreenState =
+                                    context.findAncestorStateOfType<
+                                        _FullScreenMemoryState>();
+                                fullScreenState?._toggleAnimation(pause: true);
+                                await _shareMemoryAsLink(
+                                  context,
+                                  inheritedData,
+                                  widget.title,
+                                );
+                                fullScreenState?._toggleAnimation(pause: false);
+                              },
+                              child: const Icon(
+                                Icons.link,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                           ],
                         ),
                       ],
@@ -842,5 +867,36 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
               },
             ),
           );
+  }
+}
+
+Future<void> _shareMemoryAsLink(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+  String title,
+) async {
+  final memories = inheritedData.memories;
+
+  final dialog = createProgressDialog(context, "Creating share link...");
+  await dialog.show();
+
+  try {
+    final shareUrl = await MemoryShareService.instance.shareMemories(
+      memories: memories,
+      title: title,
+    );
+
+    await dialog.hide();
+
+    await Clipboard.setData(ClipboardData(text: shareUrl));
+
+    if (context.mounted) {
+      showShortToast(context, "Link copied to clipboard");
+    }
+  } catch (e) {
+    await dialog.hide();
+    if (context.mounted) {
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 }
