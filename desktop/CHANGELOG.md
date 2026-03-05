@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.22 (unreleased)
+
+-
+
 ## v1.7.21
 
 - Masonry layout for public albums
