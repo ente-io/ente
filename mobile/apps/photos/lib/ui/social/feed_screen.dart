@@ -102,6 +102,7 @@ class _FeedScreenState extends State<FeedScreen> {
   FeedNavigationTarget? _pendingNavigationTarget;
   bool _didHandleNavigationTarget = false;
   bool _isOpeningNavigationTarget = false;
+  final Set<String> _suppressedForwardHeroPrefixes = <String>{};
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _navigationTargetItemKey = GlobalKey();
 
@@ -559,6 +560,10 @@ class _FeedScreenState extends State<FeedScreen> {
                       final isLastItem = index == _feedItems.length - 1;
                       final itemKey = _feedItemStableKey(item);
                       final heroTagPrefix = _heroTagPrefixForFeedItem(item);
+                      final isForwardHeroSuppressed =
+                          _suppressedForwardHeroPrefixes.contains(
+                        heroTagPrefix,
+                      );
                       final key = _shouldUseNavigationTargetKey(item)
                           ? _navigationTargetItemKey
                           : ValueKey(itemKey);
@@ -566,6 +571,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         key: key,
                         feedItem: item,
                         heroTagPrefix: heroTagPrefix,
+                        enableThumbnailHero: !isForwardHeroSuppressed,
                         currentUserID: _currentUserID,
                         anonDisplayNames:
                             _anonDisplayNamesByCollection[item.collectionID] ??
@@ -652,6 +658,12 @@ class _FeedScreenState extends State<FeedScreen> {
         break;
       case FeedItemType.comment:
       case FeedItemType.reply:
+        _openComments(
+          item,
+          heroTagPrefix: heroTagPrefix,
+          disableForwardHero: true,
+        );
+        break;
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
         _openComments(item, heroTagPrefix: heroTagPrefix);
@@ -730,7 +742,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   /// Opens the photo viewer for the feed item, then shows the comments sheet.
-  Future<void> _openComments(FeedItem item, {String? heroTagPrefix}) async {
+  Future<void> _openComments(
+    FeedItem item, {
+    String? heroTagPrefix,
+    bool disableForwardHero = false,
+  }) async {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
@@ -740,6 +756,9 @@ class _FeedScreenState extends State<FeedScreen> {
     }
 
     if (fileID == null) return;
+    final shouldDisableForwardHero = disableForwardHero &&
+        heroTagPrefix != null &&
+        !_suppressedForwardHeroPrefixes.contains(heroTagPrefix);
 
     final file = await FilesDB.instance.getUploadedFile(
       fileID,
@@ -748,6 +767,13 @@ class _FeedScreenState extends State<FeedScreen> {
     if (file == null || !mounted) return;
 
     final capturedFileID = fileID;
+    if (shouldDisableForwardHero) {
+      setState(() {
+        _suppressedForwardHeroPrefixes.add(heroTagPrefix);
+      });
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
 
     // Navigate to the photo first, then show comments sheet after first frame
     unawaited(
@@ -771,6 +797,15 @@ class _FeedScreenState extends State<FeedScreen> {
         forceCustomPageRoute: true,
       ),
     );
+    if (shouldDisableForwardHero) {
+      unawaited(() async {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted) return;
+        setState(() {
+          _suppressedForwardHeroPrefixes.remove(heroTagPrefix);
+        });
+      }());
+    }
   }
 
   /// Opens the photo viewer for the feed item.
