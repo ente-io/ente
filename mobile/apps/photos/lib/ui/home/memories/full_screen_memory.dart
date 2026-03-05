@@ -163,8 +163,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
   AnimationController? _zoomAnimationController;
-  final ValueNotifier<Duration> durationNotifier =
-      ValueNotifier(const Duration(seconds: 5));
+  final ValueNotifier<Duration> durationNotifier = ValueNotifier(
+    const Duration(seconds: 5),
+  );
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -180,24 +181,23 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
-    hasPointerOnScreenNotifier.addListener(
-      _hasPointerListener,
+    hasPointerOnScreenNotifier.addListener(_hasPointerListener);
+
+    _detailSheetEventSubscription = Bus.instance.on<DetailsSheetEvent>().listen(
+      (event) {
+        final inheritedData = FullScreenMemoryData.of(context);
+        if (inheritedData == null) return;
+        final index = inheritedData.indexNotifier.value;
+        final currentFile = inheritedData.memories[index].file;
+
+        if (event.isSameFile(
+          uploadedFileID: currentFile.uploadedFileID,
+          localID: currentFile.localID,
+        )) {
+          _toggleAnimation(pause: event.opened);
+        }
+      },
     );
-
-    _detailSheetEventSubscription =
-        Bus.instance.on<DetailsSheetEvent>().listen((event) {
-      final inheritedData = FullScreenMemoryData.of(context);
-      if (inheritedData == null) return;
-      final index = inheritedData.indexNotifier.value;
-      final currentFile = inheritedData.memories[index].file;
-
-      if (event.isSameFile(
-        uploadedFileID: currentFile.uploadedFileID,
-        localID: currentFile.localID,
-      )) {
-        _toggleAnimation(pause: event.opened);
-      }
-    });
   }
 
   @override
@@ -317,17 +317,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final showStepProgressIndicator = inheritedData.memories.length < 60;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 4.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: SafeArea(
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: strokeFainterDark,
-              width: 1,
-            ),
+            border: Border.all(color: strokeFainterDark, width: 1),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -344,11 +339,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     onTap: () => Navigator.pop(context),
                     child: const Padding(
                       padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: Icon(Icons.close, color: Colors.white, size: 20),
                     ),
                   ),
                   builder: (context, value, child) {
@@ -364,8 +355,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                     totalSteps: inheritedData.memories.length,
                                     currentIndex: value,
                                     selectedColor: Colors.white,
-                                    unselectedColor:
-                                        Colors.white.withValues(alpha: 0.4),
+                                    unselectedColor: Colors.white.withValues(
+                                      alpha: 0.4,
+                                    ),
                                     duration: duration,
                                     animationController: (controller) {
                                       _progressAnimationController = controller;
@@ -386,9 +378,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 final fullScreenState =
                                     context.findAncestorStateOfType<
                                         _FullScreenMemoryState>();
-                                fullScreenState?._toggleAnimation(
-                                  pause: true,
-                                );
+                                fullScreenState?._toggleAnimation(pause: true);
                                 Bus.instance.fire(PauseVideoEvent());
                                 await routeToPage(
                                   context,
@@ -398,9 +388,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                   ),
                                 );
                                 Bus.instance.fire(ResumeVideoEvent());
-                                fullScreenState?._toggleAnimation(
-                                  pause: false,
-                                );
+                                fullScreenState?._toggleAnimation(pause: false);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -507,8 +495,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             currentFile,
                             autoPlay: false,
                             tagPrefix: "memories",
-                            backgroundDecoration:
-                                const BoxDecoration(color: Colors.transparent),
+                            backgroundDecoration: const BoxDecoration(
+                              color: Colors.transparent,
+                            ),
                             isFromMemories: true,
                             playbackCallback: (shouldEnable, _) {
                               _toggleAnimation(pause: !shouldEnable);
@@ -620,9 +609,7 @@ class BottomIcons extends StatelessWidget {
                   onFileRemoved: (file) => {
                     inheritedData.removeCurrentMemory.call(),
                     if (inheritedData.memories.isEmpty)
-                      {
-                        Navigator.of(context).pop(),
-                      },
+                      {Navigator.of(context).pop()},
                   },
                 );
                 fullScreenState?._toggleAnimation(pause: false);
@@ -631,10 +618,7 @@ class BottomIcons extends StatelessWidget {
           ]);
           if (!isOfflineMode) {
             rowChildren.add(
-              SizedBox(
-                height: 32,
-                child: FavoriteWidget(currentFile),
-              ),
+              SizedBox(height: 32, child: FavoriteWidget(currentFile)),
             );
           }
         }
@@ -646,10 +630,7 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await _showMemoryShareSheet(
-                context,
-                inheritedData,
-              );
+              await _showMemoryShareSheet(context, inheritedData);
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
@@ -738,10 +719,7 @@ class _MemoryBlur extends StatelessWidget {
           switchOutCurve: Curves.easeInExpo,
           child: ImageFiltered(
             key: ValueKey(inheritedData.indexNotifier.value),
-            imageFilter: ImageFilter.blur(
-              sigmaX: 100,
-              sigmaY: 100,
-            ),
+            imageFilter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
             child: ThumbnailWidget(
               currentFile,
               shouldShowSyncStatus: false,
@@ -789,9 +767,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
   void _initAnimation() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(
-        seconds: 5,
-      ),
+      duration: const Duration(seconds: 5),
       animationBehavior: AnimationBehavior.preserve,
     );
 
@@ -806,22 +782,12 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
     _scaleAnimation = Tween<double>(
       begin: startScale,
       end: endScale,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _panAnimation = Tween<Offset>(
       begin: Offset(startX, startY),
       end: Offset(endX, endY),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.scaleController != null) {
       widget.scaleController!(_controller);
@@ -864,6 +830,8 @@ Future<void> _showMemoryShareSheet(
   FullScreenMemoryData inheritedData,
 ) async {
   final l10n = AppLocalizations.of(context);
+  final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
+      !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
   final shouldShareLink = await showBaseBottomSheet<bool>(
     context,
     backgroundColor: getEnteColorScheme(context).backgroundColour,
@@ -874,18 +842,19 @@ Future<void> _showMemoryShareSheet(
         final colorScheme = getEnteColorScheme(context);
         return SettingsGroupedCard(
           children: [
-            MenuItemWidgetNew(
-              title: l10n.shareALinkToThisMemory,
-              trailingWidget: HugeIcon(
-                icon: HugeIcons.strokeRoundedLink02,
-                color: colorScheme.textBase,
-                size: 20,
+            if (canShowMemoryShareLinkOption)
+              MenuItemWidgetNew(
+                title: l10n.shareALinkToThisMemory,
+                trailingWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedLink02,
+                  color: colorScheme.textBase,
+                  size: 20,
+                ),
+                borderRadius: 0,
+                onTap: () async {
+                  Navigator.of(context).pop(true);
+                },
               ),
-              borderRadius: 0,
-              onTap: () async {
-                Navigator.of(context).pop(true);
-              },
-            ),
             MenuItemWidgetNew(
               title: l10n.shareThisPhoto,
               trailingWidget: HugeIcon(
@@ -908,10 +877,7 @@ Future<void> _showMemoryShareSheet(
   }
 
   if (shouldShareLink) {
-    await _showMemoryLinkDetailsSheet(
-      context,
-      inheritedData,
-    );
+    await _showMemoryLinkDetailsSheet(context, inheritedData);
     return;
   }
 
@@ -924,7 +890,7 @@ Future<void> _showMemoryLinkDetailsSheet(
   BuildContext context,
   FullScreenMemoryData inheritedData,
 ) async {
-  final shareLinkData = await _createMemoryShareLinkData(
+  final shareLinkData = await _getOrCreateMemoryLink(
     context,
     inheritedData,
   );
@@ -932,7 +898,7 @@ Future<void> _showMemoryLinkDetailsSheet(
     return;
   }
   final shareUrl = shareLinkData.$1;
-  final shareId = shareLinkData.$2;
+  final int shareId = shareLinkData.$2;
 
   final l10n = AppLocalizations.of(context);
   await showBaseBottomSheet<void>(
@@ -947,10 +913,7 @@ Future<void> _showMemoryLinkDetailsSheet(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.memoryShareLinkDescription,
-              style: textTheme.smallMuted,
-            ),
+            Text(l10n.memoryShareLinkDescription, style: textTheme.smallMuted),
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
@@ -962,10 +925,7 @@ Future<void> _showMemoryLinkDetailsSheet(
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 16, 44, 16),
-                    child: SelectableText(
-                      shareUrl,
-                      style: textTheme.small,
-                    ),
+                    child: SelectableText(shareUrl, style: textTheme.small),
                   ),
                   Positioned(
                     right: 0,
@@ -975,9 +935,7 @@ Future<void> _showMemoryLinkDetailsSheet(
                       iconSize: 20,
                       visualDensity: VisualDensity.compact,
                       onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: shareUrl),
-                        );
+                        await Clipboard.setData(ClipboardData(text: shareUrl));
                         if (context.mounted) {
                           showShortToast(context, l10n.linkCopiedToClipboard);
                         }
@@ -998,10 +956,7 @@ Future<void> _showMemoryLinkDetailsSheet(
               labelText: l10n.shareLink,
               shouldSurfaceExecutionStates: false,
               onTap: () async {
-                await shareText(
-                  shareUrl,
-                  context: context,
-                );
+                await shareText(shareUrl, context: context);
               },
             ),
             const SizedBox(height: 16),
@@ -1010,10 +965,6 @@ Future<void> _showMemoryLinkDetailsSheet(
                 buttonType: ButtonTypeV2.critical,
                 labelText: l10n.deleteLink,
                 onTap: () async {
-                  if (shareId == null) {
-                    showShortToast(context, l10n.somethingWentWrong);
-                    return;
-                  }
                   final shouldDelete = await showAlertBottomSheet<bool>(
                     context,
                     title: l10n.deleteLinkQuestion,
@@ -1025,8 +976,9 @@ Future<void> _showMemoryLinkDetailsSheet(
                         labelText: l10n.deleteLink,
                         onTap: () async {
                           try {
-                            await MemoryShareService.instance
-                                .deleteMemoryShare(shareId);
+                            await MemoryShareService.instance.deleteMemoryShare(
+                              shareId,
+                            );
                             if (context.mounted) {
                               showShortToast(
                                 context,
@@ -1060,7 +1012,7 @@ Future<void> _showMemoryLinkDetailsSheet(
   );
 }
 
-Future<(String, int?)?> _createMemoryShareLinkData(
+Future<(String, int)?> _getOrCreateMemoryLink(
   BuildContext context,
   FullScreenMemoryData inheritedData,
 ) async {
@@ -1069,7 +1021,7 @@ Future<(String, int?)?> _createMemoryShareLinkData(
   await dialog.show();
   try {
     final shareLinkData =
-        await MemoryShareService.instance.createMemoryShareLinkData(
+        await MemoryShareService.instance.getOrCreateMemoryLink(
       memories: inheritedData.memories,
       title: l10n.memories,
     );
