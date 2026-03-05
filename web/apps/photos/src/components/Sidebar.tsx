@@ -245,6 +245,9 @@ type FreeUpSpaceAction = Extract<
 const appLockReauthenticationCancelledMessage =
     "app_lock_reauthentication_cancelled";
 
+const isAppLockFeatureEnabled =
+    process.env.NEXT_PUBLIC_ENTE_ENABLE_APP_LOCK == "true";
+
 const isReauthenticationCancellation = (error: unknown) =>
     error == undefined ||
     (error instanceof Error &&
@@ -1113,7 +1116,7 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && (
+                {isDesktop && isAppLockFeatureEnabled && (
                     <DesktopAppLockSettings
                         onAuthenticateUser={onAuthenticateUser}
                         onRootClose={onRootClose}
@@ -1173,14 +1176,14 @@ const DesktopAppLockSettings: React.FC<
         }
     }, [onAuthenticateUser, show]);
 
-    return (
+    return isAppLockFeatureEnabled ? (
         <>
             <RowButtonGroup>
                 <RowButton label={t("app_lock")} onClick={handleOpen} />
             </RowButtonGroup>
             <AppLockSettings {...props} onRootClose={onRootClose} />
         </>
-    );
+    ) : null;
 };
 
 type PreferencesProps = NestedSidebarDrawerVisibilityProps & {

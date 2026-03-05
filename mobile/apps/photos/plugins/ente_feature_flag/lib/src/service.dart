@@ -110,6 +110,8 @@ class FlagService {
 
   bool get useRustForFaceThumbnails => internalUser;
 
+  bool get qrFeatureEnabled => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
