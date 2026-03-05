@@ -557,22 +557,27 @@ class _FeedScreenState extends State<FeedScreen> {
                       }
                       final item = _feedItems[index];
                       final isLastItem = index == _feedItems.length - 1;
+                      final itemKey = _feedItemStableKey(item);
+                      final heroTagPrefix = _heroTagPrefixForFeedItem(item);
                       final key = _shouldUseNavigationTargetKey(item)
                           ? _navigationTargetItemKey
-                          : ValueKey(
-                              '${item.type}_${item.fileID}_${item.commentID}_${item.createdAt}',
-                            );
+                          : ValueKey(itemKey);
                       return FeedItemWidget(
                         key: key,
                         feedItem: item,
+                        heroTagPrefix: heroTagPrefix,
                         currentUserID: _currentUserID,
                         anonDisplayNames:
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
                         isLastItem: isLastItem,
-                        onTap: () => _handleFeedItemTap(item),
+                        onTap: () => _handleFeedItemTap(
+                          item,
+                          heroTagPrefix: heroTagPrefix,
+                        ),
                         onSharedHeaderTap: () => _openSharedCollection(
                           item,
+                          heroTagPrefix: heroTagPrefix,
                           jumpToFileID: _jumpFileIDForSharedCollection(
                             type: item.type,
                             sharedFileIDs: item.sharedFileIDs,
@@ -581,6 +586,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         onSharedPhotoTap: (fileID) => _openSharedPhotos(
                           item,
                           initialFileID: fileID,
+                          heroTagPrefix: heroTagPrefix,
                         ),
                       );
                     },
@@ -618,22 +624,30 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  void _handleFeedItemTap(FeedItem item) {
+  String _feedItemStableKey(FeedItem item) {
+    return '${item.type}_${item.fileID}_${item.commentID}_${item.createdAt}';
+  }
+
+  String _heroTagPrefixForFeedItem(FeedItem item) {
+    return 'feed_item_${_feedItemStableKey(item)}_';
+  }
+
+  void _handleFeedItemTap(FeedItem item, {required String heroTagPrefix}) {
     switch (item.type) {
       case FeedItemType.photoLike:
-        _openPhoto(item);
+        _openPhoto(item, heroTagPrefix: heroTagPrefix);
         break;
       case FeedItemType.sharedPhoto:
-        _openSharedPhotos(item);
+        _openSharedPhotos(item, heroTagPrefix: heroTagPrefix);
         break;
       case FeedItemType.sharedCollection:
-        _openSharedCollection(item);
+        _openSharedCollection(item, heroTagPrefix: heroTagPrefix);
         break;
       case FeedItemType.comment:
       case FeedItemType.reply:
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
-        _openComments(item);
+        _openComments(item, heroTagPrefix: heroTagPrefix);
         break;
     }
   }
@@ -641,6 +655,7 @@ class _FeedScreenState extends State<FeedScreen> {
   Future<void> _openSharedCollection(
     FeedItem item, {
     int? jumpToFileID,
+    String? heroTagPrefix,
   }) async {
     var collection = CollectionsService.instance.getCollectionByID(
       item.collectionID,
@@ -661,7 +676,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
     if (collection == null || !mounted) {
       // Fallback to shared-photos viewer if collection metadata isn't available.
-      await _openSharedPhotos(item, initialFileID: jumpToFileID);
+      await _openSharedPhotos(
+        item,
+        initialFileID: jumpToFileID,
+        heroTagPrefix: heroTagPrefix,
+      );
       return;
     }
 
@@ -704,7 +723,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   /// Opens the photo viewer for the feed item, then shows the comments sheet.
-  Future<void> _openComments(FeedItem item) async {
+  Future<void> _openComments(FeedItem item, {String? heroTagPrefix}) async {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
@@ -731,7 +750,7 @@ class _FeedScreenState extends State<FeedScreen> {
           DetailPageConfiguration(
             [file],
             0,
-            "feed_comment",
+            heroTagPrefix ?? "feed_comment",
             onPageReady: (detailContext) {
               showFileCommentsBottomSheet(
                 detailContext,
@@ -748,7 +767,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   /// Opens the photo viewer for the feed item.
-  Future<void> _openPhoto(FeedItem item) async {
+  Future<void> _openPhoto(FeedItem item, {String? heroTagPrefix}) async {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
@@ -772,7 +791,7 @@ class _FeedScreenState extends State<FeedScreen> {
           DetailPageConfiguration(
             [file],
             0,
-            "feed_item",
+            heroTagPrefix ?? "feed_item",
           ),
         ),
         forceCustomPageRoute: true,
@@ -781,7 +800,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   /// Opens a gallery view of the shared photos.
-  Future<void> _openSharedPhotos(FeedItem item, {int? initialFileID}) async {
+  Future<void> _openSharedPhotos(
+    FeedItem item, {
+    int? initialFileID,
+    String? heroTagPrefix,
+  }) async {
     final fileIDs = item.sharedFileIDs;
     if (fileIDs == null || fileIDs.isEmpty) return;
 
@@ -810,7 +833,7 @@ class _FeedScreenState extends State<FeedScreen> {
           DetailPageConfiguration(
             files,
             initialIndex,
-            "feed_shared_photos",
+            heroTagPrefix ?? "feed_shared_photos",
           ),
         ),
         forceCustomPageRoute: true,

@@ -17,6 +17,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 /// Widget that displays a single feed item.
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
+  final String heroTagPrefix;
   final int currentUserID;
 
   /// Called when the user taps anywhere on the feed item.
@@ -36,6 +37,7 @@ class FeedItemWidget extends StatelessWidget {
 
   const FeedItemWidget({
     required this.feedItem,
+    required this.heroTagPrefix,
     required this.currentUserID,
     this.onTap,
     this.onSharedPhotoTap,
@@ -113,6 +115,7 @@ class FeedItemWidget extends StatelessWidget {
               child: _FeedThumbnail(
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
               ),
             )
           else
@@ -189,6 +192,7 @@ class FeedItemWidget extends StatelessWidget {
               child: SharedPhotosGrid(
                 fileIDs: feedItem.sharedFileIDs!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
                 onTap: onTap,
                 onPhotoTap: onSharedPhotoTap,
               ),
@@ -665,10 +669,12 @@ class _FeedTextContent extends StatelessWidget {
 class _FeedThumbnail extends StatefulWidget {
   final int fileID;
   final int collectionID;
+  final String heroTagPrefix;
 
   const _FeedThumbnail({
     required this.fileID,
     required this.collectionID,
+    required this.heroTagPrefix,
   });
 
   @override
@@ -739,20 +745,23 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: colorScheme.strokeFaint),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: 66,
-          height: 66,
-          child: ThumbnailWidget(
-            _file!,
-            fit: BoxFit.cover,
-            rawThumbnail: true,
+    return Hero(
+      tag: widget.heroTagPrefix + _file!.tag,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: colorScheme.strokeFaint),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            width: 66,
+            height: 66,
+            child: ThumbnailWidget(
+              _file!,
+              fit: BoxFit.cover,
+              rawThumbnail: true,
+            ),
           ),
         ),
       ),

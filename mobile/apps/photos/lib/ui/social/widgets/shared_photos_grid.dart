@@ -26,12 +26,16 @@ class SharedPhotosGrid extends StatefulWidget {
   /// Called when user taps an individual photo thumbnail.
   final ValueChanged<int>? onPhotoTap;
 
+  /// Prefix used for Hero tags while opening shared photos.
+  final String heroTagPrefix;
+
   /// Size of the grid (width). Height is calculated based on layout.
   final double gridSize;
 
   const SharedPhotosGrid({
     required this.fileIDs,
     required this.collectionID,
+    required this.heroTagPrefix,
     this.onTap,
     this.onPhotoTap,
     this.gridSize = 300,
@@ -258,15 +262,18 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildSharedPhotoThumbnail(EnteFile file) {
-    final thumbnail = ThumbnailWidget(
-      file,
-      fit: BoxFit.cover,
-      rawThumbnail: false,
-      shouldShowFavoriteIcon: false,
-      shouldShowSyncStatus: false,
-      shouldShowLivePhotoOverlay: true,
-      thumbnailSize: thumbnailLargeSize,
-      useRequestedThumbnailSizeForLocalCache: true,
+    final thumbnail = Hero(
+      tag: widget.heroTagPrefix + file.tag,
+      child: ThumbnailWidget(
+        file,
+        fit: BoxFit.cover,
+        rawThumbnail: false,
+        shouldShowFavoriteIcon: false,
+        shouldShowSyncStatus: false,
+        shouldShowLivePhotoOverlay: true,
+        thumbnailSize: thumbnailLargeSize,
+        useRequestedThumbnailSizeForLocalCache: true,
+      ),
     );
     final fileID = file.uploadedFileID;
     if (widget.onPhotoTap == null || fileID == null) {
