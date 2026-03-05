@@ -321,12 +321,16 @@ fn naive_nms_pet_body(
     while i + 1 < detections.len() {
         let mut j = i + 1;
         while j < detections.len() {
-            let iou = calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy);
-            if iou >= iou_threshold {
-                detections.remove(j);
-            } else {
-                j += 1;
+            // Only suppress within the same COCO class so a dog and cat
+            // occupying the same region are both retained.
+            if detections[i].coco_class == detections[j].coco_class {
+                let iou = calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy);
+                if iou >= iou_threshold {
+                    detections.remove(j);
+                    continue;
+                }
             }
+            j += 1;
         }
         i += 1;
     }
