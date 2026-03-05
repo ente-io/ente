@@ -387,8 +387,8 @@ class EnteSetupServer(
 
                 const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
                 const hashParams = new URLSearchParams(hash);
-                const ek = (hashParams.get('ek') || '').trim();
-                const code = (hashParams.get('code') || '').trim();
+                const ek = (hashParams.get('k') || hashParams.get('ek') || '').trim();
+                const code = (hashParams.get('c') || hashParams.get('code') || '').trim();
 
                 const bytesToBase64 = (bytes) => {
                   let binary = '';

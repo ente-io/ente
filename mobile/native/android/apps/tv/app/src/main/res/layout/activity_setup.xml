@@ -144,8 +144,8 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="360dp"
-                android:layout_height="360dp"
+                android:layout_width="392dp"
+                android:layout_height="392dp"
                 android:layout_gravity="center"
                 android:padding="2dp">
 

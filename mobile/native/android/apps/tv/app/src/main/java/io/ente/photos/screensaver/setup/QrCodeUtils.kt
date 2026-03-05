@@ -16,6 +16,8 @@ import java.io.ByteArrayOutputStream
 object QrCodeUtils {
 
     private const val LOGO_SIZE_RATIO = 0.10f
+    private const val DENSE_PAYLOAD_LOGO_RATIO = 0.08f
+    private const val DENSE_PAYLOAD_THRESHOLD = 72
     private const val EXAMPLE_CELL_SIZE = 13
 
     private val BLACK = Colors.css("#000000")
@@ -50,27 +52,24 @@ object QrCodeUtils {
             return Bitmap.createBitmap(maxOf(1, sizePx), maxOf(1, sizePx), Bitmap.Config.ARGB_8888)
         }
 
-        val targetLogoPx = (sizePx * LOGO_SIZE_RATIO).toInt().coerceAtLeast(16)
+        val logoRatio = if (text.length >= DENSE_PAYLOAD_THRESHOLD) DENSE_PAYLOAD_LOGO_RATIO else LOGO_SIZE_RATIO
+        val targetLogoPx = (sizePx * logoRatio).toInt().coerceAtLeast(16)
         val logoBytes = scaledLogoBytes(context, targetLogoPx)
+        val hasLogo = logoBytes.isNotEmpty()
+        val profiles = listOf(
+            BuildProfile(6, ErrorCorrectionLevel.VERY_HIGH, includeLogo = hasLogo),
+            BuildProfile(8, ErrorCorrectionLevel.HIGH, includeLogo = hasLogo),
+            BuildProfile(10, ErrorCorrectionLevel.HIGH, includeLogo = hasLogo, forceDensity = true),
+            BuildProfile(11, ErrorCorrectionLevel.MEDIUM, includeLogo = hasLogo, forceDensity = true),
+            BuildProfile(12, ErrorCorrectionLevel.MEDIUM, includeLogo = false, forceDensity = true),
+        )
 
-        val qrCode = runCatching {
-            QRCode.ofCircles()
-                .withSize(EXAMPLE_CELL_SIZE)
-                .withCustomColorFunction(setupColorFunction)
-                .withInformationDensity(6)
-                .withErrorCorrectionLevel(ErrorCorrectionLevel.VERY_HIGH)
-                .withLogo(logoBytes, targetLogoPx, targetLogoPx)
-                .build(text)
-        }.getOrElse {
-            // Fallback for long payloads so setup never crashes.
-            QRCode.ofCircles()
-                .withSize(EXAMPLE_CELL_SIZE)
-                .withCustomColorFunction(setupColorFunction)
-                .withInformationDensity(20)
-                .forceInformationDensity(true)
-                .withErrorCorrectionLevel(ErrorCorrectionLevel.HIGH)
-                .build(text)
+        var qrCode: QRCode? = null
+        for (profile in profiles) {
+            qrCode = buildQrCode(text, profile, logoBytes, targetLogoPx)
+            if (qrCode != null) break
         }
+        qrCode ?: return Bitmap.createBitmap(maxOf(1, sizePx), maxOf(1, sizePx), Bitmap.Config.ARGB_8888)
 
         val rendered = qrCode.render().nativeImage() as Bitmap
         return if (rendered.width == sizePx && rendered.height == sizePx) {
@@ -78,6 +77,36 @@ object QrCodeUtils {
         } else {
             Bitmap.createScaledBitmap(rendered, sizePx, sizePx, true)
         }
+    }
+
+    private data class BuildProfile(
+        val density: Int,
+        val correctionLevel: ErrorCorrectionLevel,
+        val includeLogo: Boolean,
+        val forceDensity: Boolean = false,
+    )
+
+    private fun buildQrCode(
+        text: String,
+        profile: BuildProfile,
+        logoBytes: ByteArray,
+        logoSizePx: Int,
+    ): QRCode? {
+        return runCatching {
+            var builder = QRCode.ofCircles()
+                .withSize(EXAMPLE_CELL_SIZE)
+                .withCustomColorFunction(setupColorFunction)
+                .withInformationDensity(profile.density)
+                .withErrorCorrectionLevel(profile.correctionLevel)
+
+            if (profile.forceDensity) {
+                builder = builder.forceInformationDensity(true)
+            }
+            if (profile.includeLogo) {
+                builder = builder.withLogo(logoBytes, logoSizePx, logoSizePx)
+            }
+            builder.build(text)
+        }.getOrNull()
     }
 
     private fun squareTypeAt(qrCode: QRCode, row: Int, col: Int): QRCodeSquareType? {

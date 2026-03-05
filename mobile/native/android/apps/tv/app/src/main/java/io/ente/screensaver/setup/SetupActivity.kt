@@ -139,7 +139,7 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "http://$address:$port/#code=$pairingCode&ek=$setupEncryptionKeyB64Url"
+        return "http://$address:$port/#c=$pairingCode&k=$setupEncryptionKeyB64Url"
     }
 
     override fun onStart() {
