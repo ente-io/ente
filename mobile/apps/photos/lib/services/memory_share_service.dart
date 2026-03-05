@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
-import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/files_db.dart";
@@ -26,21 +25,23 @@ class MemoryShareService {
   final Logger _logger = Logger("MemoryShareService");
 
   static const int _shortFragmentSecretLength = 12;
+  static const int _maxMemoryShareFiles = 30;
   static final RegExp _base62SecretPattern = RegExp(r'^[0-9A-Za-z]{12}$');
 
   late final Dio _enteDio;
   late final MemorySharesDB _db;
+  final Map<String, MemoryShare> _memoryShareByHashCache = {};
 
   Future<void> init() async {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
+    await _loadMemoryShareHashCache();
   }
 
-  /// Creates a memory share and returns the shareable URL with key in fragment.
-  Future<String> createMemoryShare({
+  Future<(String, int)> _createMemoryLink({
     required List<EnteFile> files,
     required String title,
-    String? memoryId,
+    String? memoryHash,
   }) async {
     List<EnteFile> uploadedFiles = const [];
     try {
@@ -49,15 +50,12 @@ class MemoryShareService {
       if (uploadedFiles.isEmpty) {
         throw Exception("No uploaded files to share");
       }
+      final resolvedMemoryHash = memoryHash ?? _getMemoryHash(uploadedFiles);
 
       final secretPayload = await _prepareShareSecret();
       final shareKey = secretPayload.shareKey;
 
-      final metadataMap = <String, dynamic>{'name': title};
-      if (memoryId != null) {
-        metadataMap['memoryId'] = memoryId;
-      }
-      final metadata = jsonEncode(metadataMap);
+      final metadata = jsonEncode({'name': title});
       final metadataBytes = utf8.encode(metadata);
       final encryptedMetadata = CryptoUtil.encryptSync(
         Uint8List.fromList(metadataBytes),
@@ -80,6 +78,7 @@ class MemoryShareService {
             CryptoUtil.bin2base64(encryptedMetadata.encryptedData!),
         'metadataNonce': CryptoUtil.bin2base64(encryptedMetadata.nonce!),
         ...secretPayload.metadata(),
+        'memoryHash': resolvedMemoryHash,
         'files': fileItems,
       };
 
@@ -87,49 +86,19 @@ class MemoryShareService {
       final memoryShare = MemoryShare.fromJson(response.data['memoryShare']);
 
       final shareUrl = "${memoryShare.url}#${secretPayload.secret}";
-      await _db.upsert(
-        MemoryShare(
-          id: memoryShare.id,
-          type: memoryShare.type,
-          metadataCipher: memoryShare.metadataCipher,
-          metadataNonce: memoryShare.metadataNonce,
-          encryptedKey: memoryShare.encryptedKey,
-          keyDecryptionNonce: memoryShare.keyDecryptionNonce,
-          accessToken: memoryShare.accessToken,
-          isDeleted: memoryShare.isDeleted,
-          createdAt: memoryShare.createdAt,
-          updatedAt: memoryShare.updatedAt,
-          url: shareUrl,
-          previewUploadedFileID: uploadedFiles.first.uploadedFileID,
-          fileCount: uploadedFiles.length,
-        ),
+      final localShare = memoryShare.copyWith(
+        url: shareUrl,
+        memoryHash: resolvedMemoryHash,
+        previewUploadedFileID: uploadedFiles.first.uploadedFileID,
+        fileCount: uploadedFiles.length,
       );
+      await _db.upsert(localShare);
+      _updateMemoryShareCache(localShare);
 
-      return shareUrl;
+      return (shareUrl, memoryShare.id);
     } catch (e, s) {
-      if (e is DioException) {
-        final ownerIDs = uploadedFiles.map((f) => f.ownerID).toSet().toList();
-        final sampleFileIDs = uploadedFiles
-            .map((f) => f.uploadedFileID)
-            .whereType<int>()
-            .take(10)
-            .toList();
-        final distinctFileIDCount = uploadedFiles
-            .map((f) => f.uploadedFileID)
-            .whereType<int>()
-            .toSet()
-            .length;
-        _logger.severe(
-          "Failed to create memory share "
-          "(status: ${e.response?.statusCode}, data: ${e.response?.data}, "
-          "uploadedFiles: ${uploadedFiles.length}, ownerIDs: $ownerIDs, "
-          "distinctFileIDs: $distinctFileIDCount, sampleFileIDs: $sampleFileIDs)",
-          e,
-          s,
-        );
-      } else {
-        _logger.severe("Failed to create memory share", e, s);
-      }
+      _logger.severe("Failed to create memory share", e, s);
+
       rethrow;
     }
   }
@@ -168,12 +137,13 @@ class MemoryShareService {
 
       for (final share in result) {
         final localShare = await _db.getById(share.id);
-        await _db.upsert(
-          share.copyWith(
-            previewUploadedFileID: localShare?.previewUploadedFileID,
-            fileCount: localShare?.fileCount,
-          ),
+        final mergedShare = share.copyWith(
+          memoryHash: share.memoryHash ?? localShare?.memoryHash,
+          previewUploadedFileID: localShare?.previewUploadedFileID,
+          fileCount: localShare?.fileCount,
         );
+        await _db.upsert(mergedShare);
+        _updateMemoryShareCache(mergedShare);
       }
 
       return result;
@@ -211,19 +181,9 @@ class MemoryShareService {
           files.add(file);
         }
       }
-      if (files.isEmpty && kDebugMode) {
-        _logger.info(
-          "Public memory files response was empty, using debug dummy files",
-        );
-        return _buildDebugDummyMemoryFiles();
-      }
       return files;
     } catch (e, s) {
       _logger.severe("Failed to fetch public memory files", e, s);
-      if (kDebugMode) {
-        _logger.info("Using debug dummy files after fetch failure");
-        return _buildDebugDummyMemoryFiles();
-      }
       rethrow;
     }
   }
@@ -277,12 +237,13 @@ class MemoryShareService {
     }
   }
 
-  Future<void> deleteMemoryShare(int id) async {
+  Future<void> deleteMemoryShare(int shareID) async {
     try {
-      await _enteDio.delete('/memory-share/$id');
-      await _db.delete(id);
+      await _enteDio.delete('/memory-share/$shareID');
+      await _db.delete(shareID);
+      _removeMemoryShareFromCache(shareID);
     } catch (e, s) {
-      _logger.severe("Failed to delete memory share $id", e, s);
+      _logger.severe("Failed to delete memory share $shareID", e, s);
       rethrow;
     }
   }
@@ -505,92 +466,95 @@ class MemoryShareService {
     return null;
   }
 
-  Future<List<EnteFile>> _buildDebugDummyMemoryFiles({
-    int limit = 12,
-  }) async {
-    try {
-      final localFiles = await FilesDB.instance.getAllFilesFromDB(
-        const {},
-      );
-      if (localFiles.isEmpty) {
-        return [];
-      }
-      final usableFiles = localFiles
-          .where(
-            (file) =>
-                file.generatedID != null &&
-                file.creationTime != null &&
-                file.creationTime! > 0,
-          )
-          .take(limit)
-          .toList();
-      if (usableFiles.isEmpty) {
-        return [];
-      }
-      return List<EnteFile>.generate(
-        usableFiles.length,
-        (index) => usableFiles[index].copyWith(
-          title: "Dummy Memory File ${index + 1}",
-        ),
-      );
-    } catch (e, s) {
-      _logger.warning("Failed to build debug dummy memory files", e, s);
-      return [];
-    }
-  }
-
-  Future<(String, int?)> createMemoryShareLinkData({
+  Future<(String, int)> getOrCreateMemoryLink({
     required List<Memory> memories,
     required String title,
-    String? memoryId,
   }) async {
     try {
-      final shareUrl = await shareMemories(
-        memories: memories,
-        title: title,
-        memoryId: memoryId,
-      );
-      var memoryShare = await findMemoryShareByUrl(shareUrl);
-      if (memoryShare == null) {
-        await listMemoryShares();
-        memoryShare = await findMemoryShareByUrl(shareUrl);
+      final files = Memory.filesFromMemories(memories);
+      final filesForShare = files.take(_maxMemoryShareFiles).toList();
+      final memoryHash = _getMemoryHash(filesForShare);
+      final existingShare = await _findMemoryShareByHash(memoryHash);
+      if (existingShare != null &&
+          Uri.parse(existingShare.url).fragment.isNotEmpty) {
+        return (existingShare.url, existingShare.id);
       }
-      return (shareUrl, memoryShare?.id);
+      return _createMemoryLink(
+        files: filesForShare,
+        title: title,
+        memoryHash: memoryHash,
+      );
     } catch (e, s) {
       _logger.severe("Failed to create memory share link data", e, s);
       rethrow;
     }
   }
 
-  Future<MemoryShare?> findMemoryShareByUrl(String shareUrl) async {
+  Future<MemoryShare?> _findMemoryShareByHash(String memoryHash) async {
+    final cachedShare = _memoryShareByHashCache[memoryHash];
+    if (cachedShare != null && !cachedShare.isDeleted) {
+      return cachedShare;
+    }
+
     try {
-      final shares = await getLocalMemoryShares();
-      final shareUri = Uri.parse(shareUrl);
-      final linkWithoutFragment = shareUri.replace(fragment: "").toString();
-      for (final share in shares) {
-        if (share.url == shareUrl) {
-          return share;
-        }
-        final shareUriWithoutFragment =
-            Uri.parse(share.url).replace(fragment: "").toString();
-        if (shareUriWithoutFragment == linkWithoutFragment) {
+      final remoteShares = await listMemoryShares();
+      for (final share in remoteShares) {
+        if (!share.isDeleted && share.memoryHash == memoryHash) {
+          _updateMemoryShareCache(share);
           return share;
         }
       }
-      return null;
     } catch (e, s) {
-      _logger.severe("Failed to find memory share by URL", e, s);
-      rethrow;
+      _logger.warning(
+        "Failed to refresh memory-share hash cache while resolving memory hash",
+        e,
+        s,
+      );
+    }
+
+    return null;
+  }
+
+  Future<void> _loadMemoryShareHashCache() async {
+    _memoryShareByHashCache.clear();
+    final shares = await _db.getAll();
+    for (final share in shares) {
+      _updateMemoryShareCache(share);
     }
   }
 
-  Future<String> shareMemories({
-    required List<Memory> memories,
-    required String title,
-    String? memoryId,
-  }) async {
-    final files = Memory.filesFromMemories(memories);
-    return createMemoryShare(files: files, title: title, memoryId: memoryId);
+  void _updateMemoryShareCache(MemoryShare share) {
+    final hash = share.memoryHash;
+    if (hash == null || hash.isEmpty) {
+      return;
+    }
+    if (share.isDeleted) {
+      final existing = _memoryShareByHashCache[hash];
+      if (existing != null && existing.id == share.id) {
+        _memoryShareByHashCache.remove(hash);
+      }
+      return;
+    }
+    final existing = _memoryShareByHashCache[hash];
+    if (existing == null || share.createdAt >= existing.createdAt) {
+      _memoryShareByHashCache[hash] = share;
+    }
+  }
+
+  void _removeMemoryShareFromCache(int shareID) {
+    _memoryShareByHashCache.removeWhere((_, share) => share.id == shareID);
+  }
+
+  String _getMemoryHash(List<EnteFile> files) {
+    final uploadedFileIDs =
+        files.map((file) => file.uploadedFileID).whereType<int>().toList();
+    if (uploadedFileIDs.isEmpty) {
+      throw Exception("No uploaded files to share");
+    }
+    final uniqueSortedFileIDs = uploadedFileIDs.toSet().toList()..sort();
+    final hashInput =
+        "${uploadedFileIDs.length}:${uniqueSortedFileIDs.length}:${uniqueSortedFileIDs.join(',')}";
+    return sha256.convert(utf8.encode(hashInput)).toString();
   }
 }
 

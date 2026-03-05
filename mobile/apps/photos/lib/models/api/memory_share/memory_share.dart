@@ -24,6 +24,7 @@ class MemoryShare {
   final int createdAt;
   final int? updatedAt;
   final String url;
+  final String? memoryHash;
   final int? previewUploadedFileID;
   final int? fileCount;
 
@@ -39,6 +40,7 @@ class MemoryShare {
     required this.createdAt,
     this.updatedAt,
     required this.url,
+    this.memoryHash,
     this.previewUploadedFileID,
     this.fileCount,
   });
@@ -56,6 +58,7 @@ class MemoryShare {
       createdAt: json['createdAt'] as int,
       updatedAt: json['updatedAt'] as int?,
       url: json['url'] as String,
+      memoryHash: json['memoryHash'] as String?,
       previewUploadedFileID: json['previewUploadedFileID'] as int?,
       fileCount: json['fileCount'] as int?,
     );
@@ -73,6 +76,7 @@ class MemoryShare {
     int? createdAt,
     int? updatedAt,
     String? url,
+    String? memoryHash,
     int? previewUploadedFileID,
     int? fileCount,
   }) {
@@ -88,6 +92,7 @@ class MemoryShare {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       url: url ?? this.url,
+      memoryHash: memoryHash ?? this.memoryHash,
       previewUploadedFileID:
           previewUploadedFileID ?? this.previewUploadedFileID,
       fileCount: fileCount ?? this.fileCount,
@@ -107,6 +112,7 @@ class MemoryShare {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'url': url,
+      'memoryHash': memoryHash,
       'previewUploadedFileID': previewUploadedFileID,
       'fileCount': fileCount,
     };
