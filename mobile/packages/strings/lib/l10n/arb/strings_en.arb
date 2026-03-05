@@ -619,6 +619,10 @@
   "@tapToUnlock": {
     "description": "Message prompting user to tap to unlock"
   },
+  "unlock": "unlock",
+  "@unlock": {
+    "description": "Short action label used as the system authentication reason when unlocking the app"
+  },
   "areYouSureYouWantToLogout": "Are you sure you want to logout?",
   "@areYouSureYouWantToLogout": {
     "description": "Confirmation message before logout"

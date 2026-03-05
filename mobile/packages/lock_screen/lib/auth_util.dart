@@ -4,7 +4,6 @@ import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/types/auth_messages_ios.dart';
@@ -31,8 +30,8 @@ Future<bool> requestAuthentication(
     );
   }
   if (Platform.isLinux) {
-    // Linux uses flutter_local_authentication
-    return await FlutterLocalAuthentication().authenticate();
+    // Device lock is temporarily disabled on Linux.
+    return true;
   } else {
     await LocalAuthentication().stopAuthentication();
     final l10n = context.strings;
