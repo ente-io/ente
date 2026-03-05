@@ -29,6 +29,16 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Delete hidden files from device
 - Hide shared albums
 - Search in device albums
+- 
+## v1.7.19 (desktop) - Feb 2026
+
+- App lock
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
 
 ## v1.3.10 (mobile) - Feb 2026
 
@@ -36,7 +46,7 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Support for hidden rituals
 - Better upload reliability
 
-## v1.7.18 (desktop) - Feb 2026
+## v1.7.18 (desktop) - Jan 2026
 
 - Hide shared albums
 - Right click context menu for photos
