@@ -567,7 +567,7 @@ func inactivityStageConfig(stage inactivityEmailStage) inactivityEmailStageConfi
 }
 
 func isEnteDomainRolloutUser(email string) bool {
-	return strings.HasSuffix(strings.ToLower(strings.TrimSpace(email)), "@ente.io")
+	return strings.HasSuffix(emailUtil.NormalizeEmail(email), "@ente.io")
 }
 
 func formatDeletionDateForStage(stage inactivityEmailStage, now int64) string {

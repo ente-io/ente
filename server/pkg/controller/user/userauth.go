@@ -272,7 +272,7 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 // VerifyEmail validates that the OTT provided in the request is valid for the
 // provided email address and if yes returns the users credentials
 func (c *UserController) VerifyEmail(context *gin.Context, request ente.EmailVerificationRequest) (ente.EmailAuthorizationResponse, error) {
-	email := strings.ToLower(request.Email)
+	email := emailUtil.NormalizeEmail(request.Email)
 	err := c.verifyEmailOtt(context, email, request.OTT)
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -283,7 +283,7 @@ func (c *UserController) VerifyEmail(context *gin.Context, request ente.EmailVer
 // ChangeEmail validates that the OTT provided in the request is valid for the
 // provided email address and if yes updates the user's existing email address
 func (c *UserController) ChangeEmail(ctx *gin.Context, request ente.EmailVerificationRequest) error {
-	email := strings.ToLower(request.Email)
+	email := emailUtil.NormalizeEmail(request.Email)
 	err := c.verifyEmailOtt(ctx, email, request.OTT)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -294,6 +294,8 @@ func (c *UserController) ChangeEmail(ctx *gin.Context, request ente.EmailVerific
 
 // UpdateEmail updates the email address of the user with the provided userID
 func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email string) error {
+	email = emailUtil.NormalizeEmail(email)
+
 	_, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err == nil {
 		// email already owned by a user

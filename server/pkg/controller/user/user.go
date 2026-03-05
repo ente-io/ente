@@ -388,7 +388,7 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 		}
 		return stacktrace.Propagate(keyErr, "keyAttributes missing? Account can not be recovered")
 	}
-	email := strings.ToLower(req.EmailID)
+	email := email.NormalizeEmail(req.EmailID)
 	encryptedEmail, err := crypto.Encrypt(email, c.SecretEncryptionKey)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
