@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
@@ -23,7 +23,7 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	fromUserID := auth.GetUserID(ctx.Request.Header)
 	cID := req.CollectionID
 	encryptedKey := req.EncryptedKey
-	toUserEmail := strings.ToLower(strings.TrimSpace(req.Email))
+	toUserEmail := emailUtil.NormalizeEmail(req.Email)
 	// default role type
 	role := ente.VIEWER
 	if req.Role != nil {

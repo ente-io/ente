@@ -11,6 +11,7 @@ import (
 	"github.com/ente-io/museum/pkg/external/listmonk"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/crypto"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -269,7 +270,7 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 			if !subscriberInTargetLists(subscriber.ListIDs, cfg.TargetListIDSet) {
 				continue
 			}
-			email := normalizeEmailForHash(subscriber.Email)
+			email := emailUtil.NormalizeEmail(subscriber.Email)
 			if email == "" {
 				continue
 			}
@@ -352,10 +353,6 @@ func (h *AdminHandler) runListminkMissingSubscribersJob(cfg listminkMissingSubsc
 	summary.MissingCount = summary.ScannedCount - summary.MatchedCount
 	logger.WithField("missing_count", summary.MissingCount).Info("final missing subscribers count for async job")
 	return summary, nil
-}
-
-func normalizeEmailForHash(email string) string {
-	return strings.ToLower(email)
 }
 
 func subscriberInTargetLists(subscriberListIDs []int, targetListSet map[int]struct{}) bool {
