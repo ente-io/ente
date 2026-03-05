@@ -828,7 +828,8 @@ Future<MLResult> analyzeImageRust(Map args) async {
                 .toList(growable: false),
           );
           final alignment = AlignmentResult(
-            affineMatrix: [],
+            // Pet alignment is done in Rust; no Dart-side affine matrix needed.
+            affineMatrix: const [],
             center: face.alignment.center.toList(growable: false),
             size: face.alignment.cropSize,
             rotation: face.alignment.angle,

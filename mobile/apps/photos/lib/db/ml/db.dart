@@ -231,15 +231,15 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
       const String sql = '''
         INSERT INTO $detectedObjectsTable (
-          $fileIDColumn, $objectIDColumn, $detectionColumn, $bodyVectorIdColumn, $speciesColumn, $faceScore, $imageHeight, $imageWidth, $mlVersionColumn, $petBodyEmbeddingColumn
+          $fileIDColumn, $detectedObjectIDColumn, $detectionColumn, $bodyVectorIdColumn, $speciesColumn, $faceScore, $imageHeight, $imageWidth, $mlVersionColumn, $petBodyEmbeddingColumn
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT($fileIDColumn, $objectIDColumn) DO UPDATE SET $detectionColumn = excluded.$detectionColumn, $bodyVectorIdColumn = excluded.$bodyVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $faceScore = excluded.$faceScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn, $petBodyEmbeddingColumn = excluded.$petBodyEmbeddingColumn
+        ON CONFLICT($fileIDColumn, $detectedObjectIDColumn) DO UPDATE SET $detectionColumn = excluded.$detectionColumn, $bodyVectorIdColumn = excluded.$bodyVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $faceScore = excluded.$faceScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn, $petBodyEmbeddingColumn = excluded.$petBodyEmbeddingColumn
       ''';
       final parameterSets = batch.map((obj) {
         final map = obj.toMap();
         return [
           map[fileIDColumn],
-          map[objectIDColumn],
+          map[detectedObjectIDColumn],
           map[detectionColumn],
           map[bodyVectorIdColumn],
           map[speciesColumn],
@@ -296,7 +296,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       const String sql = '''
         UPDATE $detectedObjectsTable
         SET $bodyVectorIdColumn = ?
-        WHERE $objectIDColumn = ?
+        WHERE $detectedObjectIDColumn = ?
       ''';
       final parameterSets = batch.map((e) => [e.value, e.key]).toList();
       await db.executeBatch(sql, parameterSets);
@@ -368,10 +368,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<DetectedObjectResult> objects,
   ) async {
     try {
-      // Group by species (COCO class 15 = cat → species 1, 16 = dog → species 0)
+      // Group by species (0 = dog, 1 = cat)
       final bySpecies = <int, List<(DBDetectedObject, DetectedObjectResult)>>{};
       for (int i = 0; i < dbObjects.length; i++) {
-        final species = dbObjects[i].species == 15 ? 1 : 0;
+        final species = dbObjects[i].species;
         bySpecies.putIfAbsent(species, () => []);
         bySpecies[species]!.add((dbObjects[i], objects[i]));
       }
@@ -2380,6 +2380,22 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
          VALUES (?, ?)
          ON CONFLICT($fileIDColumn) DO UPDATE SET $mlVersionColumn = excluded.$mlVersionColumn''',
       [fileID, mlVersion],
+    );
+  }
+
+  @override
+  Future<void> deletePetDataForFiles(List<int> fileIDs) async {
+    if (fileIDs.isEmpty) return;
+    final db = await asyncDB;
+    final ids = fileIDs.join(", ");
+    await db.execute(
+      'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
+    );
+    await db.execute(
+      'DELETE FROM $detectedObjectsTable WHERE $fileIDColumn IN ($ids)',
+    );
+    await db.execute(
+      'DELETE FROM $petIndexedFilesTable WHERE $fileIDColumn IN ($ids)',
     );
   }
 

@@ -25,7 +25,7 @@ const BODY_EMBED_CHANNELS: i64 = 3;
 /// Faces are grouped by species and batched per model to avoid running the
 /// wrong embedding model on any detection.
 pub fn run_pet_face_embedding(
-    runtime: &mut MlRuntime,
+    runtime: &MlRuntime,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [PetFaceResult],
 ) -> MlResult<()> {
@@ -73,9 +73,9 @@ pub fn run_pet_face_embedding(
         }
 
         let session = if species == 0 {
-            runtime.pet_face_embedding_dog_session_mut()?
+            runtime.pet_face_embedding_dog_session()?
         } else {
-            runtime.pet_face_embedding_cat_session_mut()?
+            runtime.pet_face_embedding_cat_session()?
         };
 
         let (shape, output) = onnx::run_f32(
@@ -119,38 +119,86 @@ pub fn run_pet_face_embedding(
 ///
 /// Each body's own `coco_class` (16=dog, 15=cat) selects the embedding model,
 /// so mixed-species images get the correct model per detection.
+/// Bodies are grouped by species and batched per model.
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_body()`.
 pub fn run_pet_body_embedding(
-    runtime: &mut MlRuntime,
+    runtime: &MlRuntime,
     decoded: &DecodedImage,
     body_results: &mut [PetBodyResult],
 ) -> MlResult<()> {
-    for body_result in body_results.iter_mut() {
-        let (crop_data, crop_w, crop_h) = extract_crop(decoded, &body_result.detection.box_xyxy)?;
-        let input = preprocess_pet_embedding(&crop_data, crop_w, crop_h)?;
+    if body_results.is_empty() {
+        return Ok(());
+    }
 
+    let per_body_len =
+        (BODY_EMBED_INPUT_SIZE * BODY_EMBED_INPUT_SIZE * BODY_EMBED_CHANNELS) as usize;
+
+    // Preprocess all crops and group by species.
+    let mut dog_indices = Vec::new();
+    let mut cat_indices = Vec::new();
+    let mut preprocessed: Vec<Vec<f32>> = Vec::with_capacity(body_results.len());
+    for (i, body_result) in body_results.iter().enumerate() {
+        let (crop_data, crop_w, crop_h) =
+            extract_crop(decoded, &body_result.detection.box_xyxy)?;
+        let input = preprocess_pet_embedding(&crop_data, crop_w, crop_h)?;
+        preprocessed.push(input);
         // COCO class 15 = cat, 16 = dog
-        let session = if body_result.detection.coco_class == 15 {
-            runtime.pet_body_embedding_cat_session_mut()?
+        if body_result.detection.coco_class == 15 {
+            cat_indices.push(i);
         } else {
-            runtime.pet_body_embedding_dog_session_mut()?
+            dog_indices.push(i);
+        }
+    }
+
+    // Process each species batch.
+    for (is_cat, indices) in [(false, &dog_indices), (true, &cat_indices)] {
+        if indices.is_empty() {
+            continue;
+        }
+
+        let mut input = Vec::with_capacity(per_body_len * indices.len());
+        for &idx in indices {
+            input.extend_from_slice(&preprocessed[idx]);
+        }
+
+        let session = if is_cat {
+            runtime.pet_body_embedding_cat_session()?
+        } else {
+            runtime.pet_body_embedding_dog_session()?
         };
 
-        let (_shape, output) = onnx::run_f32(
+        let (shape, output) = onnx::run_f32(
             session,
             input,
             [
-                1,
+                indices.len() as i64,
                 BODY_EMBED_CHANNELS,
                 BODY_EMBED_INPUT_SIZE,
                 BODY_EMBED_INPUT_SIZE,
             ],
         )?;
 
-        let mut embedding = output;
-        normalize_embedding(&mut embedding);
-        body_result.body_embedding = embedding;
+        if shape.is_empty() {
+            return Err(MlError::Postprocess(
+                "pet body embedding output shape is empty".to_string(),
+            ));
+        }
+        let batch = shape[0] as usize;
+        if batch != indices.len() {
+            return Err(MlError::Postprocess(format!(
+                "pet body embedding batch mismatch: output={batch}, expected={}",
+                indices.len()
+            )));
+        }
+        let embedding_size = output.len() / batch;
+
+        for (batch_idx, &orig_idx) in indices.iter().enumerate() {
+            let start = batch_idx * embedding_size;
+            let mut embedding = output[start..(start + embedding_size)].to_vec();
+            normalize_embedding(&mut embedding);
+            body_results[orig_idx].body_embedding = embedding;
+        }
     }
 
     Ok(())

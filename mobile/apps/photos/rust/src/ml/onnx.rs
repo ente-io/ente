@@ -119,7 +119,7 @@ fn session_expects_f16(session: &Session) -> bool {
 /// Run inference accepting f32 data and returning f32 results.
 /// Automatically converts inputs/outputs for FP16 models.
 pub fn run_f32<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<f32>,
     input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {
@@ -155,7 +155,7 @@ pub fn run_f32<const N: usize>(
 }
 
 pub fn run_f32_data<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<f32>,
     input_shape: [i64; N],
 ) -> MlResult<Vec<f32>> {
@@ -170,7 +170,7 @@ pub fn run_f32_data<const N: usize>(
 }
 
 pub fn run_i32_f32<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<i32>,
     input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {

@@ -10,6 +10,7 @@ import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
@@ -170,7 +171,10 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
               runSpacing: 8,
               spacing: 12,
               children: _petFaces
-                  .map((info) => _buildPetThumbnail(info, thumbnailWidth))
+                  .map(
+                    (info) =>
+                        _buildPetThumbnail(info, thumbnailWidth, textTheme),
+                  )
                   .toList(),
             ),
           ),
@@ -179,7 +183,11 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
     );
   }
 
-  Widget _buildPetThumbnail(_PetFaceInfo info, double thumbnailWidth) {
+  Widget _buildPetThumbnail(
+    _PetFaceInfo info,
+    double thumbnailWidth,
+    EnteTextTheme textTheme,
+  ) {
     final l10n = AppLocalizations.of(context);
     final speciesLabel = info.species == 0 ? l10n.dog : l10n.cat;
 
@@ -200,7 +208,7 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
           const SizedBox(height: 4),
           Text(
             speciesLabel,
-            style: getEnteTextTheme(context).mini,
+            style: textTheme.mini,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),

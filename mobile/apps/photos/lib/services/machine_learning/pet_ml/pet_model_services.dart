@@ -1,8 +1,8 @@
 import 'package:logging/logging.dart';
 import "package:photos/services/machine_learning/ml_model.dart";
 
-/// Pet face detection model (YOLOv5-face with 3 keypoints).
-/// Model: yolov5n_petface_v2.onnx — detects pet faces with left_eye, right_eye, nose landmarks.
+/// Pet face detection model (YOLOv5s-face with 3 keypoints, FP16).
+/// Model: yolov5s_pet_face_fp16.onnx — detects pet faces with left_eye, right_eye, nose landmarks.
 class PetFaceDetectionService extends MlModel {
   static const kRemoteBucketModelPath = "yolov5s_pet_face_fp16.onnx";
   static const _modelName = "YOLOv5PetFace";

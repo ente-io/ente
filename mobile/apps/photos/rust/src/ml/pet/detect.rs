@@ -27,21 +27,21 @@ const COCO_DOG: u8 = 16;
 ///
 /// This mirrors `pet_pipeline/detection.py` `FaceDetector.detect()`.
 pub fn run_pet_face_detection(
-    runtime: &mut MlRuntime,
+    runtime: &MlRuntime,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetFaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
 
-    let pet_face_detection = runtime.pet_face_detection_session_mut()?;
+    let pet_face_detection = runtime.pet_face_detection_session()?;
     let (output_shape, output_data) = onnx::run_f32(
         pet_face_detection,
         input,
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
 
-    // Row format: [x, y, w, h, conf, lm_x1, lm_y1, lm_x2, lm_y2, lm_x3, lm_y3, class_id]
-    // row_len = 4 + 1 + 6 + 1 = 12
+    // Row format: [x, y, w, h, conf, lm_x1, lm_y1, lm_x2, lm_y2, lm_x3, lm_y3, cls0, cls1]
+    // row_len = 4 + 1 + 6 + 2 = 13 for 2-class model
     // Use the output shape's last dimension to determine row length reliably.
     let row_len = if output_shape.len() >= 2 {
         *output_shape.last().unwrap() as usize
@@ -109,9 +109,12 @@ pub fn run_pet_face_detection(
             pad_top,
         );
 
-        // class_id at index 11: 0=dog, 1=cat
-        let class_id = if row_len >= 12 {
-            row[11] as u8
+        // For a 2-class model (row_len >= 13): row[11] = dog score,
+        // row[12] = cat score.  Pick argmax.
+        // For a 1-class model (row_len == 12): row[11] is the single class
+        // score; class is always 0 (dog).
+        let class_id: u8 = if row_len >= 13 {
+            if row[12] > row[11] { 1 } else { 0 }
         } else {
             0
         };
@@ -134,13 +137,13 @@ pub fn run_pet_face_detection(
 ///
 /// This mirrors `pet_pipeline/detection.py` `BodyDetector.detect()`.
 pub fn run_pet_body_detection(
-    runtime: &mut MlRuntime,
+    runtime: &MlRuntime,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetBodyDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
 
-    let body_detection = runtime.pet_body_detection_session_mut()?;
+    let body_detection = runtime.pet_body_detection_session()?;
     let (_output_shape, output_data) = onnx::run_f32(
         body_detection,
         input,

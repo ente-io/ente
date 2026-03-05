@@ -93,7 +93,7 @@ class DBDetectedObject {
   Map<String, dynamic> toMap() {
     return {
       fileIDColumn: fileId,
-      objectIDColumn: objectId,
+      detectedObjectIDColumn: objectId,
       detectionColumn: detection,
       bodyVectorIdColumn: bodyVectorId,
       speciesColumn: species,
@@ -108,7 +108,7 @@ class DBDetectedObject {
   factory DBDetectedObject.fromMap(Map<String, dynamic> map) {
     return DBDetectedObject(
       fileId: map[fileIDColumn] as int,
-      objectId: map[objectIDColumn] as String,
+      objectId: map[detectedObjectIDColumn] as String,
       detection: map[detectionColumn] as String,
       bodyVectorId: map[bodyVectorIdColumn] as int,
       species: map[speciesColumn] as int,
