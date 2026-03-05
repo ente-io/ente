@@ -13,10 +13,14 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/api/memory_share/memory_share.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
@@ -28,10 +32,13 @@ import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
+import "package:photos/ui/tabs/shared/memory_link_item.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({super.key});
@@ -182,7 +189,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     return FutureBuilder<SharedCollections>(
       future: offlineUiMode
           ? Future.value(SharedCollections.empty())
-          : Future.value(CollectionsService.instance.getSharedCollections()),
+          : Future.value(
+              CollectionsService.instance.getSharedCollections(),
+            ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (offlineUiMode) {
@@ -190,12 +199,18 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               child: SharedEmptyOfflineStateWidget(),
             );
           }
-          if ((snapshot.data?.incoming.length ?? 0) == 0 &&
-              (snapshot.data?.quickLinks.length ?? 0) == 0 &&
-              (snapshot.data?.outgoing.length ?? 0) == 0) {
-            return const Center(child: SharedEmptyStateWidget());
+          final collections = snapshot.data!;
+          final hasSharedCollections = collections.incoming.isNotEmpty ||
+              collections.quickLinks.isNotEmpty ||
+              collections.outgoing.isNotEmpty;
+          if (!hasSharedCollections) {
+            return SafeArea(
+              child: _buildMemoryLinksOrEmptyState(),
+            );
           }
-          return SafeArea(child: _getSharedCollectionsGallery(snapshot.data!));
+          return SafeArea(
+            child: _getSharedCollectionsGallery(collections),
+          );
         } else if (snapshot.hasError) {
           _logger.severe(
             "critical: failed to load share gallery",
@@ -208,6 +223,174 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         } else {
           return const EnteLoadingWidget();
         }
+      },
+    );
+  }
+
+  Widget _buildMemoryLinksOrEmptyState() {
+    return FutureBuilder<List<MemoryShare>>(
+      future: _loadMemoryQuickLinks(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done &&
+            !snapshot.hasData) {
+          return const EnteLoadingWidget();
+        }
+        final memoryLinks = snapshot.data ?? const [];
+        if (memoryLinks.isEmpty) {
+          return const Center(
+            child: SharedEmptyStateWidget(),
+          );
+        }
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 50),
+            child: Column(
+              children: [
+                SectionOptions(
+                  SectionTitle(
+                    title: AppLocalizations.of(context).memories,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(
+                    bottom: 12,
+                    left: 12,
+                    right: 12,
+                  ),
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final memoryLink = memoryLinks[index];
+                    final memoryTitle = MemoryShareService.instance
+                            .getMemoryShareTitle(memoryLink) ??
+                        AppLocalizations.of(context).memories;
+                    return GestureDetector(
+                      onTap: () async {
+                        await _openMemoryQuickLink(memoryLink, memoryTitle);
+                      },
+                      child: MemoryLinkAlbumItem(
+                        title: memoryTitle,
+                        fileCount: memoryLink.fileCount,
+                        previewUploadedFileID: memoryLink.previewUploadedFileID,
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 4);
+                  },
+                  itemCount: memoryLinks.length,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<MemoryShare>> _loadMemoryQuickLinks() async {
+    List<MemoryShare> memoryLinks = const [];
+    try {
+      memoryLinks = await MemoryShareService.instance.getLocalMemoryShares();
+    } catch (e, s) {
+      _logger.warning("failed to load memory links for shared tab", e, s);
+    }
+    return memoryLinks;
+  }
+
+  Future<void> _openMemoryQuickLink(
+    MemoryShare memoryLink,
+    String memoryTitle,
+  ) async {
+    try {
+      final files = await MemoryShareService.instance
+          .getPublicMemoryFiles(memoryLink.url);
+      if (!mounted) {
+        return;
+      }
+      final id = -(memoryLink.url.hashCode.abs() + 1);
+      final collection = Collection(
+        id,
+        User(email: ""),
+        "",
+        null,
+        memoryTitle,
+        null,
+        null,
+        CollectionType.album,
+        CollectionAttributes(),
+        const [],
+        const [],
+        DateTime.now().microsecondsSinceEpoch,
+      );
+      collection.setName(memoryTitle);
+      await routeToPage(
+        context,
+        SharedPublicCollectionPage(
+          CollectionWithThumbnail(collection, null),
+          files: files,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("failed to open memory quick link", e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Widget _buildMemoryLinksSection({
+    required bool hasQuickLinks,
+  }) {
+    return FutureBuilder<List<MemoryShare>>(
+      future: _loadMemoryQuickLinks(),
+      builder: (context, snapshot) {
+        final memoryLinks = snapshot.data ?? const [];
+        if (memoryLinks.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Column(
+          children: [
+            SectionOptions(
+              SectionTitle(
+                title: AppLocalizations.of(context).memories,
+              ),
+            ),
+            const SizedBox(height: 2),
+            ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(
+                bottom: 12,
+                left: 12,
+                right: 12,
+                top: hasQuickLinks ? 0 : 12,
+              ),
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final memoryLink = memoryLinks[index];
+                final memoryTitle = MemoryShareService.instance
+                        .getMemoryShareTitle(memoryLink) ??
+                    AppLocalizations.of(context).memories;
+                return GestureDetector(
+                  onTap: () async {
+                    await _openMemoryQuickLink(memoryLink, memoryTitle);
+                  },
+                  child: MemoryLinkAlbumItem(
+                    title: memoryTitle,
+                    fileCount: memoryLink.fileCount,
+                    previewUploadedFileID: memoryLink.previewUploadedFileID,
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) {
+                return const SizedBox(height: 4);
+              },
+              itemCount: memoryLinks.length,
+            ),
+          ],
+        );
       },
     );
   }
@@ -441,43 +624,45 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             : null,
                       ),
                       const SizedBox(height: 2),
-                      ListView.separated(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.only(
-                          bottom: 12,
-                          left: 12,
-                          right: 12,
+                      if (numberOfQuickLinks > 0)
+                        ListView.separated(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.only(
+                            bottom: 12,
+                            left: 12,
+                            right: 12,
+                          ),
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () async {
+                                final thumbnail = await CollectionsService
+                                    .instance
+                                    .getCover(collections.quickLinks[index]);
+                                final page = CollectionPage(
+                                  CollectionWithThumbnail(
+                                    collections.quickLinks[index],
+                                    thumbnail,
+                                  ),
+                                  tagPrefix: heroTagPrefix,
+                                );
+                                // ignore: unawaited_futures
+                                routeToPage(context, page);
+                              },
+                              child: QuickLinkAlbumItem(
+                                c: collections.quickLinks[index],
+                              ),
+                            );
+                          },
+                          separatorBuilder: (context, index) {
+                            return const SizedBox(height: 4);
+                          },
+                          itemCount: min(numberOfQuickLinks, maxQuickLinks),
                         ),
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () async {
-                              final thumbnail = await CollectionsService
-                                  .instance
-                                  .getCover(collections.quickLinks[index]);
-                              final page = CollectionPage(
-                                CollectionWithThumbnail(
-                                  collections.quickLinks[index],
-                                  thumbnail,
-                                ),
-                                tagPrefix: heroTagPrefix,
-                              );
-                              // ignore: unawaited_futures
-                              routeToPage(context, page);
-                            },
-                            child: QuickLinkAlbumItem(
-                              c: collections.quickLinks[index],
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(height: 4);
-                        },
-                        itemCount: min(numberOfQuickLinks, maxQuickLinks),
-                      ),
                     ],
                   )
                 : const SizedBox.shrink(),
+            _buildMemoryLinksSection(hasQuickLinks: numberOfQuickLinks > 0),
             const SizedBox(height: 2),
             ValueListenableBuilder(
               valueListenable: _canLoadDeferredWidgets,
