@@ -11,7 +11,6 @@ import io.ente.photos.screensaver.diagnostics.AppLog
 import io.ente.photos.screensaver.ente.EnteCrypto
 import io.ente.photos.screensaver.ente.EntePublicAlbumRepository
 import io.ente.photos.screensaver.ente.toDisplayMessage
-import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
@@ -53,9 +52,13 @@ class EnteSetupServer(
             .ifBlank { "/" }
 
         return when {
-            session.method == Method.GET && path == "/" -> serveIndex()
-            session.method == Method.GET && path.startsWith("/setup-crypto/") ->
-                serveSetupCryptoAsset(path.removePrefix("/setup-crypto/"))
+            session.method == Method.GET && path == "/" -> {
+                newFixedLengthResponse(
+                    Response.Status.OK,
+                    MIME_PLAINTEXT,
+                    "Scan the QR code on your TV to set up",
+                )
+            }
             session.method == Method.POST && path == "/set" -> serveSet(session)
             path == "/set" -> {
                 newFixedLengthResponse(
@@ -73,60 +76,6 @@ class EnteSetupServer(
                 )
             }
         }
-    }
-
-    private fun serveSetupCryptoAsset(fileName: String): Response {
-        val allowed = mapOf(
-            "ente_wasm_bg.js" to "application/javascript",
-            "ente_wasm_bg.wasm" to "application/wasm",
-        )
-
-        val mime = allowed[fileName] ?: return newFixedLengthResponse(
-            Response.Status.NOT_FOUND,
-            MIME_PLAINTEXT,
-            s(R.string.setup_server_not_found),
-        )
-
-        val bytes = try {
-            appContext.assets.open("setup_crypto/$fileName").use { it.readBytes() }
-        } catch (_: IOException) {
-            return newFixedLengthResponse(
-                Response.Status.NOT_FOUND,
-                MIME_PLAINTEXT,
-                s(R.string.setup_server_not_found),
-            )
-        }
-
-        return newFixedLengthResponse(
-            Response.Status.OK,
-            mime,
-            bytes.inputStream(),
-            bytes.size.toLong(),
-        ).apply {
-            addHeader("Cache-Control", "no-store")
-        }
-    }
-
-    private fun serveIndex(): Response {
-        val body = """
-            <div class="card">
-              <h1>${esc(R.string.app_name)}</h1>
-              <form method="post" action="/set" id="setup-form">
-                <input type="hidden" name="payload" id="payload" />
-                <input type="hidden" name="header" id="header" />
-                <label for="url">${esc(R.string.setup_server_public_album_label)}</label>
-                <input name="url" id="url" placeholder="${esc(R.string.setup_server_public_album_placeholder)}" autocomplete="off" />
-                <label for="password">${esc(R.string.setup_server_password_label)}</label>
-                <input name="password" id="password" type="password" autocomplete="new-password" />
-                <button type="submit">${esc(R.string.setup_server_save_button)}</button>
-              </form>
-            </div>
-            <p class="note">${esc(R.string.setup_server_open_screen_note)}</p>
-            ${secureSubmitScript()}
-        """.trimIndent()
-
-        val html = renderPage(s(R.string.setup_server_page_title), body)
-        return htmlResponse(Response.Status.OK, html)
     }
 
     private fun serveSet(session: IHTTPSession): Response {
@@ -389,132 +338,6 @@ class EnteSetupServer(
         return runCatching {
             Base64.decode(value, Base64.DEFAULT)
         }.getOrNull()
-    }
-
-    private fun secureSubmitScript(): String {
-        return """
-            <script>
-              (() => {
-                const form = document.getElementById('setup-form');
-                const payloadInput = document.getElementById('payload');
-                const headerInput = document.getElementById('header');
-                const urlInput = document.getElementById('url');
-                const passwordInput = document.getElementById('password');
-                if (!form || !payloadInput || !headerInput || !urlInput || !passwordInput) return;
-
-                const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
-                const hashParams = new URLSearchParams(hash);
-                const ek = (hashParams.get('k') || hashParams.get('ek') || '').trim();
-                const code = (hashParams.get('c') || hashParams.get('code') || '').trim();
-
-                const bytesToBase64 = (bytes) => {
-                  let binary = '';
-                  bytes.forEach((b) => { binary += String.fromCharCode(b); });
-                  return btoa(binary);
-                };
-
-                const base64UrlToBytes = (value) => {
-                  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-                  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
-                  const binary = atob(padded);
-                  const out = new Uint8Array(binary.length);
-                  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
-                  return out;
-                };
-
-                let wasmModulePromise;
-                const loadEnteWasm = async () => {
-                  if (wasmModulePromise) return wasmModulePromise;
-
-                  wasmModulePromise = (async () => {
-                    const wasmModule = await import('/setup-crypto/ente_wasm_bg.js');
-                    const wasmImports = { './ente_wasm_bg.js': wasmModule };
-
-                    let instance;
-                    if (WebAssembly.instantiateStreaming) {
-                      try {
-                        const streamingResult = await WebAssembly.instantiateStreaming(
-                          fetch('/setup-crypto/ente_wasm_bg.wasm'),
-                          wasmImports,
-                        );
-                        instance = streamingResult.instance;
-                      } catch {
-                        // Fallback below.
-                      }
-                    }
-
-                    if (!instance) {
-                      const wasmResponse = await fetch('/setup-crypto/ente_wasm_bg.wasm');
-                      if (!wasmResponse.ok) {
-                        throw new Error('WASM fetch failed: ' + wasmResponse.status);
-                      }
-                      const bytes = await wasmResponse.arrayBuffer();
-                      const fallbackResult = await WebAssembly.instantiate(bytes, wasmImports);
-                      instance = fallbackResult.instance;
-                    }
-
-                    wasmModule.__wbg_set_wasm(instance.exports);
-                    if (typeof instance.exports.__wbindgen_start === 'function') {
-                      instance.exports.__wbindgen_start();
-                    }
-
-                    return wasmModule;
-                  })();
-
-                  return wasmModulePromise;
-                };
-
-                form.addEventListener('submit', async (event) => {
-                  if (!ek || !code) {
-                    event.preventDefault();
-                    alert('Pairing data missing. Please scan the QR code again from the TV.');
-                    return;
-                  }
-
-                  event.preventDefault();
-
-                  try {
-                    const wasm = await loadEnteWasm();
-
-                    if (typeof wasm.crypto_init === 'function') {
-                      wasm.crypto_init();
-                    }
-
-                    const keyBytes = base64UrlToBytes(ek);
-                    const keyB64 = bytesToBase64(keyBytes);
-
-                    const plaintext = JSON.stringify({
-                      code: code,
-                      url: urlInput.value || '',
-                      password: passwordInput.value || ''
-                    });
-                    const plaintextBytes = new TextEncoder().encode(plaintext);
-                    const plaintextB64 = bytesToBase64(plaintextBytes);
-
-                    const encrypted = wasm.crypto_encrypt_blob(plaintextB64, keyB64);
-                    const encryptedData = encrypted?.encrypted_data ?? encrypted?.encryptedData;
-                    const decryptionHeader = encrypted?.decryption_header ?? encrypted?.decryptionHeader;
-
-                    if (!encryptedData || !decryptionHeader) {
-                      throw new Error('Missing encrypted payload');
-                    }
-
-                    payloadInput.value = encryptedData;
-                    headerInput.value = decryptionHeader;
-
-                    urlInput.value = '';
-                    passwordInput.value = '';
-                    urlInput.removeAttribute('name');
-                    passwordInput.removeAttribute('name');
-
-                    form.submit();
-                  } catch (err) {
-                    alert('Secure setup failed. Please scan the QR code again and retry.');
-                  }
-                });
-              })();
-            </script>
-        """.trimIndent()
     }
 
     private fun renderPage(title: String, content: String): String {

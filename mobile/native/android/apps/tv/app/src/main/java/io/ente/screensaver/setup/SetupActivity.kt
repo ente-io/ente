@@ -139,7 +139,7 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "http://$address:$port/#c=$pairingCode&k=$setupEncryptionKeyB64Url"
+        return "https://cast.ente.io/tv-setup#k=$setupEncryptionKeyB64Url&c=$pairingCode&tv=$address:$port"
     }
 
     override fun onStart() {
