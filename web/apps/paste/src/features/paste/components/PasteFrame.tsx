@@ -1,6 +1,4 @@
-import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { usePasteColorMode } from "features/paste/hooks/usePasteColorMode";
@@ -13,10 +11,8 @@ interface PasteFrameProps {
 }
 
 export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
-    const { resolvedMode, setMode } = usePasteColorMode();
+    const { resolvedMode } = usePasteColorMode();
     const tokens = getPasteThemeTokens(resolvedMode);
-    const ActiveModeIcon =
-        resolvedMode === "light" ? LightModeRoundedIcon : DarkModeRoundedIcon;
 
     return (
         <Box
@@ -103,23 +99,6 @@ export const PasteFrame = ({ children, footer }: PasteFrameProps) => {
                         </Typography>
                     </Stack>
                     <Stack direction="row" spacing={0.85} alignItems="center">
-                        <IconButton
-                            onClick={() => {
-                                setMode(
-                                    resolvedMode === "dark" ? "light" : "dark",
-                                );
-                            }}
-                            aria-label="Toggle color mode"
-                            sx={{
-                                width: 48,
-                                height: 48,
-                                bgcolor: "transparent",
-                                color: tokens.frame.headerIcon,
-                                "&:hover": { bgcolor: "transparent" },
-                            }}
-                        >
-                            <ActiveModeIcon sx={{ fontSize: 26 }} />
-                        </IconButton>
                         <IconButton
                             component="a"
                             href="https://github.com/ente-io/ente"

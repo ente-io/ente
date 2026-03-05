@@ -544,6 +544,56 @@ func (repo *UserRepository) GetEmailsFromHashes(hashes []string) ([]string, erro
 	return emails, nil
 }
 
+// CountActiveUsersByEmailHashes returns count of active users matching any of
+// the provided hashes.
+func (repo *UserRepository) CountActiveUsersByEmailHashes(hashes []string) (int, error) {
+	if len(hashes) == 0 {
+		return 0, nil
+	}
+	var count int
+	err := repo.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes)).Scan(&count)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	return count, nil
+}
+
+// GetActiveUserEmailHashes returns active user email hashes present in the
+// provided list of hashes.
+func (repo *UserRepository) GetActiveUserEmailHashes(hashes []string) ([]string, error) {
+	if len(hashes) == 0 {
+		return []string{}, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT email_hash
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	matchedHashes := make([]string, 0, len(hashes))
+	for rows.Next() {
+		var emailHash string
+		if err := rows.Scan(&emailHash); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		matchedHashes = append(matchedHashes, emailHash)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return matchedHashes, nil
+}
+
 // GetActiveUsersForIds  returns a map of users by their IDs, similar to GetUserByID
 func (repo *UserRepository) GetActiveUsersForIds(id []int64) (map[int64]*ente.User, error) {
 	result := make(map[int64]*ente.User)
