@@ -43,6 +43,9 @@ enum IsolateOperation {
   generateFaceThumbnails,
 
   /// [MLComputer]
+  generateFaceThumbnailsWithSourceDimensions,
+
+  /// [MLComputer]
   loadModel,
 
   /// [MLComputer]
@@ -185,6 +188,50 @@ Future<dynamic> isolateFunction(
         faceBoxes,
       );
       return List.from(results);
+
+    /// MLComputer
+    case IsolateOperation.generateFaceThumbnailsWithSourceDimensions:
+      final imagePath = args['imagePath'] as String;
+      final useRustForFaceThumbnails =
+          args['useRustForFaceThumbnails'] as bool? ?? false;
+      final faceBoxesJson = args['faceBoxesList'] as List<Map<String, dynamic>>;
+      final List<FaceBox> faceBoxes =
+          faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
+
+      if (useRustForFaceThumbnails) {
+        await _ensureRustLoaded();
+        final rustFaceBoxes = faceBoxes
+            .map(
+              (box) => rust_image_processing.RustFaceBox(
+                x: box.x,
+                y: box.y,
+                width: box.width,
+                height: box.height,
+              ),
+            )
+            .toList(growable: false);
+        final batch =
+            await rust_image_processing.generateFaceThumbnailsWithMetadata(
+          imagePath: imagePath,
+          faceBoxes: rustFaceBoxes,
+        );
+        return {
+          'thumbnails': List<Uint8List>.from(batch.thumbnails),
+          'sourceWidth': batch.sourceWidth,
+          'sourceHeight': batch.sourceHeight,
+        };
+      }
+
+      final results =
+          await generateFaceThumbnailsUsingCanvasWithSourceDimensions(
+        imagePath,
+        faceBoxes,
+      );
+      return {
+        'thumbnails': List<Uint8List>.from(results.thumbnails),
+        'sourceWidth': results.sourceWidth,
+        'sourceHeight': results.sourceHeight,
+      };
 
     /// MLComputer
     case IsolateOperation.loadModel:

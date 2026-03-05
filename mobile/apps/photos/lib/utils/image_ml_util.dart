@@ -184,6 +184,24 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   String imagePath,
   List<FaceBox> faceBoxes,
 ) async {
+  final result = await generateFaceThumbnailsUsingCanvasWithSourceDimensions(
+    imagePath,
+    faceBoxes,
+  );
+  return result.thumbnails;
+}
+
+typedef FaceThumbnailCanvasGenerationResult = ({
+  List<Uint8List> thumbnails,
+  int sourceWidth,
+  int sourceHeight
+});
+
+Future<FaceThumbnailCanvasGenerationResult>
+    generateFaceThumbnailsUsingCanvasWithSourceDimensions(
+  String imagePath,
+  List<FaceBox> faceBoxes,
+) async {
   int i = 0; // Index of the faceBox, initialized here for logging purposes
   try {
     final decodedImage = await decodeImageFromPath(
@@ -195,7 +213,11 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     final Image? img = decodedImage.image;
     if (img == null) {
       _logger.severe('Image is null, cannot generate face thumbnails');
-      return [];
+      return (
+        thumbnails: <Uint8List>[],
+        sourceWidth: dimensions.width,
+        sourceHeight: dimensions.height,
+      );
     }
     final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
@@ -236,14 +258,24 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     }
     final List<Uint8List> faceThumbnails =
         await Future.wait(futureFaceThumbnails);
-    return faceThumbnails;
+    return (
+      thumbnails: faceThumbnails,
+      sourceWidth: dimensions.width,
+      sourceHeight: dimensions.height,
+    );
   } catch (e, s) {
+    final problematicFaceBox =
+        faceBoxes.isNotEmpty && i < faceBoxes.length ? faceBoxes[i] : null;
     _logger.severe(
-      'Error generating face thumbnails. cropImage problematic input argument: ${i}th facebox: ${faceBoxes[i].toString()}',
+      'Error generating face thumbnails. cropImage problematic input argument: ${i}th facebox: $problematicFaceBox',
       e,
       s,
     );
-    return [];
+    return (
+      thumbnails: <Uint8List>[],
+      sourceWidth: 0,
+      sourceHeight: 0,
+    );
   }
 }
 
