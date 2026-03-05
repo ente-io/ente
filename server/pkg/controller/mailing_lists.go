@@ -218,8 +218,8 @@ func (c *MailingListsController) listmonkSubscribe(email string) error {
 	err := listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 	if err != nil {
-		log.Errorf("Listmonk - Could not subscribe '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk subscribe failed")
+		log.Errorf("Listmonk subscribe failed '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk subscribe failed", err)
 	}
 	return err
 }
@@ -234,20 +234,20 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
-		log.Errorf("Listmonk - Could not find subscriber '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk subscriber lookup failed")
+		log.Errorf("Listmonk - Unsub failed, could not find subscriber '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk - Unsub failed, could not find subscriber", err)
 		return stacktrace.Propagate(err, "")
 	}
 
 	err = listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
 		map[string]interface{}{}, c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 	if err != nil {
-		log.Errorf("Listmonk - Could not unsubscribe '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk unsubscribe failed")
+		log.Errorf("Listmonk - Unsub failed to delete '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk - Unsub failed to delete", err)
 	}
 	return err
 }
 
-func (c *MailingListsController) notifyListmonkFailure(message string) {
-	c.discordController.Notify(message)
+func (c *MailingListsController) notifyListmonkFailure(message string, err error) {
+	c.discordController.Notify(fmt.Sprintf("%s: %v", message, err))
 }
