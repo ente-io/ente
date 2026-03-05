@@ -3,7 +3,7 @@ name: "Release (photos-tv)"
 on:
     push:
         tags:
-            - "tv-v*"
+            - "photos-tv-v*"
     workflow_dispatch:
 
 env:
@@ -37,7 +37,7 @@ jobs:
                   if [[ "${{ github.ref }}" == refs/tags/* ]]; then
                       echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
                   else
-                      echo "RELEASE_TAG=tv-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
+                      echo "RELEASE_TAG=photos-tv-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
                   fi
                   echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
