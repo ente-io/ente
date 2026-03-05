@@ -1202,7 +1202,7 @@ pub struct LegacyLocalStorageData {
 #[tauri::command]
 pub async fn read_legacy_localstorage() -> Result<LegacyLocalStorageData, ApiError> {
     let home = dirs::home_dir().ok_or_else(|| ApiError::new("io", "No home directory"))?;
-    let candidates = ["ensu-tauri", "Ensu", "ensu"];
+    let candidates = ["io.ente.ensu"];
 
     // macOS: ~/Library/WebKit/<name>/WebsiteData/...
     #[cfg(target_os = "macos")]

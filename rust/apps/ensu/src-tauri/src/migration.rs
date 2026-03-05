@@ -11,8 +11,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-/// App directory names to search (current bundle ID + old names from v1).
-const APP_NAMES: &[&str] = &["io.ente.ensu", "ensu-tauri", "Ensu", "ensu"];
+/// App directory name to search.
+const APP_NAMES: &[&str] = &["io.ente.ensu"];
 
 /// Migrate legacy WebKit data if needed. Safe to call multiple times; it is a
 /// no-op once the migration marker exists.
@@ -99,7 +99,7 @@ fn migrate_webkit_dir(base_dir: &Path) {
     //    This handles the scheme change (http → tauri) within io.ente.ensu.
     migrated |= migrate_from_sibling_origins(&default_dir, &current_data_dir);
 
-    // 2. Check old app name directories (ensu-tauri, Ensu, ensu).
+    // 2. Check old app name directories (none currently configured).
     if !migrated {
         for name in &APP_NAMES[1..] {
             let old_app_dir = base_dir.join(name);
