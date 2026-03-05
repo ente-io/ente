@@ -9,7 +9,7 @@ import { sendOTT } from "ente-accounts/services/user";
 import { appName } from "ente-base/app";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { isMuseumHTTPError } from "ente-base/http";
+import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { JOIN_ALBUM_CONTEXT_KEY } from "ente-new/albums/services/join-album";
 import { useFormik } from "formik";
@@ -57,11 +57,28 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                 try {
                     await sendOTT(email, "login");
                 } catch (e) {
-                    if (
-                        await isMuseumHTTPError(e, 404, "USER_NOT_REGISTERED")
-                    ) {
-                        setFieldError(t("email_not_registered"));
-                        return;
+                    if (e instanceof HTTPError && e.res.status === 404) {
+                        let errorCode: string | undefined;
+                        try {
+                            errorCode = z
+                                .object({ code: z.string() })
+                                .parse(await e.res.json()).code;
+                        } catch (parseErr) {
+                            log.warn(
+                                "Ignoring error when parsing error payload",
+                                parseErr,
+                            );
+                        }
+                        if (errorCode === "USER_NOT_REGISTERED") {
+                            setFieldError(t("email_not_registered"));
+                            return;
+                        }
+                        if (errorCode === "USER_SIGNUP_INCOMPLETE") {
+                            setFieldError(
+                                "Account setup incomplete. Create account to finish setup.",
+                            );
+                            return;
+                        }
                     }
                     throw e;
                 }

@@ -143,6 +143,16 @@ class UserService {
             assetPath: 'assets/warning-grey.png',
           ),
         );
+      } else if (enteErrCode == "USER_SIGNUP_INCOMPLETE") {
+        unawaited(
+          showAlertBottomSheet(
+            context,
+            title: context.strings.oops,
+            message:
+                "Account setup incomplete. Create account to finish setup.",
+            assetPath: 'assets/warning-grey.png',
+          ),
+        );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showAlertBottomSheet(
