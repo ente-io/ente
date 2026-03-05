@@ -148,8 +148,7 @@ class UserService {
           showAlertBottomSheet(
             context,
             title: context.strings.oops,
-            message:
-                "Account setup incomplete. Create account to finish setup.",
+            message: context.strings.accountSetupIncompleteCreateAccount,
             assetPath: 'assets/warning-grey.png',
           ),
         );

@@ -75,7 +75,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                         }
                         if (errorCode === "USER_SIGNUP_INCOMPLETE") {
                             setFieldError(
-                                "Account setup incomplete. Create account to finish setup.",
+                                t("account_setup_incomplete_create_account"),
                             );
                             return;
                         }
