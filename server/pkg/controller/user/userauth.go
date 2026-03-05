@@ -39,6 +39,14 @@ type HardCodedOTT struct {
 	LocalDomainValue  string
 }
 
+type signUpState int
+
+const (
+	signUpStateNoAccount signUpState = iota
+	signUpStateIncomplete
+	signUpStateComplete
+)
+
 func ReadHardCodedOTTFromConfig() HardCodedOTT {
 	emails := make([]HardCodedOTTEmail, 0)
 	emailsSlice := viper.GetStringSlice("internal.hardcoded-ott.emails")
@@ -149,20 +157,23 @@ func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose
 			return err
 		}
 	}
-	isSignUpComplete, err := c.isSignUpComplete(email)
+	signupState, err := c.getSignUpState(email)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && !isSignUpComplete {
+	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && signupState != signUpStateComplete {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
 	}
 	//
 	var registrationErr error
-	if purpose == ente.SignUpOTTPurpose && isSignUpComplete {
+	if purpose == ente.SignUpOTTPurpose && signupState == signUpStateComplete {
 		registrationErr = stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
 	}
-	if purpose == ente.LoginOTTPurpose && !isSignUpComplete {
-		registrationErr = stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
+	if purpose == ente.LoginOTTPurpose && signupState == signUpStateNoAccount {
+		registrationErr = stacktrace.Propagate(ente.ErrUserNotRegistered, "user account does not exist")
+	}
+	if purpose == ente.LoginOTTPurpose && signupState == signUpStateIncomplete {
+		registrationErr = stacktrace.Propagate(ente.ErrUserSignupIncomplete, "user has not completed sign up process")
 	}
 	// if no registration error, return
 	if registrationErr == nil {
@@ -179,24 +190,24 @@ func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose
 	return registrationErr
 }
 
-// isSignUpComplete checks if the user has completed the entire signup process.
-// Sign up is considered complete if the user has verified their email address and their key attributes are set.
-func (c *UserController) isSignUpComplete(email string) (bool, error) {
+// getSignUpState returns the signup state for an email.
+// Signup is complete only when both email and key attributes exist.
+func (c *UserController) getSignUpState(email string) (signUpState, error) {
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return false, nil
+		return signUpStateNoAccount, nil
 	}
 	if err != nil {
-		return false, stacktrace.Propagate(err, "")
+		return signUpStateNoAccount, stacktrace.Propagate(err, "")
 	}
 	_, keyErr := c.UserRepo.GetKeyAttributes(userID)
 	if keyErr != nil && errors.Is(keyErr, sql.ErrNoRows) {
-		return false, nil
+		return signUpStateIncomplete, nil
 	}
 	if keyErr != nil {
-		return false, stacktrace.Propagate(keyErr, "")
+		return signUpStateNoAccount, stacktrace.Propagate(keyErr, "")
 	}
-	return true, nil
+	return signUpStateComplete, nil
 }
 
 func (c *UserController) AddAdminOtt(req ente.AdminOttReq) error {

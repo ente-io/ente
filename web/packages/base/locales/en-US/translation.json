@@ -16,6 +16,7 @@
     "invalid_email_error": "Enter a valid email",
     "required": "Required",
     "email_not_registered": "Email not registered",
+    "account_setup_incomplete_create_account": "Account setup incomplete. Create account to finish setup.",
     "email_already_registered": "Email already registered",
     "email_sent": "Verification code sent to <a>{{email}}</a>",
     "check_inbox_hint": "Please check your inbox (and spam) to complete verification",
