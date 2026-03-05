@@ -831,7 +831,7 @@
     "confirm": "Confirmer",
     "incorrect_pin_or_password": "Code PIN ou mot de passe incorrect",
     "too_many_attempts": "Trop de tentatives.",
-    "try_again_in": "Essayez à nouveau dans {time}.",
+    "try_again_in": "Essayez à nouveau dans {{time}}.",
     "too_many_wrong_attempts": "Trop de mauvaises tentatives. Veuillez vous déconnecter et vous reconnecter.",
     "app_lock_disable_confirm": "Êtes-vous sûr de vouloir désactiver le verrouillage de l'application ?",
     "lock_type": "Mode de verrouillage",
