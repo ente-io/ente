@@ -18,6 +18,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final String heroTagPrefix;
+  final bool enableThumbnailHero;
   final int currentUserID;
 
   /// Called when the user taps anywhere on the feed item.
@@ -38,6 +39,7 @@ class FeedItemWidget extends StatelessWidget {
   const FeedItemWidget({
     required this.feedItem,
     required this.heroTagPrefix,
+    this.enableThumbnailHero = true,
     required this.currentUserID,
     this.onTap,
     this.onSharedPhotoTap,
@@ -116,6 +118,7 @@ class FeedItemWidget extends StatelessWidget {
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,
                 heroTagPrefix: heroTagPrefix,
+                enableHeroAnimation: enableThumbnailHero,
               ),
             )
           else
@@ -670,11 +673,13 @@ class _FeedThumbnail extends StatefulWidget {
   final int fileID;
   final int collectionID;
   final String heroTagPrefix;
+  final bool enableHeroAnimation;
 
   const _FeedThumbnail({
     required this.fileID,
     required this.collectionID,
     required this.heroTagPrefix,
+    required this.enableHeroAnimation,
   });
 
   @override
@@ -745,26 +750,32 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       );
     }
 
-    return Hero(
-      tag: widget.heroTagPrefix + _file!.tag,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: colorScheme.strokeFaint),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 66,
-            height: 66,
-            child: ThumbnailWidget(
-              _file!,
-              fit: BoxFit.cover,
-              rawThumbnail: true,
-            ),
+    final thumbnail = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: colorScheme.strokeFaint),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 66,
+          height: 66,
+          child: ThumbnailWidget(
+            _file!,
+            fit: BoxFit.cover,
+            rawThumbnail: true,
           ),
         ),
       ),
+    );
+
+    if (!widget.enableHeroAnimation) {
+      return thumbnail;
+    }
+
+    return Hero(
+      tag: widget.heroTagPrefix + _file!.tag,
+      child: thumbnail,
     );
   }
 }
