@@ -37,7 +37,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "CAST_SETUP_BASE_URL", "\"https://cast.ente.sh\"")
+        }
+
         release {
+            buildConfigField("String", "CAST_SETUP_BASE_URL", "\"https://cast.ente.io\"")
+
             signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
             } else {

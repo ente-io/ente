@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import fi.iki.elonen.NanoHTTPD
+import io.ente.photos.screensaver.BuildConfig
 import io.ente.photos.screensaver.R
 import io.ente.photos.screensaver.databinding.ActivitySetupBinding
 import io.ente.photos.screensaver.diagnostics.AppLog
@@ -139,7 +140,7 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun buildSetupUrl(address: String, port: Int): String {
-        return "https://cast.ente.io/tv-setup#k=$setupEncryptionKeyB64Url&c=$pairingCode&tv=$address:$port"
+        return "${BuildConfig.CAST_SETUP_BASE_URL}/tv-setup#k=$setupEncryptionKeyB64Url&c=$pairingCode&tv=$address:$port"
     }
 
     override fun onStart() {
