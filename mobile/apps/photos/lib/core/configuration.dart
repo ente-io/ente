@@ -19,6 +19,7 @@ import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/gallery_downloads_db.dart";
 import "package:photos/db/memories_db.dart";
+import "package:photos/db/memory_shares_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
@@ -229,6 +230,7 @@ class Configuration {
     await GalleryDownloadsDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
+    await MemorySharesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
     await TrashDB.instance.clearTable();

@@ -22,6 +22,7 @@ class MemorySharesDB {
   static const _columnCreatedAt = 'created_at';
   static const _columnUpdatedAt = 'updated_at';
   static const _columnUrl = 'url';
+  static const _columnMemoryHash = 'memory_hash';
   static const _columnPreviewUploadedFileID = 'preview_uploaded_file_id';
   static const _columnFileCount = 'file_count';
 
@@ -60,6 +61,7 @@ class MemorySharesDB {
         $_columnCreatedAt INTEGER NOT NULL,
         $_columnUpdatedAt INTEGER,
         $_columnUrl TEXT NOT NULL,
+        $_columnMemoryHash TEXT,
         $_columnPreviewUploadedFileID INTEGER,
         $_columnFileCount INTEGER
       )
@@ -96,6 +98,19 @@ class MemorySharesDB {
     return _fromRow(rows.first);
   }
 
+  Future<MemoryShare?> getByMemoryHash(String memoryHash) async {
+    final db = await database;
+    final rows = await db.query(
+      _table,
+      where: '$_columnMemoryHash = ? AND $_columnIsDeleted = 0',
+      whereArgs: [memoryHash],
+      orderBy: '$_columnCreatedAt DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return _fromRow(rows.first);
+  }
+
   Future<void> delete(int id) async {
     final db = await database;
     await db.delete(
@@ -123,6 +138,7 @@ class MemorySharesDB {
       _columnCreatedAt: share.createdAt,
       _columnUpdatedAt: share.updatedAt,
       _columnUrl: share.url,
+      _columnMemoryHash: share.memoryHash,
       _columnPreviewUploadedFileID: share.previewUploadedFileID,
       _columnFileCount: share.fileCount,
     };
@@ -141,6 +157,7 @@ class MemorySharesDB {
       createdAt: row[_columnCreatedAt] as int,
       updatedAt: row[_columnUpdatedAt] as int?,
       url: row[_columnUrl] as String,
+      memoryHash: row[_columnMemoryHash] as String?,
       previewUploadedFileID: row[_columnPreviewUploadedFileID] as int?,
       fileCount: row[_columnFileCount] as int?,
     );
