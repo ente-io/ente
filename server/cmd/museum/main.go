@@ -896,6 +896,7 @@ func main() {
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
 	adminAPI.POST("/mail/unsubscribe", adminHandler.UnsubscribeMail)
+	adminAPI.GET("/listmonk/missing-subscribers/count", adminHandler.GetListmonkMissingSubscribersCount)
 	adminAPI.GET("/users", adminHandler.GetUsers)
 	adminAPI.GET("/user", adminHandler.GetUser)
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
@@ -926,7 +927,7 @@ func main() {
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
-	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo}
+	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
 
 	privateAPI.POST("/authenticator/key", authenticatorHandler.CreateKey)

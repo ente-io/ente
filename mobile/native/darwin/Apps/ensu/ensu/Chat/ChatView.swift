@@ -207,23 +207,15 @@ struct ChatView: View {
                 secondaryButton: .cancel()
             )
         }
-        .confirmationDialog("Context limit reached", isPresented: overflowDialogPresented, titleVisibility: .visible) {
-            Button("Trim history") {
+        .confirmationDialog("Conversation too long", isPresented: overflowDialogPresented, titleVisibility: .visible) {
+            Button("Continue") {
                 viewModel.confirmOverflowTrim()
-            }
-            Button("Increase context") {
-                viewModel.cancelOverflowDialog()
-                viewState.showModelSettings = true
             }
             Button("Cancel", role: .cancel) {
                 viewModel.cancelOverflowDialog()
             }
         } message: {
-            if let alert = viewModel.overflowAlert {
-                Text("Input uses \(alert.inputTokens) tokens (budget \(alert.inputBudget)).")
-            } else {
-                Text("")
-            }
+            Text("This conversation is too long for the model to process. Some older messages will be dropped to make room.")
         }
         .overlay {
             if viewState.showSignInComingSoon {

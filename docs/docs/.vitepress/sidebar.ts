@@ -77,6 +77,10 @@ export const sidebar = [
                                 link: "/photos/features/account/passkeys",
                             },
                             {
+                                text: "App lock",
+                                link: "/photos/features/account/app-lock",
+                            },
+                            {
                                 text: "Referral program",
                                 link: "/photos/features/account/referral-program/",
                             },

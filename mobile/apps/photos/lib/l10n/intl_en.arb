@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Welcome back!",
   "emailAlreadyRegistered": "Email already registered.",
   "emailNotRegistered": "Email not registered.",
+  "accountSetupIncompleteCreateAccount": "Account setup incomplete. Create account to finish setup.",
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",
@@ -672,8 +673,8 @@
   "familyPlans": "Family plans",
   "referrals": "Referrals",
   "notifications": "Notifications",
-  "sharedPhotoNotifications": "New shared photos",
-  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "sharedPhotoNotifications": "New shared photos and albums",
+  "sharedPhotoNotificationsExplanation": "Get notifications for new photos in shared albums you're in and for new albums shared with you.",
   "socialNotifications": "Likes and comments",
   "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
@@ -2661,6 +2662,14 @@
       "count": {
         "type": "int"
       },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "Shared {albumName} with you",
+  "@sharedAlbumWithYou": {
+    "placeholders": {
       "albumName": {
         "type": "String"
       }

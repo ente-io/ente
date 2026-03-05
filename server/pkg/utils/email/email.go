@@ -28,6 +28,11 @@ var knownInvalidEmailErrors = []string{
 	"Invalid domain name",
 }
 
+// NormalizeEmail returns a canonical form for case-insensitive email lookup and hashing.
+func NormalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
+}
+
 // https://datatracker.ietf.org/doc/html/rfc5322#section-2.1.1
 const base64LineLength = 900 // standard MIME line length for base64 content
 
@@ -147,7 +152,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		emailAddresses += sanitizeHeaderValue(addr)
 	}
 
-	header :=  "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
+	header := "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
 		"From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
 		"To: " + emailAddresses + "\n" +
 		"Subject: " + cleanSubject + "\n" +

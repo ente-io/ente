@@ -107,6 +107,13 @@ jobs:
               shell: bash
               run: cargo install --locked trusted-signing-cli
 
+            - name: Add cargo bin to PATH (Windows only)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  CARGO_BIN_WIN=$(cygpath -w "$HOME/.cargo/bin")
+                  echo "$CARGO_BIN_WIN" >> $GITHUB_PATH
+
             - name: Resolve Windows signing tool paths
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
               shell: bash
@@ -142,13 +149,10 @@ jobs:
                   echo "TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH" >> $GITHUB_ENV
                   if [ -n "$AZ_PATH" ]; then
                       echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
-                      echo "Resolved AZURE_CLI_PATH=$AZ_PATH"
                   fi
                   if [ -n "$SIGNTOOL_PATH" ]; then
                       echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
-                      echo "Resolved SIGNTOOL_PATH=$SIGNTOOL_PATH"
                   fi
-                  echo "Resolved TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH"
 
             - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
               if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
@@ -161,37 +165,6 @@ jobs:
                   AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
                   SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
-
-            - name: Validate Azure Trusted Signing CLI setup (Windows only)
-              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
-              shell: bash
-              env:
-                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-                  TRUSTED_SIGNING_CLI_PATH: ${{ env.TRUSTED_SIGNING_CLI_PATH }}
-                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
-                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
-              run: |
-                  cmd=(
-                    "${TRUSTED_SIGNING_CLI_PATH}"
-                    -e "${AZURE_ENDPOINT}"
-                    -a "${AZURE_CODE_SIGNING_NAME}"
-                    -c "${AZURE_CERT_PROFILE_NAME}"
-                  )
-
-                  if [ -n "${AZURE_CLI_PATH}" ]; then
-                    cmd+=(--azure-cli-path "${AZURE_CLI_PATH}")
-                  fi
-                  if [ -n "${SIGNTOOL_PATH}" ]; then
-                    cmd+=(--sign-tool-path "${SIGNTOOL_PATH}")
-                  fi
-
-                  cmd+=(--ignore-unsupported true rust/apps/ensu/package.json)
-                  "${cmd[@]}"
 
             - name: Enable updater artifacts for release builds
               shell: bash
@@ -228,6 +201,8 @@ jobs:
                   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
                   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
                   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
                   tagName: ${{ env.RELEASE_TAG }}

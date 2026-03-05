@@ -1007,45 +1007,43 @@ class RemoteSyncService {
     });
   }
 
-  bool _shouldShowNotification(int collectionID) {
+  bool _shouldShowSharedPhotosAndAlbumsNotification(int collectionID) {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     final isForeground = AppLifecycleService.instance.isForeground;
-    final bool showNotification =
-        NotificationService.instance.shouldShowNotificationsForSharedPhotos() &&
-            isFirstRemoteSyncDone() &&
-            !isForeground;
+    final bool shouldShowSharedPhotosAndAlbumsNotification = NotificationService
+            .instance
+            .shouldShowNotificationsForSharedPhotosAndAlbums() &&
+        isFirstRemoteSyncDone() &&
+        !isForeground;
     _logger.info(
-      "[Collection-$collectionID] shouldShow notification: $showNotification, "
+      "[Collection-$collectionID] shouldShow notification: "
+      "$shouldShowSharedPhotosAndAlbumsNotification, "
       "isAppInForeground: $isForeground",
     );
-    return showNotification;
+    return shouldShowSharedPhotosAndAlbumsNotification;
   }
 
   Future<void> _notifyNewFiles(List<int> collectionIDs) async {
-    final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
-      if (!_shouldShowNotification(collectionID)) {
+      if (!_shouldShowSharedPhotosAndAlbumsNotification(collectionID)) {
         continue;
       }
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final Set<int> sharedFilesIDs = {};
-      final Set<int> collectedFilesIDs = {};
+      final Set<int> collectedFileIDs = {};
       for (final file in files) {
-        if (file.isUploaded && file.ownerID != userID) {
-          sharedFilesIDs.add(file.uploadedFileID!);
-        } else if (file.isUploaded && file.isCollect) {
-          collectedFilesIDs.add(file.uploadedFileID!);
+        if (file.isUploaded && file.isCollect && file.uploadedFileID != null) {
+          collectedFileIDs.add(file.uploadedFileID!);
         }
       }
-      final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
+      final totalCount = collectedFileIDs.length;
       if (totalCount > 0) {
         final collection = _collectionsService.getCollectionByID(collectionID);
         _logger.info(
           'creating notification for ${collection?.displayName} '
-          'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
+          'collected: $collectedFileIDs files',
         );
         final s = await LanguageService.locals;
         // ignore: unawaited_futures

@@ -30,50 +30,81 @@ If needed, this workflow can also be manually triggered:
 gh workflow run desktop-release.yml --source=<branch>
 ```
 
+## Release candidate for testing
+
+1. Get latest main from upstream
+
+2. Create new branch called `v1.x.x_release_candidate` and check out to it
+
+3. Update the [CHANGELOG](../CHANGELOG.md)
+
+4. Update [What's New](../../web/packages/new/photos/components/WhatsNew.tsx)
+
+5. In [changelog.ts](../../web/packages/new/photos/services/changelog.ts), bump the version number
+
+6. Open PR (title should be "[desktop] v1.x.x release candidate") and merge
+
+7. Send the release candidate build for testing
+
 ## Release checklist
 
-1. Update source repo to set version `1.x.x` in `package.json` and finalize the
-   CHANGELOG.
+1. Get latest main from upstream
 
-2. Merge PR then tag the merge commit on `main` in the source repo:
+2. Create new branch called `v1.x.x` and check out to it
+
+3. Remove "-beta" from version in [package.json](../package.json)
+
+4. Finalize the [CHANGELOG](../CHANGELOG.md) - remove (unreleased) and make sure changelog is final
+
+5. Update the [help changelog](../../docs/docs/photos/changelog.md) with the release notes (copy paste) for this version (make sure month is correct)
+
+6. Open PR (title should be "[desktop] v1.x.x")
+
+7. Merge PR then tag the merge commit on `main` in the source repo (this):
 
     ```sh
     git tag photosd-v1.x.x
-    git push origin photosd-v1.x.x
+    git push upstream photosd-v1.x.x
     ```
 
-3. In the release repo:
+8. In the cloned release repo (https://github.com/ente-io/photos-desktop), run this command:
 
     ```sh
     ./.github/trigger-release.sh v1.x.x
     ```
 
-This'll trigger the workflow and create a new pre-release. We can edit this to
-add the release notes, and convert it to a release.
+9. This'll trigger the workflow and create a new "pre-release". It'll take around 20 minutes, wait until it's live.
 
-Once it is marked as latest, the release goes live.
+10. Edit this pre-release to add the release notes (copy paste from changelog), check the "Set as the latest release" button and Update.
 
-At this point, also update the `docs/docs/photos/changelog.md` file with the release notes for this version.
+11. Once it is marked as latest, the release goes live.
 
-We are done at this point, and can now update the other pre-release that'll hold
-subsequent nightly builds.
+12. Next, we need to create a new pre-release that'll hold subsequent nightly builds. Following steps are for that.
 
-1. Update `package.json` in the source repo to use version `1.x.x-beta`, and
-   merge these changes into `main`.
+13. Get latest main from upstream
 
-2. In the release repo, delete the existing _nightly_ pre-release, then:
+14. Create new branch called `v1.x.(x+1)-beta` and check out to it
+
+15. In [package.json](../package.json), change version to `1.x.(x+1)-beta`
+
+16. Update the [CHANGELOG](../CHANGELOG.md) - add ## 1.x.(x+1)-beta (unreleased) with one empty point
+
+17. Open PR (title should be "[desktop] v1.x.(x+1)-beta") and merge
+
+18. In the release repo's [releases](https://github.com/ente-io/photos-desktop/releases), delete the existing _nightly_ pre-release:
+
+19. In the cloned release repo (https://github.com/ente-io/photos-desktop), run this command:
 
     ```sh
-    git tag v1.x.x-beta
-    git push origin v1.x.x-beta
+    git tag v1.x.(x+1)-beta
+    git push origin v1.x.(x+1)-beta
     ```
 
-3. Start a new run of the workflow (`gh workflow run desktop-release.yml`).
+20. Run this [workflow](https://github.com/ente-io/photos-desktop/actions/workflows/desktop-release.yml)
 
-4. Once the workflow creates the new 1.x.x-beta pre-release, edit its
-   description to "Nightly builds".
+21. Once the workflow creates the new v1.x.(x+1)-beta pre-release, edit its description to "Nightly builds".
 
-Subsequent scheduled nightly workflows will keep updating this pre-release.
+22. Done
 
 ## Ad-hoc builds
 

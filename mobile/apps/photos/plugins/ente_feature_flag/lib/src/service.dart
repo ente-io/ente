@@ -13,7 +13,6 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
-  static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
   static const int _memoryShareLinkFlag = 1 << 4;

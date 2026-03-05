@@ -16,6 +16,14 @@ import "package:url_launcher/url_launcher_string.dart";
 class HelpSupportPage extends StatelessWidget {
   static final _logger = Logger("HelpSupportPage");
   static const _helpUrl = "https://ente.io/help";
+  static const _photosFaqBaseUrl = "https://ente.io/help/photos/faq";
+  static const _searchAndDiscoveryFaqUrl =
+      "$_photosFaqBaseUrl/search-and-discovery";
+  static const _backupAndSyncFaqUrl = "$_photosFaqBaseUrl/backup-and-sync";
+  static const _sharingAndCollaborationFaqUrl =
+      "$_photosFaqBaseUrl/sharing-and-collaboration";
+  static const _storageAndPlansFaqUrl = "$_photosFaqBaseUrl/storage-and-plans";
+  static const _troubleshootingFaqUrl = "$_photosFaqBaseUrl/troubleshooting";
 
   const HelpSupportPage({super.key});
 
@@ -63,6 +71,7 @@ class HelpSupportPage extends StatelessWidget {
                         title: l10n.searchAndDiscovery,
                         subText: l10n.searchAndDiscoveryDesc,
                         icon: HugeIcons.strokeRoundedSearch01,
+                        faqUrl: _searchAndDiscoveryFaqUrl,
                       ),
                       const SizedBox(height: 8),
                       _buildHelpTopicItem(
@@ -70,6 +79,7 @@ class HelpSupportPage extends StatelessWidget {
                         title: l10n.backupAndSync,
                         subText: l10n.backupAndSyncDesc,
                         icon: HugeIcons.strokeRoundedCloudUpload,
+                        faqUrl: _backupAndSyncFaqUrl,
                       ),
                       const SizedBox(height: 8),
                       _buildHelpTopicItem(
@@ -77,6 +87,7 @@ class HelpSupportPage extends StatelessWidget {
                         title: l10n.sharingAndCollaboration,
                         subText: l10n.sharingAndCollaborationDesc,
                         icon: HugeIcons.strokeRoundedShare01,
+                        faqUrl: _sharingAndCollaborationFaqUrl,
                       ),
                       const SizedBox(height: 8),
                       _buildHelpTopicItem(
@@ -84,6 +95,7 @@ class HelpSupportPage extends StatelessWidget {
                         title: l10n.storageAndPlans,
                         subText: l10n.storageAndPlansDesc,
                         icon: HugeIcons.strokeRoundedHardDrive,
+                        faqUrl: _storageAndPlansFaqUrl,
                       ),
                       const SizedBox(height: 8),
                       _buildHelpTopicItem(
@@ -91,6 +103,7 @@ class HelpSupportPage extends StatelessWidget {
                         title: l10n.troubleshooting,
                         subText: l10n.troubleshootingDesc,
                         icon: HugeIcons.strokeRoundedWrench01,
+                        faqUrl: _troubleshootingFaqUrl,
                       ),
                       _SupportLink(
                         label: l10n.viewAllHelpTopics,
@@ -175,6 +188,7 @@ class HelpSupportPage extends StatelessWidget {
     required String title,
     required String subText,
     required List<List<dynamic>> icon,
+    required String faqUrl,
   }) {
     final textTheme = getEnteTextTheme(context);
     return MenuItemWidgetNew(
@@ -187,7 +201,7 @@ class HelpSupportPage extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
-        await _openHelpPage(context, title: title);
+        await _openHelpPage(context, title: title, url: faqUrl);
       },
     );
   }
@@ -204,11 +218,12 @@ class HelpSupportPage extends StatelessWidget {
   Future<void> _openHelpPage(
     BuildContext context, {
     required String title,
+    String url = _helpUrl,
   }) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return WebPage(title, _helpUrl);
+          return WebPage(title, url);
         },
       ),
     );

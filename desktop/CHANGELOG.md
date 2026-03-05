@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.19 (unreleased)
+## v1.7.21 (unreleased)
+
+-
+
+## v1.7.20
 
 - App lock
 - Masonry layout for public albums
