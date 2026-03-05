@@ -75,10 +75,13 @@ export default function PublicMemoryPage() {
                 // - pathname /TOKEN (direct links)
                 let token = currentURL.searchParams.get("t");
                 if (!token) {
-                    const path = window.location.pathname.slice(1);
-                    // Ignore /memory path prefix
-                    if (path && path !== "memory") {
-                        token = path;
+                    // Ignore routing prefixes like /memory and pick the first
+                    // non-empty path segment as token.
+                    const tokenFromPath = currentURL.pathname
+                        .split("/")
+                        .find((segment) => segment.length > 0 && segment !== "memory");
+                    if (tokenFromPath) {
+                        token = tokenFromPath;
                     }
                 }
 
@@ -246,7 +249,9 @@ const MOBILE_MEDIA_RESERVED_VERTICAL_SPACE_PX = 280;
 const DESKTOP_MEDIA_MAX_WIDTH_PX = 1264;
 const DESKTOP_MEDIA_HORIZONTAL_PADDING_PX = 48;
 const DESKTOP_MEDIA_VERTICAL_RESERVED_PX = 220;
-const MEDIA_SWITCH_TRANSITION_DURATION_MS = 220;
+const MEDIA_SWITCH_TRANSITION_DURATION_MS = 380;
+const DESKTOP_PROGRESS_MAX_WIDTH_PX = 448;
+const MOBILE_PROGRESS_MAX_WIDTH_PX = 326;
 const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(100vw - ${DESKTOP_MEDIA_HORIZONTAL_PADDING_PX}px))`;
 const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(100vh - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
 const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-desktop.svg";
@@ -266,14 +271,25 @@ const progressFillAnimation = keyframes`
     to { width: 100%; }
 `;
 
-const mediaSwitchAnimation = keyframes`
+const mediaSwitchInAnimation = keyframes`
     from {
         opacity: 0;
-        transform: translateY(6px) scale(0.992);
+        transform: translateY(4px) scale(0.996);
     }
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+`;
+
+const mediaSwitchOutAnimation = keyframes`
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-2px) scale(1.005);
     }
 `;
 
@@ -295,8 +311,14 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
     );
     const [mediaAspectRatio, setMediaAspectRatio] = useState<number>();
     const [viewport, setViewport] = useState({ width: 1280, height: 720 });
+    const [outgoingFile, setOutgoingFile] = useState<EnteFile | null>(null);
+    const [outgoingIsVideo, setOutgoingIsVideo] = useState(false);
+    const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null);
     const pressStartedAtRef = useRef<number | null>(null);
     const suppressTapNavigationRef = useRef(false);
+    const previousFileRef = useRef(currentFile);
+    const previousIndexRef = useRef(currentIndex);
+    const outgoingClearTimeoutRef = useRef<number | null>(null);
 
     const isVideo = currentFile.metadata.fileType === FileType.video;
     const isMobileLayout = viewport.width <= MOBILE_LAYOUT_BREAKPOINT_PX;
@@ -310,6 +332,37 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         // Reset to image duration; video will update this when it loads.
         setProgressDuration(IMAGE_AUTO_PROGRESS_DURATION_MS);
     }, [currentIndex]);
+
+    useEffect(() => {
+        const previousIndex = previousIndexRef.current;
+        const previousFile = previousFileRef.current;
+        if (previousIndex !== currentIndex) {
+            setOutgoingFile(previousFile);
+            setOutgoingIsVideo(previousFile.metadata.fileType === FileType.video);
+            setOutgoingIndex(previousIndex);
+
+            if (outgoingClearTimeoutRef.current !== null) {
+                window.clearTimeout(outgoingClearTimeoutRef.current);
+            }
+            outgoingClearTimeoutRef.current = window.setTimeout(() => {
+                setOutgoingFile(null);
+                setOutgoingIndex(null);
+                outgoingClearTimeoutRef.current = null;
+            }, MEDIA_SWITCH_TRANSITION_DURATION_MS);
+        }
+
+        previousIndexRef.current = currentIndex;
+        previousFileRef.current = currentFile;
+    }, [currentFile, currentIndex]);
+
+    useEffect(
+        () => () => {
+            if (outgoingClearTimeoutRef.current !== null) {
+                window.clearTimeout(outgoingClearTimeoutRef.current);
+            }
+        },
+        [],
+    );
 
     const handleFullLoad = useCallback(() => {
         setFileLoaded(true);
@@ -575,7 +628,7 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     }
                 >
                     <MediaFrame style={mediaFrameStyle}>
-                        <MediaSwitchLayer key={`memory-file-${currentIndex}`}>
+                        <MediaSwitchLayer phase="in" key={`memory-file-${currentIndex}`}>
                             {isVideo ? (
                                 <VideoPlayer
                                     file={currentFile}
@@ -595,6 +648,27 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                                 />
                             )}
                         </MediaSwitchLayer>
+                        {outgoingFile && (
+                            <MediaSwitchLayer
+                                phase="out"
+                                key={`memory-file-out-${outgoingIndex ?? currentIndex}`}
+                            >
+                                {outgoingIsVideo ? (
+                                    <VideoPlayer
+                                        file={outgoingFile}
+                                        paused
+                                        fillFrame
+                                        showLoadingOverlay={false}
+                                    />
+                                ) : (
+                                    <PhotoImage
+                                        file={outgoingFile}
+                                        fillFrame
+                                        showLoadingOverlay={false}
+                                    />
+                                )}
+                            </MediaSwitchLayer>
+                        )}
                     </MediaFrame>
                 </PhotoContainer>
 
@@ -633,12 +707,15 @@ const BackgroundPattern = styled("div")({
     inset: 0,
     backgroundColor: "#1f1f1f",
     backgroundImage: `url(${DESKTOP_BACKGROUND_IMAGE_PATH})`,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    backgroundRepeat: "repeat",
+    backgroundSize: "auto",
+    backgroundPosition: "top left",
     zIndex: 1,
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         backgroundImage: `url(${MOBILE_BACKGROUND_IMAGE_PATH})`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "auto",
+        backgroundPosition: "top left",
     },
 });
 
@@ -844,33 +921,39 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     isVideo,
     compact,
 }) => {
+    const segments = useMemo(
+        () => Array.from({ length: total }, (_, i) => i),
+        [total],
+    );
+    const progressGap = total > 15 ? "4px" : "12px";
+
     return (
         <Box
             sx={{
                 display: "flex",
-                gap: "12px",
+                gap: progressGap,
                 alignItems: "center",
                 width: "100%",
-                maxWidth: compact ? "326px" : "448px",
+                maxWidth: compact
+                    ? `${MOBILE_PROGRESS_MAX_WIDTH_PX}px`
+                    : `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
                 minWidth: 0,
                 height: "4px",
             }}
         >
-            {Array.from({ length: total }, (_, i) => (
+            {segments.map((i) => (
                 <ProgressBar
-                    key={i === current ? `active-${current}-${duration}` : i}
+                    key={
+                        i === current
+                            ? `active-${current}-${duration}`
+                            : `segment-${i}`
+                    }
                     state={
-                        i < current
-                            ? "past"
-                            : i === current
-                              ? "active"
-                              : "future"
+                        i < current ? "past" : i === current ? "active" : "future"
                     }
                     paused={paused}
                     duration={duration}
-                    onComplete={
-                        i === current && !isVideo ? onComplete : undefined
-                    }
+                    onComplete={i === current && !isVideo ? onComplete : undefined}
                 />
             ))}
         </Box>
@@ -895,7 +978,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             sx={{
                 position: "relative",
                 flex: 1,
-                minWidth: "8px",
+                minWidth: 0,
                 height: "4px",
                 borderRadius: "14px",
                 backgroundColor: "rgba(255, 255, 255, 0.45)",
@@ -947,6 +1030,7 @@ const MediaFrame = styled("div")({
     position: "relative",
     borderRadius: "24px",
     overflow: "hidden",
+    isolation: "isolate",
     backgroundColor: "#111111",
     boxShadow: "0 14px 38px rgba(0, 0, 0, 0.35)",
     width: "fit-content",
@@ -957,18 +1041,28 @@ const MediaFrame = styled("div")({
     lineHeight: 0,
 });
 
-const MediaSwitchLayer = styled("div")({
+const MediaSwitchLayer = styled("div", {
+    shouldForwardProp: (prop) => prop !== "phase",
+})<{ phase: "in" | "out" }>(({ phase }) => ({
+    position: "absolute",
+    inset: 0,
     width: "100%",
     height: "100%",
-    animation: `${mediaSwitchAnimation} ${MEDIA_SWITCH_TRANSITION_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`,
+    zIndex: phase === "out" ? 2 : 1,
+    animation:
+        phase === "out"
+            ? `${mediaSwitchOutAnimation} ${MEDIA_SWITCH_TRANSITION_DURATION_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`
+            : `${mediaSwitchInAnimation} ${MEDIA_SWITCH_TRANSITION_DURATION_MS}ms cubic-bezier(0.16, 1, 0.3, 1) both`,
     willChange: "opacity, transform",
-});
+    pointerEvents: "none",
+}));
 
 interface PhotoImageProps {
     file: EnteFile;
     onFullLoad?: () => void;
     fillFrame?: boolean;
     onAspectRatio?: (width: number, height: number) => void;
+    showLoadingOverlay?: boolean;
 }
 
 const PhotoImage: React.FC<PhotoImageProps> = ({
@@ -976,6 +1070,7 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
     onFullLoad,
     fillFrame,
     onAspectRatio,
+    showLoadingOverlay = true,
 }) => {
     const [thumbnailURL, setThumbnailURL] = useState<string | undefined>(
         undefined,
@@ -1050,7 +1145,7 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
                 overflow: "hidden",
             }}
         >
-            {isLoading && (
+            {isLoading && showLoadingOverlay && (
                 <Box
                     sx={{
                         position: "absolute",
@@ -1112,6 +1207,7 @@ interface VideoPlayerProps {
     paused?: boolean;
     fillFrame?: boolean;
     onAspectRatio?: (width: number, height: number) => void;
+    showLoadingOverlay?: boolean;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -1122,6 +1218,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     paused,
     fillFrame,
     onAspectRatio,
+    showLoadingOverlay = true,
 }) => {
     const [hlsData, setHlsData] = useState<HLSPlaylistData | undefined>(
         undefined,
@@ -1253,7 +1350,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 overflow: "hidden",
             }}
         >
-            {isLoading && (
+            {isLoading && showLoadingOverlay && (
                 <Box
                     sx={{
                         position: "absolute",

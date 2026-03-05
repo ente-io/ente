@@ -37,6 +37,7 @@ export const authenticatedPublicMemoryRequestHeaders = ({
 export interface PublicMemoryShareInfo {
     id: number;
     type: string;
+    memoryHash?: string;
     metadataCipher: string;
     metadataNonce: string;
     encryptedKey: string;
@@ -47,6 +48,7 @@ const PublicMemoryShareInfoResponse = z.object({
     memoryShare: z.object({
         id: z.number(),
         type: z.string().optional().default("share"),
+        memoryHash: z.string().optional(),
         metadataCipher: z.string().optional().default(""),
         metadataNonce: z.string().optional().default(""),
         encryptedKey: z.string(),
