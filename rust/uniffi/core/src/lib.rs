@@ -50,14 +50,14 @@ pub struct SrpVerifyResult {
 
 #[derive(Debug, thiserror::Error)]
 pub enum EnsuError {
-    #[error("{message}")]
-    Message { message: String },
+    #[error("{reason}")]
+    Message { reason: String },
 }
 
 impl From<auth::AuthError> for EnsuError {
     fn from(err: auth::AuthError) -> Self {
         EnsuError::Message {
-            message: err.to_string(),
+            reason: err.to_string(),
         }
     }
 }
@@ -71,7 +71,7 @@ static SRP_STATE: Lazy<Mutex<Option<SrpState>>> = Lazy::new(|| Mutex::new(None))
 
 fn lock_srp_state() -> Result<MutexGuard<'static, Option<SrpState>>, EnsuError> {
     SRP_STATE.lock().map_err(|_| EnsuError::Message {
-        message: "SRP state lock poisoned".to_string(),
+        reason: "SRP state lock poisoned".to_string(),
     })
 }
 
@@ -126,13 +126,13 @@ fn decode_token(token: &str) -> Result<Vec<u8>, EnsuError> {
         .decode(token)
         .or_else(|_| BASE64_STANDARD.decode(token))
         .map_err(|e| EnsuError::Message {
-            message: format!("token: {}", e),
+            reason: format!("token: {}", e),
         })
 }
 
 pub fn init_crypto() -> Result<(), EnsuError> {
     crypto::init().map_err(|e| EnsuError::Message {
-        message: e.to_string(),
+        reason: e.to_string(),
     })
 }
 
@@ -144,7 +144,7 @@ pub fn srp_start(
     let creds = auth::derive_srp_credentials(&password, &srp_attrs_core)?;
 
     let srp_salt = crypto::decode_b64(&srp_attrs.srp_salt).map_err(|e| EnsuError::Message {
-        message: format!("srp_salt: {}", e),
+        reason: format!("srp_salt: {}", e),
     })?;
 
     let session = auth::SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
@@ -153,7 +153,7 @@ pub fn srp_start(
     let mut guard = lock_srp_state()?;
     if guard.is_some() {
         return Err(EnsuError::Message {
-            message:
+            reason:
                 "SRP session already initialized. Call srp_clear() before starting a new session"
                     .to_string(),
         });
@@ -170,11 +170,11 @@ pub fn srp_start(
 pub fn srp_finish(srp_b: String) -> Result<SrpVerifyResult, EnsuError> {
     let mut guard = lock_srp_state()?;
     let state = guard.as_mut().ok_or_else(|| EnsuError::Message {
-        message: "SRP session not initialized".to_string(),
+        reason: "SRP session not initialized".to_string(),
     })?;
 
     let srp_b_bytes = crypto::decode_b64(&srp_b).map_err(|e| EnsuError::Message {
-        message: format!("srp_b: {}", e),
+        reason: format!("srp_b: {}", e),
     })?;
 
     let srp_m1 = state.session.compute_m1(&srp_b_bytes)?;
@@ -205,7 +205,7 @@ pub fn srp_decrypt_secrets(
     let state = {
         let mut guard = lock_srp_state()?;
         guard.take().ok_or_else(|| EnsuError::Message {
-            message: "SRP session not initialized".to_string(),
+            reason: "SRP session not initialized".to_string(),
         })?
     };
 
@@ -227,7 +227,7 @@ pub fn srp_decrypt_secrets(
     }
 
     Err(EnsuError::Message {
-        message: "Missing auth token".to_string(),
+        reason: "Missing auth token".to_string(),
     })
 }
 
@@ -266,6 +266,6 @@ pub fn decrypt_secrets_with_kek(
     }
 
     Err(EnsuError::Message {
-        message: "Missing auth token".to_string(),
+        reason: "Missing auth token".to_string(),
     })
 }

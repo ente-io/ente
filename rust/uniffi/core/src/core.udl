@@ -34,7 +34,7 @@ dictionary SrpVerifyResult {
 
 [Error]
 interface EnsuError {
-  Message(string message);
+  Message(string reason);
 };
 
 namespace core {

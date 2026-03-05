@@ -17,6 +17,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 /// Widget that displays a single feed item.
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
+  final String heroTagPrefix;
   final int currentUserID;
 
   /// Called when the user taps anywhere on the feed item.
@@ -28,6 +29,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps shared-feed header text/avatar area.
   final VoidCallback? onSharedHeaderTap;
 
+  /// Called when the user taps the +N extra-count badge in the shared grid.
+  final VoidCallback? onSharedExtraCountTap;
+
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
@@ -36,10 +40,12 @@ class FeedItemWidget extends StatelessWidget {
 
   const FeedItemWidget({
     required this.feedItem,
+    required this.heroTagPrefix,
     required this.currentUserID,
     this.onTap,
     this.onSharedPhotoTap,
     this.onSharedHeaderTap,
+    this.onSharedExtraCountTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -47,8 +53,9 @@ class FeedItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SharedPhoto has a different layout with photos grid below
-    if (feedItem.type == FeedItemType.sharedPhoto) {
+    // Shared feed items have a different layout with photos grid below.
+    if (feedItem.type == FeedItemType.sharedPhoto ||
+        feedItem.type == FeedItemType.sharedCollection) {
       return _buildSharedPhotoLayout(context);
     }
 
@@ -112,6 +119,7 @@ class FeedItemWidget extends StatelessWidget {
               child: _FeedThumbnail(
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
               ),
             )
           else
@@ -120,7 +128,7 @@ class FeedItemWidget extends StatelessWidget {
               height: 66,
               decoration: BoxDecoration(
                 color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(7.792),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
         ],
@@ -129,6 +137,9 @@ class FeedItemWidget extends StatelessWidget {
   }
 
   Widget _buildSharedPhotoLayout(BuildContext context) {
+    final hasSharedPhotos =
+        feedItem.sharedFileIDs != null && feedItem.sharedFileIDs!.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 18),
       child: Column(
@@ -143,7 +154,8 @@ class FeedItemWidget extends StatelessWidget {
               _FeedTypeIconWithTimeline(
                 type: feedItem.type,
                 showTimeline: !isLastItem,
-                timelineExtensionHeight: 400, // Longer for shared photo layout
+                timelineExtensionHeight:
+                    hasSharedPhotos ? 400 : 95, // Longer only when grid exists
               ),
               const SizedBox(width: 10),
               // Avatar and text
@@ -178,15 +190,16 @@ class FeedItemWidget extends StatelessWidget {
             ],
           ),
           // Photos grid below with left padding to align with text
-          if (feedItem.sharedFileIDs != null &&
-              feedItem.sharedFileIDs!.isNotEmpty)
+          if (hasSharedPhotos)
             Padding(
               padding: const EdgeInsets.only(left: 42, top: 12),
               child: SharedPhotosGrid(
                 fileIDs: feedItem.sharedFileIDs!,
                 collectionID: feedItem.collectionID,
+                heroTagPrefix: heroTagPrefix,
                 onTap: onTap,
                 onPhotoTap: onSharedPhotoTap,
+                onExtraCountTap: onSharedExtraCountTap,
               ),
             ),
         ],
@@ -320,7 +333,13 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
         );
       case FeedItemType.sharedPhoto:
         return Icon(
-          Icons.add_box_outlined,
+          Icons.add_rounded,
+          size: 18,
+          color: getEnteColorScheme(context).textMuted,
+        );
+      case FeedItemType.sharedCollection:
+        return Icon(
+          Icons.add_rounded,
           size: 18,
           color: getEnteColorScheme(context).textMuted,
         );
@@ -476,11 +495,13 @@ class _FeedTextContent extends StatelessWidget {
         _buildUsernameRow(context, primaryName, textTheme, colorScheme),
         const SizedBox(height: 2),
         // Action description
-        Text(
-          _getActionDescription(context),
-          style: textTheme.mini.copyWith(
-            color: colorScheme.textMuted,
-            fontWeight: FontWeight.w500,
+        Text.rich(
+          _getActionDescriptionSpan(
+            context,
+            textTheme.mini.copyWith(
+              color: colorScheme.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -538,35 +559,96 @@ class _FeedTextContent extends StatelessWidget {
     );
   }
 
-  String _getActionDescription(BuildContext context) {
+  InlineSpan _getActionDescriptionSpan(
+    BuildContext context,
+    TextStyle baseStyle,
+  ) {
     final l10n = AppLocalizations.of(context);
     final isOwn = feedItem.isOwnedByCurrentUser;
     switch (feedItem.type) {
       case FeedItemType.photoLike:
-        return isOwn ? l10n.likedYourPhoto : l10n.likedAPhoto;
+        return TextSpan(
+          text: isOwn ? l10n.likedYourPhoto : l10n.likedAPhoto,
+          style: baseStyle,
+        );
       case FeedItemType.comment:
-        return isOwn ? l10n.commentedOnYourPhoto : l10n.commentedOnAPhoto;
+        return TextSpan(
+          text: isOwn ? l10n.commentedOnYourPhoto : l10n.commentedOnAPhoto,
+          style: baseStyle,
+        );
       case FeedItemType.reply:
-        return isOwn ? l10n.repliedToYourComment : l10n.repliedToAComment;
+        return TextSpan(
+          text: isOwn ? l10n.repliedToYourComment : l10n.repliedToAComment,
+          style: baseStyle,
+        );
       case FeedItemType.commentLike:
-        return isOwn ? l10n.likedYourComment : l10n.likedAComment;
+        return TextSpan(
+          text: isOwn ? l10n.likedYourComment : l10n.likedAComment,
+          style: baseStyle,
+        );
       case FeedItemType.replyLike:
-        return isOwn ? l10n.likedYourReply : l10n.likedAReply;
+        return TextSpan(
+          text: isOwn ? l10n.likedYourReply : l10n.likedAReply,
+          style: baseStyle,
+        );
       case FeedItemType.sharedPhoto:
-        return _getSharedPhotoDescription(context);
+        return _getSharedPhotoDescriptionSpan(context, baseStyle);
+      case FeedItemType.sharedCollection:
+        final albumName = feedItem.collectionName ?? l10n.albums;
+        return _buildAlbumNameHighlightedSpan(
+          fullText: l10n.sharedAlbumWithYou(albumName: albumName),
+          albumName: albumName,
+          baseStyle: baseStyle,
+        );
     }
   }
 
-  String _getSharedPhotoDescription(BuildContext context) {
+  InlineSpan _getSharedPhotoDescriptionSpan(
+    BuildContext context,
+    TextStyle baseStyle,
+  ) {
     final l10n = AppLocalizations.of(context);
     final count = feedItem.sharedFileCount;
     final albumName = feedItem.collectionName ?? l10n.albums;
 
-    if (count == 1) {
-      return l10n.addedAMemoryTo(albumName: albumName);
-    } else {
-      return l10n.addedNMemoriesTo(count: count, albumName: albumName);
+    final fullText = count == 1
+        ? l10n.addedAMemoryTo(albumName: albumName)
+        : l10n.addedNMemoriesTo(count: count, albumName: albumName);
+    return _buildAlbumNameHighlightedSpan(
+      fullText: fullText,
+      albumName: albumName,
+      baseStyle: baseStyle,
+    );
+  }
+
+  InlineSpan _buildAlbumNameHighlightedSpan({
+    required String fullText,
+    required String albumName,
+    required TextStyle baseStyle,
+  }) {
+    if (albumName.isEmpty) {
+      return TextSpan(text: fullText, style: baseStyle);
     }
+
+    final startIndex = fullText.indexOf(albumName);
+    if (startIndex < 0) {
+      return TextSpan(text: fullText, style: baseStyle);
+    }
+
+    final beforeText = fullText.substring(0, startIndex);
+    final afterText = fullText.substring(startIndex + albumName.length);
+
+    return TextSpan(
+      style: baseStyle,
+      children: [
+        if (beforeText.isNotEmpty) TextSpan(text: beforeText),
+        TextSpan(
+          text: albumName,
+          style: baseStyle.copyWith(fontWeight: FontWeight.w700),
+        ),
+        if (afterText.isNotEmpty) TextSpan(text: afterText),
+      ],
+    );
   }
 
   User _getPrimaryUser() {
@@ -592,10 +674,12 @@ class _FeedTextContent extends StatelessWidget {
 class _FeedThumbnail extends StatefulWidget {
   final int fileID;
   final int collectionID;
+  final String heroTagPrefix;
 
   const _FeedThumbnail({
     required this.fileID,
     required this.collectionID,
+    required this.heroTagPrefix,
   });
 
   @override
@@ -645,7 +729,7 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
         height: 66,
         decoration: BoxDecoration(
           color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(7.792),
+          borderRadius: BorderRadius.circular(8),
         ),
       );
     }
@@ -656,7 +740,7 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
         height: 66,
         decoration: BoxDecoration(
           color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(7.792),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           Icons.image_not_supported_outlined,
@@ -666,15 +750,24 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(7.792),
-      child: SizedBox(
-        width: 66,
-        height: 66,
-        child: ThumbnailWidget(
-          _file!,
-          fit: BoxFit.cover,
-          rawThumbnail: true,
+    return Hero(
+      tag: widget.heroTagPrefix + _file!.tag,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: colorScheme.strokeFaint),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            width: 66,
+            height: 66,
+            child: ThumbnailWidget(
+              _file!,
+              fit: BoxFit.cover,
+              rawThumbnail: true,
+            ),
+          ),
         ),
       ),
     );

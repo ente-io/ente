@@ -1571,10 +1571,6 @@ impl SyncEngine {
         load_chat_key_from_meta(&self.sync_state, master_key)
     }
 
-    fn save_chat_key_to_meta(&self, payload: &ChatKeyPayload) -> Result<(), SyncError> {
-        save_chat_key_to_meta(&self.sync_state, payload)
-    }
-
     fn get_or_create_chat_key(
         &self,
         http: &HttpClient,

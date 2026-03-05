@@ -1074,6 +1074,54 @@ abstract class AppLocalizations {
   /// **'Terms'**
   String get termsOfServicesTitle;
 
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkForUpdates;
+
+  /// No description provided for @checkingForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates...'**
+  String get checkingForUpdates;
+
+  /// No description provided for @unableToCheckForUpdatesRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to check for updates right now'**
+  String get unableToCheckForUpdatesRightNow;
+
+  /// No description provided for @youAreOnTheLatestVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on the latest version'**
+  String get youAreOnTheLatestVersion;
+
+  /// No description provided for @aNewVersionOfEnteLockerIsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of Ente Locker is available.'**
+  String get aNewVersionOfEnteLockerIsAvailable;
+
+  /// No description provided for @criticalUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical update available'**
+  String get criticalUpdateAvailable;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailable;
+
+  /// No description provided for @downloadUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Download update'**
+  String get downloadUpdate;
+
   /// No description provided for @support.
   ///
   /// In en, this message translates to:
@@ -2129,6 +2177,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
   String get uploadStorageLimitErrorBody;
+
+  /// Title shown when uploads fail because the Photos subscription is expired
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription expired'**
+  String get uploadSubscriptionExpiredErrorTitle;
+
+  /// Body shown when uploads fail because the Photos subscription is expired
+  ///
+  /// In en, this message translates to:
+  /// **'Your Ente Photos subscription has expired. Renew your subscription to continue uploading.'**
+  String get uploadSubscriptionExpiredErrorBody;
 
   /// Title shown when uploads fail because the locker already has the maximum file count
   ///

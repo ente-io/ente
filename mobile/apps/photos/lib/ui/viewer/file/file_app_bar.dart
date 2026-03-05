@@ -1,9 +1,11 @@
 import "dart:async";
 import 'dart:io';
+import "dart:math" as math;
 
 import "package:ente_icons/ente_icons.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
@@ -12,7 +14,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -28,6 +29,7 @@ import "package:photos/services/video_preview_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
@@ -40,6 +42,7 @@ import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
@@ -312,7 +315,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (isFileUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
@@ -323,6 +326,21 @@ class FileAppBarState extends State<FileAppBar> {
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
+        if (isOwnedByUser && !isFileHidden) {
+          items.add(
+            EntePopupMenuItem(
+              AppLocalizations.of(context).sendLink,
+              value: 14,
+              iconWidget: Transform.rotate(
+                angle: math.pi / 2,
+                child: Icon(
+                  Icons.navigation_rounded,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
+            ),
+          );
+        }
       }
       // Edit option for images, live photos, and videos
       if (widget.file.fileType == FileType.image ||
@@ -503,6 +521,8 @@ class FileAppBarState extends State<FileAppBar> {
             _handleMenuClosed();
             if (value == 1) {
               await _download(widget.file);
+            } else if (value == 14) {
+              await _sendLink(widget.file);
             } else if (value == 2) {
               await _toggleFileArchiveStatus(widget.file);
             } else if (value == 3) {
@@ -618,14 +638,43 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
+    final existingFolderName =
+        await getExistingLocalFolderNameForDownloadSkipToast(file);
+    if (existingFolderName != null) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        showToast(
+          context,
+          l10n.downloadSkippedAlreadyAvailableOnDevice(
+            fileName: getDownloadSkipToastFileName(file),
+            albumName: existingFolderName,
+          ),
+          iosLongToastLengthInSec: 4,
+        );
+      }
+      return;
+    }
+
+    final fileToDownload =
+        !file.isRemoteFile ? file.copyWith(localID: null) : file;
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles([fileToDownload]);
+      } catch (e) {
+        _logger.warning("Failed to save file", e);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final dialog = createProgressDialog(
       context,
-      context.l10n.downloading,
+      AppLocalizations.of(context).downloading,
       isDismissible: true,
     );
     await dialog.show();
     try {
-      await downloadToGallery(file);
+      await downloadToGallery(fileToDownload);
       showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
@@ -633,6 +682,37 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _sendLink(EnteFile file) async {
+    if (!file.isUploaded || !file.isOwner) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+      );
+      return;
+    }
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).creatingLink,
+      isDismissible: true,
+    );
+    await dialog.show();
+    final Collection? sharedLinkCollection = await CollectionActions(
+      CollectionsService.instance,
+    ).createSharedCollectionLink(context, [file]);
+    if (sharedLinkCollection == null) {
+      await dialog.hide();
+      return;
+    }
+    final String url =
+        CollectionsService.instance.getPublicUrl(sharedLinkCollection);
+    await dialog.hide();
+    unawaited(Clipboard.setData(ClipboardData(text: url)));
+    await shareLinkWithDescription(
+      url,
+      context: context,
+    );
   }
 
   Future<void> _setAs(EnteFile file) async {

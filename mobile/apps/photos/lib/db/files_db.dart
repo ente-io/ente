@@ -1038,6 +1038,25 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  Future<List<EnteFile>> getUnUploadedLocalFilesPendingOfflineProcessing(
+    int processingVersion, {
+    int? limit,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    final args = <Object?>[processingVersion];
+    var query = 'SELECT * FROM $filesTable WHERE ($columnUploadedFileID IS '
+        'NULL OR $columnUploadedFileID IS -1) AND $columnLocalID IS NOT NULL '
+        'AND $columnLocalID IS NOT -1 AND ($columnMetadataVersion IS NULL OR '
+        '$columnMetadataVersion < ?) GROUP BY $columnLocalID ORDER BY '
+        '$columnCreationTime DESC';
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+    final results = await db.getAll(query, args);
+    return convertToFiles(results);
+  }
+
   Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -1237,6 +1256,35 @@ class FilesDB with SqlDbBase {
         getInt(fileType),
         localID,
         ownerID,
+      ],
+    );
+  }
+
+  Future<void> updateOfflineImportMetadataForLocalID(
+    String localID, {
+    required int processingVersion,
+    int? creationTime,
+    Location? location,
+    int? fileSize,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET  $columnCreationTime = COALESCE(?, $columnCreationTime),
+            $columnLatitude = COALESCE(?, $columnLatitude),
+            $columnLongitude = COALESCE(?, $columnLongitude),
+            $columnFileSize = COALESCE(?, $columnFileSize),
+            $columnMetadataVersion = ?
+      WHERE $columnLocalID = ? AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+    ''',
+      [
+        creationTime,
+        location?.latitude,
+        location?.longitude,
+        fileSize,
+        processingVersion,
+        localID,
       ],
     );
   }

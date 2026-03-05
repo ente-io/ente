@@ -79,13 +79,11 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut(
-                    "Watch folders updations, File context menu, Edit location, and more",
-                )}
+                {ut("App lock, Masonry layout, Quick links, and more")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Hide shared albums. Watch folders now support hidden albums, and are marked as inaccessible instead of being removed when they can't be accessed. Right-click context menu for files. New 'Clean uncategorized' and 'Clean large files' options. Edit location. Improved album selector with sort options. Upload to hidden albums. Public album improvements. Redesigned login and sign-up pages.",
+                    "App lock for additional security. Masonry layout for public albums. Quick links with full viewer experience for single-photo/video links. Update album cover. Public album improvements. Catalan language support.",
                 )}
             </Typography>
         </Stack>

@@ -31,6 +31,8 @@ class LoadingPhotosWidget extends StatefulWidget {
 }
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
+  static const int _preservedMemoriesCountInMillions = 500;
+
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   StreamSubscription<LocalImportProgressEvent>? _importProgressEvent;
   int _currentPage = 0;
@@ -280,7 +282,11 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   void _setupLoadingMessages(BuildContext context) {
     _messages.add(AppLocalizations.of(context).loadMessage1);
-    _messages.add(AppLocalizations.of(context).loadMessage2);
+    _messages.add(
+      AppLocalizations.of(context).loadMessage2(
+        memoriesCountInMillions: _preservedMemoriesCountInMillions,
+      ),
+    );
     _messages.add(AppLocalizations.of(context).loadMessage3);
     _messages.add(AppLocalizations.of(context).loadMessage4);
     _messages.add(AppLocalizations.of(context).loadMessage5);

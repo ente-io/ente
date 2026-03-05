@@ -258,7 +258,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type, collection_shares.shared_at
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -283,8 +283,13 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
 		var roleType sql.NullString
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
+		var sharedAt sql.NullInt64
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType, &sharedAt); err != nil {
 			return collections, stacktrace.Propagate(err, "")
+		}
+		if sharedAt.Valid {
+			sharedAtValue := sharedAt.Int64
+			c.SharedAt = &sharedAtValue
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
 			c.Name = collectionName.String
@@ -507,10 +512,17 @@ func (repo *CollectionRepository) Share(
 		err = fmt.Errorf("invalid role %s", string(role))
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type) VALUES($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (collection_id, from_user_id, to_user_id)
-		DO UPDATE SET(is_deleted, updation_time, role_type) = (FALSE, $5, $6)`,
-		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role)
+	_, err = tx.ExecContext(context, `INSERT INTO collection_shares(collection_id, from_user_id, to_user_id, encrypted_key, updation_time, role_type, shared_at) VALUES($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (collection_id, from_user_id, to_user_id)
+			DO UPDATE SET
+				is_deleted = FALSE,
+				updation_time = $5,
+				role_type = $6,
+				shared_at = CASE
+					WHEN collection_shares.is_deleted = TRUE THEN $7
+					ELSE collection_shares.shared_at
+				END`,
+		collectionID, fromUserID, toUserID, encryptedKey, updationTime, role, updationTime)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")

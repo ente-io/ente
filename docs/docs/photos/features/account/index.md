@@ -249,7 +249,7 @@ Learn more in the [Storage optimization guide](/photos/features/albums-and-organ
 
 Earn free storage by inviting friends:
 
-- Share your referral code from `Settings > General > Referrals`
+- Share your referral code from `Settings > Referrals`
 - When friends upgrade to a paid plan, both of you get **10 GB free**
 - Maximum earned storage equals your plan size (double your storage)
 - Earned storage lasts as long as your subscription is active
@@ -275,6 +275,7 @@ Learn more in the [Legacy guide](/photos/features/account/legacy/).
 ## Related topics
 
 - [Passkeys](/photos/features/account/passkeys) - Use passkeys for two-factor authentication
+- [App lock](/photos/features/account/app-lock) - Add a lock screen for the Ente Photos app
 - [Family Plans](/photos/features/account/family-plans) - Share storage with family members
 - [Referral Program](/photos/features/account/referral-program/) - Earn free storage by inviting friends
 - [Legacy](/photos/features/account/legacy/) - Designate trusted contacts for account recovery

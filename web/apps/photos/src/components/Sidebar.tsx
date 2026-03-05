@@ -73,6 +73,7 @@ import {
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { ShapeIcon } from "ente-new/photos/components/icons/ShapeIcon";
+import { AppLockSettings } from "ente-new/photos/components/sidebar/AppLockSettings";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
 import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
@@ -82,6 +83,11 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    reauthenticateWithAppLock,
+    suppressAppLockRefreshFromSessionForTrustedReload,
+    suppressAutoLockOnBlurForTrustedPrompt,
+} from "ente-new/photos/services/app-lock";
 import {
     PseudoCollectionID,
     type CollectionSummaries,
@@ -236,6 +242,14 @@ type FreeUpSpaceAction = Extract<
     "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
 >;
 
+const appLockReauthenticationCancelledMessage =
+    "app_lock_reauthentication_cancelled";
+
+const isReauthenticationCancellation = (error: unknown) =>
+    error == undefined ||
+    (error instanceof Error &&
+        error.message === appLockReauthenticationCancelledMessage);
+
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
@@ -290,6 +304,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         [setWatchFolderView],
     );
 
+    const handleShowExport = useCallback(() => {
+        if (!isDesktop) {
+            showMiniDialog(downloadAppDialogAttributes());
+            return;
+        }
+
+        void (async () => {
+            try {
+                await onAuthenticateUser();
+                onShowExport();
+            } catch {
+                // User cancelled reauthentication.
+            }
+        })();
+    }, [onAuthenticateUser, onShowExport, showMiniDialog]);
+
     const performSidebarAction = useCallback(
         async (actionID: SidebarActionID) =>
             performSidebarRegistryAction(actionID, {
@@ -300,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 showPreferences,
                 showHelp,
                 showFreeUpSpace,
-                onShowExport,
+                onShowExport: handleShowExport,
                 onLogout: handleLogout,
                 onShowWatchFolder: handleOpenWatchFolder,
                 pseudoIDs: {
@@ -328,7 +358,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClose,
             onShowCollectionSummary,
             onShowPlanSelector,
-            onShowExport,
+            handleShowExport,
             showAccount,
             showFreeUpSpace,
             showHelp,
@@ -376,7 +406,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <UtilitySection
                     onCloseSidebar={onClose}
                     {...{
-                        onShowExport,
+                        onShowExport: handleShowExport,
                         onAuthenticateUser,
                         showAccount,
                         accountVisibilityProps,
@@ -831,13 +861,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     pendingFreeUpSpaceAction,
     onFreeUpSpaceActionHandled,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-
-    const handleExport = () =>
-        isDesktop
-            ? onShowExport()
-            : showMiniDialog(downloadAppDialogAttributes());
-
     return (
         <>
             <RowButton
@@ -875,7 +898,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                         <RowButtonEndActivityIndicator />
                     )
                 }
-                onClick={handleExport}
+                onClick={onShowExport}
             />
             <Help
                 {...helpVisibilityProps}
@@ -989,13 +1012,33 @@ const Account: React.FC<AccountProps> = ({
         void router.push("/change-email");
     }, [router]);
 
+    const handleRecoveryKey = useCallback(async () => {
+        if (isDesktop) {
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
+        } else {
+            await onAuthenticateUser();
+        }
+        showRecoveryKey();
+    }, [onAuthenticateUser, showRecoveryKey]);
+
     const handlePasskeys = useCallback(async () => {
         onRootClose();
+        if (isDesktop) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         await openAccountsManagePasskeysPage();
     }, [onRootClose]);
 
     const handleActiveSessions = useCallback(async () => {
-        await onAuthenticateUser();
+        if (isDesktop) {
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
+        } else {
+            await onAuthenticateUser();
+        }
         showSessions();
     }, [onAuthenticateUser, showSessions]);
 
@@ -1003,7 +1046,7 @@ const Account: React.FC<AccountProps> = ({
         if (!open || !pendingAction) return;
         switch (pendingAction) {
             case "account.recoveryKey":
-                showRecoveryKey();
+                void handleRecoveryKey();
                 break;
             case "account.twoFactor.reconfigure":
             case "account.twoFactor":
@@ -1030,12 +1073,12 @@ const Account: React.FC<AccountProps> = ({
         handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
+        handleRecoveryKey,
         handlePasskeys,
         open,
         onActionHandled,
         pendingAction,
         showDeleteAccount,
-        showRecoveryKey,
         showTwoFactor,
     ]);
 
@@ -1054,7 +1097,7 @@ const Account: React.FC<AccountProps> = ({
                             />
                         }
                         label={t("recovery_key")}
-                        onClick={showRecoveryKey}
+                        onClick={() => void handleRecoveryKey()}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
@@ -1070,6 +1113,12 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
+                {isDesktop && (
+                    <DesktopAppLockSettings
+                        onAuthenticateUser={onAuthenticateUser}
+                        onRootClose={onRootClose}
+                    />
+                )}
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}
@@ -1106,6 +1155,31 @@ const Account: React.FC<AccountProps> = ({
                 {...{ onAuthenticateUser }}
             />
         </TitledNestedSidebarDrawer>
+    );
+};
+
+const DesktopAppLockSettings: React.FC<
+    Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
+> = ({ onAuthenticateUser, onRootClose }) => {
+    const { show, props } = useModalVisibility();
+
+    const handleOpen = useCallback(async () => {
+        try {
+            await onAuthenticateUser();
+            show();
+        } catch (error) {
+            if (isReauthenticationCancellation(error)) return;
+            log.error("Failed to open app lock settings", error);
+        }
+    }, [onAuthenticateUser, show]);
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton label={t("app_lock")} onClick={handleOpen} />
+            </RowButtonGroup>
+            <AppLockSettings {...props} onRootClose={onRootClose} />
+        </>
     );
 };
 
@@ -1245,6 +1319,8 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
+        if (newLocale === locale) return;
+
         void setLocaleInUse(newLocale).then(() => {
             // [Note: Changing locale causes a full reload]
             //
@@ -1254,6 +1330,12 @@ const LanguageSelector = () => {
             // We also rely on this behaviour by caching various formatters in
             // module static variables that not get updated if the i18n.language
             // changes unless there is a full reload.
+            //
+            // Mark this as a trusted app-initiated reload so desktop app-lock
+            // setup does not force an immediate lock screen.
+            if (globalThis.electron) {
+                suppressAppLockRefreshFromSessionForTrustedReload();
+            }
             window.location.reload();
         });
     };

@@ -44,6 +44,9 @@ func shouldSkipBodyLog(method string, path string) bool {
 	if path == "/admin/user/terminate-session" {
 		return true
 	}
+	if method == http.MethodPost && (path == "/paste/create" || path == "/paste/guard" || path == "/paste/consume") {
+		return true
+	}
 	return false
 }
 

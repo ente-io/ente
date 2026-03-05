@@ -239,7 +239,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     alignItems: "center",
     gap: 12,
     padding: theme.spacing(1.5, 2),
-    borderRadius: 10,
+    borderRadius: 8,
     color: theme.vars.palette.text.base,
     fontSize: 15,
     "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },

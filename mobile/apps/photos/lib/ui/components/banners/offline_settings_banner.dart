@@ -4,6 +4,9 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/banners/banner_action_button.dart";
 
 class OfflineSettingsBanner extends StatefulWidget {
   final VoidCallback onGetStarted;
@@ -27,39 +30,25 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
       return const SizedBox.shrink();
     }
 
-    const titleStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
-      height: 28 / 16,
+    final textTheme = getEnteTextTheme(context);
+    final l10n = AppLocalizations.of(context);
+    final titleStyle = textTheme.largeBold.copyWith(
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      height: 24 / 18,
       letterSpacing: -1,
       color: Colors.white,
     );
 
-    const descriptionStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.w600,
-      fontSize: 10,
-      height: 16 / 10,
-      color: Color.fromRGBO(165, 165, 165, 0.79),
-    );
-
-    const buttonTextStyle = TextStyle(
-      fontFamily: "Montserrat",
-      fontWeight: FontWeight.w600,
-      fontSize: 10,
-      color: Colors.black,
-    );
-
-    final l10n = AppLocalizations.of(context);
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(15),
+    return GestureDetector(
+      onTap: widget.onGetStarted,
       child: Container(
-        height: 156,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
+        height: 175,
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
             colors: [
               Color.fromRGBO(21, 21, 21, 1),
               Color.fromRGBO(43, 43, 43, 1),
@@ -95,13 +84,19 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                       GestureDetector(
                         onTap: _onDismiss,
                         behavior: HitTestBehavior.opaque,
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCancel01,
-                            color: Colors.white,
-                            size: 20,
-                            strokeWidth: 2,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: contentLight,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: contentDark,
+                              size: 18,
+                              strokeWidth: 2.5,
+                            ),
                           ),
                         ),
                       ),
@@ -109,28 +104,11 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                   ),
                   const SizedBox(height: 4),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200),
+                    constraints: const BoxConstraints(maxWidth: 235),
                     child: Text(
                       l10n.offlineSettingsBannerDesc,
-                      style: descriptionStyle,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: widget.onGetStarted,
-                    child: Container(
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        widthFactor: 1,
-                        child: Text(
-                          l10n.offlineEnableBackupAction,
-                          style: buttonTextStyle,
-                        ),
+                      style: textTheme.smallMuted.copyWith(
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -138,7 +116,18 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
               ),
             ),
             Positioned(
-              right: 12,
+              left: 16,
+              bottom: 16,
+              child: BannerActionButton(
+                label: l10n.getStarted,
+                onTap: widget.onGetStarted,
+                variant: BannerActionButtonVariant.primary,
+                stickTagToLightTheme: true,
+                showTag: true,
+              ),
+            ),
+            Positioned(
+              right: 16,
               bottom: 0,
               child: IgnorePointer(
                 child: Image.asset(

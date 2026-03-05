@@ -55,7 +55,6 @@ class _SearchTabState extends State<SearchTab> {
   @override
   void dispose() {
     indexOfStackNotifier.removeListener(indexNotifierListener);
-    indexOfStackNotifier.dispose();
     super.dispose();
   }
 
@@ -144,6 +143,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemCount: searchTypes.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
+                      if (!isOfflineMode) return const SizedBox.shrink();
                       return const MLProgressBanner();
                     }
                     final sectionIndex = index - 1;

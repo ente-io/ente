@@ -1,0 +1,31 @@
+[package]
+name = "ensu-tauri"
+version = "0.1.8"
+description = "Ensu Desktop (Tauri)"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ente-core = { path = "../../../core", features = ["srp"] }
+ensu-db = { path = "../../../ensu/db" }
+ensu-sync = { path = "../../../ensu/sync" }
+inference_rs = { path = "../../../ensu/inference" }
+uuid = { version = "1", features = ["v4"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.dev]
+opt-level = 1

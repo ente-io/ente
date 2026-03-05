@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
@@ -9,7 +10,9 @@ import "package:photos/events/notification_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/utils/ml_util.dart";
 
 class MLProgressBanner extends StatefulWidget {
@@ -51,7 +54,8 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       _indexingComplete = false;
       _ensurePolling();
     });
-    _notificationSubscription = Bus.instance.on<NotificationEvent>().listen((_) {
+    _notificationSubscription =
+        Bus.instance.on<NotificationEvent>().listen((_) {
       _indexingComplete = false;
       _ensurePolling();
     });
@@ -132,80 +136,103 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     final l10n = AppLocalizations.of(context);
     final format = NumberFormat();
     final progress = total > 0 ? status.indexedItems.toDouble() / total : 0.0;
+    final showModelDownloadPhase = _shouldShowModelDownloadPhase(status);
+
+    final titleStyle = textTheme.largeBold.copyWith(
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      height: 24 / 18,
+      letterSpacing: -1,
+      color: colorScheme.greenBase,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundColour,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.mlProgressBannerTitle,
-                  style: TextStyle(
-                    fontFamily: "Montserrat",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: colorScheme.greenBase,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          routeToPage(context, const MachineLearningSettingsPage());
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundColour,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.mlProgressBannerTitle,
+                    style: titleStyle,
                   ),
-                ),
-                GestureDetector(
-                  onTap: _onDismiss,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
-                      color: colorScheme.textFaint,
-                      size: 20,
-                      strokeWidth: 2,
+                  GestureDetector(
+                    onTap: _onDismiss,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
+                          color: colorScheme.contentDark,
+                          size: 18,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.mlProgressBannerDescription,
-              style: textTheme.miniMuted.copyWith(
-                fontFamily: "Montserrat",
-                fontWeight: FontWeight.w600,
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                l10n.mlProgressBannerStatus(
-                  indexed: format.format(status.indexedItems),
-                  total: format.format(total),
-                ),
-                style: textTheme.tinyMuted,
+              const SizedBox(height: 8),
+              Text(
+                l10n.mlProgressBannerDescription,
+                style: textTheme.smallMuted,
               ),
-            ),
-            const SizedBox(height: 6),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2.5),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 5,
-                backgroundColor: colorScheme.fillFaint,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  colorScheme.greenBase,
+              const SizedBox(height: 24),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2.5),
+                child: LinearProgressIndicator(
+                  value: showModelDownloadPhase ? 0.0 : progress,
+                  minHeight: 5,
+                  backgroundColor: colorScheme.fillFaint,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.greenBase,
+                  ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  showModelDownloadPhase
+                      ? l10n.loadingModel
+                      : l10n.mlProgressBannerStatus(
+                          indexed: format.format(status.indexedItems),
+                          total: format.format(total),
+                        ),
+                  style: textTheme.miniMuted,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  bool _shouldShowModelDownloadPhase(IndexStatus status) {
+    if (!localSettings.isMLLocalIndexingEnabled) return false;
+    if (status.indexedItems > 0) return false;
+    if (status.pendingItems <= 0) return false;
+    return !MLIndexingIsolate.instance.areModelsDownloaded;
   }
 
   void _onDismiss() {

@@ -67,6 +67,11 @@ class LocalSyncService {
       _permissionGrantedSubscription =
           Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
+        if (isOfflineMode) {
+          // Offline onboarding grants permission without explicitly invoking
+          // SyncService, so trigger local import right away.
+          unawaited(checkAndSync());
+        }
       });
     }
   }

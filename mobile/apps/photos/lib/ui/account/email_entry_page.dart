@@ -9,6 +9,7 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/login_page.dart";
 import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
@@ -16,7 +17,14 @@ import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({super.key});
+  const EmailEntryPage({
+    super.key,
+    this.showReferralSourceField = true,
+    this.referralSource,
+  });
+
+  final bool showReferralSourceField;
+  final String? referralSource;
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -50,6 +58,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   void initState() {
     super.initState();
+    _referralSource = widget.referralSource?.trim() ?? '';
     final storedEmail = _config.getEmail();
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _email = storedEmail;
@@ -73,6 +82,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
@@ -88,7 +98,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           },
         ),
         title: Text(
-          AppLocalizations.of(context).createAccount,
+          AppLocalizations.of(context).createAccountTitle,
           style: textTheme.largeBold,
         ),
         centerTitle: true,
@@ -99,7 +109,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: ButtonWidgetV2(
           key: const ValueKey("createAccountButton"),
           buttonType: ButtonTypeV2.primary,
-          labelText: AppLocalizations.of(context).createAccount,
+          labelText: AppLocalizations.of(context).createAccountTitle,
           isDisabled: !_isFormValid(),
           onTap: _isFormValid()
               ? () async {
@@ -117,6 +127,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               : null,
         ),
       ),
+      bottomNavigationBar:
+          isKeyboardOpen ? null : _getLoginPrompt(colorScheme, textTheme),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -129,10 +141,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       if (_passwordStrength > kStrongPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).strongPassword;
         passwordMessageType = TextInputMessageType.success;
-      } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-        passwordMessage = AppLocalizations.of(context).moderateStrength;
-        passwordMessageType = TextInputMessageType.alert;
-      } else {
+      } else if (_passwordStrength <= kMildPasswordStrengthThreshold) {
         passwordMessage = AppLocalizations.of(context).weakStrength;
         passwordMessageType = TextInputMessageType.alert;
       }
@@ -244,18 +253,48 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               );
             },
           ),
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).hearUsWhereTitle,
-            autoCorrect: false,
-            onChange: (value) {
-              _referralSource = value.trim();
-            },
-          ),
+          if (widget.showReferralSourceField) ...[
+            const SizedBox(height: 24),
+            TextInputWidgetV2(
+              label: AppLocalizations.of(context).hearUsWhereTitle,
+              autoCorrect: false,
+              onChange: (value) {
+                _referralSource = value.trim();
+              },
+            ),
+          ],
           const SizedBox(height: 16),
           _getTOSAgreement(colorScheme, textTheme),
           const SizedBox(height: 80),
         ],
+      ),
+    );
+  }
+
+  Widget _getLoginPrompt(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              AppLocalizations.of(context).alreadyHaveAnAccount,
+              style: textTheme.bodyMuted,
+            ),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.link,
+              labelText: AppLocalizations.of(context).logInLabel,
+              buttonSize: ButtonSizeV2.small,
+              shouldSurfaceExecutionStates: false,
+              onTap: _goToLoginPage,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -368,5 +407,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _passwordsMatch &&
         _hasAgreedToTOS &&
         _passwordIsValid;
+  }
+
+  Future<void> _goToLoginPage() async {
+    FocusScope.of(context).unfocus();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const LoginPage(),
+      ),
+    );
   }
 }

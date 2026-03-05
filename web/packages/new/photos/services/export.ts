@@ -5,7 +5,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { ensureElectron } from "ente-base/electron";
+import {
+    ensureElectron,
+    suppressMainWindowBlurForTrustedPrompt,
+} from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import {
@@ -1275,6 +1278,7 @@ export const selectAndPrepareExportDirectory = async (): Promise<
 > => {
     const electron = ensureElectron();
 
+    suppressMainWindowBlurForTrustedPrompt();
     const rootDir = await electron.selectDirectory();
     if (!rootDir) return undefined;
 

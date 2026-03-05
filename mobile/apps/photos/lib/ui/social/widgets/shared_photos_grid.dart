@@ -26,14 +26,21 @@ class SharedPhotosGrid extends StatefulWidget {
   /// Called when user taps an individual photo thumbnail.
   final ValueChanged<int>? onPhotoTap;
 
+  /// Called when user taps the +N extra-count badge.
+  final VoidCallback? onExtraCountTap;
+  /// Prefix used for Hero tags while opening shared photos.
+  final String heroTagPrefix;
+
   /// Size of the grid (width). Height is calculated based on layout.
   final double gridSize;
 
   const SharedPhotosGrid({
     required this.fileIDs,
     required this.collectionID,
+    required this.heroTagPrefix,
     this.onTap,
     this.onPhotoTap,
+    this.onExtraCountTap,
     this.gridSize = 300,
     super.key,
   });
@@ -113,12 +120,18 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
 
     return GestureDetector(
       onTap: widget.onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: SizedBox(
-          width: widget.gridSize,
-          height: widget.gridSize,
-          child: _buildGrid(validFiles),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorScheme.strokeFaint),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: widget.gridSize,
+            height: widget.gridSize,
+            child: _buildGrid(validFiles),
+          ),
         ),
       ),
     );
@@ -146,7 +159,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildTwoPhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemHeight = (widget.gridSize - gap) / 2;
 
     return Column(
@@ -167,7 +180,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildThreePhotos(List<EnteFile> files) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
@@ -201,7 +214,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildFourPlusPhotos(List<EnteFile> files, int extraCount) {
-    const gap = 4.0;
+    const gap = 2.0;
     final itemWidth = (widget.gridSize - gap) / 2;
     final itemHeight = (widget.gridSize - gap) / 2;
 
@@ -252,15 +265,18 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildSharedPhotoThumbnail(EnteFile file) {
-    final thumbnail = ThumbnailWidget(
-      file,
-      fit: BoxFit.cover,
-      rawThumbnail: false,
-      shouldShowFavoriteIcon: false,
-      shouldShowSyncStatus: false,
-      shouldShowLivePhotoOverlay: true,
-      thumbnailSize: thumbnailLargeSize,
-      useRequestedThumbnailSizeForLocalCache: true,
+    final thumbnail = Hero(
+      tag: widget.heroTagPrefix + file.tag,
+      child: ThumbnailWidget(
+        file,
+        fit: BoxFit.cover,
+        rawThumbnail: false,
+        shouldShowFavoriteIcon: false,
+        shouldShowSyncStatus: false,
+        shouldShowLivePhotoOverlay: true,
+        thumbnailSize: thumbnailLargeSize,
+        useRequestedThumbnailSizeForLocalCache: true,
+      ),
     );
     final fileID = file.uploadedFileID;
     if (widget.onPhotoTap == null || fileID == null) {
@@ -274,23 +290,35 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildExtraCountOverlay(int extraCount) {
-    return Positioned(
-      right: 4,
-      bottom: 4,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0x99000000),
-          borderRadius: BorderRadius.circular(100),
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0x99000000),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        '+$extraCount',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
         ),
-        child: Text(
-          '+$extraCount',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      ),
+    );
+
+    final tappableBadge = widget.onExtraCountTap == null
+        ? badge
+        : GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onExtraCountTap,
+            child: badge,
+          );
+
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: tappableBadge,
       ),
     );
   }

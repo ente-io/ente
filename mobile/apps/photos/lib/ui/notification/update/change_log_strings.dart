@@ -33,232 +33,209 @@ class ChangeLogStrings {
 
   static const Map<String, ChangeLogStrings> _translations = {
     'en': ChangeLogStrings(
-      title1: 'Clean up hidden',
+      title1: 'Faster search and discovery',
       desc1:
-          'Two new actions are available for managing hidden files on mobile',
-      desc1Item1:
-          'Clean up hidden files: Removes hidden files from any non-hidden albums they also belong to, so they only live in Hidden.',
-      desc1Item2:
-          'Delete hidden files from device: Removes local copies of hidden files from your device to free up space.',
-      title2: 'Hide shared albums',
-      desc2: 'You can now hide albums that have been shared with you.',
-      title3: 'Device album search',
-      desc3: 'Now easily search within your device folders.',
+          'Search is now even faster. We have done some improvements on our embeddings DB to make it feel instant',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Shared photos in feed',
+      desc2:
+          'Photos added to shared albums would now appear in your feed, making it easier to find recently shared photos and comment on them',
+      title3: '',
+      desc3: '',
     ),
     'cs': ChangeLogStrings(
-      title1: 'Vyčistit skryté',
-      desc1: 'Dvě nové akce pro správu skrytých souborů na mobilním zařízení',
-      desc1Item1:
-          'Vyčistit skryté soubory: Odebere skryté soubory ze všech neskrytých alb, ve kterých se také nacházejí, takže zůstanou pouze ve složce Skryté.',
-      desc1Item2:
-          'Smazat skryté soubory ze zařízení: Odstraní místní kopie skrytých souborů z vašeho zařízení a uvolní tak místo.',
-      title2: 'Skrýt sdílená alba',
-      desc2: 'Nyní můžete skrýt alba, která s vámi byla sdílena.',
-      title3: 'Hledání v albech zařízení',
-      desc3: 'Nyní můžete snadno vyhledávat ve složkách zařízení.',
+      title1: 'Rychlejší vyhledávání a objevování',
+      desc1: 'Vyhledávání je nyní ještě rychlejší díky vylepšením na pozadí.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Sdílené fotky v kanálu',
+      desc2:
+          'Fotky přidané do sdílených alb se nyní zobrazí ve vašem kanálu, takže snáze najdete nedávno sdílené fotky a můžete je komentovat.',
+      title3: '',
+      desc3: '',
     ),
     'de': ChangeLogStrings(
-      title1: 'Versteckte aufräumen',
+      title1: 'Schnellere Suche und Entdeckung',
       desc1:
-          'Zwei neue Aktionen zur Verwaltung versteckter Dateien auf dem Mobilgerät',
-      desc1Item1:
-          'Versteckte Dateien aufräumen: Entfernt versteckte Dateien aus allen nicht versteckten Alben, in denen sie sich ebenfalls befinden, sodass sie nur noch unter "Versteckt" vorhanden sind.',
-      desc1Item2:
-          'Versteckte Dateien vom Gerät löschen: Entfernt lokale Kopien versteckter Dateien von Ihrem Gerät, um Speicherplatz freizugeben.',
-      title2: 'Geteilte Alben ausblenden',
-      desc2: 'Sie können jetzt Alben ausblenden, die mit Ihnen geteilt wurden.',
-      title3: 'Suche in Gerätealben',
-      desc3: 'Durchsuchen Sie jetzt ganz einfach Ihre Geräteordner.',
+          'Die Suche ist jetzt noch schneller dank Verbesserungen im Hintergrund.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Geteilte Fotos im Feed',
+      desc2:
+          'Fotos, die zu geteilten Alben hinzugefügt werden, erscheinen jetzt in Ihrem Feed. So finden Sie kürzlich geteilte Fotos leichter und können sie kommentieren.',
+      title3: '',
+      desc3: '',
     ),
     'es': ChangeLogStrings(
-      title1: 'Limpiar ocultos',
-      desc1:
-          'Dos nuevas acciones disponibles para gestionar archivos ocultos en el móvil',
-      desc1Item1:
-          'Limpiar archivos ocultos: Elimina los archivos ocultos de cualquier álbum no oculto al que también pertenezcan, de modo que solo permanezcan en Ocultos.',
-      desc1Item2:
-          'Eliminar archivos ocultos del dispositivo: Elimina las copias locales de los archivos ocultos de tu dispositivo para liberar espacio.',
-      title2: 'Ocultar álbumes compartidos',
-      desc2: 'Ahora puedes ocultar álbumes que han sido compartidos contigo.',
-      title3: 'Búsqueda en álbumes del dispositivo',
-      desc3: 'Ahora busca fácilmente dentro de las carpetas de tu dispositivo.',
+      title1: 'Búsqueda y descubrimiento más rápidos',
+      desc1: 'La búsqueda ahora es aún más rápida gracias a mejoras internas.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Fotos compartidas en el feed',
+      desc2:
+          'Las fotos añadidas a álbumes compartidos ahora aparecerán en tu feed, lo que facilita encontrar fotos compartidas recientemente y comentarlas.',
+      title3: '',
+      desc3: '',
     ),
     'fr': ChangeLogStrings(
-      title1: 'Nettoyer les masqués',
+      title1: 'Recherche et découverte plus rapides',
       desc1:
-          'Deux nouvelles actions pour gérer les fichiers masqués sur mobile',
-      desc1Item1:
-          "Nettoyer les fichiers masqués : Retire les fichiers masqués de tous les albums non masqués auxquels ils appartiennent également, afin qu'ils ne restent que dans Masqués.",
-      desc1Item2:
-          "Supprimer les fichiers masqués de l'appareil : Supprime les copies locales des fichiers masqués de votre appareil pour libérer de l'espace.",
-      title2: 'Masquer les albums partagés',
+          'La recherche est désormais encore plus rapide grâce à des améliorations internes.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Photos partagées dans le fil',
       desc2:
-          'Vous pouvez désormais masquer les albums qui ont été partagés avec vous.',
-      title3: "Recherche dans les albums de l'appareil",
-      desc3: 'Recherchez facilement dans les dossiers de votre appareil.',
+          'Les photos ajoutées aux albums partagés apparaissent désormais dans votre fil, ce qui facilite la recherche des photos récemment partagées et leur commentaire.',
+      title3: '',
+      desc3: '',
     ),
     'it': ChangeLogStrings(
-      title1: 'Pulisci nascosti',
+      title1: 'Ricerca e scoperta più veloci',
       desc1:
-          'Due nuove azioni disponibili per gestire i file nascosti su dispositivo mobile',
-      desc1Item1:
-          'Pulisci file nascosti: Rimuove i file nascosti da qualsiasi album non nascosto a cui appartengono, in modo che restino solo nella sezione Nascosti.',
-      desc1Item2:
-          'Elimina file nascosti dal dispositivo: Rimuove le copie locali dei file nascosti dal dispositivo per liberare spazio.',
-      title2: 'Nascondi album condivisi',
-      desc2: 'Ora puoi nascondere gli album che sono stati condivisi con te.',
-      title3: 'Ricerca negli album del dispositivo',
-      desc3: 'Ora puoi cercare facilmente nelle cartelle del dispositivo.',
+          'La ricerca ora è ancora più veloce grazie a miglioramenti interni.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Foto condivise nel feed',
+      desc2:
+          'Le foto aggiunte agli album condivisi ora appariranno nel tuo feed, così è più facile trovare le foto condivise di recente e commentarle.',
+      title3: '',
+      desc3: '',
     ),
     'ja': ChangeLogStrings(
-      title1: '非表示を整理',
-      desc1: 'モバイルで非表示ファイルを管理するための2つの新しい操作が利用可能になりました',
-      desc1Item1: '非表示ファイルを整理: 非表示ファイルが属している非表示以外のアルバムから削除し、「非表示」にのみ残るようにします。',
-      desc1Item2: '非表示ファイルをデバイスから削除: 非表示ファイルのローカルコピーをデバイスから削除し、空き容量を確保します。',
-      title2: '共有アルバムを非表示',
-      desc2: '共有されたアルバムを非表示にできるようになりました。',
-      title3: 'デバイスアルバム検索',
-      desc3: 'デバイスのフォルダ内を簡単に検索できるようになりました。',
+      title1: '検索と発見がさらに高速に',
+      desc1: '検索がさらに高速になりました。内部的な改善により、ほぼ瞬時に結果が表示されます。',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: '共有写真がフィードに表示',
+      desc2: '共有アルバムに追加された写真がフィードに表示されるようになり、最近共有された写真を見つけてコメントしやすくなりました。',
+      title3: '',
+      desc3: '',
     ),
     'nl': ChangeLogStrings(
-      title1: 'Verborgen opruimen',
+      title1: 'Sneller zoeken en ontdekken',
       desc1:
-          'Twee nieuwe acties zijn beschikbaar voor het beheren van verborgen bestanden op mobiel',
-      desc1Item1:
-          'Verborgen bestanden opruimen: Verwijdert verborgen bestanden uit alle niet-verborgen albums waar ze ook in staan, zodat ze alleen in Verborgen staan.',
-      desc1Item2:
-          'Verborgen bestanden van apparaat verwijderen: Verwijdert lokale kopieën van verborgen bestanden van je apparaat om ruimte vrij te maken.',
-      title2: 'Gedeelde albums verbergen',
-      desc2: 'Je kunt nu albums verbergen die met je zijn gedeeld.',
-      title3: 'Zoeken in apparaatalbums',
-      desc3: 'Zoek nu eenvoudig binnen je apparaatmappen.',
+          'Zoeken is nu nog sneller dankzij verbeteringen achter de schermen.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: "Gedeelde foto's in je feed",
+      desc2:
+          "Foto's die aan gedeelde albums worden toegevoegd, verschijnen nu in je feed. Zo vind je recent gedeelde foto's makkelijker en kun je erop reageren.",
+      title3: '',
+      desc3: '',
     ),
     'no': ChangeLogStrings(
-      title1: 'Rydd opp i skjulte',
-      desc1:
-          'To nye handlinger er tilgjengelige for å administrere skjulte filer på mobil',
-      desc1Item1:
-          'Rydd opp i skjulte filer: Fjerner skjulte filer fra alle ikke-skjulte album de også tilhører, slik at de kun finnes i Skjult.',
-      desc1Item2:
-          'Slett skjulte filer fra enheten: Fjerner lokale kopier av skjulte filer fra enheten din for å frigjøre plass.',
-      title2: 'Skjul delte album',
-      desc2: 'Du kan nå skjule album som har blitt delt med deg.',
-      title3: 'Søk i enhetsalbum',
-      desc3: 'Søk nå enkelt i enhetsmappene dine.',
+      title1: 'Raskere søk og oppdagelse',
+      desc1: 'Søk er nå enda raskere takket være forbedringer i bakgrunnen.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Delte bilder i feeden',
+      desc2:
+          'Bilder som legges til i delte album vises nå i feeden din, slik at det blir enklere å finne nylig delte bilder og kommentere dem.',
+      title3: '',
+      desc3: '',
     ),
     'pl': ChangeLogStrings(
-      title1: 'Porządkowanie ukrytych',
+      title1: 'Szybsze wyszukiwanie i odkrywanie',
       desc1:
-          'Dwie nowe akcje są dostępne do zarządzania ukrytymi plikami na urządzeniu mobilnym',
-      desc1Item1:
-          'Uporządkuj ukryte pliki: Usuwa ukryte pliki ze wszystkich nieukrytych albumów, do których również należą, tak aby znajdowały się tylko w sekcji Ukryte.',
-      desc1Item2:
-          'Usuń ukryte pliki z urządzenia: Usuwa lokalne kopie ukrytych plików z urządzenia, aby zwolnić miejsce.',
-      title2: 'Ukryj udostępnione albumy',
-      desc2: 'Możesz teraz ukryć albumy, które zostały Ci udostępnione.',
-      title3: 'Wyszukiwanie w albumach urządzenia',
-      desc3: 'Teraz łatwo wyszukuj w folderach urządzenia.',
+          'Wyszukiwanie jest teraz jeszcze szybsze dzięki usprawnieniom działającym w tle.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Udostępnione zdjęcia w kanale',
+      desc2:
+          'Zdjęcia dodane do udostępnionych albumów będą teraz pojawiać się w Twoim kanale, dzięki czemu łatwiej znajdziesz ostatnio udostępnione zdjęcia i je skomentujesz.',
+      title3: '',
+      desc3: '',
     ),
     'pt_BR': ChangeLogStrings(
-      title1: 'Limpeza de ocultos',
-      desc1:
-          'Duas novas ações estão disponíveis para gerenciar arquivos ocultos no celular',
-      desc1Item1:
-          'Limpar arquivos ocultos: Remove os arquivos ocultos de todos os álbuns não ocultos aos quais eles também pertencem, para que fiquem apenas na seção Ocultos.',
-      desc1Item2:
-          'Excluir arquivos ocultos do dispositivo: Remove as cópias locais dos arquivos ocultos do seu dispositivo para liberar espaço.',
-      title2: 'Ocultar álbuns compartilhados',
+      title1: 'Busca e descoberta mais rápidas',
+      desc1: 'A busca está ainda mais rápida graças a melhorias internas.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Fotos compartilhadas no feed',
       desc2:
-          'Agora você pode ocultar álbuns que foram compartilhados com você.',
-      title3: 'Busca em álbuns do dispositivo',
-      desc3: 'Agora pesquise facilmente dentro das pastas do seu dispositivo.',
+          'As fotos adicionadas a álbuns compartilhados agora aparecem no seu feed, facilitando encontrar fotos compartilhadas recentemente e comentá-las.',
+      title3: '',
+      desc3: '',
     ),
     'pt_PT': ChangeLogStrings(
-      title1: 'Limpeza de ocultos',
+      title1: 'Pesquisa e descoberta mais rápidas',
       desc1:
-          'Duas novas ações estão disponíveis para gerir ficheiros ocultos no telemóvel',
-      desc1Item1:
-          'Limpar ficheiros ocultos: Remove os ficheiros ocultos de todos os álbuns não ocultos a que também pertencem, para que fiquem apenas na secção Ocultos.',
-      desc1Item2:
-          'Eliminar ficheiros ocultos do dispositivo: Remove as cópias locais dos ficheiros ocultos do seu dispositivo para libertar espaço.',
-      title2: 'Ocultar álbuns partilhados',
-      desc2: 'Agora pode ocultar álbuns que foram partilhados consigo.',
-      title3: 'Pesquisa em álbuns do dispositivo',
-      desc3: 'Agora pesquise facilmente dentro das pastas do seu dispositivo.',
+          'A pesquisa está agora ainda mais rápida graças a melhorias internas.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Fotos partilhadas no feed',
+      desc2:
+          'As fotos adicionadas a álbuns partilhados passam agora a aparecer no seu feed, facilitando encontrar fotos partilhadas recentemente e comentá-las.',
+      title3: '',
+      desc3: '',
     ),
     'ro': ChangeLogStrings(
-      title1: 'Curățare ascunse',
+      title1: 'Căutare și descoperire mai rapide',
       desc1:
-          'Două acțiuni noi sunt disponibile pentru gestionarea fișierelor ascunse pe mobil',
-      desc1Item1:
-          'Curățare fișiere ascunse: Elimină fișierele ascunse din toate albumele neascunse din care fac parte, astfel încât să existe doar în secțiunea Ascunse.',
-      desc1Item2:
-          'Ștergere fișiere ascunse de pe dispozitiv: Elimină copiile locale ale fișierelor ascunse de pe dispozitiv pentru a elibera spațiu.',
-      title2: 'Ascundere albume partajate',
-      desc2: 'Acum poți ascunde albumele care au fost partajate cu tine.',
-      title3: 'Căutare în albumele dispozitivului',
-      desc3: 'Acum poți căuta cu ușurință în folderele dispozitivului.',
+          'Căutarea este acum și mai rapidă datorită îmbunătățirilor din culise.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Fotografii partajate în flux',
+      desc2:
+          'Fotografiile adăugate în albume partajate apar acum în fluxul tău, ceea ce face mai ușor să găsești fotografiile partajate recent și să le comentezi.',
+      title3: '',
+      desc3: '',
     ),
     'ru': ChangeLogStrings(
-      title1: 'Очистка скрытых',
-      desc1:
-          'Два новых действия доступны для управления скрытыми файлами на мобильном устройстве',
-      desc1Item1:
-          'Очистить скрытые файлы: Удаляет скрытые файлы из всех нескрытых альбомов, в которых они также находятся, чтобы они оставались только в разделе «Скрытые».',
-      desc1Item2:
-          'Удалить скрытые файлы с устройства: Удаляет локальные копии скрытых файлов с вашего устройства для освобождения места.',
-      title2: 'Скрытие общих альбомов',
-      desc2: 'Теперь вы можете скрывать альбомы, которыми с вами поделились.',
-      title3: 'Поиск по альбомам устройства',
-      desc3: 'Теперь легко ищите в папках вашего устройства.',
+      title1: 'Более быстрый поиск и просмотр',
+      desc1: 'Поиск стал ещё быстрее благодаря внутренним улучшениям.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Общие фото в ленте',
+      desc2:
+          'Фотографии, добавленные в общие альбомы, теперь появляются в вашей ленте, поэтому недавние общие фото легче найти и прокомментировать.',
+      title3: '',
+      desc3: '',
     ),
     'tr': ChangeLogStrings(
-      title1: 'Gizlileri temizle',
+      title1: 'Daha hızlı arama ve keşif',
       desc1:
-          'Mobilde gizli dosyaları yönetmek için iki yeni işlem kullanılabilir',
-      desc1Item1:
-          'Gizli dosyaları temizle: Gizli dosyaları, ait oldukları gizli olmayan albümlerden kaldırır, böylece yalnızca Gizli bölümünde kalırlar.',
-      desc1Item2:
-          'Gizli dosyaları cihazdan sil: Yer açmak için gizli dosyaların yerel kopyalarını cihazınızdan kaldırır.',
-      title2: 'Paylaşılan albümleri gizle',
-      desc2: 'Artık sizinle paylaşılan albümleri gizleyebilirsiniz.',
-      title3: 'Cihaz albümünde arama',
-      desc3: 'Artık cihaz klasörlerinizde kolayca arama yapın.',
+          'Arama artık daha da hızlı; bunun için arka planda iyileştirmeler yaptık.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Akışta paylaşılan fotoğraflar',
+      desc2:
+          'Paylaşılan albümlere eklenen fotoğraflar artık akışınızda görünecek; böylece yakın zamanda paylaşılan fotoğrafları bulup yorum yapmak daha kolay olacak.',
+      title3: '',
+      desc3: '',
     ),
     'uk': ChangeLogStrings(
-      title1: 'Керування прихованими',
-      desc1: 'Дві нові дії для керування прихованими файлами на мобільному',
-      desc1Item1:
-          'Очистити приховані файли: Видаляє приховані файли з усіх не прихованих альбомів, до яких вони також належать, щоб вони залишалися лише в розділі «Приховані».',
-      desc1Item2:
-          'Видалити приховані файли з пристрою: Видаляє локальні копії прихованих файлів з вашого пристрою, щоб звільнити місце.',
-      title2: 'Приховування спільних альбомів',
-      desc2: 'Тепер ви можете приховувати альбоми, якими з вами поділилися.',
-      title3: 'Пошук в альбомах пристрою',
-      desc3: 'Тепер легко шукайте у папках вашого пристрою.',
+      title1: 'Швидший пошук і відкриття',
+      desc1: 'Пошук став ще швидшим завдяки внутрішнім покращенням.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Спільні фото у стрічці',
+      desc2:
+          'Фото, додані до спільних альбомів, тепер з’являються у вашій стрічці, тож нещодавно поширені фото легше знайти й прокоментувати.',
+      title3: '',
+      desc3: '',
     ),
     'vi': ChangeLogStrings(
-      title1: 'Dọn dẹp mục ẩn',
-      desc1: 'Hai thao tác mới để quản lý các tệp ẩn trên thiết bị di động',
-      desc1Item1:
-          'Dọn dẹp tệp ẩn: Xóa các tệp ẩn khỏi mọi album không ẩn mà chúng cũng thuộc về, để chúng chỉ nằm trong mục Ẩn.',
-      desc1Item2:
-          'Xóa tệp ẩn khỏi thiết bị: Xóa bản sao cục bộ của các tệp ẩn khỏi thiết bị để giải phóng dung lượng.',
-      title2: 'Ẩn album được chia sẻ',
-      desc2: 'Giờ đây bạn có thể ẩn các album đã được chia sẻ với bạn.',
-      title3: 'Tìm kiếm trong album thiết bị',
-      desc3:
-          'Giờ đây bạn có thể dễ dàng tìm kiếm trong các thư mục trên thiết bị.',
+      title1: 'Tìm kiếm và khám phá nhanh hơn',
+      desc1: 'Tìm kiếm giờ đây còn nhanh hơn nữa nhờ các cải tiến ở phía sau.',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: 'Ảnh chia sẻ trong bảng tin',
+      desc2:
+          'Ảnh được thêm vào album chia sẻ giờ sẽ xuất hiện trong bảng tin của bạn, giúp bạn dễ tìm ảnh mới được chia sẻ và bình luận hơn.',
+      title3: '',
+      desc3: '',
     ),
     'zh_CN': ChangeLogStrings(
-      title1: '清理隐藏项',
-      desc1: '移动端新增两项操作，用于管理隐藏文件',
-      desc1Item1: '清理隐藏文件：将隐藏文件从其所属的所有非隐藏相册中移除，使其仅保留在"已隐藏"中。',
-      desc1Item2: '从设备中删除隐藏文件：删除隐藏文件在设备上的本地副本，以释放存储空间。',
-      title2: '隐藏共享相册',
-      desc2: '您现在可以隐藏他人与您共享的相册。',
-      title3: '设备相册搜索',
-      desc3: '现在可以轻松搜索设备文件夹中的内容。',
+      title1: '更快的搜索与发现',
+      desc1: '搜索现在更快了，这得益于我们在后台所做的优化。',
+      desc1Item1: '',
+      desc1Item2: '',
+      title2: '动态中显示共享照片',
+      desc2: '添加到共享相册的照片现在会显示在你的动态中，让你更容易找到最近共享的照片并进行评论。',
+      title3: '',
+      desc3: '',
     ),
   };
 }

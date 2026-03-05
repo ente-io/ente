@@ -31,7 +31,7 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 
 ### On mobile
 
-1. Open `Settings > General > Advanced > Streamable videos`
+1. Open `Settings > Streamable videos`
 2. Enable the toggle
 
 **What happens next:**

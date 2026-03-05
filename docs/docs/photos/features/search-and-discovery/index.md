@@ -103,7 +103,7 @@ Both face recognition and magic search require enabling machine learning:
 
 **On mobile:**
 
-Open `Settings > General > Advanced > Machine learning` and enable **Machine learning** and/or **Local indexing**.
+Open `Settings > Machine learning` and enable **Machine learning** and/or **Local indexing**.
 
 **On desktop:**
 

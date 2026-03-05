@@ -785,6 +785,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (files == null || files.isEmpty) {
       return;
     }
+    if (flagService.internalUser) {
+      try {
+        await galleryDownloadQueueService.enqueueFiles(files);
+      } catch (e, s) {
+        _logger.severe("Failed to download album", e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return;
+    }
+
     final totalFiles = files.length;
     final dialog = createProgressDialog(
       context,

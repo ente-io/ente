@@ -176,13 +176,13 @@ class NotificationService {
     return result ?? false;
   }
 
-  bool shouldShowNotificationsForSharedPhotos() {
+  bool shouldShowNotificationsForSharedPhotosAndAlbums() {
     final result =
         _preferences.getBool(keyShouldShowNotificationsForSharedPhotos);
     return result ?? true;
   }
 
-  Future<void> setShouldShowNotificationsForSharedPhotos(bool value) {
+  Future<void> setShouldShowNotificationsForSharedPhotosAndAlbums(bool value) {
     return _preferences.setBool(
       keyShouldShowNotificationsForSharedPhotos,
       value,

@@ -83,7 +83,6 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           onTap: () async {
             await shareAlbumLink(
               context,
-              collection,
               url,
               effectiveKey,
             );

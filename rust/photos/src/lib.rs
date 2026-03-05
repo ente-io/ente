@@ -54,7 +54,7 @@ pub fn get_motion_video_index_from_path<P: AsRef<Path>>(
 }
 
 fn get_motion_video_index(bytes: &[u8]) -> Option<VideoIndex> {
-    if let Some(start) = find_subslice(bytes, &MP4_HEADER_PATTERN) {
+    if let Some(start) = find_last_subslice(bytes, &MP4_HEADER_PATTERN) {
         return Some(VideoIndex {
             start,
             end: bytes.len(),
@@ -219,6 +219,15 @@ fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
         .position(|window| window == needle)
 }
 
+fn find_last_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    if needle.is_empty() {
+        return Some(haystack.len());
+    }
+    haystack
+        .windows(needle.len())
+        .rposition(|window| window == needle)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -249,6 +258,20 @@ mod tests {
 
         let index = get_motion_video_index(&bytes).expect("video index should exist");
         assert_eq!(index.start, "jpeg-prefix".len());
+        assert_eq!(index.end, bytes.len());
+    }
+
+    #[test]
+    fn prefers_last_mp4_header_when_multiple_exist() {
+        let mut bytes = b"jpeg-prefix".to_vec();
+        bytes.extend_from_slice(&MP4_HEADER_PATTERN);
+        bytes.extend_from_slice(b"autoplay-segment");
+        let second_start = bytes.len();
+        bytes.extend_from_slice(&MP4_HEADER_PATTERN);
+        bytes.extend_from_slice(b"motion-video-segment");
+
+        let index = get_motion_video_index(&bytes).expect("video index should exist");
+        assert_eq!(index.start, second_start);
         assert_eq!(index.end, bytes.len());
     }
 

@@ -5,7 +5,7 @@ use crate::api::{
 use serde::Serialize;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void};
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
 
 #[repr(C)]
@@ -28,7 +28,9 @@ enum CapiEvent {
         text: String,
         token_id: Option<i32>,
     },
-    Done { summary: GenerateSummary },
+    Done {
+        summary: GenerateSummary,
+    },
     Error {
         job_id: api::JobId,
         message: String,
@@ -334,9 +336,11 @@ pub extern "C" fn inference_generate_chat_stream(
         let context =
             unsafe { context.as_ref() }.ok_or_else(|| "context is required".to_string())?;
         let request = parse_json::<GenerateChatRequest>(request_json, "request_json")?;
-        let mut sink = CapiEventSink { callback, user_data };
-        api::generate_chat_stream(context.handle.as_ref(), request, &mut sink)
-            .map(|_| ())
+        let mut sink = CapiEventSink {
+            callback,
+            user_data,
+        };
+        api::generate_chat_stream(context.handle.as_ref(), request, &mut sink).map(|_| ())
     }));
 
     let result = match result {
@@ -359,7 +363,10 @@ pub extern "C" fn inference_generate_stream(
         let context =
             unsafe { context.as_ref() }.ok_or_else(|| "context is required".to_string())?;
         let request = parse_json::<GenerateRequest>(request_json, "request_json")?;
-        let mut sink = CapiEventSink { callback, user_data };
+        let mut sink = CapiEventSink {
+            callback,
+            user_data,
+        };
         api::generate_stream(context.handle.as_ref(), request, &mut sink).map(|_| ())
     }));
 

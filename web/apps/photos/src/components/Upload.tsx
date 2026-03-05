@@ -63,6 +63,7 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     createAlbum,
     createHiddenAlbum,
@@ -853,6 +854,11 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handleUploadTypeSelect = (type: UploadType) => {
         selectedUploadType.current = type;
+        // Opening native file/folder pickers can blur the app window on
+        // desktop; suppress blur-triggered app lock for this trusted flow.
+        if (electron) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         setIsInputPending(true);
         switch (type) {
             case "files":

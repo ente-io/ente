@@ -4,7 +4,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { FeedIcon } from "components/Collections/CollectionHeader";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
@@ -35,7 +34,6 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const isTouchscreen = useIsTouchscreen();
 
     const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
     const { handleJoinAlbum } = useJoinAlbum({
@@ -84,12 +82,9 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     onClick={
                         enableJoin
                             ? handleJoinAlbum
-                            : () =>
-                                  window.open(
-                                      getEnteURL(isTouchscreen),
-                                      "_blank",
-                                      "noopener",
-                                  )
+                            : () => {
+                                  window.location.href = getEnteURL();
+                              }
                     }
                 >
                     {enableJoin ? t("join_album") : t("try_ente")}

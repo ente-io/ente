@@ -1486,6 +1486,12 @@ class FileUploader {
     return _uploadURLFetchInProgress;
   }
 
+  bool get _shouldUseCFUploadProxy =>
+      !flagService.disableCFWorker &&
+      flagService.cloudflareUploadWorker &&
+      localSettings.isCFUploadProxyEnabled &&
+      Configuration.instance.isEnteProduction();
+
   void _onStorageLimitExceeded() {
     clearQueue(StorageLimitExceededError());
     throw StorageLimitExceededError();
@@ -1502,15 +1508,19 @@ class FileUploader {
     final fileName = basename(file.path);
     int bytesSent = 0;
     try {
+      final useUploadProxy = _shouldUseCFUploadProxy;
       final Map<String, dynamic> headers = {
         Headers.contentLengthHeader: fileSize,
       };
+      if (useUploadProxy) {
+        headers["UPLOAD-URL"] = uploadURL.url;
+      }
       if (contentMd5 != null) {
-        headers['Content-MD5'] = contentMd5;
+        headers[useUploadProxy ? 'CONTENT-MD5' : 'Content-MD5'] = contentMd5;
       }
 
       await _dio.put(
-        uploadURL.url,
+        useUploadProxy ? "$kUploadProxyEndpoint/file-upload" : uploadURL.url,
         data: file.openRead(),
         options: Options(
           headers: headers,

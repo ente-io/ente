@@ -104,6 +104,7 @@ class PeopleMemory extends SmartMemory {
   final PeopleMemoryType peopleMemoryType;
   final PeopleActivity? activity;
   final String? personName;
+  final bool isUnnamedCluster;
   final bool? isBirthday;
   final int? newAge;
 
@@ -119,6 +120,7 @@ class PeopleMemory extends SmartMemory {
     super.firstCreationTime,
     super.lastCreationTime,
     this.activity,
+    this.isUnnamedCluster = false,
     this.isBirthday,
     this.newAge,
   }) : super(
@@ -133,6 +135,7 @@ class PeopleMemory extends SmartMemory {
   PeopleMemory copyWith({
     int? firstDateToShow,
     int? lastDateToShow,
+    bool? isUnnamedCluster,
     bool? isBirthday,
     int? newAge,
   }) {
@@ -146,6 +149,7 @@ class PeopleMemory extends SmartMemory {
       firstCreationTime: firstCreationTime,
       lastCreationTime: lastCreationTime,
       activity: activity,
+      isUnnamedCluster: isUnnamedCluster ?? this.isUnnamedCluster,
       isBirthday: isBirthday ?? this.isBirthday,
       newAge: newAge ?? this.newAge,
     );
@@ -153,6 +157,18 @@ class PeopleMemory extends SmartMemory {
 
   @override
   String createTitle(AppLocalizations locals, String languageCode) {
+    if (isUnnamedCluster) {
+      switch (peopleMemoryType) {
+        case PeopleMemoryType.youAndThem:
+          return locals.unnamedPeopleYouAndThem;
+        case PeopleMemoryType.doingSomethingTogether:
+          return locals.unnamedPeopleDoingSomethingTogether;
+        case PeopleMemoryType.spotlight:
+          return locals.unnamedPeopleSpotlight;
+        case PeopleMemoryType.lastTimeYouSawThem:
+          return locals.unnamedPeopleLastTimeYouSawThem;
+      }
+    }
     switch (peopleMemoryType) {
       case PeopleMemoryType.youAndThem:
         assert(personName != null);
@@ -192,6 +208,7 @@ class PeopleMemoryCandidate {
     required this.firstDateToShow,
     required this.lastDateToShow,
     this.activity,
+    this.isUnnamedCluster = false,
     this.lastCreationTime,
     this.selectionBuilder,
     this.requiresSelection = true,
@@ -201,6 +218,7 @@ class PeopleMemoryCandidate {
   final String? personName;
   final PeopleMemoryType type;
   final PeopleActivity? activity;
+  final bool isUnnamedCluster;
   final List<Memory> rawMemories;
   final int firstDateToShow;
   final int lastDateToShow;
@@ -235,6 +253,7 @@ class PeopleMemoryCandidate {
       personName,
       lastCreationTime: lastCreationTime,
       activity: activity,
+      isUnnamedCluster: isUnnamedCluster,
     );
     return _resolvedMemory;
   }

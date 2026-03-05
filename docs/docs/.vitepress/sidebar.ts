@@ -77,6 +77,10 @@ export const sidebar = [
                                 link: "/photos/features/account/passkeys",
                             },
                             {
+                                text: "App lock",
+                                link: "/photos/features/account/app-lock",
+                            },
+                            {
                                 text: "Referral program",
                                 link: "/photos/features/account/referral-program/",
                             },
@@ -440,6 +444,10 @@ export const sidebar = [
                                 text: "Public links",
                                 link: "/locker/features/sharing/public-links",
                             },
+                            {
+                                text: "Ente Paste",
+                                link: "/locker/features/sharing/ente-paste",
+                            },
                         ],
                     },
                     {
@@ -588,6 +596,10 @@ export const sidebar = [
                     {
                         text: "Building mobile apps",
                         link: "/self-hosting/development/mobile-build",
+                    },
+                    {
+                        text: "Using Lima for development",
+                        link: "/self-hosting/development/lima",
                     },
                 ],
             },

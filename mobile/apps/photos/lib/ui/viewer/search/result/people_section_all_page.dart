@@ -3,6 +3,7 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -430,6 +431,18 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             setState(() {
               _suggestionReloadToken++;
             });
+          } else if (event is PeopleChangedEvent &&
+              event.type == PeopleEventType.syncDone) {
+            _peopleReloadDebouncer.run(() async {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _isInitialLoad = false;
+                _isLoaded = false;
+                sectionData = getResults();
+              });
+            });
           } else {
             _peopleReloadDebouncer.run(() async {
               if (!mounted) {
@@ -728,7 +741,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 showAllFaces && filteredExtraFaces.isNotEmpty;
             slivers.addAll(
               [
-                if (isOfflineMode)
+                if (isOfflineMode &&
+                    !Configuration.instance.hasConfiguredAccount())
                   const SliverToBoxAdapter(
                     child: SaveFacesBanner(),
                   ),

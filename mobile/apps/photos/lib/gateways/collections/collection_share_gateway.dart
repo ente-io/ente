@@ -140,14 +140,38 @@ class CollectionShareGateway {
   /// [authToken] - The public access token from the share URL.
   ///
   /// Returns the raw response data containing collection information.
+  ///
+  /// Throws:
+  /// - [PublicCollectionInfoUnauthorizedException] when the token is invalid.
+  /// - [PublicCollectionInfoExpiredException] when the link has expired/disabled.
+  /// - [PublicCollectionDeviceLimitExceededException] when the link device
+  ///   limit is reached.
+  /// - [PublicCollectionRateLimitedException] when API rate limits are hit.
   Future<Map<String, dynamic>> getPublicCollectionInfo(String authToken) async {
-    final response = await _enteDio.get(
-      "/public-collection/info",
-      options: Options(
-        headers: {"X-Auth-Access-Token": authToken},
-      ),
-    );
-    return response.data;
+    try {
+      final response = await _enteDio.get(
+        "/public-collection/info",
+        options: Options(
+          headers: {"X-Auth-Access-Token": authToken},
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      switch (e.response?.statusCode) {
+        case 401:
+          throw PublicCollectionInfoUnauthorizedException();
+        case 410:
+          throw PublicCollectionInfoExpiredException();
+        case 429:
+          final errorMessage = _extractErrorMessage(e.response?.data);
+          if (errorMessage?.toLowerCase().contains("device limit") ?? false) {
+            throw PublicCollectionDeviceLimitExceededException();
+          }
+          throw PublicCollectionRateLimitedException();
+        default:
+          rethrow;
+      }
+    }
   }
 
   /// Verifies the password for a password-protected public collection.
@@ -188,3 +212,21 @@ class CollectionShareGateway {
     return response.data;
   }
 }
+
+String? _extractErrorMessage(dynamic data) {
+  if (data is Map<String, dynamic>) {
+    return data["error"]?.toString();
+  }
+  if (data is Map) {
+    return data["error"]?.toString();
+  }
+  return null;
+}
+
+class PublicCollectionInfoUnauthorizedException implements Exception {}
+
+class PublicCollectionInfoExpiredException implements Exception {}
+
+class PublicCollectionDeviceLimitExceededException implements Exception {}
+
+class PublicCollectionRateLimitedException implements Exception {}
