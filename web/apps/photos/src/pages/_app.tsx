@@ -244,6 +244,13 @@ const DesktopMainContent: React.FC<MainContentProps> = ({
 }) => {
     const isAppLockReady = useSetupAppLock();
     const appLock = useAppLockSnapshot();
+    const router = useRouter();
+    const { isReady, pathname, replace } = router;
+    const shouldShowLockPage =
+        appLock.isLocked &&
+        appLock.lockScreenMode === "lock";
+    const shouldRenderReauthOverlay =
+        appLock.isLocked && appLock.lockScreenMode === "reauthenticate";
 
     useAutoLockWhenBackgrounded(
         appLock.enabled,
@@ -251,13 +258,30 @@ const DesktopMainContent: React.FC<MainContentProps> = ({
         appLock.autoLockTimeMs,
     );
 
+    useEffect(() => {
+        if (!isReady) return;
+
+        if (shouldShowLockPage && pathname !== "/lock") {
+            void replace("/lock");
+            return;
+        }
+
+        if (!shouldShowLockPage && pathname === "/lock") {
+            void replace("/gallery");
+        }
+    }, [isReady, pathname, replace, shouldShowLockPage]);
+
     if (!isAppLockReady) return <LoadingIndicator />;
 
     return (
         <>
             {isChangingRoute && <TranslucentLoadingOverlay />}
-            <Component {...pageProps} />
-            <AppLockOverlay />
+            {shouldShowLockPage && pathname !== "/lock" ? (
+                <LoadingIndicator />
+            ) : (
+                <Component {...pageProps} />
+            )}
+            {shouldRenderReauthOverlay && <AppLockOverlay />}
         </>
     );
 };
