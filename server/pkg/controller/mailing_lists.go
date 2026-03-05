@@ -219,7 +219,7 @@ func (c *MailingListsController) listmonkSubscribe(email string) error {
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 	if err != nil {
 		log.Errorf("Listmonk - Could not subscribe '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk subscribe failed")
+		c.notifyListmonkFailure("Listmonk subscribe failed", err)
 	}
 	return err
 }
@@ -235,7 +235,7 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
 		log.Errorf("Listmonk - Could not find subscriber '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk subscriber lookup failed")
+		c.notifyListmonkFailure("Listmonk subscriber lookup failed", err)
 		return stacktrace.Propagate(err, "")
 	}
 
@@ -243,11 +243,11 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 		map[string]interface{}{}, c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 	if err != nil {
 		log.Errorf("Listmonk - Could not unsubscribe '%s': %s", email, err)
-		c.notifyListmonkFailure("Listmonk unsubscribe failed")
+		c.notifyListmonkFailure("Listmonk unsubscribe failed", err)
 	}
 	return err
 }
 
-func (c *MailingListsController) notifyListmonkFailure(message string) {
-	c.discordController.Notify(message)
+func (c *MailingListsController) notifyListmonkFailure(message string, err error) {
+	c.discordController.Notify(fmt.Sprintf("%s: %v", message, err))
 }
