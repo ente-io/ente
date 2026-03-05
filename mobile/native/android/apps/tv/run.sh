@@ -98,7 +98,17 @@ fi
 echo "==> Installing $APK_PATH"
 "${ADB_CMD[@]}" install -r "$APK_PATH"
 
-echo "==> Launching io.ente.photos.tv"
-"${ADB_CMD[@]}" shell monkey -p io.ente.photos.tv -c android.intent.category.LAUNCHER 1 >/dev/null
+APP_ID="io.ente.photos.tv"
+MAIN_ACTIVITY="io.ente.photos.screensaver.main.MainActivity"
+COMPONENT="${APP_ID}/${MAIN_ACTIVITY}"
+
+echo "==> Launching $COMPONENT"
+START_OUTPUT="$("${ADB_CMD[@]}" shell am start -W -n "$COMPONENT" 2>&1 || true)"
+echo "$START_OUTPUT"
+
+if echo "$START_OUTPUT" | grep -qiE "Error|Exception|Activity class .* does not exist"; then
+  echo "==> Fallback launch via LEANBACK_LAUNCHER monkey"
+  "${ADB_CMD[@]}" shell monkey -p "$APP_ID" -c android.intent.category.LEANBACK_LAUNCHER 1
+fi
 
 echo "✅ Photos TV launched on Android"
