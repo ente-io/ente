@@ -1,3 +1,4 @@
+- Ashil: Fix album sorting state not persisting 
 - Ashil: Route shared notifications to feed item in feed
 - Ashil: Fix hidden albums sorting in Hidden section all-albums view
 - Setal,Ashil: Improve Help & Support section in settings
