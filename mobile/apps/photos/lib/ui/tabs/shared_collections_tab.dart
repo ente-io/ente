@@ -182,9 +182,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     return FutureBuilder<SharedCollections>(
       future: offlineUiMode
           ? Future.value(SharedCollections.empty())
-          : Future.value(
-              CollectionsService.instance.getSharedCollections(),
-            ),
+          : Future.value(CollectionsService.instance.getSharedCollections()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (offlineUiMode) {
@@ -192,18 +190,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               child: SharedEmptyOfflineStateWidget(),
             );
           }
-          final collections = snapshot.data!;
-          final hasSharedCollections = collections.incoming.isNotEmpty ||
-              collections.quickLinks.isNotEmpty ||
-              collections.outgoing.isNotEmpty;
-          if (!hasSharedCollections) {
-            return const SafeArea(
-              child: SharedEmptyStateWidget(),
-            );
+          if ((snapshot.data?.incoming.length ?? 0) == 0 &&
+              (snapshot.data?.quickLinks.length ?? 0) == 0 &&
+              (snapshot.data?.outgoing.length ?? 0) == 0) {
+            return const Center(child: SharedEmptyStateWidget());
           }
-          return SafeArea(
-            child: _getSharedCollectionsGallery(collections),
-          );
+          return SafeArea(child: _getSharedCollectionsGallery(snapshot.data!));
         } else if (snapshot.hasError) {
           _logger.severe(
             "critical: failed to load share gallery",
@@ -449,41 +441,40 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             : null,
                       ),
                       const SizedBox(height: 2),
-                      if (numberOfQuickLinks > 0)
-                        ListView.separated(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.only(
-                            bottom: 12,
-                            left: 12,
-                            right: 12,
-                          ),
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () async {
-                                final thumbnail = await CollectionsService
-                                    .instance
-                                    .getCover(collections.quickLinks[index]);
-                                final page = CollectionPage(
-                                  CollectionWithThumbnail(
-                                    collections.quickLinks[index],
-                                    thumbnail,
-                                  ),
-                                  tagPrefix: heroTagPrefix,
-                                );
-                                // ignore: unawaited_futures
-                                routeToPage(context, page);
-                              },
-                              child: QuickLinkAlbumItem(
-                                c: collections.quickLinks[index],
-                              ),
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return const SizedBox(height: 4);
-                          },
-                          itemCount: min(numberOfQuickLinks, maxQuickLinks),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.only(
+                          bottom: 12,
+                          left: 12,
+                          right: 12,
                         ),
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () async {
+                              final thumbnail = await CollectionsService
+                                  .instance
+                                  .getCover(collections.quickLinks[index]);
+                              final page = CollectionPage(
+                                CollectionWithThumbnail(
+                                  collections.quickLinks[index],
+                                  thumbnail,
+                                ),
+                                tagPrefix: heroTagPrefix,
+                              );
+                              // ignore: unawaited_futures
+                              routeToPage(context, page);
+                            },
+                            child: QuickLinkAlbumItem(
+                              c: collections.quickLinks[index],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: 4);
+                        },
+                        itemCount: min(numberOfQuickLinks, maxQuickLinks),
+                      ),
                     ],
                   )
                 : const SizedBox.shrink(),
