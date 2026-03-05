@@ -9,14 +9,14 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/utils/file_util.dart";
 
 class QrCodeDetectionHelper {
-  static final Map<String, _DetectionResult> _cache = {};
-  static const _debounceDuration = Duration(milliseconds: 500);
+  static final Map<String, String?> _cache = {};
+  static const _debounceDuration = Duration(milliseconds: 1500);
 
   final Logger _logger = Logger("QrCodeDetectionHelper");
   final EnteQr _enteQr = EnteQr();
 
-  final ValueNotifier<List<QrDetection>> qrDetectionsNotifier =
-      ValueNotifier<List<QrDetection>>(const []);
+  /// null = no QR found, non-null = QR content string
+  final ValueNotifier<String?> qrContentNotifier = ValueNotifier<String?>(null);
 
   int _requestId = 0;
   bool _disposed = false;
@@ -29,20 +29,19 @@ class QrCodeDetectionHelper {
     final int requestId = ++_requestId;
 
     if (!isEligible) {
-      qrDetectionsNotifier.value = const [];
+      qrContentNotifier.value = null;
       return;
     }
 
     // Return cached results immediately without debounce
     final String cacheKey = _cacheKey(file);
-    final _DetectionResult? cachedResult = _cache[cacheKey];
-    if (cachedResult != null) {
+    if (_cache.containsKey(cacheKey)) {
       if (_disposed || requestId != _requestId) return;
-      qrDetectionsNotifier.value = cachedResult.detections;
+      qrContentNotifier.value = _cache[cacheKey];
       return;
     }
 
-    qrDetectionsNotifier.value = const [];
+    qrContentNotifier.value = null;
 
     // Debounce uncached scans so swiping doesn't trigger work
     _debounceTimer = Timer(_debounceDuration, () {
@@ -61,31 +60,30 @@ class QrCodeDetectionHelper {
       final File? localFile = await getFile(file);
       if (_disposed || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        _cache[cacheKey] = const _DetectionResult(detections: []);
-        qrDetectionsNotifier.value = const [];
+        _cache[cacheKey] = null;
+        qrContentNotifier.value = null;
         return;
       }
 
-      List<QrDetection> detections = const [];
+      String? content;
       try {
-        final result = await _enteQr.scanAllQrFromImage(localFile.path);
-        if (result.success && result.detections.isNotEmpty) {
-          detections = result.detections;
+        final result = await _enteQr.scanQrFromImage(localFile.path);
+        if (result.success && result.content != null) {
+          content = result.content;
         }
       } catch (error, stackTrace) {
-        _logger.severe("Failed to scan QR codes", error, stackTrace);
+        _logger.severe("Failed to scan QR code", error, stackTrace);
       }
 
       if (_disposed || requestId != _requestId) return;
 
-      final detectionResult = _DetectionResult(detections: detections);
-      _cache[cacheKey] = detectionResult;
-      qrDetectionsNotifier.value = detectionResult.detections;
+      _cache[cacheKey] = content;
+      qrContentNotifier.value = content;
     } catch (error, stackTrace) {
       _logger.severe("QR code detection failed", error, stackTrace);
       if (_disposed || requestId != _requestId) return;
-      _cache[cacheKey] = const _DetectionResult(detections: []);
-      qrDetectionsNotifier.value = const [];
+      _cache[cacheKey] = null;
+      qrContentNotifier.value = null;
     }
   }
 
@@ -107,12 +105,6 @@ class QrCodeDetectionHelper {
   void dispose() {
     _disposed = true;
     _debounceTimer?.cancel();
-    qrDetectionsNotifier.dispose();
+    qrContentNotifier.dispose();
   }
-}
-
-class _DetectionResult {
-  final List<QrDetection> detections;
-
-  const _DetectionResult({required this.detections});
 }

@@ -15,7 +15,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
-import "package:photos/models/file/trash_file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -28,6 +27,7 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/qr_code_content_sheet.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
 import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
 import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
@@ -133,6 +133,7 @@ class _BodyState extends State<_Body> {
   bool swipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   QrCodeDetectionHelper? _qrHelper;
+  bool _qrSheetOpen = false;
 
   @override
   void initState() {
@@ -150,6 +151,7 @@ class _BodyState extends State<_Body> {
     });
     if (flagService.qrFeatureEnabled) {
       _qrHelper = QrCodeDetectionHelper();
+      _qrHelper!.qrContentNotifier.addListener(_onQrContentChanged);
     }
 
     // Update shared collection state after first frame
@@ -161,8 +163,25 @@ class _BodyState extends State<_Body> {
     });
   }
 
+  void _onQrContentChanged() {
+    if (!mounted || _qrSheetOpen) return;
+    final content = _qrHelper?.qrContentNotifier.value;
+    if (content == null) return;
+    _qrSheetOpen = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        _qrSheetOpen = false;
+        return;
+      }
+      showQrContentSheet(context, content: content).whenComplete(() {
+        _qrSheetOpen = false;
+      });
+    });
+  }
+
   @override
   void dispose() {
+    _qrHelper?.qrContentNotifier.removeListener(_onQrContentChanged);
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _selectedIndexNotifier.dispose();
@@ -264,29 +283,7 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
-              if (_qrHelper != null)
-                ValueListenableBuilder(
-                  valueListenable: _selectedIndexNotifier,
-                  builder: (BuildContext context, int selectedIndex, _) {
-                    if (widget.config.mode == DetailPageMode.minimalistic ||
-                        isGuestView ||
-                        _files![selectedIndex] is TrashFile) {
-                      return const SizedBox.shrink();
-                    }
-                    return ValueListenableBuilder(
-                      valueListenable: _qrHelper!.qrDetectionsNotifier,
-                      builder: (context, detections, _) {
-                        return QrCodeHighlightOverlay(
-                          detections: detections,
-                          file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
-                        );
-                      },
-                    );
-                  },
-                ),
+              if (_qrHelper != null) const QrCodeDetectionOverlay(),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {

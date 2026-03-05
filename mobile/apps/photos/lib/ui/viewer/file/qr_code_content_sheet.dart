@@ -29,6 +29,17 @@ Future<void> showQrCodeContentSheet(
   );
 }
 
+Future<void> showQrContentSheet(
+  BuildContext context, {
+  required String content,
+}) {
+  return showBaseBottomSheet(
+    context,
+    title: AppLocalizations.of(context).qrCode,
+    child: _QrContentEntry(content: content),
+  );
+}
+
 class _QrContentEntry extends StatelessWidget {
   final String content;
 
