@@ -7,13 +7,23 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v1.7.20 (desktop) - Feb 2026
+
+- App lock
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
+
 ## v1.3.10 (mobile) - Feb 2026
 
 - Notifications for likes and comments
 - Support for hidden rituals
 - Better upload reliability
 
-## v1.7.18 (desktop) - Feb 2026
+## v1.7.18 (desktop) - Jan 2026
 
 - Hide shared albums
 - Right click context menu for photos
