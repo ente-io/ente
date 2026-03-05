@@ -140,20 +140,19 @@ class _QrTapRegionState extends State<_QrTapRegion> {
     const double minTapTarget = 48.0;
     final screenW = rawW < minTapTarget ? minTapTarget : rawW;
     final screenH = rawH < minTapTarget ? minTapTarget : rawH;
-    final screenX = widget.offsetX +
-        widget.detection.x * widget.displayWidth -
-        (screenW - rawW) / 2;
-    final screenY = widget.offsetY +
-        widget.detection.y * widget.displayHeight -
-        (screenH - rawH) / 2;
+    final centerX = widget.offsetX +
+        (widget.detection.x + widget.detection.width / 2) * widget.displayWidth;
+    final centerY = widget.offsetY +
+        (widget.detection.y + widget.detection.height / 2) *
+            widget.displayHeight;
 
     return Positioned(
-      left: screenX,
-      top: screenY,
+      left: centerX - screenW / 2,
+      top: centerY - screenH / 2,
       width: screenW,
       height: screenH,
       child: Listener(
-        behavior: HitTestBehavior.translucent,
+        behavior: HitTestBehavior.opaque,
         onPointerDown: (event) {
           _downPosition = event.position;
           _timer?.cancel();
