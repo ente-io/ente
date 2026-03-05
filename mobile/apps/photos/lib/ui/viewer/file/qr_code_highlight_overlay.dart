@@ -1,5 +1,3 @@
-import "dart:async";
-
 import "package:ente_qr/ente_qr.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -92,17 +90,6 @@ class _QrTapRegion extends StatefulWidget {
 }
 
 class _QrTapRegionState extends State<_QrTapRegion> {
-  static const _longPressDuration = Duration(milliseconds: 500);
-  static const _moveThreshold = 20.0;
-  Timer? _timer;
-  Offset? _downPosition;
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
   Future<void> _onLongPress() async {
     await HapticFeedback.lightImpact();
     final uri = Uri.tryParse(widget.detection.content);
@@ -151,21 +138,10 @@ class _QrTapRegionState extends State<_QrTapRegion> {
       top: centerY - screenH / 2,
       width: screenW,
       height: screenH,
-      child: Listener(
+      child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onPointerDown: (event) {
-          _downPosition = event.position;
-          _timer?.cancel();
-          _timer = Timer(_longPressDuration, _onLongPress);
-        },
-        onPointerMove: (event) {
-          if (_downPosition != null &&
-              (event.position - _downPosition!).distance > _moveThreshold) {
-            _timer?.cancel();
-          }
-        },
-        onPointerUp: (_) => _timer?.cancel(),
-        onPointerCancel: (_) => _timer?.cancel(),
+        onTap: () {},
+        onLongPress: _onLongPress,
         child: const SizedBox.expand(),
       ),
     );

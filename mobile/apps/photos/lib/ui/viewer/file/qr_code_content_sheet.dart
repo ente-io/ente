@@ -114,7 +114,13 @@ class _QrContentEntry extends StatelessWidget {
             labelText: l10n.pay,
             onTap: () async {
               try {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                final launched = await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                );
+                if (!launched && context.mounted) {
+                  showShortToast(context, "No payment app found");
+                }
               } catch (_) {
                 if (context.mounted) {
                   showShortToast(context, "No payment app found");
