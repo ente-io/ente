@@ -575,12 +575,13 @@ class _FeedScreenState extends State<FeedScreen> {
                           item,
                           jumpToFileID: _jumpFileIDForSharedCollection(
                             type: item.type,
+                            fileID: item.fileID,
                             sharedFileIDs: item.sharedFileIDs,
                           ),
                         ),
-                        onSharedPhotoTap: (fileID) => _openSharedPhotos(
+                        onSharedPhotoTap: (fileID) => _openSharedCollection(
                           item,
-                          initialFileID: fileID,
+                          jumpToFileID: fileID,
                         ),
                       );
                     },
@@ -624,7 +625,14 @@ class _FeedScreenState extends State<FeedScreen> {
         _openPhoto(item);
         break;
       case FeedItemType.sharedPhoto:
-        _openSharedPhotos(item);
+        _openSharedCollection(
+          item,
+          jumpToFileID: _jumpFileIDForSharedCollection(
+            type: item.type,
+            fileID: item.fileID,
+            sharedFileIDs: item.sharedFileIDs,
+          ),
+        );
         break;
       case FeedItemType.sharedCollection:
         _openSharedCollection(item);
