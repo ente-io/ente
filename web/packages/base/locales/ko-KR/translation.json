@@ -16,6 +16,7 @@
     "invalid_email_error": "올바른 이메일을 입력하세요",
     "required": "필수",
     "email_not_registered": "이메일이 등록되지 않았습니다",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "이미 등록된 이메일입니다",
     "email_sent": "<a>{{email}}</a>로 인증 코드가 전송되었습니다",
     "check_inbox_hint": "인증을 완료하기 위해 메일 수신함(그리고 스팸 수신함)을 확인하세요",

@@ -16,6 +16,7 @@
     "invalid_email_error": "Wprowadź prawidłowy adres e-mail",
     "required": "Wymagane",
     "email_not_registered": "Adres e-mail nie jest zarejestrowany",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "Adres e-mail jest już zarejestrowany",
     "email_sent": "Kod weryfikacyjny wysłany do <a>{{email}}</a>",
     "check_inbox_hint": "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację",

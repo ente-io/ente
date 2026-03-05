@@ -16,6 +16,7 @@
     "invalid_email_error": "",
     "required": "",
     "email_not_registered": "",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "",
     "email_sent": "",
     "check_inbox_hint": "",

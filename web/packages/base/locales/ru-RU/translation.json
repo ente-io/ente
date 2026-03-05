@@ -16,6 +16,7 @@
     "invalid_email_error": "Введите действительный адрес электронной почты",
     "required": "Обязательное поле",
     "email_not_registered": "Такой email не зарегистрирован",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "Такой email уже зарегистрирован",
     "email_sent": "Проверочный код отправлен на <a>{{email}}</a>",
     "check_inbox_hint": "Пожалуйста, проверьте свои входящие (и спам) на указанном email адресе для завершения верификации",

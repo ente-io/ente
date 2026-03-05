@@ -16,6 +16,7 @@
     "invalid_email_error": "輸入有效的電郵地址",
     "required": "必填",
     "email_not_registered": "電郵未註冊",
+    "account_setup_incomplete_create_account": "",
     "email_already_registered": "電郵已被註冊",
     "email_sent": "驗證碼已被發送至 <a>{{email}}</a>",
     "check_inbox_hint": "請檢查你的收件夾（和垃圾信息）來完成驗證",
