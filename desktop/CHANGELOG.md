@@ -2,6 +2,8 @@
 
 ## v1.7.20 (unreleased)
 
+-
+
 ## v1.7.19
 
 - App lock

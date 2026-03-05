@@ -7,7 +7,7 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
-## v1.7.20 (desktop) - Feb 2026
+## v1.7.19 (desktop) - Feb 2026
 
 - App lock
 - Masonry layout for public albums
