@@ -184,7 +184,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
-    await MemoryShareService.instance.init();
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
