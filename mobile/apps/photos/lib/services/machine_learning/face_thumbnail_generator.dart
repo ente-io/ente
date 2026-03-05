@@ -48,11 +48,36 @@ class FaceThumbnailGenerator extends SuperIsolate {
     String imagePath,
     List<FaceBox> faceBoxes,
   ) async {
-    final result = await generateFaceThumbnailsWithSourceDimensions(
-      imagePath,
-      faceBoxes,
-    );
-    return result.thumbnails;
+    try {
+      final useRustForFaceThumbnails = flagService.useRustForFaceThumbnails;
+      _logger.info(
+        "Generating face thumbnails for ${faceBoxes.length} face boxes in $imagePath",
+      );
+      final List<Map<String, dynamic>> faceBoxesJson =
+          faceBoxes.map((box) => box.toJson()).toList();
+      final List<Uint8List> faces = await runInIsolate(
+        IsolateOperation.generateFaceThumbnails,
+        {
+          'imagePath': imagePath,
+          'faceBoxesList': faceBoxesJson,
+          'useRustForFaceThumbnails': useRustForFaceThumbnails,
+        },
+      ).then((value) => value.cast<Uint8List>());
+      _logger.info("Generated face thumbnails");
+      if (useRustForFaceThumbnails) {
+        // Rust path already emits compressed JPEG bytes.
+        return faces;
+      }
+      final compressedFaces =
+          await compressFaceThumbnails({'listPngBytes': faces});
+      _logger.fine(
+        "Compressed face thumbnails from sizes ${faces.map((e) => e.length / 1024).toList()} to ${compressedFaces.map((e) => e.length / 1024).toList()} kilobytes",
+      );
+      return compressedFaces;
+    } catch (e, s) {
+      _logger.severe("Failed to generate face thumbnails", e, s);
+      rethrow;
+    }
   }
 
   Future<FaceThumbnailGenerationResult>
@@ -60,6 +85,15 @@ class FaceThumbnailGenerator extends SuperIsolate {
     String imagePath,
     List<FaceBox> faceBoxes,
   ) async {
+    if (!flagService.progressivePersonFaceThumbnailsEnabled) {
+      final thumbnails = await generateFaceThumbnails(imagePath, faceBoxes);
+      return FaceThumbnailGenerationResult(
+        thumbnails: thumbnails,
+        sourceWidth: 0,
+        sourceHeight: 0,
+      );
+    }
+
     try {
       final useRustForFaceThumbnails = flagService.useRustForFaceThumbnails;
       _logger.info(

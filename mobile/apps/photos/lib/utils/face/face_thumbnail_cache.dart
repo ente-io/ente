@@ -13,7 +13,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -438,19 +438,27 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
     faceIds.add(e.key);
     faceBoxes.add(e.value);
   }
-  final generationResult = await FaceThumbnailGenerator.instance
-      .generateFaceThumbnailsWithSourceDimensions(
-    imagePath,
-    faceBoxes,
-  );
-  if (!useFullFile) {
-    await _cacheThumbnailSourceDimensionsForFile(
-      file,
-      width: generationResult.sourceWidth,
-      height: generationResult.sourceHeight,
+  late final List<Uint8List> faceCrop;
+  if (flagService.progressivePersonFaceThumbnailsEnabled) {
+    final generationResult = await FaceThumbnailGenerator.instance
+        .generateFaceThumbnailsWithSourceDimensions(
+      imagePath,
+      faceBoxes,
+    );
+    if (!useFullFile) {
+      await _cacheThumbnailSourceDimensionsForFile(
+        file,
+        width: generationResult.sourceWidth,
+        height: generationResult.sourceHeight,
+      );
+    }
+    faceCrop = generationResult.thumbnails;
+  } else {
+    faceCrop = await FaceThumbnailGenerator.instance.generateFaceThumbnails(
+      imagePath,
+      faceBoxes,
     );
   }
-  final List<Uint8List> faceCrop = generationResult.thumbnails;
   final Map<String, Uint8List> result = {};
   for (int i = 0; i < faceCrop.length; i++) {
     result[faceIds[i]] = faceCrop[i];
