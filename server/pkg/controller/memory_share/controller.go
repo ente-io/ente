@@ -89,6 +89,7 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 		share = ente.MemoryShare{
 			UserID:             userID,
 			Type:               ente.MemoryShareTypeShare,
+			MemoryHash:         req.MemoryHash,
 			MetadataCipher:     req.MetadataCipher,
 			MetadataNonce:      req.MetadataNonce,
 			EncryptedKey:       req.EncryptedKey,

@@ -15,6 +15,7 @@ type MemoryShare struct {
 	ID                 int64           `json:"id"`
 	UserID             int64           `json:"-"`
 	Type               MemoryShareType `json:"type"`
+	MemoryHash         string          `json:"memoryHash,omitempty"`
 	MetadataCipher     string          `json:"metadataCipher,omitempty"`
 	MetadataNonce      string          `json:"metadataNonce,omitempty"`
 	EncryptedKey       string          `json:"encryptedKey,omitempty"`
@@ -39,6 +40,7 @@ type MemoryShareFile struct {
 
 // CreateMemoryShareRequest is the request body for creating a memory share
 type CreateMemoryShareRequest struct {
+	MemoryHash         string                `json:"memoryHash,omitempty"`
 	MetadataCipher     string                `json:"metadataCipher"`
 	MetadataNonce      string                `json:"metadataNonce"`
 	EncryptedKey       string                `json:"encryptedKey" binding:"required"`
