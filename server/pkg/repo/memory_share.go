@@ -40,11 +40,11 @@ func (r *MemoryShareRepository) Create(ctx context.Context, share ente.MemorySha
 	now := time.Microseconds()
 	err := r.DB.QueryRowContext(ctx, `
 		INSERT INTO memory_shares
-		(user_id, type, metadata_cipher, metadata_nonce,
+		(user_id, type, memory_hash, metadata_cipher, metadata_nonce,
 		 mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id`,
-		share.UserID, share.Type, share.MetadataCipher, share.MetadataNonce,
+		share.UserID, share.Type, share.MemoryHash, share.MetadataCipher, share.MetadataNonce,
 		share.EncryptedKey, share.KeyDecryptionNonce, share.AccessToken,
 		false, now, now).Scan(&share.ID)
 	if err != nil {
@@ -71,11 +71,11 @@ func (r *MemoryShareRepository) CreateWithFiles(ctx context.Context, share ente.
 
 	err = tx.QueryRowContext(ctx, `
 		INSERT INTO memory_shares
-		(user_id, type, metadata_cipher, metadata_nonce,
+		(user_id, type, memory_hash, metadata_cipher, metadata_nonce,
 		 mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id`,
-		share.UserID, share.Type, share.MetadataCipher, share.MetadataNonce,
+		share.UserID, share.Type, share.MemoryHash, share.MetadataCipher, share.MetadataNonce,
 		share.EncryptedKey, share.KeyDecryptionNonce, share.AccessToken,
 		false, now, now).Scan(&share.ID)
 	if err != nil {
@@ -136,10 +136,10 @@ func (r *MemoryShareRepository) AddFiles(ctx context.Context, shareID int64, fil
 func (r *MemoryShareRepository) GetByID(ctx context.Context, id int64) (*ente.MemoryShare, error) {
 	share := &ente.MemoryShare{}
 	err := r.DB.QueryRowContext(ctx, `
-		SELECT id, user_id, type, metadata_cipher, metadata_nonce,
+		SELECT id, user_id, type, COALESCE(memory_hash, ''), metadata_cipher, metadata_nonce,
 		       mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at
 		FROM memory_shares WHERE id = $1`, id).Scan(
-		&share.ID, &share.UserID, &share.Type, &share.MetadataCipher, &share.MetadataNonce,
+		&share.ID, &share.UserID, &share.Type, &share.MemoryHash, &share.MetadataCipher, &share.MetadataNonce,
 		&share.EncryptedKey, &share.KeyDecryptionNonce, &share.AccessToken,
 		&share.IsDeleted, &share.CreatedAt, &share.UpdatedAt)
 	if err != nil {
@@ -156,10 +156,10 @@ func (r *MemoryShareRepository) GetByID(ctx context.Context, id int64) (*ente.Me
 func (r *MemoryShareRepository) GetByAccessToken(ctx context.Context, token string) (*ente.MemoryShare, error) {
 	share := &ente.MemoryShare{}
 	err := r.DB.QueryRowContext(ctx, `
-		SELECT id, user_id, type, metadata_cipher, metadata_nonce,
+		SELECT id, user_id, type, COALESCE(memory_hash, ''), metadata_cipher, metadata_nonce,
 		       mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at
 		FROM memory_shares WHERE access_token = $1`, token).Scan(
-		&share.ID, &share.UserID, &share.Type, &share.MetadataCipher, &share.MetadataNonce,
+		&share.ID, &share.UserID, &share.Type, &share.MemoryHash, &share.MetadataCipher, &share.MetadataNonce,
 		&share.EncryptedKey, &share.KeyDecryptionNonce, &share.AccessToken,
 		&share.IsDeleted, &share.CreatedAt, &share.UpdatedAt)
 	if err != nil {
@@ -217,7 +217,7 @@ func (r *MemoryShareRepository) GetFileIDs(ctx context.Context, shareID int64) (
 // GetByUserID returns all non-deleted shares created by a user.
 func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) ([]ente.MemoryShare, error) {
 	rows, err := r.DB.QueryContext(ctx, `
-		SELECT id, user_id, type, metadata_cipher, metadata_nonce,
+		SELECT id, user_id, type, COALESCE(memory_hash, ''), metadata_cipher, metadata_nonce,
 		       mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at
 		FROM memory_shares WHERE user_id = $1 AND is_deleted = false
 		ORDER BY created_at DESC`, userID)
@@ -229,7 +229,7 @@ func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) (
 	var shares []ente.MemoryShare
 	for rows.Next() {
 		var share ente.MemoryShare
-		if err = rows.Scan(&share.ID, &share.UserID, &share.Type, &share.MetadataCipher, &share.MetadataNonce,
+		if err = rows.Scan(&share.ID, &share.UserID, &share.Type, &share.MemoryHash, &share.MetadataCipher, &share.MetadataNonce,
 			&share.EncryptedKey, &share.KeyDecryptionNonce, &share.AccessToken,
 			&share.IsDeleted, &share.CreatedAt, &share.UpdatedAt); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan memory share")
