@@ -7,12 +7,14 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/resume_video_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -22,6 +24,11 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/base_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -434,26 +441,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                               ),
                             ),
                             const Spacer(),
-                            GestureDetector(
-                              onTap: () async {
-                                final fullScreenState =
-                                    context.findAncestorStateOfType<
-                                        _FullScreenMemoryState>();
-                                fullScreenState?._toggleAnimation(pause: true);
-                                await _shareMemoryAsLink(
-                                  context,
-                                  inheritedData,
-                                  widget.title,
-                                );
-                                fullScreenState?._toggleAnimation(pause: false);
-                              },
-                              child: const Icon(
-                                Icons.link,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
                           ],
                         ),
                       ],
@@ -659,12 +646,14 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await share(context, [currentFile]);
+              await _showMemoryShareSheet(
+                context,
+                inheritedData,
+              );
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         );
-
         return Container(
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
@@ -870,33 +859,227 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
   }
 }
 
-Future<void> _shareMemoryAsLink(
+Future<void> _showMemoryShareSheet(
   BuildContext context,
   FullScreenMemoryData inheritedData,
-  String title,
 ) async {
-  final memories = inheritedData.memories;
+  final l10n = AppLocalizations.of(context);
+  final shouldShareLink = await showBaseBottomSheet<bool>(
+    context,
+    backgroundColor: getEnteColorScheme(context).backgroundColour,
+    padding: const EdgeInsets.all(16),
+    title: l10n.shareMemory,
+    child: Builder(
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        return SettingsGroupedCard(
+          children: [
+            MenuItemWidgetNew(
+              title: l10n.shareALinkToThisMemory,
+              trailingWidget: HugeIcon(
+                icon: HugeIcons.strokeRoundedLink02,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              borderRadius: 0,
+              onTap: () async {
+                Navigator.of(context).pop(true);
+              },
+            ),
+            MenuItemWidgetNew(
+              title: l10n.shareThisPhoto,
+              trailingWidget: HugeIcon(
+                icon: HugeIcons.strokeRoundedShare04,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              borderRadius: 0,
+              onTap: () async {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    ),
+  );
+  if (!context.mounted || shouldShareLink == null) {
+    return;
+  }
 
-  final dialog = createProgressDialog(context, "Creating share link...");
-  await dialog.show();
-
-  try {
-    final shareUrl = await MemoryShareService.instance.shareMemories(
-      memories: memories,
-      title: title,
+  if (shouldShareLink) {
+    await _showMemoryLinkDetailsSheet(
+      context,
+      inheritedData,
     );
+    return;
+  }
 
+  final currentFile =
+      inheritedData.memories[inheritedData.indexNotifier.value].file;
+  await share(context, [currentFile]);
+}
+
+Future<void> _showMemoryLinkDetailsSheet(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+) async {
+  final shareLinkData = await _createMemoryShareLinkData(
+    context,
+    inheritedData,
+  );
+  if (!context.mounted || shareLinkData == null) {
+    return;
+  }
+  final shareUrl = shareLinkData.$1;
+  final shareId = shareLinkData.$2;
+
+  final l10n = AppLocalizations.of(context);
+  await showBaseBottomSheet<void>(
+    context,
+    title: l10n.shareLink,
+    padding: const EdgeInsets.all(16),
+    child: Builder(
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.memoryShareLinkDescription,
+              style: textTheme.smallMuted,
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorScheme.fillDark,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 16, 44, 16),
+                    child: SelectableText(
+                      shareUrl,
+                      style: textTheme.small,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      tooltip: l10n.copyLink,
+                      iconSize: 20,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: shareUrl),
+                        );
+                        if (context.mounted) {
+                          showShortToast(context, l10n.linkCopiedToClipboard);
+                        }
+                      },
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCopy01,
+                        color: colorScheme.textBase,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: l10n.shareLink,
+              shouldSurfaceExecutionStates: false,
+              onTap: () async {
+                await shareText(
+                  shareUrl,
+                  context: context,
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ButtonWidgetV2(
+                buttonType: ButtonTypeV2.critical,
+                labelText: l10n.deleteLink,
+                onTap: () async {
+                  if (shareId == null) {
+                    showShortToast(context, l10n.somethingWentWrong);
+                    return;
+                  }
+                  final shouldDelete = await showAlertBottomSheet<bool>(
+                    context,
+                    title: l10n.deleteLinkQuestion,
+                    message: l10n.deleteMemoryLinkMessage,
+                    assetPath: "assets/warning-grey.png",
+                    buttons: [
+                      ButtonWidgetV2(
+                        buttonType: ButtonTypeV2.critical,
+                        labelText: l10n.deleteLink,
+                        onTap: () async {
+                          try {
+                            await MemoryShareService.instance
+                                .deleteMemoryShare(shareId);
+                            if (context.mounted) {
+                              showShortToast(
+                                context,
+                                l10n.linkDeletedSuccessfully,
+                              );
+                              Navigator.of(context).pop(true);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              showShortToast(context, l10n.somethingWentWrong);
+                              Navigator.of(context).pop(false);
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                  if (shouldDelete != true) {
+                    return;
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+Future<(String, int?)?> _createMemoryShareLinkData(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final dialog = createProgressDialog(context, l10n.creatingLink);
+  await dialog.show();
+  try {
+    final shareLinkData =
+        await MemoryShareService.instance.createMemoryShareLinkData(
+      memories: inheritedData.memories,
+      title: l10n.memories,
+    );
     await dialog.hide();
-
-    await Clipboard.setData(ClipboardData(text: shareUrl));
-
-    if (context.mounted) {
-      showShortToast(context, "Link copied to clipboard");
-    }
+    return shareLinkData;
   } catch (e) {
     await dialog.hide();
     if (context.mounted) {
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
+    return null;
   }
 }
