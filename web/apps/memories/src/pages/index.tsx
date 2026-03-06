@@ -1323,12 +1323,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setIsLoading(false);
         onReadyRef.current?.();
         const video = videoRef.current;
-        if (video) {
+        if (video && !paused) {
             video.play().catch(() => {
                 // Autoplay may be blocked.
             });
         }
-    }, []);
+    }, [paused]);
 
     const handleEnded = useCallback(() => {
         onEndedRef.current?.();

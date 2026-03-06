@@ -954,9 +954,13 @@ const publicMemory_downloadFile = async (
                 `${customOrigin}/public-memory/files/download/${file.id}?${params.toString()}`,
             );
         } else {
-            return fetch(await apiURL(`/public-memory/files/download/${file.id}`), {
-                headers: authenticatedPublicMemoryRequestHeaders(credentials),
-            });
+            return fetch(
+                await apiURL(`/public-memory/files/download/${file.id}`),
+                {
+                    headers:
+                        authenticatedPublicMemoryRequestHeaders(credentials),
+                },
+            );
         }
     };
 
