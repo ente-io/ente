@@ -4,6 +4,7 @@ import "dart:io";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
@@ -13,11 +14,12 @@ import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
-/// 1. When the user stays on an eligible image, full OCR detection runs
-///    automatically after the local file is resolved.
-/// 2. Detected text boundaries appear as an overlay on top of the image.
-/// 3. Long press on detected text lets users select and copy text.
-/// 4. A close button dismisses the overlay; swiping to another image resets.
+/// 1. Quick `hasText()` check runs silently when the image loads.
+/// 2. If text is found and user stays on the image for 1 second, full
+///    detection runs automatically and text boundaries appear as a
+///    transparent overlay.
+/// 3. Long press on detected text lets users select and copy.
+/// 4. Taps and swipes pass through to the underlying image viewer.
 class InlineTextDetection extends StatefulWidget {
   final EnteFile file;
   final ValueListenable<bool> enableFullScreenNotifier;
@@ -35,18 +37,22 @@ class InlineTextDetection extends StatefulWidget {
 }
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
+  static final Map<String, _HasTextResult> _hasTextCache = {};
+  final Logger _logger = Logger("InlineTextDetection");
+  final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
 
   bool _isEligible = false;
+  bool _hasText = false;
   String? _localFilePath;
   int _requestId = 0;
   bool _overlayActive = false;
-  bool _dismissed = false;
+  Timer? _activationTimer;
 
   @override
   void initState() {
     super.initState();
-    _resolveFile();
+    _evaluateFile();
   }
 
   @override
@@ -54,21 +60,23 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     super.didUpdateWidget(oldWidget);
     if (_didFileChange(oldWidget.file, widget.file)) {
       _resetState();
-      _resolveFile();
+      _evaluateFile();
     }
   }
 
   @override
   void dispose() {
+    _activationTimer?.cancel();
     _detectorController.dispose();
     super.dispose();
   }
 
   void _resetState() {
+    _activationTimer?.cancel();
     setState(() {
+      _hasText = false;
       _localFilePath = null;
       _overlayActive = false;
-      _dismissed = false;
     });
   }
 
@@ -79,18 +87,25 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return false;
   }
 
+  String _cacheKey(EnteFile file) {
+    if (file.uploadedFileID != null) return "uploaded_${file.uploadedFileID}";
+    if (file.localID != null) return "local_${file.localID}";
+    return "generated_${file.generatedID}";
+  }
+
   bool _isFileEligible(EnteFile file) {
     return file.fileType == FileType.image ||
         file.fileType == FileType.livePhoto;
   }
 
-  Future<void> _resolveFile() async {
+  Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
 
     if (!isEligible) {
       setState(() {
         _isEligible = false;
+        _hasText = false;
         _localFilePath = null;
       });
       return;
@@ -98,36 +113,69 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
     setState(() {
       _isEligible = true;
+      _hasText = false;
       _localFilePath = null;
     });
 
+    // Check cache first
+    final String cacheKey = _cacheKey(widget.file);
+    final _HasTextResult? cached = _hasTextCache[cacheKey];
+    if (cached != null) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _hasText = cached.hasText;
+        _localFilePath = cached.localPath;
+      });
+      if (cached.hasText) _scheduleActivation(requestId);
+      return;
+    }
+
+    // Resolve local file
     try {
       final File? localFile = await getFile(widget.file);
       if (!mounted || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        setState(() {
-          _localFilePath = null;
-        });
+        _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
         return;
       }
 
-      setState(() {
-        _localFilePath = localFile.path;
-        _overlayActive = true;
-      });
-    } catch (error) {
+      // Run fast hasText() check
+      bool hasText = false;
+      try {
+        hasText = await _mobileOcr.hasText(imagePath: localFile.path);
+      } catch (error, stackTrace) {
+        _logger.severe("Failed to run hasText", error, stackTrace);
+      }
+
       if (!mounted || requestId != _requestId) return;
+
+      final result = _HasTextResult(
+        hasText: hasText,
+        localPath: hasText ? localFile.path : null,
+      );
+      _hasTextCache[cacheKey] = result;
+
       setState(() {
-        _localFilePath = null;
+        _hasText = result.hasText;
+        _localFilePath = result.localPath;
       });
+
+      // If text found, schedule activation after 1 second delay
+      if (hasText) _scheduleActivation(requestId);
+    } catch (error, stackTrace) {
+      _logger.severe("Text detection pre-check failed", error, stackTrace);
+      if (!mounted || requestId != _requestId) return;
+      _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
     }
   }
 
-  void _dismissOverlay() {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _overlayActive = false;
-      _dismissed = true;
+  void _scheduleActivation(int requestId) {
+    _activationTimer?.cancel();
+    _activationTimer = Timer(const Duration(seconds: 1), () {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _overlayActive = true;
+      });
     });
   }
 
@@ -140,17 +188,12 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return ValueListenableBuilder<bool>(
       valueListenable: widget.enableFullScreenNotifier,
       builder: (context, isFullScreen, _) {
-        if (isFullScreen || widget.isGuestView || _dismissed) {
+        if (isFullScreen || widget.isGuestView) {
           return const SizedBox.shrink();
         }
 
         if (_overlayActive && _localFilePath != null) {
-          return Stack(
-            children: [
-              _buildInlineOverlay(context),
-              _buildCloseButton(context),
-            ],
-          );
+          return _buildInlineOverlay(context);
         }
 
         return const SizedBox.shrink();
@@ -186,27 +229,11 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       ),
     );
   }
+}
 
-  Widget _buildCloseButton(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.paddingOf(context).top + 8,
-      right: 8,
-      child: GestureDetector(
-        onTap: _dismissOverlay,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.black.withAlpha(160),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.close,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-      ),
-    );
-  }
+class _HasTextResult {
+  final bool hasText;
+  final String? localPath;
+
+  const _HasTextResult({required this.hasText, this.localPath});
 }
