@@ -227,9 +227,6 @@ class LockScreenSettings {
   }
 
   bool shouldShowSystemLockScreen() {
-    if (Platform.isLinux) {
-      return false;
-    }
     if (_preferences.containsKey(keyShouldShowLockScreen)) {
       return _preferences.getBool(keyShouldShowLockScreen)!;
     } else {
@@ -238,9 +235,6 @@ class LockScreenSettings {
   }
 
   Future<void> setSystemLockScreen(bool value) {
-    if (Platform.isLinux) {
-      return _preferences.setBool(keyShouldShowLockScreen, false);
-    }
     return _preferences.setBool(keyShouldShowLockScreen, value);
   }
 

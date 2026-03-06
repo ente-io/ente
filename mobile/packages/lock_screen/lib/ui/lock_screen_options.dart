@@ -174,7 +174,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final bool showDeviceLockOption = !Platform.isLinux;
     return Scaffold(
       body: ConstrainedCustomScrollView(
         slivers: <Widget>[
@@ -240,37 +239,32 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (showDeviceLockOption) ...[
-                                      MenuItemWidget(
-                                        captionedTextWidget:
-                                            CaptionedTextWidget(
-                                          title: context.strings.deviceLock,
-                                        ),
-                                        surfaceExecutionStates: false,
-                                        alignCaptionedTextToLeft: true,
-                                        isTopBorderRadiusRemoved: false,
-                                        isBottomBorderRadiusRemoved: true,
-                                        menuItemColor: colorTheme.fillFaint,
-                                        trailingIcon: isSystemLockEnabled
-                                            ? Icons.check
-                                            : null,
-                                        trailingIconColor:
-                                            colorTheme.textBase,
-                                        onTap: () => _deviceLock(),
+                                    MenuItemWidget(
+                                      captionedTextWidget: CaptionedTextWidget(
+                                        title: context.strings.deviceLock,
                                       ),
-                                      DividerWidget(
-                                        dividerType: DividerType.menuNoIcon,
-                                        bgColor: colorTheme.fillFaint,
-                                      ),
-                                    ],
+                                      surfaceExecutionStates: false,
+                                      alignCaptionedTextToLeft: true,
+                                      isTopBorderRadiusRemoved: false,
+                                      isBottomBorderRadiusRemoved: true,
+                                      menuItemColor: colorTheme.fillFaint,
+                                      trailingIcon: isSystemLockEnabled
+                                          ? Icons.check
+                                          : null,
+                                      trailingIconColor: colorTheme.textBase,
+                                      onTap: () => _deviceLock(),
+                                    ),
+                                    DividerWidget(
+                                      dividerType: DividerType.menuNoIcon,
+                                      bgColor: colorTheme.fillFaint,
+                                    ),
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
                                         title: context.strings.pinLock,
                                       ),
                                       surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
-                                      isTopBorderRadiusRemoved:
-                                          showDeviceLockOption,
+                                      isTopBorderRadiusRemoved: true,
                                       isBottomBorderRadiusRemoved: true,
                                       menuItemColor: colorTheme.fillFaint,
                                       trailingIcon:

@@ -11,6 +11,7 @@ import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 
@@ -138,10 +139,9 @@ class LocalAuthenticationService {
 
   Future<bool> isLocalAuthSupportedOnDevice() async {
     try {
-      if (Platform.isLinux) {
-        return false;
-      }
-      return await LocalAuthentication().isDeviceSupported();
+      return Platform.isLinux
+          ? await FlutterLocalAuthentication().canAuthenticate()
+          : await LocalAuthentication().isDeviceSupported();
     } on MissingPluginException {
       return false;
     }
