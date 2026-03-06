@@ -573,6 +573,7 @@ func main() {
 	privateAPI.PUT("/files/thumbnail", fileHandler.UpdateThumbnail)
 	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
 	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
+	privateAPI.GET("/files/file", fileHandler.GetFileInCollection)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
 	publicAPI.POST("/paste/create", pasteHandler.Create)
 	publicAPI.POST("/paste/guard", pasteHandler.Guard)

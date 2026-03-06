@@ -417,6 +417,28 @@ func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// GetFileInCollection returns latest file object for a single file in a given
+// collection if caller has access.
+func (h *FileHandler) GetFileInCollection(c *gin.Context) {
+	fileID, err := strconv.ParseInt(c.Query("fileID"), 10, 64)
+	if err != nil || fileID <= 0 {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "invalid fileID"))
+		return
+	}
+	collectionID, err := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	if err != nil || collectionID <= 0 {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "invalid collectionID"))
+		return
+	}
+
+	resp, err := h.Controller.GetFileInCollection(c, fileID, collectionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
 // UpdateThumbnail updates thumbnail of a file
 func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
 	enteApp := auth.GetApp(c)
