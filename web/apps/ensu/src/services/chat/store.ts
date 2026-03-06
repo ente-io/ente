@@ -217,6 +217,12 @@ const withNativeDbRecovery = async <T>(
         if (!shouldResetDbError(error)) {
             throw error;
         }
+        if (isTauriRuntime()) {
+            log.warn(
+                `Chat DB error while ${label}, preserving native store for manual recovery: ${formatLogError(error)}`,
+            );
+            throw error;
+        }
         const now = Date.now();
         if (now - lastDbResetAt < 1000) {
             throw error;
