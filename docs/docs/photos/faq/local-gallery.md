@@ -1,162 +1,88 @@
 ---
 title: Local Gallery FAQ
-description: Frequently asked questions about the local gallery, device folders, and offline mode in Ente Photos
+description: Frequently asked questions about using Ente Photos in offline mode without an account
 ---
 
 # Local Gallery
 
-## Device Folders {#device-folders}
+## Getting Started {#getting-started}
 
-### What are device folders in Ente? {#what-are-device-folders}
+### How do I use Ente without creating an account? {#use-without-account}
 
-Device folders (also called "On device" albums) are the albums and folders from your phone's native photo library that Ente can see. They appear in the Albums tab as a horizontal row at the top. These reflect your device's album structure (e.g., Camera, Screenshots, WhatsApp Images) and are separate from Ente's cloud albums.
+On the welcome screen, tap **Continue without account**. Grant photo library access when prompted. You can now browse your device photos, use face recognition, magic search, and other on-device features without signing up.
 
-### Why don't I see any device folders? {#no-device-folders}
+### Why don't I see the "Continue without account" button? {#no-offline-button}
 
-If device folders aren't showing up, check the following:
+The offline mode option is controlled by a feature flag. If you don't see the button, make sure you're running the latest version of Ente Photos. If it still doesn't appear, the feature may not be available in your region yet.
 
-1. **Photo library permission**: Make sure Ente has access to your device's photo library. Go to your device's Settings > Apps > Ente Photos and ensure photo/media access is granted.
-2. **Permission level (iOS)**: On iOS, if you selected "Allow access to selected photos" instead of "Allow access to all photos", Ente can only see the specific photos you selected, which may not include complete albums.
-3. **First sync not complete**: Device folders appear after the initial local scan completes. Wait a moment and pull down to refresh.
+### What permissions does Ente need in offline mode? {#offline-permissions}
 
-### Can I rename or reorganize device folders in Ente? {#rename-device-folders}
+Ente needs access to your photo library to display your photos. On iOS, grant "Allow access to all photos" for the best experience. On Android, grant media/photo access. No network permissions are needed since offline mode doesn't upload anything.
 
-No. Device folders in Ente are a read-only view of your device's photo library structure. To rename or reorganize them, use your device's native photos app (e.g., Apple Photos on iOS, Google Photos or Files on Android). Changes will be reflected in Ente after the next sync.
+## Features {#features}
 
-### Are device folders the same as Ente albums? {#device-vs-ente-albums}
+### Does face recognition work without an account? {#offline-face-recognition}
 
-No. Device folders and Ente albums are separate concepts:
+Yes. Face recognition runs entirely on your device in offline mode. Enable it from the banner on the Search tab or from `Settings > Machine learning`. All processing happens locally -- no data leaves your phone.
 
-- **Device folders** reflect your phone's native album structure and contain only local files
-- **Ente albums** are cloud-based collections that sync across all your devices
+### Does magic search work without an account? {#offline-magic-search}
 
-When you enable backup for a device folder, Ente creates a corresponding cloud album with the same name. But after that, the two are independent - adding photos to the Ente album doesn't add them to the device folder, and vice versa.
+Yes. Natural language search (magic search) also runs on-device. After enabling ML, Ente indexes your photos locally so you can search using descriptions like "beach sunset" or "birthday cake".
 
-## Backup {#backup}
+### Can I use the map view in offline mode? {#offline-map}
 
-### How do I back up a specific device folder? {#backup-specific-folder}
+Yes. If your photos contain location metadata, enable map view from `Settings > Map`. The map displays photo locations using the GPS data embedded in your photos.
 
-Open the device folder from the Albums tab, then toggle the **Backup** switch at the top. Alternatively, go to `Settings > Backup > Backed up folders` to manage all folder selections at once.
+### Do memories work in offline mode? {#offline-memories}
 
-### What happens when I enable backup for a folder? {#enable-backup}
+Yes. Memories appear at the top of the home gallery based on photos from past years on your device.
 
-When you enable backup for a device folder:
+### Can I favorite photos in offline mode? {#offline-favorites}
 
-1. All existing photos and videos in that folder are queued for upload
-2. A corresponding Ente album is created with the same name
-3. New photos added to that folder will be automatically uploaded in the background
-4. The upload respects your network preferences (WiFi-only by default)
+No. Favorites is an Ente cloud album and requires an account. In offline mode, you can browse and view all your device photos but cannot organize them into Ente albums.
 
-### Can I back up all folders at once? {#backup-all-folders}
+### Can I share photos from offline mode? {#offline-sharing}
 
-Yes. During initial setup, you can choose to back up all folders. After setup, go to `Settings > Backup > Backed up folders` and select all folders, or use the select all option if available.
+You can share individual photos to other apps using the standard share sheet (share button in the viewer). However, Ente's album sharing, collaborative albums, and public links require an account.
 
-### Why are some photos in a backed-up folder not uploading? {#photos-not-uploading}
+## Signing Up {#signing-up}
 
-Some files might be skipped during backup if:
+### How do I create an account from offline mode? {#create-account-from-offline}
 
-- The upload was interrupted (network issue, app closed)
-- The file format is not supported
-- The file was in a temporary error state
+There are three places to sign up:
 
-These files are tracked as "ignored files." To retry them, open the device folder and tap **Reset ignored files**. This clears the ignored list and queues those files for upload on the next sync.
+1. Tap the **Get started** banner at the top of the home gallery
+2. Tap the **Enable backup** prompt in the Albums tab
+3. Open **Settings** and tap the sign-in card at the top
 
-### Do I need to keep the app open for backup to work? {#background-backup}
+### Will I lose my photos or ML data when I sign up? {#data-preserved-on-signup}
 
-No. Ente supports background sync on both iOS and Android. However, there are platform-specific considerations:
+No. All your device photos remain on your device, and any ML processing (face recognition, search embeddings) done in offline mode is preserved. Signing up adds cloud features on top of your existing local experience.
 
-- **iOS**: The initial backup of a large library may require keeping the app in the foreground. Subsequent backups work in the background. Videos are only backed up when the app is open. Do not force-kill the app from recents.
-- **Android**: Make sure "Optimize battery usage" is disabled for Ente in your device's system settings.
+### Can I go back to offline mode after signing up? {#return-to-offline}
 
-See [Background sync](/photos/features/backup-and-sync/#background-sync) for details.
-
-## Offline Mode {#offline-mode}
-
-### Can I use Ente without creating an account? {#use-without-account}
-
-Yes. Ente Photos can be used purely as a local gallery app without signing up. In this mode, you can browse your device photos, view them in the full-featured viewer, and even use on-device ML features like face recognition and natural language search.
-
-### What features work in offline mode? {#offline-features}
-
-In offline mode (no account), you can:
-
-- Browse all device folders and photos
-- View photos and videos
-- Use on-device ML (face recognition, magic search) if enabled
-- View photos on a map (requires location data in photos)
-- Use the photo viewer with zoom, swipe, and sharing to other apps
-
-Features that require an account:
-
-- Cloud backup and cross-device sync
-- Ente albums, Favorites, Uncategorized
-- Sharing and collaborative albums
-- Cross-device ML sync (face names, etc.)
-- Memories
-
-### How do I switch from offline mode to having an account? {#switch-to-online}
-
-You can sign up at any time from the app. Your local gallery and any ML indexes built in offline mode will be preserved. After signing up, you can select which device folders to back up to Ente's cloud.
-
-### Will I lose my data if I switch from offline to online mode? {#data-loss-switching}
-
-No. Switching from offline mode to an Ente account preserves all your local data. Your device photos remain on your device, and any ML processing (face recognition, embeddings) that was done locally is kept. You then gain the additional ability to back up to the cloud and use online features.
-
-## Storage and Cache {#storage}
-
-### How much storage does the local gallery cache use? {#cache-size}
-
-Ente caches thumbnails from your device's photo library to improve scrolling performance. You can check and clear this cache in `Settings > Storage > Manage device storage` under the "Local gallery" entry. Clearing the cache is safe - thumbnails are regenerated as you browse.
-
-### Does viewing device photos in Ente use extra storage? {#extra-storage}
-
-Ente creates a small thumbnail cache for smoother browsing, but it does not duplicate your full-resolution photos. The cache can be cleared at any time without data loss.
-
-### How do I free up space on my device after backing up? {#free-up-space}
-
-Go to `Settings > Backup > Free up space`. Ente will show you how much space can be reclaimed by deleting local copies of photos that have been fully backed up. Only fully uploaded files are eligible for removal.
-
-Learn more in [Storage optimization](/photos/features/albums-and-organization/storage-optimization).
+Once you sign in to an Ente account, the app operates in signed-in mode. To return to offline mode, you would need to sign out.
 
 ## Troubleshooting {#troubleshooting}
 
-### Device folders are empty or missing photos {#empty-folders}
+### My photos aren't showing up in offline mode {#photos-not-showing-offline}
 
-Try these steps:
+1. Check that Ente has photo library access in your device's system settings
+2. On iOS, confirm you granted **Allow access to all photos** (not "Selected photos")
+3. Wait for the initial scan to complete -- check the status bar at the top of the gallery
+4. Close and reopen Ente to trigger a fresh scan
 
-1. **Check permissions**: Ensure Ente has full photo library access in your device settings
-2. **Wait for sync**: The local scan may still be in progress - check the status bar at the top of the gallery
-3. **Restart the app**: Close and reopen Ente to trigger a fresh scan
-4. **Check iOS permission level**: On iOS, make sure you granted "Allow access to all photos" rather than selecting individual photos
+### ML indexing seems slow {#slow-ml-indexing}
 
-### Photos deleted from my device still show in Ente {#deleted-still-showing}
+On-device ML processing can take time, especially for large libraries. Keep the app open and charging for faster processing. The ML progress banner on the Search tab shows current progress.
 
-This is expected behavior. Ente is a backup service, not a two-way sync. Photos backed up to Ente remain in your Ente account even after you delete them from your device. To remove them from Ente as well, delete them manually within the Ente app.
+### The app uses a lot of battery {#battery-usage-offline}
 
-### Backup is stuck or not progressing {#backup-stuck}
-
-If backup seems stuck:
-
-1. Check your network connection
-2. Make sure background sync is not restricted (see [Background sync](/photos/features/backup-and-sync/#background-sync))
-3. Open the app and leave it in the foreground for a few minutes to allow uploads to progress
-4. Check `Settings > Backup` for any error indicators
-5. Try toggling backup off and on for the affected folder
-
-### Some device folders show "0 photos" {#zero-photos}
-
-This can happen when:
-
-- The folder contains only unsupported file types
-- The media scanner hasn't indexed those files yet
-- The files were recently added and the local sync hasn't completed
-
-Pull down to refresh, or restart the app to trigger a rescan.
+ML indexing is processor-intensive. Once initial indexing completes, battery usage returns to normal. To pause indexing, disable ML from `Settings > Machine learning`.
 
 ## Related topics
 
 - [Local gallery feature guide](/photos/features/local-gallery)
-- [Backup and sync](/photos/features/backup-and-sync/)
-- [Storage optimization](/photos/features/albums-and-organization/storage-optimization)
-- [Albums and Organization FAQ](/photos/faq/albums-and-organization)
-- [Troubleshooting](/photos/faq/troubleshooting)
+- [Machine learning](/photos/features/search-and-discovery/machine-learning)
+- [Face recognition](/photos/features/search-and-discovery/face-recognition)
+- [Backup and sync](/photos/features/backup-and-sync/) (after signing up)
