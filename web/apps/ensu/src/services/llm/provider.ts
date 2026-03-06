@@ -9,22 +9,23 @@ import type {
     ModelSettings,
 } from "./types";
 
-const DEFAULT_CONTEXT_SIZE = 12000;
+const DEFAULT_WEB_CONTEXT_SIZE = 4096;
+const DEFAULT_TAURI_CONTEXT_SIZE = 12000;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
 const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
 export const DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-3.5-0.8b-q4km",
-    name: "Qwen 3.5 0.8B (Q4_K_M)",
-    url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+    id: "lfm-2.5-vl-1.6b",
+    name: "LFM 2.5 VL 1.6B (Q4_0)",
+    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
     mmprojUrl:
-        "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Qwen multimodal model (text-only on web)",
-    sizeBytes: 532_517_120,
-    mmprojSizeBytes: 204_987_232,
-    sizeHuman: "533 MB",
+        "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+    description: "Liquid AI multimodal model (text-only on web)",
+    sizeBytes: 695_752_160,
+    mmprojSizeBytes: 583_109_888,
+    sizeHuman: "~664 MB",
 };
 
 const TAURI_DEFAULT_MODEL: ModelInfo = {
@@ -101,10 +102,18 @@ export class LlmProvider {
 
     public resolveRuntimeSettings(settings: ModelSettings) {
         const model = this.resolveTargetModel(settings);
-        const contextSize =
+        const defaultContextSize =
+            this.backend.kind === "tauri"
+                ? DEFAULT_TAURI_CONTEXT_SIZE
+                : DEFAULT_WEB_CONTEXT_SIZE;
+        const requestedContextSize =
             settings.contextLength ??
             model.contextLength ??
-            DEFAULT_CONTEXT_SIZE;
+            defaultContextSize;
+        const contextSize =
+            this.backend.kind === "tauri"
+                ? requestedContextSize
+                : Math.min(requestedContextSize, DEFAULT_WEB_CONTEXT_SIZE);
         const configuredMaxTokens = settings.maxTokens ?? model.maxTokens;
         const maxAllowedTokens = Math.max(
             1,
@@ -308,7 +317,11 @@ export class LlmProvider {
         await this.backend.freeContext();
         this.currentContextKey = undefined;
         if (this.currentModel && this.currentModelPath) {
-            const resolvedContext = contextSize ?? DEFAULT_CONTEXT_SIZE;
+            const resolvedContext =
+                contextSize ??
+                (this.backend.kind === "tauri"
+                    ? DEFAULT_TAURI_CONTEXT_SIZE
+                    : DEFAULT_WEB_CONTEXT_SIZE);
             await this.backend.createContext(
                 { modelPath: this.currentModelPath },
                 { contextSize: resolvedContext },

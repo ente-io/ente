@@ -16,7 +16,7 @@ import type {
 } from "./types";
 
 const WLLAMA_VERSION = "2.3.7";
-const CDN_BASE = `https://unpkg.com/@wllama/wllama@${WLLAMA_VERSION}/esm`;
+const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}/src`;
 const MIN_GGUF_BYTES = 1024 * 1024;
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 
