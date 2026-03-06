@@ -254,15 +254,25 @@ class _BodyState extends State<_Body> {
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return widget.config.mode == DetailPageMode.minimalistic
-                      ? const SizedBox.shrink()
-                      : InlineTextDetection(
-                          file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
-                          isGuestView: isGuestView,
-                        );
+                  if (widget.config.mode == DetailPageMode.minimalistic) {
+                    return const SizedBox.shrink();
+                  }
+                  if (flagService.ocrOverlayEnabled) {
+                    return InlineTextDetection(
+                      file: _files![selectedIndex],
+                      enableFullScreenNotifier:
+                          InheritedDetailPageState.of(context)
+                              .enableFullScreenNotifier,
+                      isGuestView: isGuestView,
+                    );
+                  }
+                  return TextDetectionOverlayButton(
+                    file: _files![selectedIndex],
+                    enableFullScreenNotifier:
+                        InheritedDetailPageState.of(context)
+                            .enableFullScreenNotifier,
+                    isGuestView: isGuestView,
+                  );
                 },
               ),
               if (_qrHelper != null)
