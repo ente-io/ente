@@ -9,8 +9,10 @@ import type {
     ModelSettings,
 } from "./types";
 
-const DEFAULT_CONTEXT_SIZE = 4096;
-const DEFAULT_MAX_TOKENS = 512;
+const DEFAULT_WEB_CONTEXT_SIZE = 4096;
+const DEFAULT_TAURI_CONTEXT_SIZE = 12000;
+const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
+const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
 const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
@@ -21,18 +23,33 @@ export const DEFAULT_MODEL: ModelInfo = {
     mmprojUrl:
         "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
     description: "Liquid AI multimodal model (text-only on web)",
-    sizeHuman: "~664 MB",
     sizeBytes: 695_752_160,
     mmprojSizeBytes: 583_109_888,
+    sizeHuman: "~664 MB",
+};
+
+const TAURI_DEFAULT_MODEL: ModelInfo = {
+    id: "qwen-3.5-2b-q80",
+    name: "Qwen 3.5 2B (Q8_0)",
+    url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+    mmprojUrl:
+        "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+    description: "Qwen multimodal model",
+    sizeBytes: 2_012_012_800,
+    mmprojSizeBytes: 668_227_264,
+    sizeHuman: "2.68 GB",
 };
 
 const HIGH_RAM_MAC_MODEL: ModelInfo = {
-    id: "gemma-3-4b-it-q4km",
-    name: "Gemma 3 4B IT (Q4_K_M)",
-    url: "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf?download=true",
+    id: "qwen-3.5-4b-q4km",
+    name: "Qwen 3.5 4B (Q4_K_M)",
+    url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
     mmprojUrl:
-        "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Gemma multimodal model for higher-memory macOS devices",
+        "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+    description: "Qwen multimodal model for higher-memory macOS devices",
+    sizeBytes: 2_740_937_888,
+    mmprojSizeBytes: 672_423_616,
+    sizeHuman: "3.63 GB",
 };
 
 export class LlmProvider {
@@ -85,16 +102,30 @@ export class LlmProvider {
 
     public resolveRuntimeSettings(settings: ModelSettings) {
         const model = this.resolveTargetModel(settings);
+        const defaultContextSize =
+            this.backend.kind === "tauri"
+                ? DEFAULT_TAURI_CONTEXT_SIZE
+                : DEFAULT_WEB_CONTEXT_SIZE;
+        const requestedContextSize =
+            settings.contextLength ?? model.contextLength ?? defaultContextSize;
         const contextSize =
-            settings.contextLength ??
-            model.contextLength ??
-            DEFAULT_CONTEXT_SIZE;
-        const maxTokens =
-            settings.maxTokens ?? model.maxTokens ?? DEFAULT_MAX_TOKENS;
+            this.backend.kind === "tauri"
+                ? requestedContextSize
+                : Math.min(requestedContextSize, DEFAULT_WEB_CONTEXT_SIZE);
+        const configuredMaxTokens = settings.maxTokens ?? model.maxTokens;
+        const maxAllowedTokens = Math.max(
+            1,
+            contextSize - OVERFLOW_SAFETY_TOKENS,
+        );
+        const implicitMaxTokens = Math.min(
+            DEFAULT_GENERATION_MAX_TOKENS,
+            Math.max(1, Math.floor(contextSize / 2)),
+        );
+        const maxTokens = configuredMaxTokens ?? implicitMaxTokens;
         return {
             model,
             contextSize,
-            maxTokens: Math.min(maxTokens, contextSize),
+            maxTokens: Math.min(maxTokens, maxAllowedTokens),
         };
     }
 
@@ -284,7 +315,11 @@ export class LlmProvider {
         await this.backend.freeContext();
         this.currentContextKey = undefined;
         if (this.currentModel && this.currentModelPath) {
-            const resolvedContext = contextSize ?? DEFAULT_CONTEXT_SIZE;
+            const resolvedContext =
+                contextSize ??
+                (this.backend.kind === "tauri"
+                    ? DEFAULT_TAURI_CONTEXT_SIZE
+                    : DEFAULT_WEB_CONTEXT_SIZE);
             await this.backend.createContext(
                 { modelPath: this.currentModelPath },
                 { contextSize: resolvedContext },
@@ -331,7 +366,8 @@ export class LlmProvider {
     }
 
     private async resolveDefaultModelForDevice() {
-        this.defaultModel = DEFAULT_MODEL;
+        this.defaultModel =
+            this.backend.kind === "tauri" ? TAURI_DEFAULT_MODEL : DEFAULT_MODEL;
 
         if (this.backend.kind !== "tauri") {
             return;

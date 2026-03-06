@@ -30,7 +30,9 @@ import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.domain.state.OverflowDialogState
+import io.ente.ensu.domain.util.formatBytes
 import io.ente.ensu.utils.rememberEnsuHaptics
+import kotlin.math.roundToLong
 
 @Composable
 internal fun OverflowDialog(
@@ -68,6 +70,7 @@ internal fun OverflowDialog(
 internal fun DownloadToastOverlay(
     status: String,
     percent: Int,
+    totalBytes: Long?,
     isLoading: Boolean,
     onCancel: () -> Unit
 ) {
@@ -80,6 +83,14 @@ internal fun DownloadToastOverlay(
     ) {
         val title = if (isLoading) "Loading model" else "Downloading model"
         val clamped = percent.coerceIn(0, 100)
+        val statusText = when {
+            isLoading -> status
+            totalBytes != null -> {
+                val downloadedBytes = (totalBytes * (clamped / 100f)).roundToLong()
+                "Downloading... ${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}"
+            }
+            else -> status
+        }
         Column(
             modifier = Modifier
                 .padding(horizontal = EnsuSpacing.lg.dp)
@@ -121,7 +132,7 @@ internal fun DownloadToastOverlay(
             )
             Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = status, style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Text(text = statusText, style = EnsuTypography.small, color = EnsuColor.textMuted())
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = "$clamped%", style = EnsuTypography.mini, color = EnsuColor.textMuted())
             }

@@ -37,13 +37,19 @@ class InferenceRsProvider(
     private val modelDir: File,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) : LlmProvider {
+    private data class LoadedModelKey(
+        val id: String,
+        val requestedContextLength: Int?
+    )
+
     private val httpClient = OkHttpClient()
     private val downloadCancelled = AtomicBoolean(false)
     @Volatile private var downloadCall: Call? = null
 
     @Volatile private var modelHandle: ModelHandle? = null
     @Volatile private var contextHandle: ContextHandle? = null
-    @Volatile private var currentModelId: String? = null
+    @Volatile private var currentModelKey: LoadedModelKey? = null
+    @Volatile private var currentContextLength: Int? = null
     @Volatile private var currentJobId: Long? = null
     private var backendInitialized = false
 
@@ -56,12 +62,13 @@ class InferenceRsProvider(
         onProgress: (DownloadProgress) -> Unit
     ) {
         withContext(ioDispatcher) {
+            val modelKey = LoadedModelKey(target.id, target.contextLength)
             if (!backendInitialized) {
                 initBackend()
                 backendInitialized = true
             }
 
-            if (currentModelId == target.id && contextHandle != null && modelHandle != null) {
+            if (currentModelKey == modelKey && contextHandle != null && modelHandle != null) {
                 return@withContext
             }
 
@@ -71,35 +78,54 @@ class InferenceRsProvider(
             val mmprojFile = mmprojPathFor(target)
             val mmprojUrl = target.mmprojUrl
 
-            val downloads = mutableListOf<DownloadTarget>()
-            if (!modelFile.exists()) {
-                downloads.add(DownloadTarget("Model", target.url, modelFile))
+            val expectedTargets = mutableListOf<DownloadTarget>()
+            expectedTargets.add(DownloadTarget("Model", target.url, modelFile))
+            if (mmprojFile != null && !mmprojUrl.isNullOrBlank()) {
+                expectedTargets.add(DownloadTarget("Mmproj", mmprojUrl, mmprojFile))
             }
-            if (mmprojFile != null && !mmprojUrl.isNullOrBlank() && !mmprojFile.exists()) {
-                downloads.add(DownloadTarget("Mmproj", mmprojUrl, mmprojFile))
-            }
+
+            val downloads = expectedTargets.filterNot { it.destination.exists() }
 
             if (downloads.isNotEmpty()) {
                 downloadCancelled.set(false)
-                onProgress(DownloadProgress(0, "Starting download..."))
                 modelFile.parentFile?.mkdirs()
                 mmprojFile?.parentFile?.mkdirs()
 
-                val lengths = downloads.map { fetchContentLength(it.url) }
+                val lengths = expectedTargets.map { download ->
+                    download.destination.length().takeIf { it > 0 } ?: fetchContentLength(download.url)
+                }
                 val totalBytes = lengths.filterNotNull().sum()
                 val hasTotal = lengths.all { it != null } && totalBytes > 0
-                var downloadedSoFar = 0L
+                var downloadedSoFar = expectedTargets.zip(lengths).sumOf { (download, total) ->
+                    existingDownloadBytes(download.destination).coerceAtMost(total ?: existingDownloadBytes(download.destination))
+                }
 
-                downloads.forEachIndexed { index, download ->
-                    val fileTotal = lengths[index]
+                if (hasTotal && downloadedSoFar > 0) {
+                    val initialPercent = ((downloadedSoFar * 100) / totalBytes).toInt().coerceIn(0, 99)
+                    onProgress(
+                        DownloadProgress(
+                            initialPercent,
+                            "Downloading... ${formatBytes(downloadedSoFar)} / ${formatBytes(totalBytes)}"
+                        )
+                    )
+                } else {
+                    onProgress(DownloadProgress(0, "Starting download..."))
+                }
+
+                downloads.forEach { download ->
+                    val expectedIndex = expectedTargets.indexOfFirst { it.destination == download.destination }
+                    val fileTotal = lengths.getOrNull(expectedIndex)
+                    val existingBytesForFile = existingDownloadBytes(download.destination)
+                    // downloadedSoFar already includes any resumed bytes for this file.
+                    val bytesBeforeFile = downloadedSoFar - existingBytesForFile
                     downloadFile(download.url, download.destination) { downloaded, total ->
-                        val overallDownloaded = downloadedSoFar + downloaded
+                        val overallDownloaded = bytesBeforeFile + downloaded
                         val percent = if (hasTotal) {
                             ((overallDownloaded * 100) / totalBytes).toInt()
                         } else {
-                            val step = 100f / downloads.size
+                            val step = 100f / expectedTargets.size
                             val filePercent = total?.let { downloaded.toFloat() / it } ?: 0f
-                            ((index * step) + (filePercent * step)).toInt()
+                            ((expectedIndex.coerceAtLeast(0) * step) + (filePercent * step)).toInt()
                         }
                         val status = if (hasTotal) {
                             "Downloading... ${formatBytes(overallDownloaded)} / ${formatBytes(totalBytes)}"
@@ -108,7 +134,7 @@ class InferenceRsProvider(
                         }
                         onProgress(DownloadProgress(percent.coerceIn(0, 99), status))
                     }
-                    downloadedSoFar += fileTotal ?: download.destination.length()
+                    downloadedSoFar = bytesBeforeFile + (fileTotal ?: existingDownloadBytes(download.destination))
                 }
             }
 
@@ -123,7 +149,7 @@ class InferenceRsProvider(
         messages: List<LlmMessage>,
         imageFiles: List<File>,
         temperature: Float,
-        maxTokens: Int,
+        maxTokens: Int?,
         onToken: (String) -> Unit
     ): GenerationSummary = withContext(ioDispatcher) {
         val context = contextHandle ?: throw IllegalStateException("Model context not loaded")
@@ -186,6 +212,15 @@ class InferenceRsProvider(
         if (sizes.isEmpty()) null else sizes.sum()
     }
 
+    override fun loadedContextLength(target: LlmModelTarget): Int? {
+        val modelKey = LoadedModelKey(target.id, target.contextLength)
+        return if (currentModelKey == modelKey && contextHandle != null && modelHandle != null) {
+            currentContextLength
+        } else {
+            null
+        }
+    }
+
     override fun stopGeneration() {
         val jobId = currentJobId
         if (jobId != null) {
@@ -198,7 +233,7 @@ class InferenceRsProvider(
     override fun resetContext() {
         val model = modelHandle ?: return
         val contextParams = ContextParams(
-            contextSize = null,
+            contextSize = currentContextLength,
             nThreads = null,
             nBatch = null
         )
@@ -224,12 +259,13 @@ class InferenceRsProvider(
         contextHandle = null
         modelHandle?.destroy()
         modelHandle = null
-        currentModelId = null
+        currentModelKey = null
+        currentContextLength = null
     }
 
     private fun loadWithFallbacks(target: LlmModelTarget, modelFile: File) {
-        val desiredCtx = target.contextLength ?: 4096
-        val contexts = listOf(desiredCtx, 4096, 2048, 1024).distinct().filter { it > 0 }
+        val desiredCtx = target.contextLength ?: 12000
+        val contexts = listOf(desiredCtx, 12000, 8192, 4096, 2048, 1024).distinct().filter { it > 0 }
         val threads = max(1, Runtime.getRuntime().availableProcessors() - 1)
         val batch = 512
 
@@ -252,7 +288,8 @@ class InferenceRsProvider(
                     nBatch = batch
                 )
                 contextHandle = createContext(model, contextParams)
-                currentModelId = target.id
+                currentModelKey = LoadedModelKey(target.id, target.contextLength)
+                currentContextLength = ctx
                 return
             } catch (err: Throwable) {
                 lastError = err
@@ -380,15 +417,26 @@ class InferenceRsProvider(
         return pathForUrl(target, url, fallback = "mmproj.gguf")
     }
 
+    private fun existingDownloadBytes(dest: File): Long {
+        if (dest.exists()) return dest.length()
+        val tmp = File(dest.absolutePath + ".tmp")
+        return tmp.length().takeIf { tmp.exists() && it > 0 } ?: 0L
+    }
+
     private fun pathForUrl(target: LlmModelTarget, url: String, fallback: String): File {
         val baseDir = File(modelDir, "models")
-        val filename = url.substringAfterLast('/').ifBlank { fallback }
+        val filename = filenameForUrl(url, fallback)
         return if (target.id.startsWith("custom:")) {
             val customDir = File(baseDir, "custom")
             File(customDir, "${hash(url)}_$filename")
         } else {
             File(baseDir, filename)
         }
+    }
+
+    private fun filenameForUrl(url: String, fallback: String): String {
+        val withoutQuery = url.substringBefore('?').substringBefore('#')
+        return withoutQuery.substringAfterLast('/').ifBlank { fallback }
     }
 
     private fun looksLikeGguf(file: File): Boolean {
