@@ -365,19 +365,21 @@ class SettingsSearchRegistry {
       ),
     );
 
-    items.add(
-      SettingsSearchItem(
-        title: l10n.hideSharedItemsFromHomeGallery,
-        subtitle: l10n.gallery,
-        sectionPath: "${l10n.appearance} > ${l10n.gallery}",
-        icon: HugeIcons.strokeRoundedImage01,
-        routeBuilder: (_) => const GallerySettingsScreen(
-          fromGalleryLayoutSettingsCTA: false,
+    if (!isOffline) {
+      items.add(
+        SettingsSearchItem(
+          title: l10n.hideSharedItemsFromHomeGallery,
+          subtitle: l10n.gallery,
+          sectionPath: "${l10n.appearance} > ${l10n.gallery}",
+          icon: HugeIcons.strokeRoundedImage01,
+          routeBuilder: (_) => const GallerySettingsScreen(
+            fromGalleryLayoutSettingsCTA: false,
+          ),
+          isSubPage: true,
+          keywords: ["shared", "hide", "home gallery"],
         ),
-        isSubPage: true,
-        keywords: ["shared", "hide", "home gallery"],
-      ),
-    );
+      );
+    }
 
     // Machine Learning settings
     if (hasLoggedIn || isOffline) {
