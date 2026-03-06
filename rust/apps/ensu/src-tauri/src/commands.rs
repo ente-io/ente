@@ -1202,7 +1202,7 @@ pub struct LegacyLocalStorageData {
 #[tauri::command]
 pub async fn read_legacy_localstorage() -> Result<LegacyLocalStorageData, ApiError> {
     let home = dirs::home_dir().ok_or_else(|| ApiError::new("io", "No home directory"))?;
-    let candidates = ["ensu-tauri", "Ensu", "ensu"];
+    let candidates = ["ensu-tauri", "Ensu", "ensu", "io.ente.ensu"];
 
     // macOS: ~/Library/WebKit/<name>/WebsiteData/...
     #[cfg(target_os = "macos")]
@@ -1238,6 +1238,32 @@ pub async fn read_legacy_localstorage() -> Result<LegacyLocalStorageData, ApiErr
         chat_store_json: None,
         chat_key: None,
     })
+}
+
+#[tauri::command]
+pub async fn chat_db_validate_key(app: AppHandle, key_b64: String) -> Result<bool, ApiError> {
+    async_runtime::spawn_blocking(move || {
+        let path = chat_db_path(&app)?;
+        if !path.exists() {
+            return Ok(true);
+        }
+
+        let key = core_crypto::decode_b64(&key_b64).map_err(ApiError::from)?;
+        let sync_path = sync_db_path(&app)?;
+        let db = EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(ApiError::from)?;
+
+        match db.list_sessions() {
+            Ok(_) => Ok(true),
+            Err(
+                DbError::Crypto(_)
+                | DbError::InvalidBlobLength { .. }
+                | DbError::InvalidEncryptedField,
+            ) => Ok(false),
+            Err(err) => Err(ApiError::from(err)),
+        }
+    })
+    .await
+    .map_err(|_| chat_db_thread_error())?
 }
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]

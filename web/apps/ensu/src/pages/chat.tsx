@@ -40,7 +40,6 @@ import {
 } from "services/chat/branching";
 import {
     cachedChatKey,
-    cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
 } from "services/chat/chatKey";
@@ -987,15 +986,8 @@ const Page: React.FC = () => {
 
         setIsLoggedIn(false);
 
-        const cachedLocal = cachedLocalChatKey();
-        if (cachedLocal) {
-            log.info("Falling back to cached local chat key");
-            setChatKey(cachedLocal);
-            return;
-        }
-
         try {
-            log.info("Generating new local chat key");
+            log.info("Resolving local chat key");
             setChatKey(await getOrCreateLocalChatKey());
         } catch (error) {
             log.error("Failed to initialize local chat key", error);
