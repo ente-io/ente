@@ -951,10 +951,10 @@ const publicMemory_downloadFile = async (
             const { accessToken } = credentials;
             const params = new URLSearchParams({ accessToken });
             return fetch(
-                `${customOrigin}/public-memory/files/${file.id}?${params.toString()}`,
+                `${customOrigin}/public-memory/files/download/${file.id}?${params.toString()}`,
             );
         } else {
-            return fetch(await apiURL(`/public-memory/files/${file.id}`), {
+            return fetch(await apiURL(`/public-memory/files/download/${file.id}`), {
                 headers: authenticatedPublicMemoryRequestHeaders(credentials),
             });
         }
