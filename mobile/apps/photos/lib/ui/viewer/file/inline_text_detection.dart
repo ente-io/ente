@@ -239,6 +239,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         autoDetect: true,
         backgroundColor: Colors.transparent,
         showUnselectedBoundaries: true,
+        overlayOnly: true,
         controller: _detectorController,
         strings: TextDetectorStrings(
           processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
