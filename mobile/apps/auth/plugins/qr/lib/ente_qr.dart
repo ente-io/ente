@@ -1,6 +1,7 @@
 import 'package:ente_qr/ente_qr_platform_interface.dart';
 
-export 'ente_qr_platform_interface.dart' show QrScanResult;
+export 'ente_qr_platform_interface.dart'
+    show QrDetection, QrScanResult, QrScanResults;
 
 class EnteQr {
   Future<String?> getPlatformVersion() {
@@ -13,18 +14,15 @@ class EnteQr {
   ///
   /// Returns a [QrScanResult] containing either the QR code content on success
   /// or an error message on failure.
-  ///
-  /// Example:
-  /// ```dart
-  /// final qr = EnteQr();
-  /// final result = await qr.scanQrFromImage('/path/to/image.jpg');
-  /// if (result.success) {
-  ///   print('QR Code content: ${result.content}');
-  /// } else {
-  ///   print('Error: ${result.error}');
-  /// }
-  /// ```
   Future<QrScanResult> scanQrFromImage(String imagePath) {
     return EnteQrPlatform.instance.scanQrFromImage(imagePath);
+  }
+
+  /// Scans all QR codes from an image file at the given path.
+  ///
+  /// Returns a [QrScanResults] containing a list of [QrDetection] with
+  /// content and normalized bounding boxes for each detected QR code.
+  Future<QrScanResults> scanAllQrFromImage(String imagePath) {
+    return EnteQrPlatform.instance.scanAllQrFromImage(imagePath);
   }
 }

@@ -1,6 +1,14 @@
-- Laurens: (I) Clip text encoding in rust
+- Ashil: Fix album sorting state not persisting 
+- Amrithesh: (I) QR code detection
+- Ashil: Hero animation for feed
+- Ashil: Route shared notifications to feed item in feed
+- Ashil: Fix hidden albums sorting in Hidden section all-albums view
 - Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Internal toggle to let ML run uninterrupted
+- Ashil: Show notifications for newly added photos to shared album
+- Ashil: Show feed item and notification for newly shared album
+- Laurens: (I) Clip text encoding in rust
+- Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users
 - Neeraj: Improve public album link 429/device-limit error handling
@@ -8,6 +16,6 @@
 - Neeraj: Fix video playback for Motion photo with two videos
 - Ashil: Enable sentence capitalization for comment input field
 - Ashil: Fix files uploaded by sharing from outside of Ente missing in map
-- Laurens: (I) Use vectorDB for more accurate suggestions in the people overview
+- Laurens: Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates

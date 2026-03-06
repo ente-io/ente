@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Welcome back!",
   "emailAlreadyRegistered": "Email already registered.",
   "emailNotRegistered": "Email not registered.",
+  "accountSetupIncompleteCreateAccount": "Account setup incomplete. Create account to finish setup.",
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",
@@ -668,8 +669,8 @@
   "familyPlans": "Family plans",
   "referrals": "Referrals",
   "notifications": "Notifications",
-  "sharedPhotoNotifications": "New shared photos",
-  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "sharedPhotoNotifications": "New shared photos and albums",
+  "sharedPhotoNotificationsExplanation": "Get notifications for new photos in shared albums you're in and for new albums shared with you.",
   "socialNotifications": "Likes and comments",
   "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
@@ -966,6 +967,9 @@
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
   "shareLink": "Share link",
+  "openLink": "Open link",
+  "pay": "Pay",
+  "noPaymentAppFound": "No payment app found",
   "createCollage": "Create collage",
   "saveCollage": "Save collage",
   "collageSaved": "Collage saved to gallery",
@@ -2658,6 +2662,14 @@
       }
     }
   },
+  "sharedAlbumWithYou": "Shared {albumName} with you",
+  "@sharedAlbumWithYou": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {
@@ -2813,6 +2825,7 @@
   "offlineSettingsBannerTitle": "We can't see your photos. Ever.",
   "offlineSettingsBannerDesc": "Zero-knowledge encryption means your memories stay yours.",
   "alreadyHaveAnAccount": "Already have an account?",
+  "dontHaveAnAccount": "Don't have an account?",
   "loginToEnte": "Login to Ente",
   "searchAndDiscover": "Search and Discover",
   "searchAndDiscoverDesc": "Search photos and discover memories with on-device machine learning",

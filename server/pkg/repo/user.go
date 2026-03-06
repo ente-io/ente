@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 
@@ -135,27 +137,55 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 	return users, nil
 }
 
-// GetActiveUsersByLastActivityBefore returns active users whose latest token
-// activity is older than or equal to beforeTime. Only users having at least one
-// token row are considered. Paging is done by user_id.
-//
-// TODO(inactive-user-deletion): Tokens are not a durable activity source.
-// `RemoveDeletedTokens` prunes logged-out sessions after 30 days, which can make
-// last_activity stale or missing for users who logged out from all devices.
-// Move inactivity selection to a durable, app-wide last-activity signal.
+// GetActiveUsersByLastActivityBefore returns active users whose effective last
+// activity is older than or equal to beforeTime. Effective activity uses latest
+// token activity when present, otherwise falls back to max(users.creation_time,
+// authenticator_entity.updated_at, collections.updation_time). Paging is done
+// by user_id.
 func (repo *UserRepository) GetActiveUsersByLastActivityBefore(beforeTime int64, afterUserID int64, limit int) ([]UserInactivityCandidate, error) {
 	rows, err := repo.DB.Query(`
 		SELECT
-			u.user_id,
-			MAX(t.last_used_at) AS last_activity
-		FROM users u
-		INNER JOIN tokens t
-			ON t.user_id = u.user_id
-		WHERE u.encrypted_email IS NOT NULL
-			AND u.user_id > $2
-		GROUP BY u.user_id
-		HAVING MAX(t.last_used_at) <= $1
-		ORDER BY u.user_id
+			candidate.user_id,
+			candidate.last_activity
+		FROM (
+			SELECT
+				u.user_id,
+				COALESCE(
+					t.last_token_activity,
+					GREATEST(
+						u.creation_time,
+						COALESCE(a.last_auth_activity, 0),
+						COALESCE(c.last_collection_activity, 0)
+					)
+				) AS last_activity
+			FROM users u
+			LEFT JOIN LATERAL (
+				SELECT t.last_used_at AS last_token_activity
+				FROM tokens t
+				WHERE t.user_id = u.user_id
+				ORDER BY t.last_used_at DESC
+				LIMIT 1
+			) t ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT ae.updated_at AS last_auth_activity
+				FROM authenticator_entity ae
+				WHERE ae.user_id = u.user_id
+				ORDER BY ae.updated_at DESC
+				LIMIT 1
+			) a ON TRUE
+			LEFT JOIN LATERAL (
+				SELECT c.updation_time AS last_collection_activity
+				FROM collections c
+				WHERE c.owner_id = u.user_id
+				ORDER BY c.updation_time DESC
+				LIMIT 1
+				) c ON TRUE
+				WHERE u.encrypted_email IS NOT NULL
+					AND u.creation_time <= $1
+					AND u.user_id > $2
+			) candidate
+			WHERE candidate.last_activity <= $1
+		ORDER BY candidate.user_id
 		LIMIT $3`, beforeTime, afterUserID, limit)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to fetch inactive users")
@@ -176,18 +206,52 @@ func (repo *UserRepository) GetActiveUsersByLastActivityBefore(beforeTime int64,
 	return result, nil
 }
 
-// GetLatestTokenActivity returns the latest known token activity for a user.
-// The second return value is false when no token row exists for the user.
-func (repo *UserRepository) GetLatestTokenActivity(userID int64) (int64, bool, error) {
-	var lastActivity sql.NullInt64
-	err := repo.DB.QueryRow(`SELECT MAX(last_used_at) FROM tokens WHERE user_id = $1`, userID).Scan(&lastActivity)
+// GetLatestActivity returns the latest effective activity for a user.
+// The second return value is false when the user is no longer active.
+func (repo *UserRepository) GetLatestActivity(userID int64) (int64, bool, error) {
+	var lastActivity int64
+	err := repo.DB.QueryRow(`
+		SELECT
+			COALESCE(
+				t.last_token_activity,
+				GREATEST(
+					u.creation_time,
+					COALESCE(a.last_auth_activity, 0),
+					COALESCE(c.last_collection_activity, 0)
+				)
+			) AS last_activity
+		FROM users u
+		LEFT JOIN LATERAL (
+			SELECT t.last_used_at AS last_token_activity
+			FROM tokens t
+			WHERE t.user_id = u.user_id
+			ORDER BY t.last_used_at DESC
+			LIMIT 1
+		) t ON TRUE
+		LEFT JOIN LATERAL (
+			SELECT ae.updated_at AS last_auth_activity
+			FROM authenticator_entity ae
+			WHERE ae.user_id = u.user_id
+			ORDER BY ae.updated_at DESC
+			LIMIT 1
+		) a ON TRUE
+		LEFT JOIN LATERAL (
+			SELECT c.updation_time AS last_collection_activity
+			FROM collections c
+			WHERE c.owner_id = u.user_id
+			ORDER BY c.updation_time DESC
+			LIMIT 1
+		) c ON TRUE
+		WHERE u.user_id = $1
+			AND u.encrypted_email IS NOT NULL
+	`, userID).Scan(&lastActivity)
 	if err != nil {
-		return 0, false, stacktrace.Propagate(err, "failed to fetch latest token activity")
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, false, nil
+		}
+		return 0, false, stacktrace.Propagate(err, "failed to fetch latest user activity")
 	}
-	if !lastActivity.Valid {
-		return 0, false, nil
-	}
-	return lastActivity.Int64, true, nil
+	return lastActivity, true, nil
 }
 
 // GetUserUsageWithSubData will return current storage usage & basic information about subscription for given list
@@ -256,7 +320,7 @@ func (repo *UserRepository) UpdateEmail(userID int64, encryptedEmail ente.Encryp
 
 // GetUserIDWithEmail returns the userID associated with a provided email
 func (repo *UserRepository) GetUserIDWithEmail(email string) (int64, error) {
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
+	sanitizedEmail := emailUtil.NormalizeEmail(email)
 	emailHash, err := crypto.GetHash(sanitizedEmail, repo.HashingKey)
 	if err != nil {
 		return -1, stacktrace.Propagate(err, "")
@@ -479,6 +543,56 @@ func (repo *UserRepository) GetEmailsFromHashes(hashes []string) ([]string, erro
 		emails = append(emails, email)
 	}
 	return emails, nil
+}
+
+// CountActiveUsersByEmailHashes returns count of active users matching any of
+// the provided hashes.
+func (repo *UserRepository) CountActiveUsersByEmailHashes(hashes []string) (int, error) {
+	if len(hashes) == 0 {
+		return 0, nil
+	}
+	var count int
+	err := repo.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes)).Scan(&count)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	return count, nil
+}
+
+// GetActiveUserEmailHashes returns active user email hashes present in the
+// provided list of hashes.
+func (repo *UserRepository) GetActiveUserEmailHashes(hashes []string) ([]string, error) {
+	if len(hashes) == 0 {
+		return []string{}, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT email_hash
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	matchedHashes := make([]string, 0, len(hashes))
+	for rows.Next() {
+		var emailHash string
+		if err := rows.Scan(&emailHash); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		matchedHashes = append(matchedHashes, emailHash)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return matchedHashes, nil
 }
 
 // GetActiveUsersForIds  returns a map of users by their IDs, similar to GetUserByID

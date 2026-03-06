@@ -136,6 +136,12 @@ var ErrUserNotRegistered = &ApiError{
 	Message:        "User is not registered",
 }
 
+var ErrUserSignupIncomplete = &ApiError{
+	Code:           UserSignupIncomplete,
+	HttpStatusCode: http.StatusNotFound,
+	Message:        "User signup is incomplete",
+}
+
 var ErrCollectionNotEmpty = ApiError{
 	Code:           CollectionNotEmpty,
 	HttpStatusCode: http.StatusConflict,
@@ -256,6 +262,9 @@ const (
 
 	// Business specific error codes
 	FamiliySizeLimitExceeded ErrorCode = "FAMILY_SIZE_LIMIT_EXCEEDED"
+
+	// UserSignupIncomplete indicates that account exists but signup is not fully completed
+	UserSignupIncomplete ErrorCode = "USER_SIGNUP_INCOMPLETE"
 
 	// Subscription Already Associted with different account
 	SubscriptionAlreadyClaimed ErrorCode = "SUBSCRIPTION_ALREADY_CLAIMED"

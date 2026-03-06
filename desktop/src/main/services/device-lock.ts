@@ -18,7 +18,10 @@ export const getNativeDeviceLockCapability = (): NativeDeviceLockCapability => {
                 return {
                     available: false,
                     provider: "none",
-                    reason: "touchid-not-enrolled",
+                    // `canPromptTouchID()` can become false for transient
+                    // runtime states (for example lockout/cancellation
+                    // sequences), not only for permanent hardware setup.
+                    reason: "touchid-temporarily-unavailable",
                 };
             } catch (e) {
                 log.warn(
@@ -48,9 +51,7 @@ export const getNativeDeviceLockCapability = (): NativeDeviceLockCapability => {
  * cancelled, or failed.
  */
 export const promptDeviceLock = async (reason: string) => {
-    const capability = getNativeDeviceLockCapability();
-
-    if (!capability.available || capability.provider !== "touchid") {
+    if (process.platform !== "darwin") {
         log.warn("Native device lock prompt is unavailable on this OS");
         return false;
     }
