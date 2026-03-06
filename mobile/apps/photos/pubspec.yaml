@@ -151,7 +151,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/Amrithesh-Kakkoth/mobile_ocr
-      ref: bd1c02e499c9ec7100101ba08e11c9d9af36e4ba
+      ref: c907f27a5e7bcb8d46a7698a7d5d38d8f76a6564
   modal_bottom_sheet: ^3.0.0
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
