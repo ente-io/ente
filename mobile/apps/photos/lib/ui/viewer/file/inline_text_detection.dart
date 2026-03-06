@@ -15,9 +15,9 @@ import "package:photos/utils/file_util.dart";
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
 /// 1. Quick `hasText()` check runs silently when the image loads.
-/// 2. If text is found, a transparent long-press detector covers the image.
-/// 3. Long press triggers haptic feedback and shows the text overlay inline,
-///    letting users select and copy text directly on the image.
+/// 2. If text is found, full detection runs automatically and the text
+///    overlay appears inline on top of the image.
+/// 3. Long press on detected text lets users select and copy text.
 /// 4. A close button dismisses the overlay; swiping to another image resets.
 class InlineTextDetection extends StatefulWidget {
   final EnteFile file;
@@ -121,6 +121,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _hasText = cached.hasText;
         _localFilePath = cached.localPath;
         _isChecking = false;
+        if (cached.hasText) _overlayActive = true;
       });
       return;
     }
@@ -163,6 +164,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _hasText = result.hasText;
         _localFilePath = result.localPath;
         _isChecking = false;
+        if (result.hasText) _overlayActive = true;
       });
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
@@ -174,14 +176,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _isChecking = false;
       });
     }
-  }
-
-  void _onLongPress() {
-    if (!_hasText || _localFilePath == null) return;
-    HapticFeedback.mediumImpact();
-    setState(() {
-      _overlayActive = true;
-    });
   }
 
   void _dismissOverlay() {
@@ -211,17 +205,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
               _buildInlineOverlay(context),
               _buildCloseButton(context),
             ],
-          );
-        }
-
-        // Overlay inactive but text detected: invisible long-press detector
-        if (_hasText && !_isChecking && _localFilePath != null) {
-          return Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onLongPress: _onLongPress,
-              child: const SizedBox.expand(),
-            ),
           );
         }
 
