@@ -34,9 +34,7 @@ const extractMemoryShareKeyFromURL = async (
     if (!fragment) return null;
 
     if (shortMemorySecretPattern.test(fragment)) {
-        const subtle = globalThis.crypto?.subtle;
-        if (!subtle) return null;
-        const digest = await subtle.digest(
+        const digest = await globalThis.crypto.subtle.digest(
             "SHA-256",
             new TextEncoder().encode(fragment),
         );
@@ -79,7 +77,10 @@ export default function PublicMemoryPage() {
                     // non-empty path segment as token.
                     const tokenFromPath = currentURL.pathname
                         .split("/")
-                        .find((segment) => segment.length > 0 && segment !== "memory");
+                        .find(
+                            (segment) =>
+                                segment.length > 0 && segment !== "memory",
+                        );
                     if (tokenFromPath) {
                         token = tokenFromPath;
                     }
@@ -140,7 +141,7 @@ export default function PublicMemoryPage() {
                 setLoading(false);
             }
         };
-        main();
+        void main();
         return () => downloadManager.setPublicMemoryCredentials(undefined);
     }, []);
 
@@ -338,7 +339,9 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
         const previousFile = previousFileRef.current;
         if (previousIndex !== currentIndex) {
             setOutgoingFile(previousFile);
-            setOutgoingIsVideo(previousFile.metadata.fileType === FileType.video);
+            setOutgoingIsVideo(
+                previousFile.metadata.fileType === FileType.video,
+            );
             setOutgoingIndex(previousIndex);
 
             if (outgoingClearTimeoutRef.current !== null) {
@@ -628,7 +631,10 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     }
                 >
                     <MediaFrame style={mediaFrameStyle}>
-                        <MediaSwitchLayer phase="in" key={`memory-file-${currentIndex}`}>
+                        <MediaSwitchLayer
+                            phase="in"
+                            key={`memory-file-${currentIndex}`}
+                        >
                             {isVideo ? (
                                 <VideoPlayer
                                     file={currentFile}
@@ -949,11 +955,17 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                             : `segment-${i}`
                     }
                     state={
-                        i < current ? "past" : i === current ? "active" : "future"
+                        i < current
+                            ? "past"
+                            : i === current
+                              ? "active"
+                              : "future"
                     }
                     paused={paused}
                     duration={duration}
-                    onComplete={i === current && !isVideo ? onComplete : undefined}
+                    onComplete={
+                        i === current && !isVideo ? onComplete : undefined
+                    }
                 />
             ))}
         </Box>
@@ -1259,7 +1271,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 if (
                     !cancelled &&
                     typeof hlsPlaylistData === "object" &&
-                    hlsPlaylistData?.playlistURL
+                    hlsPlaylistData.playlistURL
                 ) {
                     setHlsData(hlsPlaylistData);
                     return;
@@ -1280,7 +1292,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 }
             }
         };
-        load();
+        void load();
         return () => {
             cancelled = true;
         };
