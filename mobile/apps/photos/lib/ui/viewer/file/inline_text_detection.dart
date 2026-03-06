@@ -4,7 +4,6 @@ import "dart:io";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
@@ -14,9 +13,9 @@ import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
-/// 1. Quick `hasText()` check runs silently when the image loads.
-/// 2. If text is found, full detection runs automatically and the text
-///    overlay appears inline on top of the image.
+/// 1. When the user stays on an eligible image, full OCR detection runs
+///    automatically after the local file is resolved.
+/// 2. Detected text boundaries appear as an overlay on top of the image.
 /// 3. Long press on detected text lets users select and copy text.
 /// 4. A close button dismisses the overlay; swiping to another image resets.
 class InlineTextDetection extends StatefulWidget {
@@ -36,23 +35,18 @@ class InlineTextDetection extends StatefulWidget {
 }
 
 class _InlineTextDetectionState extends State<InlineTextDetection> {
-  static final Map<String, _HasTextResult> _hasTextCache = {};
-  final Logger _logger = Logger("InlineTextDetection");
-  final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
 
   bool _isEligible = false;
-  bool _hasText = false;
-  bool _isChecking = false;
   String? _localFilePath;
   int _requestId = 0;
-
   bool _overlayActive = false;
+  bool _dismissed = false;
 
   @override
   void initState() {
     super.initState();
-    _evaluateFile();
+    _resolveFile();
   }
 
   @override
@@ -60,7 +54,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     super.didUpdateWidget(oldWidget);
     if (_didFileChange(oldWidget.file, widget.file)) {
       _resetState();
-      _evaluateFile();
+      _resolveFile();
     }
   }
 
@@ -72,10 +66,9 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   void _resetState() {
     setState(() {
-      _hasText = false;
       _localFilePath = null;
-      _isChecking = false;
       _overlayActive = false;
+      _dismissed = false;
     });
   }
 
@@ -86,94 +79,46 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return false;
   }
 
-  String _cacheKey(EnteFile file) {
-    if (file.uploadedFileID != null) return "uploaded_${file.uploadedFileID}";
-    if (file.localID != null) return "local_${file.localID}";
-    return "generated_${file.generatedID}";
-  }
-
   bool _isFileEligible(EnteFile file) {
     return file.fileType == FileType.image ||
         file.fileType == FileType.livePhoto;
   }
 
-  // Phase 1: Silent hasText() check
-  Future<void> _evaluateFile() async {
+  Future<void> _resolveFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
 
     if (!isEligible) {
       setState(() {
         _isEligible = false;
-        _hasText = false;
         _localFilePath = null;
-        _isChecking = false;
-      });
-      return;
-    }
-
-    final String cacheKey = _cacheKey(widget.file);
-    final _HasTextResult? cached = _hasTextCache[cacheKey];
-    if (cached != null) {
-      if (!mounted || requestId != _requestId) return;
-      setState(() {
-        _isEligible = true;
-        _hasText = cached.hasText;
-        _localFilePath = cached.localPath;
-        _isChecking = false;
-        if (cached.hasText) _overlayActive = true;
       });
       return;
     }
 
     setState(() {
       _isEligible = true;
-      _hasText = false;
       _localFilePath = null;
-      _isChecking = true;
     });
 
     try {
       final File? localFile = await getFile(widget.file);
       if (!mounted || requestId != _requestId) return;
       if (localFile == null || !localFile.existsSync()) {
-        _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
         setState(() {
-          _hasText = false;
           _localFilePath = null;
-          _isChecking = false;
         });
         return;
       }
 
-      bool hasText = false;
-      try {
-        hasText = await _mobileOcr.hasText(imagePath: localFile.path);
-      } catch (error, stackTrace) {
-        _logger.severe("Failed to run hasText", error, stackTrace);
-      }
-
-      if (!mounted || requestId != _requestId) return;
-
-      final result = _HasTextResult(
-        hasText: hasText,
-        localPath: hasText ? localFile.path : null,
-      );
-      _hasTextCache[cacheKey] = result;
       setState(() {
-        _hasText = result.hasText;
-        _localFilePath = result.localPath;
-        _isChecking = false;
-        if (result.hasText) _overlayActive = true;
+        _localFilePath = localFile.path;
+        _overlayActive = true;
       });
-    } catch (error, stackTrace) {
-      _logger.severe("Text detection pre-check failed", error, stackTrace);
+    } catch (error) {
       if (!mounted || requestId != _requestId) return;
-      _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
       setState(() {
-        _hasText = false;
         _localFilePath = null;
-        _isChecking = false;
       });
     }
   }
@@ -182,6 +127,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     HapticFeedback.selectionClick();
     setState(() {
       _overlayActive = false;
+      _dismissed = true;
     });
   }
 
@@ -194,11 +140,10 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return ValueListenableBuilder<bool>(
       valueListenable: widget.enableFullScreenNotifier,
       builder: (context, isFullScreen, _) {
-        if (isFullScreen || widget.isGuestView) {
+        if (isFullScreen || widget.isGuestView || _dismissed) {
           return const SizedBox.shrink();
         }
 
-        // Overlay active: show TextDetectorWidget + close button
         if (_overlayActive && _localFilePath != null) {
           return Stack(
             children: [
@@ -264,11 +209,4 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       ),
     );
   }
-}
-
-class _HasTextResult {
-  final bool hasText;
-  final String? localPath;
-
-  const _HasTextResult({required this.hasText, this.localPath});
 }
