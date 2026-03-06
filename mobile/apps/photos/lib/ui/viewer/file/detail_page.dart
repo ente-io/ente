@@ -15,6 +15,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -28,6 +29,9 @@ import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/inline_text_detection.dart";
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
+import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
+import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -129,6 +133,7 @@ class _BodyState extends State<_Body> {
   bool isGuestView = false;
   bool swipeLocked = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  QrCodeDetectionHelper? _qrHelper;
 
   @override
   void initState() {
@@ -144,11 +149,15 @@ class _BodyState extends State<_Body> {
         swipeLocked = event.swipeLocked;
       });
     });
+    if (flagService.qrFeatureEnabled) {
+      _qrHelper = QrCodeDetectionHelper();
+    }
 
     // Update shared collection state after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      _qrHelper?.evaluateFile(_files![_selectedIndexNotifier.value]);
       widget.config.onPageReady?.call(context);
     });
   }
@@ -158,6 +167,7 @@ class _BodyState extends State<_Body> {
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _selectedIndexNotifier.dispose();
+    _qrHelper?.dispose();
     super.dispose();
 
     SystemChrome.setSystemUIOverlayStyle(
@@ -255,6 +265,29 @@ class _BodyState extends State<_Body> {
                         );
                 },
               ),
+              if (_qrHelper != null)
+                ValueListenableBuilder(
+                  valueListenable: _selectedIndexNotifier,
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    if (widget.config.mode == DetailPageMode.minimalistic ||
+                        isGuestView ||
+                        _files![selectedIndex] is TrashFile) {
+                      return const SizedBox.shrink();
+                    }
+                    return ValueListenableBuilder(
+                      valueListenable: _qrHelper!.qrDetectionsNotifier,
+                      builder: (context, detections, _) {
+                        return QrCodeHighlightOverlay(
+                          detections: detections,
+                          file: _files![selectedIndex],
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                        );
+                      },
+                    );
+                  },
+                ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
@@ -374,6 +407,7 @@ class _BodyState extends State<_Body> {
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _updateSharedCollectionState(_files![index]);
+        _qrHelper?.evaluateFile(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
