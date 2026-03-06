@@ -238,8 +238,8 @@ const logDeviceLockEvent = (
 /**
  * Return the cooldown duration for a failed-attempt count.
  *
- * This policy is shared by lockout enforcement and cooldown UI (used by
- * AppLockOverlay to render countdown progress).
+ * This policy is shared by lockout enforcement and cooldown UI (used by the
+ * app lock screen to render countdown progress).
  */
 export const appLockCooldownDurationMs = (attemptCount: number): number => {
     if (attemptCount < cooldownStartsAtAttempt) return 0;
