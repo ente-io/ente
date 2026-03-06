@@ -1048,6 +1048,16 @@
       "title": "Kite"
     },
     {
+      "title": "Kiwix",
+      "slug": "kiwix",
+      "altNames": [
+        "kiwix.org",
+        "get.kiwix.org",
+        "pro.kiwix.org",
+        "hub.kiwix.org"
+      ]
+    },
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
