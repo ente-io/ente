@@ -10,30 +10,24 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
 ///
-/// 1. Quick `hasText()` check runs immediately when the image loads.
-/// 2. If text is found and the user stays on the image for [dwellDuration],
-///    full OCR runs automatically and an inline overlay appears.
-/// 3. The user can select and copy text directly on the image.
-/// 4. A small Live-Text-style indicator in the corner lets the user
-///    toggle the overlay on/off.
+/// 1. Quick `hasText()` check runs silently when the image loads.
+/// 2. If text is found, a transparent long-press detector covers the image.
+/// 3. Long press triggers haptic feedback and shows the text overlay inline,
+///    letting users select and copy text directly on the image.
+/// 4. A close button dismisses the overlay; swiping to another image resets.
 class InlineTextDetection extends StatefulWidget {
   final EnteFile file;
   final ValueListenable<bool> enableFullScreenNotifier;
   final bool isGuestView;
 
-  /// How long the user must stay on the image before auto-detecting.
-  final Duration dwellDuration;
-
   const InlineTextDetection({
     required this.file,
     required this.enableFullScreenNotifier,
     required this.isGuestView,
-    this.dwellDuration = const Duration(seconds: 2),
     super.key,
   });
 
@@ -47,16 +41,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   final MobileOcr _mobileOcr = MobileOcr();
   final TextDetectorController _detectorController = TextDetectorController();
 
-  /// Lifecycle: idle → checking → dwellWaiting → detecting → overlay / noText
   bool _isEligible = false;
   bool _hasText = false;
   bool _isChecking = false;
   String? _localFilePath;
   int _requestId = 0;
 
-  Timer? _dwellTimer;
   bool _overlayActive = false;
-  bool _overlayDismissed = false;
 
   @override
   void initState() {
@@ -75,19 +66,16 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
   @override
   void dispose() {
-    _dwellTimer?.cancel();
     _detectorController.dispose();
     super.dispose();
   }
 
   void _resetState() {
-    _dwellTimer?.cancel();
     setState(() {
       _hasText = false;
       _localFilePath = null;
       _isChecking = false;
       _overlayActive = false;
-      _overlayDismissed = false;
     });
   }
 
@@ -109,7 +97,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         file.fileType == FileType.livePhoto;
   }
 
-  // Phase 1: Quick hasText() check
+  // Phase 1: Silent hasText() check
   Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
@@ -134,9 +122,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _localFilePath = cached.localPath;
         _isChecking = false;
       });
-      if (cached.hasText) {
-        _startDwellTimer();
-      }
       return;
     }
 
@@ -179,11 +164,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _localFilePath = result.localPath;
         _isChecking = false;
       });
-
-      // Phase 2: Start dwell timer if text was found
-      if (hasText) {
-        _startDwellTimer();
-      }
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
@@ -196,34 +176,18 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     }
   }
 
-  // Phase 2: Dwell timer — auto-activate after user stays on image
-  void _startDwellTimer() {
-    _dwellTimer?.cancel();
-    if (_overlayDismissed) return;
-    _dwellTimer = Timer(widget.dwellDuration, () {
-      if (!mounted || _overlayDismissed) return;
-      _activateOverlay();
-    });
-  }
-
-  // Phase 3: Show inline overlay
-  void _activateOverlay() {
+  void _onLongPress() {
+    if (!_hasText || _localFilePath == null) return;
+    HapticFeedback.mediumImpact();
     setState(() {
       _overlayActive = true;
     });
   }
 
-  void _toggleOverlay() {
+  void _dismissOverlay() {
     HapticFeedback.selectionClick();
     setState(() {
-      if (_overlayActive) {
-        _overlayActive = false;
-        _overlayDismissed = true;
-        _dwellTimer?.cancel();
-      } else {
-        _overlayActive = true;
-        _overlayDismissed = false;
-      }
+      _overlayActive = false;
     });
   }
 
@@ -240,16 +204,28 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
           return const SizedBox.shrink();
         }
 
-        return Stack(
-          children: [
-            // The inline text overlay (full-screen, on top of the image)
-            if (_overlayActive && _localFilePath != null)
+        // Overlay active: show TextDetectorWidget + close button
+        if (_overlayActive && _localFilePath != null) {
+          return Stack(
+            children: [
               _buildInlineOverlay(context),
+              _buildCloseButton(context),
+            ],
+          );
+        }
 
-            // The Live Text indicator icon
-            if (_hasText && !_isChecking) _buildLiveTextIndicator(context),
-          ],
-        );
+        // Overlay inactive but text detected: invisible long-press detector
+        if (_hasText && !_isChecking && _localFilePath != null) {
+          return Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onLongPress: _onLongPress,
+              child: const SizedBox.expand(),
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
       },
     );
   }
@@ -282,70 +258,23 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     );
   }
 
-  Widget _buildLiveTextIndicator(BuildContext context) {
-    double bottomOffset = MediaQuery.paddingOf(context).bottom + 72.0;
-
-    final caption = widget.file.caption;
-    if (caption != null && caption.trim().isNotEmpty) {
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: caption.trim(),
-          style: getEnteTextTheme(context).mini,
-        ),
-        textDirection: TextDirection.ltr,
-        textScaler: MediaQuery.textScalerOf(context),
-        maxLines: 3,
-      );
-      final double maxWidth = MediaQuery.sizeOf(context).width - 16.0;
-      textPainter.layout(maxWidth: maxWidth);
-      bottomOffset += textPainter.height + 24.0;
-    }
-
+  Widget _buildCloseButton(BuildContext context) {
     return Positioned(
-      bottom: bottomOffset,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: GestureDetector(
-          onTap: _toggleOverlay,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: _overlayActive
-                  ? getEnteColorScheme(context)
-                      .primary700
-                      .withAlpha(200)
-                  : Colors.black.withAlpha(160),
-              borderRadius: BorderRadius.circular(60),
-              border: Border.all(
-                color: _overlayActive
-                    ? getEnteColorScheme(context)
-                        .primary700
-                        .withAlpha(120)
-                    : Colors.white.withAlpha(60),
-                width: 0.5,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _overlayActive
-                      ? Icons.text_fields
-                      : Icons.text_fields_outlined,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _overlayActive ? "Hide text" : "Select text",
-                  style: getEnteTextTheme(context).mini.copyWith(
-                        color: Colors.white,
-                      ),
-                ),
-              ],
-            ),
+      top: MediaQuery.paddingOf(context).top + 8,
+      right: 8,
+      child: GestureDetector(
+        onTap: _dismissOverlay,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.black.withAlpha(160),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.close,
+            color: Colors.white,
+            size: 20,
           ),
         ),
       ),
