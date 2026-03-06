@@ -101,6 +101,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
+    debugPrint("[InlineTextDetection] evaluateFile: eligible=$isEligible, type=${widget.file.fileType}");
 
     if (!isEligible) {
       setState(() {
@@ -140,10 +141,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       }
 
       // Run fast hasText() check
+      debugPrint("[InlineTextDetection] running hasText on ${localFile.path}");
       bool hasText = false;
       try {
         hasText = await _mobileOcr.hasText(imagePath: localFile.path);
+        debugPrint("[InlineTextDetection] hasText result: $hasText");
       } catch (error, stackTrace) {
+        debugPrint("[InlineTextDetection] hasText error: $error");
         _logger.severe("Failed to run hasText", error, stackTrace);
       }
 
@@ -185,48 +189,53 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       return const SizedBox.shrink();
     }
 
+    if (!_overlayActive || _localFilePath == null) {
+      return const SizedBox.shrink();
+    }
+
     return ValueListenableBuilder<bool>(
       valueListenable: widget.enableFullScreenNotifier,
       builder: (context, isFullScreen, _) {
-        if (isFullScreen || widget.isGuestView) {
-          return const SizedBox.shrink();
-        }
+        final bool shouldHide = isFullScreen || widget.isGuestView;
 
-        if (_overlayActive && _localFilePath != null) {
-          return _buildInlineOverlay(context);
-        }
-
-        return const SizedBox.shrink();
+        return Positioned.fill(
+          child: IgnorePointer(
+            ignoring: shouldHide,
+            child: AnimatedOpacity(
+              opacity: shouldHide ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: _buildInlineOverlay(context),
+            ),
+          ),
+        );
       },
     );
   }
 
   Widget _buildInlineOverlay(BuildContext context) {
     final l10n = context.l10n;
-    return Positioned.fill(
-      child: TextDetectorWidget(
-        key: ValueKey("ocr_$_localFilePath"),
-        imagePath: _localFilePath!,
-        autoDetect: true,
-        backgroundColor: Colors.transparent,
-        showUnselectedBoundaries: true,
-        overlayOnly: true,
-        controller: _detectorController,
-        strings: TextDetectorStrings(
-          processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
-          selectionHint: l10n.ocrSelectionHint,
-          noTextDetected: l10n.ocrNoTextDetected,
-          retryButtonLabel: l10n.ocrRetryButtonLabel,
-          modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
-          modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
-          imageNotFoundError: l10n.ocrImageNotFoundError,
-          imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
-          genericDetectError: l10n.ocrGenericDetectError,
-        ),
-        onTextCopied: (text) {
-          HapticFeedback.lightImpact();
-        },
+    return TextDetectorWidget(
+      key: ValueKey("ocr_$_localFilePath"),
+      imagePath: _localFilePath!,
+      autoDetect: true,
+      backgroundColor: Colors.transparent,
+      showUnselectedBoundaries: true,
+      overlayOnly: true,
+      controller: _detectorController,
+      strings: TextDetectorStrings(
+        processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
+        selectionHint: l10n.ocrSelectionHint,
+        noTextDetected: l10n.ocrNoTextDetected,
+        retryButtonLabel: l10n.ocrRetryButtonLabel,
+        modelsNetworkRequiredError: l10n.ocrModelsNetworkRequiredError,
+        modelsPrepareFailed: l10n.ocrModelsPrepareFailed,
+        imageNotFoundError: l10n.ocrImageNotFoundError,
+        imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
+        genericDetectError: l10n.ocrGenericDetectError,
       ),
+      onTextCopied: (text) {
+        HapticFeedback.lightImpact();
+      },
     );
   }
 }
