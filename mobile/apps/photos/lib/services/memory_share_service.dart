@@ -38,6 +38,10 @@ class MemoryShareService {
     await _loadMemoryShareHashCache();
   }
 
+  void clearCache() {
+    _memoryShareByHashCache.clear();
+  }
+
   Future<(String, int)> _createMemoryLink({
     required List<EnteFile> files,
     required String title,
