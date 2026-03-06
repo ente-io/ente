@@ -13,21 +13,21 @@ class MLResult {
   List<FaceResult>? faces = <FaceResult>[];
   ClipResult? clip;
   List<PetFaceResult>? petFaces;
-  List<DetectedObjectResult>? detectedObjects;
+  List<PetBodyResult>? petBodies;
 
   Dimensions decodedImageSize;
 
   bool get ranML => facesRan || clipRan || petsRan;
   bool get facesRan => faces != null;
   bool get clipRan => clip != null;
-  bool get petsRan => petFaces != null || detectedObjects != null;
+  bool get petsRan => petFaces != null || petBodies != null;
 
   MLResult({
     this.fileId = -1,
     this.faces,
     this.clip,
     this.petFaces,
-    this.detectedObjects,
+    this.petBodies,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
@@ -41,7 +41,7 @@ class MLResult {
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
         'petFaces': petFaces?.map((pf) => pf.toJson()).toList(),
-        'detectedObjects': detectedObjects?.map((obj) => obj.toJson()).toList(),
+        'petBodies': petBodies?.map((obj) => obj.toJson()).toList(),
         'decodedImageSize': {
           'width': decodedImageSize.width,
           'height': decodedImageSize.height,
@@ -68,11 +68,11 @@ class MLResult {
               )
               .toList()
           : null,
-      detectedObjects: json['detectedObjects'] != null
-          ? (json['detectedObjects'] as List)
+      petBodies: json['petBodies'] != null
+          ? (json['petBodies'] as List)
               .map(
                 (item) =>
-                    DetectedObjectResult.fromJson(item as Map<String, dynamic>),
+                    PetBodyResult.fromJson(item as Map<String, dynamic>),
               )
               .toList()
           : null,
@@ -237,18 +237,18 @@ class PetFaceResult {
   }
 }
 
-class DetectedObjectResult {
+class PetBodyResult {
   late List<double> boxXyxy;
   late double score;
   late int cocoClass;
-  late String objectId;
+  late String petBodyId;
   late Embedding embedding;
 
-  DetectedObjectResult({
+  PetBodyResult({
     required this.boxXyxy,
     required this.score,
     required this.cocoClass,
-    required this.objectId,
+    required this.petBodyId,
     required this.embedding,
   });
 
@@ -256,16 +256,16 @@ class DetectedObjectResult {
         'boxXyxy': boxXyxy,
         'score': score,
         'cocoClass': cocoClass,
-        'objectId': objectId,
+        'petBodyId': petBodyId,
         'embedding': embedding,
       };
 
-  static DetectedObjectResult fromJson(Map<String, dynamic> json) {
-    return DetectedObjectResult(
+  static PetBodyResult fromJson(Map<String, dynamic> json) {
+    return PetBodyResult(
       boxXyxy: (json['boxXyxy'] as List).cast<double>(),
       score: json['score'],
       cocoClass: json['cocoClass'],
-      objectId: json['objectId'],
+      petBodyId: json['petBodyId'],
       embedding: Embedding.from(json['embedding']),
     );
   }

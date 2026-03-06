@@ -632,7 +632,7 @@ class MLService {
 
       // Pet results locally
       final rustPets =
-          result.petFaces != null || result.detectedObjects != null;
+          result.petFaces != null || result.petBodies != null;
       if (rustPets) {
         if (result.petFaces != null && result.petFaces!.isNotEmpty) {
           final dbPetFaces = result.petFaces!.map((pf) {
@@ -662,9 +662,8 @@ class MLService {
           );
         }
 
-        if (result.detectedObjects != null &&
-            result.detectedObjects!.isNotEmpty) {
-          final dbObjects = result.detectedObjects!.map((obj) {
+        if (result.petBodies != null && result.petBodies!.isNotEmpty) {
+          final dbPetBodies = result.petBodies!.map((obj) {
             final detectionObj = FaceDetectionRelative(
               score: obj.score,
               box: [
@@ -675,15 +674,9 @@ class MLService {
               ],
               allKeypoints: const [],
             );
-            final floatList = Float32List.fromList(obj.embedding);
-            final blob = Uint8List.view(
-              floatList.buffer,
-              floatList.offsetInBytes,
-              floatList.lengthInBytes,
-            );
-            return DBDetectedObject(
+            return DBPetBody(
               fileId: result.fileId,
-              objectId: obj.objectId,
+              petBodyId: obj.petBodyId,
               detection: jsonEncode(detectionObj.toJson()),
               bodyVectorId: -1,
               species: obj.cocoClass == 15 ? 1 : 0,
@@ -691,13 +684,12 @@ class MLService {
               imageHeight: result.decodedImageSize.height,
               imageWidth: result.decodedImageSize.width,
               mlVersion: petMlVersion,
-              embeddingBlob: blob,
             );
           }).toList();
-          await mlDataDB.bulkInsertDetectedObjects(dbObjects);
-          await mlDataDB.storeObjectEmbeddings(
-            dbObjects,
-            result.detectedObjects!,
+          await mlDataDB.bulkInsertPetBodies(dbPetBodies);
+          await mlDataDB.storePetBodyEmbeddings(
+            dbPetBodies,
+            result.petBodies!,
           );
         }
       }

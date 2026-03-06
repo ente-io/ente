@@ -163,7 +163,7 @@ class PetVectorDB {
   }
 
   /// Get or create integer vector IDs for body/object embeddings.
-  /// Uses [objectVectorIdMappingTable] — separate ID space from face embeddings.
+  /// Uses [petBodyVectorIdMappingTable] — separate ID space from face embeddings.
   Future<Map<String, int>> getObjectVectorIdMap(
     Iterable<String> objectIds, {
     bool createIfMissing = false,
@@ -176,7 +176,7 @@ class PetVectorDB {
 
     if (createIfMissing) {
       const insertSql = '''
-        INSERT OR IGNORE INTO $objectVectorIdMappingTable ($detectedObjectIDColumn)
+        INSERT OR IGNORE INTO $petBodyVectorIdMappingTable ($petBodyIDColumn)
         VALUES (?)
       ''';
       final insertParams = <List<Object?>>[];
@@ -192,15 +192,15 @@ class PetVectorDB {
       final chunk = uniqueIds.sublist(i, min(i + chunkSize, uniqueIds.length));
       final rows = await db.getAll(
         '''
-          SELECT $detectedObjectIDColumn, $objectVectorIdColumn
-          FROM $objectVectorIdMappingTable
-          WHERE $detectedObjectIDColumn IN (${List.filled(chunk.length, '?').join(',')})
+          SELECT $petBodyIDColumn, $petBodyVectorIdColumn
+          FROM $petBodyVectorIdMappingTable
+          WHERE $petBodyIDColumn IN (${List.filled(chunk.length, '?').join(',')})
         ''',
         chunk,
       );
       for (final row in rows) {
-        result[row[detectedObjectIDColumn] as String] =
-            row[objectVectorIdColumn] as int;
+        result[row[petBodyIDColumn] as String] =
+            row[petBodyVectorIdColumn] as int;
       }
     }
     return result;

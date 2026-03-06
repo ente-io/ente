@@ -846,12 +846,12 @@ Future<MLResult> analyzeImageRust(Map args) async {
       }
 
       if (rustResult.petBodies != null) {
-        result.detectedObjects = rustResult.petBodies!.map((body) {
-          return DetectedObjectResult(
+        result.petBodies = rustResult.petBodies!.map((body) {
+          return PetBodyResult(
             boxXyxy: body.boxXyxy.toList(growable: false),
             score: body.score,
             cocoClass: body.cocoClass,
-            objectId: body.petBodyId,
+            petBodyId: body.petBodyId,
             embedding: Embedding.from(body.bodyEmbedding),
           );
         }).toList(growable: false);

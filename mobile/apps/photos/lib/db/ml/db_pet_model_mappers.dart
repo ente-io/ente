@@ -64,10 +64,10 @@ class DBPetFace {
 
 // ── Detected Object DB Mapper ──
 
-/// Represents a row in the [detectedObjectsTable].
-class DBDetectedObject {
+/// Represents a row in the [petBodiesTable].
+class DBPetBody {
   final int fileId;
-  final String objectId;
+  final String petBodyId;
   final String detection;
   final int bodyVectorId;
   final int species;
@@ -75,11 +75,10 @@ class DBDetectedObject {
   final int imageHeight;
   final int imageWidth;
   final int mlVersion;
-  final Uint8List? embeddingBlob;
 
-  DBDetectedObject({
+  DBPetBody({
     required this.fileId,
-    required this.objectId,
+    required this.petBodyId,
     required this.detection,
     required this.bodyVectorId,
     required this.species,
@@ -87,13 +86,12 @@ class DBDetectedObject {
     required this.imageHeight,
     required this.imageWidth,
     required this.mlVersion,
-    this.embeddingBlob,
   });
 
   Map<String, dynamic> toMap() {
     return {
       fileIDColumn: fileId,
-      detectedObjectIDColumn: objectId,
+      petBodyIDColumn: petBodyId,
       detectionColumn: detection,
       bodyVectorIdColumn: bodyVectorId,
       speciesColumn: species,
@@ -101,14 +99,13 @@ class DBDetectedObject {
       'height': imageHeight,
       'width': imageWidth,
       mlVersionColumn: mlVersion,
-      petBodyEmbeddingColumn: embeddingBlob,
     };
   }
 
-  factory DBDetectedObject.fromMap(Map<String, dynamic> map) {
-    return DBDetectedObject(
+  factory DBPetBody.fromMap(Map<String, dynamic> map) {
+    return DBPetBody(
       fileId: map[fileIDColumn] as int,
-      objectId: map[detectedObjectIDColumn] as String,
+      petBodyId: map[petBodyIDColumn] as String,
       detection: map[detectionColumn] as String,
       bodyVectorId: map[bodyVectorIdColumn] as int,
       species: map[speciesColumn] as int,
@@ -116,7 +113,6 @@ class DBDetectedObject {
       imageHeight: map['height'] as int,
       imageWidth: map['width'] as int,
       mlVersion: map[mlVersionColumn] as int,
-      embeddingBlob: map[petBodyEmbeddingColumn] as Uint8List?,
     );
   }
 }
