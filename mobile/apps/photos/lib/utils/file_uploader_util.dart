@@ -346,7 +346,20 @@ Future<void> _decorateEnteFileData(
       file.location = exifLocation;
     }
   }
-  if (file.title == null || file.title!.isEmpty) {
+  if (Platform.isIOS) {
+    // On iOS with "Optimize iPhone Storage" enabled, the synchronous
+    // asset.title may return the UUID-based filename of the local low-res
+    // proxy (e.g. 6337B495-...HEIC) instead of the original filename
+    // (e.g. IMG_0079.HEIC). titleAsync queries PHAssetResource for the
+    // correct original filename.
+    final asyncTitle = await asset.titleAsync;
+    if (asyncTitle.isNotEmpty && asyncTitle != file.title) {
+      _logger.info(
+        "Updating title from '${file.title}' to '$asyncTitle' for ${file.tag}",
+      );
+      file.title = asyncTitle;
+    }
+  } else if (file.title == null || file.title!.isEmpty) {
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;
   }
