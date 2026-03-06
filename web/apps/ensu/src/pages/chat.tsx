@@ -93,6 +93,8 @@ const formatTime = (timestamp: number) => {
     return `${hour12}:${minute} ${period}`;
 };
 
+const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
+
 const loadingPhraseVerbs = [
     "Generating",
     "Thinking through",
@@ -1922,7 +1924,10 @@ const Page: React.FC = () => {
                     ? mmprojUrl.trim()
                     : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
-            maxTokens: maxTokens ? Number(maxTokens) : undefined,
+            maxTokens:
+                maxTokens && Number(maxTokens) > 0
+                    ? Number(maxTokens)
+                    : undefined,
         };
     }, [
         useCustomModel,
@@ -2347,7 +2352,7 @@ const Page: React.FC = () => {
             path: ChatMessage[],
             promptText: string,
             contextSize: number,
-            maxTokensCount: number,
+            maxTokensCount?: number,
             stopAtMessageUuid?: string | null,
         ): Promise<LlmMessage[]> => {
             const candidates = slicePathUntil(path, stopAtMessageUuid);
@@ -2360,7 +2365,10 @@ const Page: React.FC = () => {
                     : candidates;
 
             const safetyMargin = 256;
-            let budget = contextSize - maxTokensCount - safetyMargin;
+            let budget =
+                contextSize -
+                (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
+                safetyMargin;
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -3332,9 +3340,9 @@ const Page: React.FC = () => {
     const suggestedModels = useMemo(
         () => [
             {
-                name: "LFM 2.5 VL 1.6B (Q4_0)",
-                url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+                name: "Qwen 3.5 2B (Q8_0)",
+                url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+                mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
             },
             {
                 name: "LFM 2.5 1.2B Instruct (Q4_0)",

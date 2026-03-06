@@ -6,6 +6,7 @@ use llama_cpp_2::model::{AddBos, LlamaChatMessage, LlamaChatTemplate, LlamaModel
 use llama_cpp_2::mtmd::{
     MtmdBitmap, MtmdContext, MtmdContextParams, MtmdInputText, mtmd_default_marker,
 };
+use llama_cpp_2::openai::OpenAIChatTemplateParams;
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
 use llama_cpp_sys_2::{
@@ -45,6 +46,7 @@ static MTMD_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
 static MTMD_LOG_HOOK: OnceLock<()> = OnceLock::new();
 
 const CANCEL_MESSAGE: &str = "Generation cancelled";
+const DEFAULT_GENERATION_MAX_TOKENS: i32 = 8_192;
 
 fn backend() -> Result<&'static LlamaBackend, String> {
     match BACKEND.get_or_init(|| LlamaBackend::init().map_err(|err| err.to_string())) {
@@ -136,14 +138,41 @@ fn build_chat_prompt(
     template_override: Option<String>,
     add_assistant: bool,
 ) -> Result<String, String> {
-    let template = match template_override {
-        Some(template) => LlamaChatTemplate::new(&template)
-            .map_err(|err| format_error("Invalid chat template", err))?,
+    let template_text = match template_override {
+        Some(template) => template,
         None => model
             .chat_template(None)
-            .or_else(|_| LlamaChatTemplate::new("chatml"))
-            .map_err(|err| format_error("Failed to load chat template", err))?,
+            .ok()
+            .and_then(|template| template.to_string().ok())
+            .unwrap_or_else(|| "chatml".to_string()),
     };
+    let template = LlamaChatTemplate::new(&template_text)
+        .map_err(|err| format_error("Invalid chat template", err))?;
+
+    if template_text.contains("enable_thinking") {
+        let messages_json =
+            serde_json::to_string(&messages).map_err(|err| format_error("Invalid chat messages", err))?;
+        let params = OpenAIChatTemplateParams {
+            messages_json: &messages_json,
+            tools_json: None,
+            tool_choice: None,
+            json_schema: None,
+            grammar: None,
+            reasoning_format: None,
+            chat_template_kwargs: Some(r#"{"enable_thinking":false}"#),
+            add_generation_prompt: add_assistant,
+            use_jinja: true,
+            parallel_tool_calls: false,
+            enable_thinking: false,
+            add_bos: false,
+            add_eos: false,
+            parse_tool_calls: false,
+        };
+        let result = model
+            .apply_chat_template_oaicompat(&template, &params)
+            .map_err(|err| format_error("Failed to apply chat template", err))?;
+        return Ok(result.prompt);
+    }
 
     let chat_messages = messages
         .into_iter()
@@ -757,7 +786,7 @@ pub fn generate_chat_stream(
         token_id: None,
     });
 
-    let max_tokens = max_tokens.unwrap_or(128);
+    let max_tokens = max_tokens.unwrap_or(DEFAULT_GENERATION_MAX_TOKENS);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = stop_sequences.unwrap_or_default();
 
@@ -1046,7 +1075,7 @@ pub fn generate_stream(
         token_id: None,
     });
 
-    let max_tokens = request.max_tokens.unwrap_or(128);
+    let max_tokens = request.max_tokens.unwrap_or(DEFAULT_GENERATION_MAX_TOKENS);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = request.stop_sequences.clone().unwrap_or_default();
 
