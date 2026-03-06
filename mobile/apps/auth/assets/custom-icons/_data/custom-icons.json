@@ -453,9 +453,9 @@
       "title": "ClouDNS"
     },
     {
-      "title": "Cocos Capital"
-      "slug": "cocos_capital"
-      "altanames": [
+      "title": "Cocos Capital",
+      "slug": "cocos_capital",
+      "altNames": [
         "cocos crypto"
       ]
     },
@@ -1566,7 +1566,7 @@
       "slug": "pionex"
     },
     {
-      "title": "Plus Crypto"
+      "title": "Plus Crypto",
       "slug": "plus_crypto"
     },
     {
