@@ -118,7 +118,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetUser(c *gin.Context) {
-	e := strings.ToLower(strings.TrimSpace(c.Query("email")))
+	e := emailUtil.NormalizeEmail(c.Query("email"))
 	if e == "" {
 		id, err := strconv.ParseInt(c.Query("id"), 10, 64)
 		if err != nil {
@@ -161,8 +161,7 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	email := c.Query("email")
-	email = strings.TrimSpace(email)
+	email := emailUtil.NormalizeEmail(c.Query("email"))
 	if email == "" {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "email id is missing"))
 		return
@@ -546,7 +545,7 @@ func (h *AdminHandler) RecoverAccount(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetEmailHash(c *gin.Context) {
-	e := c.Query("email")
+	e := emailUtil.NormalizeEmail(c.Query("email"))
 	hash, err := crypto.GetHash(e, h.HashingKey)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

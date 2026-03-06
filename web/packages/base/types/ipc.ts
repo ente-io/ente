@@ -17,6 +17,7 @@ export type NativeDeviceLockProvider = "touchid" | "none";
 export type NativeDeviceLockUnavailableReason =
     | "unsupported-platform"
     | "touchid-not-enrolled"
+    | "touchid-temporarily-unavailable"
     | "touchid-api-error";
 
 /**

@@ -15,6 +15,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -160,6 +161,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _saveCodesWithSingleSync(List<Code> updatedCodes) async {
+    if (updatedCodes.isEmpty) {
+      return;
+    }
+    final results = await Future.wait(
+      updatedCodes.map(
+        (code) => CodeStore.instance.addCode(code, shouldSync: false),
+      ),
+    );
+    if (results.any((result) => result != AddResult.duplicate)) {
+      AuthenticatorService.instance.onlineSync().ignore();
+    }
+  }
+
   Future<void> _onRestoreSelectedPressed() async {
     final selectedIds = _codeDisplayStore.selectedCodeIds.value;
     if (selectedIds.isEmpty) return;
@@ -171,11 +186,13 @@ class _HomePageState extends State<HomePage> {
               ?.where((c) => selectedIds.contains(c.selectionKey))
               .toList() ??
           [];
-      for (final code in codesToRestore) {
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(trashed: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-      }
+      final updatedCodes = codesToRestore
+          .map(
+            (code) =>
+                code.copyWith(display: code.display.copyWith(trashed: false)),
+          )
+          .toList();
+      await _saveCodesWithSingleSync(updatedCodes);
     } catch (e) {
       if (mounted) {
         showGenericErrorDialog(context: context, error: e).ignore();
@@ -285,46 +302,56 @@ class _HomePageState extends State<HomePage> {
         [];
     if (codesToUpdate.isEmpty) return;
 
-    // Determine the state of the current selection (pinned/unpinned)
-    final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+    try {
+      // Determine the state of the current selection (pinned/unpinned)
+      final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+      final updatedCodes = <Code>[];
 
-    if (allArePinned) {
-      // if all are pinned, unpin all
-      for (final code in codesToUpdate) {
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(pinned: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-      }
+      if (allArePinned) {
+        // if all are pinned, unpin all
+        for (final code in codesToUpdate) {
+          updatedCodes.add(
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
+        }
 
-      if (codesToUpdate.length == 1) {
-        showToast(
-          context,
-          context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
-        );
+        if (codesToUpdate.length == 1) {
+          showToast(
+            context,
+            context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
+          );
+        } else {
+          showToast(context, context.l10n.unpinnedCount(codesToUpdate.length));
+        }
       } else {
-        showToast(context, context.l10n.unpinnedCount(codesToUpdate.length));
-      }
-    } else {
-      int pinnedCount = 0;
-      for (final code in codesToUpdate) {
-        if (!code.isPinned) {
-          // Only pin the codes that are currently unpinned
-          final updatedCode =
-              code.copyWith(display: code.display.copyWith(pinned: true));
-          unawaited(CodeStore.instance.addCode(updatedCode));
-          pinnedCount++;
+        int pinnedCount = 0;
+        for (final code in codesToUpdate) {
+          if (!code.isPinned) {
+            // Only pin the codes that are currently unpinned
+            updatedCodes.add(
+              code.copyWith(display: code.display.copyWith(pinned: true)),
+            );
+            pinnedCount++;
+          }
+        }
+
+        if (pinnedCount == 1) {
+          final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
+          showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
+        } else if (pinnedCount > 0) {
+          showToast(context, context.l10n.pinnedCount(pinnedCount));
         }
       }
 
-      if (pinnedCount == 1) {
-        final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
-        showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
-      } else if (pinnedCount > 0) {
-        showToast(context, context.l10n.pinnedCount(pinnedCount));
+      await _saveCodesWithSingleSync(updatedCodes);
+    } catch (e, s) {
+      _logger.severe('Failed to update pin state for selected code(s)', e, s);
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
       }
+    } finally {
+      _codeDisplayStore.clearSelection();
     }
-
-    _codeDisplayStore.clearSelection();
   }
 
   Future<void> _onUnpinSelectedPressed() async {
@@ -337,25 +364,38 @@ class _HomePageState extends State<HomePage> {
         [];
     if (codesToUpdate.isEmpty) return;
 
-    int unpinnedCount = 0;
-    for (final code in codesToUpdate) {
-      if (code.isPinned) {
-        // only unpin the codes that are currently pinned
-        final updatedCode =
-            code.copyWith(display: code.display.copyWith(pinned: false));
-        unawaited(CodeStore.instance.addCode(updatedCode));
-        unpinnedCount++;
+    try {
+      int unpinnedCount = 0;
+      final updatedCodes = <Code>[];
+      for (final code in codesToUpdate) {
+        if (code.isPinned) {
+          // only unpin the codes that are currently pinned
+          updatedCodes.add(
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
+          unpinnedCount++;
+        }
       }
-    }
 
-    if (unpinnedCount == 1) {
-      final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
-      showToast(context, context.l10n.unpinnedCodeMessage(unpinnedCode.issuer));
-    } else if (unpinnedCount > 0) {
-      showToast(context, context.l10n.unpinnedCount(unpinnedCount));
-    }
+      if (unpinnedCount == 1) {
+        final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
+        showToast(
+          context,
+          context.l10n.unpinnedCodeMessage(unpinnedCode.issuer),
+        );
+      } else if (unpinnedCount > 0) {
+        showToast(context, context.l10n.unpinnedCount(unpinnedCount));
+      }
 
-    _codeDisplayStore.clearSelection();
+      await _saveCodesWithSingleSync(updatedCodes);
+    } catch (e, s) {
+      _logger.severe('Failed to unpin selected code(s)', e, s);
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
+      }
+    } finally {
+      _codeDisplayStore.clearSelection();
+    }
   }
 
   Future<void> _onTrashSelectedPressed() async {
@@ -394,13 +434,14 @@ class _HomePageState extends State<HomePage> {
                   ?.where((c) => selectedIds.contains(c.selectionKey))
                   .toList() ??
               [];
-
-          for (final code in codesToTrash) {
-            final updatedCode = code.copyWith(
-              display: code.display.copyWith(trashed: true),
-            );
-            unawaited(CodeStore.instance.addCode(updatedCode));
-          }
+          final updatedCodes = codesToTrash
+              .map(
+                (code) => code.copyWith(
+                  display: code.display.copyWith(trashed: true),
+                ),
+              )
+              .toList();
+          await _saveCodesWithSingleSync(updatedCodes);
         } catch (e) {
           _logger.severe('Failed to trash code(s): ${e.toString()}');
           if (mounted) {

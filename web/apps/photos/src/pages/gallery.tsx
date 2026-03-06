@@ -346,8 +346,11 @@ const Page: React.FC = () => {
     const authenticateUser = useCallback(async () => {
         if (!isDesktop) return authenticateUserWithPasswordModal();
 
-        const didAuthenticateWithAppLock = await reauthenticateWithAppLock();
-        if (didAuthenticateWithAppLock) return;
+        const reauthResult = await reauthenticateWithAppLock();
+        if (reauthResult === "authenticated") return;
+        if (reauthResult === "cancelled") {
+            throw new Error("app_lock_reauthentication_cancelled");
+        }
 
         return authenticateUserWithPasswordModal();
     }, [authenticateUserWithPasswordModal]);

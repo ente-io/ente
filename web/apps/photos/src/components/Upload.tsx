@@ -63,6 +63,7 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { suppressAutoLockOnBlurForTrustedPrompt } from "ente-new/photos/services/app-lock";
 import {
     createAlbum,
     createHiddenAlbum,
@@ -85,6 +86,8 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
+import { hasReliableCanvasReadback } from "utils/upload/canvas-integrity";
+import { CanvasReadbackBlockedDialog } from "./CanvasReadbackBlockedDialog";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
@@ -194,6 +197,10 @@ export const Upload: React.FC<UploadProps> = ({
     const { showNotification, watchFolderView } = usePhotosAppContext();
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
+    const [
+        showCanvasReadbackBlockedDialog,
+        setShowCanvasReadbackBlockedDialog,
+    ] = useState(false);
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
@@ -503,6 +510,14 @@ export const Upload: React.FC<UploadProps> = ({
                 );
                 return;
             }
+        }
+
+        if (!electron && !hasReliableCanvasReadback()) {
+            log.warn("Canvas readback integrity check failed; blocking upload");
+            setWebFiles([]);
+            selectedUploadType.current = undefined;
+            setShowCanvasReadbackBlockedDialog(true);
+            return;
         }
 
         uploadRunning.current = true;
@@ -853,6 +868,11 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handleUploadTypeSelect = (type: UploadType) => {
         selectedUploadType.current = type;
+        // Opening native file/folder pickers can blur the app window on
+        // desktop; suppress blur-triggered app lock for this trusted flow.
+        if (electron) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         setIsInputPending(true);
         switch (type) {
             case "files":
@@ -930,6 +950,10 @@ export const Upload: React.FC<UploadProps> = ({
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
+            />
+            <CanvasReadbackBlockedDialog
+                open={showCanvasReadbackBlockedDialog}
+                onClose={() => setShowCanvasReadbackBlockedDialog(false)}
             />
             <SingleInputDialog
                 {...newAlbumNameInputVisibilityProps}

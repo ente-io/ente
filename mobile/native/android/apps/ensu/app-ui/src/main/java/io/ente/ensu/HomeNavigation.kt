@@ -133,10 +133,6 @@ internal fun HomeNavigation(
                             store.startModelDownload(userInitiated = userInitiated)
                         },
                         onOverflowTrim = store::confirmOverflowTrim,
-                        onOverflowIncreaseContext = {
-                            store.cancelOverflowDialog()
-                            navController.navigate(HomeRoute.ModelSettings)
-                        },
                         onOverflowCancel = store::cancelOverflowDialog
                     )
                 }

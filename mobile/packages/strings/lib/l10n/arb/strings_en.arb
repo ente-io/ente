@@ -719,6 +719,10 @@
   "@emailNotRegistered": {
     "description": "Error message when email is not registered"
   },
+  "accountSetupIncompleteCreateAccount": "Account setup incomplete. Create account to finish setup.",
+  "@accountSetupIncompleteCreateAccount": {
+    "description": "Error shown when account exists but signup is incomplete"
+  },
   "thisEmailIsAlreadyInUse": "This email is already in use",
   "@thisEmailIsAlreadyInUse": {
     "description": "Error message when email is already in use"

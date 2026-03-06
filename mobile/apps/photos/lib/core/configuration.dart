@@ -22,6 +22,7 @@ import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
@@ -209,6 +210,9 @@ class Configuration {
         }
       }
     }
+
+    // Reset feed cutoff so it is recreated for the next login session.
+    await localSettings.clearSharedPhotoFeedCutoffTime();
 
     // Clear preferences and secure storage
     await _preferences.clear();
@@ -543,6 +547,7 @@ class Configuration {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
     await localSettings.setAppMode(AppMode.online);
+    Bus.instance.fire(AppModeChangedEvent());
     Bus.instance.fire(SignedInEvent());
   }
 

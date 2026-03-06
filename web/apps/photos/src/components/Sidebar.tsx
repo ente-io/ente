@@ -83,7 +83,11 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import { reauthenticateWithAppLock } from "ente-new/photos/services/app-lock";
+import {
+    reauthenticateWithAppLock,
+    suppressAppLockRefreshFromSessionForTrustedReload,
+    suppressAutoLockOnBlurForTrustedPrompt,
+} from "ente-new/photos/services/app-lock";
 import {
     PseudoCollectionID,
     type CollectionSummaries,
@@ -237,6 +241,17 @@ type FreeUpSpaceAction = Extract<
     SidebarActionID,
     "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
 >;
+
+const appLockReauthenticationCancelledMessage =
+    "app_lock_reauthentication_cancelled";
+
+const isAppLockFeatureEnabled =
+    process.env.NEXT_PUBLIC_ENTE_ENABLE_APP_LOCK == "true";
+
+const isReauthenticationCancellation = (error: unknown) =>
+    error == undefined ||
+    (error instanceof Error &&
+        error.message === appLockReauthenticationCancelledMessage);
 
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
@@ -1000,16 +1015,30 @@ const Account: React.FC<AccountProps> = ({
         void router.push("/change-email");
     }, [router]);
 
+    const handleRecoveryKey = useCallback(async () => {
+        if (isDesktop) {
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
+        } else {
+            await onAuthenticateUser();
+        }
+        showRecoveryKey();
+    }, [onAuthenticateUser, showRecoveryKey]);
+
     const handlePasskeys = useCallback(async () => {
         onRootClose();
+        if (isDesktop) {
+            suppressAutoLockOnBlurForTrustedPrompt();
+        }
         await openAccountsManagePasskeysPage();
     }, [onRootClose]);
 
     const handleActiveSessions = useCallback(async () => {
         if (isDesktop) {
-            const didAuthenticateWithAppLock =
-                await reauthenticateWithAppLock();
-            if (!didAuthenticateWithAppLock) await onAuthenticateUser();
+            const reauthResult = await reauthenticateWithAppLock();
+            if (reauthResult === "cancelled") return;
+            if (reauthResult === "fallback") await onAuthenticateUser();
         } else {
             await onAuthenticateUser();
         }
@@ -1020,7 +1049,7 @@ const Account: React.FC<AccountProps> = ({
         if (!open || !pendingAction) return;
         switch (pendingAction) {
             case "account.recoveryKey":
-                showRecoveryKey();
+                void handleRecoveryKey();
                 break;
             case "account.twoFactor.reconfigure":
             case "account.twoFactor":
@@ -1047,12 +1076,12 @@ const Account: React.FC<AccountProps> = ({
         handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
+        handleRecoveryKey,
         handlePasskeys,
         open,
         onActionHandled,
         pendingAction,
         showDeleteAccount,
-        showRecoveryKey,
         showTwoFactor,
     ]);
 
@@ -1071,7 +1100,7 @@ const Account: React.FC<AccountProps> = ({
                             />
                         }
                         label={t("recovery_key")}
-                        onClick={showRecoveryKey}
+                        onClick={() => void handleRecoveryKey()}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
@@ -1087,7 +1116,7 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && (
+                {isDesktop && isAppLockFeatureEnabled && (
                     <DesktopAppLockSettings
                         onAuthenticateUser={onAuthenticateUser}
                         onRootClose={onRootClose}
@@ -1138,18 +1167,23 @@ const DesktopAppLockSettings: React.FC<
     const { show, props } = useModalVisibility();
 
     const handleOpen = useCallback(async () => {
-        await onAuthenticateUser();
-        show();
+        try {
+            await onAuthenticateUser();
+            show();
+        } catch (error) {
+            if (isReauthenticationCancellation(error)) return;
+            log.error("Failed to open app lock settings", error);
+        }
     }, [onAuthenticateUser, show]);
 
-    return (
+    return isAppLockFeatureEnabled ? (
         <>
             <RowButtonGroup>
                 <RowButton label={t("app_lock")} onClick={handleOpen} />
             </RowButtonGroup>
             <AppLockSettings {...props} onRootClose={onRootClose} />
         </>
-    );
+    ) : null;
 };
 
 type PreferencesProps = NestedSidebarDrawerVisibilityProps & {
@@ -1288,6 +1322,8 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
+        if (newLocale === locale) return;
+
         void setLocaleInUse(newLocale).then(() => {
             // [Note: Changing locale causes a full reload]
             //
@@ -1297,6 +1333,12 @@ const LanguageSelector = () => {
             // We also rely on this behaviour by caching various formatters in
             // module static variables that not get updated if the i18n.language
             // changes unless there is a full reload.
+            //
+            // Mark this as a trusted app-initiated reload so desktop app-lock
+            // setup does not force an immediate lock screen.
+            if (globalThis.electron) {
+                suppressAppLockRefreshFromSessionForTrustedReload();
+            }
             window.location.reload();
         });
     };

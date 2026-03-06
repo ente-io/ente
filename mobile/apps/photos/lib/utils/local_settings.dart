@@ -443,6 +443,10 @@ class LocalSettings {
     return cutoff;
   }
 
+  Future<void> clearSharedPhotoFeedCutoffTime() async {
+    await _prefs.remove(_kSharedPhotoFeedCutoffTime);
+  }
+
   int wrapped2025ResumeIndex() {
     return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
   }

@@ -34,7 +34,16 @@
       "slug": "addy_io"
     },
     {
+      "title": "adnymics",
+      "hex": "189cd9"
+    },
+    {
       "title": "Adobe"
+    },
+    {
+      "title": "Affiliprint",
+      "slug": "affiliprint",
+      "hex": "0000ff"
     },
     {
       "title": "Airtable"
@@ -173,6 +182,11 @@
     {
       "title": "Band",
       "slug": "band"
+    },
+    {
+      "title": "Basebuilder",
+      "slug": "basebuilder",
+      "hex": "ff6900"
     },
     {
       "title": "Battle.net",
@@ -506,6 +520,9 @@
       "slug": "crowdsec"
     },
     {
+      "title": "Crowdstrike"
+    },
+    {
       "title": "Cryptee",
       "slug": "cryptee"
     },
@@ -544,6 +561,11 @@
         "c wallet",
         "cwallet.com"
       ]
+    },
+    {
+      "title": "Daisycon",
+      "slug": "daisycon",
+      "hex": "9cd137"
     },
     {
       "title": "DCS",
@@ -1110,6 +1132,11 @@
       ]
     },
     {
+      "title": "Linehub",
+      "slug": "linehub",
+      "hex": "000000"
+    },
+    {
       "title": "LinkedIn",
       "slug": "linkedin"
     },
@@ -1462,6 +1489,11 @@
         "Parallels Desktop",
         "Parallels VM"
       ]
+    },
+    {
+      "title": "ParcelDealz",
+      "slug": "parceldealz",
+      "hex": "a930af"
     },
     {
       "title": "Parqet",

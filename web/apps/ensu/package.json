@@ -1,6 +1,6 @@
 {
     "name": "ensu",
-    "version": "0.1.6",
+    "version": "0.1.8",
     "private": true,
     "dependencies": {
         "@fontsource/cormorant-garamond": "^5.2.7",
