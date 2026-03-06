@@ -10,7 +10,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 abstract class IMLDataDB<T> {
   Future<void> bulkInsertFaces(List<Face> faces);
   Future<void> bulkInsertPetFaces(List<DBPetFace> petFaces);
-  Future<void> bulkInsertDetectedObjects(List<DBDetectedObject> objects);
+  Future<void> bulkInsertPetBodies(List<DBPetBody> petBodies);
   Future<void> updateFaceIdToClusterId(Map<String, String> faceIDToClusterID);
   Future<Map<int, int>> faceIndexedFileIds({int minimumMlVersion});
   Future<int> getFaceIndexedFileCount({int minimumMlVersion});
@@ -36,7 +36,7 @@ abstract class IMLDataDB<T> {
   });
   Future<List<Face>?> getFacesForGivenFileID(T fileUploadID);
   Future<List<DBPetFace>?> getPetFacesForFileID(T fileUploadID);
-  Future<List<DBDetectedObject>?> getDetectedObjectsForFileID(T fileUploadID);
+  Future<List<DBPetBody>?> getPetBodiesForFileID(T fileUploadID);
   Future<Map<int, List<FaceWithoutEmbedding>>>
       getFileIDsToFacesWithoutEmbedding();
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
@@ -117,7 +117,7 @@ abstract class IMLDataDB<T> {
   });
 
   Future<void> updatePetFaceVectorIds(Map<String, int> petFaceIdToVectorId);
-  Future<void> updateObjectVectorIds(Map<String, int> objectIdToVectorId);
+  Future<void> updatePetBodyVectorIds(Map<String, int> petBodyIdToVectorId);
 
   Future<List<EmbeddingVector>> getAllClipVectors();
   Future<Map<int, int>> clipIndexedFileWithVersion();

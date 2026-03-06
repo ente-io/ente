@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
 
 // Shared column names
 const petFaceIDColumn = 'pet_face_id';
-const detectedObjectIDColumn = 'object_id';
+const petBodyIDColumn = 'pet_body_id';
 const speciesColumn = 'species';
 const detectionColumn = 'detection';
 const faceVectorIdColumn = 'face_vector_id';
@@ -214,14 +214,13 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
 
-// ── Detected Objects Table ──
+// ── Pet Bodies Table ──
 
-const detectedObjectsTable = 'detected_objects';
+const petBodiesTable = 'pet_bodies';
 
-const createDetectedObjectsTable =
-    '''CREATE TABLE IF NOT EXISTS $detectedObjectsTable (
+const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
   $fileIDColumn INTEGER NOT NULL,
-  $detectedObjectIDColumn TEXT NOT NULL UNIQUE,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE,
   $detectionColumn TEXT NOT NULL,
   $bodyVectorIdColumn INTEGER NOT NULL,
   $speciesColumn INTEGER NOT NULL,
@@ -229,12 +228,11 @@ const createDetectedObjectsTable =
   $imageHeight INTEGER NOT NULL DEFAULT 0,
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
-  $petBodyEmbeddingColumn BLOB,
-  PRIMARY KEY($fileIDColumn, $detectedObjectIDColumn)
+  PRIMARY KEY($fileIDColumn, $petBodyIDColumn)
 );
 ''';
 
-const deleteDetectedObjectsTable = 'DELETE FROM $detectedObjectsTable';
+const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
 
 // ── Clustering Tables ──
 
@@ -270,7 +268,6 @@ const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
 // ── Embedding BLOB Columns ──
 
 const petFaceEmbeddingColumn = 'pet_face_embedding';
-const petBodyEmbeddingColumn = 'pet_body_embedding';
 
 // ── Vector ID Mapping Tables ──
 
@@ -288,19 +285,19 @@ CREATE TABLE IF NOT EXISTS $petFaceVectorIdMappingTable (
 const deletePetFaceVectorIdMappingTable =
     'DELETE FROM $petFaceVectorIdMappingTable';
 
-/// Maps object_id (string) → integer for body usearch index
-const objectVectorIdMappingTable = 'object_vector_id_map';
-const objectVectorIdColumn = 'object_vector_id';
+/// Maps pet_body_id (string) → integer for body usearch index
+const petBodyVectorIdMappingTable = 'pet_body_vector_id_map';
+const petBodyVectorIdColumn = 'pet_body_vector_id';
 
-const createObjectVectorIdMappingTable = '''
-CREATE TABLE IF NOT EXISTS $objectVectorIdMappingTable (
-  $objectVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  $detectedObjectIDColumn TEXT NOT NULL UNIQUE
+const createPetBodyVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
+  $petBodyVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE
 );
 ''';
 
-const deleteObjectVectorIdMappingTable =
-    'DELETE FROM $objectVectorIdMappingTable';
+const deletePetBodyVectorIdMappingTable =
+    'DELETE FROM $petBodyVectorIdMappingTable';
 
 // ── Pet Indexing Tracking Table ──
 
