@@ -99,8 +99,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
-    debugPrint(
-      "[InlineTextDetection] evaluateFile: eligible=$isEligible, type=${widget.file.fileType}",
+    _logger.info(
+      "evaluateFile: eligible=$isEligible, type=${widget.file.fileType}",
     );
 
     if (!isEligible) {
@@ -138,13 +138,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       }
 
       // Run fast hasText() check
-      debugPrint("[InlineTextDetection] running hasText on ${localFile.path}");
+      _logger.info("running hasText check");
       bool hasText = false;
       try {
         hasText = await _mobileOcr.hasText(imagePath: localFile.path);
-        debugPrint("[InlineTextDetection] hasText result: $hasText");
+        _logger.info("hasText result: $hasText");
       } catch (error, stackTrace) {
-        debugPrint("[InlineTextDetection] hasText error: $error");
+        _logger.warning("hasText error: $error");
         _logger.severe("Failed to run hasText", error, stackTrace);
       }
 
