@@ -177,6 +177,10 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (_isRunningML) {
+      _logger.info("runAllML called while already running, skipping");
+      return;
+    }
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
