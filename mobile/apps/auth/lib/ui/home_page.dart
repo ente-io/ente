@@ -311,7 +311,8 @@ class _HomePageState extends State<HomePage> {
         // if all are pinned, unpin all
         for (final code in codesToUpdate) {
           updatedCodes.add(
-              code.copyWith(display: code.display.copyWith(pinned: false)));
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
         }
 
         if (codesToUpdate.length == 1) {
@@ -370,7 +371,8 @@ class _HomePageState extends State<HomePage> {
         if (code.isPinned) {
           // only unpin the codes that are currently pinned
           updatedCodes.add(
-              code.copyWith(display: code.display.copyWith(pinned: false)));
+            code.copyWith(display: code.display.copyWith(pinned: false)),
+          );
           unpinnedCount++;
         }
       }
