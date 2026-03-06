@@ -107,9 +107,7 @@ export class LlmProvider {
                 ? DEFAULT_TAURI_CONTEXT_SIZE
                 : DEFAULT_WEB_CONTEXT_SIZE;
         const requestedContextSize =
-            settings.contextLength ??
-            model.contextLength ??
-            defaultContextSize;
+            settings.contextLength ?? model.contextLength ?? defaultContextSize;
         const contextSize =
             this.backend.kind === "tauri"
                 ? requestedContextSize

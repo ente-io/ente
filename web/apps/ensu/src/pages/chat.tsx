@@ -1968,9 +1968,7 @@ const Page: React.FC = () => {
     const formatErrorMessage = useCallback((error: unknown) => {
         const normalizeErrorMessage = (message: string) => {
             if (
-                message
-                    .toLowerCase()
-                    .includes("length out of range of buffer")
+                message.toLowerCase().includes("length out of range of buffer")
             ) {
                 return "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.";
             }
