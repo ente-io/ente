@@ -1786,8 +1786,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "22ca5289d7659f4048092887c2827b919525504c"
-      resolved-ref: "22ca5289d7659f4048092887c2827b919525504c"
+      ref: "2aa70fb937ee1d0e2ed98ace75a7ea9f8a429531"
+      resolved-ref: "2aa70fb937ee1d0e2ed98ace75a7ea9f8a429531"
       url: "https://github.com/Amrithesh-Kakkoth/mobile_ocr"
     source: git
     version: "1.0.0"
