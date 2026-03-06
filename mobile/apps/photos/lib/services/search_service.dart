@@ -70,6 +70,7 @@ class SearchService {
   Future<List<EnteFile>>? _cachedFilesForSearch;
   Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
   Future<List<EnteFile>>? _cachedFilesForGenericGallery;
+  Future<List<EnteFile>>? _cachedFilesForOfflineGallery;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
@@ -90,6 +91,7 @@ class SearchService {
       _cachedFilesForSearch = null;
       _cachedFilesForHierarchicalSearch = null;
       _cachedFilesForGenericGallery = null;
+      _cachedFilesForOfflineGallery = null;
       _cachedHiddenFilesFuture = null;
     });
   }
@@ -150,9 +152,16 @@ class SearchService {
     return _cachedFilesForHierarchicalSearch!;
   }
 
-  Future<List<EnteFile>> getAllFilesForGenericGallery() async {
-    if (_cachedFilesFuture != null && _cachedFilesForGenericGallery != null) {
-      return _cachedFilesForGenericGallery!;
+  Future<List<EnteFile>> getAllFilesForGenericGallery({
+    bool onlyUploadedFiles = true,
+  }) async {
+    if (_cachedFilesFuture != null) {
+      if (onlyUploadedFiles && _cachedFilesForGenericGallery != null) {
+        return _cachedFilesForGenericGallery!;
+      }
+      if (!onlyUploadedFiles && _cachedFilesForOfflineGallery != null) {
+        return _cachedFilesForOfflineGallery!;
+      }
     }
 
     if (_cachedFilesFuture == null) {
@@ -163,17 +172,23 @@ class SearchService {
       );
     }
 
-    _cachedFilesForGenericGallery = _cachedFilesFuture!.then((files) {
+    final filteredFiles = _cachedFilesFuture!.then((files) {
       return applyDBFilters(
         files,
         DBFilterOptions(
           dedupeUploadID: true,
-          onlyUploadedFiles: true,
+          onlyUploadedFiles: onlyUploadedFiles,
         ),
       );
     });
 
-    return _cachedFilesForGenericGallery!;
+    if (onlyUploadedFiles) {
+      _cachedFilesForGenericGallery = filteredFiles;
+      return _cachedFilesForGenericGallery!;
+    } else {
+      _cachedFilesForOfflineGallery = filteredFiles;
+      return _cachedFilesForOfflineGallery!;
+    }
   }
 
   Future<List<EnteFile>> getHiddenFiles() async {
@@ -193,6 +208,7 @@ class SearchService {
     _cachedFilesForSearch = null;
     _cachedFilesForHierarchicalSearch = null;
     _cachedFilesForGenericGallery = null;
+    _cachedFilesForOfflineGallery = null;
     _cachedHiddenFilesFuture = null;
     unawaited(memoriesCacheService.clearMemoriesCache());
   }
