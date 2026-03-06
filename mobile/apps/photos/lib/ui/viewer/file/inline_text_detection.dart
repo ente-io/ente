@@ -43,7 +43,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   final TextDetectorController _detectorController = TextDetectorController();
 
   bool _isEligible = false;
-  bool _hasText = false;
   String? _localFilePath;
   int _requestId = 0;
   bool _overlayActive = false;
@@ -74,7 +73,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   void _resetState() {
     _activationTimer?.cancel();
     setState(() {
-      _hasText = false;
       _localFilePath = null;
       _overlayActive = false;
     });
@@ -101,12 +99,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   Future<void> _evaluateFile() async {
     final bool isEligible = _isFileEligible(widget.file);
     final int requestId = ++_requestId;
-    debugPrint("[InlineTextDetection] evaluateFile: eligible=$isEligible, type=${widget.file.fileType}");
+    debugPrint(
+      "[InlineTextDetection] evaluateFile: eligible=$isEligible, type=${widget.file.fileType}",
+    );
 
     if (!isEligible) {
       setState(() {
         _isEligible = false;
-        _hasText = false;
         _localFilePath = null;
       });
       return;
@@ -114,7 +113,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
 
     setState(() {
       _isEligible = true;
-      _hasText = false;
       _localFilePath = null;
     });
 
@@ -124,7 +122,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     if (cached != null) {
       if (!mounted || requestId != _requestId) return;
       setState(() {
-        _hasText = cached.hasText;
         _localFilePath = cached.localPath;
       });
       if (cached.hasText) _scheduleActivation(requestId);
@@ -160,7 +157,6 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       _hasTextCache[cacheKey] = result;
 
       setState(() {
-        _hasText = result.hasText;
         _localFilePath = result.localPath;
       });
 
