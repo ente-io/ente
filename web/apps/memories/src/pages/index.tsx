@@ -254,9 +254,9 @@ const MEDIA_SWITCH_TRANSITION_DURATION_MS = 380;
 const DESKTOP_PROGRESS_MAX_WIDTH_PX = 448;
 const MOBILE_PROGRESS_MAX_WIDTH_PX = 326;
 const DESKTOP_MEDIA_MAX_WIDTH_CSS = `min(${DESKTOP_MEDIA_MAX_WIDTH_PX}px, calc(100vw - ${DESKTOP_MEDIA_HORIZONTAL_PADDING_PX}px))`;
-const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(100vh - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
-const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-desktop.svg";
-const MOBILE_BACKGROUND_IMAGE_PATH = "/images/memory-lane-bg-mobile.svg";
+const DESKTOP_MEDIA_MAX_HEIGHT_CSS = `calc(min(100vh, 100dvh) - ${DESKTOP_MEDIA_VERTICAL_RESERVED_PX}px)`;
+const DESKTOP_BACKGROUND_IMAGE_PATH = "/images/desktop-bg.svg";
+const MOBILE_BACKGROUND_IMAGE_PATH = "/images/mobile-bg.svg";
 
 const isInteractiveTapTarget = (target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
@@ -503,11 +503,11 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const mediaFrameStyle = isMobileLayout
         ? {
               width: `${mobileFrameSize.width}px`,
-              height: `${mobileFrameSize.height}px`,
+              aspectRatio: `${resolvedMediaAspectRatio ?? 4 / 3}`,
           }
         : {
               width: `${desktopFrameSize.width}px`,
-              height: `${desktopFrameSize.height}px`,
+              aspectRatio: `${resolvedMediaAspectRatio ?? 4 / 3}`,
           };
 
     return (
@@ -573,13 +573,28 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                             />
                         </HeaderSection>
 
-                        <JoinNowButton
-                            href="https://ente.io"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Join now
-                        </JoinNowButton>
+                        <TopRightActions>
+                            <BrandLink
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                                data-memory-control="true"
+                            >
+                                <DesktopBrandFigma>
+                                    <DesktopBrandWordmark>
+                                        <EnteLogo height={16.4} />
+                                    </DesktopBrandWordmark>
+                                    <DesktopBrandTag>photos</DesktopBrandTag>
+                                </DesktopBrandFigma>
+                            </BrandLink>
+                            <JoinNowButton
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                Join now
+                            </JoinNowButton>
+                        </TopRightActions>
                     </TopControls>
                 )}
 
@@ -680,10 +695,19 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
 
                 {isMobileLayout && (
                     <MobileBottomBar>
-                        <MobileBrand>
-                            <EnteLogo height={30} />
-                            <MobileBrandTag>photos</MobileBrandTag>
-                        </MobileBrand>
+                        <BrandLink
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noreferrer"
+                            data-memory-control="true"
+                        >
+                            <DesktopBrandFigma>
+                                <DesktopBrandWordmark>
+                                    <EnteLogo height={16.4} />
+                                </DesktopBrandWordmark>
+                                <DesktopBrandTag>photos</DesktopBrandTag>
+                            </DesktopBrandFigma>
+                        </BrandLink>
                         <MobileJoinNowButton
                             href="https://ente.io"
                             target="_blank"
@@ -701,7 +725,8 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
 const ViewerRoot = styled("div")({
     position: "relative",
     width: "100vw",
-    height: "100vh",
+    minHeight: "100vh",
+    height: "100dvh",
     overflow: "hidden",
     display: "flex",
     alignItems: "center",
@@ -709,19 +734,19 @@ const ViewerRoot = styled("div")({
 });
 
 const BackgroundPattern = styled("div")({
-    position: "absolute",
+    position: "fixed",
     inset: 0,
     backgroundColor: "#1f1f1f",
     backgroundImage: `url(${DESKTOP_BACKGROUND_IMAGE_PATH})`,
-    backgroundRepeat: "repeat",
-    backgroundSize: "auto",
-    backgroundPosition: "top left",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     zIndex: 1,
     [`@media (max-width: ${MOBILE_LAYOUT_BREAKPOINT_PX}px)`]: {
         backgroundImage: `url(${MOBILE_BACKGROUND_IMAGE_PATH})`,
-        backgroundRepeat: "repeat",
-        backgroundSize: "auto",
-        backgroundPosition: "top left",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
     },
 });
 
@@ -734,7 +759,8 @@ const ContentContainer = styled("div")({
     gap: "32px",
     width: "100%",
     maxWidth: `${DESKTOP_MEDIA_MAX_WIDTH_PX}px`,
-    height: "100vh",
+    minHeight: "100vh",
+    height: "100dvh",
     padding: "42px 24px 24px",
     boxSizing: "border-box",
 });
@@ -760,16 +786,19 @@ const MobileTitle = styled(Typography)({
 });
 
 const TopControls = styled("div")({
-    display: "grid",
-    gridTemplateColumns: "64px minmax(0, 1fr) auto",
+    position: "relative",
+    display: "flex",
     alignItems: "center",
-    columnGap: "28px",
+    justifyContent: "center",
+    minHeight: "64px",
     width: "100%",
-    "@media (max-width: 900px)": { columnGap: "12px" },
+    boxSizing: "border-box",
+    "@media (max-width: 900px)": { minHeight: "56px" },
 });
 
 const HeaderSection = styled("div")({
-    width: "100%",
+    width: "min(100%, 448px)",
+    maxWidth: `${DESKTOP_PROGRESS_MAX_WIDTH_PX}px`,
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
@@ -792,6 +821,10 @@ const MemoryTitle = styled(Typography)({
 });
 
 const PlaybackControl = styled("button")({
+    position: "absolute",
+    left: 0,
+    top: "50%",
+    transform: "translateY(-50%)",
     width: "64px",
     height: "64px",
     borderRadius: "19.2px",
@@ -827,6 +860,64 @@ const JoinNowButton = styled("a")({
     "@media (max-width: 900px)": { padding: "14px 24px", fontSize: "14px" },
 });
 
+const TopRightActions = styled("div")({
+    position: "absolute",
+    right: "-72px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    "@media (max-width: 1200px)": { right: "-36px" },
+    "@media (max-width: 1000px)": { right: 0 },
+    "@media (max-width: 900px)": { gap: "10px" },
+});
+
+const BrandLink = styled("a")({
+    color: "inherit",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+});
+
+const DesktopBrandFigma = styled("div")({
+    position: "relative",
+    width: "58px",
+    height: "42px",
+    lineHeight: 0,
+    flexShrink: 0,
+});
+
+const DesktopBrandWordmark = styled("div")({
+    position: "absolute",
+    top: "0",
+    left: "0",
+    color: "white",
+    transform: "rotate(-4.27deg)",
+    transformOrigin: "left center",
+});
+
+const BrandTagBase = styled("div")({
+    borderRadius: "999px",
+    padding: "2px 8px",
+    fontSize: "9px",
+    lineHeight: "11px",
+    fontWeight: 700,
+    backgroundColor: "#08c225",
+    color: "white",
+    whiteSpace: "nowrap",
+});
+
+const DesktopBrandTag = styled(BrandTagBase)({
+    position: "absolute",
+    right: "0",
+    top: "14px",
+    transform: "rotate(-8.52deg)",
+    transformOrigin: "right top",
+});
+
 const MobileBottomBar = styled("div")({
     width: "100%",
     display: "flex",
@@ -835,26 +926,6 @@ const MobileBottomBar = styled("div")({
     gap: "10px",
     marginTop: "auto",
     paddingBottom: "2px",
-});
-
-const MobileBrand = styled("div")({
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    lineHeight: 0,
-});
-
-const MobileBrandTag = styled("div")({
-    marginTop: "-2px",
-    borderRadius: "999px",
-    padding: "2px 8px",
-    fontSize: "10px",
-    lineHeight: "12px",
-    fontWeight: 700,
-    backgroundColor: "#08c225",
-    color: "white",
 });
 
 const MobileJoinNowButton = styled("a")({
@@ -999,6 +1070,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         >
             <Box
                 onAnimationEnd={state === "active" ? onComplete : undefined}
+                style={
+                    state === "active"
+                        ? { animationPlayState: paused ? "paused" : "running" }
+                        : undefined
+                }
                 sx={{
                     position: "absolute",
                     top: 0,
@@ -1014,7 +1090,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                               : "0%",
                     ...(state === "active" && {
                         animation: `${progressFillAnimation} ${duration}ms linear forwards`,
-                        animationPlayState: paused ? "paused" : "running",
                     }),
                     ...(state === "past" && { transition: "none" }),
                 }}
@@ -1043,8 +1118,7 @@ const MediaFrame = styled("div")({
     borderRadius: "24px",
     overflow: "hidden",
     isolation: "isolate",
-    backgroundColor: "#111111",
-    boxShadow: "0 14px 38px rgba(0, 0, 0, 0.35)",
+    backgroundColor: "transparent",
     width: "fit-content",
     height: "fit-content",
     maxWidth: DESKTOP_MEDIA_MAX_WIDTH_CSS,
@@ -1179,15 +1253,17 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
                     alt=""
                     draggable={false}
                     onLoad={(event) => {
-                        onAspectRatio?.(
-                            event.currentTarget.naturalWidth,
-                            event.currentTarget.naturalHeight,
-                        );
+                        const isFullImageLoad =
+                            !!fullImageURL &&
+                            event.currentTarget.src === fullImageURL;
+                        if (isFullImageLoad) {
+                            onAspectRatio?.(
+                                event.currentTarget.naturalWidth,
+                                event.currentTarget.naturalHeight,
+                            );
+                        }
                         setIsLoading(false);
-                        if (
-                            fullImageURL &&
-                            event.currentTarget.src === fullImageURL
-                        ) {
+                        if (isFullImageLoad) {
                             signalReady();
                         }
                     }}
