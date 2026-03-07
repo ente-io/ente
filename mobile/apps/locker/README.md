@@ -29,8 +29,12 @@ flutter run -t lib/main.dart --flavor independent
 
 For iOS, use `flutter run`
 
-## TODOs
+## Certificate Fingerprints
 
-Refactor and merge
-- [ ] Verify correctness for `PackageInfoUtil.getPackageName()` on Linux and Windows
-- [ ] Update `file_url.dart` to download only via CF worker when necessary
+- **SHA1**: EF:BA:46:7F:BE:E2:F7:9A:0C:A7:76:A2:9D:AA:70:13:B9:B7:AE:D2
+- **SHA256**: 6E:5B:71:61:B0:FA:F1:01:B6:AF:3D:33:C6:B0:8C:AD:AC:4A:8B:DF:85:E5:BE:A5:06:83:AA:FA:74:05:0D:B1
+
+To verify these fingerprints, use the following command:
+```bash
+apksigner verify --print-certs <path_to_apk>
+```
