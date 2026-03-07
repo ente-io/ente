@@ -139,7 +139,13 @@ class MemoryShareService {
         return share;
       }).toList();
 
+      _memoryShareByHashCache.clear();
+      final activeShares = <MemoryShare>[];
       for (final share in result) {
+        if (share.isDeleted) {
+          await _db.delete(share.id);
+          continue;
+        }
         final localShare = await _db.getById(share.id);
         final mergedShare = share.copyWith(
           memoryHash: share.memoryHash ?? localShare?.memoryHash,
@@ -148,9 +154,10 @@ class MemoryShareService {
         );
         await _db.upsert(mergedShare);
         _updateMemoryShareCache(mergedShare);
+        activeShares.add(mergedShare);
       }
 
-      return result;
+      return activeShares;
     } catch (e, s) {
       _logger.severe("Failed to list memory shares", e, s);
       rethrow;
