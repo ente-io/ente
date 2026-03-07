@@ -154,46 +154,40 @@ struct SessionDrawerView: View {
                     hapticTap()
                     onOpenSettings()
                 } label: {
-                    HStack(spacing: EnsuSpacing.md) {
-                        Text(email ?? "")
-                            .font(EnsuTypography.body)
-                            .foregroundStyle(EnsuColor.textPrimary)
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Image("ArrowRight01Icon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(EnsuColor.textMuted)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                    footerButtonLabel(title: email ?? "")
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
             } else {
                 Button {
                     hapticTap()
                     onOpenSettings()
                 } label: {
-                    HStack(spacing: EnsuSpacing.md) {
-                        Text("Settings")
-                            .font(EnsuTypography.body)
-                            .foregroundStyle(EnsuColor.textPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Image("ArrowRight01Icon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(EnsuColor.textMuted)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                    footerButtonLabel(title: "Settings")
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
             }
             Spacer(minLength: 0)
         }
         .padding(EnsuSpacing.lg)
+    }
+
+    private func footerButtonLabel(title: String) -> some View {
+        HStack(spacing: EnsuSpacing.md) {
+            Text(title)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textPrimary)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Image("ArrowRight01Icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .foregroundStyle(EnsuColor.textMuted)
+        }
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .contentShape(Rectangle())
     }
 
     private func drawerPrimaryTile(icon: String, title: String, action: @escaping () -> Void, expands: Bool = true) -> some View {

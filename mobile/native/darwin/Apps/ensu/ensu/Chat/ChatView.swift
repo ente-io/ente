@@ -33,7 +33,6 @@ struct ChatView: View {
             && !viewState.isDrawerOpen
             && !viewState.didDismissKeyboard
             && !viewState.showSettings
-            && !viewState.showDeveloperSettings
     }
 
     private var overflowDialogPresented: Binding<Bool> {
@@ -129,7 +128,6 @@ struct ChatView: View {
                         && !viewModel.isGenerating
                         && !viewState.didDismissKeyboard
                         && !viewState.showSettings
-                        && !viewState.showDeveloperSettings
                     if shouldRestoreFocus {
                         requestInputFocus()
                     }
@@ -177,25 +175,6 @@ struct ChatView: View {
                 onCancel: { viewModel.cancelAttachmentDownload($0) },
                 onDismiss: { viewState.showAttachmentDownloads = false }
             )
-        }
-        .sheet(isPresented: $viewState.showModelSettings) {
-            ModelSettingsView(embeddedInNavigation: true)
-        }
-        .platformFullScreenCover(isPresented: $viewState.showDeveloperSettings) {
-            DeveloperSettingsView { message in
-                showToast(message, duration: 2)
-            }
-        }
-        .alert("Developer settings", isPresented: $viewState.showDeveloperAlert) {
-            Button("Yes") {
-                viewState.showDeveloperSettings = true
-                viewState.isOpeningDeveloperSettings = false
-            }
-            Button("Cancel", role: .cancel) {
-                viewState.isOpeningDeveloperSettings = false
-            }
-        } message: {
-            Text("Are you sure that you want to modify Developer settings?")
         }
         .alert(item: $viewState.deleteSession) { session in
             Alert(
@@ -478,31 +457,6 @@ struct ChatView: View {
             viewState.showSignInComingSoon = true
         }
     }
-
-    private func handleDeveloperTap() {
-        guard EnsuFeatureFlags.enableDeveloperTools else { return }
-        // Don't allow switching endpoints for logged-in users.
-        guard !appState.isLoggedIn else { return }
-
-        let now = Date()
-        if let lastDeveloperTapAt = viewState.lastDeveloperTapAt,
-           now.timeIntervalSince(lastDeveloperTapAt) > 2 {
-            viewState.developerTapCount = 0
-        }
-
-        viewState.lastDeveloperTapAt = now
-        viewState.developerTapCount += 1
-
-        guard viewState.developerTapCount >= 5 else { return }
-        viewState.developerTapCount = 0
-        presentDeveloperPrompt()
-    }
-
-    private func presentDeveloperPrompt() {
-        guard !viewState.isOpeningDeveloperSettings else { return }
-        viewState.isOpeningDeveloperSettings = true
-        viewState.showDeveloperAlert = true
-    }
 }
 
 private final class ChatViewState: ObservableObject {
@@ -510,12 +464,6 @@ private final class ChatViewState: ObservableObject {
     @Published var showSettings = false
     @Published var toastMessage: ToastMessage?
     @Published var deleteSession: ChatSession?
-    @Published var developerTapCount = 0
-    @Published var lastDeveloperTapAt: Date?
-    @Published var isOpeningDeveloperSettings = false
-    @Published var showDeveloperAlert = false
-    @Published var showDeveloperSettings = false
-    @Published var showModelSettings = false
     @Published var showAttachmentDownloads = false
     @Published var showSignInComingSoon = false
     @Published var pendingSignInRequest = false

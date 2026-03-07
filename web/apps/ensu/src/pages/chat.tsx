@@ -67,8 +67,6 @@ import {
 } from "services/chat/sync";
 import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
-    DEVELOPER_SETTINGS_ENABLED,
-    MODEL_SETTINGS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
 import { DEFAULT_MODEL, LlmProvider } from "services/llm/provider";
@@ -96,6 +94,9 @@ const formatTime = (timestamp: number) => {
 const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 const OVERFLOW_SAFETY_TOKENS = 256;
 const DEFAULT_WEB_CONTEXT_SIZE = 4096;
+const ADVANCED_SETTINGS_UNLOCK_KEY = "ensu.advancedSettingsUnlocked";
+const MODEL_SETTINGS_STORAGE_KEY = "ensu.modelSettings";
+const SYSTEM_PROMPT_STORAGE_KEY = "ensu.systemPrompt";
 
 const loadingPhraseVerbs = [
     "Generating",
@@ -177,12 +178,15 @@ const toSafeBlobPart = (bytes: Uint8Array): ArrayBuffer => {
     return copy.buffer;
 };
 
-const CHAT_SYSTEM_PROMPT_BODY =
-    "Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.";
+const DEFAULT_CHAT_SYSTEM_PROMPT_BODY =
+    "You are Ensu, an AI assistant built by Ente. Current date and time: $date\n\nUse Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request.";
+const SYSTEM_PROMPT_DATE_PLACEHOLDER = "$date";
 
-const buildChatSystemPrompt = () => {
+const buildChatSystemPrompt = (customSystemPrompt?: string) => {
     const dateAndTime = new Date().toLocaleString();
-    return `Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: ${dateAndTime}. ${CHAT_SYSTEM_PROMPT_BODY}`;
+    const promptBody =
+        customSystemPrompt?.trim() || DEFAULT_CHAT_SYSTEM_PROMPT_BODY;
+    return promptBody.split(SYSTEM_PROMPT_DATE_PLACEHOLDER).join(dateAndTime);
 };
 
 const SESSION_TITLE_PROMPT =
@@ -776,11 +780,12 @@ const Page: React.FC = () => {
     const [sessionSearch, setSessionSearch] = useState("");
     const [showSessionSearch, setShowSessionSearch] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
-    const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
+    const [advancedUnlocked, setAdvancedUnlocked] = useState(false);
     const [isDraftSession, setIsDraftSession] = useState(false);
     const [stickToBottom, setStickToBottom] = useState(true);
-    const [showDevSettings, setShowDevSettings] = useState(false);
     const [showModelSettings, setShowModelSettings] = useState(false);
+    const [showSystemPromptSettings, setShowSystemPromptSettings] =
+        useState(false);
     const [useCustomModel, setUseCustomModel] = useState(false);
     const [resolvedDefaultModel, setResolvedDefaultModel] =
         useState<ModelInfo>(DEFAULT_MODEL);
@@ -788,6 +793,9 @@ const Page: React.FC = () => {
     const [mmprojUrl, setMmprojUrl] = useState("");
     const [contextLength, setContextLength] = useState("");
     const [maxTokens, setMaxTokens] = useState("");
+    const [systemPrompt, setSystemPrompt] = useState(
+        DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
+    );
     const [modelUrlError, setModelUrlError] = useState<string | null>(null);
     const [mmprojError, setMmprojError] = useState<string | null>(null);
     const [contextError, setContextError] = useState<string | null>(null);
@@ -857,8 +865,8 @@ const Page: React.FC = () => {
     const userScrollTimeoutRef = useRef<number | null>(null);
     const currentSessionIdRef = useRef<string | undefined>(undefined);
     const isDraftSessionRef = useRef(false);
-    const logoClickCountRef = useRef(0);
-    const logoClickTimeoutRef = useRef<number | null>(null);
+    const buildVersionTapCountRef = useRef(0);
+    const buildVersionTapTimeoutRef = useRef<number | null>(null);
     const toastTimeoutRef = useRef<number | null>(null);
     const streamingBufferRef = useRef("");
     const streamingChunksRef = useRef<string[]>([]);
@@ -897,6 +905,10 @@ const Page: React.FC = () => {
         if (Array.isArray(value)) return value[0];
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
+
+    const buildVersion = process.env.NEXT_PUBLIC_ENSU_VERSION
+        ? `v${process.env.NEXT_PUBLIC_ENSU_VERSION}`
+        : "dev";
 
     const lastRouteUpdateRef = useRef<{ sessionId?: string; at: number }>({
         sessionId: undefined,
@@ -1200,7 +1212,15 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (typeof window === "undefined") return;
-        const raw = window.localStorage.getItem("ensu.modelSettings");
+        setAdvancedUnlocked(
+            window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1",
+        );
+        setSystemPrompt(
+            window.localStorage.getItem(SYSTEM_PROMPT_STORAGE_KEY)?.trim() ||
+                DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
+        );
+
+        const raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
         if (!raw) return;
         try {
             const parsed = JSON.parse(raw) as {
@@ -1226,13 +1246,11 @@ const Page: React.FC = () => {
                     maxTokens: parsed.maxTokens ?? "",
                 };
                 window.localStorage.setItem(
-                    "ensu.modelSettings",
+                    MODEL_SETTINGS_STORAGE_KEY,
                     JSON.stringify(nextSettings),
                 );
             }
-            setUseCustomModel(
-                MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
-            );
+            setUseCustomModel(!!parsed.useCustomModel);
             setModelUrl(parsed.modelUrl ?? "");
             setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
             setContextLength(clampedContextLength);
@@ -1934,7 +1952,7 @@ const Page: React.FC = () => {
     }, []);
 
     const getModelSettings = useCallback((): ModelSettings => {
-        const customModelEnabled = MODEL_SETTINGS_ENABLED && useCustomModel;
+        const customModelEnabled = useCustomModel;
         return {
             useCustomModel: customModelEnabled,
             modelUrl:
@@ -2400,7 +2418,7 @@ const Page: React.FC = () => {
                 contextSize -
                 (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
                 safetyMargin;
-            budget -= approxTokens(buildChatSystemPrompt());
+            budget -= approxTokens(buildChatSystemPrompt(systemPrompt));
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -2451,7 +2469,7 @@ const Page: React.FC = () => {
 
             return selected.reverse();
         },
-        [approxTokens, slicePathUntil, stripHiddenParts],
+        [approxTokens, slicePathUntil, stripHiddenParts, systemPrompt],
     );
 
     const handleNewChat = useCallback(() => {
@@ -2941,7 +2959,10 @@ const Page: React.FC = () => {
                     )) ?? [];
 
                 const messages: LlmMessage[] = [
-                    { role: "system", content: buildChatSystemPrompt() },
+                    {
+                        role: "system",
+                        content: buildChatSystemPrompt(systemPrompt),
+                    },
                     ...history,
                     { role: "user", content: promptText },
                 ];
@@ -3123,6 +3144,7 @@ const Page: React.FC = () => {
             scheduleStreamingFlush,
             flushStreamingText,
             maybeGenerateSessionTitle,
+            systemPrompt,
         ],
     );
 
@@ -3234,38 +3256,10 @@ const Page: React.FC = () => {
         [],
     );
 
-    const openDeveloperMenu = useCallback(() => {
-        if (!DEVELOPER_SETTINGS_ENABLED) return;
-        if (!MODEL_SETTINGS_ENABLED) {
-            setShowDevSettings(true);
-            return;
-        }
-        setShowDeveloperMenu(true);
-    }, []);
-    const closeDeveloperMenu = useCallback(
-        () => setShowDeveloperMenu(false),
-        [],
-    );
-
     const handleLogoClick = useCallback(() => {
         if (typeof window === "undefined") return;
-        if (!DEVELOPER_SETTINGS_ENABLED) {
-            window.location.reload();
-            return;
-        }
-        if (logoClickTimeoutRef.current) {
-            window.clearTimeout(logoClickTimeoutRef.current);
-        }
-        logoClickCountRef.current += 1;
-        if (logoClickCountRef.current >= 5) {
-            logoClickCountRef.current = 0;
-            openDeveloperMenu();
-            return;
-        }
-        logoClickTimeoutRef.current = window.setTimeout(() => {
-            logoClickCountRef.current = 0;
-        }, 1500);
-    }, [openDeveloperMenu]);
+        window.location.reload();
+    }, []);
 
     const markUserScrollIntent = useCallback(() => {
         userScrollIntentRef.current = true;
@@ -3334,9 +3328,6 @@ const Page: React.FC = () => {
         setShowSessionSearch(false);
     }, []);
 
-    const openDevSettings = useCallback(() => setShowDevSettings(true), []);
-    const closeDevSettings = useCallback(() => setShowDevSettings(false), []);
-
     const saveLogs = useCallback(async () => {
         log.info("Saving logs");
         const electron = globalThis.electron;
@@ -3372,13 +3363,39 @@ const Page: React.FC = () => {
     }, [isTauriRuntime, showMiniDialog]);
 
     const openModelSettings = useCallback(() => {
-        if (!MODEL_SETTINGS_ENABLED) return;
+        if (!advancedUnlocked) return;
         setShowModelSettings(true);
-    }, []);
+    }, [advancedUnlocked]);
     const closeModelSettings = useCallback(
         () => setShowModelSettings(false),
         [],
     );
+    const openSystemPromptSettings = useCallback(() => {
+        if (!advancedUnlocked) return;
+        setShowSystemPromptSettings(true);
+    }, [advancedUnlocked]);
+    const closeSystemPromptSettings = useCallback(
+        () => setShowSystemPromptSettings(false),
+        [],
+    );
+
+    const handleBuildVersionTap = useCallback(() => {
+        if (advancedUnlocked || typeof window === "undefined") return;
+        if (buildVersionTapTimeoutRef.current) {
+            window.clearTimeout(buildVersionTapTimeoutRef.current);
+        }
+        buildVersionTapCountRef.current += 1;
+        if (buildVersionTapCountRef.current >= 5) {
+            buildVersionTapCountRef.current = 0;
+            setAdvancedUnlocked(true);
+            window.localStorage.setItem(ADVANCED_SETTINGS_UNLOCK_KEY, "1");
+            return;
+        }
+        buildVersionTapTimeoutRef.current = window.setTimeout(() => {
+            buildVersionTapCountRef.current = 0;
+            buildVersionTapTimeoutRef.current = null;
+        }, 1800);
+    }, [advancedUnlocked]);
 
     const suggestedModels = useMemo(
         () =>
@@ -3432,8 +3449,15 @@ const Page: React.FC = () => {
             }
         };
 
-        const modelError = modelUrl ? validateUrl(modelUrl) : "Required";
-        const mmprojError = isTauriRuntime ? validateUrl(mmprojUrl) : undefined;
+        const modelError = useCustomModel
+            ? modelUrl
+                ? validateUrl(modelUrl)
+                : "Required"
+            : undefined;
+        const mmprojError =
+            useCustomModel && isTauriRuntime
+                ? validateUrl(mmprojUrl)
+                : undefined;
 
         const contextErrorValue =
             contextLength && !/^\d+$/.test(contextLength)
@@ -3470,19 +3494,19 @@ const Page: React.FC = () => {
         if (!validateModelSettings()) return;
         setIsSavingModel(true);
         const payload = {
-            useCustomModel: true,
-            modelUrl,
-            mmprojUrl: isTauriRuntime ? mmprojUrl : "",
+            useCustomModel,
+            modelUrl: useCustomModel ? modelUrl : "",
+            mmprojUrl: useCustomModel && isTauriRuntime ? mmprojUrl : "",
             contextLength,
             maxTokens,
         };
         if (typeof window !== "undefined") {
             window.localStorage.setItem(
-                "ensu.modelSettings",
+                MODEL_SETTINGS_STORAGE_KEY,
                 JSON.stringify(payload),
             );
         }
-        setUseCustomModel(true);
+        setUseCustomModel(useCustomModel);
         setLoadedModelName(null);
         setIsSavingModel(false);
         setShowModelSettings(false);
@@ -3491,13 +3515,14 @@ const Page: React.FC = () => {
         maxTokens,
         mmprojUrl,
         modelUrl,
+        useCustomModel,
         validateModelSettings,
         isTauriRuntime,
     ]);
 
     const handleUseDefaultModel = useCallback(() => {
         if (typeof window !== "undefined") {
-            window.localStorage.removeItem("ensu.modelSettings");
+            window.localStorage.removeItem(MODEL_SETTINGS_STORAGE_KEY);
         }
         setUseCustomModel(false);
         setModelUrl("");
@@ -3512,15 +3537,34 @@ const Page: React.FC = () => {
         setShowModelSettings(false);
     }, []);
 
-    const handleFillSuggestion = useCallback(
-        (url: string, mmproj?: string) => {
-            setModelUrl(url);
-            setMmprojUrl(allowMmproj ? (mmproj ?? "") : "");
-            setModelUrlError(null);
-            setMmprojError(null);
-        },
-        [allowMmproj],
-    );
+    const handleSaveSystemPrompt = useCallback(() => {
+        const normalizedPrompt = systemPrompt.trim();
+        const isDefaultPrompt =
+            !normalizedPrompt ||
+            normalizedPrompt === DEFAULT_CHAT_SYSTEM_PROMPT_BODY;
+        if (typeof window !== "undefined") {
+            if (!isDefaultPrompt) {
+                window.localStorage.setItem(
+                    SYSTEM_PROMPT_STORAGE_KEY,
+                    normalizedPrompt,
+                );
+            } else {
+                window.localStorage.removeItem(SYSTEM_PROMPT_STORAGE_KEY);
+            }
+        }
+        setSystemPrompt(
+            isDefaultPrompt ? DEFAULT_CHAT_SYSTEM_PROMPT_BODY : normalizedPrompt,
+        );
+        setShowSystemPromptSettings(false);
+    }, [systemPrompt]);
+
+    const handleUseDefaultSystemPrompt = useCallback(() => {
+        if (typeof window !== "undefined") {
+            window.localStorage.removeItem(SYSTEM_PROMPT_STORAGE_KEY);
+        }
+        setSystemPrompt(DEFAULT_CHAT_SYSTEM_PROMPT_BODY);
+        setShowSystemPromptSettings(false);
+    }, []);
 
     const closeAttachmentMenu = useCallback(() => {
         setAttachmentAnchor(null);
@@ -4281,12 +4325,11 @@ const Page: React.FC = () => {
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}
-                developerSettingsEnabled={DEVELOPER_SETTINGS_ENABLED}
-                modelSettingsEnabled={MODEL_SETTINGS_ENABLED}
-                showDeveloperMenu={showDeveloperMenu}
-                closeDeveloperMenu={closeDeveloperMenu}
+                advancedUnlocked={advancedUnlocked}
+                buildVersion={buildVersion}
+                handleBuildVersionTap={handleBuildVersionTap}
                 openModelSettings={openModelSettings}
-                openDevSettings={openDevSettings}
+                openSystemPromptSettings={openSystemPromptSettings}
                 isSmall={isSmall}
                 deleteSessionId={deleteSessionId}
                 deleteSessionLabel={deleteSessionLabel}
@@ -4296,17 +4339,18 @@ const Page: React.FC = () => {
                 closeModelSettings={closeModelSettings}
                 useCustomModel={useCustomModel}
                 defaultModelName={resolvedDefaultModel.name}
+                defaultModelUrl={resolvedDefaultModel.url}
                 loadedModelName={loadedModelName}
                 allowMmproj={allowMmproj}
                 isTauriRuntime={isTauriRuntime}
                 modelUrl={modelUrl}
                 setModelUrl={setModelUrl}
+                setUseCustomModel={setUseCustomModel}
                 modelUrlError={modelUrlError}
                 mmprojUrl={mmprojUrl}
                 setMmprojUrl={setMmprojUrl}
                 mmprojError={mmprojError}
                 suggestedModels={suggestedModels}
-                handleFillSuggestion={handleFillSuggestion}
                 contextLength={contextLength}
                 setContextLength={setContextLength}
                 contextError={contextError}
@@ -4316,11 +4360,17 @@ const Page: React.FC = () => {
                 isSavingModel={isSavingModel}
                 handleSaveModel={handleSaveModel}
                 handleUseDefaultModel={handleUseDefaultModel}
+                showSystemPromptSettings={showSystemPromptSettings}
+                closeSystemPromptSettings={closeSystemPromptSettings}
+                systemPrompt={systemPrompt}
+                setSystemPrompt={setSystemPrompt}
+                handleSaveSystemPrompt={handleSaveSystemPrompt}
+                handleUseDefaultSystemPrompt={
+                    handleUseDefaultSystemPrompt
+                }
                 syncNotificationOpen={syncNotificationOpen}
                 setSyncNotificationOpen={setSyncNotificationOpen}
                 syncNotification={syncNotification}
-                showDevSettings={showDevSettings}
-                closeDevSettings={closeDevSettings}
                 modelGateStatus={modelGateStatus}
             />
         </>

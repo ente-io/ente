@@ -394,12 +394,12 @@ final class ChatViewModel: ObservableObject {
     }
 
     private static let defaultTemperature: Float = 0.5
-    private static let systemPromptBody = "Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
     private static let systemPromptDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         return formatter
     }()
+    private static let systemPromptDatePlaceholder = "$date"
     private static let defaultGenerationMaxTokens = 8_192
     private static let overflowSafetyTokens = 128
     private static let imageTokenEstimate = 768
@@ -408,9 +408,10 @@ final class ChatViewModel: ObservableObject {
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
     private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
 
-    private static func systemPrompt() -> String {
-        let dateAndTime = systemPromptDateFormatter.string(from: Date())
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: \(dateAndTime). \(systemPromptBody)"
+    private func systemPrompt() -> String {
+        let dateAndTime = Self.systemPromptDateFormatter.string(from: Date())
+        let promptBody = ModelSettingsStore.currentSystemPromptBody()
+        return promptBody.replacingOccurrences(of: Self.systemPromptDatePlaceholder, with: dateAndTime)
     }
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
@@ -1517,7 +1518,7 @@ final class ChatViewModel: ObservableObject {
             overflowAlert = nil
 
             let history = historySelection.messages
-            let systemMessage = InferenceMessage(text: Self.systemPrompt(), role: .system, hasAttachments: false)
+            let systemMessage = InferenceMessage(text: systemPrompt(), role: .system, hasAttachments: false)
             let messages = [systemMessage] + history + [InferenceMessage(text: prompt.text, role: .user, hasAttachments: !userNode.attachments.isEmpty)]
 
             let bufferLock = NSLock()
@@ -2543,7 +2544,7 @@ final class ChatViewModel: ObservableObject {
         let historyMessages = path.prefix { $0.id != currentMessageId }
 
         let inputBudget = max(0, limits.contextLength - limits.maxOutput - Self.overflowSafetyTokens)
-        let systemTokens = estimateTokens(Self.systemPrompt())
+        let systemTokens = estimateTokens(systemPrompt())
         let promptTokens = estimatePromptTokens(promptText: promptText, imageCount: promptImageCount)
         let historyTokens = historyMessages.reduce(0) { total, node in
             total + estimateTokens(historyText(node))

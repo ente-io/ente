@@ -13,6 +13,12 @@ ARCHIVE_PATH="$DERIVED_DATA_PATH/Archive/ensu.xcarchive"
 EXPORT_PATH="$DERIVED_DATA_PATH/Export"
 EXPORT_OPTIONS_PLIST="$ROOT/ExportOptions-AppStore.plist"
 
+XCODE_EXTRA_ARGS=()
+XCODE_VERSION="$(xcodebuild -version 2>/dev/null | awk '/^Xcode / { print $2; exit }')"
+if [[ "$XCODE_VERSION" == 26* ]]; then
+  XCODE_EXTRA_ARGS+=(SWIFT_ENABLE_EXPLICIT_MODULES=NO)
+fi
+
 usage() {
   cat <<'EOF'
 Build Ensu Apple app.
@@ -187,7 +193,8 @@ build_archive() {
     -sdk iphoneos \
     -destination 'generic/platform=iOS' \
     -archivePath "$ARCHIVE_PATH" \
-    archive
+    archive \
+    "${XCODE_EXTRA_ARGS[@]}"
   echo "✅ Archive: $ARCHIVE_PATH"
 }
 
@@ -211,7 +218,8 @@ case "$MODE" in
       -configuration Debug \
       -sdk iphonesimulator \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH"
+      -derivedDataPath "$DERIVED_DATA_PATH" \
+      "${XCODE_EXTRA_ARGS[@]}"
     ;;
   device)
     if [[ -z "$DESTINATION_ID" ]]; then
@@ -229,7 +237,8 @@ case "$MODE" in
       -configuration Debug \
       -sdk iphoneos \
       -destination "id=$DESTINATION_ID" \
-      -derivedDataPath "$DERIVED_DATA_PATH"
+      -derivedDataPath "$DERIVED_DATA_PATH" \
+      "${XCODE_EXTRA_ARGS[@]}"
     ;;
   archive)
     build_archive

@@ -15,6 +15,7 @@ fi
 
 REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
+GENERATED_DIR="${SRCROOT}/ensu/Generated"
 
 mkdir -p "${OUT_DIR}"
 
@@ -33,7 +34,7 @@ write_endpoint_config() {
   endpoint_value="${endpoint_value%%$'\n'*}"
   endpoint_value="$(echo "${endpoint_value}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 
-  generated_file="${SRCROOT}/ensu/Generated/EndpointConfig.swift"
+  generated_file="${GENERATED_DIR}/EndpointConfig.swift"
   mkdir -p "$(dirname "${generated_file}")"
 
   if [ -n "${endpoint_value}" ]; then
@@ -54,6 +55,55 @@ enum BuildEndpointConfig {
 EOF
 }
 
+bindings_missing() {
+  for binding in \
+    "${GENERATED_DIR}/core.swift" \
+    "${GENERATED_DIR}/coreFFI.h" \
+    "${GENERATED_DIR}/coreFFI.modulemap" \
+    "${GENERATED_DIR}/db.swift" \
+    "${GENERATED_DIR}/dbFFI.h" \
+    "${GENERATED_DIR}/dbFFI.modulemap" \
+    "${GENERATED_DIR}/sync.swift" \
+    "${GENERATED_DIR}/syncFFI.h" \
+    "${GENERATED_DIR}/syncFFI.modulemap"; do
+    if [ ! -f "${binding}" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+generate_swift_binding() {
+  crate_dir="$1"
+  dylib_name="$2"
+
+  (
+    cd "${crate_dir}"
+    cargo build --locked --release
+    uniffi-bindgen generate "target/release/${dylib_name}" --language swift --out-dir "${GENERATED_DIR}"
+  )
+}
+
+ensure_generated_bindings() {
+  if ! bindings_missing; then
+    return
+  fi
+
+  if ! command -v uniffi-bindgen >/dev/null 2>&1; then
+    echo "Missing generated UniFFI Swift bindings in ${GENERATED_DIR}." >&2
+    echo "Install uniffi-bindgen and retry the build." >&2
+    exit 1
+  fi
+
+  echo "Generating missing UniFFI Swift bindings..."
+  mkdir -p "${GENERATED_DIR}"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/core" "libcore.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/db" "libdb.dylib"
+  generate_swift_binding "${REPO_ROOT}/rust/uniffi/ensu/sync" "libsync.dylib"
+}
+
+ensure_generated_bindings
 write_endpoint_config
 
 # Map Xcode platform+arch to Rust target triple.

@@ -20,30 +20,34 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import io.ente.ensu.chat.ChatView
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.modelsettings.ModelSettingsScreen
-import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.LogViewerScreen
 import io.ente.ensu.settings.SettingsScreen
+import io.ente.ensu.settings.SystemPromptSettingsScreen
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun HomeNavigation(
     appState: AppState,
     store: AppStore,
     logRepository: io.ente.ensu.data.logging.FileLogRepository,
-    authService: io.ente.ensu.data.auth.EnsuAuthService,
     currentEndpointFlow: Flow<String>,
+    advancedSettingsDataStore: AdvancedSettingsDataStore,
+    appVersion: String,
     navController: NavHostController,
     drawerState: DrawerState,
     currentRoute: String,
@@ -58,6 +62,8 @@ internal fun HomeNavigation(
     onOpenAttachment: (Attachment) -> Unit,
     onDeleteAccount: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         containerColor = EnsuColor.backgroundBase(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -88,8 +94,8 @@ internal fun HomeNavigation(
                 HomeRoute.ModelSettings -> {
                     SimpleTopBar(title = "Model Settings") { navController.popBackStack() }
                 }
-                HomeRoute.DeveloperSettings -> {
-                    SimpleTopBar(title = "Developer Settings") { navController.popBackStack() }
+                HomeRoute.SystemPromptSettings -> {
+                    SimpleTopBar(title = "System Prompt") { navController.popBackStack() }
                 }
                 HomeRoute.Settings -> {
                     SimpleTopBar(title = "Settings") { navController.popBackStack() }
@@ -146,9 +152,19 @@ internal fun HomeNavigation(
                     val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
                     SettingsScreen(
                         currentEndpoint = currentEndpoint,
+                        buildVersion = appVersion,
                         isLoggedIn = appState.auth.isLoggedIn,
                         userEmail = appState.auth.email,
+                        isAdvancedUnlocked = appState.developerSettings.isAdvancedUnlocked,
                         onOpenLogs = { navController.navigate(HomeRoute.Logs) },
+                        onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
+                        onOpenSystemPromptSettings = { navController.navigate(HomeRoute.SystemPromptSettings) },
+                        onUnlockAdvanced = {
+                            store.unlockAdvancedSettings()
+                            scope.launch {
+                                advancedSettingsDataStore.unlockAdvancedSettings()
+                            }
+                        },
                         onSignOut = onSignOut,
                         onSignIn = onSignIn,
                         onDeleteAccount = onDeleteAccount
@@ -174,22 +190,45 @@ internal fun HomeNavigation(
                 ) {
                     ModelSettingsScreen(
                         state = appState.modelSettings,
-                        onSave = store::updateModelSettings,
-                        onReset = store::resetModelSettings
+                        onSave = { modelSettings ->
+                            store.updateModelSettings(modelSettings)
+                            scope.launch {
+                                advancedSettingsDataStore.saveModelSettings(modelSettings)
+                            }
+                        },
+                        onReset = {
+                            store.resetModelSettings()
+                            scope.launch {
+                                advancedSettingsDataStore.resetModelSettings()
+                            }
+                        }
                     )
                 }
                 composable(
-                    route = HomeRoute.DeveloperSettings,
+                    route = HomeRoute.SystemPromptSettings,
                     enterTransition = { forwardEnter() },
                     exitTransition = { forwardExit() },
                     popEnterTransition = { backEnter() },
                     popExitTransition = { backExit() }
                 ) {
-                    DeveloperSettingsScreen(
-                        authService = authService,
-                        currentEndpointFlow = currentEndpointFlow,
-                        onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
-                        onSaved = { navController.popBackStack() }
+                    SystemPromptSettingsScreen(
+                        systemPrompt = appState.developerSettings.systemPrompt,
+                        onSave = { value ->
+                            val updated = appState.developerSettings.copy(systemPrompt = value)
+                            store.updateDeveloperSettings(updated)
+                            scope.launch {
+                                advancedSettingsDataStore.saveSystemPrompt(value)
+                            }
+                            navController.popBackStack()
+                        },
+                        onReset = {
+                            val updated = appState.developerSettings.copy(systemPrompt = "")
+                            store.updateDeveloperSettings(updated)
+                            scope.launch {
+                                advancedSettingsDataStore.saveSystemPrompt("")
+                            }
+                            navController.popBackStack()
+                        }
                     )
                 }
             }
@@ -202,7 +241,7 @@ internal object HomeRoute {
     const val Settings = "settings"
     const val Logs = "logs"
     const val ModelSettings = "model-settings"
-    const val DeveloperSettings = "developer-settings"
+    const val SystemPromptSettings = "system-prompt-settings"
 }
 
 internal fun AnimatedContentTransitionScope<NavBackStackEntry>.forwardEnter() =

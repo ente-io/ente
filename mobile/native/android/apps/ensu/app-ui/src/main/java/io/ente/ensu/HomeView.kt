@@ -53,6 +53,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import io.ente.ensu.auth.AuthFlowScreen
 import io.ente.ensu.chat.SessionDrawer
 import io.ente.ensu.components.NativeChoiceDialog
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.FilePathManager
@@ -80,7 +81,9 @@ fun HomeView(
     logs: List<LogEntry>,
     logRepository: FileLogRepository,
     authService: EnsuAuthService,
-    currentEndpointFlow: Flow<String>
+    currentEndpointFlow: Flow<String>,
+    advancedSettingsDataStore: AdvancedSettingsDataStore,
+    appVersion: String
 ) {
     val drawerState = androidx.compose.material3.rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -99,34 +102,12 @@ fun HomeView(
     var showLogShareDialog by remember { mutableStateOf(false) }
     var showSignInComingSoon by remember { mutableStateOf(false) }
 
-    var developerTapCount by remember { mutableStateOf(0) }
-    var lastDeveloperTapAt by remember { mutableStateOf<Long?>(null) }
-    var showDeveloperDialog by remember { mutableStateOf(false) }
-
     val handleSignInRequest: () -> Unit = handle@{
         if (!EnsuFeatureFlags.enableSignIn) {
             showSignInComingSoon = true
             return@handle
         }
         isShowingAuth = true
-    }
-
-    val handleDeveloperTap: () -> Unit = handle@{
-        if (!EnsuFeatureFlags.enableDeveloperTools) return@handle
-        // Don't allow switching endpoints for logged-in users.
-        if (appState.auth.isLoggedIn) return@handle
-
-        val now = System.currentTimeMillis()
-        val last = lastDeveloperTapAt
-        if (last != null && now - last > 2000) {
-            developerTapCount = 0
-        }
-        lastDeveloperTapAt = now
-        developerTapCount += 1
-        if (developerTapCount >= 5) {
-            developerTapCount = 0
-            showDeveloperDialog = true
-        }
     }
 
     val imagePicker = rememberAttachmentPicker(
@@ -282,8 +263,9 @@ fun HomeView(
             appState = appState,
             store = store,
             logRepository = logRepository,
-            authService = authService,
             currentEndpointFlow = currentEndpointFlow,
+            advancedSettingsDataStore = advancedSettingsDataStore,
+            appVersion = appVersion,
             navController = navController,
             drawerState = drawerState,
             currentRoute = currentRoute,
@@ -401,47 +383,6 @@ fun HomeView(
                 Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
             }
         }
-    }
-
-    if (showDeveloperDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeveloperDialog = false },
-            title = {
-                Text(text = "Developer settings", style = EnsuTypography.h3Bold)
-            },
-            text = {
-                Text(
-                    text = "Are you sure that you want to modify Developer settings?",
-                    style = EnsuTypography.body,
-                    color = EnsuColor.textMuted()
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeveloperDialog = false
-                        navController.navigate(HomeRoute.DeveloperSettings) {
-                            launchSingleTop = true
-                            restoreState = true
-                            popUpTo(HomeRoute.Chat) { inclusive = false }
-                        }
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
-                ) {
-                    Text(text = "Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDeveloperDialog = false },
-                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textMuted())
-                ) {
-                    Text(text = "Cancel")
-                }
-            },
-            containerColor = EnsuColor.backgroundBase()
-        )
     }
 
     if (isShowingSignOutDialog) {
@@ -601,4 +542,3 @@ private fun querySize(resolver: android.content.ContentResolver, uri: Uri): Long
     }
     return null
 }
-

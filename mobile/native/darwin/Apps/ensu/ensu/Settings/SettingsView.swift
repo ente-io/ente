@@ -14,6 +14,8 @@ struct SettingsView: View {
 
     @State private var query: String = ""
     @State private var showSignOutConfirm = false
+    @State private var buildVersionTapCount = 0
+    @State private var isAdvancedUnlocked = EnsuAdvancedSettings.isUnlocked
 
     var body: some View {
         NavigationStack {
@@ -60,6 +62,22 @@ struct SettingsView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if shouldShowAdvancedSection {
+                        Text("Advanced")
+                            .font(EnsuTypography.small)
+                            .foregroundStyle(EnsuColor.textMuted)
+                            .padding(.top, EnsuSpacing.xs)
+
+                        ForEach(filteredAdvancedItems) { item in
+                            NavigationLink {
+                                item.destination
+                            } label: {
+                                settingsCard(title: item.title, iconName: item.iconName, showsChevron: true)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
                     if let endpointInfoText {
                         Text(endpointInfoText)
                             .font(EnsuTypography.small)
@@ -68,6 +86,16 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.vertical, 8)
                     }
+
+                    Button(action: handleBuildVersionTap) {
+                        Text(buildVersionText)
+                            .font(EnsuTypography.small)
+                            .foregroundStyle(EnsuColor.textMuted)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(EnsuSpacing.lg)
             }
@@ -103,6 +131,15 @@ struct SettingsView: View {
         guard !trimmedQuery.isEmpty else { return allItems }
         let q = trimmedQuery.lowercased()
         return allItems.filter { item in
+            item.title.lowercased().contains(q)
+        }
+    }
+
+    private var filteredAdvancedItems: [SettingsItem] {
+        guard isAdvancedUnlocked else { return [] }
+        guard !trimmedQuery.isEmpty else { return advancedItems }
+        let q = trimmedQuery.lowercased()
+        return advancedItems.filter { item in
             item.title.lowercased().contains(q)
         }
     }
@@ -188,6 +225,25 @@ struct SettingsView: View {
         ]
     }
 
+    private var advancedItems: [SettingsItem] {
+        [
+            SettingsItem(
+                title: "Model settings",
+                iconName: "Settings01Icon",
+                destination: AnyView(ModelSettingsView(embeddedInNavigation: true))
+            ),
+            SettingsItem(
+                title: "System prompt",
+                iconName: "Edit01Icon",
+                destination: AnyView(SystemPromptSettingsView(embeddedInNavigation: true))
+            )
+        ]
+    }
+
+    private var shouldShowAdvancedSection: Bool {
+        isAdvancedUnlocked && !filteredAdvancedItems.isEmpty
+    }
+
     private var endpointInfoText: String? {
         guard trimmedQuery.isEmpty else { return nil }
 
@@ -204,11 +260,27 @@ struct SettingsView: View {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var buildVersionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "unknown"
+        let build = info?["CFBundleVersion"] as? String ?? "unknown"
+        return "Build \(version) (\(build))"
+    }
+
     private func openDeleteAccountEmail() {
         let subject = "Request Deletion for Ente Account"
         let encoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
         guard let url = URL(string: "mailto:support@ente.io?subject=\(encoded)") else { return }
         openURL(url)
+    }
+
+    private func handleBuildVersionTap() {
+        guard !isAdvancedUnlocked else { return }
+        buildVersionTapCount += 1
+        guard buildVersionTapCount >= 5 else { return }
+        EnsuAdvancedSettings.unlock()
+        isAdvancedUnlocked = true
+        buildVersionTapCount = 0
     }
 
     private func openExternalLink(_ urlString: String) {
@@ -256,6 +328,150 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(EnsuColor.fillFaint)
         .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
+    }
+}
+
+private struct SystemPromptSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let embeddedInNavigation: Bool
+
+    @ObservedObject private var settings = ModelSettingsStore.shared
+    @State private var promptBody: String = ""
+    @State private var isSaving = false
+
+    init(embeddedInNavigation: Bool = false) {
+        self.embeddedInNavigation = embeddedInNavigation
+    }
+
+    var body: some View {
+        Group {
+            if embeddedInNavigation {
+                content
+                    #if os(iOS)
+                    .navigationBarTitleDisplayMode(.inline)
+                    #endif
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("System Prompt")
+                                .font(EnsuTypography.large)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                        }
+                    }
+            } else {
+                #if os(iOS)
+                NavigationStack {
+                    content
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .principal) {
+                                Text("System Prompt")
+                                    .font(EnsuTypography.large)
+                                    .foregroundStyle(EnsuColor.textPrimary)
+                            }
+                            ToolbarItem(placement: .primaryAction) {
+                                Button("Done") { dismiss() }
+                            }
+                        }
+                }
+                #else
+                content
+                #endif
+            }
+        }
+        .onAppear {
+            promptBody = ModelSettingsStore.resolveSystemPromptBody(settings.systemPromptBody)
+        }
+        #if os(macOS)
+        .safeAreaInset(edge: .top) {
+            if embeddedInNavigation {
+                EmptyView()
+            } else {
+                MacSheetHeader(
+                    leading: {
+                        EmptyView()
+                    },
+                    center: {
+                        Text("System Prompt")
+                            .font(EnsuTypography.large)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                    },
+                    trailing: {
+                        Button("Done") {
+                            dismiss()
+                        }
+                        .font(EnsuTypography.small)
+                        .foregroundStyle(EnsuColor.textMuted)
+                        .buttonStyle(.plain)
+                    }
+                )
+            }
+        }
+        #endif
+    }
+
+    private var content: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: EnsuSpacing.xxl) {
+                sectionHeader("Prompt text")
+
+                Text("This prompt is used as-is. Use $date anywhere to insert the current date and time.")
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
+
+                TextEditor(text: $promptBody)
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textPrimary)
+                    .scrollContentBackground(.hidden)
+                    .frame(minHeight: 220)
+                    .padding(.horizontal, EnsuSpacing.inputHorizontal)
+                    .padding(.vertical, EnsuSpacing.inputVertical)
+                    .background(EnsuColor.fillFaint)
+                    .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
+
+                Text("Leave this blank to use the default prompt.")
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
+
+                Divider().background(EnsuColor.border)
+
+                VStack(spacing: EnsuSpacing.md) {
+                    PrimaryButton(text: "Save Prompt", isLoading: isSaving, isEnabled: !isSaving) {
+                        saveTapped()
+                    }
+
+                    Button("Use Default Prompt") {
+                        resetTapped()
+                    }
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textMuted)
+                }
+            }
+            .padding(EnsuSpacing.lg)
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(EnsuTypography.body)
+            .foregroundStyle(EnsuColor.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func saveTapped() {
+        isSaving = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            let trimmedPrompt = promptBody.trimmingCharacters(in: .whitespacesAndNewlines)
+            let defaultPrompt = ModelSettingsStore.defaultSystemPromptBody.trimmingCharacters(in: .whitespacesAndNewlines)
+            settings.systemPromptBody = trimmedPrompt == defaultPrompt ? "" : trimmedPrompt
+            promptBody = ModelSettingsStore.resolveSystemPromptBody(settings.systemPromptBody)
+            isSaving = false
+        }
+    }
+
+    private func resetTapped() {
+        settings.systemPromptBody = ""
+        promptBody = ModelSettingsStore.defaultSystemPromptBody
     }
 }
 

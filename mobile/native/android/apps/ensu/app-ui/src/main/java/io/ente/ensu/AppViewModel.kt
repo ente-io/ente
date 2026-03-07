@@ -5,6 +5,7 @@ import android.os.Build
 import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.data.auth.EnsuAuthService
@@ -23,7 +24,9 @@ import java.io.File
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val sessionPreferences = SessionPreferencesDataStore(application)
     private val endpointPreferences = EndpointPreferencesDataStore(application)
+    val advancedSettingsDataStore = AdvancedSettingsDataStore(application)
     private val credentialStore = CredentialStore(application)
+    val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
 
     val logRepository = FileLogRepository(application)
     private val llmProvider = InferenceRsProvider(
@@ -55,7 +58,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val currentEndpointFlow = authService.currentEndpointFlow
 
     init {
-        val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
         val launchMessage = "App launched app=$appVersion device=${Build.MANUFACTURER} ${Build.MODEL} os=${Build.VERSION.RELEASE} (sdk=${Build.VERSION.SDK_INT})"
         logRepository.log(LogLevel.Info, launchMessage, tag = "App")
 
@@ -85,6 +87,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             authService.storedEndpointFlow.collectLatest { endpoint ->
                 authService.updateEndpoint(endpoint)
+            }
+        }
+
+        viewModelScope.launch {
+            advancedSettingsDataStore.settingsFlow.collectLatest { settings ->
+                store.applyPersistedSettings(
+                    developerSettings = settings.developerSettings,
+                    modelSettings = settings.modelSettings
+                )
             }
         }
     }

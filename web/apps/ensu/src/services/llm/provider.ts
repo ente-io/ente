@@ -17,27 +17,25 @@ const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
 const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
 export const DEFAULT_MODEL: ModelInfo = {
-    id: "lfm-2.5-vl-1.6b",
-    name: "LFM 2.5 VL 1.6B (Q4_0)",
-    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-    mmprojUrl:
-        "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-    description: "Liquid AI multimodal model (text-only on web)",
-    sizeBytes: 695_752_160,
-    mmprojSizeBytes: 583_109_888,
-    sizeHuman: "~664 MB",
-};
-
-const TAURI_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-3.5-2b-q80",
+    id: "qwen-3.5-2b-q8_0",
     name: "Qwen 3.5 2B (Q8_0)",
     url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
     mmprojUrl:
         "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Qwen multimodal model",
     sizeBytes: 2_012_012_800,
     mmprojSizeBytes: 668_227_264,
-    sizeHuman: "2.68 GB",
+    sizeHuman: "2.50 GB",
+};
+
+const TAURI_DEFAULT_MODEL: ModelInfo = {
+    id: "qwen-3.5-2b-q8_0",
+    name: "Qwen 3.5 2B (Q8_0)",
+    url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+    mmprojUrl:
+        "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+    sizeBytes: 2_012_012_800,
+    mmprojSizeBytes: 668_227_264,
+    sizeHuman: "2.50 GB",
 };
 
 const HIGH_RAM_MAC_MODEL: ModelInfo = {
@@ -46,7 +44,6 @@ const HIGH_RAM_MAC_MODEL: ModelInfo = {
     url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
     mmprojUrl:
         "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-    description: "Qwen multimodal model for higher-memory macOS devices",
     sizeBytes: 2_740_937_888,
     mmprojSizeBytes: 672_423_616,
     sizeHuman: "3.63 GB",

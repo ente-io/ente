@@ -9,6 +9,7 @@ import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
+import io.ente.ensu.domain.state.DeveloperSettingsState
 import io.ente.ensu.domain.state.ModelSettingsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,6 +109,27 @@ class AppStore(
         modelSettingsActions.updateModelSettings(state)
 
     fun resetModelSettings() = modelSettingsActions.resetModelSettings()
+
+    fun updateDeveloperSettings(state: DeveloperSettingsState) {
+        _state.value = _state.value.copy(developerSettings = state)
+    }
+
+    fun unlockAdvancedSettings() {
+        updateDeveloperSettings(
+            _state.value.developerSettings.copy(isAdvancedUnlocked = true)
+        )
+    }
+
+    fun applyPersistedSettings(
+        developerSettings: DeveloperSettingsState,
+        modelSettings: ModelSettingsState
+    ) {
+        _state.value = _state.value.copy(
+            developerSettings = developerSettings,
+            modelSettings = modelSettings
+        )
+        modelSettingsActions.refreshModelDownloadInfo()
+    }
 
     fun signIn(email: String) = authActions.signIn(email)
 
