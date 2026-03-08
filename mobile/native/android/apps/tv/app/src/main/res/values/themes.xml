@@ -1,0 +1,19 @@
+<resources>
+    <style name="Theme.EntePhotos" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/ssaver_background</item>
+        <item name="android:colorBackground">@color/ssaver_background</item>
+        <item name="colorBackgroundFloating">@color/ssaver_surface</item>
+        <item name="android:textColorPrimary">@color/ssaver_text_primary</item>
+        <item name="android:textColorSecondary">@color/ssaver_text_secondary</item>
+        <item name="android:colorAccent">@color/ssaver_green</item>
+        <item name="colorAccent">@color/ssaver_green</item>
+        <item name="colorControlNormal">@color/ssaver_text_secondary</item>
+        <item name="colorControlActivated">@color/ssaver_green</item>
+        <item name="colorControlHighlight">@color/ssaver_green_alpha</item>
+        <item name="android:buttonStyle">@style/Widget.EntePhotos.Button.Primary</item>
+        <item name="android:editTextStyle">@style/Widget.EntePhotos.Input</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.EntePhotos.AlertDialog</item>
+        <item name="android:alertDialogTheme">@style/ThemeOverlay.EntePhotos.AlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.EntePhotos</item>
+    </style>
+</resources>

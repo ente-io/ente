@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+**/build/
+
+# Local configuration
+local.properties
+key.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Mac
+.DS_Store
+
+# Generated
+**/captures/
+**/.externalNativeBuild/
+**/.cxx/
+app/src/main/jniLibs/
+app/keystore/

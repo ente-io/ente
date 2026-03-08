@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:paddingStart="48dp"
+    android:paddingTop="40dp"
+    android:paddingEnd="48dp"
+    android:paddingBottom="24dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_setup_card">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingStart="56dp"
+            android:paddingTop="40dp"
+            android:paddingEnd="56dp"
+            android:paddingBottom="40dp">
+
+            <TextView
+                android:id="@+id/text_diagnostics_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/opensans_bold"
+                android:text="@string/diagnostics"
+                android:textColor="#111111"
+                android:textSize="30sp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_adb_command"
+                android:padding="14dp"
+                android:scrollbars="vertical">
+
+                <TextView
+                    android:id="@+id/text_logs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:textColor="#F5F5F5"
+                    android:textIsSelectable="true"
+                    android:textSize="13sp" />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

@@ -1,0 +1,132 @@
+<resources>
+    <style name="Widget.EntePhotos.Button.Primary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/ssaver_text_on_primary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <style name="Widget.EntePhotos.Button.Secondary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:textColor">@color/ssaver_text_primary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <style name="Widget.EntePhotos.Input" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:textColor">@color/ssaver_text_primary</item>
+        <item name="android:textColorHint">@color/ssaver_text_hint</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+    </style>
+
+    <style name="Widget.EntePhotos.SettingsRow" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">68dp</item>
+        <item name="android:background">@drawable/bg_settings_row</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:fontFamily">@font/opensans_bold</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingStart">60dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="Widget.EntePhotos.SettingsRowContainer" parent="@android:style/Widget">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">68dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:background">@drawable/bg_settings_row</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:paddingStart">60dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="Widget.EntePhotos.SettingsRowTitle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/opensans_bold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="Widget.EntePhotos.SettingsRowSubtitle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:fontFamily">@font/opensans_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/ssaver_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.EntePhotos.SettingsRowValue" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/opensans_semibold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/ssaver_text_secondary</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextAppearance.EntePhotos.ListItem" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/ssaver_text_primary</item>
+    </style>
+
+    <style name="ThemeOverlay.EntePhotos.AlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@color/ssaver_surface</item>
+        <item name="android:colorBackground">@color/ssaver_surface</item>
+        <item name="android:textColorPrimary">@color/ssaver_text_primary</item>
+        <item name="android:textColorSecondary">@color/ssaver_text_secondary</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearance.EntePhotos.ListItem</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.EntePhotos.ListItem</item>
+        <item name="android:textColorAlertDialogListItem">@color/ssaver_text_primary</item>
+        <item name="textColorAlertDialogListItem">@color/ssaver_text_primary</item>
+        <item name="android:listDivider">@color/ssaver_surface_border</item>
+    </style>
+
+    <style name="PreferenceThemeOverlay.EntePhotos" parent="PreferenceThemeOverlay.v14">
+        <item name="android:textColorPrimary">@color/ssaver_text_primary</item>
+        <item name="android:textColorSecondary">@color/ssaver_text_secondary</item>
+        <item name="android:colorBackground">@color/ssaver_background</item>
+        <item name="colorBackgroundFloating">@color/ssaver_surface</item>
+        <item name="android:colorAccent">@color/ssaver_green</item>
+        <item name="colorAccent">@color/ssaver_green</item>
+        <item name="android:colorControlActivated">@color/ssaver_green</item>
+        <item name="colorControlActivated">@color/ssaver_green</item>
+        <item name="android:colorControlNormal">@color/ssaver_text_secondary</item>
+        <item name="colorControlNormal">@color/ssaver_text_secondary</item>
+    </style>
+</resources>
