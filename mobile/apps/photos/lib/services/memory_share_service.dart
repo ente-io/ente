@@ -36,6 +36,11 @@ class MemoryShareService {
     _enteDio = NetworkClient.instance.enteDio;
     _db = MemorySharesDB.instance;
     await _loadMemoryShareHashCache();
+    try {
+      await listMemoryShares();
+    } catch (e, s) {
+      _logger.warning("Failed to refresh memory shares during init", e, s);
+    }
   }
 
   void clearCache() {
@@ -67,17 +72,20 @@ class MemoryShareService {
       );
 
       final fileItems = <Map<String, dynamic>>[];
-      for (final file in uploadedFiles) {
+      for (var i = 0; i < uploadedFiles.length; i++) {
+        final file = uploadedFiles[i];
         final fileKey = getFileKey(file);
         final reEncryptedKey = CryptoUtil.encryptSync(fileKey, shareKey);
         fileItems.add({
           'fileID': file.uploadedFileID,
+          'position': i,
           'encryptedKey': CryptoUtil.bin2base64(reEncryptedKey.encryptedData!),
           'keyDecryptionNonce': CryptoUtil.bin2base64(reEncryptedKey.nonce!),
         });
       }
 
       final requestData = {
+        'type': MemoryShareType.share.name,
         'metadataCipher':
             CryptoUtil.bin2base64(encryptedMetadata.encryptedData!),
         'metadataNonce': CryptoUtil.bin2base64(encryptedMetadata.nonce!),
@@ -139,14 +147,19 @@ class MemoryShareService {
         return share;
       }).toList();
 
+      final localSharesByID = {
+        for (final share in await _db.getAll()) share.id: share,
+      };
       _memoryShareByHashCache.clear();
+      final activeRemoteShareIDs = <int>{};
       final activeShares = <MemoryShare>[];
       for (final share in result) {
         if (share.isDeleted) {
           await _db.delete(share.id);
           continue;
         }
-        final localShare = await _db.getById(share.id);
+        activeRemoteShareIDs.add(share.id);
+        final localShare = localSharesByID[share.id];
         final mergedShare = share.copyWith(
           memoryHash: share.memoryHash ?? localShare?.memoryHash,
           previewUploadedFileID: localShare?.previewUploadedFileID,
@@ -155,6 +168,11 @@ class MemoryShareService {
         await _db.upsert(mergedShare);
         _updateMemoryShareCache(mergedShare);
         activeShares.add(mergedShare);
+      }
+      for (final localShare in localSharesByID.values) {
+        if (!activeRemoteShareIDs.contains(localShare.id)) {
+          await _db.delete(localShare.id);
+        }
       }
 
       return activeShares;
@@ -446,8 +464,12 @@ class MemoryShareService {
     if (tokenFromQuery != null && tokenFromQuery.isNotEmpty) {
       return tokenFromQuery;
     }
-    for (final segment in uri.pathSegments) {
-      if (segment.isNotEmpty && segment != "memory") {
+    const routePrefixes = {"memories"};
+    final pathSegments =
+        uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
+    for (var i = pathSegments.length - 1; i >= 0; i--) {
+      final segment = pathSegments[i];
+      if (!routePrefixes.contains(segment.toLowerCase())) {
         return segment;
       }
     }
