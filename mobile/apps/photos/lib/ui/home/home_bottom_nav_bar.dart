@@ -27,7 +27,7 @@ class HomeBottomNavigationBar extends StatefulWidget {
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
-  static const int _searchTabIndex = 3;
+  static const int _searchTabIndex = 4;
   static const Duration _doubleTapWindow = Duration(milliseconds: 350);
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   int currentTabIndex = 0;
@@ -187,13 +187,27 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         ),
                         GButton(
                           margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                          icon: Icons.search_outlined,
+                          icon: Icons.offline_pin_outlined,
                           iconColor: enteColorScheme.tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
                           onPressed: () {
                             _onTabChange(
                               3,
+                              mode: "OnPressed",
+                            ); // To take care
+                            // of occasional missing events
+                          },
+                        ),
+                        GButton(
+                          margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+                          icon: Icons.search_outlined,
+                          iconColor: enteColorScheme.tabIcon,
+                          iconActiveColor: strokeBaseLight,
+                          text: '',
+                          onPressed: () {
+                            _onTabChange(
+                              4,
                               mode: "OnPressed",
                             ); // To take care
                             // of occasional missing events

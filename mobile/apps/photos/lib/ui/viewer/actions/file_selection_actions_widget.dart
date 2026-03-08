@@ -512,6 +512,16 @@ class _FileSelectionActionsWidgetState
           ),
         );
       }
+      if (widget.type.showCreateLink()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.offline_pin_outlined,
+            labelText: "Make available offline",
+            onTap: _makeAvailableOffline,
+            shouldShow: ownedFilesCount > 0,
+          ),
+        );
+      }
     }
 
     if (items.isNotEmpty) {
@@ -595,6 +605,15 @@ class _FileSelectionActionsWidgetState
       widget.selectedFiles.files.toList(),
     );
     widget.selectedFiles.clearAll();
+  }
+
+  Future<void> _makeAvailableOffline() async {
+    final files = widget.selectedFiles.files.toList();
+    for (final file in files) {
+      await offlineFileService.makeFileAvailableOffline(file);
+    }
+    widget.selectedFiles.clearAll();
+    showToast(context, "Files are being made available offline");
   }
 
   Future<void> _moveFiles() async {
