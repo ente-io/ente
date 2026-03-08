@@ -20,8 +20,9 @@ CREATE TABLE IF NOT EXISTS memory_share_files (
     memory_share_id BIGINT NOT NULL REFERENCES memory_shares(id) ON DELETE CASCADE,
     file_id BIGINT NOT NULL,
     file_owner_id BIGINT NOT NULL,
+    position BIGINT NOT NULL,
     file_enc_key TEXT NOT NULL,
     file_key_decryption_nonce TEXT NOT NULL,
     created_at BIGINT NOT NULL,
-    UNIQUE(memory_share_id, file_id)
+    UNIQUE(memory_share_id, position)
 );

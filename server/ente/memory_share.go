@@ -33,6 +33,7 @@ type MemoryShareFile struct {
 	MemoryShareID      int64  `json:"-"`
 	FileID             int64  `json:"fileID"`
 	FileOwnerID        int64  `json:"-"`
+	Position           int64  `json:"position,omitempty"`
 	EncryptedKey       string `json:"encryptedKey"`
 	KeyDecryptionNonce string `json:"keyDecryptionNonce"`
 	CreatedAt          int64  `json:"createdAt"`
@@ -40,6 +41,7 @@ type MemoryShareFile struct {
 
 // CreateMemoryShareRequest is the request body for creating a memory share
 type CreateMemoryShareRequest struct {
+	Type               MemoryShareType       `json:"type,omitempty"`
 	MemoryHash         string                `json:"memoryHash,omitempty"`
 	MetadataCipher     string                `json:"metadataCipher"`
 	MetadataNonce      string                `json:"metadataNonce"`
@@ -51,6 +53,7 @@ type CreateMemoryShareRequest struct {
 // MemoryShareFileItem represents a file in the create request
 type MemoryShareFileItem struct {
 	FileID             int64  `json:"fileID" binding:"required"`
+	Position           *int64 `json:"position,omitempty"`
 	EncryptedKey       string `json:"encryptedKey" binding:"required"`
 	KeyDecryptionNonce string `json:"keyDecryptionNonce" binding:"required"`
 }

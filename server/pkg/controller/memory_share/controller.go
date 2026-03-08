@@ -40,6 +40,15 @@ func NewController(
 
 // Create creates a new memory share
 func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemoryShareRequest) (*ente.CreateMemoryShareResponse, error) {
+	shareType := req.Type
+	if shareType == "" {
+		shareType = ente.MemoryShareTypeShare
+	}
+	if shareType != ente.MemoryShareTypeShare &&
+		shareType != ente.MemoryShareTypeLane {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid memory share type")
+	}
+
 	fileIDs := make([]int64, len(req.Files))
 	for i, f := range req.Files {
 		fileIDs[i] = f.FileID
@@ -72,9 +81,17 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 	shareFiles := make([]ente.MemoryShareFile, len(req.Files))
 	now := time.Microseconds()
 	for i, f := range req.Files {
+		position := int64(i)
+		if f.Position != nil {
+			if *f.Position < 0 {
+				return nil, stacktrace.Propagate(ente.ErrBadRequest, "position cannot be negative")
+			}
+			position = *f.Position
+		}
 		shareFiles[i] = ente.MemoryShareFile{
 			FileID:             f.FileID,
 			FileOwnerID:        fileOwnerMap[f.FileID],
+			Position:           position,
 			EncryptedKey:       f.EncryptedKey,
 			KeyDecryptionNonce: f.KeyDecryptionNonce,
 			CreatedAt:          now,
@@ -88,7 +105,7 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 
 		share = ente.MemoryShare{
 			UserID:             userID,
-			Type:               ente.MemoryShareTypeShare,
+			Type:               shareType,
 			MemoryHash:         req.MemoryHash,
 			MetadataCipher:     req.MetadataCipher,
 			MetadataNonce:      req.MetadataNonce,
