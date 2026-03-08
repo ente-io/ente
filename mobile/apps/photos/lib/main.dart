@@ -156,6 +156,11 @@ Future<void> runBackgroundTask(
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   try {
+    // Background worker can run in a process/isolate where Rust has been
+    // disposed or not initialized; always initialize before ML usage.
+    await EntePhotosRust.init();
+    _logger.info("Rust bridge initialized in background via: workmanager");
+
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
@@ -183,6 +188,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -216,9 +224,18 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    // await MLService.instance.init();
-    // await PersonService.init(entityService, MLDataDB.instance, prefs);
-    // await MLService.instance.runAllML(force: true);
+    if (flagService.enableMLInBackground) {
+      await MLService.instance.init();
+      await PersonService.init(entityService, MLDataDB.instance, prefs);
+      final canRunML = controller.requestCompute(ml: true);
+      if (!canRunML) {
+        _logger.info(
+          "[BG TASK] skipping ML, compute requirements not satisfied",
+        );
+      } else {
+        await MLService.instance.runAllML(force: true);
+      }
+    }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
