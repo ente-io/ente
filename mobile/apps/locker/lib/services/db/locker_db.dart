@@ -140,9 +140,7 @@ class LockerDB extends EnteBaseDatabase {
         file_size INTEGER,
         payload_encrypted_data TEXT NOT NULL,
         payload_decryption_header TEXT NOT NULL,
-        payload_version INTEGER DEFAULT $_filePayloadVersion,
-        is_available_offline INTEGER DEFAULT 0,
-        local_offline_path TEXT
+        payload_version INTEGER DEFAULT $_filePayloadVersion
       )
     ''');
   }

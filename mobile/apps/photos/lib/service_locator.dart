@@ -42,7 +42,6 @@ import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/services/wrapped/wrapped_cache_service.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
-import "package:photos/services/offline_file_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -281,12 +280,6 @@ WrappedCacheService? _wrappedCacheService;
 WrappedCacheService get wrappedCacheService {
   _wrappedCacheService ??= WrappedCacheService.instance;
   return _wrappedCacheService!;
-}
-
-OfflineFileService? _offlineFileService;
-OfflineFileService get offlineFileService {
-  _offlineFileService ??= OfflineFileService();
-  return _offlineFileService!;
 }
 
 // Gateways
