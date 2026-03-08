@@ -514,6 +514,17 @@ export const sidebar = [
         ],
     },
     {
+        text: "Ensu",
+        collapsed: true,
+        items: [
+            { text: "Introduction", link: "/ensu/" },
+            {
+                text: "FAQ",
+                link: "/ensu/faq/",
+            },
+        ],
+    },
+    {
         text: "Self-hosting",
         collapsed: true,
         items: [
