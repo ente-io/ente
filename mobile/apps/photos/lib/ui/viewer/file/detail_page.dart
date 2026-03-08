@@ -27,6 +27,7 @@ import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/inline_text_detection.dart";
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import "package:photos/ui/viewer/file/qr_code_detection_helper.dart";
 import "package:photos/ui/viewer/file/qr_code_highlight_overlay.dart";
@@ -253,15 +254,25 @@ class _BodyState extends State<_Body> {
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return widget.config.mode == DetailPageMode.minimalistic
-                      ? const SizedBox.shrink()
-                      : TextDetectionOverlayButton(
-                          file: _files![selectedIndex],
-                          enableFullScreenNotifier:
-                              InheritedDetailPageState.of(context)
-                                  .enableFullScreenNotifier,
-                          isGuestView: isGuestView,
-                        );
+                  if (widget.config.mode == DetailPageMode.minimalistic) {
+                    return const SizedBox.shrink();
+                  }
+                  if (flagService.ocrOverlayEnabled) {
+                    return InlineTextDetection(
+                      file: _files![selectedIndex],
+                      enableFullScreenNotifier:
+                          InheritedDetailPageState.of(context)
+                              .enableFullScreenNotifier,
+                      isGuestView: isGuestView,
+                    );
+                  }
+                  return TextDetectionOverlayButton(
+                    file: _files![selectedIndex],
+                    enableFullScreenNotifier:
+                        InheritedDetailPageState.of(context)
+                            .enableFullScreenNotifier,
+                    isGuestView: isGuestView,
+                  );
                 },
               ),
               if (_qrHelper != null)
