@@ -44,6 +44,32 @@ const extractMemoryShareKeyFromURL = async (
     return await extractCollectionKeyFromShareURL(url);
 };
 
+const extractAccessTokenFromURL = (url: URL): string | null => {
+    const tokenFromQuery =
+        url.searchParams.get("t") ?? url.searchParams.get("accessToken");
+    if (tokenFromQuery) {
+        return tokenFromQuery;
+    }
+
+    // Ignore route prefixes and pick the final non-prefix path segment.
+    // Supports:
+    // - /<TOKEN>#<SECRET>
+    // - /memory/<TOKEN>#<SECRET>
+    // - /memories/<TOKEN>#<SECRET>
+    const routePrefixes = new Set(["memory", "memories"]);
+    const pathSegments = url.pathname
+        .split("/")
+        .filter((segment) => segment.length > 0);
+    for (let i = pathSegments.length - 1; i >= 0; i--) {
+        const segment = pathSegments[i]!;
+        if (!routePrefixes.has(segment.toLowerCase())) {
+            return segment;
+        }
+    }
+
+    return null;
+};
+
 /**
  * Index page that handles both root redirect and memory share links
  *
@@ -68,23 +94,7 @@ export default function PublicMemoryPage() {
             try {
                 const currentURL = new URL(window.location.href);
 
-                // Extract token from either:
-                // - query param ?t=TOKEN (from server-generated URLs)
-                // - pathname /TOKEN (direct links)
-                let token = currentURL.searchParams.get("t");
-                if (!token) {
-                    // Ignore routing prefixes like /memory and pick the first
-                    // non-empty path segment as token.
-                    const tokenFromPath = currentURL.pathname
-                        .split("/")
-                        .find(
-                            (segment) =>
-                                segment.length > 0 && segment !== "memory",
-                        );
-                    if (tokenFromPath) {
-                        token = tokenFromPath;
-                    }
-                }
+                const token = extractAccessTokenFromURL(currentURL);
 
                 // Root path → redirect to ente.io/memories (or show landing)
                 if (!token) {
