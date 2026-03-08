@@ -70,6 +70,7 @@ import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
+import "package:photos/ui/offline/offline_screen.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/ritual_privacy.dart";
@@ -102,6 +103,7 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
+  static const _offlineScreen = OfflineScreen();
 
   final _logger = Logger("HomeWidgetState");
   final _selectedAlbums = SelectedAlbums();
@@ -159,7 +161,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
 
-      if (event.selectedIndex == 3) {
+      if (event.selectedIndex == 4) {
         isOnSearchTabNotifier.value = true;
       } else {
         isOnSearchTabNotifier.value = false;
@@ -949,6 +951,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         : child!,
                     UserCollectionsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
+                    _offlineScreen,
                     _searchTab,
                   ],
                 );
