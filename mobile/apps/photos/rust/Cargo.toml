@@ -4,7 +4,7 @@ version = "0.0.1"
 edition = "2024"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
@@ -20,6 +20,7 @@ libheic-rs = { git = "https://github.com/laurens-pilot/libheic-rs.git", tag = "v
 tiff = "0.10.3"
 nalgebra = "0.33.2"
 ndarray = "0.16.1"
+half = "2.1"
 once_cell = "1.20.2"
 regex = "1.11.1"
 html-escape = "0.2.13"
@@ -29,6 +30,7 @@ thiserror = "2.0.11"
 [target.'cfg(target_os = "ios")'.dependencies]
 ort = { version = "=2.0.0-rc.4", default-features = false, features = [
     "ndarray",
+    "half",
     # Temporarily disabled to avoid iOS duplicate ObjC class collisions
     # when both Dart ONNXRuntime and Rust ONNXRuntime are linked.
     # Re-enable once we move to a single shared ORT runtime.
@@ -39,6 +41,7 @@ ort = { version = "=2.0.0-rc.4", default-features = false, features = [
 [target.'cfg(not(target_os = "ios"))'.dependencies]
 ort = { version = "=2.0.0-rc.4", default-features = false, features = [
     "ndarray",
+    "half",
     "load-dynamic",
     "copy-dylibs",
     "coreml",

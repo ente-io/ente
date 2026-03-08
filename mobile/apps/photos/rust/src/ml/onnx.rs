@@ -1,6 +1,6 @@
 use ort::{
-    CPUExecutionProvider, ExecutionProviderDispatch, GraphOptimizationLevel, Session, Tensor,
-    XNNPACKExecutionProvider,
+    CPUExecutionProvider, ExecutionProviderDispatch, GraphOptimizationLevel, Session,
+    TensorElementType, Tensor, ValueType, XNNPACKExecutionProvider,
 };
 
 // Temporarily disabled on Rust side to avoid iOS duplicate ObjC class collisions
@@ -83,11 +83,7 @@ fn providers_for_policy(
         if include_xnnpack && policy.prefer_xnnpack {
             providers.push(XNNPACKExecutionProvider::default().build());
         }
-        providers.push(
-            CPUExecutionProvider::default()
-                .with_arena_allocator()
-                .build(),
-        );
+        providers.push(CPUExecutionProvider::default().with_arena_allocator().build());
     }
 
     providers
@@ -108,25 +104,58 @@ fn build_session_with_providers(
     Ok(session)
 }
 
+/// Returns true if the session's first input expects FP16 tensors.
+fn session_expects_f16(session: &Session) -> bool {
+    session
+        .inputs
+        .first()
+        .and_then(|i| match &i.input_type {
+            ValueType::Tensor { ty, .. } => Some(*ty == TensorElementType::Float16),
+            _ => None,
+        })
+        .unwrap_or(false)
+}
+
+/// Run inference accepting f32 data and returning f32 results.
+/// Automatically converts inputs/outputs for FP16 models.
 pub fn run_f32<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<f32>,
     input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {
-    let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
-    let outputs = session.run(ort::inputs![input_tensor]?)?;
+    let outputs = if session_expects_f16(session) {
+        // Convert f32->f16 in-place: drop the f32 vec first to avoid holding both.
+        let f16_input: Vec<half::f16> = {
+            let converted: Vec<half::f16> = input.into_iter().map(half::f16::from_f32).collect();
+            converted
+        };
+        let input_tensor = Tensor::<half::f16>::from_array((input_shape, f16_input))?;
+        session.run(ort::inputs![input_tensor]?)?
+    } else {
+        let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
+        session.run(ort::inputs![input_tensor]?)?
+    };
+
     if outputs.is_empty() {
         return Err(MlError::Ort("missing first output tensor".to_string()));
     }
     let output = &outputs[0];
-    let tensor = output.try_extract_tensor::<f32>()?;
-    let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
-    let data = tensor.iter().copied().collect::<Vec<_>>();
-    Ok((shape, data))
+
+    // Extract output: try f32 first, fall back to f16 with conversion.
+    if let Ok(tensor) = output.try_extract_tensor::<f32>() {
+        let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
+        let data = tensor.iter().copied().collect::<Vec<_>>();
+        Ok((shape, data))
+    } else {
+        let tensor = output.try_extract_tensor::<half::f16>()?;
+        let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
+        let data = tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>();
+        Ok((shape, data))
+    }
 }
 
 pub fn run_f32_data<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<f32>,
     input_shape: [i64; N],
 ) -> MlResult<Vec<f32>> {
@@ -141,7 +170,7 @@ pub fn run_f32_data<const N: usize>(
 }
 
 pub fn run_i32_f32<const N: usize>(
-    session: &mut Session,
+    session: &Session,
     input: Vec<i32>,
     input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {

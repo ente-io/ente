@@ -8,6 +8,7 @@ import 'package:photos/services/machine_learning/face_ml/face_detection/face_det
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/pet_ml/pet_model_services.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
@@ -87,6 +88,7 @@ class MLIndexingIsolate extends SuperIsolate {
         "useRustMl": useRustMl,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
+        "runPets": useRustMl && instruction.shouldRunPets,
         ...rustRuntimeArgs,
         "faceDetectionAddress": FaceDetectionService.instance.sessionAddress,
         "faceEmbeddingAddress": FaceEmbeddingService.instance.sessionAddress,
@@ -175,11 +177,24 @@ class MLIndexingIsolate extends SuperIsolate {
         return;
       }
       _logger.info('Downloading models');
-      await Future.wait([
+      final modelsToDownload = <Future<void>>[
         FaceDetectionService.instance.downloadModel(forceRefresh),
         FaceEmbeddingService.instance.downloadModel(forceRefresh),
         ClipImageEncoder.instance.downloadModel(forceRefresh),
-      ]);
+      ];
+
+      if (flagService.petEnabled) {
+        modelsToDownload.addAll([
+          PetFaceDetectionService.instance.downloadModel(forceRefresh),
+          PetFaceEmbeddingDogService.instance.downloadModel(forceRefresh),
+          PetFaceEmbeddingCatService.instance.downloadModel(forceRefresh),
+          PetBodyDetectionService.instance.downloadModel(forceRefresh),
+          PetBodyEmbeddingDogService.instance.downloadModel(forceRefresh),
+          PetBodyEmbeddingCatService.instance.downloadModel(forceRefresh),
+        ]);
+      }
+
+      await Future.wait(modelsToDownload);
       areModelsDownloaded = true;
       _logger.info('Downloaded models');
     });
@@ -348,10 +363,39 @@ class MLIndexingIsolate extends SuperIsolate {
     final faceEmbedding =
         await FaceEmbeddingService.instance.getModelNameAndPath();
     final clipImage = await ClipImageEncoder.instance.getModelNameAndPath();
+
+    String petFaceDetectionPath = "";
+    String petFaceEmbeddingDogPath = "";
+    String petFaceEmbeddingCatPath = "";
+    String petBodyDetectionPath = "";
+    String petBodyEmbeddingDogPath = "";
+    String petBodyEmbeddingCatPath = "";
+
+    if (flagService.petEnabled) {
+      petFaceDetectionPath =
+          (await PetFaceDetectionService.instance.getModelNameAndPath()).$2;
+      petFaceEmbeddingDogPath =
+          (await PetFaceEmbeddingDogService.instance.getModelNameAndPath()).$2;
+      petFaceEmbeddingCatPath =
+          (await PetFaceEmbeddingCatService.instance.getModelNameAndPath()).$2;
+      petBodyDetectionPath =
+          (await PetBodyDetectionService.instance.getModelNameAndPath()).$2;
+      petBodyEmbeddingDogPath =
+          (await PetBodyEmbeddingDogService.instance.getModelNameAndPath()).$2;
+      petBodyEmbeddingCatPath =
+          (await PetBodyEmbeddingCatService.instance.getModelNameAndPath()).$2;
+    }
+
     return {
       "faceDetectionModelPath": faceDetection.$2,
       "faceEmbeddingModelPath": faceEmbedding.$2,
       "clipImageModelPath": clipImage.$2,
+      "petFaceDetectionModelPath": petFaceDetectionPath,
+      "petFaceEmbeddingDogModelPath": petFaceEmbeddingDogPath,
+      "petFaceEmbeddingCatModelPath": petFaceEmbeddingCatPath,
+      "petBodyDetectionModelPath": petBodyDetectionPath,
+      "petBodyEmbeddingDogModelPath": petBodyEmbeddingDogPath,
+      "petBodyEmbeddingCatModelPath": petBodyEmbeddingCatPath,
       "preferCoreml": Platform.isIOS,
       "preferNnapi": Platform.isAndroid,
       "preferXnnpack": Platform.isAndroid,

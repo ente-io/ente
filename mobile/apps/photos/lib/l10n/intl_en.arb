@@ -2850,5 +2850,7 @@
   "offlineFacesBannerSubtitle": "Sign up to tag people and easily find them later.",
   "offlineNameFaceBannerTitle": "Give this face a name",
   "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
-  "signUp": "Sign up"
+  "signUp": "Sign up",
+  "dog": "Dog",
+  "cat": "Cat"
 }
