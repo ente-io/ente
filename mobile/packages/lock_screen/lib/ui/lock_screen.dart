@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -10,7 +11,6 @@ import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logging/logging.dart';
 
@@ -331,11 +331,13 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)?.didUnlock();
-        await _lockscreenSetting.setInvalidAttemptCount(0);
-        setState(() {
-          lockedTimeInSeconds = 15;
-          isTimerRunning = false;
-        });
+        unawaited(_lockscreenSetting.setInvalidAttemptCount(0));
+        if (mounted) {
+          setState(() {
+            lockedTimeInSeconds = 15;
+            isTimerRunning = false;
+          });
+        }
       } else {
         if (!_hasPlacedAppInBackground) {
           // Treat this as a failure only if user did not explicitly
