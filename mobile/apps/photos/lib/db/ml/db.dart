@@ -107,6 +107,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetBodyVectorIdMappingTable,
     createPetIndexedFilesTable,
     dropPetIndexedFilesTable,
+    dropPetFaceClustersTable,
+    dropPetClusterSummaryTable,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -559,8 +561,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     // Pet tables
     await db.execute(deletePetFacesTable);
     await db.execute(deletePetBodiesTable);
-    await db.execute(deletePetFaceClustersTable);
-    await db.execute(deletePetClusterSummaryTable);
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deletePetBodyVectorIdMappingTable);
     for (final vdb in PetVectorDB.allInstances) {

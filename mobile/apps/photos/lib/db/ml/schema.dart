@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
 const petFcClusterIDIndex =
     '''CREATE INDEX IF NOT EXISTS idx_petFcClusterID ON $petFaceClustersTable($clusterIDColumn);''';
 
-const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
+const dropPetFaceClustersTable = 'DROP TABLE IF EXISTS $petFaceClustersTable';
 
 const petClusterSummaryTable = 'pet_cluster_summary';
 
@@ -262,7 +262,8 @@ CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
 );
 ''';
 
-const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
+const dropPetClusterSummaryTable =
+    'DROP TABLE IF EXISTS $petClusterSummaryTable';
 
 // ── Vector ID Mapping Tables ──
 
