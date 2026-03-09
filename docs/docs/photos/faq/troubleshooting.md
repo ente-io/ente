@@ -235,7 +235,7 @@ When photos are uploaded on the web app, the most common cause of thumbnails not
 **Solution:**
 
 - Disable canvas fingerprinting for Ente's domain, OR
-- Turn off Brave Shields for Ente, OR
+- Turn off Brave Shields for Ente's domain, OR
 - Check if you're using browser extensions that block canvas access and whitelist Ente
 
 **Important:** Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
