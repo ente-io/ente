@@ -3,7 +3,8 @@ import "dart:io" show Platform;
 
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
-import "package:photos/service_locator.dart" show flagService, isOfflineMode, localSettings;
+import "package:photos/service_locator.dart"
+    show flagService, isOfflineMode, localSettings;
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";

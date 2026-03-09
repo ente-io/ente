@@ -71,8 +71,7 @@ class MLResult {
       petBodies: json['petBodies'] != null
           ? (json['petBodies'] as List)
               .map(
-                (item) =>
-                    PetBodyResult.fromJson(item as Map<String, dynamic>),
+                (item) => PetBodyResult.fromJson(item as Map<String, dynamic>),
               )
               .toList()
           : null,

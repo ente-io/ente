@@ -109,7 +109,8 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled = flagService.internalUser && localSettings.petRecognitionEnabled;
+  final bool petEnabled =
+      flagService.internalUser && localSettings.petRecognitionEnabled;
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFiledIDs = {};
@@ -224,7 +225,8 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled = flagService.internalUser && localSettings.petRecognitionEnabled;
+  final bool petEnabled =
+      flagService.internalUser && localSettings.petRecognitionEnabled;
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFileIDs = {};

@@ -109,6 +109,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     dropPetIndexedFilesTable,
     dropPetFaceClustersTable,
     dropPetClusterSummaryTable,
+    dropPetFacesTable, // 23: recreate with UNIQUE faceVectorId
+    createPetFacesTable,
+    dropPetBodiesTable, // 25: recreate with UNIQUE bodyVectorId
+    createPetBodiesTable,
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,

@@ -9,7 +9,7 @@ class DBPetFace {
   final int fileId;
   final String petFaceId;
   final String detection;
-  final int faceVectorId;
+  final int? faceVectorId;
   final int species;
   final double faceScore;
   final int imageHeight;
@@ -49,7 +49,7 @@ class DBPetFace {
       fileId: fileId,
       petFaceId: '${fileId}_pet_0_0_0_0',
       detection: '{}',
-      faceVectorId: -1,
+      faceVectorId: null,
       species: -1,
       faceScore: error ? -1.0 : 0.0,
       imageHeight: 0,
@@ -63,7 +63,7 @@ class DBPetFace {
       fileId: map[fileIDColumn] as int,
       petFaceId: map[petFaceIDColumn] as String,
       detection: map[faceDetectionColumn] as String,
-      faceVectorId: map[faceVectorIdColumn] as int,
+      faceVectorId: map[faceVectorIdColumn] as int?,
       species: map[speciesColumn] as int,
       faceScore: parseIntOrDoubleAsDouble(map['score']) ?? 0.0,
       imageHeight: map['height'] as int,
@@ -80,7 +80,7 @@ class DBPetBody {
   final int fileId;
   final String petBodyId;
   final String detection;
-  final int bodyVectorId;
+  final int? bodyVectorId;
   final int species;
   final double score;
   final int imageHeight;
@@ -118,7 +118,7 @@ class DBPetBody {
       fileId: map[fileIDColumn] as int,
       petBodyId: map[petBodyIDColumn] as String,
       detection: map[detectionColumn] as String,
-      bodyVectorId: map[bodyVectorIdColumn] as int,
+      bodyVectorId: map[bodyVectorIdColumn] as int?,
       species: map[speciesColumn] as int,
       score: parseIntOrDoubleAsDouble(map['score']) ?? 0.0,
       imageHeight: map['height'] as int,

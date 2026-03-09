@@ -201,7 +201,7 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
   $fileIDColumn INTEGER NOT NULL,
   $petFaceIDColumn TEXT NOT NULL UNIQUE,
   $faceDetectionColumn TEXT NOT NULL,
-  $faceVectorIdColumn INTEGER NOT NULL,
+  $faceVectorIdColumn INTEGER UNIQUE,
   $speciesColumn INTEGER NOT NULL,
   $faceScore REAL NOT NULL,
   $imageHeight INTEGER NOT NULL DEFAULT 0,
@@ -221,7 +221,7 @@ const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
   $fileIDColumn INTEGER NOT NULL,
   $petBodyIDColumn TEXT NOT NULL UNIQUE,
   $detectionColumn TEXT NOT NULL,
-  $bodyVectorIdColumn INTEGER NOT NULL,
+  $bodyVectorIdColumn INTEGER UNIQUE,
   $speciesColumn INTEGER NOT NULL,
   $faceScore REAL NOT NULL,
   $imageHeight INTEGER NOT NULL DEFAULT 0,
@@ -307,3 +307,7 @@ CREATE TABLE IF NOT EXISTS $petIndexedFilesTable (
 ''';
 
 const dropPetIndexedFilesTable = 'DROP TABLE IF EXISTS $petIndexedFilesTable';
+
+// ── Recreate pet tables with UNIQUE vector ID columns ──
+const dropPetFacesTable = 'DROP TABLE IF EXISTS $petFacesTable';
+const dropPetBodiesTable = 'DROP TABLE IF EXISTS $petBodiesTable';
