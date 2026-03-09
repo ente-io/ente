@@ -103,8 +103,8 @@ const IllustrationWrapper = styled(Box)(() => ({
 }));
 
 const ErrorIconContainer = styled(Box)(({ theme }) => ({
-    width: 112,
-    height: 112,
+    width: 92,
+    height: 92,
     borderRadius: 56,
     display: "flex",
     alignItems: "center",
