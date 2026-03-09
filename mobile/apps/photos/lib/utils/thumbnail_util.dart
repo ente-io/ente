@@ -239,9 +239,15 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
 File cachedThumbnailPath(EnteFile file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
-  return File(
-    thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
-  );
+  if (file.uploadedFileID != null && file.uploadedFileID != -1) {
+    return File(
+      thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
+    );
+  } else {
+    return File(
+      thumbnailCacheDirectory + "/local-" + file.localID.toString(),
+    );
+  }
 }
 
 File cachedFaceCropPath(String faceID, bool useTempCache) {
