@@ -179,6 +179,8 @@ Yes! Ente recommends enabling 2FA for additional security. Supported methods inc
 
 You can set up 2FA in Settings on mobile or desktop apps.
 
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
+
 Learn more in our [Security and Privacy FAQ](/photos/faq/security-and-privacy).
 
 ### Can I use passkeys instead of passwords? {#use-passkeys}

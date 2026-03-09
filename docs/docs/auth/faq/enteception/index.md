@@ -5,14 +5,15 @@ description: Using Ente Auth to store 2FA for your Ente account
 
 # Enteception
 
-Your 2FA codes are in Ente Auth, but if you enable 2FA for your Ente account
-itself, where should the 2FA for your Ente account be stored?
+If you enable 2FA in Ente Photos, that also enables 2FA for the same Ente
+account in Ente Auth and Ente Locker, because all three use the same account.
+So if you store your Ente account's 2FA code inside Ente Auth, you can end up
+needing Ente Auth to log into Ente Auth.
 
 There are multiple answers, none of which are better or worse, they just depend
 on your situation and risk tolerance.
 
-If you are using the same account for both Ente Photos and Ente Auth and have
-enabled 2FA from the Ente Photos app, we recommend that you ensure you store
+We recommend that you ensure you store
 your recovery key in a safe place (writing it down on a paper is a good idea).
 This key can be used to bypass Ente 2FA in case you are locked out.
 
@@ -44,7 +45,7 @@ warning when you try to enable email verification in the auth app:
 
 </div>
 
-The solution here are the same as the Ente-in-Ente case.
+The solutions here are the same as the Ente-in-Ente case.
 
 ## TL;DR;
 
