@@ -403,6 +403,7 @@
     "thumbnail_generation_failed": "Nepavyko sugeneruoti miniatiūrų",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Šie failai buvo įkelti, bet, deja, negalėjome sugeneruoti jų miniatiūrų.",
+    "learn_how": "",
     "unsupported_files": "Nepalaikomi failai",
     "unsupported_files_hint": "„Ente“ dar nepalaiko šių failų formatų.",
     "zero_size_files": "Tušti failai",
