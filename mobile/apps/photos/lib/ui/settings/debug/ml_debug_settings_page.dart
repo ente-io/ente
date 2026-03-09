@@ -728,6 +728,9 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<void> _onPetRecognitionChanged() async {
     try {
       await localSettings.togglePetRecognition();
+      // Invalidate cached runtime args so pet model paths are rebuilt
+      // with the new toggle state on the next indexing run.
+      await MLIndexingIsolate.instance.releaseRustRuntime();
       logger.info(
         'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
       );
