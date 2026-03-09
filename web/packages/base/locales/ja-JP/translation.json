@@ -403,7 +403,6 @@
     "thumbnail_generation_failed": "サムネイルの生成に失敗しました",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "これらのファイルはアップロードされましたが、残念ながらサムネイルを生成できませんでした。",
-    "learn_more": "",
     "unsupported_files": "サポートされないファイル",
     "unsupported_files_hint": "Enteはこれらのファイル形式をサポートしていません",
     "zero_size_files": "",

@@ -403,7 +403,6 @@
     "thumbnail_generation_failed": "Falha ao gerar miniaturas",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Estes ficheiros foram carregados, mas infelizmente não foi possível gerar as respectivas miniaturas.",
-    "learn_more": "",
     "unsupported_files": "Arquivos não suportados",
     "unsupported_files_hint": "Ente ainda não suporta estes formatos de arquivo",
     "zero_size_files": "",

@@ -403,7 +403,6 @@
     "thumbnail_generation_failed": "Vytvoření miniatury se nezdařilo",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Tyto soubory byly nahrány, ale bohužel jsme pro ně nemohli vygenerovat miniatury.",
-    "learn_more": "",
     "unsupported_files": "Nepodporované soubory",
     "unsupported_files_hint": "Ente zatím nepodporuje tyto formáty souborů",
     "zero_size_files": "Prázdné soubory",
