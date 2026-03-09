@@ -2,7 +2,7 @@ import "dart:async";
 import "dart:convert" show jsonEncode;
 import "dart:io" show Platform;
 import "dart:math" show min;
-import "dart:typed_data" show Float32List, Uint8List;
+import "dart:typed_data" show Uint8List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
@@ -631,17 +631,10 @@ class MLService {
       }
 
       // Pet results locally
-      final rustPets =
-          result.petFaces != null || result.petBodies != null;
+      final rustPets = result.petFaces != null || result.petBodies != null;
       if (rustPets) {
         if (result.petFaces != null && result.petFaces!.isNotEmpty) {
           final dbPetFaces = result.petFaces!.map((pf) {
-            final floatList = Float32List.fromList(pf.embedding);
-            final blob = Uint8List.view(
-              floatList.buffer,
-              floatList.offsetInBytes,
-              floatList.lengthInBytes,
-            );
             return DBPetFace(
               fileId: result.fileId,
               petFaceId: pf.petFaceId,
@@ -652,7 +645,6 @@ class MLService {
               imageHeight: result.decodedImageSize.height,
               imageWidth: result.decodedImageSize.width,
               mlVersion: petMlVersion,
-              embeddingBlob: blob,
             );
           }).toList();
           await mlDataDB.bulkInsertPetFaces(dbPetFaces);
@@ -694,7 +686,11 @@ class MLService {
         }
       }
       if (instruction.shouldRunPets && rustPets) {
-        await mlDataDB.markPetIndexed(result.fileId, petMlVersion);
+        final hasPetFaces =
+            result.petFaces != null && result.petFaces!.isNotEmpty;
+        if (!hasPetFaces) {
+          await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
+        }
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
@@ -725,7 +721,9 @@ class MLService {
           );
         }
         if (instruction.shouldRunPets) {
-          await mlDataDB.markPetIndexed(instruction.fileKey, petMlVersion);
+          await mlDataDB.bulkInsertPetFaces(
+            [DBPetFace.empty(instruction.fileKey, error: true)],
+          );
         }
         return true;
       }

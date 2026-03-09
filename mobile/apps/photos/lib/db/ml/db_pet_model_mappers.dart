@@ -1,7 +1,6 @@
-import "dart:typed_data" show Uint8List;
-
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:photos/db/ml/schema.dart";
+import "package:photos/models/ml/ml_versions.dart";
 
 // ── Pet Face DB Mapper ──
 
@@ -16,7 +15,6 @@ class DBPetFace {
   final int imageHeight;
   final int imageWidth;
   final int mlVersion;
-  final Uint8List? embeddingBlob;
 
   DBPetFace({
     required this.fileId,
@@ -28,7 +26,6 @@ class DBPetFace {
     required this.imageHeight,
     required this.imageWidth,
     required this.mlVersion,
-    this.embeddingBlob,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,8 +39,23 @@ class DBPetFace {
       'height': imageHeight,
       'width': imageWidth,
       mlVersionColumn: mlVersion,
-      petFaceEmbeddingColumn: embeddingBlob,
     };
+  }
+
+  /// Creates a dummy entry to mark a file as pet-indexed when no pets were
+  /// found, matching how [Face.empty] works for human face detection.
+  factory DBPetFace.empty(int fileId, {bool error = false}) {
+    return DBPetFace(
+      fileId: fileId,
+      petFaceId: '${fileId}_pet_0_0_0_0',
+      detection: '{}',
+      faceVectorId: -1,
+      species: -1,
+      faceScore: error ? -1.0 : 0.0,
+      imageHeight: 0,
+      imageWidth: 0,
+      mlVersion: petMlVersion,
+    );
   }
 
   factory DBPetFace.fromMap(Map<String, dynamic> map) {
@@ -57,7 +69,6 @@ class DBPetFace {
       imageHeight: map['height'] as int,
       imageWidth: map['width'] as int,
       mlVersion: map[mlVersionColumn] as int,
-      embeddingBlob: map[petFaceEmbeddingColumn] as Uint8List?,
     );
   }
 }

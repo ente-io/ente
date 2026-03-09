@@ -207,7 +207,6 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
   $imageHeight INTEGER NOT NULL DEFAULT 0,
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
-  $petFaceEmbeddingColumn BLOB,
   PRIMARY KEY($fileIDColumn, $petFaceIDColumn)
 );
 ''';
@@ -265,10 +264,6 @@ CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
 
 const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
 
-// ── Embedding BLOB Columns ──
-
-const petFaceEmbeddingColumn = 'pet_face_embedding';
-
 // ── Vector ID Mapping Tables ──
 
 /// Maps pet_face_id (string) → integer for face usearch index
@@ -310,4 +305,4 @@ CREATE TABLE IF NOT EXISTS $petIndexedFilesTable (
 );
 ''';
 
-const deletePetIndexedFilesTable = 'DELETE FROM $petIndexedFilesTable';
+const dropPetIndexedFilesTable = 'DROP TABLE IF EXISTS $petIndexedFilesTable';
