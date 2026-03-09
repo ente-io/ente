@@ -39,7 +39,7 @@ export const CanvasReadbackBlockedDialog: React.FC<
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            {t("learn_more")}
+                            {t("learn_how")}
                         </HelpLink>
                         .
                     </Subtitle>

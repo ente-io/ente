@@ -230,9 +230,12 @@ When photos are uploaded on the web app, the most common cause of thumbnails not
 
 **Firefox users:** If you have "block canvas fingerprinting" enabled (`privacy.resistFingerprinting` set to true in `about:config`), Firefox will prevent the app from generating thumbnails.
 
+**Brave users:** Brave Shields can block canvas access and prevent the app from generating thumbnails.
+
 **Solution:**
 
 - Disable canvas fingerprinting for Ente's domain, OR
+- Turn off Brave Shields for Ente, OR
 - Check if you're using browser extensions that block canvas access and whitelist Ente
 
 **Important:** Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
