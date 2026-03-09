@@ -30,6 +30,7 @@ class ChangeLogEntryWidget extends StatelessWidget {
     final hasDescription =
         entry.description != null && entry.description!.isNotEmpty;
     final hasItems = entry.items.isNotEmpty;
+    final hasBody = hasDescription || hasItems;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,9 +44,7 @@ class ChangeLogEntryWidget extends StatelessWidget {
                 : colorScheme.textMuted,
           ),
         ),
-        const SizedBox(
-          height: 18,
-        ),
+        if (hasBody) const SizedBox(height: 10),
         if (hasDescription)
           Padding(
             padding: EdgeInsets.only(bottom: hasItems ? 12 : 0),
@@ -81,9 +80,6 @@ class ChangeLogEntryWidget extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        const SizedBox(
-          height: 10,
         ),
       ],
     );
