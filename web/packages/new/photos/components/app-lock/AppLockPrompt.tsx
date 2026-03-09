@@ -5,9 +5,9 @@ import { t } from "i18next";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { cancelReauthentication } from "../../services/app-lock";
+import { useAppLockSnapshot } from "../utils/use-snapshot";
 import { AppLockLogoutConfirmation } from "./AppLockFeedback";
 import { AppLockUnlockForm } from "./AppLockUnlockForm";
-import { useAppLockSnapshot } from "../utils/use-snapshot";
 
 type AppLockSnapshot = ReturnType<typeof useAppLockSnapshot>;
 
@@ -31,9 +31,7 @@ const AppLockCloseAction = () => (
             ...theme.applyStyles("dark", {
                 backgroundColor: "rgba(255, 255, 255, 0.12)",
                 color: "#fff",
-                "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.16)",
-                },
+                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
             }),
         })}
     >
@@ -65,7 +63,9 @@ export const AppLockPrompt = ({
     if (!isVisible) return null;
 
     const closeAction =
-        isReauthentication && !showLogoutConfirm ? <AppLockCloseAction /> : undefined;
+        isReauthentication && !showLogoutConfirm ? (
+            <AppLockCloseAction />
+        ) : undefined;
 
     return (
         <>

@@ -5,8 +5,8 @@
 import { Box, Modal } from "@mui/material";
 import { t } from "i18next";
 import type { CSSProperties } from "react";
-import { AppLockPrompt } from "./AppLockPrompt";
 import { useAppLockSnapshot } from "../utils/use-snapshot";
+import { AppLockPrompt } from "./AppLockPrompt";
 
 export const AppLockReauthenticationDialog = () => {
     const appLock = useAppLockSnapshot();

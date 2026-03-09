@@ -6,11 +6,7 @@ import {
     CooldownIllustration,
     LogoutIllustration,
 } from "./AppLockIllustrations";
-import {
-    LOGOUT_MODAL_WIDTH,
-    subtitleTextSx,
-    titleTextSx,
-} from "./styles";
+import { LOGOUT_MODAL_WIDTH, subtitleTextSx, titleTextSx } from "./styles";
 
 const DANGER_RED = "#E53935";
 const DANGER_RED_HOVER = "#D32F2F";
@@ -142,7 +138,9 @@ export const AppLockLogoutConfirmation = ({
                 }}
             >
                 <Typography sx={titleTextSx}>{t("logout")}</Typography>
-                <Typography sx={subtitleTextSx}>{t("logout_message")}</Typography>
+                <Typography sx={subtitleTextSx}>
+                    {t("logout_message")}
+                </Typography>
             </Box>
 
             <Stack spacing={1.5} sx={{ width: "100%" }}>
@@ -212,7 +210,9 @@ export const CooldownScreen = ({
                     mb: 2.5,
                 }}
             >
-                <Typography sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}>
+                <Typography
+                    sx={(theme) => ({ ...titleTextSx(theme), mb: 0.5 })}
+                >
                     {t("app_locked")}
                 </Typography>
                 <Typography

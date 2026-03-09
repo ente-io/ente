@@ -1,4 +1,10 @@
-import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    CircularProgress,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { useBaseContext } from "ente-base/context";
@@ -12,15 +18,11 @@ import {
     type DeviceLockUnlockResult,
     type UnlockResult,
 } from "../../services/app-lock";
+import { useAppLockSnapshot } from "../utils/use-snapshot";
 import { AppLockCard } from "./AppLockCard";
 import { CooldownScreen, ErrorMessage } from "./AppLockFeedback";
-import {
-    LOGOUT_MODAL_WIDTH,
-    subtitleTextSx,
-    titleTextSx,
-} from "./styles";
 import { LockIllustration } from "./AppLockIllustrations";
-import { useAppLockSnapshot } from "../utils/use-snapshot";
+import { LOGOUT_MODAL_WIDTH, subtitleTextSx, titleTextSx } from "./styles";
 
 type AppLockSnapshot = ReturnType<typeof useAppLockSnapshot>;
 
@@ -44,10 +46,7 @@ interface AppLockFormHeaderProps {
 
 const ENTE_GREEN = "#08C225";
 const ENTE_GREEN_HOVER = "#07A820";
-const appLockModalContentSx = {
-    width: 408 - 32,
-    maxWidth: "100%",
-} as const;
+const appLockModalContentSx = { width: 408 - 32, maxWidth: "100%" } as const;
 
 const useCooldownState = (
     cooldownExpiresAt: number,
@@ -381,7 +380,9 @@ const PinUnlockContent = ({
                 >
                     <AppLockFormHeader
                         title={
-                            isReauthentication ? t("authenticate") : t("app_locked")
+                            isReauthentication
+                                ? t("authenticate")
+                                : t("app_locked")
                         }
                         subtitle={t("app_lock_enter_pin_to_unlock")}
                         isReauthentication={isReauthentication}
@@ -406,7 +407,9 @@ const PinUnlockContent = ({
                                     inputRefs.current[i] = el;
                                 }}
                                 value={digit}
-                                onChange={(e) => handlePinChange(i, e.target.value)}
+                                onChange={(e) =>
+                                    handlePinChange(i, e.target.value)
+                                }
                                 onKeyDown={(e) => handleKeyDown(i, e)}
                                 disabled={loading}
                                 slotProps={{
@@ -426,7 +429,9 @@ const PinUnlockContent = ({
                                     },
                                 }}
                                 sx={(theme) => ({
-                                    ...inputFieldSx(theme, { borderRadius: 12 }),
+                                    ...inputFieldSx(theme, {
+                                        borderRadius: 12,
+                                    }),
                                     flex: 1,
                                     minWidth: 0,
                                     "& .MuiInputBase-input": {
@@ -520,7 +525,9 @@ const PasswordUnlockContent = ({
                     sx={appLockModalContentSx}
                 >
                     <AppLockFormHeader
-                        title={isReauthentication ? t("password") : t("app_locked")}
+                        title={
+                            isReauthentication ? t("password") : t("app_locked")
+                        }
                         subtitle={t("app_lock_enter_password")}
                         isReauthentication={isReauthentication}
                         marginBottom={2}
@@ -541,7 +548,9 @@ const PasswordUnlockContent = ({
                         }}
                         disabled={loading}
                         placeholder={
-                            isReauthentication ? t("password") : t("app_lock_password")
+                            isReauthentication
+                                ? t("password")
+                                : t("app_lock_password")
                         }
                         autoComplete="off"
                         slotProps={{
@@ -549,7 +558,9 @@ const PasswordUnlockContent = ({
                                 endAdornment: (
                                     <ShowHidePasswordInputAdornment
                                         showPassword={showPassword}
-                                        onToggle={() => setShowPassword((s) => !s)}
+                                        onToggle={() =>
+                                            setShowPassword((s) => !s)
+                                        }
                                     />
                                 ),
                             },
@@ -669,7 +680,9 @@ const DeviceLockUnlockContent = ({
                 >
                     <AppLockFormHeader
                         title={
-                            isReauthentication ? t("authenticate") : t("app_locked")
+                            isReauthentication
+                                ? t("authenticate")
+                                : t("app_locked")
                         }
                         subtitle={t("device_lock_login_instructions")}
                         isReauthentication={isReauthentication}
