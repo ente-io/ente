@@ -194,25 +194,19 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         ?.isZoomedNotifier;
 
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.enableFullScreenNotifier,
-      builder: (context, isFullScreen, _) {
-        return ValueListenableBuilder<bool>(
-          valueListenable: isZoomedNotifier ?? ValueNotifier(false),
-          builder: (context, isZoomed, _) {
-            final bool shouldHide =
-                isFullScreen || widget.isGuestView || isZoomed;
+      valueListenable: isZoomedNotifier ?? ValueNotifier(false),
+      builder: (context, isZoomed, _) {
+        final bool shouldHide = widget.isGuestView || isZoomed;
 
-            return Positioned.fill(
-              child: IgnorePointer(
-                ignoring: shouldHide,
-                child: AnimatedOpacity(
-                  opacity: shouldHide ? 0.0 : 1.0,
-                  duration: const Duration(milliseconds: 150),
-                  child: _buildInlineOverlay(context),
-                ),
-              ),
-            );
-          },
+        return Positioned.fill(
+          child: IgnorePointer(
+            ignoring: shouldHide,
+            child: AnimatedOpacity(
+              opacity: shouldHide ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: _buildInlineOverlay(context),
+            ),
+          ),
         );
       },
     );
