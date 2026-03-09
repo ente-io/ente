@@ -1,4 +1,5 @@
 import { safeStorage } from "electron/main";
+import type { PersistedAppLockConfig } from "../../types/ipc";
 import { safeStorageStore } from "../stores/safe-storage";
 import { uploadStatusStore } from "../stores/upload-status";
 import { userPreferences } from "../stores/user-preferences";
@@ -35,6 +36,63 @@ export const masterKeyFromSafeStorage = (): string | undefined => {
     if (!encryptedKey) return undefined;
     const encryptedKeyBuffer = Buffer.from(encryptedKey, "base64");
     return safeStorage.decryptString(encryptedKeyBuffer);
+};
+
+const encryptStringForSafeStorageStore = (value: string) => {
+    return Buffer.from(safeStorage.encryptString(value)).toString("base64");
+};
+
+const decryptStringFromSafeStorageStore = (value: string) => {
+    return safeStorage.decryptString(Buffer.from(value, "base64"));
+};
+
+const parsePersistedAppLockConfig = (json: string): PersistedAppLockConfig => {
+    const parsed: unknown = JSON.parse(json);
+    if (!parsed || typeof parsed !== "object") {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    const { enabled, lockType, autoLockTimeMs } = parsed as Record<
+        string,
+        unknown
+    >;
+    if (
+        typeof enabled !== "boolean" ||
+        (lockType !== "pin" &&
+            lockType !== "password" &&
+            lockType !== "device" &&
+            lockType !== "none") ||
+        typeof autoLockTimeMs !== "number" ||
+        !Number.isFinite(autoLockTimeMs)
+    ) {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    return { enabled, lockType, autoLockTimeMs };
+};
+
+export const saveAppLockConfigInSafeStorage = (
+    config: PersistedAppLockConfig,
+) => {
+    const encryptedConfig = encryptStringForSafeStorageStore(
+        JSON.stringify(config),
+    );
+    safeStorageStore.set("appLockConfig", encryptedConfig);
+};
+
+export const appLockConfigFromSafeStorage = ():
+    | PersistedAppLockConfig
+    | undefined => {
+    const encryptedConfig = safeStorageStore.get("appLockConfig");
+    if (!encryptedConfig) return undefined;
+
+    return parsePersistedAppLockConfig(
+        decryptStringFromSafeStorageStore(encryptedConfig),
+    );
+};
+
+export const clearAppLockConfigFromSafeStorage = () => {
+    safeStorageStore.delete("appLockConfig");
 };
 
 export const lastShownChangelogVersion = (): number | undefined =>

@@ -5,6 +5,7 @@ import {
 import { updateSessionFromElectronSafeStorageIfNeeded } from "ente-base/session";
 import { useEffect, useRef, useState } from "react";
 import {
+    appLockSnapshot,
     clearAutoLockBlurSuppression,
     initAppLock,
     lock,
@@ -22,15 +23,13 @@ export const useSetupAppLock = () => {
     const [isAppLockReady, setIsAppLockReady] = useState(false);
 
     useEffect(() => {
-        const isAppLockEnabled =
-            localStorage.getItem("appLock.enabled") === "true";
-        initAppLock();
-        if (!isAppLockEnabled) {
-            setIsAppLockReady(true);
-            return;
-        }
-
         void (async () => {
+            await initAppLock();
+            if (!appLockSnapshot().enabled) {
+                setIsAppLockReady(true);
+                return;
+            }
+
             try {
                 /**
                  * The current session's master key might be already existing in the OS's safe
@@ -44,7 +43,7 @@ export const useSetupAppLock = () => {
                  * The app lock config is actually persisted across sessions, and for refreshing this
                  * the user must haveMasterKeyInSession().
                  */
-                refreshAppLockStateFromSession();
+                await refreshAppLockStateFromSession();
                 setIsAppLockReady(true);
             }
         })();

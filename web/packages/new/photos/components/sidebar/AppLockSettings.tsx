@@ -13,6 +13,7 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
+    RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
@@ -58,6 +59,11 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { showMiniDialog } = useBaseContext();
 
     useEffect(() => {
+        if (!state.supported) {
+            setShowDeviceLockOption(false);
+            return;
+        }
+
         isDeviceLockOptionRequestCancelled.current = false;
 
         void (async () => {
@@ -80,7 +86,7 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         return () => {
             isDeviceLockOptionRequestCancelled.current = true;
         };
-    }, []);
+    }, [state.supported]);
 
     useEffect(() => {
         if (!open) {
@@ -135,6 +141,8 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         }, [isSettingDeviceLock, showMiniDialog]);
 
     const handleToggleEnabled = useCallback(() => {
+        if (!state.supported) return;
+
         if (state.enabled) {
             showMiniDialog({
                 title: t("disable"),
@@ -189,9 +197,17 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         <RowSwitch
                             label={t("enabled")}
                             checked={state.enabled}
+                            disabled={!state.supported}
                             onClick={handleToggleEnabled}
                         />
                     </RowButtonGroup>
+                    {!state.supported && (
+                        <RowButtonGroupHint>
+                            {t("app_lock_not_supported", {
+                                defaultValue: "App lock is not supported",
+                            })}
+                        </RowButtonGroupHint>
+                    )}
 
                     {state.enabled && (
                         <>
@@ -884,14 +900,18 @@ const AutoLockOptionsDrawer: React.FC<AutoLockOptionsDrawerProps> = ({
             if (pendingAutoLockMs !== null || ms === currentValue) return;
 
             setPendingAutoLockMs(ms);
-            try {
-                setAutoLockTime(ms);
-                onClose();
-            } finally {
-                setPendingAutoLockMs((pending) =>
-                    pending === ms ? null : pending,
-                );
-            }
+            void (async () => {
+                try {
+                    await setAutoLockTime(ms);
+                    onClose();
+                } catch (e) {
+                    log.error("Failed to update app lock auto-lock time", e);
+                } finally {
+                    setPendingAutoLockMs((pending) =>
+                        pending === ms ? null : pending,
+                    );
+                }
+            })();
         },
         [pendingAutoLockMs, currentValue, onClose],
     );
