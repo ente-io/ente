@@ -10,7 +10,7 @@
 
 import type { FSWatcher } from "chokidar";
 import type { BrowserWindow } from "electron";
-import { ipcMain } from "electron/main";
+import { ipcMain, safeStorage } from "electron/main";
 import type {
     CollectionMapping,
     FFmpegCommand,
@@ -56,7 +56,6 @@ import { logout } from "./services/logout";
 import {
     appLockConfigFromSafeStorage,
     clearAppLockConfigFromSafeStorage,
-    isSafeStorageAvailable,
     lastShownChangelogVersion,
     masterKeyFromSafeStorage,
     saveAppLockConfigInSafeStorage,
@@ -151,7 +150,9 @@ export const attachIPCHandlers = () => {
         saveMasterKeyInSafeStorage(masterKey),
     );
 
-    ipcMain.handle("isSafeStorageAvailable", () => isSafeStorageAvailable());
+    ipcMain.handle("isSafeStorageAvailable", (): boolean =>
+        safeStorage.isEncryptionAvailable(),
+    );
 
     ipcMain.handle("appLockConfigFromSafeStorage", () =>
         appLockConfigFromSafeStorage(),
