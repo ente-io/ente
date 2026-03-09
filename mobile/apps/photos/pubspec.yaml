@@ -152,8 +152,8 @@ dependencies:
   ml_linalg: ^13.11.31
   mobile_ocr:
     git:
-      url: https://github.com/Amrithesh-Kakkoth/mobile_ocr
-      ref: cdf5aaebe773e50a0a713bb53d00c7141d0078cc
+      url: https://github.com/ente-io/mobile_ocr
+      ref: 6238cb84476694c8d613f88a2da554ea9fdd103e
   modal_bottom_sheet: ^3.0.0
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
