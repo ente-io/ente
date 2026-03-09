@@ -7,9 +7,9 @@ import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/ml/clip_vector_db.dart" show VectorDbStats;
-import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/schema.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
+import "package:sqlite_async/sqlite_async.dart";
 import "package:synchronized/synchronized.dart";
 
 /// Vector database for pet embeddings.
@@ -122,13 +122,11 @@ class PetVectorDB {
   /// Returns a map of petFaceId → integer vectorId.
   Future<Map<String, int>> getPetFaceVectorIdMap(
     Iterable<String> petFaceIds, {
+    required SqliteDatabase db,
     bool createIfMissing = false,
   }) async {
     final uniqueIds = petFaceIds.toSet().toList(growable: false);
     if (uniqueIds.isEmpty) return {};
-
-    final mlDataDB = MLDataDB.instance;
-    final db = await mlDataDB.asyncDB;
 
     if (createIfMissing) {
       const insertSql = '''
@@ -166,13 +164,11 @@ class PetVectorDB {
   /// Uses [petBodyVectorIdMappingTable] — separate ID space from face embeddings.
   Future<Map<String, int>> getObjectVectorIdMap(
     Iterable<String> objectIds, {
+    required SqliteDatabase db,
     bool createIfMissing = false,
   }) async {
     final uniqueIds = objectIds.toSet().toList(growable: false);
     if (uniqueIds.isEmpty) return {};
-
-    final mlDataDB = MLDataDB.instance;
-    final db = await mlDataDB.asyncDB;
 
     if (createIfMissing) {
       const insertSql = '''

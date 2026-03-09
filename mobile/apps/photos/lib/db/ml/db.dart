@@ -311,6 +311,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<PetFaceResult> petFaces,
   ) async {
     try {
+      final db = await asyncDB;
       // Group by species
       final bySpecies = <int, List<(DBPetFace, PetFaceResult)>>{};
       for (int i = 0; i < dbPetFaces.length; i++) {
@@ -326,6 +327,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final petFaceIds = entry.value.map((e) => e.$1.petFaceId).toList();
         final idMap = await vdb.getPetFaceVectorIdMap(
           petFaceIds,
+          db: db,
           createIfMissing: true,
         );
         final vectorIds = <int>[];
@@ -369,6 +371,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<PetBodyResult> petBodies,
   ) async {
     try {
+      final db = await asyncDB;
       // Group by species (0 = dog, 1 = cat)
       final bySpecies = <int, List<(DBPetBody, PetBodyResult)>>{};
       for (int i = 0; i < dbPetBodies.length; i++) {
@@ -384,6 +387,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final bodyIds = entry.value.map((e) => e.$1.petBodyId).toList();
         final idMap = await vdb.getObjectVectorIdMap(
           bodyIds,
+          db: db,
           createIfMissing: true,
         );
         final vectorIds = <int>[];
