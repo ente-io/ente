@@ -28,8 +28,9 @@ class UpdateService {
   }
 
   Future<bool> showChangeLog() async {
-    // Temporary override to keep the changelog visible on every launch.
-    return true;
+    // fetch the change log version which was last shown to user.
+    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
+    return lastShownAtVersion < currentChangeLogVersion;
   }
 
   Future<bool> hideChangeLog() async {
