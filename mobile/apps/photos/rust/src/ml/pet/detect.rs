@@ -109,12 +109,12 @@ pub fn run_pet_face_detection(
             pad_top,
         );
 
-        // For a 2-class model (row_len >= 13): row[11] = dog score,
-        // row[12] = cat score.  Pick argmax.
+        // For a 2-class model (row_len >= 13): row[11] = cat score,
+        // row[12] = dog score.  Pick argmax and map to 0=dog, 1=cat.
         // For a 1-class model (row_len == 12): row[11] is the single class
         // score; class is always 0 (dog).
         let class_id: u8 = if row_len >= 13 {
-            if row[12] > row[11] { 1 } else { 0 }
+            if row[12] > row[11] { 0 } else { 1 }
         } else {
             0
         };

@@ -306,7 +306,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         FacesItemWidget(file),
         const FileDetailsDivider(),
       ]);
-      if (flagService.petEnabled) {
+      if (flagService.internalUser && localSettings.petRecognitionEnabled) {
         fileDetailsTiles.addAll([
           PetsItemWidget(file),
           const FileDetailsDivider(),

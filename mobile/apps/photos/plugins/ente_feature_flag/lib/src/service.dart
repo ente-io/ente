@@ -102,9 +102,6 @@ class FlagService {
 
   bool get useRustForFaceThumbnails => internalUser;
 
-  bool get petEnabled =>
-      internalUser && (_prefs.getBool("ls.pet_recognition_enabled") ?? false);
-
   bool get qrFeatureEnabled => internalUser;
 
   Future<void> tryRefreshFlags() async {
