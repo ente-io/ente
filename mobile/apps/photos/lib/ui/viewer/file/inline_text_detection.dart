@@ -10,6 +10,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/utils/file_util.dart";
 
 /// Inline text detection widget that mimics Apple's Live Text behavior:
@@ -189,20 +190,29 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       return const SizedBox.shrink();
     }
 
+    final isZoomedNotifier = InheritedDetailPageState.maybeOf(context)
+        ?.isZoomedNotifier;
+
     return ValueListenableBuilder<bool>(
       valueListenable: widget.enableFullScreenNotifier,
       builder: (context, isFullScreen, _) {
-        final bool shouldHide = isFullScreen || widget.isGuestView;
+        return ValueListenableBuilder<bool>(
+          valueListenable: isZoomedNotifier ?? ValueNotifier(false),
+          builder: (context, isZoomed, _) {
+            final bool shouldHide =
+                isFullScreen || widget.isGuestView || isZoomed;
 
-        return Positioned.fill(
-          child: IgnorePointer(
-            ignoring: shouldHide,
-            child: AnimatedOpacity(
-              opacity: shouldHide ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: _buildInlineOverlay(context),
-            ),
-          ),
+            return Positioned.fill(
+              child: IgnorePointer(
+                ignoring: shouldHide,
+                child: AnimatedOpacity(
+                  opacity: shouldHide ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: _buildInlineOverlay(context),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -216,6 +226,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       autoDetect: true,
       backgroundColor: Colors.transparent,
       showUnselectedBoundaries: true,
+      overlayOnly: true,
       controller: _detectorController,
       strings: TextDetectorStrings(
         processingOverlayMessage: l10n.ocrProcessingOverlayMessage,

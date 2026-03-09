@@ -91,12 +91,14 @@ class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   final _isInSharedCollectionNotifier = ValueNotifier(false);
   final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
+  final _isZoomedNotifier = ValueNotifier(false);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
     _isInSharedCollectionNotifier.dispose();
     _showingThumbnailFallbackNotifier.dispose();
+    _isZoomedNotifier.dispose();
     super.dispose();
   }
 
@@ -109,6 +111,7 @@ class _DetailPageState extends State<DetailPage> {
       enableFullScreenNotifier: _enableFullScreenNotifier,
       isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
       showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
+      isZoomedNotifier: _isZoomedNotifier,
       child: _Body(widget.config),
     );
   }
