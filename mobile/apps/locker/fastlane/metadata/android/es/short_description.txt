@@ -1,0 +1,1 @@
+Ente Locker es una app de almacenamiento de documentos con cifrado de extremo a extremo
