@@ -48,5 +48,3 @@ dependency_overrides:
     path: ../../packages/rust
   ente_pure_utils:
     path: ../../packages/ente_pure_utils
-  mobile_ocr:
-    path: /Users/akente/mobile_ocr
