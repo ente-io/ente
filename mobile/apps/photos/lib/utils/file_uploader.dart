@@ -285,23 +285,49 @@ class FileUploader {
       return;
     }
     if (_uploadCounter < kMaximumConcurrentUploads) {
-      var pendingEntry = _queue.entries
-          .firstWhereOrNull(
-            (entry) => entry.value.status == UploadStatus.notStarted,
-          )
-          ?.value;
+      FileUploadItem? pendingEntry;
+      if (_processType == ProcessType.background) {
+        final selectedItems = List<FileUploadItem?>.filled(2, null);
+        for (final item in _queue.values) {
+          if (item.status != UploadStatus.notStarted) {
+            continue;
+          }
 
-      if (pendingEntry != null &&
-          pendingEntry.file.fileType == FileType.video &&
-          _videoUploadCounter >= kMaximumConcurrentVideoUploads) {
-        // check if there's any non-video entry which can be queued for upload
+          final selectedIndex = item.file.fileType == FileType.video ? 1 : 0;
+          final selectedItem = selectedItems[selectedIndex];
+          final selectedSize = selectedItem?.file.fileSize;
+          final itemSize = item.file.fileSize;
+          final shouldSelectItem = selectedItem == null ||
+              (itemSize != null &&
+                  (selectedSize == null || itemSize < selectedSize));
+          if (shouldSelectItem) {
+            selectedItems[selectedIndex] = item;
+          }
+        }
+        pendingEntry = selectedItems[0];
+        if (pendingEntry == null &&
+            _videoUploadCounter < kMaximumConcurrentVideoUploads) {
+          pendingEntry = selectedItems[1];
+        }
+      } else {
         pendingEntry = _queue.entries
             .firstWhereOrNull(
-              (entry) =>
-                  entry.value.status == UploadStatus.notStarted &&
-                  entry.value.file.fileType != FileType.video,
+              (entry) => entry.value.status == UploadStatus.notStarted,
             )
             ?.value;
+
+        if (pendingEntry != null &&
+            pendingEntry.file.fileType == FileType.video &&
+            _videoUploadCounter >= kMaximumConcurrentVideoUploads) {
+          // check if there's any non-video entry which can be queued for upload
+          pendingEntry = _queue.entries
+              .firstWhereOrNull(
+                (entry) =>
+                    entry.value.status == UploadStatus.notStarted &&
+                    entry.value.file.fileType != FileType.video,
+              )
+              ?.value;
+        }
       }
       if (pendingEntry != null) {
         pendingEntry.status = UploadStatus.inProgress;

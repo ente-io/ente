@@ -19,3 +19,4 @@
 - Laurens: Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
+- Prateek: Prioritize smaller known-size photos over videos during background upload queue selection
