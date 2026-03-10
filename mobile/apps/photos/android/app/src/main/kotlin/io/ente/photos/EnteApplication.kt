@@ -69,7 +69,7 @@ private class InternalUserWorkmanagerDebugHandler : WorkmanagerDebug() {
     if (prefs.getBoolean(EnteApplication.INTERNAL_USER_DISABLED_KEY, false)) {
       return false
     }
-    if (!prefs.getBoolean(EnteApplication.BG_DEBUG_NOTIFICATIONS_ENABLED_KEY, true)) {
+    if (!prefs.getBoolean(EnteApplication.BG_DEBUG_NOTIFICATIONS_ENABLED_KEY, false)) {
       return false
     }
 

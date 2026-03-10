@@ -1,3 +1,5 @@
+import "dart:io";
+
 import 'package:flutter/foundation.dart';
 import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
@@ -419,7 +421,8 @@ class LocalSettings {
   }
 
   bool get isBGDebugNotificationsEnabled =>
-      _prefs.getBool(_kBGDebugNotificationsEnabled) ?? true;
+      _prefs.getBool(_kBGDebugNotificationsEnabled) ??
+      (Platform.isAndroid ? false : true);
 
   Future<void> setBGDebugNotificationsEnabled(bool value) async {
     await _prefs.setBool(_kBGDebugNotificationsEnabled, value);
