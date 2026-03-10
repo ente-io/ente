@@ -403,6 +403,7 @@
     "thumbnail_generation_failed": "Das Vorschaubild konnte nicht erzeugt werden",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Diese Dateien wurden hochgeladen, aber leider konnten wir nicht die Thumbnails für sie generieren.",
+    "learn_how": "",
     "unsupported_files": "Nicht unterstützte Dateien",
     "unsupported_files_hint": "Ente unterstützt diese Dateiformate noch nicht",
     "zero_size_files": "",
