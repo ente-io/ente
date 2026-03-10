@@ -685,12 +685,10 @@ class MLService {
           );
         }
       }
-      if (instruction.shouldRunPets) {
-        final hasPetFaces =
-            result.petFaces != null && result.petFaces!.isNotEmpty;
-        if (!hasPetFaces) {
-          await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
-        }
+      if (instruction.shouldRunPets &&
+          result.petFaces != null &&
+          result.petFaces!.isEmpty) {
+        await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
