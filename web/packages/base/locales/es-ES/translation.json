@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Habrá una opción para reintentarlo cuando termine la subida",
     "retry_failed_uploads": "Reintentar subidas fallidas",
     "thumbnail_generation_failed": "Generación de miniaturas fallida",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Estos archivos fueron cargados, pero por desgracia no pudimos generar las miniaturas para ellos.",
     "unsupported_files": "Archivos no soportados",
     "unsupported_files_hint": "ente no soporta estos formatos de archivo aún",

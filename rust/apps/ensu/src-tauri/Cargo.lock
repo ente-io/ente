@@ -333,9 +333,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.55"
+version = "1.2.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47b26a0954ae34af09b50f0de26458fa95369a0d478d8236d3f93082b219bd29"
+checksum = "aebf35691d1bfb0ac386a69bac2fde4dd276fb618cf8bf4f5318fe285e821bb2"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -735,7 +735,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -892,7 +892,7 @@ dependencies = [
 
 [[package]]
 name = "ensu-tauri"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "ensu-db",
  "ensu-sync",
@@ -977,7 +977,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2113,22 +2113,23 @@ checksum = "6373607a59f0be73a39b6fe456b8192fcc3585f602af20751600e974dd455e77"
 
 [[package]]
 name = "llama-cpp-2"
-version = "0.1.131"
+version = "0.1.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a256ab71761e7c46a24e21fe7d923e1e6b78d465f41c897277f79477da96b84"
+checksum = "2947ab625c59d1fdf42e61f538c3fa66f43de2f78316971920873f359483d1d8"
 dependencies = [
+ "encoding_rs",
  "enumflags2",
  "llama-cpp-sys-2",
- "thiserror 1.0.69",
+ "thiserror 2.0.18",
  "tracing",
  "tracing-core",
 ]
 
 [[package]]
 name = "llama-cpp-sys-2"
-version = "0.1.131"
+version = "0.1.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff5b2268a06180a67d8a1d3dd9d1f1c70d52de7b6f40f967ec4eabd90d0417ae"
+checksum = "84a529006bf16af70c7485ba957820dc2bc9467d75697e97970c81d2da73c76f"
 dependencies = [
  "bindgen",
  "cc",
@@ -2638,7 +2639,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -5213,7 +5214,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

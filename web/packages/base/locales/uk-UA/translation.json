@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Буде можливість повторити спробу, коли вивантаження завершиться",
     "retry_failed_uploads": "Спробувати відновити невдалі вивантаження",
     "thumbnail_generation_failed": "Не вдалося створити мініатюру",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Ці файли були вивантажені, але, на жаль, ми не змогли створити для них мініатюри.",
     "unsupported_files": "Непідтримувані файли",
     "unsupported_files_hint": "Ente ще не підтримує ці формати файлів",

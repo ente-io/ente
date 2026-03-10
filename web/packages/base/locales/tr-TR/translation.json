@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Yükleme tamamlandığında bu dosyalar için yeniden deneme seçeneği sunulacak",
     "retry_failed_uploads": "Başarısız yüklemeleri yeniden dene",
     "thumbnail_generation_failed": "Küçük resim oluşturulamadı",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Bu dosyalar yüklendi, ancak ne yazık ki küçük resimleri oluşturulamadı.",
     "unsupported_files": "Desteklenmeyen dosyalar",
     "unsupported_files_hint": "Ente bu dosya formatlarını henüz desteklemiyor",

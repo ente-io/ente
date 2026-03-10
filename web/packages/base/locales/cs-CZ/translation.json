@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Po dokončení nahrávání bude k dispozici možnost tyto soubory zkusit nahrát znovu",
     "retry_failed_uploads": "Opakujte neúspěšné nahrávání",
     "thumbnail_generation_failed": "Vytvoření miniatury se nezdařilo",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Tyto soubory byly nahrány, ale bohužel jsme pro ně nemohli vygenerovat miniatury.",
     "unsupported_files": "Nepodporované soubory",
     "unsupported_files_hint": "Ente zatím nepodporuje tyto formáty souborů",

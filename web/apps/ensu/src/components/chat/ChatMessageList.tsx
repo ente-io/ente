@@ -195,7 +195,7 @@ const MessageRow = memo(
             const fallbackText = imageCount ? "Attached images" : "";
             const displayText = isSelf
                 ? parsedDocuments.text || fallbackText
-                : message.text || fallbackText;
+                : stripHiddenParts(message.text) || fallbackText;
             const copyText = isSelf
                 ? displayText
                 : stripHiddenParts(message.text);

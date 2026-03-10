@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Kai baigsis įkėlimas, bus parinktis bandyti tai pakartoti",
     "retry_failed_uploads": "Kartoti nepavykusius įkėlimus",
     "thumbnail_generation_failed": "Nepavyko sugeneruoti miniatiūrų",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Šie failai buvo įkelti, bet, deja, negalėjome sugeneruoti jų miniatiūrų.",
     "unsupported_files": "Nepalaikomi failai",
     "unsupported_files_hint": "„Ente“ dar nepalaiko šių failų formatų.",

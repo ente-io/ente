@@ -133,7 +133,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         controller: _scrollController,
         thumbVisibility: true,
         thickness: 2.0,
-        child: ListView.builder(
+        child: ListView.separated(
           controller: _scrollController,
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
@@ -143,6 +143,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               child: ChangeLogEntryWidget(entry: items[index]),
             );
           },
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
           itemCount: items.length,
         ),
       ),

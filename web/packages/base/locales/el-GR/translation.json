@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Θα υπάρχει μια επιλογή για να τα ξαναδοκιμάσετε όταν ολοκληρωθεί η μεταφόρτωση",
     "retry_failed_uploads": "Επανάληψη αποτυχημένων μεταφορτώσεων",
     "thumbnail_generation_failed": "Η δημιουργία μικρογραφιών απέτυχε",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Αυτά τα αρχεία ανέβηκαν, αλλά δυστυχώς δεν μπορέσαμε να δημιουργήσουμε τις μικρογραφίες τους.",
     "unsupported_files": "Μη υποστηριζόμενα αρχεία",
     "unsupported_files_hint": "Το Ente δεν υποστηρίζει ακόμα αυτές τις μορφές αρχείων",

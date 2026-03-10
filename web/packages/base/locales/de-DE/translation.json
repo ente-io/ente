@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Es wird eine Option geben, diese zu wiederholen, wenn der Upload beendet ist",
     "retry_failed_uploads": "Fehlgeschlagene Uploads erneut probieren",
     "thumbnail_generation_failed": "Das Vorschaubild konnte nicht erzeugt werden",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Diese Dateien wurden hochgeladen, aber leider konnten wir nicht die Thumbnails für sie generieren.",
     "unsupported_files": "Nicht unterstützte Dateien",
     "unsupported_files_hint": "Ente unterstützt diese Dateiformate noch nicht",

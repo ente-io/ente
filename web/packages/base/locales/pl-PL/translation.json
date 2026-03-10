@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Po zakończeniu przesyłania będzie dostępna opcja do powtórzenia",
     "retry_failed_uploads": "Ponów nieudane przesłania",
     "thumbnail_generation_failed": "Generowanie miniatur nie powiodło się",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Te pliki zostały przesłane, ale niestety nie mogliśmy dla nich wygenerować miniatur.",
     "unsupported_files": "Nieobsługiwane pliki",
     "unsupported_files_hint": "Ente nie obsługuje jeszcze tych formatów plików",

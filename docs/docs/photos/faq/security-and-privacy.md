@@ -157,6 +157,8 @@ Yes, we recommend enabling 2FA for an additional layer of security. We support:
 
 You can set up 2FA in the settings of our mobile or desktop apps.
 
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
+
 ### Can I contact support using PGP? {#support-pgp}
 
 Yes. You can send encrypted messages to [pgp@ente.io](mailto:pgp@ente.io). The

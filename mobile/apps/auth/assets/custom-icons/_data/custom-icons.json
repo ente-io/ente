@@ -340,6 +340,9 @@
       "title": "btcturk"
     },
     {
+      "title": "Buenbit"
+    },
+    {
       "title": "Bugzilla"
     },
     {
@@ -448,6 +451,13 @@
     },
     {
       "title": "ClouDNS"
+    },
+    {
+      "title": "Cocos Capital",
+      "slug": "cocos_capital",
+      "altNames": [
+        "cocos crypto"
+      ]
     },
     {
       "title": "Co-Wheels",
@@ -776,6 +786,9 @@
       "title": "Finary"
     },
     {
+      "title": "Fiwind"
+    },
+    {
       "title": "Firefox",
       "slug": "mozilla"
     },
@@ -1046,6 +1059,16 @@
     },
     {
       "title": "Kite"
+    },
+    {
+      "title": "Kiwix",
+      "slug": "kiwix",
+      "altNames": [
+        "kiwix.org",
+        "get.kiwix.org",
+        "pro.kiwix.org",
+        "hub.kiwix.org"
+      ]
     },
     {
       "title": "KnownHost",
@@ -1556,6 +1579,10 @@
       "slug": "pionex"
     },
     {
+      "title": "Plus Crypto",
+      "slug": "plus_crypto"
+    },
+    {
       "title": "Plutus",
       "hex": "DEC685"
     },
@@ -1727,6 +1754,9 @@
       "altNames": [
         "restream.io"
       ]
+    },
+    {
+      "title": "Ripio"
     },
     {
       "title": "RippleMatch"
