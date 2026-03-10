@@ -8,7 +8,3 @@ files:
     type: arb
     skip_untranslated_strings: true
     skip_untranslated_files: false
-  - source: /fastlane/metadata/android/en-US/*.txt
-    translation: /fastlane/metadata/android/%two_letters_code%/%original_file_name%
-    dest: /fdroid/%original_file_name%
-    type: txt
