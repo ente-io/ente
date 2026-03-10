@@ -12,4 +12,3 @@ files:
     translation: /fastlane/metadata/android/%two_letters_code%/%original_file_name%
     dest: /fdroid/%original_file_name%
     type: txt
-    skip_untranslated_files: true
