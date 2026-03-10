@@ -17,6 +17,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
@@ -95,12 +96,19 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   Future<void> _checkForWidgetLaunch() async {
+    _logger.info("Initializing widget launch handling");
     await HomeWidgetService.instance.setAppGroup();
     await hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
-      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
+      (uri) {
+        _logger.info("Initial widget launch URI received: $uri");
+        return HomeWidgetService.instance.onLaunchFromWidget(uri);
+      },
     );
     _widgetClickedSubscription = hw.HomeWidget.widgetClicked.listen(
-      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
+      (uri) {
+        _logger.info("Widget click stream URI received: $uri");
+        unawaited(HomeWidgetService.instance.onLaunchFromWidget(uri));
+      },
     );
   }
 
@@ -132,6 +140,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           dark: darkThemeData,
           initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
+            navigatorKey: AppNavigationService.instance.navigatorKey,
             title: "ente",
             themeMode: ThemeMode.system,
             theme: lightTheme,
@@ -162,6 +171,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           computeController.onUserInteraction();
         },
         child: MaterialApp(
+          navigatorKey: AppNavigationService.instance.navigatorKey,
           title: "ente",
           themeMode: ThemeMode.system,
           theme: lightThemeData,

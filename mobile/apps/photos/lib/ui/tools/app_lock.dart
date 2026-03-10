@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/utils/lock_screen_settings.dart";
@@ -57,6 +58,7 @@ class AppLock extends StatefulWidget {
 class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
+  final Logger _logger = Logger("AppLock");
   late bool _didUnlockForAppLaunch;
   late bool _isLocked;
   late bool _enabled;
@@ -70,6 +72,9 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     this._didUnlockForAppLaunch = !this.widget.enabled;
     this._isLocked = false;
     this._enabled = this.widget.enabled;
+    _logger.info(
+      "AppLock initialized: enabled=$_enabled didUnlockForAppLaunch=$_didUnlockForAppLaunch",
+    );
 
     super.initState();
   }
@@ -80,8 +85,13 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       return;
     }
 
+    _logger.info(
+      "AppLock lifecycle change: state=$state isLocked=$_isLocked didUnlockForAppLaunch=$_didUnlockForAppLaunch",
+    );
+
     if (state == AppLifecycleState.paused &&
         (!this._isLocked && this._didUnlockForAppLaunch)) {
+      _logger.info("Scheduling app lock on background pause");
       this._backgroundLockLatencyTimer = Timer(
         Duration(milliseconds: LockScreenSettings.instance.getAutoLockTime()),
         () => this.showLockScreen(),
@@ -89,6 +99,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     }
 
     if (state == AppLifecycleState.resumed) {
+      _logger.info("App resumed; cancelling pending app lock timer if any");
       this._backgroundLockLatencyTimer?.cancel();
     }
 
@@ -156,6 +167,9 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// [lockScreen] in to the rest of your app so you can better guarantee that some
   /// objects, services or databases are already instantiated before using them.
   void didUnlock([Object? args]) {
+    _logger.info(
+      "AppLock.didUnlock called: didUnlockForAppLaunch=$_didUnlockForAppLaunch args=${args?.runtimeType}",
+    );
     if (this._didUnlockForAppLaunch) {
       this._didUnlockOnAppPaused();
     } else {
@@ -194,17 +208,21 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// Manually show the [lockScreen].
   Future<void> showLockScreen() {
     this._isLocked = true;
+    _logger.info("Entering app lock: pushing lock screen route");
     return _navigatorKey.currentState!.pushNamed('/lock-screen');
   }
 
   void _didUnlockOnAppLaunch(Object? args) {
     this._didUnlockForAppLaunch = true;
+    _logger.info("Exiting app lock on app launch: showing unlocked app");
     _navigatorKey.currentState!
         .pushReplacementNamed('/unlocked', arguments: args);
   }
 
   void _didUnlockOnAppPaused() {
     this._isLocked = false;
+    _logger
+        .info("Exiting app lock from background resume: popping lock screen");
     _navigatorKey.currentState!.pop();
   }
 }

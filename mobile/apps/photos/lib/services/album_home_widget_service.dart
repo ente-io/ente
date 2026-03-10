@@ -4,7 +4,6 @@ import "dart:math";
 
 import "package:collection/collection.dart";
 import 'package:crypto/crypto.dart';
-import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -13,6 +12,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/app_navigation_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -163,8 +163,10 @@ class AlbumHomeWidgetService {
   Future<void> onLaunchFromWidget(
     int fileId,
     int collectionId,
-    BuildContext context,
   ) async {
+    _logger.info(
+      "Album widget launch entered: fileId=$fileId collectionId=$collectionId",
+    );
     final collection =
         CollectionsService.instance.getCollectionByID(collectionId);
     if (collection == null) {
@@ -176,12 +178,16 @@ class AlbumHomeWidgetService {
 
     // First navigate to the collection page
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    routeToPage(
-      context,
-      CollectionPage(
-        CollectionWithThumbnail(collection, thumbnail),
-      ),
-    ).ignore();
+    _logger.info(
+      "Album widget: pushing collection page for collectionId=$collectionId",
+    );
+    AppNavigationService.instance
+        .pushPage(
+          CollectionPage(
+            CollectionWithThumbnail(collection, thumbnail),
+          ),
+        )
+        .ignore();
     final getAllFilesCollection =
         await FilesDB.instance.getAllFilesCollection(collection.id);
 
@@ -192,17 +198,21 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    routeToPage(
-      context,
-      DetailPage(
-        DetailPageConfiguration(
-          getAllFilesCollection,
-          getAllFilesCollection.indexOf(file),
-          "albumwidget",
-        ),
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+    _logger.info(
+      "Album widget: pushing detail page for collectionId=$collectionId fileId=$fileId",
+    );
+    AppNavigationService.instance
+        .pushPage(
+          DetailPage(
+            DetailPageConfiguration(
+              getAllFilesCollection,
+              getAllFilesCollection.indexOf(file),
+              "albumwidget",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        )
+        .ignore();
     await _refreshAlbumsWidget();
   }
 

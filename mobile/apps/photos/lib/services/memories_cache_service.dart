@@ -21,6 +21,7 @@ import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
@@ -761,9 +762,12 @@ class MemoriesCacheService {
   }
 
   Future<void> goToMemoryFromGeneratedFileID(
-    BuildContext context,
-    int generatedFileID,
-  ) async {
+    int generatedFileID, {
+    BuildContext? context,
+  }) async {
+    _logger.info(
+      "Memory routing entered for generatedFileID=$generatedFileID contextProvided=${context != null}",
+    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     int memoryIdx = 0;
@@ -787,8 +791,10 @@ class MemoriesCacheService {
       );
       return;
     }
-    await routeToPage(
-      context,
+    _logger.info(
+      "Memory routing resolved: generatedFileID=$generatedFileID memoryIdx=$memoryIdx fileIdx=$fileIdx",
+    );
+    await _routeToPage(
       AllMemoriesPage(
         allMemories: _cachedMemories!.map((e) => e.memories).toList(),
         allTitles: _cachedMemories!.map((e) => e.title).toList(),
@@ -796,11 +802,15 @@ class MemoriesCacheService {
         inititalFileIndex: fileIdx,
         isFromWidgetOrNotifications: true,
       ),
+      context: context,
       forceCustomPageRoute: true,
     );
   }
 
-  Future<void> goToOnThisDayMemory(BuildContext context) async {
+  Future<void> goToOnThisDayMemory({BuildContext? context}) async {
+    _logger.info(
+      "On-this-day routing entered: contextProvided=${context != null}",
+    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     int memoryIdx = 0;
@@ -819,8 +829,8 @@ class MemoriesCacheService {
       );
       return;
     }
-    await routeToPage(
-      context,
+    _logger.info("On-this-day routing resolved: memoryIdx=$memoryIdx");
+    await _routeToPage(
       AllMemoriesPage(
         allMemories: allMemories.map((e) => e.memories).toList(),
         allTitles: allMemories.map((e) => e.title).toList(),
@@ -828,12 +838,18 @@ class MemoriesCacheService {
         inititalFileIndex: 0,
         isFromWidgetOrNotifications: true,
       ),
+      context: context,
       forceCustomPageRoute: true,
     );
   }
 
-  Future<void> goToPersonMemory(BuildContext context, String personID) async {
-    _logger.info("Going to person memory for personID: $personID");
+  Future<void> goToPersonMemory(
+    String personID, {
+    BuildContext? context,
+  }) async {
+    _logger.info(
+      "Person memory routing entered: personID=$personID contextProvided=${context != null}",
+    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     final personMemories = <PeopleMemory>[];
@@ -875,18 +891,18 @@ class MemoriesCacheService {
         _logger.severe("Person with ID $personID not found");
         return;
       }
-      await routeToPage(
-        context,
+      await _routeToPage(
         PeoplePage(
           person: person,
           searchResult: null,
         ),
+        context: context,
         forceCustomPageRoute: true,
       );
+      _logger.info("Person memory routing fell back to PeoplePage");
     }
     _logger.info("Routing to the birthday memory");
-    await routeToPage(
-      context,
+    await _routeToPage(
       FullScreenMemoryDataUpdater(
         initialIndex: 0,
         memories: personMemory!.memories,
@@ -897,7 +913,31 @@ class MemoriesCacheService {
           child: FullScreenMemory(personMemory.title, 0),
         ),
       ),
+      context: context,
       forceCustomPageRoute: true,
+    );
+  }
+
+  Future<void> _routeToPage(
+    Widget page, {
+    BuildContext? context,
+    bool forceCustomPageRoute = false,
+  }) async {
+    _logger.info(
+      "Routing page=${page.runtimeType} via ${context != null ? "context" : "inner_app_navigator"} forceCustomPageRoute=$forceCustomPageRoute",
+    );
+    if (context != null) {
+      await routeToPage(
+        context,
+        page,
+        forceCustomPageRoute: forceCustomPageRoute,
+      );
+      return;
+    }
+
+    await AppNavigationService.instance.pushPage(
+      page,
+      forceCustomPageRoute: forceCustomPageRoute,
     );
   }
 

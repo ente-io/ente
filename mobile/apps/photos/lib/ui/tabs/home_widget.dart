@@ -43,6 +43,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/album_home_widget_service.dart";
 import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/services/app_navigation_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
@@ -1105,6 +1106,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!mounted) return;
     final String? payload = notificationResponse.payload;
     if (payload != null) {
+      _logger.info("Notification tap entered: payload=$payload");
       debugPrint('notification payload: $payload');
       final uri = Uri.tryParse(payload);
       if (uri != null &&
@@ -1124,18 +1126,22 @@ class _HomeWidgetState extends State<HomeWidget> {
           if (!mounted || !canOpenRitual) {
             return;
           }
+          _logger.info(
+            "Notification tap: pushing ritual page for ritualId=$ritualId",
+          );
           // Ensure the camera is stacked on top of the ritual page so the user
           // lands on the ritual details after adding photos via a notification.
           // ignore: unawaited_futures
-          routeToPage(
-            context,
+          AppNavigationService.instance.pushPage(
             RitualPage(ritualId: ritualId),
           );
         }
         if (!canOpenRitual) return;
+        _logger.info(
+          "Notification tap: pushing ritual camera page for ritualId=$ritualId albumId=$albumId",
+        );
         // ignore: unawaited_futures
-        routeToPage(
-          context,
+        AppNavigationService.instance.pushPage(
           RitualCameraPage(
             ritualId: ritualId,
             albumId: albumId,
@@ -1148,9 +1154,9 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
         final target = FeedNavigationTarget.fromUri(uri);
+        _logger.info("Notification tap: pushing feed screen target=$target");
         // ignore: unawaited_futures
-        routeToPage(
-          context,
+        AppNavigationService.instance.pushPage(
           FeedScreen(
             initialTarget: target,
           ),
@@ -1160,23 +1166,25 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (payload.toLowerCase().contains("onthisday")) {
         _logger.info("On this day notification received");
         // ignore: unawaited_futures
-        memoriesCacheService.goToOnThisDayMemory(context);
+        memoriesCacheService.goToOnThisDayMemory();
       } else if (payload.toLowerCase().contains("birthday")) {
         _logger.info("Birthday notification received");
         final personID = payload.substring("birthday_".length);
         // ignore: unawaited_futures
-        memoriesCacheService.goToPersonMemory(context, personID);
+        memoriesCacheService.goToPersonMemory(personID);
       } else {
         _logger.info("Album notification received");
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
+          _logger.info(
+            "Notification tap: pushing collection page for collectionId=$collectionID",
+          );
           final collection = CollectionsService.instance
               .getCollectionByID(int.parse(collectionID))!;
           final thumbnail =
               await CollectionsService.instance.getCover(collection);
           // ignore: unawaited_futures
-          routeToPage(
-            context,
+          AppNavigationService.instance.pushPage(
             CollectionPage(
               CollectionWithThumbnail(
                 collection,
