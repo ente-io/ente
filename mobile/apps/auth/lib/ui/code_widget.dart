@@ -15,6 +15,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/code_widget_layout_utils.dart';
 import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
@@ -337,7 +338,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       );
     }
 
-    return Container(
+    final bool isIOS = !kIsWeb && Platform.isIOS;
+    final Widget content = Container(
       margin: widget.isCompactMode
           ? const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 6)
           : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
@@ -368,34 +370,56 @@ class _CodeWidgetState extends State<CodeWidget> {
         },
       ),
     );
+    if (!isIOS) return content;
+    final double scale =
+        MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 2.0);
+    return MediaQuery(
+      data:
+          MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+      child: content,
+    );
   }
 
   Widget _getBottomRow(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: ValueListenableBuilder<String>(
-              valueListenable: _currentCode,
-              builder: (context, value, child) {
-                return Material(
-                  type: MaterialType.transparency,
-                  child: AutoSizeText(
-                    _getFormattedCode(value),
-                    style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
-                    maxLines: 1,
-                    textDirection: TextDirection.ltr,
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(width: 8),
-          widget.code.type.isTOTPCompatible
-              ? IgnorePointer(
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1.0);
+    final isIOS = !kIsWeb && Platform.isIOS;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final showNextTotp = widget.code.type.isTOTPCompatible &&
+            shouldShowNextTotpCode(
+              isIOS: isIOS,
+              availableWidth: constraints.maxWidth,
+              textScaleFactor: textScaleFactor,
+              isCompactMode: widget.isCompactMode,
+            );
+        return Container(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder<String>(
+                  valueListenable: _currentCode,
+                  builder: (context, value, child) {
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: AutoSizeText(
+                        _getFormattedCode(value),
+                        style: TextStyle(
+                          fontSize: widget.isCompactMode ? 14 : 24,
+                        ),
+                        maxLines: 1,
+                        minFontSize: widget.isCompactMode ? 12 : 16,
+                        textDirection: TextDirection.ltr,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (showNextTotp) ...[
+                const SizedBox(width: 8),
+                IgnorePointer(
                   ignoring:
                       CodeDisplayStore.instance.isSelectionModeActive.value,
                   child: GestureDetector(
@@ -428,8 +452,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                       ],
                     ),
                   ),
-                )
-              : IgnorePointer(
+                ),
+              ] else if (!widget.code.type.isTOTPCompatible) ...[
+                const SizedBox(width: 8),
+                IgnorePointer(
                   ignoring:
                       CodeDisplayStore.instance.isSelectionModeActive.value,
                   child: Column(
@@ -450,8 +476,11 @@ class _CodeWidgetState extends State<CodeWidget> {
                     ],
                   ),
                 ),
-        ],
-      ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 
