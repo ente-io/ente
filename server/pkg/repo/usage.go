@@ -67,34 +67,15 @@ func (repo *UsageRepository) GetCombinedUsage(ctx context.Context, userIDs []int
 
 func (repo *UsageRepository) GetStorageWarningCandidates(ctx context.Context, usageThreshold int64) ([]StorageWarningCandidate, error) {
 	rows, err := repo.DB.QueryContext(ctx, `
-		SELECT recipient_id, is_family_plan
-		FROM (
-			SELECT
-				f.admin_id AS recipient_id,
-				TRUE AS is_family_plan
-			FROM users u
-			INNER JOIN usage us
-				ON us.user_id = u.user_id
-			INNER JOIN families f
-				ON f.member_id = u.user_id
-				AND f.admin_id = u.family_admin_id
-				AND f.status IN ('SELF', 'ACCEPTED')
-			WHERE
-				us.storage_consumed > $1
-				AND u.encrypted_email IS NOT NULL
-				AND u.family_admin_id IS NOT NULL
-			UNION ALL
-			SELECT
-				u.user_id AS recipient_id,
-				FALSE AS is_family_plan
-			FROM users u
-			INNER JOIN usage us
-				ON us.user_id = u.user_id
-			WHERE
-				us.storage_consumed > $1
-				AND u.encrypted_email IS NOT NULL
-				AND u.family_admin_id IS NULL
-		) candidates
+		SELECT
+			COALESCE(u.family_admin_id, u.user_id) AS recipient_id,
+			u.family_admin_id IS NOT NULL AS is_family_plan
+		FROM users u
+		INNER JOIN usage us
+			ON us.user_id = u.user_id
+		WHERE
+			us.storage_consumed > $1
+			AND u.encrypted_email IS NOT NULL
 		ORDER BY recipient_id
 	`, usageThreshold)
 	if err != nil {

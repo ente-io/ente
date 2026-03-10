@@ -205,7 +205,7 @@ func TestGetStorageWarningCandidatesExcludesFamilyTotalBelowPerMemberThreshold(t
 	}
 }
 
-func TestGetStorageWarningCandidatesExcludesInactiveFamilyMemberships(t *testing.T) {
+func TestGetStorageWarningCandidatesUsesFamilyAdminIDForMembershipAwareness(t *testing.T) {
 	db := getStorageWarningRepoTestDB(t)
 	repo := &UsageRepository{DB: db}
 	ctx := context.Background()
@@ -214,7 +214,7 @@ func TestGetStorageWarningCandidatesExcludesInactiveFamilyMemberships(t *testing
 	memberID := int64(252)
 
 	insertStorageWarningTestUser(t, db, adminID, &adminID)
-	insertStorageWarningTestUser(t, db, memberID, &adminID)
+	insertStorageWarningTestUser(t, db, memberID, nil)
 	insertStorageWarningTestFamilyMember(t, db, adminID, memberID, "INVITED")
 	insertStorageWarningTestUsage(t, db, memberID, 26*testGiB)
 
@@ -222,8 +222,14 @@ func TestGetStorageWarningCandidatesExcludesInactiveFamilyMemberships(t *testing
 	if err != nil {
 		t.Fatalf("GetStorageWarningCandidates() error = %v", err)
 	}
-	if len(candidates) != 0 {
-		t.Fatalf("expected no candidates for inactive family membership, got %+v", candidates)
+	if len(candidates) != 1 {
+		t.Fatalf("expected invited member without family_admin_id to be treated as an individual candidate, got %+v", candidates)
+	}
+	if candidates[0].RecipientID != memberID {
+		t.Fatalf("unexpected recipient id: got %d want %d", candidates[0].RecipientID, memberID)
+	}
+	if candidates[0].IsFamilyPlan {
+		t.Fatal("expected invited member without family_admin_id to not be marked as family plan")
 	}
 }
 
