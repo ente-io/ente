@@ -323,7 +323,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           ? false
           : await requestAuthentication(
               context,
-              context.strings.unlock,
+              context.strings.authToViewSecrets,
+              macOSReason: context.strings.unlock,
               isOpeningApp: true,
             );
       _logger.finest("LockScreen Result $result $currentTimestamp");
