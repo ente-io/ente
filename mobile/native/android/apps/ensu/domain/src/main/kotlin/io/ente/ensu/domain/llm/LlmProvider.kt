@@ -45,12 +45,13 @@ interface LlmProvider {
         messages: List<LlmMessage>,
         imageFiles: List<File>,
         temperature: Float,
-        maxTokens: Int,
+        maxTokens: Int?,
         onToken: (String) -> Unit
     ): GenerationSummary
 
     fun isModelDownloaded(target: LlmModelTarget): Boolean
     suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long?
+    fun loadedContextLength(target: LlmModelTarget): Int?
 
     fun stopGeneration()
     fun resetContext()

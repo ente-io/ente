@@ -160,6 +160,15 @@ class UserService {
             assetPath: 'assets/warning-green.png',
           ),
         );
+      } else if (enteErrCode == "USER_SIGNUP_INCOMPLETE") {
+        unawaited(
+          showAlertBottomSheet(
+            context,
+            title: context.l10n.oops,
+            message: context.l10n.accountSetupIncompleteCreateAccount,
+            assetPath: 'assets/warning-green.png',
+          ),
+        );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showAlertBottomSheet(

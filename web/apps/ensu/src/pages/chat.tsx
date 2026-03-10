@@ -93,6 +93,10 @@ const formatTime = (timestamp: number) => {
     return `${hour12}:${minute} ${period}`;
 };
 
+const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
+const OVERFLOW_SAFETY_TOKENS = 256;
+const DEFAULT_WEB_CONTEXT_SIZE = 4096;
+
 const loadingPhraseVerbs = [
     "Generating",
     "Thinking through",
@@ -1206,17 +1210,37 @@ const Page: React.FC = () => {
                 contextLength?: string;
                 maxTokens?: string;
             };
+            const rawContextLength = parsed.contextLength ?? "";
+            const clampedContextLength =
+                !isTauriRuntime &&
+                rawContextLength &&
+                Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                    ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                    : rawContextLength;
+            if (clampedContextLength !== rawContextLength) {
+                const nextSettings = {
+                    useCustomModel: !!parsed.useCustomModel,
+                    modelUrl: parsed.modelUrl ?? "",
+                    mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
+                    contextLength: clampedContextLength,
+                    maxTokens: parsed.maxTokens ?? "",
+                };
+                window.localStorage.setItem(
+                    "ensu.modelSettings",
+                    JSON.stringify(nextSettings),
+                );
+            }
             setUseCustomModel(
                 MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
             );
             setModelUrl(parsed.modelUrl ?? "");
             setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
-            setContextLength(parsed.contextLength ?? "");
+            setContextLength(clampedContextLength);
             setMaxTokens(parsed.maxTokens ?? "");
         } catch (error) {
             log.error("Failed to read model settings", error);
         }
-    }, [allowMmproj]);
+    }, [allowMmproj, isTauriRuntime]);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);
@@ -1922,7 +1946,10 @@ const Page: React.FC = () => {
                     ? mmprojUrl.trim()
                     : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
-            maxTokens: maxTokens ? Number(maxTokens) : undefined,
+            maxTokens:
+                maxTokens && Number(maxTokens) > 0
+                    ? Number(maxTokens)
+                    : undefined,
         };
     }, [
         useCustomModel,
@@ -1939,25 +1966,34 @@ const Page: React.FC = () => {
     );
 
     const formatErrorMessage = useCallback((error: unknown) => {
-        if (error instanceof Error) return error.message;
-        if (typeof error === "string") return error;
+        const normalizeErrorMessage = (message: string) => {
+            if (
+                message.toLowerCase().includes("length out of range of buffer")
+            ) {
+                return "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.";
+            }
+            return message;
+        };
+
+        if (error instanceof Error) return normalizeErrorMessage(error.message);
+        if (typeof error === "string") return normalizeErrorMessage(error);
         if (error && typeof error === "object") {
             const maybeMessage = (error as { message?: unknown }).message;
             if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-                return maybeMessage;
+                return normalizeErrorMessage(maybeMessage);
             }
             if ("__wbg_ptr" in error) {
                 return "Model failed to start. Please refresh and try again.";
             }
             const text = String(error);
             if (text && text !== "[object Object]") {
-                return text;
+                return normalizeErrorMessage(text);
             }
         }
         try {
-            return JSON.stringify(error);
+            return normalizeErrorMessage(JSON.stringify(error));
         } catch {
-            return String(error);
+            return normalizeErrorMessage(String(error));
         }
     }, []);
 
@@ -2347,7 +2383,7 @@ const Page: React.FC = () => {
             path: ChatMessage[],
             promptText: string,
             contextSize: number,
-            maxTokensCount: number,
+            maxTokensCount?: number,
             stopAtMessageUuid?: string | null,
         ): Promise<LlmMessage[]> => {
             const candidates = slicePathUntil(path, stopAtMessageUuid);
@@ -2360,7 +2396,11 @@ const Page: React.FC = () => {
                     : candidates;
 
             const safetyMargin = 256;
-            let budget = contextSize - maxTokensCount - safetyMargin;
+            let budget =
+                contextSize -
+                (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
+                safetyMargin;
+            budget -= approxTokens(buildChatSystemPrompt());
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -2905,6 +2945,17 @@ const Page: React.FC = () => {
                     ...history,
                     { role: "user", content: promptText },
                 ];
+                const promptTokenEstimate = messages.reduce(
+                    (total, message) => total + approxTokens(message.content),
+                    0,
+                );
+                const inputBudget =
+                    contextSize - maxTokens - OVERFLOW_SAFETY_TOKENS;
+                if (promptTokenEstimate > inputBudget) {
+                    throw new Error(
+                        "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.",
+                    );
+                }
 
                 if (pendingCancelRef.current || stopRequestedRef.current) {
                     pendingCancelRef.current = false;
@@ -3330,27 +3381,38 @@ const Page: React.FC = () => {
     );
 
     const suggestedModels = useMemo(
-        () => [
-            {
-                name: "LFM 2.5 VL 1.6B (Q4_0)",
-                url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-            },
-            {
-                name: "LFM 2.5 1.2B Instruct (Q4_0)",
-                url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF/resolve/main/LFM2.5-1.2B-Instruct-Q4_0.gguf",
-            },
-            {
-                name: "Qwen3-VL 2B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
-                mmproj: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf",
-            },
-            {
-                name: "Llama 3.2 1B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-            },
-        ],
-        [],
+        () =>
+            isTauriRuntime
+                ? [
+                      {
+                          name: "Qwen 3.5 0.8B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 2B (Q8_0)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 4B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                  ]
+                : [
+                      {
+                          name: "LFM 2.5 VL 1.6B (Q4_0)",
+                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+                          mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 0.8B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                  ],
+        [isTauriRuntime],
     );
 
     const validateModelSettings = useCallback(() => {

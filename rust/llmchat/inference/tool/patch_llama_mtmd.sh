@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN=python
+fi
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE_DIR="$(
-  python3 - <<PY
+  "$PYTHON_BIN" - <<PY
 import json
 import os
 import subprocess
@@ -34,6 +39,11 @@ fi
 if [[ -z "$CRATE_DIR" ]]; then
   echo "llama-cpp-sys-2 not found in cargo metadata or registry. Run 'cargo fetch' in $ROOT and try again." >&2
   exit 1
+fi
+
+PY_CRATE_DIR="$CRATE_DIR"
+if command -v cygpath >/dev/null 2>&1; then
+  PY_CRATE_DIR="$(cygpath -w "$CRATE_DIR")"
 fi
 
 TOOLS_DIR="$CRATE_DIR/llama.cpp/tools"
@@ -70,52 +80,111 @@ fi
 
 CLIP_CPP="$MTMD_DIR/clip.cpp"
 if [[ -f "$CLIP_CPP" ]]; then
-  python3 - <<PY
+  PY_CRATE_DIR="$PY_CRATE_DIR" "$PYTHON_BIN" - <<PY
+import os
 from pathlib import Path
 import sys
 
-path = Path("$CLIP_CPP")
-text = path.read_text()
+crate_dir = os.environ["PY_CRATE_DIR"]
+root = Path(crate_dir) / "llama.cpp" / "tools" / "mtmd"
 
-replacements = {
-    """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""": """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM, false);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B, false);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
-    """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n\n            cur = ggml_mul_mat(ctx0, model.mm_1_w, cur);\n""": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            if (model.mm_input_norm_w && model.mm_input_norm_b) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n                cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            }\n\n            cur = ggml_mul_mat(ctx0, model.mm_1_w, cur);\n""",
-    """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            cur = ggml_view_2d(ctx0, cur,\n""": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            if (model.mm_input_norm_w && model.mm_input_norm_b) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n                cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            }\n            cur = ggml_view_2d(ctx0, cur,\n""",
-    """            cur = ggml_mul(ctx0, ggml_rms_norm(ctx0, cur, eps), model.mm_input_norm_w);\n""": """            cur = ggml_rms_norm(ctx0, cur, eps);\n            if (model.mm_input_norm_w) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            }\n""",
-}
+patches = [
+    {
+        "label": "legacy clip.cpp LFM2/KIMIVL optional norm tensors",
+        "relpath": "clip.cpp",
+        "old": """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
+        "new": """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM, false);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B, false);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
+    },
+    {
+        "label": "legacy clip.cpp siglip norm guard",
+        "relpath": "clip.cpp",
+        "old": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n\n            cur = ggml_mul_mat(ctx0, model.mm_1_w, cur);\n""",
+        "new": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            if (model.mm_input_norm_w && model.mm_input_norm_b) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n                cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            }\n\n            cur = ggml_mul_mat(ctx0, model.mm_1_w, cur);\n""",
+    },
+    {
+        "label": "legacy clip.cpp kimivl norm guard",
+        "relpath": "clip.cpp",
+        "old": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            cur = ggml_view_2d(ctx0, cur,\n""",
+        "new": """            cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n            if (model.mm_input_norm_w && model.mm_input_norm_b) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n                cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n            }\n            cur = ggml_view_2d(ctx0, cur,\n""",
+    },
+    {
+        "label": "legacy clip.cpp pixtral rms norm guard",
+        "relpath": "clip.cpp",
+        "old": """            cur = ggml_mul(ctx0, ggml_rms_norm(ctx0, cur, eps), model.mm_input_norm_w);\n""",
+        "new": """            cur = ggml_rms_norm(ctx0, cur, eps);\n            if (model.mm_input_norm_w) {\n                cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n            }\n""",
+    },
+    {
+        "label": "modern clip.cpp KIMI projector optional norm tensors",
+        "relpath": "clip.cpp",
+        "old": """            case PROJECTOR_TYPE_KIMIVL:\n            case PROJECTOR_TYPE_PADDLEOCR:\n            case PROJECTOR_TYPE_KIMIK25:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
+        "new": """            case PROJECTOR_TYPE_KIMIVL:\n            case PROJECTOR_TYPE_PADDLEOCR:\n            case PROJECTOR_TYPE_KIMIK25:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM, false);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B, false);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
+    },
+    {
+        "label": "modern kimivl projector norm guard",
+        "relpath": "models/kimivl.cpp",
+        "old": """        cur = ggml_norm(ctx0, cur, 1e-5); // default nn.LayerNorm\n        cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n        cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n""",
+        "new": """        cur = build_norm(cur,\n            model.mm_input_norm_w, model.mm_input_norm_b,\n            NORM_TYPE_NORMAL, 1e-5, -1);\n""",
+    },
+    {
+        "label": "modern kimik25 projector norm guard",
+        "relpath": "models/kimik25.cpp",
+        "old": """        cur = ggml_norm(ctx0, cur, hparams.eps);\n        cur = ggml_mul(ctx0, cur, model.mm_input_norm_w);\n        cur = ggml_add(ctx0, cur, model.mm_input_norm_b);\n""",
+        "new": """        cur = build_norm(cur,\n            model.mm_input_norm_w, model.mm_input_norm_b,\n            NORM_TYPE_NORMAL, hparams.eps, -1);\n""",
+    },
+    {
+        "label": "modern pixtral projector rms norm guard",
+        "relpath": "models/pixtral.cpp",
+        "old": """        cur = ggml_mul(ctx0, ggml_rms_norm(ctx0, cur, eps), model.mm_input_norm_w);\n""",
+        "new": """        cur = build_norm(cur,\n            model.mm_input_norm_w, nullptr,\n            NORM_TYPE_RMS, eps, -1);\n""",
+    },
+]
 
-updated = text
 applied = []
+already = []
 missing = []
+changed_files = set()
 
-for old, new in replacements.items():
-    if old in text:
-        updated = updated.replace(old, new)
-        applied.append(old)
-    elif new in text:
+for patch in patches:
+    path = root / patch["relpath"]
+    if not path.exists():
+        missing.append(f'{patch["label"]} (missing file: {path})')
         continue
+
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    old = patch["old"]
+    new = patch["new"]
+
+    if new in text:
+        already.append(patch["label"])
+        continue
+
+    if old in text:
+        updated = text.replace(old, new)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            applied.append(patch["label"])
+            changed_files.add(path)
+        else:
+            already.append(patch["label"])
     else:
-        missing.append(old)
+        missing.append(patch["label"])
 
-if updated != text:
-    path.write_text(updated)
-
-if missing:
-    sys.stderr.write("mtmd clip.cpp patch patterns not found; llama.cpp may have changed.\n")
-    sys.stderr.write(f"File: {path}\n")
-    sys.exit(1)
-
-marker = Path("$CRATE_DIR") / "llama.cpp" / "CMakeMtmdPatch.txt"
-needs_rebuild = applied or not marker.exists()
+marker = Path(crate_dir) / "llama.cpp" / "CMakeMtmdPatch.txt"
+needs_rebuild = bool(applied) or not marker.exists()
 if needs_rebuild:
     marker.write_text("# mtmd patch applied\n")
-    cmake_root = Path("$CRATE_DIR") / "llama.cpp" / "CMakeLists.txt"
+    cmake_root = Path(crate_dir) / "llama.cpp" / "CMakeLists.txt"
     if cmake_root.exists():
         cmake_root.touch()
 
 if applied:
-    print(f"Patched mtmd clip.cpp ({len(applied)} replacements).")
+    print(f"Patched mtmd sources ({len(applied)} replacements).")
 else:
-    print("mtmd clip.cpp already patched.")
+    print("mtmd sources already patched or no compatible patch needed.")
+
+if missing:
+    sys.stderr.write("mtmd patch: some patterns were not found (upstream may have changed):\n")
+    for item in missing:
+        sys.stderr.write(f"  - {item}\n")
 PY
 fi

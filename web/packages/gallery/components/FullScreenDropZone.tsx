@@ -5,6 +5,22 @@ import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { type FileWithPath, useDropzone } from "react-dropzone";
 
+const hasDraggedFiles = (
+    dataTransfer: DataTransfer | null | undefined,
+): boolean => {
+    if (!dataTransfer) return false;
+
+    for (const item of Array.from(dataTransfer.items)) {
+        if (item.kind == "file") return true;
+    }
+
+    for (const type of Array.from(dataTransfer.types)) {
+        if (type == "Files") return true;
+    }
+
+    return false;
+};
+
 interface FullScreenDropZoneProps {
     /**
      * Optional override to the message show to the user when a drag is in
@@ -64,14 +80,26 @@ export const FullScreenDropZone: React.FC<
     const [isDragActive, setIsDragActive] = useState(false);
     const [isDropPending, setIsDropPending] = useState(false);
 
-    const handleDragEnter = useCallback(() => {
-        setIsDragActive(true);
-    }, []);
+    const handleDragEnter = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!hasDraggedFiles(event.dataTransfer)) return;
+            setIsDragActive(true);
+        },
+        [],
+    );
 
-    const handleOverlayDrop = useCallback(() => {
-        setIsDropPending(true);
-        setIsDragActive(false);
-    }, []);
+    const handleOverlayDrop = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!hasDraggedFiles(event.dataTransfer)) {
+                setIsDropPending(false);
+                setIsDragActive(false);
+                return;
+            }
+            setIsDropPending(true);
+            setIsDragActive(false);
+        },
+        [],
+    );
 
     const handleDragLeave = useCallback(() => {
         setIsDragActive(false);

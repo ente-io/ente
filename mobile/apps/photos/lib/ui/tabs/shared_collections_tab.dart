@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
@@ -48,6 +49,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
+  late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
   final _debouncer = Debouncer(
@@ -95,6 +97,12 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
           setState(() {});
         }
       });
+    });
+    _albumSortOrderChangeEvent =
+        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
@@ -518,6 +526,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   void dispose() {
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
+    _albumSortOrderChangeEvent.cancel();
     _loggedOutEvent.cancel();
     _appModeChangedEvent.cancel();
     _debouncer.cancelDebounceTimer();

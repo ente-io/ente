@@ -10,6 +10,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 
@@ -319,7 +320,7 @@ func (repo *UserRepository) UpdateEmail(userID int64, encryptedEmail ente.Encryp
 
 // GetUserIDWithEmail returns the userID associated with a provided email
 func (repo *UserRepository) GetUserIDWithEmail(email string) (int64, error) {
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
+	sanitizedEmail := emailUtil.NormalizeEmail(email)
 	emailHash, err := crypto.GetHash(sanitizedEmail, repo.HashingKey)
 	if err != nil {
 		return -1, stacktrace.Propagate(err, "")
