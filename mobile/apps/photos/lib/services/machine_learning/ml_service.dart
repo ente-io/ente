@@ -685,7 +685,7 @@ class MLService {
           );
         }
       }
-      if (instruction.shouldRunPets && rustPets) {
+      if (instruction.shouldRunPets) {
         final hasPetFaces =
             result.petFaces != null && result.petFaces!.isNotEmpty;
         if (!hasPetFaces) {
