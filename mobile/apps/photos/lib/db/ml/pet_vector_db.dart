@@ -38,7 +38,7 @@ class PetVectorDB {
     this._embeddingDimension,
   );
 
-  // ── 4 separate vector spaces, one per model ──
+  // ── Online vector spaces ──
 
   static final dogFace = PetVectorDB._named(
     "ente.ml.vectordb.pet.dog_face.usearch",
@@ -60,7 +60,29 @@ class PetVectorDB {
     BigInt.from(bodyDimension),
   );
 
-  /// All 4 vector DB instances for iteration.
+  // ── Offline vector spaces ──
+
+  static final offlineDogFace = PetVectorDB._named(
+    "ente.ml.offline.vectordb.pet.dog_face.usearch",
+    BigInt.from(faceDimension),
+  );
+
+  static final offlineCatFace = PetVectorDB._named(
+    "ente.ml.offline.vectordb.pet.cat_face.usearch",
+    BigInt.from(faceDimension),
+  );
+
+  static final offlineDogBody = PetVectorDB._named(
+    "ente.ml.offline.vectordb.pet.dog_body.usearch",
+    BigInt.from(bodyDimension),
+  );
+
+  static final offlineCatBody = PetVectorDB._named(
+    "ente.ml.offline.vectordb.pet.cat_body.usearch",
+    BigInt.from(bodyDimension),
+  );
+
+  /// All online vector DB instances for iteration.
   static final List<PetVectorDB> allInstances = [
     dogFace,
     catFace,
@@ -68,10 +90,29 @@ class PetVectorDB {
     catBody,
   ];
 
+  /// All offline vector DB instances for iteration.
+  static final List<PetVectorDB> allOfflineInstances = [
+    offlineDogFace,
+    offlineCatFace,
+    offlineDogBody,
+    offlineCatBody,
+  ];
+
   /// Get the correct vector DB for a species + embedding type.
   /// [species]: 0 = dog, 1 = cat
   /// [isFace]: true = face embedding, false = body embedding
-  static PetVectorDB forModel({required int species, required bool isFace}) {
+  static PetVectorDB forModel({
+    required int species,
+    required bool isFace,
+    bool offline = false,
+  }) {
+    if (offline) {
+      if (species == 0) {
+        return isFace ? offlineDogFace : offlineDogBody;
+      } else {
+        return isFace ? offlineCatFace : offlineCatBody;
+      }
+    }
     if (species == 0) {
       return isFace ? dogFace : dogBody;
     } else {

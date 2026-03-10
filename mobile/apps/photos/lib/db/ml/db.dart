@@ -56,6 +56,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   final String _databaseName;
   final ClipVectorDB _clipVectorDB;
   final ClusterCentroidVectorDB _clusterCentroidVectorDB;
+  final bool _isOffline;
   final List<String> _migrationScripts;
   int _clusterSummaryMutationVersion = 0;
   Future<void>? _clipVectorDbRecoveryFuture;
@@ -71,11 +72,13 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     String databaseName = "ente.ml.db",
     ClipVectorDB? clipVectorDB,
     ClusterCentroidVectorDB? clusterCentroidVectorDB,
+    bool isOffline = false,
     List<String>? migrationScripts,
   })  : _databaseName = databaseName,
         _clipVectorDB = clipVectorDB ?? ClipVectorDB.instance,
         _clusterCentroidVectorDB =
             clusterCentroidVectorDB ?? ClusterCentroidVectorDB.instance,
+        _isOffline = isOffline,
         _migrationScripts = migrationScripts ?? _defaultMigrationScripts;
 
   static final MLDataDB instance = MLDataDB._privateConstructor();
@@ -83,6 +86,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     databaseName: "ente.ml.offline.db",
     clipVectorDB: ClipVectorDB.offlineInstance,
     clusterCentroidVectorDB: ClusterCentroidVectorDB.offlineInstance,
+    isOffline: true,
     migrationScripts: _offlineMigrationScripts,
   );
 
@@ -327,6 +331,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: true,
+          offline: _isOffline,
         );
         final petFaceIds = entry.value.map((e) => e.$1.petFaceId).toList();
         final idMap = await vdb.getPetFaceVectorIdMap(
@@ -387,6 +392,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final vdb = PetVectorDB.forModel(
           species: entry.key,
           isFace: false,
+          offline: _isOffline,
         );
         final bodyIds = entry.value.map((e) => e.$1.petBodyId).toList();
         final idMap = await vdb.getObjectVectorIdMap(
@@ -571,7 +577,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deletePetBodiesTable);
     await db.execute(deletePetFaceVectorIdMappingTable);
     await db.execute(deletePetBodyVectorIdMappingTable);
-    for (final vdb in PetVectorDB.allInstances) {
+    final petVdbs =
+        _isOffline ? PetVectorDB.allOfflineInstances : PetVectorDB.allInstances;
+    for (final vdb in petVdbs) {
       await vdb.deleteIndexFile();
     }
     _markClusterSummaryMutated();

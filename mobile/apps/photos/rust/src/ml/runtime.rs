@@ -269,34 +269,43 @@ fn write_runtime() -> std::sync::RwLockWriteGuard<'static, Option<RuntimeState>>
 }
 
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
-    let rebuild_config = {
+    // Fast path: check under read lock whether the current runtime can serve.
+    {
         let guard = read_runtime();
-        match guard.as_ref() {
-            Some(existing) => {
-                if existing.config.provider_policy == config.provider_policy
-                    && existing.config.model_paths.can_serve(&config.model_paths)
-                {
-                    None // existing runtime can handle this request
-                } else {
-                    // Merge: keep already-known paths, add/update from request
-                    Some(MlRuntimeConfig {
-                        model_paths: existing.config.model_paths.merge(&config.model_paths),
-                        provider_policy: config.provider_policy.clone(),
-                    })
-                }
+        if let Some(existing) = guard.as_ref() {
+            if existing.config.provider_policy == config.provider_policy
+                && existing.config.model_paths.can_serve(&config.model_paths)
+            {
+                return Ok(()); // existing runtime handles this request
             }
-            None => Some(config.clone()),
         }
+    }
+
+    // Slow path: acquire write lock, re-check (another thread may have
+    // already merged), compute the merged config, build, and install.
+    let mut guard = write_runtime();
+    let merged = match guard.as_ref() {
+        Some(existing) => {
+            // Re-check: a concurrent caller may have updated since the
+            // read-lock check above.
+            if existing.config.provider_policy == config.provider_policy
+                && existing.config.model_paths.can_serve(&config.model_paths)
+            {
+                return Ok(());
+            }
+            MlRuntimeConfig {
+                model_paths: existing.config.model_paths.merge(&config.model_paths),
+                provider_policy: config.provider_policy.clone(),
+            }
+        }
+        None => config.clone(),
     };
 
-    if let Some(merged) = rebuild_config {
-        let runtime = create_runtime(&merged);
-        let mut guard = write_runtime();
-        *guard = Some(RuntimeState {
-            config: merged,
-            runtime,
-        });
-    }
+    let runtime = create_runtime(&merged);
+    *guard = Some(RuntimeState {
+        config: merged,
+        runtime,
+    });
     Ok(())
 }
 

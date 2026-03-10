@@ -77,7 +77,9 @@ Future<IndexStatus> getIndexStatus() async {
     final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
     final int clipIndexedFiles = await mlDataDB.getClipIndexedFileCount();
     int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
-    if (flagService.internalUser && localSettings.petRecognitionEnabled) {
+    if (flagService.internalUser &&
+        localSettings.petRecognitionEnabled &&
+        (flagService.useRustForML || isOfflineMode)) {
       final int petIndexedFiles = await mlDataDB.getPetIndexedFileCount();
       indexedFiles = math.min(indexedFiles, petIndexedFiles);
     }
@@ -109,8 +111,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled =
-      flagService.internalUser && localSettings.petRecognitionEnabled;
+  final bool petEnabled = flagService.internalUser &&
+      localSettings.petRecognitionEnabled &&
+      (flagService.useRustForML || isOfflineMode);
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFiledIDs = {};
@@ -225,8 +228,9 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await mlDataDB.clipIndexedFileWithVersion();
-  final bool petEnabled =
-      flagService.internalUser && localSettings.petRecognitionEnabled;
+  final bool petEnabled = flagService.internalUser &&
+      localSettings.petRecognitionEnabled &&
+      (flagService.useRustForML || isOfflineMode);
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
   final Set<int> queuedFileIDs = {};
