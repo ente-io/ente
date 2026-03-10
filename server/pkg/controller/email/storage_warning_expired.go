@@ -11,10 +11,10 @@ const (
 	storageWarningExpiredWarning90Delay  = 90 * 24 * time.MicroSecondsInOneHour
 	storageWarningExpiredWarning119Delay = 119 * 24 * time.MicroSecondsInOneHour
 
-	storageWarningExpired30TemplateID  = "family_storage_warning_expired_30d"
-	storageWarningExpired60TemplateID  = "family_storage_warning_expired_60d"
-	storageWarningExpired90TemplateID  = "family_storage_warning_expired_90d"
-	storageWarningExpired119TemplateID = "family_storage_warning_expired_119d"
+	storageWarningExpired30TemplateID  = "storage_warning_expired_30d"
+	storageWarningExpired60TemplateID  = "storage_warning_expired_60d"
+	storageWarningExpired90TemplateID  = "storage_warning_expired_90d"
+	storageWarningExpired119TemplateID = "storage_warning_expired_119d"
 
 	storageWarningExpired30Subject  = "Action needed: Your Ente subscription has expired"
 	storageWarningExpired60Subject  = "Reminder: Your Ente data is scheduled for deletion"

@@ -3,16 +3,15 @@ package email
 import "github.com/ente-io/museum/pkg/utils/time"
 
 const (
-	StorageWarningActiveOverageAnchorTemplateID = "family_storage_warning_active_overage"
-	FamilyStorageWarningActiveOverageTemplateID = StorageWarningActiveOverageAnchorTemplateID
+	StorageWarningActiveOverageAnchorTemplateID = "storage_warning_active_overage"
 	storageWarningActiveOverageTemplate         = "storage_warning_active_overage.html"
 	storageWarningActiveOverageDeletionDelay    = 90 * 24 * time.MicroSecondsInOneHour
 	storageWarningActiveOverageWarning30Delay   = 30 * 24 * time.MicroSecondsInOneHour
 	storageWarningActiveOverageWarning60Delay   = 60 * 24 * time.MicroSecondsInOneHour
 	storageWarningActiveOverageWarning89Delay   = 89 * 24 * time.MicroSecondsInOneHour
-	storageWarningActiveOverage30TemplateID     = "family_storage_warning_active_overage_30d"
-	storageWarningActiveOverage60TemplateID     = "family_storage_warning_active_overage_60d"
-	storageWarningActiveOverage89TemplateID     = "family_storage_warning_active_overage_89d"
+	storageWarningActiveOverage30TemplateID     = "storage_warning_active_overage_30d"
+	storageWarningActiveOverage60TemplateID     = "storage_warning_active_overage_60d"
+	storageWarningActiveOverage89TemplateID     = "storage_warning_active_overage_89d"
 	storageWarningActiveOverage0Subject         = "Action needed: Reduce usage or upgrade your Ente plan"
 	storageWarningActiveOverage30Subject        = "Reminder: Your Ente data is scheduled for deletion due to overusage"
 	storageWarningActiveOverage60Subject        = "30-day reminder: Your Ente data will be deleted in 30 days due to overusage"
