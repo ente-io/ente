@@ -108,30 +108,35 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               },
                             ),
                           ),
-                          MenuItemWidgetNew(
-                            title: "Background sync notification",
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedNotification01,
+                          if (flagService.flags.internalUser)
+                            MenuItemWidgetNew(
+                              title: "Background sync notification",
+                              leadingIconWidget: _buildIconWidget(
+                                context,
+                                HugeIcons.strokeRoundedNotification01,
+                              ),
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    localSettings
+                                        .isBGDebugNotificationsEnabled,
+                                onChanged: () async {
+                                  final newValue =
+                                      !localSettings
+                                          .isBGDebugNotificationsEnabled;
+                                  await localSettings
+                                      .setBGDebugNotificationsEnabled(
+                                    newValue,
+                                  );
+                                  setState(() {});
+                                  showShortToast(
+                                    context,
+                                    newValue
+                                        ? "Background debug notifications enabled. Restart app."
+                                        : "Background debug notifications disabled. Restart app.",
+                                  );
+                                },
+                              ),
                             ),
-                            trailingWidget: ToggleSwitchWidget(
-                              value: () =>
-                                  localSettings.isBGDebugNotificationsEnabled,
-                              onChanged: () async {
-                                final newValue =
-                                    !localSettings.isBGDebugNotificationsEnabled;
-                                await localSettings
-                                    .setBGDebugNotificationsEnabled(newValue);
-                                setState(() {});
-                                showShortToast(
-                                  context,
-                                  newValue
-                                      ? "Background debug notifications enabled. Restart app."
-                                      : "Background debug notifications disabled. Restart app.",
-                                );
-                              },
-                            ),
-                          ),
                           MenuItemWidgetNew(
                             title: "Enable database logging",
                             leadingIconWidget: _buildIconWidget(
