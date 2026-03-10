@@ -48,6 +48,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
   int _requestId = 0;
   bool _overlayActive = false;
   Timer? _activationTimer;
+  bool _userTriggered = false;
+  Offset? _pendingLongPressPosition;
 
   @override
   void initState() {
@@ -76,6 +78,8 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     setState(() {
       _localFilePath = null;
       _overlayActive = false;
+      _userTriggered = false;
+      _pendingLongPressPosition = null;
     });
   }
 
@@ -125,7 +129,7 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
       setState(() {
         _localFilePath = cached.localPath;
       });
-      if (cached.hasText) _scheduleActivation(requestId);
+      if (cached.hasText) _activateOrSchedule(requestId);
       return;
     }
 
@@ -161,12 +165,24 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
         _localFilePath = result.localPath;
       });
 
-      // If text found, schedule activation after 1 second delay
-      if (hasText) _scheduleActivation(requestId);
+      // If text found, activate immediately if user already long pressed,
+      // otherwise schedule activation after 1 second delay.
+      if (hasText) _activateOrSchedule(requestId);
     } catch (error, stackTrace) {
       _logger.severe("Text detection pre-check failed", error, stackTrace);
       if (!mounted || requestId != _requestId) return;
       _hasTextCache[cacheKey] = const _HasTextResult(hasText: false);
+    }
+  }
+
+  void _activateOrSchedule(int requestId) {
+    if (_userTriggered) {
+      // User already long pressed — skip delay, activate immediately
+      setState(() {
+        _overlayActive = true;
+      });
+    } else {
+      _scheduleActivation(requestId);
     }
   }
 
@@ -180,18 +196,45 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     });
   }
 
+  void _handleLongPress(LongPressStartDetails details) {
+    if (_overlayActive) return; // Already active, let overlay handle it
+    _activationTimer?.cancel();
+    setState(() {
+      _userTriggered = true;
+      _pendingLongPressPosition = details.globalPosition;
+    });
+    // If hasText already completed and file path is ready, activate now
+    if (_localFilePath != null) {
+      setState(() {
+        _overlayActive = true;
+      });
+    }
+    // Otherwise _evaluateFile will activate when hasText completes
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isEligible || widget.file is TrashFile) {
       return const SizedBox.shrink();
     }
 
-    if (!_overlayActive || _localFilePath == null) {
-      return const SizedBox.shrink();
-    }
-
     final isZoomedNotifier = InheritedDetailPageState.maybeOf(context)
         ?.isZoomedNotifier;
+
+    // During the wait period (hasText passed but 1s timer hasn't fired),
+    // show a transparent gesture layer to capture long press.
+    if (!_overlayActive || _localFilePath == null) {
+      if (!_isEligible || widget.isGuestView) {
+        return const SizedBox.shrink();
+      }
+      return Positioned.fill(
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onLongPressStart: _handleLongPress,
+          child: const SizedBox.expand(),
+        ),
+      );
+    }
 
     return ValueListenableBuilder<bool>(
       valueListenable: isZoomedNotifier ?? ValueNotifier(false),
@@ -217,12 +260,13 @@ class _InlineTextDetectionState extends State<InlineTextDetection> {
     return TextDetectorWidget(
       key: ValueKey("ocr_$_localFilePath"),
       imagePath: _localFilePath!,
-      autoDetect: true,
+      autoDetect: !_userTriggered,
       backgroundColor: Colors.transparent,
       showUnselectedBoundaries: true,
       overlayOnly: true,
       showProcessingOverlay: false,
       showEditorHint: false,
+      initialInteractionPosition: _pendingLongPressPosition,
       controller: _detectorController,
       strings: TextDetectorStrings(
         processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
