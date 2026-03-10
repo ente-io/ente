@@ -203,6 +203,10 @@ func main() {
 
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
+		UsageRepo:               usageRepo,
+		BillingRepo:             billingRepo,
+		StorageBonusRepo:        storagBonusRepo,
+		DiscordController:       discordController,
 		LockController:          lockController,
 		NotificationHistoryRepo: notificationHistoryRepo,
 	}
@@ -1198,6 +1202,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	scheduleAndRun(c, "@every 24h", func() {
 		inactiveUserOrchestrator.ProcessInactiveUsers()
+	})
+
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.SendStorageWarningMails()
 	})
 
 	schedule(c, "@every 1m", func() {
