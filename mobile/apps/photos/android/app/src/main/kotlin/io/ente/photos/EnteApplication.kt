@@ -1,5 +1,6 @@
 package io.ente.photos
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import dev.fluttercommunity.workmanager.NotificationDebugHandler
@@ -7,10 +8,9 @@ import dev.fluttercommunity.workmanager.TaskDebugInfo
 import dev.fluttercommunity.workmanager.TaskResult
 import dev.fluttercommunity.workmanager.WorkmanagerDebug
 import dev.fluttercommunity.workmanager.pigeon.TaskStatus
-import io.flutter.app.FlutterApplication
 import org.json.JSONObject
 
-class EnteApplication : FlutterApplication() {
+class EnteApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     WorkmanagerDebug.setCurrent(InternalUserWorkmanagerDebugHandler())
