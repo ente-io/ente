@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -331,7 +330,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)?.didUnlock();
-        unawaited(_lockscreenSetting.setInvalidAttemptCount(0));
+        await _lockscreenSetting.setInvalidAttemptCount(0);
         if (mounted) {
           setState(() {
             lockedTimeInSeconds = 15;
