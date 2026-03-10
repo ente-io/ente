@@ -10,7 +10,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ente-io/museum/ente/storagebonus"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/google/uuid"
@@ -128,25 +127,6 @@ func insertStorageWarningTestSubscription(t *testing.T, db *sql.DB, userID int64
 	)
 	if err != nil {
 		t.Fatalf("failed to insert subscription for user %d: %v", userID, err)
-	}
-}
-
-func insertStorageWarningTestBonus(t *testing.T, db *sql.DB, userID int64, bonusType storagebonus.BonusType) {
-	t.Helper()
-	_, err := db.Exec(
-		`INSERT INTO storage_bonus(bonus_id, type, user_id, storage, valid_till, is_revoked, created_at, updated_at)
-		 VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
-		fmt.Sprintf("bonus-%d-%s", userID, bonusType),
-		string(bonusType),
-		userID,
-		10*testGiB,
-		int64(0),
-		false,
-		int64(1),
-		int64(1),
-	)
-	if err != nil {
-		t.Fatalf("failed to insert storage bonus for user %d: %v", userID, err)
 	}
 }
 
