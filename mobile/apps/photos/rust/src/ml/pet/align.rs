@@ -187,7 +187,7 @@ fn rotate_around_center(
                     + p10[c] as f32 * fx * (1.0 - fy)
                     + p01[c] as f32 * (1.0 - fx) * fy
                     + p11[c] as f32 * fx * fy;
-                px[c] = v.round().max(0.0).min(255.0) as u8;
+                px[c] = v.round().clamp(0.0, 255.0) as u8;
             }
             output.put_pixel(out_x, out_y, Rgb(px));
         }
