@@ -62,21 +62,21 @@ func resolveExpiredWarningStage(effectiveExpiry int64, now int64, history map[st
 	}
 
 	daysSinceExpiry := now - effectiveExpiry
-	if daysSinceExpiry >= storageWarningExpiredWarning119Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningExpired119TemplateID, effectiveExpiry) {
-		return expiredWarningStage119
-	}
-	if daysSinceExpiry >= storageWarningExpiredWarning90Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningExpired90TemplateID, effectiveExpiry) {
-		return expiredWarningStage90
+	if daysSinceExpiry >= storageWarningExpiredWarning30Delay &&
+		!storageWarningTemplateSentInCycle(history, storageWarningExpired30TemplateID, effectiveExpiry) {
+		return expiredWarningStage30
 	}
 	if daysSinceExpiry >= storageWarningExpiredWarning60Delay &&
 		!storageWarningTemplateSentInCycle(history, storageWarningExpired60TemplateID, effectiveExpiry) {
 		return expiredWarningStage60
 	}
-	if daysSinceExpiry >= storageWarningExpiredWarning30Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningExpired30TemplateID, effectiveExpiry) {
-		return expiredWarningStage30
+	if daysSinceExpiry >= storageWarningExpiredWarning90Delay &&
+		!storageWarningTemplateSentInCycle(history, storageWarningExpired90TemplateID, effectiveExpiry) {
+		return expiredWarningStage90
+	}
+	if daysSinceExpiry >= storageWarningExpiredWarning119Delay &&
+		!storageWarningTemplateSentInCycle(history, storageWarningExpired119TemplateID, effectiveExpiry) {
+		return expiredWarningStage119
 	}
 	return expiredWarningStageNone
 }

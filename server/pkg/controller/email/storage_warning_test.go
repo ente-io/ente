@@ -190,6 +190,12 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			want: expiredWarningStage119,
 		},
 		{
+			name:    "long expired backfill without history starts at first reminder",
+			now:     effectiveExpiry + storageWarningExpiredWarning119Delay + 10,
+			history: map[string]int64{},
+			want:    expiredWarningStage30,
+		},
+		{
 			name: "old cycle reminder ignored after renewal",
 			now:  effectiveExpiry + storageWarningExpiredWarning30Delay,
 			history: map[string]int64{
