@@ -227,10 +227,14 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
 
             let mut body_results: Vec<crate::ml::types::PetBodyResult> = body_detections
                 .into_iter()
-                .map(|det| crate::ml::types::PetBodyResult {
-                    pet_body_id: crate::ml::types::to_face_id(req.file_id, det.box_xyxy),
-                    detection: det,
-                    body_embedding: Vec::new(),
+                .map(|det| {
+                    let base_id = crate::ml::types::to_face_id(req.file_id, det.box_xyxy);
+                    let pet_body_id = format!("{base_id}_c{}", det.coco_class);
+                    crate::ml::types::PetBodyResult {
+                        pet_body_id,
+                        detection: det,
+                        body_embedding: Vec::new(),
+                    }
                 })
                 .collect();
             if !body_results.is_empty() {
