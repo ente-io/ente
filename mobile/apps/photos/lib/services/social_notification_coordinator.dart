@@ -369,7 +369,7 @@ class SocialNotificationCoordinator {
     }
     final user =
         _collectionsService.getFileOwner(userID, candidate.collectionID);
-    return user.nameOrEmail;
+    return user.displayName ?? user.email;
   }
 
   String _getSocialNotificationBody(
