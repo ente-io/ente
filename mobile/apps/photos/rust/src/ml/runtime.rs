@@ -337,15 +337,13 @@ where
             let fallback_config = cpu_only_runtime_config(config);
             rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
             ensure_runtime(&fallback_config)?;
-            let retry_result = {
+            {
                 let guard = read_runtime();
                 let state = guard
                     .as_ref()
                     .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
                 func(&state.runtime)
-            };
-
-            retry_result
+            }
         }
     }
 }
