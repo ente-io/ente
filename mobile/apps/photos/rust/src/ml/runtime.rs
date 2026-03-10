@@ -345,13 +345,6 @@ where
                 func(&state.runtime)
             };
 
-            if retry_result.is_ok() {
-                let mut guard = write_runtime();
-                if let Some(state) = guard.as_mut() {
-                    state.config = config.clone();
-                }
-            }
-
             retry_result
         }
     }
