@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/external/listmonk"
 	"github.com/ente-io/museum/pkg/external/zoho"
 	"github.com/ente-io/stacktrace"
@@ -28,10 +29,11 @@ type MailingListsController struct {
 	zohoCredentials     zoho.Credentials
 	listmonkListIDs     []int
 	listmonkCredentials listmonk.Credentials
+	discordController   *discord.DiscordController
 }
 
 // Return a new instance of MailingListsController
-func NewMailingListsController() *MailingListsController {
+func NewMailingListsController(discordController *discord.DiscordController) *MailingListsController {
 	zohoCredentials := zoho.Credentials{
 		ClientID:     viper.GetString("zoho.client-id"),
 		ClientSecret: viper.GetString("zoho.client-secret"),
@@ -77,6 +79,7 @@ func NewMailingListsController() *MailingListsController {
 		zohoAccessToken:     zohoAccessToken,
 		listmonkCredentials: listmonkCredentials,
 		listmonkListIDs:     listmonkListIDs,
+		discordController:   discordController,
 	}
 }
 
@@ -212,8 +215,13 @@ func (c *MailingListsController) listmonkSubscribe(email string) error {
 		"email": email,
 		"lists": c.listmonkListIDs,
 	}
-	return listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
+	err := listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+	if err != nil {
+		log.Errorf("Listmonk - Could not subscribe '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk subscribe failed")
+	}
+	return err
 }
 
 // Unsubscribes an email address to a particular listmonk campaign mailing list
@@ -226,9 +234,20 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
-		stacktrace.Propagate(err, "")
+		log.Errorf("Listmonk - Could not find subscriber '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk subscriber lookup failed")
+		return stacktrace.Propagate(err, "")
 	}
 
-	return listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
+	err = listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
 		map[string]interface{}{}, c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+	if err != nil {
+		log.Errorf("Listmonk - Could not unsubscribe '%s': %s", email, err)
+		c.notifyListmonkFailure("Listmonk unsubscribe failed")
+	}
+	return err
+}
+
+func (c *MailingListsController) notifyListmonkFailure(message string) {
+	c.discordController.Notify(message)
 }

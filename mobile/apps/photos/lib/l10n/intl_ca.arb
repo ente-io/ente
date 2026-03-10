@@ -1104,7 +1104,6 @@
   "didYouKnow": "Sabies que?",
   "loadingMessage": "Carregant les teves fotos...",
   "loadMessage1": "Pots compartir la teva subscripció amb la teva família",
-  "loadMessage2": "Hem preservat més de 200 milions de records fins ara",
   "loadMessage3": "Guardem 3 còpies de les teves dades, una en un refugi nuclear subterrani",
   "loadMessage4": "Totes les nostres aplicacions són de codi obert",
   "loadMessage5": "El nostre codi font i criptografia han estat auditats externament",
@@ -1754,7 +1753,6 @@
   "legacyPageDesc2": "Els contactes de confiança poden iniciar la recuperació del compte, i si no es bloquegen en 30 dies, restablir la teva contrasenya i accedir al teu compte.",
   "legacyAccounts": "Comptes de llegat",
   "trustedContacts": "Contactes de confiança",
-  "addTrustedContact": "Afegeix contacte de confiança",
   "removeInvite": "Elimina invitació",
   "recoveryWarning": "Un contacte de confiança està intentant accedir al teu compte",
   "rejectRecovery": "Rebutja recuperació",
@@ -2516,7 +2514,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, =0{Sense comentaris} one{1 comentari} other{{count} comentaris}}",
+  "commentsCount": "{count, plural, one {}=0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

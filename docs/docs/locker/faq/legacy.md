@@ -25,6 +25,12 @@ After the waiting period passes without the account owner blocking the recovery:
 2. They gain full access to the account with the new password
 3. All data in the account (Photos, Auth, Locker) becomes accessible
 
+### What happens to 2FA (if enabled) once recovery is initiated? {#locker-legacy-2fa-recovery}
+
+If you have two-factor authentication enabled on your account, it will be
+removed after the waiting period, once recovery is initiated. This ensures the
+trusted contact can access the account without needing your 2FA device.
+
 ### Can I customize the waiting period? {#locker-legacy-custom-waiting-period}
 
 Yes. You can choose from three waiting period options:

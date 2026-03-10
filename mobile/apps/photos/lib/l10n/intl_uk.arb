@@ -333,6 +333,7 @@
   "freeStorageClaimed": "Безплатне сховище отримано",
   "freeStorageUsable": "Безплатне сховище можна використовувати",
   "usableReferralStorageInfo": "Доступний обсяг пам'яті обмежений вашим поточним тарифом. Надлишок заявленого обсягу автоматично стане доступним, коли ви покращите тариф.",
+  "earned": "отримано",
   "removeFromAlbumTitle": "Вилучити з альбому?",
   "removeFromAlbum": "Вилучити з альбому",
   "itemsWillBeRemovedFromAlbum": "Обрані елементи будуть вилучені з цього альбому",
@@ -1481,7 +1482,6 @@
   "legacyPageDesc2": "Довірені контакти можуть ініціювати відновлення облікового запису, і якщо його не буде заблоковано протягом 30 днів, скинути пароль і отримати доступ до нього.",
   "legacyAccounts": "Облікові записи «Спадку»",
   "trustedContacts": "Довірені контакти",
-  "addTrustedContact": "Додати довірений контакт",
   "removeInvite": "Вилучити запрошення",
   "recoveryWarning": "Довірений контакт намагається отримати доступ до вашого облікового запису",
   "rejectRecovery": "Відхилити відновлення",
@@ -1737,7 +1737,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
+  "albumsCount": "{count, plural, =1{1 альбом} one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -1754,7 +1754,7 @@
   "@deletedComment": {
     "description": "Label for deleted comments"
   },
-  "commentsCount": "{count, plural, =0{Немає коментарів} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
+  "commentsCount": "{count, plural, =0{Немає коментарів} =1{1 коментар} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

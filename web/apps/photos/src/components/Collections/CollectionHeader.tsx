@@ -9,10 +9,12 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import PublicIcon from "@mui/icons-material/Public";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
@@ -102,6 +104,8 @@ export interface CollectionHeaderProps
     onCollectionShare: () => void;
     onCollectionManageLink: () => void;
     onCollectionCast: () => void;
+    canSetAlbumCover: boolean;
+    onSetAlbumCover: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -159,6 +163,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionShare,
     onCollectionManageLink,
     onCollectionCast,
+    canSetAlbumCover,
+    onSetAlbumCover,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
     onMarkTempDeleted,
@@ -507,6 +513,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "sharedIncoming":
             menuOptions = [
+                shouldShowMapOption(collectionSummary) && (
+                    <OverflowMenuOption
+                        key="map"
+                        onClick={handleShowMap}
+                        startIcon={<MapOutlinedIcon />}
+                    >
+                        {t("map")}
+                    </OverflowMenuOption>
+                ),
                 // Pin/Unpin for shared incoming collections
                 collectionSummary.attributes.has("shareePinned") ? (
                     <OverflowMenuOption
@@ -629,6 +644,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("rename_album")}
                 </OverflowMenuOption>,
+                canSetAlbumCover && (
+                    <OverflowMenuOption
+                        key="set-cover"
+                        onClick={onSetAlbumCover}
+                        startIcon={<ImageOutlinedIcon />}
+                    >
+                        {t("set_cover")}
+                    </OverflowMenuOption>
+                ),
                 <OverflowMenuOption
                     key="sort"
                     onClick={showSortOrderMenu}
@@ -733,6 +757,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 collectionSummary={collectionSummary}
                 isQuickLinkAlbum={!!isQuickLinkAlbum}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
+                onMapClick={handleShowMap}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
                 onShareClick={
@@ -797,6 +822,7 @@ interface QuickOptionsProps {
     collectionSummary: CollectionSummary;
     isQuickLinkAlbum: boolean;
     isDownloadInProgress: () => boolean;
+    onMapClick: () => void;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
@@ -805,6 +831,7 @@ interface QuickOptionsProps {
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
+    onMapClick,
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
@@ -832,6 +859,9 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
             <CleanUncategorizedQuickOption
                 onClick={onCleanUncategorizedClick}
             />
+        )}
+        {showMapQuickOption(collectionSummary) && (
+            <MapQuickOption onClick={onMapClick} />
         )}
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
@@ -870,6 +900,24 @@ const CleanUncategorizedQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const MapQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("map")}>
+        <IconButton onClick={onClick}>
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <PublicIcon />
+            </Box>
+        </IconButton>
+    </Tooltip>
+);
+
 const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
@@ -877,6 +925,10 @@ const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "hiddenItems" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const showMapQuickOption = (collectionSummary: CollectionSummary) =>
+    collectionSummary.type == "userFavorites" &&
+    shouldShowMapOption(collectionSummary);
 
 const shouldShowMapOption = ({ type, fileCount }: CollectionSummary) =>
     fileCount > 0 &&

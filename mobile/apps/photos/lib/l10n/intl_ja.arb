@@ -1449,7 +1449,6 @@
   "legacyPageDesc2": "信頼できる連絡先はアカウントの回復を開始することができます。30日以内にあなたが拒否しない場合は、その信頼する人がパスワードをリセットしてあなたのアカウントにアクセスできるようになります。",
   "legacyAccounts": "レガシーアカウント",
   "trustedContacts": "信頼する連絡先",
-  "addTrustedContact": "信頼する連絡先を追加",
   "removeInvite": "招待を削除",
   "recoveryWarning": "信頼する連絡先の持ち主があなたのアカウントにアクセスしようとしています",
   "rejectRecovery": "リカバリを拒否する",

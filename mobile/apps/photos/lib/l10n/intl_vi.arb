@@ -134,6 +134,8 @@
   "changeEmail": "Đổi email",
   "enterYourPassword": "Nhập mật khẩu của bạn",
   "welcomeBack": "Chào mừng trở lại!",
+  "readyToBackupTitle": "Sẵn sàng sao lưu",
+  "readyToBackupSubtitle": "Ảnh của bạn sẽ được đồng bộ trong nền. Lần sao lưu đầu tiên có thể hơi lâu.",
   "contactSupport": "Liên hệ hỗ trợ",
   "locationPickerTip": "Bạn cũng có thể thêm vị trí tập trung vào ảnh từ phần thông tin của ảnh",
   "@locationPickerTip": {
@@ -240,6 +242,7 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Bố cục album",
+  "layoutMasonry": "Masonry",
   "layoutGrouped": "Đã phân nhóm",
   "layoutContinuous": "Liên tục",
   "layoutTrip": "Chuyến đi",
@@ -288,6 +291,7 @@
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
   "linkHasExpired": "Liên kết đã hết hạn",
+  "linkRequestLimitExceeded": "Album này đang được xem trên quá nhiều thiết bị",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
   "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
@@ -357,7 +361,7 @@
   "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
   "referralStep1": "1. Tùy chỉnh và chia sẻ mã của bạn.",
   "referralStep2": "2. Họ đăng ký Ente bằng mã của bạn.",
-  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bjan khi bạn nâng cấp.",
+  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bạn khi bạn nâng cấp.",
   "referralsAreCurrentlyPaused": "Giới thiệu hiện đang tạm dừng",
   "youCanAtMaxDoubleYourStorage": "Bạn có thể tối đa ×2 dung lượng của mình",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Gia đình bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} false {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} other {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại!}}",
@@ -527,6 +531,8 @@
   "clearIndexes": "Xóa chỉ mục",
   "selectFoldersForBackup": "Chọn thư mục để sao lưu",
   "selectFolders": "Chọn nhiều thư mục",
+  "backupToEnte": "Sao lưu lên Ente",
+  "selectAlbumsToBackUpToEnte": "Chọn những album sẽ sao lưu lên Ente",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Các thư mục đã chọn sẽ được mã hóa và sao lưu",
   "unselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
@@ -619,9 +625,9 @@
   "removeDuplicates": "Xóa tệp trùng lặp",
   "removeDuplicatesDesc": "Xem và xóa các tệp hoàn toàn giống nhau.",
   "viewLargeFiles": "Xóa tệp dung lượng lớn",
-  "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "viewLargeFilesDesc": "Xem các tệp đang chiếm dung lượng nhiều nhất.",
   "deleteSuggestions": "Gợi ý xóa",
-  "deleteSuggestionsDesc": "Xóa những tệp được gợi ý xóa.",
+  "deleteSuggestionsDesc": "Xem các tệp được gợi ý xóa.",
   "rejectSuggestions": "Từ chối gợi ý",
   "noDeleteSuggestion": "Không có gợi ý xóa",
   "youHaveNoFileSuggestedForDeletion": "Bạn không có tệp được đề xuất xóa",
@@ -791,6 +797,26 @@
   "youAreOnAFamilyPlan": "Bạn đang dùng gói gia đình!",
   "contactFamilyAdmin": "Vui lòng liên hệ <green>{familyAdminEmail}</green> để quản lý gói của bạn",
   "leaveFamily": "Rời khỏi gia đình",
+  "youAreOnAFamilyPlanSubtitle": "Bạn đang trong một gói gia đình.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " quản lý gói này.\nLiên hệ họ nếu có thay đổi.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Rời gói gia đình",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Cần trợ giúp? Liên hệ ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Bạn có chắc muốn rời khỏi gói gia đình không?",
   "leave": "Rời",
   "rateTheApp": "Đánh giá ứng dụng",
@@ -1165,7 +1191,14 @@
   "didYouKnow": "Bạn có biết?",
   "loadingMessage": "Đang tải ảnh của bạn...",
   "loadMessage1": "Bạn có thể chia sẻ gói của mình với gia đình",
-  "loadMessage2": "Chúng tôi đã lưu giữ hơn 200 triệu kỷ niệm cho đến hiện tại",
+  "loadMessage2": "Chúng tôi đã phục vụ hơn {memoriesCountInMillions} triệu kỷ niệm",
+  "@loadMessage2": {
+    "placeholders": {
+      "memoriesCountInMillions": {
+        "type": "int"
+      }
+    }
+  },
   "loadMessage3": "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một cái lưu ở hầm trú ẩn hạt nhân",
   "loadMessage4": "Tất cả các ứng dụng của chúng tôi đều là mã nguồn mở",
   "loadMessage5": "Mã nguồn và mã hóa của chúng tôi đã được kiểm nghiệm ngoại bộ",
@@ -1575,7 +1608,7 @@
   "@pleaseNamePersonInPeopleSectionFirst": {
     "description": "Shown when manual tagging requires at least one named person."
   },
-  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ những tệp đã tải lên mới có thể được thêm vào",
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ các tệp đã tải lên mới có thể được thêm vào người",
   "@onlyUploadedFilesCanBeAddedToPerson": {
     "description": "Shown when user tries to manually tag files that are not uploaded yet."
   },
@@ -1817,9 +1850,93 @@
   "legacyAccounts": "Tài khoản thừa kế",
   "trustedContacts": "Liên hệ tin cậy",
   "addTrustedContact": "Thêm liên hệ tin cậy",
+  "chooseFromAnExistingContact": "Chọn từ danh bạ hiện có",
+  "chooseARecoveryTime": "Chọn thời điểm khôi phục",
+  "addContact": "Thêm liên hệ",
   "removeInvite": "Gỡ bỏ lời mời",
   "recoveryWarning": "Một liên hệ tin cậy đang cố gắng truy cập tài khoản của bạn",
   "rejectRecovery": "Từ chối khôi phục",
+  "cannotUpdateRecoveryTime": "Không thể cập nhật thời gian khôi phục",
+  "cannotUpdateRecoveryTimeMessage": "Thời gian khôi phục không thể thay đổi khi đang trong một phiên khôi phục hoạt động. Vui lòng từ chối hoặc đợi khôi phục hoàn tất.",
+  "updateTime": "Cập nhật thời gian",
+  "revokeInvite": "Gỡ lời mời",
+  "trustedContactInvitePending": "Bạn đã mời {email} làm một liên hệ tin cậy. Họ chưa chấp nhận lời mời của bạn.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "Bạn đã mời {email} làm một liên hệ tin cậy. Họ đã chấp nhận lời mời của bạn.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Hủy lời mời",
+  "cancelInviteDesc": "Nếu bạn xóa lời mời này, bạn sẽ phải gửi một lời mời mới nếu bạn đổi ý.",
+  "removeContactDesc": "Nếu bạn xóa lời mời này, bạn sẽ phải gửi một lời mời mới, và liên hệ cũng cần chấp nhận lại.",
+  "removeContact": "Gỡ liên hệ",
+  "letsTryThatAgain": "Hãy thử lại",
+  "removeYourselfDesc": "Nếu bạn tự gỡ bạn khỏi liên hệ tin cậy, bạn sẽ mất quyền truy cập tài khoản {email} sau chu kỳ họ không hoạt động.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Hủy khôi phục",
+  "cancelRecoveryDesc": "Bạn có chắc muốn hủy khôi phục tài khoản {email}?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Bắt đầu khôi phục",
+  "startRecoveryDesc": "Bạn có chắc muốn bắt đầu khôi phục tài khoản {email}?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "Bạn có thể khôi phục tài khoản {email} trong {days} ngày sau khi bắt đầu quá trình khôi phục.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "Bạn có thể khôi phục tài khoản {email} sau {time}.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Hoặc gỡ bạn khỏi vai trò liên hệ tin cậy của {email}",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Quá trình khôi phục đã được khởi động",
   "recoveryInitiatedDesc": "Bạn có thể truy cập tài khoản sau {days} ngày. Một thông báo sẽ được gửi đến {email}.",
   "@recoveryInitiatedDesc": {
@@ -1858,6 +1975,19 @@
       "email": {
         "type": "String",
         "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "confirmAddingTrustedContacts": "Bạn sắp thêm {count} liên hệ tin cậy. Họ sẽ có thể khôi phục tài khoản của bạn nếu bạn vắng mặt {numOfDays} ngày.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
       },
       "numOfDays": {
         "type": "int",
@@ -2080,9 +2210,9 @@
   "shouldRemoveFilesSmartAlbumsDesc": "Bạn có muốn xóa các tệp liên quan đến người đã được chọn trước đó trong album thông minh không?",
   "addingPhotos": "Đang thêm ảnh",
   "gettingReady": "Chuẩn bị sẵn sàng",
-  "addSomePhotosDesc1": "Thêm vài ảnh hoặc chọn ",
-  "addSomePhotosDesc2": "những khuôn mặt giống nhau",
-  "addSomePhotosDesc3": "\nđể bắt đầu với",
+  "addSomePhotosDesc1": "Thêm ảnh hoặc chọn ",
+  "addSomePhotosDesc2": "khuôn mặt giống nhau",
+  "addSomePhotosDesc3": "\nđể bắt đầu",
   "ignorePerson": "Bỏ qua người",
   "mixedGrouping": "Nhóm hỗn hợp?",
   "analysis": "Phân tích",

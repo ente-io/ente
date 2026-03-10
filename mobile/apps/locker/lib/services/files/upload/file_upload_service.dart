@@ -669,6 +669,10 @@ class FileUploader {
       final int statusCode = e.response?.statusCode ?? -1;
       if (_isFileLimitReachedResponse(e.response)) {
         throw FileLimitReachedError();
+      } else if (statusCode == 402) {
+        final error = NoActiveSubscriptionError();
+        clearQueue(error);
+        throw error;
       } else if (statusCode == 413) {
         throw FileTooLargeForPlanError();
       } else if (statusCode == 426) {

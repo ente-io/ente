@@ -14,7 +14,9 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/account_configured_event.dart";
+import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/gateways/users/models/delete_account.dart';
 import 'package:photos/gateways/users/models/key_attributes.dart';
 import 'package:photos/gateways/users/models/key_gen_result.dart';
@@ -66,18 +68,33 @@ class UserService {
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
   late SharedPreferences _preferences;
+  StreamSubscription<UserLoggedOutEvent>? _loggedOutEventSubscription;
+  StreamSubscription<SignedInEvent>? _signedInEventSubscription;
 
   UsersGateway get _gateway => usersGateway;
 
-  late ValueNotifier<String?> emailValueNotifier;
+  final ValueNotifier<String?> emailValueNotifier =
+      ValueNotifier<String?>(null);
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> init() async {
-    emailValueNotifier =
-        ValueNotifier<String?>(Configuration.instance.getEmail());
+    emailValueNotifier.value = Configuration.instance.getEmail();
+    if (_loggedOutEventSubscription != null) {
+      await _loggedOutEventSubscription!.cancel();
+    }
+    _loggedOutEventSubscription =
+        Bus.instance.on<UserLoggedOutEvent>().listen((_) {
+      emailValueNotifier.value = null;
+    });
+    if (_signedInEventSubscription != null) {
+      await _signedInEventSubscription!.cancel();
+    }
+    _signedInEventSubscription = Bus.instance.on<SignedInEvent>().listen((_) {
+      emailValueNotifier.value = Configuration.instance.getEmail();
+    });
     _preferences = await SharedPreferences.getInstance();
     if (Configuration.instance.isLoggedIn() && !isOfflineMode) {
       // add artificial delay in refreshing 2FA status
@@ -1161,6 +1178,9 @@ class UserService {
     } else {
       await Configuration.instance.setToken(responseData["token"]);
     }
+
+    // Initialize shared feed cutoff at login; feed path keeps the same fallback.
+    localSettings.getOrCreateSharedPhotoFeedCutoffTime();
   }
 
   Future<void> setTwoFactor({

@@ -52,5 +52,6 @@ in `ports` in compose file.
 | [Ente Cast](https://ente.io/help/photos/features/cast/) | Web      | 3004      | 3004           |
 | Ente Public Locker                                      | Web      | 3005      | 3005           |
 | Ente Embed                                              | Web      | 3006      | 3006           |
+| Ente Paste (if deployed separately)                     | Web      | 3008      | 3008           |
 | MinIO                                                   | S3       | 3200      | 3200           |
 | PostgreSQL                                              | Database |           | 5432           |

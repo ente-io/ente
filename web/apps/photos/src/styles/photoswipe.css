@@ -110,6 +110,10 @@
     line-height: 20px;
 }
 
+.pswp-ente-public-album .pswp__button--ente-logo {
+    display: none;
+}
+
 @media (width >= 450px) {
     .pswp-ente .pswp__counter {
         margin-top: 22px;
@@ -194,6 +198,37 @@
     .pswp-ente .pswp__button--close {
         margin-right: -2px;
     }
+
+    .pswp-ente-public-album
+        .pswp__top-bar
+        .pswp__button:not(.pswp__button--ente-logo):not(.pswp__button--zoom) {
+        margin-top: 1px;
+    }
+
+    .pswp-ente-public-album .pswp__counter,
+    .pswp-ente-public-album .pswp__button--zoom {
+        display: none;
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 21.5px;
+        margin-inline-start: 4px;
+        margin-inline-end: 0;
+        width: auto;
+        min-width: 0;
+        padding-inline: 0;
+        height: 20px;
+        color: rgb(255 255 255 / 0.85);
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo .pswp__ente-logo-svg {
+        display: block;
+        height: 15px;
+        width: auto;
+    }
 }
 
 @media (width < 350px) {
@@ -207,6 +242,10 @@
 
     .pswp-ente .pswp__button--close {
         margin-right: -4px;
+    }
+
+    .pswp-ente-public-album .pswp__button--ente-logo {
+        margin-inline-start: 2px;
     }
 }
 
@@ -310,6 +349,7 @@
   being attached to the video.
  */
 .pswp-ente .pswp__media-controls {
+    display: none;
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -356,9 +396,19 @@
     flex-direction: column;
 }
 
-/* Hide the controls if they're not associated to a media-controller. */
-media-control-bar:not([mediacontroller]) {
-    display: none;
+/* Controls are shown in a disabled state while video data is still loading. */
+.pswp-ente .pswp__media-controls.pswp__media-controls--visible {
+    display: block;
+}
+
+.pswp-ente
+    .pswp__media-controls.pswp__media-controls--disabled
+    media-control-bar:not(:first-child),
+.pswp-ente
+    .pswp__media-controls.pswp__media-controls--disabled
+    media-playback-rate-menu {
+    opacity: 0.45;
+    pointer-events: none;
 }
 
 media-control-bar {

@@ -16,11 +16,12 @@ permissions:
 
 jobs:
     release-desktop:
+        environment: "auth-win-build"
         strategy:
             fail-fast: false
             matrix:
                 platform:
-                    - os: ubuntu-22.04
+                    - os: ubuntu-24.04
                       rust-target: x86_64-unknown-linux-gnu
                     - os: macos-latest
                       rust-target: x86_64-apple-darwin
@@ -30,8 +31,20 @@ jobs:
                       rust-target: x86_64-pc-windows-msvc
 
         runs-on: ${{ matrix.platform.os }}
+        env:
+            HAS_WINDOWS_SIGNING: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_SECRET != '' && secrets.AZURE_ENDPOINT != '' && secrets.AZURE_CODE_SIGNING_NAME != '' && secrets.AZURE_CERT_PROFILE_NAME != '' }}
 
         steps:
+            - name: Set release tag
+              shell: bash
+              run: |
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+                      echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+                  else
+                      echo "RELEASE_TAG=ensu-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
+                  fi
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
             - name: Checkout code
               uses: actions/checkout@v4
 
@@ -54,10 +67,10 @@ jobs:
                   echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
 
             - name: Install dependencies (Ubuntu only)
-              if: matrix.platform.os == 'ubuntu-22.04'
+              if: matrix.platform.os == 'ubuntu-24.04'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
             - name: Rust cache
               uses: actions/cache@v4
@@ -89,37 +102,125 @@ jobs:
               shell: bash
               run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
+            - name: Install trusted-signing-cli (Windows only)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: cargo install --locked trusted-signing-cli
+
+            - name: Add cargo bin to PATH (Windows only)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  CARGO_BIN_WIN=$(cygpath -w "$HOME/.cargo/bin")
+                  echo "$CARGO_BIN_WIN" >> $GITHUB_PATH
+
+            - name: Resolve Windows signing tool paths
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              run: |
+                  TRUSTED_SIGNING_CLI_UNIX="$HOME/.cargo/bin/trusted-signing-cli.exe"
+                  if [ ! -f "$TRUSTED_SIGNING_CLI_UNIX" ]; then
+                      TRUSTED_SIGNING_CLI_FALLBACK=$(where.exe trusted-signing-cli 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$TRUSTED_SIGNING_CLI_FALLBACK" ]; then
+                          TRUSTED_SIGNING_CLI_PATH="$TRUSTED_SIGNING_CLI_FALLBACK"
+                      else
+                          echo "::error::trusted-signing-cli binary not found"
+                          exit 1
+                      fi
+                  else
+                      TRUSTED_SIGNING_CLI_PATH=$(cygpath -w "$TRUSTED_SIGNING_CLI_UNIX")
+                  fi
+
+                  AZ_PATH=$(where.exe az.cmd 2>/dev/null | tr -d '\r' | head -n1 || true)
+                  if [ -z "$AZ_PATH" ]; then
+                      AZ_PATH_FALLBACK=$(where.exe az 2>/dev/null | tr -d '\r' | head -n1 || true)
+                      if [ -n "$AZ_PATH_FALLBACK" ] && [ -f "${AZ_PATH_FALLBACK}.cmd" ]; then
+                          AZ_PATH="${AZ_PATH_FALLBACK}.cmd"
+                      else
+                          echo "::warning::az.cmd not found on PATH; relying on trusted-signing-cli default AZURE_CLI_PATH"
+                      fi
+                  fi
+
+                  SIGNTOOL_PATH=$(powershell -NoProfile -Command "Get-ChildItem 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*\\x64\\signtool.exe' -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName" | tr -d '\r' || true)
+                  if [ -z "$SIGNTOOL_PATH" ]; then
+                      echo "::warning::signtool not auto-detected; relying on trusted-signing-cli default SIGNTOOL_PATH"
+                  fi
+
+                  echo "TRUSTED_SIGNING_CLI_PATH=$TRUSTED_SIGNING_CLI_PATH" >> $GITHUB_ENV
+                  if [ -n "$AZ_PATH" ]; then
+                      echo "AZURE_CLI_PATH=$AZ_PATH" >> $GITHUB_ENV
+                  fi
+                  if [ -n "$SIGNTOOL_PATH" ]; then
+                      echo "SIGNTOOL_PATH=$SIGNTOOL_PATH" >> $GITHUB_ENV
+                  fi
+
+            - name: Enable Windows signCommand for Tauri (Azure Trusted Signing)
+              if: matrix.platform.os == 'windows-latest' && env.HAS_WINDOWS_SIGNING == 'true'
+              shell: bash
+              env:
+                  AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+                  AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                  AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                  TRUSTED_SIGNING_CLI_PATH: ${{ env.TRUSTED_SIGNING_CLI_PATH }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
+              run: node rust/apps/ensu/scripts/ci-enable-windows-signing.mjs
+
+            - name: Enable updater artifacts for release builds
+              shell: bash
+              env:
+                  ENSU_TAURI_UPDATER_PUBKEY: ${{ vars.ENSU_TAURI_UPDATER_PUBKEY }}
+                  ENSU_TAURI_UPDATER_ENDPOINT: ${{ vars.ENSU_TAURI_UPDATER_ENDPOINT }}
+              run: node rust/apps/ensu/scripts/ci-enable-updater.mjs
+
+            - name: Ensure ENSU Tauri signing key is configured
+              shell: bash
+              env:
+                  ENSU_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
+              run: |
+                  if [ -z "${ENSU_TAURI_SIGNING_PRIVATE_KEY}" ]; then
+                      echo "::error::Missing ENSU_TAURI_SIGNING_PRIVATE_KEY secret"
+                      exit 1
+                  fi
+
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-                  TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY }}
+                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.ENSU_TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
+                  APPLE_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
+                  APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+                  APPLE_SIGNING_IDENTITY: "Developer ID Application"
+                  KEYCHAIN_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+                  AZURE_CLI_PATH: ${{ env.AZURE_CLI_PATH }}
+                  SIGNTOOL_PATH: ${{ env.SIGNTOOL_PATH }}
               with:
                   projectPath: rust/apps/ensu
-                  tagName: ${{ github.ref_name }}
-                  releaseName: "Ensu Desktop ${{ github.ref_name }}"
-                  releaseBody: |
-                      Desktop release for Ensu
-
-                      **Platforms:**
-                      - Linux (AppImage, deb)
-                      - macOS (dmg, app)
-                      - Windows (msi, exe)
-
-                      Download the appropriate file for your platform below.
+                  tagName: ${{ env.RELEASE_TAG }}
+                  releaseName: "Ensu Desktop ${{ env.RELEASE_TAG }}"
+                  releaseBody: "Ensu release assets: Linux/macOS/Windows desktop + Android APK."
                   releaseDraft: true
                   prerelease: false
+                  includeDebug: false
+                  includeRelease: true
+                  includeUpdaterJson: false
                   args: ${{ matrix.platform.rust-target != 'x86_64-unknown-linux-gnu' && format('--target {0}', matrix.platform.rust-target) || '' }}
 
     build-android:
-        runs-on: ubuntu-latest
-        needs: release-desktop
+        runs-on: ubuntu-24.04
         env:
             HAS_ANDROID_SIGNING: ${{ secrets.SIGNING_KEY_ENSU != '' && secrets.SIGNING_STORE_PASSWORD_ENSU != '' && secrets.SIGNING_KEY_ALIAS_ENSU != '' && secrets.SIGNING_KEY_PASSWORD_ENSU != '' }}
-            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU != '' }}
+            HAS_PLAYSTORE_SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT_JSON != '' }}
+            SHOULD_UPLOAD_PLAYSTORE: ${{ github.event_name != 'workflow_dispatch' && secrets.SERVICE_ACCOUNT_JSON != '' }}
             HAS_DISCORD_WEBHOOK: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK != '' }}
 
         defaults:
@@ -131,6 +232,16 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
+
+            - name: Set release tag
+              shell: bash
+              run: |
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+                      echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+                  else
+                      echo "RELEASE_TAG=ensu-nightly-$(date -u +%Y%m%d)" >> $GITHUB_ENV
+                  fi
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
             - name: Setup JDK 17
               uses: actions/setup-java@v4
@@ -166,14 +277,16 @@ jobs:
               run: |
                   echo "HAS_ANDROID_SIGNING=${HAS_ANDROID_SIGNING}"
                   echo "HAS_PLAYSTORE_SERVICE_ACCOUNT=${HAS_PLAYSTORE_SERVICE_ACCOUNT}"
+                  echo "SHOULD_UPLOAD_PLAYSTORE=${SHOULD_UPLOAD_PLAYSTORE}"
                   echo "HAS_DISCORD_WEBHOOK=${HAS_DISCORD_WEBHOOK}"
 
             - name: Setup signing keys
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
-                  echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > ensu-release.keystore
+                  KEYSTORE_PATH=$(pwd)/ensu-release.keystore
+                  echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > "$KEYSTORE_PATH"
                   cat > key.properties << EOF
-                  storeFile=ensu-release.keystore
+                  storeFile=$KEYSTORE_PATH
                   storePassword=${{ secrets.SIGNING_STORE_PASSWORD_ENSU }}
                   keyAlias=${{ secrets.SIGNING_KEY_ALIAS_ENSU }}
                   keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
@@ -182,52 +295,44 @@ jobs:
             - name: Build signed Android artifacts
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
-                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
+                  if [ "${SHOULD_UPLOAD_PLAYSTORE}" = "true" ]; then
                       ./gradlew :app-ui:assembleRelease :app-ui:bundleRelease
                   else
                       ./gradlew :app-ui:assembleRelease
                   fi
 
-            - name: Collect Android artifacts (signed)
+            - name: Prepare Android APK for GitHub release
               if: env.HAS_ANDROID_SIGNING == 'true'
               run: |
                   mkdir -p artifacts
-                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/ensu-${{ github.ref_name }}.apk
-                  if [ "${HAS_PLAYSTORE_SERVICE_ACCOUNT}" = "true" ]; then
-                      cp app-ui/build/outputs/bundle/release/app-ui-release.aab artifacts/ensu-${{ github.ref_name }}.aab
-                  fi
+                  cp app-ui/build/outputs/apk/release/app-ui-release.apk artifacts/${{ env.RELEASE_TAG }}.apk
 
-            - name: Attach Android artifacts to draft GitHub release
-              if: startsWith(github.ref, 'refs/tags/ensu-v') && env.HAS_ANDROID_SIGNING == 'true'
+            - name: Upload Android APK to draft GitHub release
+              if: env.HAS_ANDROID_SIGNING == 'true'
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "mobile/native/android/apps/ensu/artifacts/*"
-                  draft: true
+                  tag: ${{ env.RELEASE_TAG }}
+                  artifacts: mobile/native/android/apps/ensu/artifacts/${{ env.RELEASE_TAG }}.apk
                   allowUpdates: true
+                  draft: true
                   updateOnlyUnreleased: true
 
-            - name: Upload Android artifacts
-              if: env.HAS_ANDROID_SIGNING == 'true'
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ensu-android-artifacts
-                  path: mobile/native/android/apps/ensu/artifacts/*
-
             - name: Upload AAB to PlayStore
-              if: env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true'
+              if: env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true'
               uses: r0adkll/upload-google-play@v1
               with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_ENSU }}
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.ensu
                   releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
                   track: internal
 
             - name: Notify Discord
-              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.HAS_PLAYSTORE_SERVICE_ACCOUNT == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
+              if: success() && env.HAS_ANDROID_SIGNING == 'true' && env.SHOULD_UPLOAD_PLAYSTORE == 'true' && env.HAS_DISCORD_WEBHOOK == 'true'
               uses: sarisia/actions-status-discord@v1
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🤖 Internal draft release available for Ensu"
-                  description: "Draft release uploaded to Play Store internal track"
-                  color: 0x4CAF50
+                  title: "🤖 Internal release available for Ensu"
+                  description: |
+                      ${{ env.RELEASE_TAG }} ([${{ env.SHORT_SHA }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})) · [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }})
+                  color: 0xFDCE13

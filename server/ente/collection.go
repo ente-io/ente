@@ -23,6 +23,7 @@ type Collection struct {
 	Sharees             []CollectionUser     `json:"sharees"`
 	PublicURLs          []PublicURL          `json:"publicURLs"`
 	UpdationTime        int64                `json:"updationTime"`
+	SharedAt            *int64               `json:"sharedAt,omitempty"`
 	IsDeleted           bool                 `json:"isDeleted,omitempty"`
 	MagicMetadata       *MagicMetadata       `json:"magicMetadata,omitempty"`
 	App                 string               `json:"app"`

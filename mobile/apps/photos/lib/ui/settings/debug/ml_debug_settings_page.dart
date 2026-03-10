@@ -181,6 +181,17 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             onChanged: _onAutoIndexingChanged,
           ),
         ),
+        MenuItemWidgetNew(
+          title: "Run ML on interactions",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedPlay,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.runMLDuringInteractionOverride,
+            onChanged: _onRunMLDuringInteractionChanged,
+          ),
+        ),
       ],
     );
   }
@@ -679,6 +690,24 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       }
     } catch (e, s) {
       logger.warning('debugIndexingDisabled toggle failed ', e, s);
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
+  }
+
+  Future<void> _onRunMLDuringInteractionChanged() async {
+    try {
+      final enabled = !localSettings.runMLDuringInteractionOverride;
+      await computeController.setMLDebugInteractionOverride(turnOn: enabled);
+      logger.info(
+        'run ML during interaction is turned ${enabled ? 'on' : 'off'}',
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e, s) {
+      logger.warning('run ML during interaction toggle failed ', e, s);
       if (mounted) {
         await showGenericErrorDialog(context: context, error: e);
       }

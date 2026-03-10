@@ -608,6 +608,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             <DownloadStatusNotifications
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
+                fullWidthOnMobile
             />
 
             {/* Public feed sidebar */}

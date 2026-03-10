@@ -9,7 +9,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { open as openFileDialog, save } from "@tauri-apps/api/dialog";
+import { open as openFileDialog, save } from "@tauri-apps/plugin-dialog";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -600,7 +600,6 @@ const Page: React.FC = () => {
     const isSmall = useMediaQuery(theme.breakpoints.down("md"));
     const assetBasePath = router.basePath ?? "";
     const logoSrc = `${assetBasePath}/images/ensu-logo.svg`;
-    const appIconSrc = `${assetBasePath}/images/ensu-app-icon-foreground.png`;
     const comingSoonDuckySrc = `${assetBasePath}/images/ensu-ducky.png`;
     const [isDarkMode, setIsDarkMode] = useState(theme.palette.mode === "dark");
 
@@ -1984,8 +1983,8 @@ const Page: React.FC = () => {
         async (images: ImageAttachment[]) => {
             if (!isTauriRuntime || images.length === 0) return [] as string[];
             const { appDataDir, join } = await import("@tauri-apps/api/path");
-            const { createDir, writeBinaryFile } = await import(
-                "@tauri-apps/api/fs"
+            const { mkdir: createDir, writeFile } = await import(
+                "@tauri-apps/plugin-fs"
             );
             const root = await appDataDir();
             const dir = await join(root, "ensu_llmchat_inference_images");
@@ -2000,7 +1999,7 @@ const Page: React.FC = () => {
                         );
                     const suffix = extension ? `.${extension}` : ".jpg";
                     const path = await join(dir, `${image.id}${suffix}`);
-                    await writeBinaryFile({ path, contents: bytes });
+                    await writeFile(path, bytes);
                     return path;
                 }),
             );
@@ -2013,11 +2012,11 @@ const Page: React.FC = () => {
     const cleanupInferenceImages = useCallback(
         async (paths: string[]) => {
             if (!isTauriRuntime || paths.length === 0) return;
-            const { removeFile } = await import("@tauri-apps/api/fs");
+            const { remove } = await import("@tauri-apps/plugin-fs");
             await Promise.all(
                 paths.map(async (path) => {
                     try {
-                        await removeFile(path);
+                        await remove(path);
                     } catch {
                         // ignore cleanup failures
                     }
@@ -2638,19 +2637,19 @@ const Page: React.FC = () => {
                 if (isTauriRuntime) {
                     const [
                         { appDataDir, join },
-                        { createDir, writeBinaryFile },
+                        { mkdir: createDir, writeFile },
                         { open },
                     ] = await Promise.all([
                         import("@tauri-apps/api/path"),
-                        import("@tauri-apps/api/fs"),
-                        import("@tauri-apps/api/shell"),
+                        import("@tauri-apps/plugin-fs"),
+                        import("@tauri-apps/plugin-shell"),
                     ]);
                     const root = await appDataDir();
                     const dir = await join(root, "ensu_llmchat_attachments");
                     await createDir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
-                    await writeBinaryFile({ path: filePath, contents: bytes });
+                    await writeFile(filePath, bytes);
 
                     const fileUrl = encodeURI(`file://${filePath}`);
                     await open(fileUrl);
@@ -3199,7 +3198,10 @@ const Page: React.FC = () => {
 
     const handleLogoClick = useCallback(() => {
         if (typeof window === "undefined") return;
-        if (!DEVELOPER_SETTINGS_ENABLED) return;
+        if (!DEVELOPER_SETTINGS_ENABLED) {
+            window.location.reload();
+            return;
+        }
         if (logoClickTimeoutRef.current) {
             window.clearTimeout(logoClickTimeoutRef.current);
         }
@@ -3258,6 +3260,21 @@ const Page: React.FC = () => {
         [setStickToBottom],
     );
 
+    useEffect(() => {
+        if (!isGenerating || !stickToBottom) return;
+
+        const frame = window.requestAnimationFrame(() => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+            container.scrollTop = container.scrollHeight;
+            lastScrollTopRef.current = container.scrollTop;
+        });
+
+        return () => {
+            window.cancelAnimationFrame(frame);
+        };
+    }, [displayMessages, isGenerating, loadingDots, stickToBottom]);
+
     const handleOpenSessionSearch = useCallback(() => {
         setShowSessionSearch(true);
     }, []);
@@ -3285,9 +3302,9 @@ const Page: React.FC = () => {
                     filters: [{ name: "Logs", extensions: ["txt"] }],
                 });
                 if (!path) return;
-                const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+                const { writeFile } = await import("@tauri-apps/plugin-fs");
                 const encoded = new TextEncoder().encode(savedLogs());
-                await writeBinaryFile({ path, contents: encoded });
+                await writeFile(path, encoded);
                 return;
             } catch (error) {
                 log.error("Failed to export logs", error);
@@ -3554,14 +3571,14 @@ const Page: React.FC = () => {
                 return;
             }
 
-            const { readBinaryFile } = await import("@tauri-apps/api/fs");
+            const { readFile } = await import("@tauri-apps/plugin-fs");
             const files = await Promise.all(
                 selectedPaths.map(async (selectedPath) => {
                     const normalized = selectedPath.replace(/\\/g, "/");
                     const name =
                         normalized.split("/").pop()?.replace(/\0/g, "") ||
                         "image";
-                    const bytes = await readBinaryFile(selectedPath);
+                    const bytes = await readFile(selectedPath);
                     return new File([toSafeBlobPart(bytes)], name, {
                         type: inferImageMime(name),
                     });
@@ -3955,9 +3972,7 @@ const Page: React.FC = () => {
             handleSelectSession={handleSelectSession}
             requestDeleteSession={requestDeleteSession}
             isLoggedIn={isLoggedIn}
-            syncNow={syncNow}
             openSettingsModal={openSettingsModal}
-            appIconSrc={appIconSrc}
         />
     );
 

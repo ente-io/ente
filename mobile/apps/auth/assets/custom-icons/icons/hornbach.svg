@@ -1,0 +1,30 @@
+<svg version="1.2" baseProfile="tiny-ps" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1535 1533" width="1535" height="1533">
+	<title>Hornbach_Logo_black-svg</title>
+	<defs>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp1">
+			<path d="M0.33 0.46L1534.4 0.46L1534.4 1532.9L0.33 1532.9L0.33 0.46Z" />
+		</clipPath>
+	</defs>
+	<style>
+		tspan { white-space:pre }
+		.shp0 { fill: #c40070 } 
+		.shp1 { fill: #f7911a } 
+	</style>
+	<g id="g2">
+		<path id="path60" class="shp0" d="M0.33 1532.9L1534.41 1532.9L1534.41 0.46L0.33 0.46L0.33 1532.9L0.33 1532.9Z" />
+		<g id="Clip-Path: g6" clip-path="url(#cp1)">
+			<g id="g6">
+				<path id="path70" class="shp1" d="M-242.74 1669.34L1643.27 -213.77L1748.47 -108.82L-137.54 1774.29L-242.74 1669.34Z" />
+				<path id="path72" class="shp1" d="M-400.43 1512.06L1485.59 -371.06L1590.81 -266.1L-295.2 1617.02L-400.43 1512.06" />
+				<path id="path74" class="shp1" d="M-558.07 1354.79L1327.92 -528.34L1433.12 -423.37L-452.87 1459.74L-558.07 1354.79Z" />
+				<path id="path76" class="shp1" d="M-715.76 1197.51L1170.25 -685.61L1275.46 -580.66L-610.53 1302.46L-715.76 1197.51" />
+				<path id="path78" class="shp1" d="M2929.16 2587.02L1041.35 703.9L1146.57 598.82L3034.37 2481.95L2929.16 2587.02Z" />
+				<path id="path80" class="shp1" d="M2771.5 2744.46L883.68 861.34L988.9 756.28L2876.7 2639.4L2771.5 2744.46Z" />
+				<path id="path82" class="shp1" d="M2613.81 2901.91L726.02 1018.78L831.22 913.72L2719.03 2796.85L2613.81 2901.91Z" />
+				<path id="path84" class="shp1" d="M2456.15 3059.36L568.33 1176.23L673.55 1071.16L2561.35 2954.29L2456.15 3059.36Z" />
+			</g>
+		</g>
+		<g id="g8">
+		</g>
+	</g>
+</svg>

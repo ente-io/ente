@@ -31,6 +31,7 @@ import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
 import 'package:locker/services/trash/trash_service.dart';
+import "package:locker/services/update_service.dart";
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -186,6 +187,7 @@ Future<void> _init(bool bool, {String? via}) async {
       Network.instance.getDio(),
       packageInfo,
     );
+    await UpdateService.instance.init(preferences, packageInfo);
     await TrashService.instance.init(preferences);
     await EmergencyContactService.instance.init(
       UserService.instance,

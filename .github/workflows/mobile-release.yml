@@ -10,6 +10,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.90.0"
 
 permissions:
     contents: write
@@ -71,6 +72,11 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen

@@ -360,6 +360,18 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     publicAlbumsCredentials?: PublicAlbumsCredentials;
     /**
+     * If set, overrides whether browser back should be consumed to close the
+     * viewer.
+     *
+     * By default this is enabled in public album context, and disabled
+     * otherwise.
+     */
+    shouldCloseOnBrowserBack?: boolean;
+    /**
+     * If `true`, disables closing the viewer with the Escape key.
+     */
+    disableEscapeClose?: boolean;
+    /**
      * The decrypted collection key (base64 encoded) for encrypting reactions.
      * Required when viewing a public album (no logged in user).
      */
@@ -432,6 +444,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onAddFileToCollection,
     activeCollectionID,
     publicAlbumsCredentials,
+    shouldCloseOnBrowserBack: shouldCloseOnBrowserBackOverride,
+    disableEscapeClose = false,
     collectionKey,
     onJoinAlbum,
     enableComment = true,
@@ -439,7 +453,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
-    const shouldCloseOnBrowserBack = !!publicAlbumsCredentials;
+    const shouldCloseOnBrowserBack =
+        shouldCloseOnBrowserBackOverride ?? !!publicAlbumsCredentials;
 
     // There are 3 things involved in this dance:
     //
@@ -777,15 +792,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
+    const isPublicAlbum = shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
+
     // Called when the like button (heart) is clicked.
     // - If public album: toggle like (unlike if already liked, else show modal)
     // - If gallery view: show album selector (like) OR unlike selector/direct delete
     // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
-        // Detect public album: albums-only build OR we have public album credentials
-        const isPublicAlbum =
-            shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
-
         if (isPublicAlbum) {
             const file = activeAnnotatedFileRef.current?.file;
             if (!file || !publicAlbumsCredentials) {
@@ -1074,6 +1087,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         activeCollectionID,
         getUserFileReactions,
         user?.id,
+        isPublicAlbum,
         publicAlbumsCredentials,
         collectionKey,
     ]);
@@ -2484,9 +2498,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                isPublicAlbum,
                 showSocialButtons,
                 enableComment,
                 showFullscreenButton,
+                disableEscapeClose,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -2528,7 +2544,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         initialIndex,
         disableDownload,
         showFullscreenButton,
+        disableEscapeClose,
         haveUser,
+        isPublicAlbum,
         handleClose,
         handleAnnotate,
         handleViewInfo,

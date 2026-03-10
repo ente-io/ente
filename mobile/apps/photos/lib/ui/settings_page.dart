@@ -12,6 +12,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/account/login_page.dart";
 import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
@@ -19,7 +20,6 @@ import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/about/about_us_page.dart";
 import "package:photos/ui/settings/account/account_settings_page.dart";
@@ -87,13 +87,19 @@ class _SettingsBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleBar(context, colorScheme),
-                _buildEmailHeaderSection(context, colorScheme, textTheme),
+                if (hasLoggedIn)
+                  _buildEmailHeaderSection(context, colorScheme, textTheme)
+                else
+                  const SizedBox(height: 8),
                 if (showLoginEntry) ...[
                   OfflineSettingsBanner(
                     onGetStarted: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const LandingPageWidget(),
+                          builder: (_) => const EmailEntryPage(
+                            showReferralSourceField: false,
+                            referralSource: "Offline",
+                          ),
                         ),
                       );
                     },
@@ -660,7 +666,7 @@ class _SettingsBody extends StatelessWidget {
     EnteColorScheme colorScheme,
   ) {
     return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).support,
+      title: AppLocalizations.of(context).helpAndSupport,
       leadingIconWidget: _buildIconWidget(
         HugeIcons.strokeRoundedHelpCircle,
         colorScheme,

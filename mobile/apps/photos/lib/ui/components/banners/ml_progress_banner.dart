@@ -10,6 +10,7 @@ import "package:photos/events/notification_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/utils/ml_util.dart";
@@ -135,6 +136,16 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     final l10n = AppLocalizations.of(context);
     final format = NumberFormat();
     final progress = total > 0 ? status.indexedItems.toDouble() / total : 0.0;
+    final showModelDownloadPhase = _shouldShowModelDownloadPhase(status);
+
+    final titleStyle = textTheme.largeBold.copyWith(
+      fontFamily: "Nunito",
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+      height: 24 / 18,
+      letterSpacing: -1,
+      color: colorScheme.greenBase,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -157,25 +168,23 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
                 children: [
                   Text(
                     l10n.mlProgressBannerTitle,
-                    style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: colorScheme.greenBase,
-                    ),
+                    style: titleStyle,
                   ),
                   GestureDetector(
                     onTap: _onDismiss,
                     behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.fillDark,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedCancel01,
-                          color: colorScheme.textFaint,
-                          size: 20,
-                          strokeWidth: 2,
+                          color: colorScheme.contentDark,
+                          size: 18,
+                          strokeWidth: 2.5,
                         ),
                       ),
                     ),
@@ -185,16 +194,13 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
               const SizedBox(height: 8),
               Text(
                 l10n.mlProgressBannerDescription,
-                style: textTheme.miniMuted.copyWith(
-                  fontFamily: "Montserrat",
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textTheme.smallMuted,
               ),
               const SizedBox(height: 24),
               ClipRRect(
                 borderRadius: BorderRadius.circular(2.5),
                 child: LinearProgressIndicator(
-                  value: progress,
+                  value: showModelDownloadPhase ? 0.0 : progress,
                   minHeight: 5,
                   backgroundColor: colorScheme.fillFaint,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -206,11 +212,13 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  l10n.mlProgressBannerStatus(
-                    indexed: format.format(status.indexedItems),
-                    total: format.format(total),
-                  ),
-                  style: textTheme.tinyMuted,
+                  showModelDownloadPhase
+                      ? l10n.loadingModel
+                      : l10n.mlProgressBannerStatus(
+                          indexed: format.format(status.indexedItems),
+                          total: format.format(total),
+                        ),
+                  style: textTheme.miniMuted,
                 ),
               ),
             ],
@@ -218,6 +226,13 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
         ),
       ),
     );
+  }
+
+  bool _shouldShowModelDownloadPhase(IndexStatus status) {
+    if (!localSettings.isMLLocalIndexingEnabled) return false;
+    if (status.indexedItems > 0) return false;
+    if (status.pendingItems <= 0) return false;
+    return !MLIndexingIsolate.instance.areModelsDownloaded;
   }
 
   void _onDismiss() {

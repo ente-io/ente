@@ -180,6 +180,13 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
   }
 
   Future<void> _showUploadFailureError(Object error) async {
+    if (error is NoActiveSubscriptionError) {
+      await _showUploadErrorSheet(
+        context.l10n.uploadSubscriptionExpiredErrorTitle,
+        context.l10n.uploadSubscriptionExpiredErrorBody,
+      );
+      return;
+    }
     if (error is StorageLimitExceededError) {
       await _showUploadErrorSheet(
         context.l10n.uploadStorageLimitErrorTitle,
@@ -218,7 +225,11 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         GradientButton(
           text: context.l10n.contactSupport,
           onTap: () async {
-            await openSupportPage(message, null);
+            await sendEmail(
+              context,
+              to: "support@ente.io",
+              body: message,
+            );
           },
         ),
       ],

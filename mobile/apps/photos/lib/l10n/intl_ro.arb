@@ -1438,7 +1438,6 @@
   "legacyPageDesc2": "Persoanele de contact de încredere pot iniția recuperarea contului și, dacă nu este blocată în termen de 30 de zile, vă pot reseta parola și accesa contul.",
   "legacyAccounts": "Conturi de moștenire",
   "trustedContacts": "Contacte de încredere",
-  "addTrustedContact": "Adăugare contact de încredere",
   "removeInvite": "Eliminare invitație",
   "recoveryWarning": "Un contact de încredere încearcă să vă acceseze contul",
   "rejectRecovery": "Respingeți recuperarea",

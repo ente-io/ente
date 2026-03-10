@@ -1041,7 +1041,6 @@
   "didYouKnow": "Ar žinojote?",
   "loadingMessage": "Įkeliamos jūsų nuotraukos...",
   "loadMessage1": "Galite bendrinti savo prenumeratą su šeima.",
-  "loadMessage2": "Iki šiol išsaugojome daugiau nei 200 milijonų prisiminimų.",
   "loadMessage3": "Laikome 3 jūsų duomenų kopijas, vieną iš jų – požeminėje priešgaisrinėje slėptuvėje.",
   "loadMessage4": "Visos mūsų programos yra atvirojo kodo.",
   "loadMessage5": "Mūsų šaltinio kodas ir kriptografija buvo išoriškai audituoti.",
@@ -1435,7 +1434,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1520,7 +1519,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, =0 {0 nuotraukų} one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1569,7 +1568,6 @@
   "legacyPageDesc2": "Patikimi kontaktai gali pradėti paskyros atkūrimą, o jei per 30 dienų paskyra neužblokuojama, iš naujo nustatyti slaptažodį ir pasiekti paskyrą.",
   "legacyAccounts": "Palikimo paskyros",
   "trustedContacts": "Patikimi kontaktai",
-  "addTrustedContact": "Pridėti patikimą kontaktą",
   "removeInvite": "Šalinti kvietimą",
   "recoveryWarning": "Patikimas kontaktas bando pasiekti jūsų paskyrą.",
   "rejectRecovery": "Atmesti atkūrimą",

@@ -53,17 +53,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               onTap: () async {
                 final url = _urlController.text.trim();
                 _logger.info("Entered endpoint: $url");
-                if (url == "offline") {
-                  await localSettings.setShowOfflineModeOption(true);
+                final modeToggleMessage =
+                    await _maybeToggleOfflineModeOption(url);
+                if (modeToggleMessage != null) {
                   Bus.instance.fire(AppModeChangedEvent());
-                  showToast(context, "App mode set to offline");
-                  Navigator.of(context).pop();
-                  return;
-                }
-                if (url == "online") {
-                  await localSettings.setShowOfflineModeOption(false);
-                  Bus.instance.fire(AppModeChangedEvent());
-                  showToast(context, "App mode set to online");
+                  showToast(context, modeToggleMessage);
                   Navigator.of(context).pop();
                   return;
                 }
@@ -108,6 +102,19 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       }
     } catch (e) {
       throw Exception('Error occurred: $e');
+    }
+  }
+
+  Future<String?> _maybeToggleOfflineModeOption(String input) async {
+    switch (input) {
+      case "offline":
+        await localSettings.setShowOfflineModeOption(true);
+        return "Offline mode option enabled";
+      case "online":
+        await localSettings.setShowOfflineModeOption(false);
+        return "Offline mode option disabled";
+      default:
+        return null;
     }
   }
 }

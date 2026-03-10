@@ -134,6 +134,8 @@
   "changeEmail": "E-poçtu dəyişdir",
   "enterYourPassword": "Şifrənizi daxil edin",
   "welcomeBack": "Yenidən xoş gəldiniz!",
+  "readyToBackupTitle": "Yedəkləməyə hazırdır",
+  "readyToBackupSubtitle": "Şəkilləriniz arxa planda sinxronizasiya olunacaq. İlk yedəkləmə bir qədər vaxt ala bilər.",
   "contactSupport": "Dəstək ilə əlaqə",
   "locationPickerTip": "Siz həmçinin fotoşəkilin məlumat ekranından istifadə edərək həmin fotonun mərkəzində olduğu bir məkan əlavə edə bilərsiniz",
   "@locationPickerTip": {
@@ -527,6 +529,8 @@
   "clearIndexes": "İndeksləri təmizlə",
   "selectFoldersForBackup": "Yedəkləmə üçün qovluqları seçin",
   "selectFolders": "Qovluqları seçin",
+  "backupToEnte": "Ente yedəklə",
+  "selectAlbumsToBackUpToEnte": "Ente yedəkləmək üçün albomları seçin",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Seçilmiş qovluqlar şifrələnəcək və yedəklənəcək",
   "unselectAll": "Hamısını ləğv et",
   "selectAll": "Hamısını seç",
@@ -791,6 +795,26 @@
   "youAreOnAFamilyPlan": "Siz ailə planındasınız!",
   "contactFamilyAdmin": "Abunəliyinizi idarə etmək üçün lütfən <green>{familyAdminEmail}</green> ilə əlaqə saxlayın",
   "leaveFamily": "Ailədən ayrıl",
+  "youAreOnAFamilyPlanSubtitle": "Siz ailə planındasınız.",
+  "@youAreOnAFamilyPlanSubtitle": {
+    "description": "Subtitle shown on family member subscription screen",
+    "type": "text"
+  },
+  "familyAdminManagesPlanSuffix": " bu planı idarə edir.\nHər hansı dəyişiklik üçün onlarla əlaqə saxlayın.",
+  "@familyAdminManagesPlanSuffix": {
+    "description": "Text shown after family admin email on family member subscription screen",
+    "type": "text"
+  },
+  "leaveFamilyPlan": "Ailə planından çıxın",
+  "@leaveFamilyPlan": {
+    "description": "Button label for leaving family plan",
+    "type": "text"
+  },
+  "needHelpContact": "Kömək lazımdır? Əlaqə saxlayın ",
+  "@needHelpContact": {
+    "description": "Prefix text before support email on family member subscription screen",
+    "type": "text"
+  },
   "areYouSureThatYouWantToLeaveTheFamily": "Ailə planından ayrılmaq istədiyinizə əminsiniz?",
   "leave": "Ayrıl",
   "rateTheApp": "Tətbiqi qiymətləndirin",
@@ -1165,7 +1189,6 @@
   "didYouKnow": "Bilirdinizmi?",
   "loadingMessage": "",
   "loadMessage1": "Abunəliyinizi ailənizlə bölüşə bilərsiniz",
-  "loadMessage2": "İndiyə qədər 200 milyondan çox xatirəni qorumuşuq",
   "loadMessage3": "Məlumatlarınızın 3 nüsxəsini saxlayırıq, onlardan biri yeraltı sığınacaqdadır",
   "loadMessage4": "Bütün tətbiqlərimiz açıq mənbəlidir",
   "loadMessage5": "Mənbə kodumuz və kriptoqrafiyamız kənar auditdən keçib",
@@ -1816,10 +1839,94 @@
   "legacyPageDesc2": "Etibarlı əlaqələr hesabın bərpasını başlada bilər və əgər 30 gün ərzində bloklanmasa, şifrənizi sıfırlayıb hesabınıza daxil ola bilərlər.",
   "legacyAccounts": "Varislik hesabları",
   "trustedContacts": "Etibarlı əlaqələr",
-  "addTrustedContact": "Etibarlı əlaqə əlavə et",
+  "addTrustedContact": "Etibarlı kontakt əlavə edin",
+  "chooseFromAnExistingContact": "Mövcud kontaktlardan seçin",
+  "chooseARecoveryTime": "Bərpa vaxtı seçin",
+  "addContact": "Kontakt əlavə edin",
   "removeInvite": "Dəvəti sil",
   "recoveryWarning": "Etibarlı əlaqə hesabınıza daxil olmağa çalışır",
   "rejectRecovery": "Bərpanı rədd et",
+  "cannotUpdateRecoveryTime": "Bərpa vaxtını yeniləmək mümkün deyil",
+  "cannotUpdateRecoveryTimeMessage": "Aktiv bərpa sessiyası zamanı bərpa vaxtı dəyişdirilə bilməz. Zəhmət olmasa, imtina edin və ya bərpanın tamamlanmasını gözləyin.",
+  "updateTime": "Vaxtı yeniləyin",
+  "revokeInvite": "Dəvəti geri alın",
+  "trustedContactInvitePending": "Siz {email} ünvanını etibarlı kontakt olmaq üçün dəvət etmisiniz. Onlar hələ dəvətinizi qəbul etməyiblər.",
+  "@trustedContactInvitePending": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedContactAccepted": "Siz {email} ünvanını etibarlı kontakt olmaq üçün əlavə etmisiniz. Onlar dəvətinizi qəbul ediblər.",
+  "@trustedContactAccepted": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Dəvəti ləğv et",
+  "cancelInviteDesc": "Bu dəvəti silsəniz, fikrinizi dəyişdiyiniz təqdirdə yenisini göndərməli olacaqsınız.",
+  "removeContactDesc": "Bu kontaktı silsəniz, yeni dəvət göndərməli olacaqsınız və həmin şəxs dəvəti yenidən qəbul etməli olacaq.",
+  "removeContact": "Kontaktı silin",
+  "letsTryThatAgain": "Yenidən yoxlayaq",
+  "removeYourselfDesc": "Özünüzü etibarlı kontakt siyahısından silsəniz, qeyri-aktivlik müddəti bitdikdən sonra {email} hesabına giriş imkanınızı itirəcəksiniz.",
+  "@removeYourselfDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecovery": "Bərpanı ləğv et",
+  "cancelRecoveryDesc": "{email} hesabının bərpasını ləğv etmək istədiyinizə əminsiniz?",
+  "@cancelRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecovery": "Bərpanı başladın",
+  "startRecoveryDesc": "{email} hesabının bərpasını başlatmaq istədiyinizə əminsiniz?",
+  "@startRecoveryDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "Bərpa prosesini başlatdıqdan {days} gün sonra {email} hesabını bərpa edə bilərsiniz.",
+  "@recoverAccountDesc": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "{time} vaxtından sonra {email} hesabını bərpa edə bilərsiniz.",
+  "@recoverAccountAfter": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Və ya özünüzü {email} üçün etibarlı kontakt siyahısından çıxarın",
+  "@orRemoveYourself": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "recoveryInitiated": "Bərpa başladıldı",
   "recoveryInitiatedDesc": "Hesaba {days} gündən sonra daxil ola bilərsiniz. {email} ünvanına bildiriş göndəriləcək.",
   "@recoveryInitiatedDesc": {
@@ -1858,6 +1965,19 @@
       "email": {
         "type": "String",
         "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "confirmAddingTrustedContacts": "Siz {count} etibarlı kontakt əlavə etmək üzrəsiniz. {numOfDays} gün ərzində aktiv olmasanız, onlar hesabınızı bərpa edə biləcəklər.",
+  "@confirmAddingTrustedContacts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
       },
       "numOfDays": {
         "type": "int",

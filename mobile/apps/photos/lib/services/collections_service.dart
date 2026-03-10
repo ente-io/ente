@@ -23,6 +23,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/gateways/collections/collection_share_gateway.dart";
 import 'package:photos/gateways/collections/models/collection_file_item.dart';
 import 'package:photos/gateways/collections/models/create_request.dart';
 import "package:photos/gateways/collections/models/metadata.dart";
@@ -1491,7 +1492,7 @@ class CollectionsService {
     }
   }
 
-  Future<Collection> getCollectionFromPublicLink(
+  Future<Collection?> getCollectionFromPublicLink(
     BuildContext context,
     Uri uri,
   ) async {
@@ -1530,22 +1531,43 @@ class CollectionsService {
 
       collection.setName(_getDecryptedCollectionName(collection));
       return collection;
+    } on PublicCollectionInfoExpiredException catch (e, s) {
+      _logger.warning("Public collection link expired", e, s);
+      await showInfoDialog(
+        context,
+        title: AppLocalizations.of(context).linkExpired,
+        body:
+            AppLocalizations.of(context).theLinkYouAreTryingToAccessHasExpired,
+      );
+      return null;
+    } on PublicCollectionDeviceLimitExceededException catch (e, s) {
+      _logger.warning("Public collection link device limit reached", e, s);
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).canNotOpenTitle,
+        AppLocalizations.of(context).linkRequestLimitExceeded,
+      );
+      return null;
+    } on PublicCollectionRateLimitedException catch (e, s) {
+      _logger.warning("Public collection link request rate limited", e, s);
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).canNotOpenTitle,
+        AppLocalizations.of(context).linkRequestLimitExceeded,
+      );
+      return null;
+    } on PublicCollectionInfoUnauthorizedException catch (e, s) {
+      _logger.warning("Public collection link is unauthorized", e, s);
+      await showErrorDialog(
+        context,
+        AppLocalizations.of(context).canNotOpenTitle,
+        AppLocalizations.of(context).canNotOpenBody,
+      );
+      return null;
     } catch (e, s) {
       _logger.warning(e, s);
       _logger.severe("Failed to fetch public collection");
-      if (e is DioException && e.response?.statusCode == 410) {
-        await showInfoDialog(
-          context,
-          title: AppLocalizations.of(context).linkExpired,
-          body: AppLocalizations.of(context)
-              .theLinkYouAreTryingToAccessHasExpired,
-        );
-        throw UnauthorizedError();
-      }
       await showGenericErrorDialog(context: context, error: e);
-      if (e is DioException && e.response?.statusCode == 401) {
-        throw UnauthorizedError();
-      }
       rethrow;
     }
   }

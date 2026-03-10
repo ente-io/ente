@@ -1559,14 +1559,17 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
         setErrorMessage("");
         setPending(attributes ? "collect" : "link");
 
-        void createPublicURL(collection.id, attributes)
-            .then((publicURL) => {
+        void (async () => {
+            try {
+                const publicURL = await createPublicURL(
+                    collection.id,
+                    attributes,
+                );
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();
                 void onRemotePull({ silent: true });
-            })
-            .catch((e: unknown) => {
+            } catch (e: unknown) {
                 log.error("Could not create public link", e);
                 setErrorMessage(
                     isHTTPErrorWithStatus(e, 402)
@@ -1574,7 +1577,8 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                         : t("generic_error"),
                 );
                 setPending("");
-            });
+            }
+        })();
     };
 
     return (
@@ -2300,8 +2304,9 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 
     const options = useMemo(() => layoutOptions(), []);
 
-    const currentLayout =
-        collection.pubMagicMetadata?.data?.layout || "grouped";
+    const currentLayout = normalizedLayoutValue(
+        collection.pubMagicMetadata?.data?.layout,
+    );
 
     const changeLayoutValue = (value: string) => async () => {
         if (value === currentLayout) return;
@@ -2326,7 +2331,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
             <RowButtonGroup>
                 <RowButton
                     label={t("album_layout")}
-                    caption={t(currentLayout)}
+                    caption={layoutLabel(currentLayout)}
                     onClick={showLayoutOptions}
                     endIcon={<ChevronRightIcon />}
                 />
@@ -2387,7 +2392,22 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 };
 
 const layoutOptions = () => [
-    { label: t("grouped"), value: "grouped" },
-    { label: t("continuous"), value: "continuous" },
+    { label: layoutLabel("masonry"), value: "masonry" },
     { label: t("trip"), value: "trip" },
+    { label: t("grouped"), value: "grouped" },
 ];
+
+const normalizedLayoutValue = (layout: string | undefined) => {
+    if (layout === "continuous") {
+        return "masonry";
+    }
+    if (layout === "grouped" || layout === "trip" || layout === "masonry") {
+        return layout;
+    }
+    return "masonry";
+};
+
+const layoutLabel = (layout: string) =>
+    layout === "masonry"
+        ? t("masonry", { defaultValue: "Masonry" })
+        : t(layout);

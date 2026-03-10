@@ -7,6 +7,7 @@ import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
 
 class ClusterCentroidVectorDB {
   static final Logger _logger = Logger("ClusterCentroidVectorDB");
@@ -37,6 +38,7 @@ class ClusterCentroidVectorDB {
 
   Future<VectorDb>? _vectorDbFuture;
   Future<void>? _warmupFuture;
+  final Lock _writeLock = Lock();
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -124,13 +126,23 @@ class ClusterCentroidVectorDB {
     _migrationDone = false;
   }
 
+  Future<void> _runWriteOperation(
+    Future<void> Function(VectorDb db) operation,
+  ) async {
+    final db = await _vectorDB;
+    await _writeLock.synchronized(() async {
+      await operation(db);
+    });
+  }
+
   Future<void> insertCentroid({
     required int clusterVectorID,
     required List<double> centroid,
   }) async {
-    final db = await _vectorDB;
     try {
-      await db.addVector(key: BigInt.from(clusterVectorID), vector: centroid);
+      await _runWriteOperation((db) async {
+        await db.addVector(key: BigInt.from(clusterVectorID), vector: centroid);
+      });
     } catch (e, s) {
       _logger.severe("Error inserting cluster centroid", e, s);
       rethrow;
@@ -144,12 +156,13 @@ class ClusterCentroidVectorDB {
     if (clusterVectorIDs.isEmpty || centroids.isEmpty) {
       return;
     }
-    final db = await _vectorDB;
     try {
-      await db.bulkAddVectors(
-        keys: Uint64List.fromList(clusterVectorIDs),
-        vectors: centroids,
-      );
+      await _runWriteOperation((db) async {
+        await db.bulkAddVectors(
+          keys: Uint64List.fromList(clusterVectorIDs),
+          vectors: centroids,
+        );
+      });
     } catch (e, s) {
       _logger.severe("Error bulk inserting cluster centroids", e, s);
       rethrow;
@@ -160,11 +173,13 @@ class ClusterCentroidVectorDB {
     if (clusterVectorIDs.isEmpty) {
       return;
     }
-    final db = await _vectorDB;
     try {
-      final deletedCount = await db.bulkRemoveVectors(
-        keys: Uint64List.fromList(clusterVectorIDs),
-      );
+      BigInt deletedCount = BigInt.zero;
+      await _runWriteOperation((db) async {
+        deletedCount = await db.bulkRemoveVectors(
+          keys: Uint64List.fromList(clusterVectorIDs),
+        );
+      });
       _logger.info(
         "Deleted $deletedCount centroids from ${clusterVectorIDs.length} keys",
       );
@@ -176,9 +191,10 @@ class ClusterCentroidVectorDB {
 
   Future<void> deleteAllCentroids() async {
     await invalidateMigrationState();
-    final db = await _vectorDB;
     try {
-      await db.resetIndex();
+      await _runWriteOperation((db) async {
+        await db.resetIndex();
+      });
     } catch (e, s) {
       _logger.severe("Error deleting all cluster centroids", e, s);
       rethrow;
@@ -393,9 +409,11 @@ class ClusterCentroidVectorDB {
     await invalidateMigrationState();
     final db = await _vectorDB;
     try {
-      await db.deleteIndex();
-      _vectorDbFuture = null;
-      _warmupFuture = null;
+      await _writeLock.synchronized(() async {
+        await db.deleteIndex();
+        _vectorDbFuture = null;
+        _warmupFuture = null;
+      });
     } catch (e, s) {
       _logger.severe("Error deleting cluster centroid index", e, s);
       rethrow;
@@ -403,26 +421,28 @@ class ClusterCentroidVectorDB {
   }
 
   Future<void> deleteIndexFile() async {
-    try {
-      final documentsDirectory = await getApplicationDocumentsDirectory();
-      final String dbPath = join(documentsDirectory.path, _databaseName);
-      _logger.info("Delete cluster centroid index file: DB path $dbPath");
-      final file = File(dbPath);
-      if (await file.exists()) {
-        await file.delete();
+    await _writeLock.synchronized(() async {
+      try {
+        final documentsDirectory = await getApplicationDocumentsDirectory();
+        final String dbPath = join(documentsDirectory.path, _databaseName);
+        _logger.info("Delete cluster centroid index file: DB path $dbPath");
+        final file = File(dbPath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        _logger.info("Deleted cluster centroid index file on disk");
+        _vectorDbFuture = null;
+        _warmupFuture = null;
+        await invalidateMigrationState();
+      } catch (e, s) {
+        _logger.severe(
+          "Error deleting cluster centroid index file on disk",
+          e,
+          s,
+        );
+        rethrow;
       }
-      _logger.info("Deleted cluster centroid index file on disk");
-      _vectorDbFuture = null;
-      _warmupFuture = null;
-      await invalidateMigrationState();
-    } catch (e, s) {
-      _logger.severe(
-        "Error deleting cluster centroid index file on disk",
-        e,
-        s,
-      );
-      rethrow;
-    }
+    });
   }
 }
 

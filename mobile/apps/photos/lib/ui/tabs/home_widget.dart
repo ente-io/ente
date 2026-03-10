@@ -233,6 +233,13 @@ class _HomeWidgetState extends State<HomeWidget> {
             if (mounted) {
               setState(() {});
               syncWidget();
+              if (!NotificationService.instance.hasGrantedPermissions() &&
+                  isOfflineMode &&
+                  !Configuration.instance.hasConfiguredAccount()) {
+                Future.delayed(const Duration(seconds: 2), () {
+                  NotificationService.instance.requestPermissions().ignore();
+                });
+              }
             }
           },
         );
@@ -355,8 +362,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
 
-      final Collection collection = await CollectionsService.instance
+      final Collection? collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+      if (collection == null) {
+        return;
+      }
 
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
@@ -712,6 +722,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     bool isSettingsOpen = false;
     final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
+    final isOnOnlineGrantPermissionScreen =
+        Configuration.instance.hasConfiguredAccount() &&
+            !isOfflineMode &&
+            _shouldShowPermissionWidget();
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
@@ -810,41 +824,44 @@ class _HomeWidgetState extends State<HomeWidget> {
 
           ///To fix the status bar not adapting it's color when switching
           ///screens the have different appbar colours.
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(0),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: isOnSearchTabNotifier,
-              builder: (context, isOnSearchTab, _) {
-                return AnimatedBuilder(
-                  animation: IndexOfStackNotifier(),
-                  builder: (context, _) {
-                    final colorScheme = getEnteColorScheme(context);
-                    final resultsBackground = EnteTheme.isDark(context)
-                        ? const Color.fromRGBO(22, 22, 22, 1)
-                        : colorScheme.backgroundElevated2;
-                    final isSearchResults =
-                        isOnSearchTab && IndexOfStackNotifier().index == 1;
-                    final isOnLandingPage =
-                        !Configuration.instance.hasConfiguredAccount() &&
-                            !isOfflineMode;
-                    final isOnOnlineGrantPermissionScreen =
-                        Configuration.instance.hasConfiguredAccount() &&
-                            !isOfflineMode &&
-                            _shouldShowPermissionWidget();
-                    return AppBar(
-                      backgroundColor: isOnLandingPage
-                          ? colorScheme.greenBase
-                          : isSearchResults
-                              ? resultsBackground
-                              : isOnOnlineGrantPermissionScreen
-                                  ? colorScheme.backgroundColour
-                                  : colorScheme.backgroundBase,
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+          appBar: isOnOnlineGrantPermissionScreen
+              ? null
+              : PreferredSize(
+                  preferredSize: const Size.fromHeight(0),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isOnSearchTabNotifier,
+                    builder: (context, isOnSearchTab, _) {
+                      return AnimatedBuilder(
+                        animation: IndexOfStackNotifier(),
+                        builder: (context, _) {
+                          final colorScheme = getEnteColorScheme(context);
+                          final resultsBackground = EnteTheme.isDark(context)
+                              ? const Color.fromRGBO(22, 22, 22, 1)
+                              : colorScheme.backgroundElevated2;
+                          final isSearchResults = isOnSearchTab &&
+                              IndexOfStackNotifier().index == 1;
+                          final isOnLandingPage =
+                              !Configuration.instance.hasConfiguredAccount() &&
+                                  !isOfflineMode &&
+                                  !widget.startWithoutAccount;
+                          final isOnOnlineGrantPermissionScreen =
+                              Configuration.instance.hasConfiguredAccount() &&
+                                  !isOfflineMode &&
+                                  _shouldShowPermissionWidget();
+                          return AppBar(
+                            backgroundColor: isOnLandingPage
+                                ? colorScheme.greenBase
+                                : isSearchResults
+                                    ? resultsBackground
+                                    : isOnOnlineGrantPermissionScreen
+                                        ? colorScheme.backgroundColour
+                                        : colorScheme.backgroundBase,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -855,16 +872,21 @@ class _HomeWidgetState extends State<HomeWidget> {
     final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      final isOfflineEntryFlowEnabled =
-          widget.startWithoutAccount && offlineMode;
+      final shouldBootstrapOfflineEntryFlow =
+          widget.startWithoutAccount && !offlineMode;
       final hasPersistedOfflineMode = localSettings.isAppModeSet && offlineMode;
       final canResumePersistedOfflineMode =
           hasPersistedOfflineMode && permissionService.hasGrantedPermissions();
-      if (isOfflineEntryFlowEnabled || canResumePersistedOfflineMode) {
-        if (_shouldShowPermissionWidget()) {
-          return const GrantPermissionsWidget(startWithoutAccount: true);
-        }
-      } else {
+      final shouldUseOfflineEntryFlow =
+          widget.startWithoutAccount || canResumePersistedOfflineMode;
+
+      if (shouldBootstrapOfflineEntryFlow) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (shouldUseOfflineEntryFlow && _shouldShowPermissionWidget()) {
+        return const GrantPermissionsWidget(startWithoutAccount: true);
+      }
+      if (!shouldUseOfflineEntryFlow) {
         return const LandingPageWidget();
       }
     }

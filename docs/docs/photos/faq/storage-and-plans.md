@@ -74,6 +74,12 @@ Once files are permanently deleted (either manually or after 30 days), the stora
 
 Learn more in [Albums and Organization FAQ](/photos/faq/albums-and-organization#trash).
 
+### I deleted photos from Ente, but my storage didn’t decrease. Why?
+
+Deleted photos are moved to Trash first, and items in Trash still count toward your storage.
+
+To free up space immediately, empty Trash from the app. Trash will also be cleared automatically after 30 days.
+
 ### What happens if I exceed my storage limit? {#exceed-storage}
 
 Ente will stop backing up your files and you will receive an email alerting you of the same.

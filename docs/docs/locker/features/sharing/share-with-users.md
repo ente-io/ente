@@ -23,10 +23,7 @@ When you share a collection with another Ente user:
 2. Tap the share button
 3. Select **Share with Ente user**
 4. Enter the person's Ente email address
-5. Choose the permission level:
-   - **Viewer**: Can view only
-   - **Collaborator**: Can view and add items
-6. Tap **Share**
+5. Tap **Share**
 
 All items in the collection will be shared.
 
@@ -44,19 +41,11 @@ the collection. Alternatively, you can create a
 2. Tap the share button
 3. View the list of people with access
 
-### Changing permissions
-
-1. Open the shared collection
-2. Tap the share button
-3. Tap on the person's name
-4. Select new permissions
-5. Tap **Save**
-
 ### Removing access
 
 1. Open the shared collection
 2. Tap the share button
-3. Tap on the person's name
+3. Tap on the three dots next to the person's email ID
 4. Select **Remove access**
 5. Confirm removal
 
@@ -67,13 +56,6 @@ When someone shares a collection with you:
 1. You'll receive a notification
 2. The shared collection appears in your **Shared with me** section
 3. Tap to view the shared items
-
-## Permissions
-
-| Permission   | View | Add Items | Delete | Share |
-| ------------ | ---- | --------- | ------ | ----- |
-| Viewer       | Yes  | No        | No     | No    |
-| Collaborator | Yes  | Yes       | No     | No    |
 
 ## Related FAQs
 

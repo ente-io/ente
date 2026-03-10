@@ -187,7 +187,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             ? null
             : Text(
                 widget.isOnboarding
-                    ? AppLocalizations.of(context).selectYourPlan
+                    ? AppLocalizations.of(context).chooseYourPlan
                     : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
                 style: textTheme.largeBold,
               ),
@@ -339,7 +339,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
             child: MenuItemWidgetNew(
-              title: "Manage payment method",
+              title: AppLocalizations.of(context).managePaymentMethod,
               menuItemColor: colorScheme.fillFaint,
               pressedColor: colorScheme.fillFaintPressed,
               trailingWidget: Icon(

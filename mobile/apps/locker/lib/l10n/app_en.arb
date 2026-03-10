@@ -360,6 +360,14 @@
   "privacy": "Privacy",
   "terms": "Terms",
   "termsOfServicesTitle": "Terms",
+  "checkForUpdates": "Check for updates",
+  "checkingForUpdates": "Checking for updates...",
+  "unableToCheckForUpdatesRightNow": "Unable to check for updates right now",
+  "youAreOnTheLatestVersion": "You are on the latest version",
+  "aNewVersionOfEnteLockerIsAvailable": "A new version of Ente Locker is available.",
+  "criticalUpdateAvailable": "Critical update available",
+  "updateAvailable": "Update available",
+  "downloadUpdate": "Download update",
   "support": "Support",
   "helpAndSupport": "Help and Support",
   "contactSupport": "Contact support",
@@ -613,6 +621,14 @@
   "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
+  },
+  "uploadSubscriptionExpiredErrorTitle": "Subscription expired",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Your Ente Photos subscription has expired. Renew your subscription to continue uploading.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
   },
   "uploadFileCountLimitErrorTitle": "File limit reached",
   "@uploadFileCountLimitErrorTitle": {
