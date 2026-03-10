@@ -43,9 +43,7 @@ class ChangeLogEntryWidget extends StatelessWidget {
                 : colorScheme.textMuted,
           ),
         ),
-        const SizedBox(
-          height: 18,
-        ),
+        const SizedBox(height: 10),
         if (hasDescription)
           Padding(
             padding: EdgeInsets.only(bottom: hasItems ? 12 : 0),
@@ -81,9 +79,6 @@ class ChangeLogEntryWidget extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        const SizedBox(
-          height: 10,
         ),
       ],
     );

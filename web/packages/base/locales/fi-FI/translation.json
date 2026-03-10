@@ -401,6 +401,7 @@
     "failed_uploads_hint": "Kun lataus valmistuu, voit yrittää näitä uudelleen",
     "retry_failed_uploads": "Yritä uudelleen epäonnistuneita latauksia",
     "thumbnail_generation_failed": "Pienoiskuvan luonti epäonnistui",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",

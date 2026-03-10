@@ -233,6 +233,13 @@ class _HomeWidgetState extends State<HomeWidget> {
             if (mounted) {
               setState(() {});
               syncWidget();
+              if (!NotificationService.instance.hasGrantedPermissions() &&
+                  isOfflineMode &&
+                  !Configuration.instance.hasConfiguredAccount()) {
+                Future.delayed(const Duration(seconds: 2), () {
+                  NotificationService.instance.requestPermissions().ignore();
+                });
+              }
             }
           },
         );

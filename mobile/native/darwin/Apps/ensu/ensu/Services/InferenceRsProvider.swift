@@ -47,10 +47,16 @@ import CryptoKit
 import InferenceRS
 
 final class InferenceRsProvider {
+    private struct LoadedModelKey: Equatable {
+        let id: String
+        let requestedContextLength: Int?
+    }
+
     private let modelDir: URL
     private var modelHandle: ModelHandle?
     private var contextHandle: ContextHandle?
-    private var currentModelId: String?
+    private var currentModelKey: LoadedModelKey?
+    private var currentContextLength: Int?
     private var backendInitialized = false
     private var downloadCancelled = false
     private var currentDownloadTask: URLSessionTask?
@@ -73,7 +79,8 @@ final class InferenceRsProvider {
         onProgress: @escaping (InferenceDownloadProgress) -> Void,
         allowRecovery: Bool
     ) async throws {
-        if currentModelId == target.id, modelHandle != nil, contextHandle != nil {
+        let modelKey = LoadedModelKey(id: target.id, requestedContextLength: target.contextLength)
+        if currentModelKey == modelKey, modelHandle != nil, contextHandle != nil {
             return
         }
 
@@ -87,14 +94,14 @@ final class InferenceRsProvider {
         let modelPath = modelPathFor(target: target)
         let mmprojPath = mmprojPathFor(target: target)
 
-        var downloads: [DownloadTarget] = []
+        var expectedTargets: [DownloadTarget] = []
         let modelExistsAtStart = FileManager.default.fileExists(atPath: modelPath.path)
         if shouldRedownloadExistingFile(at: modelPath) || !modelExistsAtStart {
             if modelExistsAtStart {
                 try? FileManager.default.removeItem(at: modelPath)
             }
-            downloads.append(DownloadTarget(label: "Model", url: target.url, destination: modelPath))
         }
+        expectedTargets.append(DownloadTarget(label: "Model", url: target.url, destination: modelPath))
 
         if let mmprojUrl = target.mmprojUrl, let mmprojPath {
             let mmprojExistsAtStart = FileManager.default.fileExists(atPath: mmprojPath.path)
@@ -102,33 +109,58 @@ final class InferenceRsProvider {
                 if mmprojExistsAtStart {
                     try? FileManager.default.removeItem(at: mmprojPath)
                 }
-                downloads.append(DownloadTarget(label: "Mmproj", url: mmprojUrl, destination: mmprojPath))
             }
+            expectedTargets.append(DownloadTarget(label: "Mmproj", url: mmprojUrl, destination: mmprojPath))
         }
+
+        let downloads = expectedTargets.filter { !FileManager.default.fileExists(atPath: $0.destination.path) }
 
         if !downloads.isEmpty {
             downloadCancelled = false
-            onProgress(InferenceDownloadProgress(percent: 0, status: "Starting download..."))
             var lengths: [Int64?] = []
-            for download in downloads {
-                lengths.append(await fetchContentLength(for: download.url))
+            for download in expectedTargets {
+                if FileManager.default.fileExists(atPath: download.destination.path) {
+                    lengths.append(fileSize(download.destination))
+                } else {
+                    lengths.append(await fetchContentLength(for: download.url))
+                }
             }
 
             let totalBytes = lengths.compactMap { $0 }.reduce(0, +)
             let hasTotal = lengths.allSatisfy { $0 != nil } && totalBytes > 0
-            var downloadedSoFar: Int64 = 0
+            var downloadedSoFar: Int64 = zip(expectedTargets, lengths).reduce(0) { partial, pair in
+                let existing = existingDownloadBytes(at: pair.0.destination)
+                let capped = min(existing, pair.1 ?? existing)
+                return partial + capped
+            }
 
-            for (index, download) in downloads.enumerated() {
-                let fileTotal = lengths[index]
+            if hasTotal, downloadedSoFar > 0 {
+                let initialPercent = min(99, max(0, Int((Double(downloadedSoFar) / Double(totalBytes)) * 100.0)))
+                onProgress(
+                    InferenceDownloadProgress(
+                        percent: initialPercent,
+                        status: "Downloading... \(downloadedSoFar.formattedFileSize) / \(totalBytes.formattedFileSize)"
+                    )
+                )
+            } else {
+                onProgress(InferenceDownloadProgress(percent: 0, status: "Starting download..."))
+            }
+
+            for download in downloads {
+                let expectedIndex = expectedTargets.firstIndex(where: { $0.destination == download.destination }) ?? 0
+                let fileTotal = lengths[expectedIndex]
+                let existingBytesForFile = existingDownloadBytes(at: download.destination)
+                // downloadedSoFar already includes any resumed bytes for this file.
+                let bytesBeforeFile = downloadedSoFar - existingBytesForFile
                 try await downloadFile(from: download.url, to: download.destination) { [self] downloaded, total in
-                    let overallDownloaded = downloadedSoFar + downloaded
+                    let overallDownloaded = bytesBeforeFile + downloaded
                     let percent: Int
                     if hasTotal {
                         percent = Int((Double(overallDownloaded) / Double(totalBytes)) * 100.0)
                     } else {
-                        let step = 100.0 / Double(downloads.count)
+                        let step = 100.0 / Double(expectedTargets.count)
                         let filePercent = total.map { Double(downloaded) / Double($0) } ?? 0
-                        percent = Int((Double(index) * step) + (filePercent * step))
+                        percent = Int((Double(expectedIndex) * step) + (filePercent * step))
                     }
 
                     let status = if hasTotal {
@@ -139,8 +171,8 @@ final class InferenceRsProvider {
 
                     onProgress(InferenceDownloadProgress(percent: min(99, max(0, percent)), status: status))
                 }
-                let finishedBytes = fileTotal ?? fileSize(download.destination)
-                downloadedSoFar += finishedBytes
+                let finishedBytes = fileTotal ?? existingDownloadBytes(at: download.destination)
+                downloadedSoFar = bytesBeforeFile + finishedBytes
             }
         }
 
@@ -150,7 +182,7 @@ final class InferenceRsProvider {
         } catch {
             if allowRecovery, downloads.isEmpty,
                recoverFromCachedModelLoadFailure(modelPath: modelPath, mmprojPath: mmprojPath) {
-                onProgress(InferenceDownloadProgress(percent: 0, status: "Cached model looked invalid. Retrying download..."))
+                onProgress(InferenceDownloadProgress(percent: 0, status: "Starting download..."))
                 try await ensureModelReady(target: target, onProgress: onProgress, allowRecovery: false)
                 return
             }
@@ -164,7 +196,7 @@ final class InferenceRsProvider {
         messages: [InferenceMessage],
         imageFiles: [URL],
         temperature: Float,
-        maxTokens: Int,
+        maxTokens: Int?,
         onToken: @escaping (String) -> Void
     ) async throws -> InferenceGenerationSummary {
         guard let context = contextHandle else {
@@ -186,7 +218,7 @@ final class InferenceRsProvider {
             imagePaths: imageFiles.map { $0.path },
             mmprojPath: mmprojPath,
             mediaMarker: nil,
-            maxTokens: Int32(maxTokens),
+            maxTokens: maxTokens.map(Int32.init),
             temperature: clampedTemperature,
             topP: 0.9,
             topK: 50,
@@ -251,7 +283,7 @@ final class InferenceRsProvider {
 
     func resetContext() {
         guard let model = modelHandle else { return }
-        let contextParams = ContextParams(contextSize: nil, nThreads: nil, nBatch: nil)
+        let contextParams = ContextParams(contextSize: currentContextLength.map(Int32.init), nThreads: nil, nBatch: nil)
         contextHandle = nil
         contextHandle = try? createContext(model: model, params: contextParams)
     }
@@ -303,10 +335,19 @@ final class InferenceRsProvider {
         return sizes.reduce(0, +)
     }
 
+    func loadedContextLength(target: InferenceModelTarget) -> Int? {
+        let modelKey = LoadedModelKey(id: target.id, requestedContextLength: target.contextLength)
+        guard currentModelKey == modelKey, modelHandle != nil, contextHandle != nil else {
+            return nil
+        }
+        return currentContextLength
+    }
+
     private func unloadModel() {
         contextHandle = nil
         modelHandle = nil
-        currentModelId = nil
+        currentModelKey = nil
+        currentContextLength = nil
     }
 
     private func loadModelHandle(target: InferenceModelTarget, modelPath: URL) throws {
@@ -314,15 +355,16 @@ final class InferenceRsProvider {
         let model = try InferenceRS.loadModel(params: params)
         modelHandle = model
 
-        let desiredContext = target.contextLength ?? 4096
-        let candidates = Array(Set([desiredContext, 4096, 2048, 1024])).filter { $0 > 0 }
+        let desiredContext = target.contextLength ?? 12000
+        let candidates = Array(Set([desiredContext, 12000, 8192, 4096, 2048, 1024])).filter { $0 > 0 }
         let threadCount = max(1, ProcessInfo.processInfo.activeProcessorCount - 1)
 
         for contextSize in candidates {
             do {
                 let contextParams = ContextParams(contextSize: Int32(contextSize), nThreads: Int32(threadCount), nBatch: Int32(512))
                 contextHandle = try createContext(model: model, params: contextParams)
-                currentModelId = target.id
+                currentModelKey = LoadedModelKey(id: target.id, requestedContextLength: target.contextLength)
+                currentContextLength = contextSize
                 return
             } catch {
                 continue
@@ -470,6 +512,17 @@ final class InferenceRsProvider {
         return Int64(parts[1])
     }
 
+    private func existingDownloadBytes(at destination: URL) -> Int64 {
+        if FileManager.default.fileExists(atPath: destination.path) {
+            return fileSize(destination)
+        }
+        let tmp = destination.appendingPathExtension("tmp")
+        if FileManager.default.fileExists(atPath: tmp.path) {
+            return fileSize(tmp)
+        }
+        return 0
+    }
+
     private func fetchContentLength(for urlString: String) async -> Int64? {
         guard let url = URL(string: urlString) else { return nil }
         var request = URLRequest(url: url)
@@ -595,7 +648,7 @@ final class InferenceRsProvider {
         messages: [InferenceMessage],
         imageFiles: [URL],
         temperature: Float,
-        maxTokens: Int,
+        maxTokens: Int?,
         onToken: @escaping (String) -> Void
     ) async throws -> InferenceGenerationSummary {
         _ = target
@@ -619,6 +672,11 @@ final class InferenceRsProvider {
     }
 
     func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
+        _ = target
+        return nil
+    }
+
+    func loadedContextLength(target: InferenceModelTarget) -> Int? {
         _ = target
         return nil
     }

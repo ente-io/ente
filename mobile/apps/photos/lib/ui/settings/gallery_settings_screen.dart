@@ -106,7 +106,8 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                           });
                         },
                       ),
-                      if (!widget.fromGalleryLayoutSettingsCTA) ...[
+                      if (!widget.fromGalleryLayoutSettingsCTA &&
+                          !isOfflineMode) ...[
                         const SizedBox(height: 8),
                         MenuItemWidgetNew(
                           title: AppLocalizations.of(context)

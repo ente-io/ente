@@ -401,6 +401,7 @@
     "failed_uploads_hint": "アップロードが完了すると、これらを再試行するオプションがあります",
     "retry_failed_uploads": "失敗したアップロードを再試行する",
     "thumbnail_generation_failed": "サムネイルの生成に失敗しました",
+    "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "これらのファイルはアップロードされましたが、残念ながらサムネイルを生成できませんでした。",
     "unsupported_files": "サポートされないファイル",
     "unsupported_files_hint": "Enteはこれらのファイル形式をサポートしていません",

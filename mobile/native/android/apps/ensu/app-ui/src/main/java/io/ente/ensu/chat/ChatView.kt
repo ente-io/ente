@@ -233,6 +233,7 @@ fun ChatView(
             DownloadToastOverlay(
                 status = status ?: "",
                 percent = chatState.downloadPercent ?: 0,
+                totalBytes = chatState.modelDownloadSizeBytes,
                 isLoading = isLoading,
                 onCancel = onCancelDownload
             )

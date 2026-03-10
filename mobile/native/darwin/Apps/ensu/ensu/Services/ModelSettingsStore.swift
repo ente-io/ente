@@ -85,8 +85,8 @@ final class ModelSettingsStore: ObservableObject {
     }
 
     private enum Defaults {
-        static let modelName = "LFM 2.5 VL 1.6B (Q4_0)"
-        static let modelUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
-        static let mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+        static let modelName = "Qwen 3.5 2B (Q8_0)"
+        static let modelUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true"
+        static let mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
     }
 }

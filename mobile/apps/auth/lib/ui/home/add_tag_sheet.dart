@@ -4,6 +4,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
+import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -70,10 +71,16 @@ class _AddTagSheetState extends State<AddTagSheet> {
         code.copyWith(
           display: code.display.copyWith(tags: updatedTags.toList()),
         ),
+        shouldSync: false,
       );
     });
 
-    await Future.wait(updateFutures);
+    final updateResults = await Future.wait(updateFutures);
+    final hasChanges = updateResults.any((r) => r != AddResult.duplicate);
+    if (hasChanges &&
+        AuthenticatorService.instance.getAccountMode() == AccountMode.online) {
+      AuthenticatorService.instance.onlineSync().ignore();
+    }
     if (mounted) {
       Navigator.of(context).pop();
     }
