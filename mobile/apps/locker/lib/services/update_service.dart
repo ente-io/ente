@@ -14,7 +14,7 @@ class UpdateService {
   static const String kUpdateAvailableShownTimeKey =
       "update_available_shown_time_key";
   static const String kChangeLogShownVersionKey = "update_change_log_key";
-  static const int currentChangeLogVersion = 1;
+  static const int currentChangeLogVersion = 0;
   static const String _lockerIndependentPackageName =
       "io.ente.locker.independent";
   static const String _lockerIndependentPackagePrefix =
