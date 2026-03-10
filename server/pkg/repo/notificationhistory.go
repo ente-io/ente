@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 
@@ -26,8 +27,19 @@ func (repo *NotificationHistoryRepository) GetLastNotificationTime(userID int64,
 }
 
 func (repo *NotificationHistoryRepository) SetLastNotificationTimeToNow(userID int64, templateID string) error {
-	_, err := repo.DB.Exec(`INSERT INTO notification_history(user_id, template_id, sent_time) VALUES($1, $2, $3)`,
-		userID, templateID, time.Microseconds())
+	return repo.SetLastNotificationTimeToNowWithGroup(userID, templateID, "")
+}
+
+func (repo *NotificationHistoryRepository) SetLastNotificationTimeToNowWithGroup(userID int64, templateID string, notificationGroup string) error {
+	var groupValue sql.NullString
+	if notificationGroup != "" {
+		groupValue = sql.NullString{
+			String: notificationGroup,
+			Valid:  true,
+		}
+	}
+	_, err := repo.DB.Exec(`INSERT INTO notification_history(user_id, template_id, sent_time, notification_group) VALUES($1, $2, $3, $4)`,
+		userID, templateID, time.Microseconds(), groupValue)
 	return stacktrace.Propagate(err, "")
 }
 
@@ -62,4 +74,22 @@ func (repo *NotificationHistoryRepository) GetLastNotificationTimes(userID int64
 	}
 
 	return result, nil
+}
+
+func (repo *NotificationHistoryRepository) DeleteNotificationHistoryByGroupExcludingUsers(notificationGroup string, keepUserIDs []int64) error {
+	if notificationGroup == "" {
+		return nil
+	}
+
+	if len(keepUserIDs) == 0 {
+		_, err := repo.DB.Exec(`DELETE FROM notification_history WHERE notification_group = $1`, notificationGroup)
+		return stacktrace.Propagate(err, "failed to delete grouped notification history")
+	}
+
+	_, err := repo.DB.Exec(
+		`DELETE FROM notification_history
+		 WHERE notification_group = $1
+		   AND NOT (user_id = ANY($2))`,
+		notificationGroup, pq.Array(keepUserIDs))
+	return stacktrace.Propagate(err, "failed to delete grouped notification history")
 }
