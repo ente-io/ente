@@ -272,12 +272,11 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     // Fast path: check under read lock whether the current runtime can serve.
     {
         let guard = read_runtime();
-        if let Some(existing) = guard.as_ref() {
-            if existing.config.provider_policy == config.provider_policy
-                && existing.config.model_paths.can_serve(&config.model_paths)
-            {
-                return Ok(()); // existing runtime handles this request
-            }
+        if let Some(existing) = guard.as_ref()
+            && existing.config.provider_policy == config.provider_policy
+            && existing.config.model_paths.can_serve(&config.model_paths)
+        {
+            return Ok(()); // existing runtime handles this request
         }
     }
 
