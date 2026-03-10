@@ -63,6 +63,46 @@ pub struct ModelPaths {
     pub pet_body_embedding_cat: String,
 }
 
+impl ModelPaths {
+    /// Check whether the existing runtime can serve a request with `requested` paths.
+    /// An empty path in `requested` means "not needed" and is always compatible.
+    fn can_serve(&self, requested: &ModelPaths) -> bool {
+        fn ok(existing: &str, requested: &str) -> bool {
+            requested.is_empty() || existing == requested
+        }
+        ok(&self.face_detection, &requested.face_detection)
+            && ok(&self.face_embedding, &requested.face_embedding)
+            && ok(&self.clip_image, &requested.clip_image)
+            && ok(&self.clip_text, &requested.clip_text)
+            && ok(&self.pet_face_detection, &requested.pet_face_detection)
+            && ok(&self.pet_face_embedding_dog, &requested.pet_face_embedding_dog)
+            && ok(&self.pet_face_embedding_cat, &requested.pet_face_embedding_cat)
+            && ok(&self.pet_body_detection, &requested.pet_body_detection)
+            && ok(&self.pet_body_embedding_dog, &requested.pet_body_embedding_dog)
+            && ok(&self.pet_body_embedding_cat, &requested.pet_body_embedding_cat)
+    }
+
+    /// Merge two configs: keep existing non-empty paths, override with non-empty
+    /// paths from `other`.
+    fn merge(&self, other: &ModelPaths) -> ModelPaths {
+        fn pick(existing: &str, new: &str) -> String {
+            if new.is_empty() { existing.to_string() } else { new.to_string() }
+        }
+        ModelPaths {
+            face_detection: pick(&self.face_detection, &other.face_detection),
+            face_embedding: pick(&self.face_embedding, &other.face_embedding),
+            clip_image: pick(&self.clip_image, &other.clip_image),
+            clip_text: pick(&self.clip_text, &other.clip_text),
+            pet_face_detection: pick(&self.pet_face_detection, &other.pet_face_detection),
+            pet_face_embedding_dog: pick(&self.pet_face_embedding_dog, &other.pet_face_embedding_dog),
+            pet_face_embedding_cat: pick(&self.pet_face_embedding_cat, &other.pet_face_embedding_cat),
+            pet_body_detection: pick(&self.pet_body_detection, &other.pet_body_detection),
+            pet_body_embedding_dog: pick(&self.pet_body_embedding_dog, &other.pet_body_embedding_dog),
+            pet_body_embedding_cat: pick(&self.pet_body_embedding_cat, &other.pet_body_embedding_cat),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MlRuntimeConfig {
     pub model_paths: ModelPaths,
@@ -229,19 +269,31 @@ fn write_runtime() -> std::sync::RwLockWriteGuard<'static, Option<RuntimeState>>
 }
 
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
-    let should_rebuild = {
+    let rebuild_config = {
         let guard = read_runtime();
         match guard.as_ref() {
-            Some(existing) => existing.config != *config,
-            None => true,
+            Some(existing) => {
+                if existing.config.provider_policy == config.provider_policy
+                    && existing.config.model_paths.can_serve(&config.model_paths)
+                {
+                    None // existing runtime can handle this request
+                } else {
+                    // Merge: keep already-known paths, add/update from request
+                    Some(MlRuntimeConfig {
+                        model_paths: existing.config.model_paths.merge(&config.model_paths),
+                        provider_policy: config.provider_policy.clone(),
+                    })
+                }
+            }
+            None => Some(config.clone()),
         }
     };
 
-    if should_rebuild {
-        let runtime = create_runtime(config);
+    if let Some(merged) = rebuild_config {
+        let runtime = create_runtime(&merged);
         let mut guard = write_runtime();
         *guard = Some(RuntimeState {
-            config: config.clone(),
+            config: merged,
             runtime,
         });
     }
