@@ -152,6 +152,7 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
+      galleryType: galleryType,
       groupType: groupType,
       header: widget.c.collection.isJoinEnabled &&
               Configuration.instance.isLoggedIn()
