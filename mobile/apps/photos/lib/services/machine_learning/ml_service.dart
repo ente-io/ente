@@ -630,9 +630,11 @@ class MLService {
         }
       }
 
-      // Pet results locally
+      // Pet results locally — delete stale rows before writing so
+      // re-indexing with fewer detections doesn't leave old data behind.
       final rustPets = result.petFaces != null || result.petBodies != null;
       if (rustPets) {
+        await mlDataDB.deletePetDataForFiles([result.fileId]);
         if (result.petFaces != null && result.petFaces!.isNotEmpty) {
           final dbPetFaces = result.petFaces!.map((pf) {
             return DBPetFace(
@@ -719,6 +721,7 @@ class MLService {
           );
         }
         if (instruction.shouldRunPets) {
+          await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
           await mlDataDB.bulkInsertPetFaces(
             [DBPetFace.empty(instruction.fileKey, error: true)],
           );
