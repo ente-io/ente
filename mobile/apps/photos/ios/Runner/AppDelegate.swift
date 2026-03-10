@@ -10,6 +10,7 @@ import workmanager_apple
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    WorkmanagerDebug.setCurrent(InternalUserWorkmanagerDebugHandler())
 
     // Prevent interrupting background audio from other apps on launch
     do {
@@ -55,5 +56,39 @@ import workmanager_apple
 
   override func applicationWillEnterForeground(_ application: UIApplication) {
     signal(SIGPIPE, SIG_IGN)
+  }
+}
+
+private final class InternalUserWorkmanagerDebugHandler: WorkmanagerDebug {
+  private let delegate = NotificationDebugHandler()
+
+  override func onTaskStatusUpdate(taskInfo: TaskDebugInfo, status: TaskStatus, result: TaskResult?) {
+    guard shouldEnableWorkmanagerDebugNotifications() else { return }
+    delegate.onTaskStatusUpdate(taskInfo: taskInfo, status: status, result: result)
+  }
+
+  override func onExceptionEncountered(taskInfo: TaskDebugInfo?, exception: Error) {
+    guard shouldEnableWorkmanagerDebugNotifications() else { return }
+    delegate.onExceptionEncountered(taskInfo: taskInfo, exception: exception)
+  }
+
+  private func shouldEnableWorkmanagerDebugNotifications() -> Bool {
+    let defaults = UserDefaults.standard
+    if defaults.bool(forKey: "flutter.ls.internal_user_disabled") {
+      return false
+    }
+
+    #if DEBUG
+      return true
+    #else
+      guard let remoteFlags = defaults.string(forKey: "flutter.remote_flags"),
+            let data = remoteFlags.data(using: .utf8),
+            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+      else {
+        return false
+      }
+
+      return json["internalUser"] as? Bool ?? false
+    #endif
   }
 }
