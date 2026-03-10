@@ -165,39 +165,43 @@ pub fn run_pet_body_detection(
         let row = &output_data[start..(start + row_len)];
         let obj_conf = row[4];
 
-        // Check cat (class 15) and dog (class 16) scores
-        for &class_id in &[COCO_CAT, COCO_DOG] {
-            let class_score = row[5 + class_id as usize] * obj_conf;
-            if class_score < BODY_MIN_SCORE {
-                continue;
-            }
-
-            let x_min_abs = row[0] - row[2] / 2.0;
-            let y_min_abs = row[1] - row[3] / 2.0;
-            let x_max_abs = row[0] + row[2] / 2.0;
-            let y_max_abs = row[1] + row[3] / 2.0;
-
-            let mut box_xyxy = [
-                x_min_abs / INPUT_WIDTH,
-                y_min_abs / INPUT_HEIGHT,
-                x_max_abs / INPUT_WIDTH,
-                y_max_abs / INPUT_HEIGHT,
-            ];
-
-            correct_box_for_aspect_ratio(
-                &mut box_xyxy,
-                scaled_width,
-                scaled_height,
-                pad_left,
-                pad_top,
-            );
-
-            detections.push(PetBodyDetection {
-                score: class_score,
-                box_xyxy,
-                coco_class: class_id,
-            });
+        // Each anchor represents a single object — pick the best pet class.
+        let cat_score = row[5 + COCO_CAT as usize] * obj_conf;
+        let dog_score = row[5 + COCO_DOG as usize] * obj_conf;
+        let (class_score, class_id) = if dog_score >= cat_score {
+            (dog_score, COCO_DOG)
+        } else {
+            (cat_score, COCO_CAT)
+        };
+        if class_score < BODY_MIN_SCORE {
+            continue;
         }
+
+        let x_min_abs = row[0] - row[2] / 2.0;
+        let y_min_abs = row[1] - row[3] / 2.0;
+        let x_max_abs = row[0] + row[2] / 2.0;
+        let y_max_abs = row[1] + row[3] / 2.0;
+
+        let mut box_xyxy = [
+            x_min_abs / INPUT_WIDTH,
+            y_min_abs / INPUT_HEIGHT,
+            x_max_abs / INPUT_WIDTH,
+            y_max_abs / INPUT_HEIGHT,
+        ];
+
+        correct_box_for_aspect_ratio(
+            &mut box_xyxy,
+            scaled_width,
+            scaled_height,
+            pad_left,
+            pad_top,
+        );
+
+        detections.push(PetBodyDetection {
+            score: class_score,
+            box_xyxy,
+            coco_class: class_id,
+        });
     }
 
     Ok(naive_nms_pet_body(detections, BODY_IOU_THRESHOLD))

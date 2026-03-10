@@ -164,6 +164,12 @@ pub struct MlRuntime {
 struct RuntimeState {
     config: MlRuntimeConfig,
     runtime: MlRuntime,
+    /// Set after a hardware EP failure triggers a successful CPU-only fallback.
+    /// While true, `ensure_runtime` treats a CPU-only runtime as compatible
+    /// with requests that prefer hardware acceleration (when
+    /// `allow_cpu_fallback` is set), avoiding repeated rebuild/retry cycles
+    /// on devices where NNAPI/CoreML is broken.
+    fell_back_to_cpu: bool,
 }
 
 static GLOBAL_RUNTIME: Lazy<RwLock<Option<RuntimeState>>> = Lazy::new(|| RwLock::new(None));
@@ -268,12 +274,19 @@ fn write_runtime() -> std::sync::RwLockWriteGuard<'static, Option<RuntimeState>>
     }
 }
 
+/// A CPU-only runtime satisfies a hardware-preferring request when the
+/// runtime was installed via EP fallback and the caller allows CPU fallback.
+fn policy_compatible(existing: &RuntimeState, requested: &ExecutionProviderPolicy) -> bool {
+    existing.config.provider_policy == *requested
+        || (existing.fell_back_to_cpu && requested.allow_cpu_fallback)
+}
+
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     // Fast path: check under read lock whether the current runtime can serve.
     {
         let guard = read_runtime();
         if let Some(existing) = guard.as_ref()
-            && existing.config.provider_policy == config.provider_policy
+            && policy_compatible(existing, &config.provider_policy)
             && existing.config.model_paths.can_serve(&config.model_paths)
         {
             return Ok(()); // existing runtime handles this request
@@ -283,27 +296,39 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     // Slow path: acquire write lock, re-check (another thread may have
     // already merged), compute the merged config, build, and install.
     let mut guard = write_runtime();
-    let merged = match guard.as_ref() {
+    let (merged, preserve_fallback) = match guard.as_ref() {
         Some(existing) => {
             // Re-check: a concurrent caller may have updated since the
             // read-lock check above.
-            if existing.config.provider_policy == config.provider_policy
+            if policy_compatible(existing, &config.provider_policy)
                 && existing.config.model_paths.can_serve(&config.model_paths)
             {
                 return Ok(());
             }
-            MlRuntimeConfig {
-                model_paths: existing.config.model_paths.merge(&config.model_paths),
-                provider_policy: config.provider_policy.clone(),
-            }
+            // If we previously fell back to CPU, keep the CPU-only policy
+            // for the merged config instead of re-trying the broken EP.
+            let effective_policy =
+                if existing.fell_back_to_cpu && config.provider_policy.allow_cpu_fallback {
+                    existing.config.provider_policy.clone()
+                } else {
+                    config.provider_policy.clone()
+                };
+            (
+                MlRuntimeConfig {
+                    model_paths: existing.config.model_paths.merge(&config.model_paths),
+                    provider_policy: effective_policy,
+                },
+                existing.fell_back_to_cpu,
+            )
         }
-        None => config.clone(),
+        None => (config.clone(), false),
     };
 
     let runtime = create_runtime(&merged);
     *guard = Some(RuntimeState {
         config: merged,
         runtime,
+        fell_back_to_cpu: preserve_fallback,
     });
     Ok(())
 }
@@ -337,6 +362,16 @@ where
             let fallback_config = cpu_only_runtime_config(config);
             rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
             ensure_runtime(&fallback_config)?;
+
+            // Mark that the hardware EP failed so future ensure_runtime
+            // calls reuse the CPU-only runtime instead of rebuilding.
+            {
+                let mut guard = write_runtime();
+                if let Some(state) = guard.as_mut() {
+                    state.fell_back_to_cpu = true;
+                }
+            }
+
             {
                 let guard = read_runtime();
                 let state = guard
