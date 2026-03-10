@@ -98,6 +98,8 @@ import workmanager_apple
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
     let content = notification.request.content
+    // iOS suppresses foreground notification presentation unless the delegate
+    // opts in, so explicitly allow only our internal Workmanager debug thread.
     if content.threadIdentifier == Self.workmanagerDebugThreadIdentifier {
       if #available(iOS 14.0, *) {
         completionHandler([.list, .banner])

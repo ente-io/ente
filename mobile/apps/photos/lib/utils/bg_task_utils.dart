@@ -87,9 +87,7 @@ class BgTaskUtils {
         frequency: Platform.isIOS
             ? const Duration(minutes: 30)
             : const Duration(minutes: 15),
-        // TODO: Remove the forced zero delay once Workmanager debug notification testing is done.
-        initialDelay:
-            (kDebugMode || true) ? Duration.zero : const Duration(minutes: 10),
+        initialDelay: kDebugMode ? Duration.zero : const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,
