@@ -1,11 +1,13 @@
 package email
 
 import (
+	"context"
 	"strings"
 	"testing"
 
 	"github.com/ente-io/museum/ente"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
+	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -229,6 +231,29 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			want: expiredWarningStage119,
 		},
 		{
+			name: "scheduled deletion after final reminder sent",
+			now:  expiredWarningAnchor + storageWarningExpiredDeletionDelay,
+			history: map[string]int64{
+				storageWarningExpired30TemplateID:  expiredWarningAnchor,
+				storageWarningExpired60TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired90TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired119TemplateID: expiredWarningAnchor + storageWarningExpiredWarning119Delay,
+			},
+			want: expiredWarningStageScheduledDeletion,
+		},
+		{
+			name: "scheduled deletion is sent only once",
+			now:  expiredWarningAnchor + storageWarningExpiredDeletionDelay + 10,
+			history: map[string]int64{
+				storageWarningExpired30TemplateID:                     expiredWarningAnchor,
+				storageWarningExpired60TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired90TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired119TemplateID:                    expiredWarningAnchor + storageWarningExpiredWarning119Delay,
+				repo.StorageWarningExpiredScheduledDeletionTemplateID: expiredWarningAnchor + storageWarningExpiredDeletionDelay,
+			},
+			want: expiredWarningStageNone,
+		},
+		{
 			name:    "long expired backfill without history starts at first reminder",
 			now:     expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
 			history: map[string]int64{},
@@ -266,7 +291,7 @@ func TestExpiredWarningAutoDeleteDateClampsOverdueFinalStage(t *testing.T) {
 }
 
 func TestResolveActiveOverageWarningStage(t *testing.T) {
-	now := int64(1000)
+	now := storageWarningActiveOverageDeletionDelay + (10 * storageWarningOneDayInMicroseconds)
 	firstWarningTime := now - storageWarningActiveOverageWarning89Delay - 10
 
 	tests := []struct {
@@ -309,6 +334,17 @@ func TestResolveActiveOverageWarningStage(t *testing.T) {
 			want: activeOverageWarningStage89,
 		},
 		{
+			name: "scheduled deletion after final reminder sent",
+			now:  now,
+			history: map[string]int64{
+				StorageWarningActiveOverageAnchorTemplateID: now - storageWarningActiveOverageDeletionDelay,
+				storageWarningActiveOverage30TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning30Delay,
+				storageWarningActiveOverage60TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning60Delay,
+				storageWarningActiveOverage89TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning89Delay,
+			},
+			want: activeOverageWarningStageScheduledDeletion,
+		},
+		{
 			name: "no reminder when all due stages already sent",
 			now:  now,
 			history: map[string]int64{
@@ -325,6 +361,37 @@ func TestResolveActiveOverageWarningStage(t *testing.T) {
 				storageWarningActiveOverage30TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning30Delay,
 			},
 			want: activeOverageWarningStage0,
+		},
+		{
+			name: "stale final reminder restarts at day zero",
+			now:  now + storageWarningPreviousStageFreshnessWindow + storageWarningOneDayInMicroseconds,
+			history: map[string]int64{
+				StorageWarningActiveOverageAnchorTemplateID: now - storageWarningActiveOverageDeletionDelay,
+				storageWarningActiveOverage30TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning30Delay,
+				storageWarningActiveOverage60TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning60Delay,
+				storageWarningActiveOverage89TemplateID:     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning89Delay,
+			},
+			want: activeOverageWarningStage0,
+		},
+		{
+			name: "scheduled deletion is sent only once",
+			now:  now,
+			history: map[string]int64{
+				StorageWarningActiveOverageAnchorTemplateID:                 now - storageWarningActiveOverageDeletionDelay,
+				storageWarningActiveOverage30TemplateID:                     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning30Delay,
+				storageWarningActiveOverage60TemplateID:                     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning60Delay,
+				storageWarningActiveOverage89TemplateID:                     now - storageWarningActiveOverageDeletionDelay + storageWarningActiveOverageWarning89Delay,
+				repo.StorageWarningActiveOverageScheduledDeletionTemplateID: now - 1,
+			},
+			want: activeOverageWarningStageNone,
+		},
+		{
+			name: "terminal marker suppresses restart even without anchor history",
+			now:  now,
+			history: map[string]int64{
+				repo.StorageWarningActiveOverageScheduledDeletionTemplateID: now - 1,
+			},
+			want: activeOverageWarningStageNone,
 		},
 	}
 
@@ -350,7 +417,7 @@ func TestActiveOverageWarningAutoDeleteDateClampsOverdueFinalStage(t *testing.T)
 }
 
 func TestResolveActiveOverageWarningReturnsCycleStart(t *testing.T) {
-	now := int64(1000)
+	now := storageWarningActiveOverageDeletionDelay + storageWarningOneDayInMicroseconds
 	history := map[string]int64{
 		StorageWarningActiveOverageAnchorTemplateID: now - storageWarningActiveOverageWarning30Delay,
 	}
@@ -378,7 +445,7 @@ func TestStorageWarningTemplateSentInCycle(t *testing.T) {
 }
 
 func TestStorageWarningCadenceBroken(t *testing.T) {
-	now := int64(100 * time.MicroSecondsInOneHour)
+	now := storageWarningActiveOverageDeletionDelay + (10 * storageWarningOneDayInMicroseconds)
 
 	tests := []struct {
 		name       string
@@ -451,6 +518,34 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			},
 			wantBroken: false,
 		},
+		{
+			name: "terminal expired stage requires final reminder",
+			snapshot: storageWarningSnapshot{
+				Bucket:            storageWarningBucketExpired,
+				ExpiredStage:      expiredWarningStageScheduledDeletion,
+				EvaluatedAt:       now,
+				WarningCycleStart: now - storageWarningExpiredDeletionDelay,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired90TemplateID: now - storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: true,
+			wantStage:  string(expiredWarningStage119),
+		},
+		{
+			name: "terminal active overage stage requires final reminder",
+			snapshot: storageWarningSnapshot{
+				Bucket:             storageWarningBucketActiveOverage,
+				ActiveOverageStage: activeOverageWarningStageScheduledDeletion,
+				EvaluatedAt:        now,
+				WarningCycleStart:  now - storageWarningActiveOverageDeletionDelay,
+				NotificationHistory: map[string]int64{
+					storageWarningActiveOverage60TemplateID: now - storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: true,
+			wantStage:  string(activeOverageWarningStage89),
+		},
 	}
 
 	for _, tc := range tests {
@@ -508,6 +603,13 @@ func TestStorageWarningShouldPreserveActiveOverageHistory(t *testing.T) {
 	if !storageWarningShouldPreserveActiveOverageHistory(storageWarningSnapshot{CurrentBucket: storageWarningBucketActiveOverage, Bucket: storageWarningBucketNone}) {
 		t.Fatal("expected active overage history to be preserved even when no stage is due")
 	}
+	if storageWarningShouldPreserveActiveOverageHistory(storageWarningSnapshot{
+		CurrentBucket:       storageWarningBucketActiveOverage,
+		WarningCycleStart:   100,
+		NotificationHistory: map[string]int64{repo.StorageWarningActiveOverageScheduledDeletionTemplateID: 100},
+	}) {
+		t.Fatal("expected active overage history to be dropped after scheduled deletion")
+	}
 	if storageWarningShouldPreserveActiveOverageHistory(storageWarningSnapshot{CurrentBucket: storageWarningBucketExpired}) {
 		t.Fatal("expected expired snapshot to not preserve active overage history")
 	}
@@ -524,6 +626,32 @@ func TestStorageWarningTemplateDetailsExpired(t *testing.T) {
 	}
 	if templateID != storageWarningExpired90TemplateID || templateName != storageWarningExpiredTemplate || subject != storageWarningExpired90Subject {
 		t.Fatalf("unexpected expired template details: %q %q %q", templateID, templateName, subject)
+	}
+}
+
+func TestStorageWarningTemplateDetailsScheduledDeletion(t *testing.T) {
+	expiredSnapshot := storageWarningSnapshot{
+		Bucket:       storageWarningBucketExpired,
+		ExpiredStage: expiredWarningStageScheduledDeletion,
+	}
+	templateID, templateName, subject, ok := storageWarningTemplateDetails(expiredSnapshot)
+	if !ok {
+		t.Fatal("expected expired scheduled deletion template details")
+	}
+	if templateID != repo.StorageWarningExpiredScheduledDeletionTemplateID || templateName != storageWarningExpiredScheduledDeletionTemplate || subject != storageWarningExpiredScheduledDeletionSubject {
+		t.Fatalf("unexpected expired scheduled deletion template details: %q %q %q", templateID, templateName, subject)
+	}
+
+	activeSnapshot := storageWarningSnapshot{
+		Bucket:             storageWarningBucketActiveOverage,
+		ActiveOverageStage: activeOverageWarningStageScheduledDeletion,
+	}
+	templateID, templateName, subject, ok = storageWarningTemplateDetails(activeSnapshot)
+	if !ok {
+		t.Fatal("expected active overage scheduled deletion template details")
+	}
+	if templateID != repo.StorageWarningActiveOverageScheduledDeletionTemplateID || templateName != storageWarningActiveOverageScheduledDeletionTemplate || subject != storageWarningActiveOverageScheduledDeletionSubject {
+		t.Fatalf("unexpected active overage scheduled deletion template details: %q %q %q", templateID, templateName, subject)
 	}
 }
 
@@ -558,7 +686,7 @@ func TestProcessStorageWarningSnapshotSkipsDueToRolloutAfterTemplateSelection(t 
 		EffectiveExpiry:  1,
 	}
 
-	result, err := (&EmailNotificationController{}).processStorageWarningSnapshot(snapshot)
+	result, err := (&EmailNotificationController{}).processStorageWarningSnapshot(context.Background(), snapshot)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -598,9 +726,45 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_30d=1, expired_60d=0, expired_90d=0, expired_119d=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0} | failures={expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_30d=1, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | failures={expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0, active_overage_scheduled_deletion=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
+	}
+}
+
+func TestStorageWarningHistoryGroup(t *testing.T) {
+	if got := storageWarningHistoryGroup(storageWarningSnapshot{
+		Bucket:             storageWarningBucketActiveOverage,
+		ActiveOverageStage: activeOverageWarningStage60,
+	}); got != storageWarningActiveOverageNotificationGroup {
+		t.Fatalf("unexpected active overage history group: got %q want %q", got, storageWarningActiveOverageNotificationGroup)
+	}
+	if got := storageWarningHistoryGroup(storageWarningSnapshot{
+		Bucket:       storageWarningBucketExpired,
+		ExpiredStage: expiredWarningStageScheduledDeletion,
+	}); got != "" {
+		t.Fatalf("unexpected terminal history group: got %q want empty", got)
+	}
+}
+
+func TestStorageWarningShouldResetUserAccess(t *testing.T) {
+	if !storageWarningShouldResetUserAccess(storageWarningSnapshot{
+		Bucket:       storageWarningBucketExpired,
+		ExpiredStage: expiredWarningStageScheduledDeletion,
+	}) {
+		t.Fatal("expected expired scheduled deletion stage to reset access")
+	}
+	if !storageWarningShouldResetUserAccess(storageWarningSnapshot{
+		Bucket:             storageWarningBucketActiveOverage,
+		ActiveOverageStage: activeOverageWarningStageScheduledDeletion,
+	}) {
+		t.Fatal("expected active overage scheduled deletion stage to reset access")
+	}
+	if storageWarningShouldResetUserAccess(storageWarningSnapshot{
+		Bucket:             storageWarningBucketActiveOverage,
+		ActiveOverageStage: activeOverageWarningStage89,
+	}) {
+		t.Fatal("expected non-terminal stage to not reset access")
 	}
 }
 

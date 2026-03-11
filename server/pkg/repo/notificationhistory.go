@@ -13,6 +13,11 @@ type NotificationHistoryRepository struct {
 	DB *sql.DB
 }
 
+const (
+	StorageWarningExpiredScheduledDeletionTemplateID       = "storage_warning_expired_scheduled_deletion"
+	StorageWarningActiveOverageScheduledDeletionTemplateID = "storage_warning_active_overage_scheduled_deletion"
+)
+
 func (repo *NotificationHistoryRepository) GetLastNotificationTime(userID int64, templateID string) (int64, error) {
 	var lastNotificationTime sql.NullInt64
 	row := repo.DB.QueryRow(`SELECT MAX(sent_time) FROM notification_history WHERE user_id = $1 and template_id = $2`, userID, templateID)
@@ -92,4 +97,44 @@ func (repo *NotificationHistoryRepository) DeleteNotificationHistoryByGroupExclu
 		   AND NOT (user_id = ANY($2))`,
 		notificationGroup, pq.Array(keepUserIDs))
 	return stacktrace.Propagate(err, "failed to delete grouped notification history")
+}
+
+func StorageWarningScheduledDeletionTemplateIDs() []string {
+	return []string{
+		StorageWarningExpiredScheduledDeletionTemplateID,
+		StorageWarningActiveOverageScheduledDeletionTemplateID,
+	}
+}
+
+func (repo *NotificationHistoryRepository) HasAnyNotificationForTemplates(userID int64, templateIDs []string) (bool, error) {
+	if len(templateIDs) == 0 {
+		return false, nil
+	}
+
+	row := repo.DB.QueryRow(
+		`SELECT EXISTS(
+			SELECT 1
+			  FROM notification_history
+			 WHERE user_id = $1
+			   AND template_id = ANY($2)
+		)`,
+		userID, pq.Array(templateIDs))
+	var exists bool
+	if err := row.Scan(&exists); err != nil {
+		return false, stacktrace.Propagate(err, "failed to read notification history existence")
+	}
+	return exists, nil
+}
+
+func (repo *NotificationHistoryRepository) IsStorageWarningDeletionScheduled(userID int64) (bool, error) {
+	return repo.HasAnyNotificationForTemplates(userID, StorageWarningScheduledDeletionTemplateIDs())
+}
+
+func (repo *NotificationHistoryRepository) ClearStorageWarningDeletionScheduled(userID int64) error {
+	_, err := repo.DB.Exec(
+		`DELETE FROM notification_history
+		 WHERE user_id = $1
+		   AND template_id = ANY($2)`,
+		userID, pq.Array(StorageWarningScheduledDeletionTemplateIDs()))
+	return stacktrace.Propagate(err, "failed to clear storage warning scheduled deletion history")
 }

@@ -1,31 +1,37 @@
 package email
 
-import "github.com/ente-io/museum/pkg/utils/time"
+import (
+	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/museum/pkg/utils/time"
+)
 
 const (
-	StorageWarningActiveOverageAnchorTemplateID = "storage_warning_active_overage"
-	storageWarningActiveOverageTemplate         = "storage_warning_active_overage.html"
-	storageWarningActiveOverageDeletionDelay    = 90 * 24 * time.MicroSecondsInOneHour
-	storageWarningActiveOverageWarning30Delay   = 30 * 24 * time.MicroSecondsInOneHour
-	storageWarningActiveOverageWarning60Delay   = 60 * 24 * time.MicroSecondsInOneHour
-	storageWarningActiveOverageWarning89Delay   = 89 * 24 * time.MicroSecondsInOneHour
-	storageWarningActiveOverage30TemplateID     = "storage_warning_active_overage_30d"
-	storageWarningActiveOverage60TemplateID     = "storage_warning_active_overage_60d"
-	storageWarningActiveOverage89TemplateID     = "storage_warning_active_overage_89d"
-	storageWarningActiveOverage0Subject         = "Action needed: Reduce usage or upgrade your Ente plan"
-	storageWarningActiveOverage30Subject        = "Reminder: Your Ente data is scheduled for deletion due to overusage"
-	storageWarningActiveOverage60Subject        = "30-day reminder: Your Ente data will be deleted in 30 days due to overusage"
-	storageWarningActiveOverage89Subject        = "Final reminder: Your Ente data will be deleted tomorrow due to overusage"
+	StorageWarningActiveOverageAnchorTemplateID          = "storage_warning_active_overage"
+	storageWarningActiveOverageTemplate                  = "storage-warning/storage_warning_active_overage.html"
+	storageWarningActiveOverageScheduledDeletionTemplate = "storage-warning/storage_warning_active_overage_scheduled_deletion.html"
+	storageWarningActiveOverageDeletionDelay             = 90 * 24 * time.MicroSecondsInOneHour
+	storageWarningActiveOverageWarning30Delay            = 30 * 24 * time.MicroSecondsInOneHour
+	storageWarningActiveOverageWarning60Delay            = 60 * 24 * time.MicroSecondsInOneHour
+	storageWarningActiveOverageWarning89Delay            = 89 * 24 * time.MicroSecondsInOneHour
+	storageWarningActiveOverage30TemplateID              = "storage_warning_active_overage_30d"
+	storageWarningActiveOverage60TemplateID              = "storage_warning_active_overage_60d"
+	storageWarningActiveOverage89TemplateID              = "storage_warning_active_overage_89d"
+	storageWarningActiveOverage0Subject                  = "Action needed: Reduce usage or upgrade your Ente plan"
+	storageWarningActiveOverage30Subject                 = "Reminder: Your Ente data is scheduled for deletion due to overusage"
+	storageWarningActiveOverage60Subject                 = "30-day reminder: Your Ente data will be deleted in 30 days due to overusage"
+	storageWarningActiveOverage89Subject                 = "Final reminder: Your Ente data will be deleted tomorrow due to overusage"
+	storageWarningActiveOverageScheduledDeletionSubject  = "Your Ente data is scheduled for deletion due to overusage"
 )
 
 type activeOverageWarningStage string
 
 const (
-	activeOverageWarningStageNone activeOverageWarningStage = "none"
-	activeOverageWarningStage0    activeOverageWarningStage = "active_overage_0d"
-	activeOverageWarningStage30   activeOverageWarningStage = "active_overage_30d"
-	activeOverageWarningStage60   activeOverageWarningStage = "active_overage_60d"
-	activeOverageWarningStage89   activeOverageWarningStage = "active_overage_89d"
+	activeOverageWarningStageNone              activeOverageWarningStage = "none"
+	activeOverageWarningStage0                 activeOverageWarningStage = "active_overage_0d"
+	activeOverageWarningStage30                activeOverageWarningStage = "active_overage_30d"
+	activeOverageWarningStage60                activeOverageWarningStage = "active_overage_60d"
+	activeOverageWarningStage89                activeOverageWarningStage = "active_overage_89d"
+	activeOverageWarningStageScheduledDeletion activeOverageWarningStage = "active_overage_scheduled_deletion"
 )
 
 type activeOverageWarningResolution struct {
@@ -43,6 +49,8 @@ func activeOverageWarningTemplateDetails(stage activeOverageWarningStage) (templ
 		return storageWarningActiveOverage60TemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage60Subject, true
 	case activeOverageWarningStage89:
 		return storageWarningActiveOverage89TemplateID, storageWarningActiveOverageTemplate, storageWarningActiveOverage89Subject, true
+	case activeOverageWarningStageScheduledDeletion:
+		return repo.StorageWarningActiveOverageScheduledDeletionTemplateID, storageWarningActiveOverageScheduledDeletionTemplate, storageWarningActiveOverageScheduledDeletionSubject, true
 	default:
 		return "", "", "", false
 	}
@@ -54,6 +62,7 @@ func activeOverageWarningTemplateIDs() []string {
 		storageWarningActiveOverage30TemplateID,
 		storageWarningActiveOverage60TemplateID,
 		storageWarningActiveOverage89TemplateID,
+		repo.StorageWarningActiveOverageScheduledDeletionTemplateID,
 	}
 }
 
@@ -63,17 +72,40 @@ func resolveActiveOverageWarningStage(now int64, history map[string]int64) activ
 
 func resolveActiveOverageWarning(now int64, history map[string]int64) activeOverageWarningResolution {
 	cycleStart := history[StorageWarningActiveOverageAnchorTemplateID]
-	if cycleStart == 0 || now-cycleStart >= storageWarningActiveOverageDeletionDelay {
+	scheduledDeletionSentAt := history[repo.StorageWarningActiveOverageScheduledDeletionTemplateID]
+	if scheduledDeletionSentAt > 0 {
+		if cycleStart <= 0 {
+			cycleStart = scheduledDeletionSentAt
+		}
+		return activeOverageWarningResolution{
+			Stage:      activeOverageWarningStageNone,
+			CycleStart: cycleStart,
+		}
+	}
+	if cycleStart == 0 {
 		return activeOverageWarningResolution{
 			Stage:      activeOverageWarningStage0,
 			CycleStart: now,
 		}
 	}
-
-	if now >= cycleStart+storageWarningActiveOverageWarning89Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage89TemplateID, cycleStart) {
+	if now-cycleStart >= storageWarningActiveOverageDeletionDelay {
+		finalReminderSentAt := history[storageWarningActiveOverage89TemplateID]
+		if storageWarningTemplateSentInCycle(history, storageWarningActiveOverage89TemplateID, cycleStart) &&
+			finalReminderSentAt >= now-storageWarningPreviousStageFreshnessWindow {
+			return activeOverageWarningResolution{
+				Stage:      activeOverageWarningStageScheduledDeletion,
+				CycleStart: cycleStart,
+			}
+		}
 		return activeOverageWarningResolution{
-			Stage:      activeOverageWarningStage89,
+			Stage:      activeOverageWarningStage0,
+			CycleStart: now,
+		}
+	}
+	if now >= cycleStart+storageWarningActiveOverageWarning30Delay &&
+		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage30TemplateID, cycleStart) {
+		return activeOverageWarningResolution{
+			Stage:      activeOverageWarningStage30,
 			CycleStart: cycleStart,
 		}
 	}
@@ -84,10 +116,10 @@ func resolveActiveOverageWarning(now int64, history map[string]int64) activeOver
 			CycleStart: cycleStart,
 		}
 	}
-	if now >= cycleStart+storageWarningActiveOverageWarning30Delay &&
-		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage30TemplateID, cycleStart) {
+	if now >= cycleStart+storageWarningActiveOverageWarning89Delay &&
+		!storageWarningTemplateSentInCycle(history, storageWarningActiveOverage89TemplateID, cycleStart) {
 		return activeOverageWarningResolution{
-			Stage:      activeOverageWarningStage30,
+			Stage:      activeOverageWarningStage89,
 			CycleStart: cycleStart,
 		}
 	}

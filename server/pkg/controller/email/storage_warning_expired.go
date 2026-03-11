@@ -1,9 +1,13 @@
 package email
 
-import "github.com/ente-io/museum/pkg/utils/time"
+import (
+	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/museum/pkg/utils/time"
+)
 
 const (
-	storageWarningExpiredTemplate = "storage_warning_expired.html"
+	storageWarningExpiredTemplate                  = "storage-warning/storage_warning_expired.html"
+	storageWarningExpiredScheduledDeletionTemplate = "storage-warning/storage_warning_expired_scheduled_deletion.html"
 
 	storageWarningExpiredAnchorDelay     = 30 * 24 * time.MicroSecondsInOneHour
 	storageWarningExpiredDeletionDelay   = 120 * 24 * time.MicroSecondsInOneHour
@@ -17,20 +21,22 @@ const (
 	storageWarningExpired90TemplateID  = "storage_warning_expired_90d"
 	storageWarningExpired119TemplateID = "storage_warning_expired_119d"
 
-	storageWarningExpired30Subject  = "Action needed: Your Ente subscription has expired"
-	storageWarningExpired60Subject  = "Reminder: Your Ente data is scheduled for deletion"
-	storageWarningExpired90Subject  = "Reminder: Renew your Ente plan to avoid data deletion"
-	storageWarningExpired119Subject = "Final reminder: Your Ente data will be deleted tomorrow"
+	storageWarningExpired30Subject                = "Action needed: Your Ente subscription has expired"
+	storageWarningExpired60Subject                = "Reminder: Your Ente data is scheduled for deletion"
+	storageWarningExpired90Subject                = "Reminder: Renew your Ente plan to avoid data deletion"
+	storageWarningExpired119Subject               = "Final reminder: Your Ente data will be deleted tomorrow"
+	storageWarningExpiredScheduledDeletionSubject = "Your Ente data is scheduled for deletion"
 )
 
 type expiredWarningStage string
 
 const (
-	expiredWarningStageNone expiredWarningStage = "none"
-	expiredWarningStage30   expiredWarningStage = "expired_30d"
-	expiredWarningStage60   expiredWarningStage = "expired_60d"
-	expiredWarningStage90   expiredWarningStage = "expired_90d"
-	expiredWarningStage119  expiredWarningStage = "expired_119d"
+	expiredWarningStageNone              expiredWarningStage = "none"
+	expiredWarningStage30                expiredWarningStage = "expired_30d"
+	expiredWarningStage60                expiredWarningStage = "expired_60d"
+	expiredWarningStage90                expiredWarningStage = "expired_90d"
+	expiredWarningStage119               expiredWarningStage = "expired_119d"
+	expiredWarningStageScheduledDeletion expiredWarningStage = "expired_scheduled_deletion"
 )
 
 func expiredWarningTemplateDetails(stage expiredWarningStage) (templateID string, templateName string, subject string, ok bool) {
@@ -43,6 +49,8 @@ func expiredWarningTemplateDetails(stage expiredWarningStage) (templateID string
 		return storageWarningExpired90TemplateID, storageWarningExpiredTemplate, storageWarningExpired90Subject, true
 	case expiredWarningStage119:
 		return storageWarningExpired119TemplateID, storageWarningExpiredTemplate, storageWarningExpired119Subject, true
+	case expiredWarningStageScheduledDeletion:
+		return repo.StorageWarningExpiredScheduledDeletionTemplateID, storageWarningExpiredScheduledDeletionTemplate, storageWarningExpiredScheduledDeletionSubject, true
 	default:
 		return "", "", "", false
 	}
@@ -54,6 +62,7 @@ func expiredWarningTemplateIDs() []string {
 		storageWarningExpired60TemplateID,
 		storageWarningExpired90TemplateID,
 		storageWarningExpired119TemplateID,
+		repo.StorageWarningExpiredScheduledDeletionTemplateID,
 	}
 }
 
@@ -80,6 +89,10 @@ func resolveExpiredWarningStage(expiredWarningAnchor int64, now int64, history m
 	if daysSinceAnchor >= storageWarningExpiredWarning119Delay &&
 		!storageWarningTemplateSentInCycle(history, storageWarningExpired119TemplateID, expiredWarningAnchor) {
 		return expiredWarningStage119
+	}
+	if daysSinceAnchor >= storageWarningExpiredDeletionDelay &&
+		!storageWarningTemplateSentInCycle(history, repo.StorageWarningExpiredScheduledDeletionTemplateID, expiredWarningAnchor) {
+		return expiredWarningStageScheduledDeletion
 	}
 	return expiredWarningStageNone
 }

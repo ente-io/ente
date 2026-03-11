@@ -99,10 +99,12 @@ var storageWarningStageOrder = []string{
 	string(expiredWarningStage60),
 	string(expiredWarningStage90),
 	string(expiredWarningStage119),
+	string(expiredWarningStageScheduledDeletion),
 	string(activeOverageWarningStage0),
 	string(activeOverageWarningStage30),
 	string(activeOverageWarningStage60),
 	string(activeOverageWarningStage89),
+	string(activeOverageWarningStageScheduledDeletion),
 }
 
 func newStorageWarningRunStats() storageWarningRunStats {
@@ -208,7 +210,7 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 		if storageWarningShouldPreserveActiveOverageHistory(snapshot) {
 			preserveActiveOverageHistoryRecipientIDs[snapshot.RecipientID] = struct{}{}
 		}
-		result, err := c.processStorageWarningSnapshot(snapshot)
+		result, err := c.processStorageWarningSnapshot(ctx, snapshot)
 		if err != nil {
 			failed++
 			stage := storageWarningStageKey(snapshot)
@@ -414,7 +416,7 @@ func (c *EmailNotificationController) decorateStorageWarningSnapshot(snapshot st
 	return snapshot, nil
 }
 
-func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot storageWarningSnapshot) (storageWarningProcessResult, error) {
+func (c *EmailNotificationController) processStorageWarningSnapshot(ctx context.Context, snapshot storageWarningSnapshot) (storageWarningProcessResult, error) {
 	logger := log.WithFields(log.Fields{
 		"recipient_id":   snapshot.RecipientID,
 		"is_family_plan": snapshot.IsFamilyPlan,
@@ -494,6 +496,21 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		}).Info("Skipping storage warning email due to rollout")
 		return storageWarningProcessResultSkippedRollout, nil
 	}
+	if storageWarningShouldResetUserAccess(snapshot) {
+		if c.UserAccessResetter == nil {
+			err := errors.New("storage warning user access resetter is not configured")
+			logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
+			return storageWarningProcessResultSkipped, err
+		}
+		// Intentionally do not enqueue data cleanup here yet. We will start
+		// scheduling auto-deletion only after validating that this workflow is
+		// consistently identifying the correct deletion candidates.
+		if err := c.UserAccessResetter.ResetUserAccess(ctx, snapshot.RecipientID, logger); err != nil {
+			logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
+			return storageWarningProcessResultSkipped, err
+		}
+		logger.Info("Restricted user access for storage scheduled deletion")
+	}
 
 	err := emailUtil.SendTemplatedEmailV2(
 		[]string{snapshot.AccountEmail},
@@ -510,7 +527,13 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		return storageWarningProcessResultSkipped, err
 	}
 
-	if err := c.NotificationHistoryRepo.SetLastNotificationTimeToNowWithGroup(snapshot.RecipientID, templateID, storageWarningNotificationGroup(snapshot.Bucket)); err != nil {
+	historyGroup := storageWarningHistoryGroup(snapshot)
+	if historyGroup == "" {
+		err = c.NotificationHistoryRepo.SetLastNotificationTimeToNow(snapshot.RecipientID, templateID)
+	} else {
+		err = c.NotificationHistoryRepo.SetLastNotificationTimeToNowWithGroup(snapshot.RecipientID, templateID, historyGroup)
+	}
+	if err != nil {
 		logger.WithError(err).Error("Failed to persist storage warning history")
 		return storageWarningProcessResultSkipped, err
 	}
@@ -622,6 +645,8 @@ func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID st
 			return storageWarningExpired60TemplateID, string(expiredWarningStage60), true
 		case expiredWarningStage119:
 			return storageWarningExpired90TemplateID, string(expiredWarningStage90), true
+		case expiredWarningStageScheduledDeletion:
+			return storageWarningExpired119TemplateID, string(expiredWarningStage119), true
 		}
 	case storageWarningBucketActiveOverage:
 		switch snapshot.ActiveOverageStage {
@@ -631,6 +656,8 @@ func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID st
 			return storageWarningActiveOverage30TemplateID, string(activeOverageWarningStage30), true
 		case activeOverageWarningStage89:
 			return storageWarningActiveOverage60TemplateID, string(activeOverageWarningStage60), true
+		case activeOverageWarningStageScheduledDeletion:
+			return storageWarningActiveOverage89TemplateID, string(activeOverageWarningStage89), true
 		}
 	}
 
@@ -662,8 +689,33 @@ func storageWarningNotificationGroup(bucket storageWarningBucket) string {
 	}
 }
 
+func storageWarningHistoryGroup(snapshot storageWarningSnapshot) string {
+	if storageWarningShouldResetUserAccess(snapshot) {
+		return ""
+	}
+	return storageWarningNotificationGroup(snapshot.Bucket)
+}
+
+func storageWarningShouldResetUserAccess(snapshot storageWarningSnapshot) bool {
+	switch snapshot.Bucket {
+	case storageWarningBucketExpired:
+		return snapshot.ExpiredStage == expiredWarningStageScheduledDeletion
+	case storageWarningBucketActiveOverage:
+		return snapshot.ActiveOverageStage == activeOverageWarningStageScheduledDeletion
+	default:
+		return false
+	}
+}
+
 func storageWarningShouldPreserveActiveOverageHistory(snapshot storageWarningSnapshot) bool {
-	return snapshot.CurrentBucket == storageWarningBucketActiveOverage
+	if snapshot.CurrentBucket != storageWarningBucketActiveOverage {
+		return false
+	}
+	return !storageWarningTemplateSentInCycle(
+		snapshot.NotificationHistory,
+		repo.StorageWarningActiveOverageScheduledDeletionTemplateID,
+		snapshot.WarningCycleStart,
+	)
 }
 
 func storageWarningTemplateSentInCycle(history map[string]int64, templateID string, cycleStart int64) bool {

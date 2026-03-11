@@ -406,6 +406,7 @@ func main() {
 		collectionController,
 		collectionRepo,
 		dataCleanupRepository,
+		notificationHistoryRepo,
 		billingRepo,
 		secretEncryptionKeyBytes,
 		hashingKeyBytes,
@@ -419,6 +420,7 @@ func main() {
 		userCache,
 		userCacheCtrl,
 	)
+	emailNotificationCtrl.UserAccessResetter = userController
 	inactiveUserOrchestrator := user.NewInactiveUserOrchestrator(
 		userRepo,
 		notificationHistoryRepo,
@@ -871,6 +873,7 @@ func main() {
 	adminAPI.POST("/user/update-referral", adminHandler.UpdateReferral)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/update-email-mfa", adminHandler.UpdateEmailMFA)
+	adminAPI.POST("/user/unblock-storage-warning-login", adminHandler.UnblockStorageWarningLogin)
 	adminAPI.POST("/user/add-ott", adminHandler.AddOtt)
 	adminAPI.POST("/user/terminate-session", adminHandler.TerminateSession)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)

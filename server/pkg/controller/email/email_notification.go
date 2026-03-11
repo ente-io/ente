@@ -1,6 +1,7 @@
 package email
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -14,6 +15,10 @@ import (
 	"github.com/ente-io/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 )
+
+type UserAccessResetter interface {
+	ResetUserAccess(ctx context.Context, userID int64, logger *log.Entry) error
+}
 
 const (
 	WebAppFirstUploadTemplate    = "web_app_first_upload.html"
@@ -61,6 +66,7 @@ type EmailNotificationController struct {
 	DiscordController                  *discordCtrl.DiscordController
 	LockController                     *lock.LockController
 	NotificationHistoryRepo            *repo.NotificationHistoryRepository
+	UserAccessResetter                 UserAccessResetter
 	isSendingStorageLimitExceededMails bool
 }
 
