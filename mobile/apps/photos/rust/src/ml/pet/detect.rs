@@ -303,7 +303,12 @@ fn naive_nms_pet_face(
             if suppressed[j] {
                 continue;
             }
-            if calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy) >= iou_threshold {
+            // Only suppress within the same class so a dog and cat
+            // occupying the same region are both retained.
+            if detections[i].class_id == detections[j].class_id
+                && calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy)
+                    >= iou_threshold
+            {
                 suppressed[j] = true;
             }
         }
