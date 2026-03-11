@@ -275,6 +275,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                     style={{ textAlign: "left" }}
                                 >
                                     <MenuItem value="stripe">Stripe</MenuItem>
+                                    <MenuItem value="appstore">AppStore</MenuItem>
                                     <MenuItem value="paypal">PayPal</MenuItem>
                                     <MenuItem value="bitpay">BitPay</MenuItem>
                                     <MenuItem value="None">None</MenuItem>
