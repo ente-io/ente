@@ -176,7 +176,7 @@ struct EntePeopleWidgetEntryView: View {
                             .aspectRatio(contentMode: .fit)
                             .padding(8)
 
-                        Text("Go to Settings -> General to customise the widget")
+                        Text("Go to Settings -> Widgets to customise the widget")
                             .font(.custom("Inter", size: 12, relativeTo: .caption))
                             .foregroundStyle(.white)  // Tint-aware color
                             .multilineTextAlignment(.center)
