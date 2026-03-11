@@ -16,32 +16,46 @@ import (
 func TestBucketStorageWarningActiveOverage(t *testing.T) {
 	now := int64(100)
 	effectiveExpiry := now + 10
+	expiredWarningAnchor := now + 20
 	allottedStorage := int64(50)
 	totalUsage := allottedStorage + storageWarningOverageThreshold + 1
 
-	got := bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, now)
+	got := bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, expiredWarningAnchor, now)
 	if got != storageWarningBucketActiveOverage {
 		t.Fatalf("unexpected bucket: got %q want %q", got, storageWarningBucketActiveOverage)
 	}
 }
 
 func TestBucketStorageWarningExpired(t *testing.T) {
-	effectiveExpiry := int64(100)
-	now := effectiveExpiry
+	effectiveExpiry := int64(90)
+	expiredWarningAnchor := int64(100)
+	now := expiredWarningAnchor
 	allottedStorage := int64(0)
 	totalUsage := allottedStorage + storageWarningOverageThreshold + 1
 
-	got := bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, now)
+	got := bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, expiredWarningAnchor, now)
 	if got != storageWarningBucketExpired {
 		t.Fatalf("unexpected bucket: got %q want %q", got, storageWarningBucketExpired)
 	}
 }
 
-func TestBucketStorageWarningExpiredRequiresUsageAboveThreshold(t *testing.T) {
+func TestBucketStorageWarningWaitsForExpiredWarningAnchor(t *testing.T) {
 	effectiveExpiry := int64(100)
+	expiredWarningAnchor := effectiveExpiry + storageWarningExpiredAnchorDelay
 	now := effectiveExpiry
 
-	got := bucketStorageWarning(storageWarningOverageThreshold, 0, effectiveExpiry, now)
+	got := bucketStorageWarning(storageWarningOverageThreshold+1, 0, effectiveExpiry, expiredWarningAnchor, now)
+	if got != storageWarningBucketNone {
+		t.Fatalf("unexpected bucket: got %q want %q", got, storageWarningBucketNone)
+	}
+}
+
+func TestBucketStorageWarningExpiredRequiresUsageAboveThreshold(t *testing.T) {
+	effectiveExpiry := int64(100)
+	expiredWarningAnchor := int64(100)
+	now := effectiveExpiry
+
+	got := bucketStorageWarning(storageWarningOverageThreshold, 0, effectiveExpiry, expiredWarningAnchor, now)
 	if got != storageWarningBucketNone {
 		t.Fatalf("unexpected bucket: got %q want %q", got, storageWarningBucketNone)
 	}
@@ -61,9 +75,16 @@ func TestComputeStorageWarningMetricsActiveSubscription(t *testing.T) {
 	if got.BaseStorage != subscription.Storage {
 		t.Fatalf("unexpected base storage: got %d want %d", got.BaseStorage, subscription.Storage)
 	}
+	if got.SubscriptionExpiry != subscription.ExpiryTime {
+		t.Fatalf("unexpected subscription expiry: got %d want %d", got.SubscriptionExpiry, subscription.ExpiryTime)
+	}
 	wantEffectiveExpiry := subscription.ExpiryTime + billing.ProviderToExpiryGracePeriodMap[ente.Stripe]
 	if got.EffectiveExpiry != wantEffectiveExpiry {
 		t.Fatalf("unexpected effective expiry: got %d want %d", got.EffectiveExpiry, wantEffectiveExpiry)
+	}
+	wantExpiredWarningAnchor := subscription.ExpiryTime + storageWarningExpiredAnchorDelay
+	if got.ExpiredWarningAnchor != wantExpiredWarningAnchor {
+		t.Fatalf("unexpected expired warning anchor: got %d want %d", got.ExpiredWarningAnchor, wantExpiredWarningAnchor)
 	}
 	if got.Bucket != storageWarningBucketActiveOverage {
 		t.Fatalf("unexpected bucket: got %q want %q", got.Bucket, storageWarningBucketActiveOverage)
@@ -71,7 +92,7 @@ func TestComputeStorageWarningMetricsActiveSubscription(t *testing.T) {
 }
 
 func TestComputeStorageWarningMetricsAddonKeepsAccountActive(t *testing.T) {
-	now := int64(1000)
+	now := billing.ProviderToExpiryGracePeriodMap[ente.Stripe] + 1000
 	subscription := &ente.Subscription{
 		Storage:         100,
 		ExpiryTime:      now - billing.ProviderToExpiryGracePeriodMap[ente.Stripe] - 1,
@@ -93,8 +114,15 @@ func TestComputeStorageWarningMetricsAddonKeepsAccountActive(t *testing.T) {
 	if got.BaseStorage != 0 {
 		t.Fatalf("unexpected base storage for expired subscription: got %d want 0", got.BaseStorage)
 	}
+	if got.SubscriptionExpiry != subscription.ExpiryTime {
+		t.Fatalf("unexpected subscription expiry: got %d want %d", got.SubscriptionExpiry, subscription.ExpiryTime)
+	}
 	if got.EffectiveExpiry != now+time.MicroSecondsInOneHour {
 		t.Fatalf("unexpected effective expiry: got %d want %d", got.EffectiveExpiry, now+time.MicroSecondsInOneHour)
+	}
+	wantExpiredWarningAnchor := subscription.ExpiryTime + storageWarningExpiredAnchorDelay
+	if got.ExpiredWarningAnchor != wantExpiredWarningAnchor {
+		t.Fatalf("unexpected expired warning anchor: got %d want %d", got.ExpiredWarningAnchor, wantExpiredWarningAnchor)
 	}
 	if got.Bucket != storageWarningBucketActiveOverage {
 		t.Fatalf("unexpected bucket: got %q want %q", got.Bucket, storageWarningBucketActiveOverage)
@@ -118,6 +146,12 @@ func TestComputeStorageWarningMetricsNilSubscriptionDoesNotCrash(t *testing.T) {
 	if got.BaseStorage != 0 {
 		t.Fatalf("unexpected base storage without subscription: got %d want 0", got.BaseStorage)
 	}
+	if got.SubscriptionExpiry != 0 {
+		t.Fatalf("unexpected subscription expiry without subscription: got %d want 0", got.SubscriptionExpiry)
+	}
+	if got.ExpiredWarningAnchor != 0 {
+		t.Fatalf("unexpected expired warning anchor without subscription: got %d want 0", got.ExpiredWarningAnchor)
+	}
 	if got.Bucket != storageWarningBucketActiveOverage {
 		t.Fatalf("unexpected bucket: got %q want %q", got.Bucket, storageWarningBucketActiveOverage)
 	}
@@ -138,13 +172,16 @@ func TestComputeStorageWarningMetricsFreeSubscriptionCanBeActiveOverage(t *testi
 	if got.BaseStorage != subscription.Storage {
 		t.Fatalf("unexpected base storage: got %d want %d", got.BaseStorage, subscription.Storage)
 	}
+	if got.SubscriptionExpiry != subscription.ExpiryTime {
+		t.Fatalf("unexpected subscription expiry: got %d want %d", got.SubscriptionExpiry, subscription.ExpiryTime)
+	}
 	if got.Bucket != storageWarningBucketActiveOverage {
 		t.Fatalf("unexpected bucket: got %q want %q", got.Bucket, storageWarningBucketActiveOverage)
 	}
 }
 
 func TestResolveExpiredWarningStage(t *testing.T) {
-	effectiveExpiry := int64(100)
+	expiredWarningAnchor := int64(100)
 
 	tests := []struct {
 		name    string
@@ -154,54 +191,54 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 	}{
 		{
 			name:    "before first reminder",
-			now:     effectiveExpiry + storageWarningExpiredWarning30Delay - 1,
+			now:     expiredWarningAnchor - 1,
 			history: map[string]int64{},
 			want:    expiredWarningStageNone,
 		},
 		{
-			name:    "first reminder at 30 days",
-			now:     effectiveExpiry + storageWarningExpiredWarning30Delay,
+			name:    "first reminder at anchor day",
+			now:     expiredWarningAnchor,
 			history: map[string]int64{},
 			want:    expiredWarningStage30,
 		},
 		{
 			name: "second reminder after first sent",
-			now:  effectiveExpiry + storageWarningExpiredWarning60Delay,
+			now:  expiredWarningAnchor + storageWarningExpiredWarning30Delay,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: effectiveExpiry + storageWarningExpiredWarning30Delay,
+				storageWarningExpired30TemplateID: expiredWarningAnchor,
 			},
 			want: expiredWarningStage60,
 		},
 		{
 			name: "third reminder after earlier stages sent",
-			now:  effectiveExpiry + storageWarningExpiredWarning90Delay,
+			now:  expiredWarningAnchor + storageWarningExpiredWarning60Delay,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: effectiveExpiry + storageWarningExpiredWarning30Delay,
-				storageWarningExpired60TemplateID: effectiveExpiry + storageWarningExpiredWarning60Delay,
+				storageWarningExpired30TemplateID: expiredWarningAnchor,
+				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
 			},
 			want: expiredWarningStage90,
 		},
 		{
 			name: "final reminder for long expired user",
-			now:  effectiveExpiry + storageWarningExpiredWarning119Delay + 10,
+			now:  expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: effectiveExpiry + storageWarningExpiredWarning30Delay,
-				storageWarningExpired60TemplateID: effectiveExpiry + storageWarningExpiredWarning60Delay,
-				storageWarningExpired90TemplateID: effectiveExpiry + storageWarningExpiredWarning90Delay,
+				storageWarningExpired30TemplateID: expiredWarningAnchor,
+				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired90TemplateID: expiredWarningAnchor + storageWarningExpiredWarning60Delay,
 			},
 			want: expiredWarningStage119,
 		},
 		{
 			name:    "long expired backfill without history starts at first reminder",
-			now:     effectiveExpiry + storageWarningExpiredWarning119Delay + 10,
+			now:     expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
 			history: map[string]int64{},
 			want:    expiredWarningStage30,
 		},
 		{
 			name: "old cycle reminder ignored after renewal",
-			now:  effectiveExpiry + storageWarningExpiredWarning30Delay,
+			now:  expiredWarningAnchor,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: effectiveExpiry - 1,
+				storageWarningExpired30TemplateID: expiredWarningAnchor - 1,
 			},
 			want: expiredWarningStage30,
 		},
@@ -209,7 +246,7 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := resolveExpiredWarningStage(effectiveExpiry, tc.now, tc.history)
+			got := resolveExpiredWarningStage(expiredWarningAnchor, tc.now, tc.history)
 			if got != tc.want {
 				t.Fatalf("unexpected stage: got %q want %q", got, tc.want)
 			}
@@ -219,9 +256,9 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 
 func TestExpiredWarningAutoDeleteDateClampsOverdueFinalStage(t *testing.T) {
 	now := int64(1000)
-	effectiveExpiry := now - storageWarningExpiredDeletionDelay - 10
+	expiredWarningAnchor := now - storageWarningExpiredDeletionDelay - 10
 
-	got := expiredWarningAutoDeleteDate(effectiveExpiry, expiredWarningStage119, now)
+	got := expiredWarningAutoDeleteDate(expiredWarningAnchor, expiredWarningStage119, now)
 	want := now + storageWarningOneDayInMicroseconds
 	if got != want {
 		t.Fatalf("unexpected auto delete date: got %d want %d", got, want)
@@ -391,10 +428,10 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 				Bucket:            storageWarningBucketExpired,
 				ExpiredStage:      expiredWarningStage60,
 				EvaluatedAt:       now,
-				EffectiveExpiry:   now - storageWarningExpiredWarning60Delay,
-				WarningCycleStart: now - storageWarningExpiredWarning60Delay,
+				EffectiveExpiry:   now - storageWarningExpiredWarning30Delay,
+				WarningCycleStart: now - storageWarningExpiredWarning30Delay,
 				NotificationHistory: map[string]int64{
-					storageWarningExpired30TemplateID: now - storageWarningExpiredWarning60Delay - 1,
+					storageWarningExpired30TemplateID: now - storageWarningExpiredWarning30Delay - 1,
 				},
 			},
 			wantBroken: true,
@@ -406,8 +443,8 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 				Bucket:            storageWarningBucketExpired,
 				ExpiredStage:      expiredWarningStage90,
 				EvaluatedAt:       now,
-				EffectiveExpiry:   now - storageWarningExpiredWarning90Delay,
-				WarningCycleStart: now - storageWarningExpiredWarning90Delay,
+				EffectiveExpiry:   now - storageWarningExpiredWarning60Delay,
+				WarningCycleStart: now - storageWarningExpiredWarning60Delay,
 				NotificationHistory: map[string]int64{
 					storageWarningExpired60TemplateID: now - storageWarningOneDayInMicroseconds,
 				},

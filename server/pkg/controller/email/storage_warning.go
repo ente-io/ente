@@ -45,32 +45,36 @@ const (
 )
 
 type storageWarningSnapshot struct {
-	RecipientID         int64
-	AccountEmail        string
-	TotalUsage          int64
-	BaseStorage         int64
-	UsableBonus         int64
-	AllottedStorage     int64
-	AvailableStorage    int64
-	EffectiveExpiry     int64
-	EvaluatedAt         int64
-	CurrentBucket       storageWarningBucket
-	Bucket              storageWarningBucket
-	ActiveOverageStage  activeOverageWarningStage
-	ExpiredStage        expiredWarningStage
-	AutoDeleteDate      int64
-	IsFamilyPlan        bool
-	WarningCycleStart   int64
-	NotificationHistory map[string]int64
+	RecipientID          int64
+	AccountEmail         string
+	TotalUsage           int64
+	BaseStorage          int64
+	UsableBonus          int64
+	AllottedStorage      int64
+	AvailableStorage     int64
+	SubscriptionExpiry   int64
+	EffectiveExpiry      int64
+	ExpiredWarningAnchor int64
+	EvaluatedAt          int64
+	CurrentBucket        storageWarningBucket
+	Bucket               storageWarningBucket
+	ActiveOverageStage   activeOverageWarningStage
+	ExpiredStage         expiredWarningStage
+	AutoDeleteDate       int64
+	IsFamilyPlan         bool
+	WarningCycleStart    int64
+	NotificationHistory  map[string]int64
 }
 
 type storageWarningMetrics struct {
-	BaseStorage      int64
-	UsableBonus      int64
-	AllottedStorage  int64
-	AvailableStorage int64
-	EffectiveExpiry  int64
-	Bucket           storageWarningBucket
+	BaseStorage          int64
+	UsableBonus          int64
+	AllottedStorage      int64
+	AvailableStorage     int64
+	SubscriptionExpiry   int64
+	EffectiveExpiry      int64
+	ExpiredWarningAnchor int64
+	Bucket               storageWarningBucket
 }
 
 type storageWarningRunStats struct {
@@ -312,18 +316,20 @@ func (c *EmailNotificationController) buildFamilyStorageWarningSnapshot(ctx cont
 
 	metrics := computeStorageWarningMetrics(sub, activeBonuses, totalUsage, now)
 	snapshot := storageWarningSnapshot{
-		RecipientID:      adminID,
-		AccountEmail:     admin.Email,
-		TotalUsage:       totalUsage,
-		BaseStorage:      metrics.BaseStorage,
-		UsableBonus:      metrics.UsableBonus,
-		AllottedStorage:  metrics.AllottedStorage,
-		AvailableStorage: metrics.AvailableStorage,
-		EffectiveExpiry:  metrics.EffectiveExpiry,
-		EvaluatedAt:      now,
-		CurrentBucket:    metrics.Bucket,
-		Bucket:           metrics.Bucket,
-		IsFamilyPlan:     true,
+		RecipientID:          adminID,
+		AccountEmail:         admin.Email,
+		TotalUsage:           totalUsage,
+		BaseStorage:          metrics.BaseStorage,
+		UsableBonus:          metrics.UsableBonus,
+		AllottedStorage:      metrics.AllottedStorage,
+		AvailableStorage:     metrics.AvailableStorage,
+		SubscriptionExpiry:   metrics.SubscriptionExpiry,
+		EffectiveExpiry:      metrics.EffectiveExpiry,
+		ExpiredWarningAnchor: metrics.ExpiredWarningAnchor,
+		EvaluatedAt:          now,
+		CurrentBucket:        metrics.Bucket,
+		Bucket:               metrics.Bucket,
+		IsFamilyPlan:         true,
 	}
 	return c.decorateStorageWarningSnapshot(snapshot, now)
 }
@@ -357,18 +363,20 @@ func (c *EmailNotificationController) buildIndividualStorageWarningSnapshot(ctx 
 
 	metrics := computeStorageWarningMetrics(sub, activeBonuses, totalUsage, now)
 	snapshot := storageWarningSnapshot{
-		RecipientID:      userID,
-		AccountEmail:     user.Email,
-		TotalUsage:       totalUsage,
-		BaseStorage:      metrics.BaseStorage,
-		UsableBonus:      metrics.UsableBonus,
-		AllottedStorage:  metrics.AllottedStorage,
-		AvailableStorage: metrics.AvailableStorage,
-		EffectiveExpiry:  metrics.EffectiveExpiry,
-		EvaluatedAt:      now,
-		CurrentBucket:    metrics.Bucket,
-		Bucket:           metrics.Bucket,
-		IsFamilyPlan:     false,
+		RecipientID:          userID,
+		AccountEmail:         user.Email,
+		TotalUsage:           totalUsage,
+		BaseStorage:          metrics.BaseStorage,
+		UsableBonus:          metrics.UsableBonus,
+		AllottedStorage:      metrics.AllottedStorage,
+		AvailableStorage:     metrics.AvailableStorage,
+		SubscriptionExpiry:   metrics.SubscriptionExpiry,
+		EffectiveExpiry:      metrics.EffectiveExpiry,
+		ExpiredWarningAnchor: metrics.ExpiredWarningAnchor,
+		EvaluatedAt:          now,
+		CurrentBucket:        metrics.Bucket,
+		Bucket:               metrics.Bucket,
+		IsFamilyPlan:         false,
 	}
 	return c.decorateStorageWarningSnapshot(snapshot, now)
 }
@@ -381,13 +389,13 @@ func (c *EmailNotificationController) decorateStorageWarningSnapshot(snapshot st
 			return storageWarningSnapshot{}, err
 		}
 		snapshot.NotificationHistory = history
-		snapshot.WarningCycleStart = snapshot.EffectiveExpiry
-		snapshot.ExpiredStage = resolveExpiredWarningStage(snapshot.EffectiveExpiry, now, history)
+		snapshot.WarningCycleStart = snapshot.ExpiredWarningAnchor
+		snapshot.ExpiredStage = resolveExpiredWarningStage(snapshot.ExpiredWarningAnchor, now, history)
 		if snapshot.ExpiredStage == expiredWarningStageNone {
 			snapshot.Bucket = storageWarningBucketNone
 			return snapshot, nil
 		}
-		snapshot.AutoDeleteDate = expiredWarningAutoDeleteDate(snapshot.EffectiveExpiry, snapshot.ExpiredStage, now)
+		snapshot.AutoDeleteDate = expiredWarningAutoDeleteDate(snapshot.ExpiredWarningAnchor, snapshot.ExpiredStage, now)
 	case storageWarningBucketActiveOverage:
 		history, err := c.NotificationHistoryRepo.GetLastNotificationTimes(snapshot.RecipientID, activeOverageWarningTemplateIDs())
 		if err != nil {
@@ -442,7 +450,7 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		"AllottedStorage":  snapshot.AllottedStorage,
 		"AvailableStorage": snapshot.AvailableStorage,
 		"AccountEmail":     snapshot.AccountEmail,
-		"ExpiryDate":       formatDate(snapshot.EffectiveExpiry),
+		"ExpiryDate":       formatDate(snapshot.SubscriptionExpiry),
 		"AutoDeleteDate":   formatDate(snapshot.AutoDeleteDate),
 		"IsFamilyPlan":     snapshot.IsFamilyPlan,
 	}
@@ -468,7 +476,9 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		"overage_trigger_limit_gib":     formatStorageGiB(snapshot.AllottedStorage + storageWarningOverageThreshold),
 		"usage_above_allotted_gib":      formatStorageGiB(positiveDelta(snapshot.TotalUsage, snapshot.AllottedStorage)),
 		"usage_above_trigger_limit_gib": formatStorageGiB(positiveDelta(snapshot.TotalUsage, snapshot.AllottedStorage+storageWarningOverageThreshold)),
+		"subscription_expiry":           snapshot.SubscriptionExpiry,
 		"effective_expiry":              snapshot.EffectiveExpiry,
+		"expired_warning_anchor":        snapshot.ExpiredWarningAnchor,
 		"warning_cycle_start":           snapshot.WarningCycleStart,
 		"active_stage":                  snapshot.ActiveOverageStage,
 		"expired_stage":                 snapshot.ExpiredStage,
@@ -512,7 +522,9 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 func computeStorageWarningMetrics(subscription *ente.Subscription, activeBonuses *bonus.ActiveStorageBonus, totalUsage int64, now int64) storageWarningMetrics {
 	baseEffectiveExpiry := int64(0)
 	baseStorage := int64(0)
+	subscriptionExpiry := int64(0)
 	if subscription != nil {
+		subscriptionExpiry = subscription.ExpiryTime
 		baseEffectiveExpiry = effectiveSubscriptionExpiry(*subscription)
 		if baseEffectiveExpiry > now {
 			baseStorage = subscription.Storage
@@ -526,13 +538,16 @@ func computeStorageWarningMetrics(subscription *ente.Subscription, activeBonuses
 
 	usableBonus := activeBonuses.GetUsableBonus(baseStorage)
 	allottedStorage := baseStorage + usableBonus
+	expiredWarningAnchor := expiredWarningAnchorFromSubscriptionExpiry(subscriptionExpiry)
 	return storageWarningMetrics{
-		BaseStorage:      baseStorage,
-		UsableBonus:      usableBonus,
-		AllottedStorage:  allottedStorage,
-		AvailableStorage: allottedStorage - totalUsage,
-		EffectiveExpiry:  effectiveExpiry,
-		Bucket:           bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, now),
+		BaseStorage:          baseStorage,
+		UsableBonus:          usableBonus,
+		AllottedStorage:      allottedStorage,
+		AvailableStorage:     allottedStorage - totalUsage,
+		SubscriptionExpiry:   subscriptionExpiry,
+		EffectiveExpiry:      effectiveExpiry,
+		ExpiredWarningAnchor: expiredWarningAnchor,
+		Bucket:               bucketStorageWarning(totalUsage, allottedStorage, effectiveExpiry, expiredWarningAnchor, now),
 	}
 }
 
@@ -544,15 +559,15 @@ func effectiveSubscriptionExpiry(subscription ente.Subscription) int64 {
 	return expiry
 }
 
-func bucketStorageWarning(totalUsage int64, allottedStorage int64, effectiveExpiry int64, now int64) storageWarningBucket {
+func bucketStorageWarning(totalUsage int64, allottedStorage int64, effectiveExpiry int64, expiredWarningAnchor int64, now int64) storageWarningBucket {
 	if totalUsage <= allottedStorage+storageWarningOverageThreshold {
 		return storageWarningBucketNone
 	}
-	if effectiveExpiry > 0 && effectiveExpiry <= now {
-		return storageWarningBucketExpired
-	}
 	if effectiveExpiry > now && totalUsage > (allottedStorage+storageWarningOverageThreshold) {
 		return storageWarningBucketActiveOverage
+	}
+	if expiredWarningAnchor > 0 && expiredWarningAnchor <= now {
+		return storageWarningBucketExpired
 	}
 	return storageWarningBucketNone
 }
