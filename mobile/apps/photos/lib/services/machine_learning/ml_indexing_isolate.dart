@@ -188,7 +188,9 @@ class MLIndexingIsolate extends SuperIsolate {
         ClipImageEncoder.instance.downloadModel(forceRefresh),
       ];
 
-      if (flagService.internalUser && localSettings.petRecognitionEnabled) {
+      if (flagService.internalUser &&
+          localSettings.petRecognitionEnabled &&
+          _shouldUseRustMl) {
         modelsToDownload.addAll([
           PetFaceDetectionService.instance.downloadModel(forceRefresh),
           PetFaceEmbeddingDogService.instance.downloadModel(forceRefresh),
