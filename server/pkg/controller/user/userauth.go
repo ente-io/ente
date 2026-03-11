@@ -411,14 +411,12 @@ func (c *UserController) RemoveTokensForApps(userID int64, apps []ente.App) erro
 	if len(apps) == 0 {
 		return nil
 	}
-	tokenCacheKeys, err := c.activeTokenCacheKeysForApps(userID, apps)
-	if err != nil {
+	if err := c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
 		return err
 	}
 	if err := c.UserAuthRepo.RemoveTokensForApps(userID, apps); err != nil {
 		return stacktrace.Propagate(err, "failed to remove tokens")
 	}
-	c.deleteTokenCacheKeys(tokenCacheKeys)
 	return nil
 }
 
@@ -427,14 +425,12 @@ func (c *UserController) RemoveAllTokens(userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get user apps")
 	}
-	tokenCacheKeys, err := c.activeTokenCacheKeysForApps(userID, apps)
-	if err != nil {
+	if err = c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
 		return err
 	}
 	if err = c.UserAuthRepo.RemoveAllTokens(userID); err != nil {
 		return stacktrace.Propagate(err, "failed to remove tokens")
 	}
-	c.deleteTokenCacheKeys(tokenCacheKeys)
 	return nil
 }
 
@@ -450,27 +446,22 @@ func (c *UserController) TerminateSession(userID int64, token string) error {
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
 }
 
-func (c *UserController) activeTokenCacheKeysForApps(userID int64, apps []ente.App) ([]string, error) {
+// Auth middleware trusts cached app:token entries for up to a minute, so token
+// revocation needs to evict those entries as well to take effect immediately.
+func (c *UserController) deleteActiveTokenCacheEntriesForApps(userID int64, apps []ente.App) error {
 	if len(apps) == 0 {
-		return nil, nil
+		return nil
 	}
-	tokenCacheKeys := make([]string, 0)
 	for _, app := range apps {
 		sessions, err := c.UserAuthRepo.GetActiveSessions(userID, app)
 		if err != nil {
-			return nil, stacktrace.Propagate(err, "failed to get active sessions")
+			return stacktrace.Propagate(err, "failed to get active sessions")
 		}
 		for _, session := range sessions {
-			tokenCacheKeys = append(tokenCacheKeys, fmt.Sprintf("%s:%s", app, session.Token))
+			c.Cache.Delete(fmt.Sprintf("%s:%s", app, session.Token))
 		}
 	}
-	return tokenCacheKeys, nil
-}
-
-func (c *UserController) deleteTokenCacheKeys(tokenCacheKeys []string) {
-	for _, cacheKey := range tokenCacheKeys {
-		c.Cache.Delete(cacheKey)
-	}
+	return nil
 }
 
 func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) error {
