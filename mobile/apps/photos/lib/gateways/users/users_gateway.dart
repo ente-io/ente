@@ -192,8 +192,94 @@ class UsersGateway {
   /// Leave the family plan.
   ///
   /// Endpoint: DELETE /family/leave
-  Future<void> leaveFamilyPlan() async {
-    await _enteDio.delete("/family/leave");
+  ///
+  /// Family management endpoints expect the dedicated `FAMILIES` JWT, not the
+  /// app session token.
+  Future<void> leaveFamilyPlan({
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.delete(
+      "/family/leave",
+      options: _familyAuthOptions(familiesToken),
+    );
+  }
+
+  /// Create a family with the current user as the admin.
+  ///
+  /// Endpoint: POST /family/create
+  Future<void> createFamily({
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.post(
+      "/family/create",
+      options: _familyAuthOptions(familiesToken),
+    );
+  }
+
+  /// Invite a user to join the current user's family.
+  ///
+  /// Endpoint: POST /family/add-member
+  Future<void> inviteFamilyMember({
+    required String email,
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.post(
+      "/family/add-member",
+      data: {
+        "email": email,
+      },
+      options: _familyAuthOptions(familiesToken),
+    );
+  }
+
+  /// Remove an active family member.
+  ///
+  /// Endpoint: DELETE /family/remove-member/:id
+  Future<void> removeFamilyMember(
+    String id, {
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.delete(
+      "/family/remove-member/$id",
+      options: _familyAuthOptions(familiesToken),
+    );
+  }
+
+  /// Revoke a pending family invite.
+  ///
+  /// Endpoint: DELETE /family/revoke-invite/:id
+  Future<void> revokeFamilyInvite(
+    String id, {
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.delete(
+      "/family/revoke-invite/$id",
+      options: _familyAuthOptions(familiesToken),
+    );
+  }
+
+  /// Update a family member's storage limit.
+  ///
+  /// Endpoint: PUT /family/modify-storage
+  Future<void> updateFamilyMemberStorage({
+    required String id,
+    int? storageLimit,
+    String? authToken,
+  }) async {
+    final familiesToken = authToken ?? await getFamiliesAuthToken();
+    await _enteDio.put(
+      "/family/modify-storage",
+      data: {
+        "id": id,
+        "storageLimit": storageLimit,
+      },
+      options: _familyAuthOptions(familiesToken),
+    );
   }
 
   /// Get the families portal token and URL.
@@ -206,6 +292,23 @@ class UsersGateway {
   Future<Map<String, dynamic>> getFamiliesToken() async {
     final response = await _enteDio.get("/users/families-token");
     return response.data as Map<String, dynamic>;
+  }
+
+  Future<String> getFamiliesAuthToken() async {
+    final responseData = await getFamiliesToken();
+    final familiesToken = responseData["familiesToken"];
+    if (familiesToken is! String || familiesToken.isEmpty) {
+      throw StateError("Missing familiesToken in /users/families-token");
+    }
+    return familiesToken;
+  }
+
+  Options _familyAuthOptions(String familiesToken) {
+    return Options(
+      headers: {
+        "X-Auth-Token": familiesToken,
+      },
+    );
   }
 
   // ============================================================
