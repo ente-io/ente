@@ -403,7 +403,7 @@
     "thumbnail_generation_failed": "Η δημιουργία μικρογραφιών απέτυχε",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Αυτά τα αρχεία ανέβηκαν, αλλά δυστυχώς δεν μπορέσαμε να δημιουργήσουμε τις μικρογραφίες τους.",
-    "learn_more": "",
+    "learn_how": "",
     "unsupported_files": "Μη υποστηριζόμενα αρχεία",
     "unsupported_files_hint": "Το Ente δεν υποστηρίζει ακόμα αυτές τις μορφές αρχείων",
     "zero_size_files": "Κενά αρχεία",

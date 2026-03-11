@@ -403,7 +403,7 @@
     "thumbnail_generation_failed": "Не удалось создать миниатюру",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Эти файлы были загружены, но, к сожалению, мы не смогли сгенерировать для них миниатюры.",
-    "learn_more": "",
+    "learn_how": "",
     "unsupported_files": "Неподдерживаемые файлы",
     "unsupported_files_hint": "Ente пока не поддерживает эти форматы файлов",
     "zero_size_files": "Пустые файлы",

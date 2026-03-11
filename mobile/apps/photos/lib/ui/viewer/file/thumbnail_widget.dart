@@ -19,6 +19,7 @@ import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
@@ -184,6 +185,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     } else {
       _loadLocalImage(context);
     }
+    final galleryContext = GalleryContextState.of(context);
     Widget? image;
     if (_imageProvider != null) {
       image = Image(
@@ -199,6 +201,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (widget.rawThumbnail) {
         return image;
       }
+      final shouldShowOwnerAvatar = widget.shouldShowOwnerAvatar &&
+          galleryContext?.galleryType != GalleryType.sharedPublicCollection;
       final List<Widget> contentChildren = [image];
       if (widget.shouldShowFavoriteIcon) {
         if (FavoritesService.instance.isFavoriteCache(
@@ -214,7 +218,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
-      if (widget.shouldShowOwnerAvatar) {
+      if (shouldShowOwnerAvatar) {
         if (!widget.file.isOwner) {
           final owner = CollectionsService.instance
               .getFileOwner(widget.file.ownerID!, widget.file.collectionID);
@@ -258,7 +262,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     if (widget.file.isTrash) {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
-    } else if (GalleryContextState.of(context)?.type == GroupType.size) {
+    } else if (galleryContext?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
     } else if (widget.file.debugCaption != null) {
       viewChildren.add(FileOverlayText(widget.file.debugCaption!));

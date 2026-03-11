@@ -403,7 +403,7 @@
     "thumbnail_generation_failed": "La generació de miniatures ha fallat",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Aquests fitxers s'han pujat, però malauradament no hem pogut generar les miniatures per a ells.",
-    "learn_more": "",
+    "learn_how": "",
     "unsupported_files": "Fitxers no suportats",
     "unsupported_files_hint": "Ente encara no suporta aquests formats de fitxer",
     "zero_size_files": "Fitxers buits",

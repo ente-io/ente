@@ -403,7 +403,7 @@
     "thumbnail_generation_failed": "Thumbnail generation failed",
     "canvas_blocked_upload_description": "Browser settings are blocking canvas access. Fix this before uploading so thumbnails are generated correctly.",
     "thumbnail_generation_failed_hint": "These files were uploaded, but unfortunately we could not generate the thumbnails for them.",
-    "learn_more": "Learn more",
+    "learn_how": "Learn how",
     "unsupported_files": "Unsupported files",
     "unsupported_files_hint": "Ente does not support these file formats yet",
     "zero_size_files": "Empty files",

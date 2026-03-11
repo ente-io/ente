@@ -403,7 +403,7 @@
     "thumbnail_generation_failed": "Échec de création d'une miniature",
     "canvas_blocked_upload_description": "Les paramètres du navigateur bloquent l'accès au canvas. Corrigez ceci avant le chargement pour que les vignettes soient générées correctement.",
     "thumbnail_generation_failed_hint": "Ces fichiers sont bien chargés, mais nous ne pouvons pas créer de miniatures pour eux.",
-    "learn_more": "En apprendre plus",
+    "learn_how": "",
     "unsupported_files": "Fichiers non supportés",
     "unsupported_files_hint": "Ente ne supporte pas encore ces formats de fichiers",
     "zero_size_files": "Fichiers vides",
