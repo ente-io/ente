@@ -24,6 +24,7 @@ import "package:photos/services/machine_learning/face_ml/face_detection/detectio
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -215,6 +216,12 @@ class MLService {
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
+      if (_hasModeChanged(mode)) {
+        _logger.info("App mode changed during ML run, stopping");
+        return;
+      }
+      // Pet clustering
+      await _clusterPets(mlDataDB, mode);
       if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
           _logger.info("App mode changed during ML run, stopping");
@@ -530,6 +537,18 @@ class MLService {
       _clusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
+    }
+  }
+
+  Future<void> _clusterPets(MLDataDB mlDataDB, MLMode mode) async {
+    if (_shouldPauseIndexingAndClustering) return;
+    try {
+      await PetClusteringService.instance.clusterPets(
+        mlDataDB: mlDataDB,
+        isOffline: mode == MLMode.offline,
+      );
+    } catch (e, s) {
+      _logger.severe("Pet clustering failed", e, s);
     }
   }
 
