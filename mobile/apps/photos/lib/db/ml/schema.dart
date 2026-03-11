@@ -216,6 +216,9 @@ const deletePetFacesTable = 'DELETE FROM $petFacesTable';
 // ── Pet Bodies Table ──
 
 const petBodiesTable = 'pet_bodies';
+// Alias so pet-body code doesn't reference the face-specific constant name.
+// The underlying SQL column is the same ('score').
+const bodyScore = faceScore;
 
 const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
   $fileIDColumn INTEGER NOT NULL,
@@ -223,7 +226,7 @@ const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
   $detectionColumn TEXT NOT NULL,
   $bodyVectorIdColumn INTEGER UNIQUE,
   $speciesColumn INTEGER NOT NULL,
-  $faceScore REAL NOT NULL,
+  $bodyScore REAL NOT NULL,
   $imageHeight INTEGER NOT NULL DEFAULT 0,
   $imageWidth INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn INTEGER NOT NULL DEFAULT -1,

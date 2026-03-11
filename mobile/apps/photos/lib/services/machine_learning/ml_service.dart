@@ -605,7 +605,7 @@ class MLService {
           );
         }
       }
-      if (!isOffline) {
+      if (!isOffline && (result.facesRan || result.clipRan)) {
         // Storing results on remote
         await fileDataService.putFileData(
           instruction.file,
@@ -654,6 +654,10 @@ class MLService {
             dbPetFaces,
             result.petFaces!,
           );
+        } else if (instruction.shouldRunPets) {
+          // No pet faces detected; insert empty marker so the file is
+          // considered pet-indexed (mirrors Face.empty for human faces).
+          await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
         }
 
         if (result.petBodies != null && result.petBodies!.isNotEmpty) {
@@ -686,11 +690,6 @@ class MLService {
             result.petBodies!,
           );
         }
-      }
-      if (instruction.shouldRunPets &&
-          result.petFaces != null &&
-          result.petFaces!.isEmpty) {
-        await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;

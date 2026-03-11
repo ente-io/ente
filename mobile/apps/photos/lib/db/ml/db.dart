@@ -241,9 +241,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
       const String sql = '''
         INSERT INTO $petBodiesTable (
-          $fileIDColumn, $petBodyIDColumn, $detectionColumn, $bodyVectorIdColumn, $speciesColumn, $faceScore, $imageHeight, $imageWidth, $mlVersionColumn
+          $fileIDColumn, $petBodyIDColumn, $detectionColumn, $bodyVectorIdColumn, $speciesColumn, $bodyScore, $imageHeight, $imageWidth, $mlVersionColumn
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT($fileIDColumn, $petBodyIDColumn) DO UPDATE SET $detectionColumn = excluded.$detectionColumn, $bodyVectorIdColumn = excluded.$bodyVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $faceScore = excluded.$faceScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn
+        ON CONFLICT($fileIDColumn, $petBodyIDColumn) DO UPDATE SET $detectionColumn = excluded.$detectionColumn, $bodyVectorIdColumn = excluded.$bodyVectorIdColumn, $speciesColumn = excluded.$speciesColumn, $bodyScore = excluded.$bodyScore, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn
       ''';
       final parameterSets = batch.map((obj) {
         final map = obj.toMap();
@@ -253,7 +253,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           map[detectionColumn],
           map[bodyVectorIdColumn],
           map[speciesColumn],
-          map[faceScore],
+          map[bodyScore],
           map[imageHeight],
           map[imageWidth],
           map[mlVersionColumn],
@@ -2398,17 +2398,19 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> deletePetDataForFiles(List<int> fileIDs) async {
     if (fileIDs.isEmpty) return;
     final db = await asyncDB;
-    final ids = fileIDs.join(", ");
+    final placeholders = List.filled(fileIDs.length, '?').join(', ');
 
     // Collect vector IDs grouped by species before deleting rows,
     // so we can remove them from the usearch indexes and mapping tables.
     final faceRows = await db.getAll(
       'SELECT $petFaceIDColumn, $faceVectorIdColumn, $speciesColumn '
-      'FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
+      'FROM $petFacesTable WHERE $fileIDColumn IN ($placeholders)',
+      fileIDs,
     );
     final bodyRows = await db.getAll(
       'SELECT $petBodyIDColumn, $bodyVectorIdColumn, $speciesColumn '
-      'FROM $petBodiesTable WHERE $fileIDColumn IN ($ids)',
+      'FROM $petBodiesTable WHERE $fileIDColumn IN ($placeholders)',
+      fileIDs,
     );
 
     // Group face vector IDs by species for targeted vector DB deletion.
@@ -2484,10 +2486,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         );
       }
       await tx.execute(
-        'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
+        'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($placeholders)',
+        fileIDs,
       );
       await tx.execute(
-        'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($ids)',
+        'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($placeholders)',
+        fileIDs,
       );
     });
   }

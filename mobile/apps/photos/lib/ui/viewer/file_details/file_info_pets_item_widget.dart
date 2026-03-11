@@ -71,7 +71,8 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
       final faces = <Face>[];
       for (final dbPetFace in dbPetFaces) {
         final json = jsonDecode(dbPetFace.detection) as Map<String, dynamic>;
-        final boxList = (json['box'] as List).cast<double>();
+        final boxList =
+            (json['box'] as List).map((e) => (e as num).toDouble()).toList();
         final detection = Detection(
           box: FaceBox(
             x: boxList[0],
