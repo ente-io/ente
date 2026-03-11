@@ -19,8 +19,8 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import 'package:photos/ui/family/family_plan_page.dart';
 import 'package:photos/ui/notification/toast.dart';
-import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
@@ -60,6 +60,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   EnteColorScheme colorScheme = darkScheme;
   final Logger logger = Logger("StripeSubscriptionPage");
   String? _selectedPlanProductID;
+  bool _hasRedirectedFamilyMember = false;
 
   Future<void> _fetchSub() async {
     return _userService
@@ -197,12 +198,31 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        _redirectFamilyMemberToDashboard();
+        return const EnteLoadingWidget();
       } else {
         return _buildPlans();
       }
     }
     return const EnteLoadingWidget();
+  }
+
+  void _redirectFamilyMemberToDashboard() {
+    if (_hasRedirectedFamilyMember || !mounted) {
+      return;
+    }
+    _hasRedirectedFamilyMember = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              FamilyPlanPage(initialUserDetails: _userDetails),
+        ),
+      );
+    });
   }
 
   Widget _buildPlans() {

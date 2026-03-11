@@ -505,8 +505,11 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   }
 
   List<FamilyMember> _sortedMembersForList() {
-    final members =
-        List<FamilyMember>.from(_userDetails.familyData?.members ?? []);
+    final Iterable<FamilyMember> sourceMembers = _isAdmin
+        ? (_userDetails.familyData?.members ?? const <FamilyMember>[])
+        : (_userDetails.familyData?.members ?? const <FamilyMember>[])
+            .where((member) => member.isActive);
+    final members = List<FamilyMember>.from(sourceMembers);
     final currentEmail = _userDetails.email.trim().toLowerCase();
 
     members.sort((a, b) {

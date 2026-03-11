@@ -21,8 +21,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import 'package:photos/ui/family/family_plan_page.dart';
 import 'package:photos/ui/notification/toast.dart';
-import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
@@ -59,6 +59,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   late bool _isActiveStripeSubscriber;
   EnteColorScheme colorScheme = darkScheme;
   String? _selectedProductID;
+  bool _hasRedirectedFamilyMember = false;
 
   // hasYearlyPlans is used to check if there are yearly plans for given store
   bool hasYearlyPlans = false;
@@ -280,12 +281,31 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   Widget _getBody() {
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        _redirectFamilyMemberToDashboard();
+        return const EnteLoadingWidget();
       } else {
         return _buildPlans();
       }
     }
     return const EnteLoadingWidget();
+  }
+
+  void _redirectFamilyMemberToDashboard() {
+    if (_hasRedirectedFamilyMember || !mounted) {
+      return;
+    }
+    _hasRedirectedFamilyMember = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              FamilyPlanPage(initialUserDetails: _userDetails),
+        ),
+      );
+    });
   }
 
   Widget _buildPlans() {
