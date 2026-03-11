@@ -124,11 +124,7 @@ pub fn run_f32<const N: usize>(
     input_shape: [i64; N],
 ) -> MlResult<(Vec<i64>, Vec<f32>)> {
     let outputs = if session_expects_f16(session) {
-        // Convert f32->f16 in-place: drop the f32 vec first to avoid holding both.
-        let f16_input: Vec<half::f16> = {
-            let converted: Vec<half::f16> = input.into_iter().map(half::f16::from_f32).collect();
-            converted
-        };
+        let f16_input: Vec<half::f16> = input.into_iter().map(half::f16::from_f32).collect();
         let input_tensor = Tensor::<half::f16>::from_array((input_shape, f16_input))?;
         session.run(ort::inputs![input_tensor]?)?
     } else {
@@ -159,14 +155,24 @@ pub fn run_f32_data<const N: usize>(
     input: Vec<f32>,
     input_shape: [i64; N],
 ) -> MlResult<Vec<f32>> {
-    let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
-    let outputs = session.run(ort::inputs![input_tensor]?)?;
+    let outputs = if session_expects_f16(session) {
+        let f16_input: Vec<half::f16> = input.into_iter().map(half::f16::from_f32).collect();
+        let input_tensor = Tensor::<half::f16>::from_array((input_shape, f16_input))?;
+        session.run(ort::inputs![input_tensor]?)?
+    } else {
+        let input_tensor = Tensor::<f32>::from_array((input_shape, input))?;
+        session.run(ort::inputs![input_tensor]?)?
+    };
     if outputs.is_empty() {
         return Err(MlError::Ort("missing first output tensor".to_string()));
     }
     let output = &outputs[0];
-    let tensor = output.try_extract_tensor::<f32>()?;
-    Ok(tensor.iter().copied().collect::<Vec<_>>())
+    if let Ok(tensor) = output.try_extract_tensor::<f32>() {
+        Ok(tensor.iter().copied().collect::<Vec<_>>())
+    } else {
+        let tensor = output.try_extract_tensor::<half::f16>()?;
+        Ok(tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>())
+    }
 }
 
 pub fn run_i32_f32<const N: usize>(

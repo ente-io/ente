@@ -46,12 +46,13 @@ pub fn run_pet_face_detection(
     let row_len = if output_shape.len() >= 2 {
         *output_shape.last().unwrap() as usize
     } else if output_shape.len() == 1 {
-        // Flat output: total_elements, must infer row_len
-        // Try common sizes: 13 (2-class), 12 (1-class), 11 (no class)
+        // Flat output: total_elements, must infer row_len.
+        // Prefer the smallest valid row length to avoid false matches
+        // (e.g. 143 is divisible by both 11 and 13).
         let total = output_data.len();
-        if total % 13 == 0 { 13 }
+        if total % 11 == 0 { 11 }
         else if total % 12 == 0 { 12 }
-        else if total % 11 == 0 { 11 }
+        else if total % 13 == 0 { 13 }
         else {
             return Err(MlError::Postprocess(format!(
                 "unexpected pet face detector output size: {} (shape: {:?})",
@@ -207,43 +208,6 @@ pub fn run_pet_body_detection(
     Ok(naive_nms_pet_body(detections, BODY_IOU_THRESHOLD))
 }
 
-fn correct_for_maintained_aspect_ratio_3kp(
-    box_xyxy: &mut [f32; 4],
-    keypoints: &mut [[f32; 2]; 3],
-    scaled_width: usize,
-    scaled_height: usize,
-    pad_left: usize,
-    pad_top: usize,
-) {
-    if scaled_width == INPUT_WIDTH as usize
-        && scaled_height == INPUT_HEIGHT as usize
-        && pad_left == 0
-        && pad_top == 0
-    {
-        return;
-    }
-
-    let scaled_width = scaled_width as f32;
-    let scaled_height = scaled_height as f32;
-    let pad_left = pad_left as f32;
-    let pad_top = pad_top as f32;
-
-    let transform_x =
-        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left) / scaled_width).clamp(0.0, 1.0) };
-    let transform_y =
-        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top) / scaled_height).clamp(0.0, 1.0) };
-
-    box_xyxy[0] = transform_x(box_xyxy[0]);
-    box_xyxy[1] = transform_y(box_xyxy[1]);
-    box_xyxy[2] = transform_x(box_xyxy[2]);
-    box_xyxy[3] = transform_y(box_xyxy[3]);
-
-    for point in keypoints.iter_mut() {
-        point[0] = transform_x(point[0]);
-        point[1] = transform_y(point[1]);
-    }
-}
-
 fn correct_box_for_aspect_ratio(
     box_xyxy: &mut [f32; 4],
     scaled_width: usize,
@@ -275,6 +239,35 @@ fn correct_box_for_aspect_ratio(
     box_xyxy[3] = transform_y(box_xyxy[3]);
 }
 
+fn correct_for_maintained_aspect_ratio_3kp(
+    box_xyxy: &mut [f32; 4],
+    keypoints: &mut [[f32; 2]; 3],
+    scaled_width: usize,
+    scaled_height: usize,
+    pad_left: usize,
+    pad_top: usize,
+) {
+    correct_box_for_aspect_ratio(box_xyxy, scaled_width, scaled_height, pad_left, pad_top);
+
+    if scaled_width == INPUT_WIDTH as usize
+        && scaled_height == INPUT_HEIGHT as usize
+        && pad_left == 0
+        && pad_top == 0
+    {
+        return;
+    }
+
+    let transform_x =
+        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32).clamp(0.0, 1.0) };
+    let transform_y =
+        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32).clamp(0.0, 1.0) };
+
+    for point in keypoints.iter_mut() {
+        point[0] = transform_x(point[0]);
+        point[1] = transform_y(point[1]);
+    }
+}
+
 fn calculate_iou_4(a: &[f32; 4], b: &[f32; 4]) -> f32 {
     let area_a = (a[2] - a[0]).max(0.0) * (a[3] - a[1]).max(0.0);
     let area_b = (b[2] - b[0]).max(0.0) * (b[3] - b[1]).max(0.0);
@@ -300,20 +293,26 @@ fn naive_nms_pet_face(
     iou_threshold: f32,
 ) -> Vec<PetFaceDetection> {
     detections.sort_by(|a, b| b.score.total_cmp(&a.score));
-    let mut i = 0usize;
-    while i + 1 < detections.len() {
-        let mut j = i + 1;
-        while j < detections.len() {
-            let iou = calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy);
-            if iou >= iou_threshold {
-                detections.remove(j);
-            } else {
-                j += 1;
+    let n = detections.len();
+    let mut suppressed = vec![false; n];
+    for i in 0..n {
+        if suppressed[i] {
+            continue;
+        }
+        for j in (i + 1)..n {
+            if suppressed[j] {
+                continue;
+            }
+            if calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy) >= iou_threshold {
+                suppressed[j] = true;
             }
         }
-        i += 1;
     }
     detections
+        .into_iter()
+        .zip(suppressed)
+        .filter_map(|(d, s)| if s { None } else { Some(d) })
+        .collect()
 }
 
 fn naive_nms_pet_body(
@@ -321,22 +320,28 @@ fn naive_nms_pet_body(
     iou_threshold: f32,
 ) -> Vec<PetBodyDetection> {
     detections.sort_by(|a, b| b.score.total_cmp(&a.score));
-    let mut i = 0usize;
-    while i + 1 < detections.len() {
-        let mut j = i + 1;
-        while j < detections.len() {
+    let n = detections.len();
+    let mut suppressed = vec![false; n];
+    for i in 0..n {
+        if suppressed[i] {
+            continue;
+        }
+        for j in (i + 1)..n {
+            if suppressed[j] {
+                continue;
+            }
             // Only suppress within the same COCO class so a dog and cat
             // occupying the same region are both retained.
-            if detections[i].coco_class == detections[j].coco_class {
-                let iou = calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy);
-                if iou >= iou_threshold {
-                    detections.remove(j);
-                    continue;
-                }
+            if detections[i].coco_class == detections[j].coco_class
+                && calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy) >= iou_threshold
+            {
+                suppressed[j] = true;
             }
-            j += 1;
         }
-        i += 1;
     }
     detections
+        .into_iter()
+        .zip(suppressed)
+        .filter_map(|(d, s)| if s { None } else { Some(d) })
+        .collect()
 }

@@ -102,6 +102,12 @@ pub fn run_pet_face_embedding(
             )));
         }
         let embedding_size = output.len() / batch;
+        if embedding_size == 0 || output.len() != batch * embedding_size {
+            return Err(MlError::Postprocess(format!(
+                "pet face embedding output not evenly divisible: len={}, batch={batch}",
+                output.len()
+            )));
+        }
 
         for (batch_idx, &orig_idx) in indices.iter().enumerate() {
             let start = batch_idx * embedding_size;
@@ -199,6 +205,12 @@ pub fn run_pet_body_embedding(
             )));
         }
         let embedding_size = output.len() / batch;
+        if embedding_size == 0 || output.len() != batch * embedding_size {
+            return Err(MlError::Postprocess(format!(
+                "pet body embedding output not evenly divisible: len={}, batch={batch}",
+                output.len()
+            )));
+        }
 
         for (batch_idx, &orig_idx) in indices.iter().enumerate() {
             let start = batch_idx * embedding_size;

@@ -318,6 +318,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<DBPetFace> dbPetFaces,
     List<PetFaceResult> petFaces,
   ) async {
+    assert(
+      dbPetFaces.length == petFaces.length,
+      'dbPetFaces.length (${dbPetFaces.length}) != petFaces.length (${petFaces.length})',
+    );
     try {
       final db = await asyncDB;
       // Group by species
@@ -379,6 +383,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<DBPetBody> dbPetBodies,
     List<PetBodyResult> petBodies,
   ) async {
+    assert(
+      dbPetBodies.length == petBodies.length,
+      'dbPetBodies.length (${dbPetBodies.length}) != petBodies.length (${petBodies.length})',
+    );
     try {
       final db = await asyncDB;
       // Group by species (0 = dog, 1 = cat)
@@ -2363,7 +2371,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }) async {
     final db = await asyncDB;
     final String query = '''
-      SELECT $fileIDColumn, $mlVersionColumn
+      SELECT DISTINCT $fileIDColumn, $mlVersionColumn
       FROM $petFacesTable
       WHERE $mlVersionColumn >= $minimumMlVersion
     ''';
@@ -2457,33 +2465,31 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
 
-    // Delete from ID mapping tables.
-    if (faceIdsToRemove.isNotEmpty) {
-      final placeholders =
-          List.filled(faceIdsToRemove.length, '?').join(',');
-      await db.execute(
-        'DELETE FROM $petFaceVectorIdMappingTable '
-        'WHERE $petFaceIDColumn IN ($placeholders)',
-        faceIdsToRemove,
+    // Delete mapping table entries and detection rows atomically.
+    await db.writeTransaction((tx) async {
+      if (faceIdsToRemove.isNotEmpty) {
+        final placeholders = List.filled(faceIdsToRemove.length, '?').join(',');
+        await tx.execute(
+          'DELETE FROM $petFaceVectorIdMappingTable '
+          'WHERE $petFaceIDColumn IN ($placeholders)',
+          faceIdsToRemove,
+        );
+      }
+      if (bodyIdsToRemove.isNotEmpty) {
+        final placeholders = List.filled(bodyIdsToRemove.length, '?').join(',');
+        await tx.execute(
+          'DELETE FROM $petBodyVectorIdMappingTable '
+          'WHERE $petBodyIDColumn IN ($placeholders)',
+          bodyIdsToRemove,
+        );
+      }
+      await tx.execute(
+        'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
       );
-    }
-    if (bodyIdsToRemove.isNotEmpty) {
-      final placeholders =
-          List.filled(bodyIdsToRemove.length, '?').join(',');
-      await db.execute(
-        'DELETE FROM $petBodyVectorIdMappingTable '
-        'WHERE $petBodyIDColumn IN ($placeholders)',
-        bodyIdsToRemove,
+      await tx.execute(
+        'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($ids)',
       );
-    }
-
-    // Delete the detection rows themselves.
-    await db.execute(
-      'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
-    );
-    await db.execute(
-      'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($ids)',
-    );
+    });
   }
 
   @override

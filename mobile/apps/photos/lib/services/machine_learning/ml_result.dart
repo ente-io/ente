@@ -199,12 +199,12 @@ int? tryGetFileIdFromFaceId(String faceId) {
 }
 
 class PetFaceResult {
-  late FaceDetectionRelative detection;
-  late AlignmentResult alignment;
-  late int species;
-  late Embedding embedding;
-  late int fileId;
-  late String petFaceId;
+  final FaceDetectionRelative detection;
+  final AlignmentResult alignment;
+  final int species;
+  final Embedding embedding;
+  final int fileId;
+  final String petFaceId;
 
   PetFaceResult({
     required this.fileId,
@@ -237,11 +237,11 @@ class PetFaceResult {
 }
 
 class PetBodyResult {
-  late List<double> boxXyxy;
-  late double score;
-  late int cocoClass;
-  late String petBodyId;
-  late Embedding embedding;
+  final List<double> boxXyxy;
+  final double score;
+  final int cocoClass;
+  final String petBodyId;
+  final Embedding embedding;
 
   PetBodyResult({
     required this.boxXyxy,
@@ -261,8 +261,9 @@ class PetBodyResult {
 
   static PetBodyResult fromJson(Map<String, dynamic> json) {
     return PetBodyResult(
-      boxXyxy: (json['boxXyxy'] as List).cast<double>(),
-      score: json['score'],
+      boxXyxy:
+          (json['boxXyxy'] as List).map((e) => (e as num).toDouble()).toList(),
+      score: (json['score'] as num).toDouble(),
       cocoClass: json['cocoClass'],
       petBodyId: json['petBodyId'],
       embedding: Embedding.from(json['embedding']),

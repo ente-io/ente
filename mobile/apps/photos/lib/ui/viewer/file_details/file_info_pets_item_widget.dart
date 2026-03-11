@@ -4,11 +4,13 @@ import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -39,13 +41,25 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
 
   Future<void> _loadPetFaces() async {
     try {
-      final fileKey = widget.file.uploadedFileID;
-      if (fileKey == null) {
-        if (mounted) setState(() => _isLoading = false);
-        return;
+      final bool isOffline = isOfflineMode;
+      int? fileKey;
+      if (isOffline) {
+        final localId = widget.file.localID;
+        if (localId == null || localId.isEmpty) {
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+        fileKey = await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+      } else {
+        fileKey = widget.file.uploadedFileID;
+        if (fileKey == null) {
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
       }
 
-      final dbPetFaces = await MLDataDB.instance.getPetFacesForFileID(fileKey);
+      final mlDataDB = isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+      final dbPetFaces = await mlDataDB.getPetFacesForFileID(fileKey);
       if (dbPetFaces == null || dbPetFaces.isEmpty) {
         if (mounted) setState(() => _isLoading = false);
         return;
