@@ -264,6 +264,10 @@ export const sidebar = [
                         link: "/photos/faq/account-creation",
                     },
                     {
+                        text: "Gallery Mode",
+                        link: "/photos/faq/gallery-mode",
+                    },
+                    {
                         text: "Advanced Features",
                         link: "/photos/faq/advanced-features",
                     },
@@ -274,10 +278,6 @@ export const sidebar = [
                     {
                         text: "Backup and Sync",
                         link: "/photos/faq/backup-and-sync",
-                    },
-                    {
-                        text: "Gallery Mode",
-                        link: "/photos/faq/gallery-mode",
                     },
                     {
                         text: "Metadata and Editing",
