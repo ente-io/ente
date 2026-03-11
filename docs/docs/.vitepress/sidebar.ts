@@ -96,7 +96,7 @@ export const sidebar = [
                             },
                             {
                                 text: "Gallery mode",
-                                link: "/photos/features/local-gallery",
+                                link: "/photos/features/gallery-mode",
                             },
                             {
                                 text: "Watch folders",
