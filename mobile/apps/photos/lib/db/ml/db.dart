@@ -106,6 +106,17 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetBodiesTable,
     createPetFaceVectorIdMappingTable,
     createPetBodyVectorIdMappingTable,
+    createPetIndexedFilesTable,
+    dropPetIndexedFilesTable,
+    dropPetFaceClustersTable,
+    dropPetClusterSummaryTable,
+    dropPetFacesTable, // 23: recreate with UNIQUE faceVectorId
+    createPetFacesTable,
+    dropPetBodiesTable, // 25: recreate with UNIQUE bodyVectorId
+    createPetBodiesTable,
+    createPetFaceClustersTable, // 26: recreate (dropped in step 20)
+    petFcClusterIDIndex, // 27
+    createPetClusterSummaryTable, // 28: recreate (dropped in step 21)
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,

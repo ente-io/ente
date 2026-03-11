@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::image::decode::decode_image_from_path;
 use crate::ml::{
     clip::{image::run_clip_image, text::run_clip_text_query, tokenizer::tokenize_clip_text},
@@ -5,6 +7,7 @@ use crate::ml::{
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     pet::{
         align::run_pet_face_alignment,
+        cluster::{self, ClusterConfig, PetClusterInput, Species},
         detect::{run_pet_body_detection, run_pet_face_detection},
         embed::{run_pet_body_embedding, run_pet_face_embedding},
     },
@@ -459,5 +462,151 @@ fn to_api_pet_body_result(result: crate::ml::types::PetBodyResult) -> RustPetBod
         coco_class: result.detection.coco_class,
         pet_body_id: result.pet_body_id,
         body_embedding: result.body_embedding.into_iter().map(|v| v as f64).collect(),
+    }
+}
+
+// ── Pet Clustering API ──────────────────────────────────────────────────
+
+/// A single pet face/body entry for clustering, passed from Dart.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterInput {
+    pub pet_face_id: String,
+    /// L2-normalized face embedding. Empty if no face detected.
+    pub face_embedding: Vec<f64>,
+    /// L2-normalized body embedding. Empty if no body detected.
+    pub body_embedding: Vec<f64>,
+    /// 0 = dog, 1 = cat.
+    pub species: u8,
+    pub file_id: i64,
+}
+
+/// Result entry: one pet_face_id mapped to a cluster.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterEntry {
+    pub pet_face_id: String,
+    pub cluster_id: String,
+}
+
+/// Cluster summary: centroid + count.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterSummary {
+    pub cluster_id: String,
+    pub centroid: Vec<f64>,
+    pub count: i32,
+}
+
+/// Full clustering result returned to Dart.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterResult {
+    pub assignments: Vec<RustPetClusterEntry>,
+    pub summaries: Vec<RustPetClusterSummary>,
+    pub n_unclustered: i32,
+}
+
+/// Run batch pet clustering on all provided inputs.
+pub fn run_pet_clustering_rust(
+    inputs: Vec<RustPetClusterInput>,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+
+    let cluster_inputs: Vec<PetClusterInput> = inputs
+        .into_iter()
+        .map(|i| PetClusterInput {
+            pet_face_id: i.pet_face_id,
+            face_embedding: i.face_embedding.into_iter().map(|v| v as f32).collect(),
+            body_embedding: i.body_embedding.into_iter().map(|v| v as f32).collect(),
+            species: i.species,
+            file_id: i.file_id,
+        })
+        .collect();
+
+    let result = cluster::run_pet_clustering(&cluster_inputs, &config);
+
+    Ok(to_api_cluster_result(result))
+}
+
+/// Run incremental pet clustering: assign new inputs to existing clusters,
+/// then cluster remainder among themselves.
+pub fn run_pet_clustering_incremental_rust(
+    new_inputs: Vec<RustPetClusterInput>,
+    existing_face_centroids: Vec<RustPetClusterSummary>,
+    existing_body_centroids: Vec<RustPetClusterSummary>,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+
+    let cluster_inputs: Vec<PetClusterInput> = new_inputs
+        .into_iter()
+        .map(|i| PetClusterInput {
+            pet_face_id: i.pet_face_id,
+            face_embedding: i.face_embedding.into_iter().map(|v| v as f32).collect(),
+            body_embedding: i.body_embedding.into_iter().map(|v| v as f32).collect(),
+            species: i.species,
+            file_id: i.file_id,
+        })
+        .collect();
+
+    let face_centroids: HashMap<String, Vec<f32>> = existing_face_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
+
+    let body_centroids: HashMap<String, Vec<f32>> = existing_body_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
+
+    let result = cluster::run_pet_clustering_incremental(
+        &cluster_inputs,
+        &face_centroids,
+        &body_centroids,
+        &config,
+    );
+
+    Ok(to_api_cluster_result(result))
+}
+
+fn to_api_cluster_result(result: cluster::PetClusterResult) -> RustPetClusterResult {
+    let assignments: Vec<RustPetClusterEntry> = result
+        .face_to_cluster
+        .into_iter()
+        .map(|(face_id, cluster_id)| RustPetClusterEntry {
+            pet_face_id: face_id,
+            cluster_id,
+        })
+        .collect();
+
+    let summaries: Vec<RustPetClusterSummary> = result
+        .cluster_centroids
+        .into_iter()
+        .map(|(cluster_id, centroid)| {
+            let count = result
+                .cluster_counts
+                .get(&cluster_id)
+                .copied()
+                .unwrap_or(0) as i32;
+            RustPetClusterSummary {
+                cluster_id,
+                centroid: centroid.into_iter().map(|v| v as f64).collect(),
+                count,
+            }
+        })
+        .collect();
+
+    RustPetClusterResult {
+        assignments,
+        summaries,
+        n_unclustered: result.n_unclustered as i32,
     }
 }

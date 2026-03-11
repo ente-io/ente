@@ -235,28 +235,32 @@ fn correct_box_for_aspect_ratio(
     pad_left: usize,
     pad_top: usize,
 ) {
-    if scaled_width == INPUT_WIDTH as usize
-        && scaled_height == INPUT_HEIGHT as usize
-        && pad_left == 0
-        && pad_top == 0
+    if scaled_width != INPUT_WIDTH as usize
+        || scaled_height != INPUT_HEIGHT as usize
+        || pad_left != 0
+        || pad_top != 0
     {
-        return;
+        let scaled_width = scaled_width as f32;
+        let scaled_height = scaled_height as f32;
+        let pad_left = pad_left as f32;
+        let pad_top = pad_top as f32;
+
+        let transform_x =
+            |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left) / scaled_width };
+        let transform_y =
+            |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top) / scaled_height };
+
+        box_xyxy[0] = transform_x(box_xyxy[0]);
+        box_xyxy[1] = transform_y(box_xyxy[1]);
+        box_xyxy[2] = transform_x(box_xyxy[2]);
+        box_xyxy[3] = transform_y(box_xyxy[3]);
     }
 
-    let scaled_width = scaled_width as f32;
-    let scaled_height = scaled_height as f32;
-    let pad_left = pad_left as f32;
-    let pad_top = pad_top as f32;
-
-    let transform_x =
-        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left) / scaled_width).clamp(0.0, 1.0) };
-    let transform_y =
-        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top) / scaled_height).clamp(0.0, 1.0) };
-
-    box_xyxy[0] = transform_x(box_xyxy[0]);
-    box_xyxy[1] = transform_y(box_xyxy[1]);
-    box_xyxy[2] = transform_x(box_xyxy[2]);
-    box_xyxy[3] = transform_y(box_xyxy[3]);
+    // Always clamp to [0, 1] — YOLO can predict boxes that extend beyond
+    // the image boundary, matching the Python pipeline's post-detection clamp.
+    for v in box_xyxy.iter_mut() {
+        *v = v.clamp(0.0, 1.0);
+    }
 }
 
 fn correct_for_maintained_aspect_ratio_3kp(
@@ -269,22 +273,26 @@ fn correct_for_maintained_aspect_ratio_3kp(
 ) {
     correct_box_for_aspect_ratio(box_xyxy, scaled_width, scaled_height, pad_left, pad_top);
 
-    if scaled_width == INPUT_WIDTH as usize
-        && scaled_height == INPUT_HEIGHT as usize
-        && pad_left == 0
-        && pad_top == 0
+    if scaled_width != INPUT_WIDTH as usize
+        || scaled_height != INPUT_HEIGHT as usize
+        || pad_left != 0
+        || pad_top != 0
     {
-        return;
+        let transform_x =
+            |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32 };
+        let transform_y =
+            |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32 };
+
+        for point in keypoints.iter_mut() {
+            point[0] = transform_x(point[0]);
+            point[1] = transform_y(point[1]);
+        }
     }
 
-    let transform_x =
-        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32).clamp(0.0, 1.0) };
-    let transform_y =
-        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32).clamp(0.0, 1.0) };
-
+    // Always clamp keypoints to [0, 1], matching box clamping above.
     for point in keypoints.iter_mut() {
-        point[0] = transform_x(point[0]);
-        point[1] = transform_y(point[1]);
+        point[0] = point[0].clamp(0.0, 1.0);
+        point[1] = point[1].clamp(0.0, 1.0);
     }
 }
 
