@@ -122,12 +122,15 @@ class RemoteSyncService {
     );
 
     try {
+      final canPrepareUploadsInBackground =
+          !isProcessBg || await canUseHighBandwidth();
+
       // use flag to decide if we should start marking files for upload before
       // remote-sync is done. This is done to avoid adding existing files to
       // the same or different collection when user had already uploaded them
       // before.
       final bool hasSyncedBefore = _prefs.containsKey(_isFirstRemoteSyncDone);
-      if (hasSyncedBefore) {
+      if (hasSyncedBefore && canPrepareUploadsInBackground) {
         await syncDeviceCollectionFilesForUpload();
       }
       await _pullDiff();
@@ -143,7 +146,9 @@ class RemoteSyncService {
 
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
-        await syncDeviceCollectionFilesForUpload();
+        if (canPrepareUploadsInBackground) {
+          await syncDeviceCollectionFilesForUpload();
+        }
       }
 
       if (
@@ -152,7 +157,7 @@ class RemoteSyncService {
         fileDataService.syncFDStatus().ignore();
       }
 
-      if (isProcessBg && !await canUseHighBandwidth()) {
+      if (!canPrepareUploadsInBackground) {
         throw WiFiUnavailableError();
       }
 
