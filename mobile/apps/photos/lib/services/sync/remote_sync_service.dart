@@ -37,6 +37,7 @@ import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/network_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
@@ -149,6 +150,10 @@ class RemoteSyncService {
           // We don't need syncFDStatus here if in background
           !isProcessBg) {
         fileDataService.syncFDStatus().ignore();
+      }
+
+      if (isProcessBg && !await canUseHighBandwidth()) {
+        throw WiFiUnavailableError();
       }
 
       final filesToBeUploaded = await _getFilesToBeUploaded();
