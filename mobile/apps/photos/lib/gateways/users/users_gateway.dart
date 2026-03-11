@@ -192,17 +192,8 @@ class UsersGateway {
   /// Leave the family plan.
   ///
   /// Endpoint: DELETE /family/leave
-  ///
-  /// Family management endpoints expect the dedicated `FAMILIES` JWT, not the
-  /// app session token.
-  Future<void> leaveFamilyPlan({
-    String? authToken,
-  }) async {
-    final familiesToken = authToken ?? await getFamiliesAuthToken();
-    await _enteDio.delete(
-      "/family/leave",
-      options: _familyAuthOptions(familiesToken),
-    );
+  Future<void> leaveFamilyPlan() async {
+    await _enteDio.delete("/family/leave");
   }
 
   /// Create a family with the current user as the admin.
