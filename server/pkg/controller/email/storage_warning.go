@@ -82,6 +82,14 @@ type storageWarningRunStats struct {
 	SkippedRolloutPct int
 }
 
+type storageWarningProcessResult string
+
+const (
+	storageWarningProcessResultSkipped        storageWarningProcessResult = "skipped"
+	storageWarningProcessResultSkippedRollout storageWarningProcessResult = "skipped_rollout"
+	storageWarningProcessResultSent           storageWarningProcessResult = "sent"
+)
+
 var storageWarningStageOrder = []string{
 	string(expiredWarningStage30),
 	string(expiredWarningStage60),
@@ -196,27 +204,7 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 		if storageWarningShouldPreserveActiveOverageHistory(snapshot) {
 			preserveActiveOverageHistoryRecipientIDs[snapshot.RecipientID] = struct{}{}
 		}
-		candidateType := "individual"
-		if candidate.IsFamilyPlan {
-			candidateType = "family"
-		}
-		if !isInStorageWarningRollout(snapshot.RecipientID, snapshot.AccountEmail) {
-			skippedRolloutPct++
-			stats.SkippedRolloutPct++
-			log.WithFields(log.Fields{
-				"recipient_id":     snapshot.RecipientID,
-				"account_email":    snapshot.AccountEmail,
-				"candidate_type":   candidateType,
-				"rollout_nonce":    storageWarningRolloutNonce,
-				"rollout_percent":  storageWarningRolloutPercentage,
-				"rollout_reason":   "percentage",
-				"is_family_plan":   snapshot.IsFamilyPlan,
-				"rollout_included": false,
-			}).Info("Skipping storage warning email due to rollout")
-			skipped++
-			continue
-		}
-		sentNow, skippedNow, err := c.processStorageWarningSnapshot(snapshot)
+		result, err := c.processStorageWarningSnapshot(snapshot)
 		if err != nil {
 			failed++
 			stage := storageWarningStageKey(snapshot)
@@ -228,11 +216,17 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 			failedByBucket[snapshot.Bucket]++
 			continue
 		}
-		if skippedNow {
+		if result == storageWarningProcessResultSkipped {
 			skipped++
 			continue
 		}
-		if sentNow {
+		if result == storageWarningProcessResultSkippedRollout {
+			skipped++
+			skippedRolloutPct++
+			stats.SkippedRolloutPct++
+			continue
+		}
+		if result == storageWarningProcessResultSent {
 			sent++
 			stats.SentEmails++
 			if stage := storageWarningStageKey(snapshot); stage != "" {
@@ -412,23 +406,23 @@ func (c *EmailNotificationController) decorateStorageWarningSnapshot(snapshot st
 	return snapshot, nil
 }
 
-func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot storageWarningSnapshot) (sent bool, skipped bool, err error) {
+func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot storageWarningSnapshot) (storageWarningProcessResult, error) {
 	logger := log.WithFields(log.Fields{
 		"recipient_id":   snapshot.RecipientID,
 		"is_family_plan": snapshot.IsFamilyPlan,
 	})
 	if snapshot.Bucket == storageWarningBucketNone {
-		return false, true, nil
+		return storageWarningProcessResultSkipped, nil
 	}
 
 	templateID, templateName, subject, ok := storageWarningTemplateDetails(snapshot)
 	if !ok {
 		logger.WithField("bucket", snapshot.Bucket).Warn("Skipping storage warning due to unknown bucket")
-		return false, true, nil
+		return storageWarningProcessResultSkipped, nil
 	}
 
 	if storageWarningTemplateSentInCycle(snapshot.NotificationHistory, templateID, snapshot.WarningCycleStart) {
-		return false, true, nil
+		return storageWarningProcessResultSkipped, nil
 	}
 	if cadenceBroken, cadenceAlert := storageWarningCadenceBroken(snapshot); cadenceBroken {
 		logger.WithFields(log.Fields{
@@ -440,7 +434,7 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		if c.DiscordController != nil {
 			c.DiscordController.NotifyAdminAction(cadenceAlert)
 		}
-		return false, true, nil
+		return storageWarningProcessResultSkipped, nil
 	}
 
 	templateData := map[string]interface{}{
@@ -483,8 +477,15 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 		"template_id":                   templateID,
 		"template_filename":             templateName,
 	})
+	if !isInStorageWarningRollout(snapshot.RecipientID, snapshot.AccountEmail) {
+		logger.WithFields(log.Fields{
+			"rollout_reason":   "percentage",
+			"rollout_included": false,
+		}).Info("Skipping storage warning email due to rollout")
+		return storageWarningProcessResultSkippedRollout, nil
+	}
 
-	err = emailUtil.SendTemplatedEmailV2(
+	err := emailUtil.SendTemplatedEmailV2(
 		[]string{snapshot.AccountEmail},
 		storageWarningFromName,
 		storageWarningFromEmail,
@@ -496,16 +497,16 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(snapshot sto
 	)
 	if err != nil {
 		logger.WithError(err).Error("Failed to send storage warning email")
-		return false, false, err
+		return storageWarningProcessResultSkipped, err
 	}
 
 	if err := c.NotificationHistoryRepo.SetLastNotificationTimeToNowWithGroup(snapshot.RecipientID, templateID, storageWarningNotificationGroup(snapshot.Bucket)); err != nil {
 		logger.WithError(err).Error("Failed to persist storage warning history")
-		return false, false, err
+		return storageWarningProcessResultSkipped, err
 	}
 
 	logger.Info("Sent storage warning email")
-	return true, false, nil
+	return storageWarningProcessResultSent, nil
 }
 
 func computeStorageWarningMetrics(subscription *ente.Subscription, activeBonuses *bonus.ActiveStorageBonus, totalUsage int64, now int64) storageWarningMetrics {

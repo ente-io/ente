@@ -9,6 +9,8 @@ import (
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/ente-io/museum/pkg/utils/time"
+	log "github.com/sirupsen/logrus"
+	logtest "github.com/sirupsen/logrus/hooks/test"
 )
 
 func TestBucketStorageWarningActiveOverage(t *testing.T) {
@@ -499,6 +501,52 @@ func TestStorageWarningTemplateDetailsActiveOverage(t *testing.T) {
 	}
 	if templateID != storageWarningActiveOverage60TemplateID || templateName != storageWarningActiveOverageTemplate || subject != storageWarningActiveOverage60Subject {
 		t.Fatalf("unexpected active overage template details: %q %q %q", templateID, templateName, subject)
+	}
+}
+
+func TestProcessStorageWarningSnapshotSkipsDueToRolloutAfterTemplateSelection(t *testing.T) {
+	standardLogger := log.StandardLogger()
+	originalHooks := standardLogger.ReplaceHooks(make(log.LevelHooks))
+	hook := logtest.NewGlobal()
+	defer standardLogger.ReplaceHooks(originalHooks)
+
+	snapshot := storageWarningSnapshot{
+		RecipientID:      12345,
+		AccountEmail:     "user@example.com",
+		TotalUsage:       storageWarningOverageThreshold + 10,
+		AllottedStorage:  0,
+		AvailableStorage: -10,
+		Bucket:           storageWarningBucketExpired,
+		ExpiredStage:     expiredWarningStage30,
+		EffectiveExpiry:  1,
+	}
+
+	result, err := (&EmailNotificationController{}).processStorageWarningSnapshot(snapshot)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result != storageWarningProcessResultSkippedRollout {
+		t.Fatalf("unexpected result: got %q want %q", result, storageWarningProcessResultSkippedRollout)
+	}
+
+	entry := hook.LastEntry()
+	if entry == nil {
+		t.Fatal("expected rollout skip log entry")
+	}
+	if entry.Message != "Skipping storage warning email due to rollout" {
+		t.Fatalf("unexpected log message: %q", entry.Message)
+	}
+	if got := entry.Data["template_id"]; got != storageWarningExpired30TemplateID {
+		t.Fatalf("unexpected template id in log: got %v want %q", got, storageWarningExpired30TemplateID)
+	}
+	if got := entry.Data["template_filename"]; got != storageWarningExpiredTemplate {
+		t.Fatalf("unexpected template filename in log: got %v want %q", got, storageWarningExpiredTemplate)
+	}
+	if got := entry.Data["subject"]; got != storageWarningExpired30Subject {
+		t.Fatalf("unexpected subject in log: got %v want %q", got, storageWarningExpired30Subject)
+	}
+	if got := entry.Data["rollout_included"]; got != false {
+		t.Fatalf("unexpected rollout flag in log: got %v want false", got)
 	}
 }
 
