@@ -578,6 +578,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final imageDimensions = decodedImage.dimensions;
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = imageDimensions;
+    if (!runFaces) result.faces = null;
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
 
@@ -782,6 +783,11 @@ Future<MLResult> analyzeImageRust(Map args) async {
       width: rustResult.decodedImageSize.width,
       height: rustResult.decodedImageSize.height,
     );
+
+    // Nullify faces/clip when their pipelines were not requested so that
+    // facesRan/clipRan correctly report false and processImage does not
+    // overwrite existing remote embeddings with empty payloads.
+    if (!runFaces) result.faces = null;
 
     if (runFaces) {
       final rustFaces = rustResult.faces ?? const <rust_ml.RustFaceResult>[];
