@@ -19,5 +19,5 @@
 - Laurens: Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
-- Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
+- Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled
