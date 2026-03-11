@@ -123,7 +123,8 @@ pub fn run_pet_face_alignment(
 
         let normalized = aligned_face_to_tensor(&aligned_rgb);
 
-        let pet_face_id = to_face_id(file_id, detection.box_xyxy);
+        let base_id = to_face_id(file_id, detection.box_xyxy);
+        let pet_face_id = format!("{base_id}_c{}", detection.class_id);
 
         let center_x = (left_eye[0] + right_eye[0]) / 2.0;
         let center_y = (left_eye[1] + right_eye[1]) / 2.0;
