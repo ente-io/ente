@@ -78,12 +78,13 @@ type storageWarningMetrics struct {
 }
 
 type storageWarningRunStats struct {
-	ProcessedUsers    int
-	SentEmails        int
-	SuccessByStage    map[string]int
-	FailureByStage    map[string]int
-	PreStageFailures  int
-	SkippedRolloutPct int
+	ProcessedUsers        int
+	SentEmails            int
+	SuccessByStage        map[string]int
+	FailureByStage        map[string]int
+	SkippedRolloutByStage map[string]int
+	PreStageFailures      int
+	SkippedRolloutPct     int
 }
 
 type storageWarningProcessResult string
@@ -110,19 +111,22 @@ var storageWarningStageOrder = []string{
 func newStorageWarningRunStats() storageWarningRunStats {
 	successByStage := make(map[string]int, len(storageWarningStageOrder))
 	failureByStage := make(map[string]int, len(storageWarningStageOrder))
+	skippedRolloutByStage := make(map[string]int, len(storageWarningStageOrder))
 	for _, stage := range storageWarningStageOrder {
 		successByStage[stage] = 0
 		failureByStage[stage] = 0
+		skippedRolloutByStage[stage] = 0
 	}
 	return storageWarningRunStats{
-		SuccessByStage: successByStage,
-		FailureByStage: failureByStage,
+		SuccessByStage:        successByStage,
+		FailureByStage:        failureByStage,
+		SkippedRolloutByStage: skippedRolloutByStage,
 	}
 }
 
-func hasAnyStorageWarningStageSuccess(successByStage map[string]int) bool {
+func hasAnyStorageWarningStageCount(counts map[string]int) bool {
 	for _, stage := range storageWarningStageOrder {
-		if successByStage[stage] > 0 {
+		if counts[stage] > 0 {
 			return true
 		}
 	}
@@ -139,12 +143,13 @@ func formatStorageWarningStageCounts(counts map[string]int) string {
 
 func buildStorageWarningRunSummary(stats storageWarningRunStats, runAt int64) string {
 	return fmt.Sprintf(
-		"Storage warning run summary (%s): processed=%d sent=%d | success={%s} | failures={%s} | pre_stage_failures=%d | skipped_rollout_percentage=%d | rollout_percentage=%d",
+		"Storage warning run summary (%s): processed=%d sent=%d | success={%s} | failures={%s} | skipped_rollout={%s} | pre_stage_failures=%d | skipped_rollout_percentage=%d | rollout_percentage=%d",
 		stdtime.UnixMicro(runAt).UTC().Format(stdtime.RFC3339),
 		stats.ProcessedUsers,
 		stats.SentEmails,
 		formatStorageWarningStageCounts(stats.SuccessByStage),
 		formatStorageWarningStageCounts(stats.FailureByStage),
+		formatStorageWarningStageCounts(stats.SkippedRolloutByStage),
 		stats.PreStageFailures,
 		stats.SkippedRolloutPct,
 		storageWarningRolloutPercentage,
@@ -230,6 +235,9 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 			skipped++
 			skippedRolloutPct++
 			stats.SkippedRolloutPct++
+			if stage := storageWarningStageKey(snapshot); stage != "" {
+				stats.SkippedRolloutByStage[stage]++
+			}
 			continue
 		}
 		if result == storageWarningProcessResultSent {
@@ -257,14 +265,15 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 		"failed_active_overage":      failedByBucket[storageWarningBucketActiveOverage],
 		"stage_success":              stats.SuccessByStage,
 		"stage_failures":             stats.FailureByStage,
+		"stage_skipped_rollout":      stats.SkippedRolloutByStage,
 		"pre_stage_failures":         stats.PreStageFailures,
 		"skipped_rollout_percentage": skippedRolloutPct,
-		"has_stage_movements":        hasAnyStorageWarningStageSuccess(stats.SuccessByStage),
+		"has_stage_movements":        hasAnyStorageWarningStageCount(stats.SuccessByStage),
 		"rollout_percentage":         storageWarningRolloutPercentage,
 		"rollout_nonce":              storageWarningRolloutNonce,
 	}).Info("Storage warning mail run completed")
 
-	if c.DiscordController != nil && hasAnyStorageWarningStageSuccess(stats.SuccessByStage) {
+	if c.DiscordController != nil && (hasAnyStorageWarningStageCount(stats.SuccessByStage) || hasAnyStorageWarningStageCount(stats.SkippedRolloutByStage)) {
 		c.DiscordController.NotifyAdminAction(buildStorageWarningRunSummary(stats, now))
 	}
 }
@@ -490,10 +499,6 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(ctx context.
 		"template_filename":             templateName,
 	})
 	if !isInStorageWarningRollout(snapshot.RecipientID, snapshot.AccountEmail) {
-		logger.WithFields(log.Fields{
-			"rollout_reason":   "percentage",
-			"rollout_included": false,
-		}).Info("Skipping storage warning email due to rollout")
 		return storageWarningProcessResultSkippedRollout, nil
 	}
 	if storageWarningShouldResetUserAccess(snapshot) {

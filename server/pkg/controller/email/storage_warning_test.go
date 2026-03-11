@@ -669,7 +669,7 @@ func TestStorageWarningTemplateDetailsActiveOverage(t *testing.T) {
 	}
 }
 
-func TestProcessStorageWarningSnapshotSkipsDueToRolloutAfterTemplateSelection(t *testing.T) {
+func TestProcessStorageWarningSnapshotSkipsDueToRolloutWithoutPerRecipientLog(t *testing.T) {
 	standardLogger := log.StandardLogger()
 	originalHooks := standardLogger.ReplaceHooks(make(log.LevelHooks))
 	hook := logtest.NewGlobal()
@@ -694,24 +694,8 @@ func TestProcessStorageWarningSnapshotSkipsDueToRolloutAfterTemplateSelection(t 
 		t.Fatalf("unexpected result: got %q want %q", result, storageWarningProcessResultSkippedRollout)
 	}
 
-	entry := hook.LastEntry()
-	if entry == nil {
-		t.Fatal("expected rollout skip log entry")
-	}
-	if entry.Message != "Skipping storage warning email due to rollout" {
-		t.Fatalf("unexpected log message: %q", entry.Message)
-	}
-	if got := entry.Data["template_id"]; got != storageWarningExpired30TemplateID {
-		t.Fatalf("unexpected template id in log: got %v want %q", got, storageWarningExpired30TemplateID)
-	}
-	if got := entry.Data["template_filename"]; got != storageWarningExpiredTemplate {
-		t.Fatalf("unexpected template filename in log: got %v want %q", got, storageWarningExpiredTemplate)
-	}
-	if got := entry.Data["subject"]; got != storageWarningExpired30Subject {
-		t.Fatalf("unexpected subject in log: got %v want %q", got, storageWarningExpired30Subject)
-	}
-	if got := entry.Data["rollout_included"]; got != false {
-		t.Fatalf("unexpected rollout flag in log: got %v want false", got)
+	if entry := hook.LastEntry(); entry != nil {
+		t.Fatalf("expected no per-recipient rollout log, got %q", entry.Message)
 	}
 }
 
@@ -722,11 +706,12 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats.SuccessByStage[string(expiredWarningStage30)] = 1
 	stats.SuccessByStage[string(activeOverageWarningStage0)] = 2
 	stats.FailureByStage[string(activeOverageWarningStage60)] = 1
+	stats.SkippedRolloutByStage[string(expiredWarningStage60)] = 39
 	stats.PreStageFailures = 4
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_30d=1, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | failures={expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0, active_overage_scheduled_deletion=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_30d=1, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | failures={expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0, active_overage_scheduled_deletion=0} | skipped_rollout={expired_30d=0, expired_60d=39, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
 	}
