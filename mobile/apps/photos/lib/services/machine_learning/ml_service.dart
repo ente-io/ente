@@ -709,15 +709,19 @@ class MLService {
           e,
           s,
         );
-        await mlDataDB.bulkInsertFaces(
-          [Face.empty(instruction.fileKey, error: true)],
-        );
-        if (instruction.isOffline) {
-          await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
-        } else {
-          await SemanticSearchService.instance.storeEmptyClipImageResult(
-            instruction.file,
+        if (instruction.shouldRunFaces) {
+          await mlDataDB.bulkInsertFaces(
+            [Face.empty(instruction.fileKey, error: true)],
           );
+        }
+        if (instruction.shouldRunClip) {
+          if (instruction.isOffline) {
+            await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
+          } else {
+            await SemanticSearchService.instance.storeEmptyClipImageResult(
+              instruction.file,
+            );
+          }
         }
         if (instruction.shouldRunPets) {
           await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
