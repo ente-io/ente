@@ -1,9 +1,9 @@
 ---
-title: Local Gallery FAQ
+title: Gallery FAQ
 description: Frequently asked questions about using Ente Photos in offline mode without an account
 ---
 
-# Local Gallery
+# Gallery
 
 ## Getting Started {#getting-started}
 
@@ -82,7 +82,7 @@ ML indexing is processor-intensive. Once initial indexing completes, battery usa
 
 ## Related topics
 
-- [Local gallery feature guide](/photos/features/local-gallery)
+- [Gallery feature guide](/photos/features/local-gallery)
 - [Machine learning](/photos/features/search-and-discovery/machine-learning)
 - [Face recognition](/photos/features/search-and-discovery/face-recognition)
 - [Backup and sync](/photos/features/backup-and-sync/) (after signing up)

@@ -1,11 +1,11 @@
 ---
-title: Local gallery (offline mode)
-description: Use Ente Photos as a local gallery app without an account
+title: Gallery (offline mode)
+description: Use Ente Photos as a gallery app without an account
 ---
 
-# Local gallery (offline mode)
+# Gallery (offline mode)
 
-Ente Photos can be used as a local gallery app on your phone without creating an account. This is called **offline mode**. It gives you a private, on-device photo gallery with smart features like face recognition and natural language search, all without uploading anything to the cloud.
+Ente Photos can be used as a gallery app on your phone without creating an account. This is called **offline mode**. It gives you a private, on-device photo gallery with smart features like face recognition and natural language search, all without uploading anything to the cloud.
 
 > **Availability**: Offline mode is available on the **Ente Photos mobile app** (iOS and Android).
 
