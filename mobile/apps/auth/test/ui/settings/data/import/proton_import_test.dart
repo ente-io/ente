@@ -108,7 +108,7 @@ Map<String, dynamic> _createEncryptedExport(
   final nonce = Uint8List.fromList(
     List<int>.generate(12, (index) => index + 31),
   );
-  final derivedKey = _deriveProtonPasswordKey(password, salt);
+  final derivedKey = deriveProtonPasswordKeyForTesting(password, salt);
 
   final cipher = GCMBlockCipher(AESEngine())
     ..init(
@@ -117,7 +117,7 @@ Map<String, dynamic> _createEncryptedExport(
         KeyParameter(derivedKey),
         128,
         nonce,
-        Uint8List.fromList(utf8.encode('proton.authenticator.export.v1')),
+        Uint8List.fromList(utf8.encode(protonExportAadForTesting)),
       ),
     );
   final encryptedBytes = cipher.process(
@@ -130,21 +130,4 @@ Map<String, dynamic> _createEncryptedExport(
     'salt': base64Encode(salt),
     'content': base64Encode(payload),
   };
-}
-
-Uint8List _deriveProtonPasswordKey(String password, Uint8List salt) {
-  final generator = Argon2BytesGenerator()
-    ..init(
-      Argon2Parameters(
-        Argon2Parameters.ARGON2_id,
-        salt,
-        desiredKeyLength: 32,
-        iterations: 2,
-        memory: 19 * 1024,
-        lanes: 1,
-        version: Argon2Parameters.ARGON2_VERSION_13,
-      ),
-    );
-
-  return generator.process(Uint8List.fromList(utf8.encode(password)));
 }
