@@ -58,11 +58,11 @@ pub fn run_pet_face_alignment(
             continue;
         }
 
-        // Absolute bounding box (clamped)
-        let box_x1 = (detection.box_xyxy[0] * img_wf).max(0.0) as i32;
-        let box_y1 = (detection.box_xyxy[1] * img_hf).max(0.0) as i32;
-        let box_x2 = (detection.box_xyxy[2] * img_wf).min(img_wf) as i32;
-        let box_y2 = (detection.box_xyxy[3] * img_hf).min(img_hf) as i32;
+        // Absolute bounding box (clamped to image bounds on both sides)
+        let box_x1 = (detection.box_xyxy[0] * img_wf).clamp(0.0, img_wf) as i32;
+        let box_y1 = (detection.box_xyxy[1] * img_hf).clamp(0.0, img_hf) as i32;
+        let box_x2 = (detection.box_xyxy[2] * img_wf).clamp(0.0, img_wf) as i32;
+        let box_y2 = (detection.box_xyxy[3] * img_hf).clamp(0.0, img_hf) as i32;
 
         let angle_deg = dy.atan2(dx).to_degrees();
         let angle_rad = dy.atan2(dx);
