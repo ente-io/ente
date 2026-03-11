@@ -277,7 +277,7 @@ export const sidebar = [
                     },
                     {
                         text: "Gallery Mode",
-                        link: "/photos/faq/local-gallery",
+                        link: "/photos/faq/gallery-mode",
                     },
                     {
                         text: "Metadata and Editing",
