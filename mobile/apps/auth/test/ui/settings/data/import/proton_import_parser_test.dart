@@ -7,26 +7,49 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Proton import parser', () {
     test('parses plaintext Proton exports from fixture', () async {
-      final exportJson = decodeProtonExportJson(
-        await _fixture('proton_authenticator_backup.json').readAsString(),
-      );
-
-      final codes = parseProtonExport(exportJson);
+      final codes = await _loadPlaintextFixtureCodes();
 
       expect(codes, hasLength(4));
-
-      expect(codes.first.type, Type.totp);
-      expect(codes.first.issuer, 'Userlane Realm');
-      expect(codes.first.account, 'sean.hickey+2fa@userlane.com');
-
-      expect(codes[1].issuer, 'john.appleseed@example.org');
-      expect(codes[1].account, 'john.appleseed@example.org');
-
-      expect(codes[2].issuer, 'Simplesat');
-      expect(codes[2].account, 'ravin@prontomarketing.com');
-
-      expect(codes[3].issuer, 'Gemini');
-      expect(codes[3].account, 'dele@countersoft.com');
+      _assertCode(
+        codes[0],
+        type: Type.totp,
+        issuer: '.env',
+        account: 'example@ente.io',
+        secret: 'MI4GCOJSGIZTKLJSGMZWKLJUGEZDQLJYG5STILJSMUYDIYTCMQ3TSOJRGI',
+        algorithm: Algorithm.sha1,
+        digits: 6,
+        period: 30,
+      );
+      _assertCode(
+        codes[1],
+        type: Type.totp,
+        issuer: '/e/',
+        account: 'cool@ente.com',
+        secret: '554VBDOGJRLDG2JV',
+        algorithm: Algorithm.sha1,
+        digits: 6,
+        period: 30,
+      );
+      _assertCode(
+        codes[2],
+        type: Type.totp,
+        issuer: 'ente',
+        account: 'simple@ente.sh',
+        secret: 'PIBTGMBYQYVSLN5PVZYQUTKYHOBRYYT7',
+        algorithm: Algorithm.sha1,
+        digits: 6,
+        period: 30,
+      );
+      _assertCode(
+        codes[3],
+        type: Type.totp,
+        issuer: 'reddit',
+        account: 'r@ente.com',
+        secret: 'J4YFC3TZKVYWCVCNIVBWIV2GHFAXUNDF',
+        algorithm: Algorithm.sha1,
+        digits: 6,
+        period: 30,
+      );
     });
 
     test('decrypts password protected Proton exports from fixture', () async {
@@ -42,11 +65,15 @@ void main() {
         encryptedJson,
         password: '1231246',
       );
-      final codes = parseProtonExport(decodeProtonExportJson(decryptedJson));
+      final decryptedCodes =
+          parseProtonExport(decodeProtonExportJson(decryptedJson));
+      final plaintextCodes = await _loadPlaintextFixtureCodes();
 
-      expect(codes, hasLength(4));
-      expect(codes.first.issuer, 'Userlane Realm');
-      expect(codes.last.issuer, 'Gemini');
+      expect(decryptedCodes, hasLength(4));
+      expect(decryptedCodes, hasLength(plaintextCodes.length));
+      for (var index = 0; index < plaintextCodes.length; index++) {
+        expect(decryptedCodes[index], plaintextCodes[index]);
+      }
     });
 
     test('fails to decrypt password protected Proton exports with bad password',
@@ -59,10 +86,36 @@ void main() {
 
       expect(
         () => decryptProtonExport(encryptedJson, password: 'wrong-password'),
-        throwsA(isA<Exception>()),
+        throwsA(isA<IncorrectProtonExportPasswordException>()),
       );
     });
   });
+}
+
+Future<List<Code>> _loadPlaintextFixtureCodes() async {
+  final exportJson = decodeProtonExportJson(
+    await _fixture('proton_authenticator_backup.json').readAsString(),
+  );
+  return parseProtonExport(exportJson);
+}
+
+void _assertCode(
+  Code code, {
+  required Type type,
+  required String issuer,
+  required String account,
+  required String secret,
+  required Algorithm algorithm,
+  required int digits,
+  required int period,
+}) {
+  expect(code.type, type);
+  expect(code.issuer, issuer);
+  expect(code.account, account);
+  expect(code.secret, secret);
+  expect(code.algorithm, algorithm);
+  expect(code.digits, digits);
+  expect(code.period, period);
 }
 
 File _fixture(String name) => File(

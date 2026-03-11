@@ -14,12 +14,22 @@ const _protonExportAad = 'proton.authenticator.export.v1';
 
 final _logger = Logger('ProtonImportParser');
 
+class IncorrectProtonExportPasswordException implements Exception {
+  const IncorrectProtonExportPasswordException();
+
+  @override
+  String toString() => 'Incorrect password';
+}
+
 Map<String, dynamic> decodeProtonExportJson(String jsonString) {
   final decodedJson = jsonDecode(jsonString);
   if (decodedJson is! Map) {
     throw const FormatException('Invalid Proton export');
   }
-  return Map<String, dynamic>.from(decodedJson);
+
+  final exportJson = Map<String, dynamic>.from(decodedJson);
+  _validateProtonExportVersion(exportJson);
+  return exportJson;
 }
 
 bool isEncryptedProtonExport(Map<String, dynamic> decodedJson) {
@@ -105,6 +115,7 @@ String decryptProtonExport(
   Map<String, dynamic> decodedJson, {
   required String password,
 }) {
+  _validateProtonExportVersion(decodedJson);
   if (!isEncryptedProtonExport(decodedJson)) {
     throw const FormatException('Invalid Proton export');
   }
@@ -140,7 +151,12 @@ String decryptProtonExport(
       ),
     );
 
-  final decryptedBytes = cipher.process(cipherText);
+  late final Uint8List decryptedBytes;
+  try {
+    decryptedBytes = cipher.process(cipherText);
+  } on InvalidCipherTextException {
+    throw const IncorrectProtonExportPasswordException();
+  }
   return utf8.decode(decryptedBytes);
 }
 
@@ -167,4 +183,10 @@ Uint8List _deriveProtonPasswordKey(String password, Uint8List salt) {
     );
 
   return generator.process(Uint8List.fromList(utf8.encode(password)));
+}
+
+void _validateProtonExportVersion(Map<String, dynamic> decodedJson) {
+  if (decodedJson['version'] != _protonExportVersion) {
+    throw const FormatException('Invalid Proton export');
+  }
 }

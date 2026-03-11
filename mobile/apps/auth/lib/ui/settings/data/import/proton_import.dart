@@ -100,30 +100,42 @@ Future<int?> _processProtonExportFile(
 
   if (isEncryptedProtonExport(decodedJson)) {
     await dialog.hide();
-    final password = await _promptForProtonExportPassword(context);
-    if (password == null) {
-      return null;
-    }
+    while (true) {
+      final password = await _promptForProtonExportPassword(context);
+      if (password == null) {
+        return null;
+      }
 
-    await dialog.show();
-    try {
-      final decryptedJsonString = await compute(
-        _decryptProtonExportInBackground,
-        {
-          'jsonString': jsonString,
-          'password': password,
-        },
-      );
-      decodedJson = decodeProtonExportJson(decryptedJsonString);
-    } catch (e, s) {
-      Logger('ProtonImport').warning('Failed to decrypt Proton export', e, s);
-      await dialog.hide();
-      await showErrorDialog(
-        context,
-        context.l10n.incorrectPasswordTitle,
-        context.l10n.pleaseCheckPasswordAndTryAgain,
-      );
-      return null;
+      await dialog.show();
+      try {
+        final decryptedJsonResult = await compute(
+          _decryptProtonExportInBackground,
+          {
+            'jsonString': jsonString,
+            'password': password,
+          },
+        );
+        switch (decryptedJsonResult['status']) {
+          case 'incorrect_password':
+            await dialog.hide();
+            await showErrorDialog(
+              context,
+              context.l10n.incorrectPasswordTitle,
+              context.l10n.pleaseCheckPasswordAndTryAgain,
+            );
+            continue;
+          case 'ok':
+            decodedJson =
+                decodeProtonExportJson(decryptedJsonResult['jsonString']!);
+            break;
+          default:
+            throw StateError('Unexpected Proton decrypt result status');
+        }
+        break;
+      } catch (e, s) {
+        Logger('ProtonImport').warning('Failed to decrypt Proton export', e, s);
+        rethrow;
+      }
     }
   }
 
@@ -136,7 +148,9 @@ Future<int?> _processProtonExportFile(
   return parsedCodes.length;
 }
 
-String _decryptProtonExportInBackground(Map<String, String> params) {
+Map<String, String> _decryptProtonExportInBackground(
+  Map<String, String> params,
+) {
   final jsonString = params['jsonString'];
   final password = params['password'];
   if (jsonString == null || password == null) {
@@ -144,24 +158,26 @@ String _decryptProtonExportInBackground(Map<String, String> params) {
   }
 
   final decodedJson = decodeProtonExportJson(jsonString);
-  return decryptProtonExport(decodedJson, password: password);
+  try {
+    return {
+      'status': 'ok',
+      'jsonString': decryptProtonExport(decodedJson, password: password),
+    };
+  } on IncorrectProtonExportPasswordException {
+    return {'status': 'incorrect_password'};
+  }
 }
 
 Future<String?> _promptForProtonExportPassword(BuildContext context) async {
-  final password = Completer<String?>();
+  String? password;
   await showTextInputDialog(
     context,
     title: context.l10n.passwordForDecryptingExport,
     submitButtonLabel: context.l10n.submit,
     isPasswordInput: true,
     onSubmit: (value) async {
-      if (!password.isCompleted) {
-        password.complete(value);
-      }
+      password = value;
     },
   );
-  if (!password.isCompleted) {
-    return null;
-  }
-  return password.future;
+  return password;
 }
