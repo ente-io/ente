@@ -406,11 +406,71 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 	return nil
 }
 
+// RemoveTokensForApps marks the given app tokens as deleted and evicts them from the auth cache.
+func (c *UserController) RemoveTokensForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	tokenCacheKeys, err := c.activeTokenCacheKeysForApps(userID, apps)
+	if err != nil {
+		return err
+	}
+	if err := c.UserAuthRepo.RemoveTokensForApps(userID, apps); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	c.deleteTokenCacheKeys(tokenCacheKeys)
+	return nil
+}
+
+func (c *UserController) RemoveAllTokens(userID int64) error {
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	tokenCacheKeys, err := c.activeTokenCacheKeysForApps(userID, apps)
+	if err != nil {
+		return err
+	}
+	if err = c.UserAuthRepo.RemoveAllTokens(userID); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	c.deleteTokenCacheKeys(tokenCacheKeys)
+	return nil
+}
+
 // TerminateSession removes the token for a user from cache and database
 func (c *UserController) TerminateSession(userID int64, token string) error {
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Photos, token))
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Auth, token))
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	for _, app := range apps {
+		c.Cache.Delete(fmt.Sprintf("%s:%s", app, token))
+	}
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
+}
+
+func (c *UserController) activeTokenCacheKeysForApps(userID int64, apps []ente.App) ([]string, error) {
+	if len(apps) == 0 {
+		return nil, nil
+	}
+	tokenCacheKeys := make([]string, 0)
+	for _, app := range apps {
+		sessions, err := c.UserAuthRepo.GetActiveSessions(userID, app)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to get active sessions")
+		}
+		for _, session := range sessions {
+			tokenCacheKeys = append(tokenCacheKeys, fmt.Sprintf("%s:%s", app, session.Token))
+		}
+	}
+	return tokenCacheKeys, nil
+}
+
+func (c *UserController) deleteTokenCacheKeys(tokenCacheKeys []string) {
+	for _, cacheKey := range tokenCacheKeys {
+		c.Cache.Delete(cacheKey)
+	}
 }
 
 func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) error {
