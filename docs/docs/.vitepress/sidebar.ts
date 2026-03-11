@@ -17,6 +17,10 @@ export const sidebar = [
                     },
                     { text: "Sign up", link: "/photos/getting-started/signup" },
                     {
+                        text: "Gallery mode",
+                        link: "/photos/getting-started/gallery-mode",
+                    },
+                    {
                         text: "Migration",
                         link: "/photos/getting-started/migration",
                     },
@@ -93,10 +97,6 @@ export const sidebar = [
                             {
                                 text: "Overview",
                                 link: "/photos/features/backup-and-sync/",
-                            },
-                            {
-                                text: "Gallery mode",
-                                link: "/photos/features/gallery-mode",
                             },
                             {
                                 text: "Watch folders",
