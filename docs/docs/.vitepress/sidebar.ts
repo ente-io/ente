@@ -95,7 +95,7 @@ export const sidebar = [
                                 link: "/photos/features/backup-and-sync/",
                             },
                             {
-                                text: "Gallery",
+                                text: "Gallery mode",
                                 link: "/photos/features/local-gallery",
                             },
                             {
@@ -276,7 +276,7 @@ export const sidebar = [
                         link: "/photos/faq/backup-and-sync",
                     },
                     {
-                        text: "Gallery",
+                        text: "Gallery Mode",
                         link: "/photos/faq/local-gallery",
                     },
                     {
