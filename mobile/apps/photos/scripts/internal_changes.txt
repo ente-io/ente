@@ -9,3 +9,5 @@ Still behind internal flag:
 - Laurens: (I) Use rust indexing ML pipeline for internal users
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
+- Prateek: (i) Enable BG sync notifications by default for internal users on iOS
+- Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled
