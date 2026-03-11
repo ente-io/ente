@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ente_auth/models/code.dart';
@@ -19,6 +20,11 @@ void main() {
         algorithm: Algorithm.sha1,
         digits: 6,
         period: 30,
+        rawData: _expectedStoredTotpRawData(
+          issuer: '.env',
+          account: 'example@ente.io',
+          secret: 'MI4GCOJSGIZTKLJSGMZWKLJUGEZDQLJYG5STILJSMUYDIYTCMQ3TSOJRGI',
+        ),
       );
       _assertCode(
         codes[1],
@@ -29,6 +35,11 @@ void main() {
         algorithm: Algorithm.sha1,
         digits: 6,
         period: 30,
+        rawData: _expectedStoredTotpRawData(
+          issuer: '/e/',
+          account: 'cool@ente.com',
+          secret: '554VBDOGJRLDG2JV',
+        ),
       );
       _assertCode(
         codes[2],
@@ -39,6 +50,11 @@ void main() {
         algorithm: Algorithm.sha1,
         digits: 6,
         period: 30,
+        rawData: _expectedStoredTotpRawData(
+          issuer: 'ente',
+          account: 'simple@ente.sh',
+          secret: 'PIBTGMBYQYVSLN5PVZYQUTKYHOBRYYT7',
+        ),
       );
       _assertCode(
         codes[3],
@@ -49,6 +65,11 @@ void main() {
         algorithm: Algorithm.sha1,
         digits: 6,
         period: 30,
+        rawData: _expectedStoredTotpRawData(
+          issuer: 'reddit',
+          account: 'r@ente.com',
+          secret: 'J4YFC3TZKVYWCVCNIVBWIV2GHFAXUNDF',
+        ),
       );
     });
 
@@ -108,6 +129,7 @@ void _assertCode(
   required Algorithm algorithm,
   required int digits,
   required int period,
+  required String rawData,
 }) {
   expect(code.type, type);
   expect(code.issuer, issuer);
@@ -116,8 +138,25 @@ void _assertCode(
   expect(code.algorithm, algorithm);
   expect(code.digits, digits);
   expect(code.period, period);
+  expect(code.rawData, rawData);
 }
 
 File _fixture(String name) => File(
       'test/ui/settings/data/import/fixtures/$name',
     );
+
+String _expectedStoredTotpRawData({
+  required String issuer,
+  required String account,
+  required String secret,
+}) {
+  final encodedIssuer = Uri.encodeComponent(issuer);
+  final encodedAccount = Uri.encodeComponent(account);
+  final otpUrl = 'otpauth://totp/$encodedIssuer:$encodedAccount?secret=$secret'
+      '&issuer=$encodedIssuer'
+      '&algorithm=SHA1'
+      '&digits=6'
+      '&period=30';
+  final code = Code.fromOTPAuthUrl(otpUrl);
+  return jsonDecode(code.toOTPAuthUrlFormat()) as String;
+}

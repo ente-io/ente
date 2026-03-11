@@ -88,7 +88,7 @@ List<Code> parseProtonExport(Map<String, dynamic> decodedJson) {
           if (otpUri == null || !otpUri.startsWith('otpauth://')) {
             continue;
           }
-          code = Code.fromOTPAuthUrl(otpUri);
+          code = _parseProtonTotpCode(otpUri);
           break;
         default:
           _logger.warning('Unsupported Proton entry type: $entryType');
@@ -102,7 +102,7 @@ List<Code> parseProtonExport(Map<String, dynamic> decodedJson) {
         );
       }
 
-      parsedCodes.add(code);
+      parsedCodes.add(_serializeImportedCode(code));
     } catch (e, s) {
       _logger.warning('Failed to parse Proton export entry', e, s);
     }
@@ -189,4 +189,22 @@ void _validateProtonExportVersion(Map<String, dynamic> decodedJson) {
   if (decodedJson['version'] != _protonExportVersion) {
     throw const FormatException('Invalid Proton export');
   }
+}
+
+Code _parseProtonTotpCode(String otpUri) {
+  final parsedCode = Code.fromOTPAuthUrl(otpUri);
+  final encodedIssuer = Uri.encodeComponent(parsedCode.issuer);
+  final encodedAccount = Uri.encodeComponent(parsedCode.account);
+  final otpUrl =
+      'otpauth://totp/$encodedIssuer:$encodedAccount?secret=${parsedCode.secret}'
+      '&issuer=$encodedIssuer'
+      '&algorithm=${parsedCode.algorithm.name.toUpperCase()}'
+      '&digits=${parsedCode.digits}'
+      '&period=${parsedCode.period}';
+  return _serializeImportedCode(Code.fromOTPAuthUrl(otpUrl));
+}
+
+Code _serializeImportedCode(Code code) {
+  final serializedRawData = jsonDecode(code.toOTPAuthUrlFormat()) as String;
+  return Code.fromOTPAuthUrl(serializedRawData);
 }

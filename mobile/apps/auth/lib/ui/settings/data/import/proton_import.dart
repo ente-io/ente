@@ -57,8 +57,6 @@ Future<void> _pickProtonJsonFile(BuildContext context) async {
   }
 
   final progressDialog = createProgressDialog(context, l10n.pleaseWait);
-  await progressDialog.show();
-
   try {
     final path = result.files.single.path!;
     final count = await _processProtonExportFile(context, path, progressDialog);
@@ -99,7 +97,6 @@ Future<int?> _processProtonExportFile(
   }
 
   if (isEncryptedProtonExport(decodedJson)) {
-    await dialog.hide();
     while (true) {
       final password = await _promptForProtonExportPassword(context);
       if (password == null) {
@@ -137,6 +134,8 @@ Future<int?> _processProtonExportFile(
         rethrow;
       }
     }
+  } else {
+    await dialog.show();
   }
 
   final parsedCodes = parseProtonExport(decodedJson);
