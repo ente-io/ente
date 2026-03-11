@@ -134,6 +134,10 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> releaseRustRuntime() async {
+    // Reset so the next indexing run re-enters ensureDownloadedModels,
+    // which checks bandwidth and downloads any newly required models
+    // (e.g. pet models after toggling pet recognition on).
+    areModelsDownloaded = false;
     if (!_shouldUseRustMl) {
       return;
     }

@@ -2391,6 +2391,93 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     if (fileIDs.isEmpty) return;
     final db = await asyncDB;
     final ids = fileIDs.join(", ");
+
+    // Collect vector IDs grouped by species before deleting rows,
+    // so we can remove them from the usearch indexes and mapping tables.
+    final faceRows = await db.getAll(
+      'SELECT $petFaceIDColumn, $faceVectorIdColumn, $speciesColumn '
+      'FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
+    );
+    final bodyRows = await db.getAll(
+      'SELECT $petBodyIDColumn, $bodyVectorIdColumn, $speciesColumn '
+      'FROM $petBodiesTable WHERE $fileIDColumn IN ($ids)',
+    );
+
+    // Group face vector IDs by species for targeted vector DB deletion.
+    final faceVidsBySpecies = <int, List<int>>{};
+    final faceIdsToRemove = <String>[];
+    for (final row in faceRows) {
+      final vid = row[faceVectorIdColumn] as int?;
+      final petFaceId = row[petFaceIDColumn] as String;
+      faceIdsToRemove.add(petFaceId);
+      if (vid != null) {
+        final species = row[speciesColumn] as int;
+        faceVidsBySpecies.putIfAbsent(species, () => []);
+        faceVidsBySpecies[species]!.add(vid);
+      }
+    }
+
+    // Group body vector IDs by species.
+    final bodyVidsBySpecies = <int, List<int>>{};
+    final bodyIdsToRemove = <String>[];
+    for (final row in bodyRows) {
+      final vid = row[bodyVectorIdColumn] as int?;
+      final petBodyId = row[petBodyIDColumn] as String;
+      bodyIdsToRemove.add(petBodyId);
+      if (vid != null) {
+        final species = row[speciesColumn] as int;
+        bodyVidsBySpecies.putIfAbsent(species, () => []);
+        bodyVidsBySpecies[species]!.add(vid);
+      }
+    }
+
+    // Delete from usearch vector indexes.
+    for (final entry in faceVidsBySpecies.entries) {
+      try {
+        final vdb = PetVectorDB.forModel(
+          species: entry.key,
+          isFace: true,
+          offline: _isOffline,
+        );
+        await vdb.deleteEmbeddings(entry.value);
+      } catch (e, s) {
+        _logger.warning("Failed to delete pet face vectors", e, s);
+      }
+    }
+    for (final entry in bodyVidsBySpecies.entries) {
+      try {
+        final vdb = PetVectorDB.forModel(
+          species: entry.key,
+          isFace: false,
+          offline: _isOffline,
+        );
+        await vdb.deleteEmbeddings(entry.value);
+      } catch (e, s) {
+        _logger.warning("Failed to delete pet body vectors", e, s);
+      }
+    }
+
+    // Delete from ID mapping tables.
+    if (faceIdsToRemove.isNotEmpty) {
+      final placeholders =
+          List.filled(faceIdsToRemove.length, '?').join(',');
+      await db.execute(
+        'DELETE FROM $petFaceVectorIdMappingTable '
+        'WHERE $petFaceIDColumn IN ($placeholders)',
+        faceIdsToRemove,
+      );
+    }
+    if (bodyIdsToRemove.isNotEmpty) {
+      final placeholders =
+          List.filled(bodyIdsToRemove.length, '?').join(',');
+      await db.execute(
+        'DELETE FROM $petBodyVectorIdMappingTable '
+        'WHERE $petBodyIDColumn IN ($placeholders)',
+        bodyIdsToRemove,
+      );
+    }
+
+    // Delete the detection rows themselves.
     await db.execute(
       'DELETE FROM $petFacesTable WHERE $fileIDColumn IN ($ids)',
     );
