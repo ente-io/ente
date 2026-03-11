@@ -313,7 +313,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   /// Store pet face embeddings into PetVectorDB after SQLite insert.
-  /// Failure is logged but does not block indexing.
   Future<void> storePetFaceEmbeddings(
     List<DBPetFace> dbPetFaces,
     List<PetFaceResult> petFaces,
@@ -374,11 +373,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     } catch (e, s) {
       _logger.severe("Failed to store pet face embeddings in vector DB", e, s);
+      rethrow;
     }
   }
 
   /// Store pet body embeddings into PetVectorDB after SQLite insert.
-  /// Failure is logged but does not block indexing.
   Future<void> storePetBodyEmbeddings(
     List<DBPetBody> dbPetBodies,
     List<PetBodyResult> petBodies,
@@ -443,6 +442,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         e,
         s,
       );
+      rethrow;
     }
   }
 

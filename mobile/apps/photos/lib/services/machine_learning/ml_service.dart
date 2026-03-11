@@ -732,10 +732,15 @@ class MLService {
         return true;
       }
       _logger.severe(
-        "Failed to index file for fileID ${instruction.fileKey} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file for fileID ${instruction.fileKey} (format $format, type $fileType, size $size). Cleaning up partial results so the file will be automatically retried later.",
         e,
         s,
       );
+      // Clean up any pet rows that were already committed before the
+      // failure so the file is not treated as fully indexed.
+      if (instruction.shouldRunPets) {
+        await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
+      }
       return false;
     }
   }
