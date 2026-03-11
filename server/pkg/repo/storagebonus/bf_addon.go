@@ -67,7 +67,7 @@ func (r *Repository) UpdateAddOnBonus(ctx context.Context, bonusType storagebonu
 }
 
 func _validate(bonusType storagebonus.BonusType) error {
-	if bonusType == storagebonus.AddOnBf2023 || bonusType == storagebonus.AddOnBf2024 || bonusType == storagebonus.AddOnSupport {
+	if bonusType == storagebonus.AddOnBf2023 || bonusType == storagebonus.AddOnBf2024 || bonusType == storagebonus.AddOnSupport || bonusType == storagebonus.AddOnNonProfit {
 		return nil
 	}
 	return fmt.Errorf("invalid bonus type: %s", bonusType)

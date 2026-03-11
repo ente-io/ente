@@ -119,8 +119,8 @@ func (u SupportUpdateBonus) UpdateLog() string {
 }
 
 func (u SupportUpdateBonus) Validate() error {
-	isSupportBonus := u.BonusType == "ADD_ON_SUPPORT"
-	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_BF_2023" && u.BonusType != "ADD_ON_BF_2024" {
+	usesFlexibleAddOnRules := u.BonusType == "ADD_ON_SUPPORT" || u.BonusType == "ADD_ON_NON_PROFIT"
+	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_NON_PROFIT" && u.BonusType != "ADD_ON_BF_2023" && u.BonusType != "ADD_ON_BF_2024" {
 		return errors.New("invalid bonus type")
 	}
 	if u.Action == ADD || u.Action == UPDATE {
@@ -129,7 +129,7 @@ func (u SupportUpdateBonus) Validate() error {
 				return errors.New("invalid input, set in MB and minute for test")
 			}
 		} else {
-			if isSupportBonus {
+			if usesFlexibleAddOnRules {
 				if u.Year == 0 || u.Year > 100 {
 					return errors.New("invalid input for year, only 1-100")
 				}
