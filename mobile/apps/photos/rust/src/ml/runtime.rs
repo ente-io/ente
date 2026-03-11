@@ -282,8 +282,18 @@ fn policy_compatible(existing: &RuntimeState, requested: &ExecutionProviderPolic
 }
 
 pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
+    ensure_runtime_inner(config, false)
+}
+
+/// When `mark_as_fallback` is true the installed runtime is atomically
+/// tagged with `fell_back_to_cpu = true` inside the same write lock,
+/// preventing a concurrent caller from observing an un-tagged CPU runtime
+/// and replacing it with a hardware EP runtime before the flag is set.
+fn ensure_runtime_inner(config: &MlRuntimeConfig, mark_as_fallback: bool) -> MlResult<()> {
     // Fast path: check under read lock whether the current runtime can serve.
-    {
+    // Skip the fast path when marking a fallback — we need the write lock to
+    // set `fell_back_to_cpu` atomically.
+    if !mark_as_fallback {
         let guard = read_runtime();
         if let Some(existing) = guard.as_ref()
             && policy_compatible(existing, &config.provider_policy)
@@ -303,6 +313,13 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
             if policy_compatible(existing, &config.provider_policy)
                 && existing.config.model_paths.can_serve(&config.model_paths)
             {
+                // Runtime already compatible — just ensure the fallback
+                // flag is set when requested.
+                if mark_as_fallback
+                    && let Some(state) = guard.as_mut()
+                {
+                    state.fell_back_to_cpu = true;
+                }
                 return Ok(());
             }
             // If we previously fell back to CPU, keep the CPU-only policy
@@ -328,7 +345,7 @@ pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
     *guard = Some(RuntimeState {
         config: merged,
         runtime,
-        fell_back_to_cpu: preserve_fallback,
+        fell_back_to_cpu: preserve_fallback || mark_as_fallback,
     });
     Ok(())
 }
@@ -361,16 +378,10 @@ where
 
             let fallback_config = cpu_only_runtime_config(config);
             rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
-            ensure_runtime(&fallback_config)?;
-
-            // Mark that the hardware EP failed so future ensure_runtime
-            // calls reuse the CPU-only runtime instead of rebuilding.
-            {
-                let mut guard = write_runtime();
-                if let Some(state) = guard.as_mut() {
-                    state.fell_back_to_cpu = true;
-                }
-            }
+            // Install the CPU-only runtime and atomically mark it as a
+            // fallback so concurrent callers see `fell_back_to_cpu = true`
+            // immediately and don't rebuild a hardware EP runtime.
+            ensure_runtime_inner(&fallback_config, true)?;
 
             {
                 let guard = read_runtime();
