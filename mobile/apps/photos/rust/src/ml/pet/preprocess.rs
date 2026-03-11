@@ -89,10 +89,10 @@ pub fn extract_crop(
     let img_w = decoded.dimensions.width;
     let img_h = decoded.dimensions.height;
 
-    let x1 = (box_xyxy[0] * img_w as f32).round().max(0.0) as u32;
-    let y1 = (box_xyxy[1] * img_h as f32).round().max(0.0) as u32;
-    let x2 = (box_xyxy[2] * img_w as f32).round().min(img_w as f32) as u32;
-    let y2 = (box_xyxy[3] * img_h as f32).round().min(img_h as f32) as u32;
+    let x1 = (box_xyxy[0] * img_w as f32).round().clamp(0.0, img_w as f32) as u32;
+    let y1 = (box_xyxy[1] * img_h as f32).round().clamp(0.0, img_h as f32) as u32;
+    let x2 = (box_xyxy[2] * img_w as f32).round().clamp(0.0, img_w as f32) as u32;
+    let y2 = (box_xyxy[3] * img_h as f32).round().clamp(0.0, img_h as f32) as u32;
 
     let crop_w = x2.saturating_sub(x1);
     let crop_h = y2.saturating_sub(y1);
