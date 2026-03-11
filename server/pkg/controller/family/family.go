@@ -97,7 +97,7 @@ func (c *Controller) FetchMembersForAdminID(ctx context.Context, familyAdminID i
 	}, nil
 }
 
-func (c *Controller) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {
+func (c *Controller) ResetUserFamilyAccess(ctx context.Context, userID int64, logger *logrus.Entry) error {
 	user, err := c.UserRepo.Get(userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -122,6 +122,10 @@ func (c *Controller) HandleAccountDeletion(ctx context.Context, userID int64, lo
 		}
 	}
 	return nil
+}
+
+func (c *Controller) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {
+	return c.ResetUserFamilyAccess(ctx, userID, logger)
 }
 
 func (c *Controller) removeMembers(ctx context.Context, adminID int64, logger *logrus.Entry) error {
