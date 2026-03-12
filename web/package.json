@@ -36,7 +36,8 @@
     },
     "resolutions": {
         "@types/react": "^19.2.2",
-        "@types/react-dom": "^19.2.2"
+        "@types/react-dom": "^19.2.2",
+        "base-x": "5.0.1"
     },
     "devDependencies": {
         "concurrently": "^9.2.1",
