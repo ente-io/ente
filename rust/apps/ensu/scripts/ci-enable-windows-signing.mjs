@@ -16,6 +16,14 @@ if (!endpoint || !accountName || !profileName) {
 }
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+if (config.tauri && typeof config.tauri === "object" && config.bundle && typeof config.bundle === "object") {
+    config.tauri.bundle = {
+        ...(config.tauri.bundle || {}),
+        ...config.bundle,
+    };
+    delete config.bundle;
+}
+
 const bundleConfig = config.bundle ?? config.tauri?.bundle;
 if (!bundleConfig || typeof bundleConfig !== "object") {
     throw new Error(`Unable to locate bundle config in ${configPath}`);

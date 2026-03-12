@@ -11,6 +11,27 @@ const endpoint = (
 ).trim();
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+if (config.tauri && typeof config.tauri === "object") {
+    if (config.bundle && typeof config.bundle === "object") {
+        config.tauri.bundle = {
+            ...(config.tauri.bundle || {}),
+            ...config.bundle,
+        };
+        delete config.bundle;
+    }
+
+    if (config.plugins?.updater && typeof config.plugins.updater === "object") {
+        config.tauri.updater = {
+            ...(config.tauri.updater || {}),
+            ...config.plugins.updater,
+        };
+        delete config.plugins.updater;
+        if (Object.keys(config.plugins).length === 0) {
+            delete config.plugins;
+        }
+    }
+}
+
 if (!config.tauri && config.bundle && typeof config.bundle === "object") {
     config.bundle.createUpdaterArtifacts = true;
 }
