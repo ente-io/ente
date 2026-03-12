@@ -76,6 +76,7 @@ type PublicMemoryShareResponse struct {
 // PublicMemoryShareFile combines file data with its re-encrypted key for public access
 type PublicMemoryShareFile struct {
 	File               File   `json:"file"`
+	Position           int64  `json:"position"`
 	EncryptedKey       string `json:"encryptedKey"`
 	KeyDecryptionNonce string `json:"keyDecryptionNonce"`
 }

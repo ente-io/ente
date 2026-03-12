@@ -77,6 +77,7 @@ func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int6
 
 		publicFile := ente.PublicMemoryShareFile{
 			File:               *file,
+			Position:           sf.Position,
 			EncryptedKey:       sf.EncryptedKey,
 			KeyDecryptionNonce: sf.KeyDecryptionNonce,
 		}
