@@ -650,6 +650,11 @@
   resolved "https://registry.npmjs.org/@fontsource/cormorant-garamond/-/cormorant-garamond-5.2.11.tgz"
   integrity sha512-5JjpN023lhA5soijgVT0BdRGzmlijm402ppjccMd6h+vRE0mX2lJnE+41UPfnlidrkV9/rCo1mf58WZlHnB0CA==
 
+"@fontsource/itim@^5.2.7":
+  version "5.2.7"
+  resolved "https://registry.yarnpkg.com/@fontsource/itim/-/itim-5.2.7.tgz#c966f5d12688057821599f8a2b9f6342bb661251"
+  integrity sha512-ssx6eGnPXJ1grG1/nWjZWvv0bMvCHOf6L7iRqA00Hz0QGukZjETH6tJV7ps/998YdhHFgCQ8KzsBHwQrsNt7EQ==
+
 "@fontsource/jetbrains-mono@^5.2.7":
   version "5.2.8"
   resolved "https://registry.npmjs.org/@fontsource/jetbrains-mono/-/jetbrains-mono-5.2.8.tgz"
