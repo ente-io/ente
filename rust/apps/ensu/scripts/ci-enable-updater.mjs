@@ -11,19 +11,31 @@ const endpoint = (
 ).trim();
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-config.bundle = config.bundle || {};
-config.bundle.createUpdaterArtifacts = true;
+if (!config.tauri && config.bundle && typeof config.bundle === "object") {
+    config.bundle.createUpdaterArtifacts = true;
+}
 
 if (pubkey) {
-    config.plugins = config.plugins || {};
-    config.plugins.updater = {
-        pubkey,
-        endpoints: [endpoint],
-    };
-    console.log(`Enabled updater artifacts + updater plugin config in ${configPath}`);
+    if (config.tauri && typeof config.tauri === "object") {
+        config.tauri.updater = {
+            ...(config.tauri.updater || {}),
+            active: true,
+            dialog: false,
+            pubkey,
+            endpoints: [endpoint],
+        };
+    } else {
+        config.plugins = config.plugins || {};
+        config.plugins.updater = {
+            ...(config.plugins.updater || {}),
+            pubkey,
+            endpoints: [endpoint],
+        };
+    }
+    console.log(`Enabled updater config in ${configPath}`);
 } else {
     console.log(
-        `Enabled updater artifacts in ${configPath} (ENSU_TAURI_UPDATER_PUBKEY not set, leaving updater plugin config unchanged)`,
+        `No updater key configured for ${configPath}; leaving updater config unchanged`,
     );
 }
 

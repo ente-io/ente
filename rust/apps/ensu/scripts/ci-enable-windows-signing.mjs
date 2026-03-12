@@ -16,11 +16,15 @@ if (!endpoint || !accountName || !profileName) {
 }
 
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-config.bundle = config.bundle || {};
-config.bundle.windows = config.bundle.windows || {};
+const bundleConfig = config.bundle ?? config.tauri?.bundle;
+if (!bundleConfig || typeof bundleConfig !== "object") {
+    throw new Error(`Unable to locate bundle config in ${configPath}`);
+}
+
+bundleConfig.windows = bundleConfig.windows || {};
 
 const signerBinary = trustedSigningCliPath || "trusted-signing-cli";
-config.bundle.windows.signCommand = {
+bundleConfig.windows.signCommand = {
     cmd: signerBinary,
     args: [
         "-e",
