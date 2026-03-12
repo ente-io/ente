@@ -444,7 +444,7 @@ const invokeChat = async <T>(
     command: string,
     args?: Record<string, unknown>,
 ) => {
-    const { invoke } = await import("@tauri-apps/api/core");
+    const { invoke } = await import("@tauri-apps/api/tauri");
     return invoke<T>(command, args);
 };
 
@@ -987,7 +987,7 @@ const attachmentDir = async () => {
 
     _attachmentDir ??= (async () => {
         const { appDataDir, join } = await import("@tauri-apps/api/path");
-        const { mkdir: createDir } = await import("@tauri-apps/plugin-fs");
+        const { createDir } = await import("@tauri-apps/api/fs");
         const root = await appDataDir();
         const dir = await join(root, "ensu_llmchat_attachments");
         await createDir(dir, { recursive: true });
@@ -1005,9 +1005,9 @@ const attachmentPath = async (id: string) => {
 
 export const writeAttachmentBytes = async (id: string, data: Uint8Array) => {
     if (isTauriRuntime()) {
-        const { writeFile } = await import("@tauri-apps/plugin-fs");
+        const { writeBinaryFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
-        await writeFile(path, data);
+        await writeBinaryFile({ path, contents: data });
         return;
     }
 
@@ -1027,9 +1027,9 @@ export const storeEncryptedAttachmentBytes = async (
 
 export const readAttachmentBytes = async (id: string): Promise<Uint8Array> => {
     if (isTauriRuntime()) {
-        const { readFile } = await import("@tauri-apps/plugin-fs");
+        const { readBinaryFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
-        return readFile(path);
+        return readBinaryFile(path);
     }
 
     const db = await chatDb();
@@ -1061,7 +1061,7 @@ export const readDecryptedAttachmentBytes = async (
 
 export const attachmentBytesExists = async (id: string): Promise<boolean> => {
     if (isTauriRuntime()) {
-        const { exists } = await import("@tauri-apps/plugin-fs");
+        const { exists } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
         return exists(path);
     }
@@ -1073,10 +1073,10 @@ export const attachmentBytesExists = async (id: string): Promise<boolean> => {
 
 export const deleteAttachmentBytes = async (id: string) => {
     if (isTauriRuntime()) {
-        const { remove } = await import("@tauri-apps/plugin-fs");
+        const { removeFile } = await import("@tauri-apps/api/fs");
         const path = await attachmentPath(id);
         try {
-            await remove(path);
+            await removeFile(path);
         } catch {
             // ignore missing files
         }
