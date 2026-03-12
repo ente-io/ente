@@ -802,7 +802,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       await metadataController.initialize().timeout(const Duration(seconds: 4));
       final value = metadataController.value;
       final probeAspectRatio = value.aspectRatio;
-      if ((aspectRatio == null || aspectRatio == 1) && probeAspectRatio > 0) {
+      // Always prefer the probed aspect ratio over file metadata dimensions,
+      // because AVPlayer correctly accounts for video rotation metadata.
+      // Raw file width/height may not reflect rotation (e.g. a portrait video
+      // stored as 1920x1080 with 90° rotation).
+      if (probeAspectRatio > 0) {
         aspectRatio = probeAspectRatio;
       }
       final durationInMilliseconds = value.duration.inMilliseconds;
