@@ -180,17 +180,23 @@ pub fn run_pet_body_detection(
         let row = &output_data[start..(start + row_len)];
         let obj_conf = row[4];
 
-        // Each anchor represents a single object — pick the best pet class.
-        let cat_score = row[5 + COCO_CAT as usize] * obj_conf;
-        let dog_score = row[5 + COCO_DOG as usize] * obj_conf;
-        let (class_score, class_id) = if dog_score >= cat_score {
-            (dog_score, COCO_DOG)
-        } else {
-            (cat_score, COCO_CAT)
-        };
+        // Find the winning class across all 80 COCO classes and only
+        // keep detections whose predicted class is cat (15) or dog (16).
+        let class_logits = &row[5..85];
+        let (best_cls, best_logit) = class_logits
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .unwrap();
+        let best_cls = best_cls as u8;
+        if best_cls != COCO_CAT && best_cls != COCO_DOG {
+            continue;
+        }
+        let class_score = best_logit * obj_conf;
         if class_score < BODY_MIN_SCORE {
             continue;
         }
+        let class_id = best_cls;
 
         let x_min_abs = row[0] - row[2] / 2.0;
         let y_min_abs = row[1] - row[3] / 2.0;
