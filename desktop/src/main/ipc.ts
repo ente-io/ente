@@ -10,12 +10,13 @@
 
 import type { FSWatcher } from "chokidar";
 import type { BrowserWindow } from "electron";
-import { ipcMain } from "electron/main";
+import { ipcMain, safeStorage } from "electron/main";
 import type {
     CollectionMapping,
     FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    PersistedAppLockConfig,
     UtilityProcessType,
     ZipItem,
 } from "../types/ipc";
@@ -53,8 +54,11 @@ import {
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import {
+    appLockConfigFromSafeStorage,
+    clearAppLockConfigFromSafeStorage,
     lastShownChangelogVersion,
     masterKeyFromSafeStorage,
+    saveAppLockConfigInSafeStorage,
     saveMasterKeyInSafeStorage,
     setLastShownChangelogVersion,
 } from "./services/store";
@@ -75,6 +79,32 @@ import {
     watchUpdateSyncedFiles,
 } from "./services/watch";
 import { triggerCreateUtilityProcess } from "./services/workers";
+
+const parsePersistedAppLockConfig = (
+    config: unknown,
+): PersistedAppLockConfig => {
+    if (!config || typeof config !== "object") {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    const { enabled, lockType, autoLockTimeMs } = config as Record<
+        string,
+        unknown
+    >;
+    if (
+        typeof enabled !== "boolean" ||
+        (lockType !== "pin" &&
+            lockType !== "password" &&
+            lockType !== "device" &&
+            lockType !== "none") ||
+        typeof autoLockTimeMs !== "number" ||
+        !Number.isFinite(autoLockTimeMs)
+    ) {
+        throw new Error("Invalid persisted app lock config");
+    }
+
+    return { enabled, lockType, autoLockTimeMs };
+};
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -118,6 +148,22 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("saveMasterKeyInSafeStorage", (_, masterKey: string) =>
         saveMasterKeyInSafeStorage(masterKey),
+    );
+
+    ipcMain.handle("isSafeStorageAvailable", (): boolean =>
+        safeStorage.isEncryptionAvailable(),
+    );
+
+    ipcMain.handle("appLockConfigFromSafeStorage", () =>
+        appLockConfigFromSafeStorage(),
+    );
+
+    ipcMain.handle("saveAppLockConfigInSafeStorage", (_, config: unknown) =>
+        saveAppLockConfigInSafeStorage(parsePersistedAppLockConfig(config)),
+    );
+
+    ipcMain.handle("clearAppLockConfigFromSafeStorage", () =>
+        clearAppLockConfigFromSafeStorage(),
     );
 
     ipcMain.handle("lastShownChangelogVersion", () =>
