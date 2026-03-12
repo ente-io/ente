@@ -589,10 +589,10 @@ Yes! Switching between monthly and yearly billing works the same as upgrading or
 
 The same prorating calculation applies as described above.
 
-### If I subscribed to a plan with a reference code and a discount, and then need to upgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
+### If I subscribed to a plan with a reference code and a discount, and then need to upgrade/downgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
 
 The referral bonus remains, and the discount stays valid for 12 months even on
-an upgraded plan. The amount is prorated.
+an upgraded/downgraded plan. The amount is prorated.
 
 ### How can I update my payment method? {#update-payment}
 
