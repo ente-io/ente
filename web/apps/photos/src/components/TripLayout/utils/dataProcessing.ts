@@ -1,6 +1,10 @@
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName, fileLocation } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import React from "react";
 
 import type { JourneyPoint } from "../types";
@@ -43,7 +47,7 @@ export const processPhotosData = ({
                     name: finalName,
                     country: finalCountry,
                     timestamp: new Date(
-                        file.metadata.creationTime / 1000,
+                        fileCreationTime(file) / 1000,
                     ).toISOString(),
                     image: "",
                     fileId: file.id,
