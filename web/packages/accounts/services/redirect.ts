@@ -13,6 +13,7 @@ export const appHomeRoute: string = {
     share: "/" /* The locker public app also doesn't use this. */,
     photos: "/gallery",
     ensu: "/",
+    locker: "/locker",
 }[appName];
 
 let _stashedRedirect: string | undefined;
