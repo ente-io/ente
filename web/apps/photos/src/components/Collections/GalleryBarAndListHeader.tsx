@@ -1,6 +1,6 @@
 // TODO: Audit this file
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { AllPeople, type PeopleSortBy } from "components/Collections/AllPeople";
+import { AllPeople } from "components/Collections/AllPeople";
 import {
     CollectionShare,
     type CollectionShareIntent,
@@ -14,6 +14,10 @@ import {
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
+import {
+    sortPeople,
+    type PeopleSortBy,
+} from "ente-new/photos/components/PeopleSortOptions";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -45,6 +49,8 @@ type GalleryBarAndListHeaderProps = Omit<
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
+    | "peopleSortBy"
+    | "onChangePeopleSortBy"
     | "onShowAllAlbums"
     | "onShowAllPeople"
 > & {
@@ -173,6 +179,10 @@ export const GalleryBarAndListHeader: React.FC<
             ).sort((a, b) => b.sortPriority - a.sortPriority),
         [collectionsSortBy, toShowCollectionSummaries],
     );
+    const sortedPeople = useMemo(
+        () => sortPeople(people, peopleSortBy),
+        [people, peopleSortBy],
+    );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
         const group = saveGroups.find(
@@ -278,13 +288,15 @@ export const GalleryBarAndListHeader: React.FC<
                     mode,
                     onChangeMode,
                     activeCollectionID,
-                    people,
+                    people: sortedPeople,
                     activePerson,
                     onSelectPerson,
                     collectionsSortBy,
+                    peopleSortBy,
                 }}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
+                onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
                 onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter(
@@ -305,7 +317,7 @@ export const GalleryBarAndListHeader: React.FC<
             />
             <AllPeople
                 {...allPeopleVisibilityProps}
-                people={people}
+                people={sortedPeople}
                 onSelectPerson={onSelectPerson}
                 peopleSortBy={peopleSortBy}
                 onChangePeopleSortBy={setPeopleSortBy}

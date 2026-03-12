@@ -1,6 +1,4 @@
 // TODO: Audit this file.
-import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -9,26 +7,20 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import SortIcon from "@mui/icons-material/Sort";
 import {
     Box,
     Dialog,
     DialogContent,
     DialogTitle,
     Divider,
-    IconButton,
     InputAdornment,
-    MenuItem,
     Stack,
     TextField,
     Tooltip,
     Typography,
     styled,
     useMediaQuery,
-    type IconButtonProps,
-    type PaperProps,
 } from "@mui/material";
-import Menu, { type MenuProps } from "@mui/material/Menu";
 import { FilledIconButton } from "ente-base/components/mui";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import {
@@ -38,6 +30,10 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useBaseContext } from "ente-base/context";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
+import {
+    PeopleSortOptions,
+    type PeopleSortBy,
+} from "ente-new/photos/components/PeopleSortOptions";
 import {
     ItemCard,
     LargeTileButton,
@@ -68,12 +64,6 @@ import {
     areEqual,
     type ListChildComponentProps,
 } from "react-window";
-
-export type PeopleSortBy =
-    | "count-desc"
-    | "count-asc"
-    | "name-asc"
-    | "name-desc";
 
 interface AllPeopleProps {
     open: boolean;
@@ -132,21 +122,16 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
         });
     };
 
-    const sortedPeople = useMemo(
-        () => [...people].sort(personComparator(peopleSortBy)),
-        [people, peopleSortBy],
-    );
-
     const filteredPeople = useMemo(() => {
         if (!searchTerm.trim()) {
-            return sortedPeople;
+            return people;
         }
 
         const searchLower = searchTerm.toLowerCase();
-        return sortedPeople.filter((person) =>
+        return people.filter((person) =>
             person.name?.toLowerCase().includes(searchLower),
         );
-    }, [searchTerm, sortedPeople]);
+    }, [searchTerm, people]);
 
     return (
         <>
@@ -348,194 +333,6 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
         />
     );
 };
-
-type PeopleSortCategory = "name" | "count";
-
-const getPeopleSortCategory = (sortBy: PeopleSortBy): PeopleSortCategory =>
-    sortBy.startsWith("name") ? "name" : "count";
-
-const isPeopleSortAscending = (sortBy: PeopleSortBy) => sortBy.endsWith("asc");
-
-const getPeopleSortBy = (
-    category: PeopleSortCategory,
-    ascending: boolean,
-): PeopleSortBy => `${category}-${ascending ? "asc" : "desc"}` as PeopleSortBy;
-
-interface PeopleSortOptionsProps {
-    activeSortBy: PeopleSortBy;
-    onChangeSortBy: (by: PeopleSortBy) => void;
-    nestedInDialog?: boolean;
-    transparentTriggerButtonBackground?: boolean;
-}
-
-const PeopleSortOptions: React.FC<PeopleSortOptionsProps> = ({
-    activeSortBy,
-    onChangeSortBy,
-    nestedInDialog,
-    transparentTriggerButtonBackground,
-}) => {
-    const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
-    const pendingSortByRef = useRef<PeopleSortBy | undefined>(undefined);
-    const ariaID = "people-sort";
-
-    const activeCategory = getPeopleSortCategory(activeSortBy);
-    const activeAscending = isPeopleSortAscending(activeSortBy);
-
-    const handleCategoryClick = (category: PeopleSortCategory) => {
-        let nextSortBy: PeopleSortBy;
-        if (category === activeCategory) {
-            nextSortBy = getPeopleSortBy(category, !activeAscending);
-        } else {
-            nextSortBy = getPeopleSortBy(category, category === "name");
-        }
-        pendingSortByRef.current = nextSortBy;
-        setAnchorEl(undefined);
-    };
-
-    const triggerButtonSxProps: IconButtonProps["sx"] = [
-        transparentTriggerButtonBackground
-            ? {}
-            : { backgroundColor: "fill.faint" },
-    ];
-
-    const menuPaperSxProps: PaperProps["sx"] | undefined = nestedInDialog
-        ? { backgroundColor: "background.paper2" }
-        : undefined;
-
-    return (
-        <>
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                aria-controls={anchorEl ? ariaID : undefined}
-                aria-haspopup="true"
-                aria-expanded={anchorEl ? "true" : undefined}
-                sx={triggerButtonSxProps}
-            >
-                <SortIcon />
-            </IconButton>
-            <StyledMenu
-                id={ariaID}
-                {...(anchorEl && { anchorEl })}
-                open={!!anchorEl}
-                onClose={() => setAnchorEl(undefined)}
-                slotProps={{
-                    paper: menuPaperSxProps ? { sx: menuPaperSxProps } : {},
-                    list: { disablePadding: true, "aria-labelledby": ariaID },
-                    transition: {
-                        onExited: () => {
-                            const nextSortBy = pendingSortByRef.current;
-                            if (nextSortBy) {
-                                pendingSortByRef.current = undefined;
-                                onChangeSortBy(nextSortBy);
-                            }
-                        },
-                    },
-                }}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-                <PeopleSortCategoryOption
-                    category="name"
-                    activeCategory={activeCategory}
-                    activeAscending={activeAscending}
-                    onClick={handleCategoryClick}
-                    label={t("name")}
-                    directionLabel={
-                        activeAscending
-                            ? t("sort_asc_indicator")
-                            : t("sort_desc_indicator")
-                    }
-                />
-                <PeopleSortCategoryOption
-                    category="count"
-                    activeCategory={activeCategory}
-                    activeAscending={activeAscending}
-                    onClick={handleCategoryClick}
-                    label={t("photos")}
-                />
-            </StyledMenu>
-        </>
-    );
-};
-
-interface PeopleSortCategoryOptionProps {
-    category: PeopleSortCategory;
-    activeCategory: PeopleSortCategory;
-    activeAscending: boolean;
-    onClick: (category: PeopleSortCategory) => void;
-    label: string;
-    directionLabel?: string;
-}
-
-const PeopleSortCategoryOption: React.FC<PeopleSortCategoryOptionProps> = ({
-    category,
-    activeCategory,
-    activeAscending,
-    onClick,
-    label,
-    directionLabel,
-}) => {
-    const isSelected = category === activeCategory;
-    const arrowIcon = activeAscending ? ArrowUp02Icon : ArrowDown02Icon;
-
-    return (
-        <StyledMenuItem onClick={() => onClick(category)}>
-            <Stack direction="row" sx={{ alignItems: "center" }}>
-                <Typography
-                    sx={{
-                        color: isSelected ? "text.primary" : "text.secondary",
-                    }}
-                >
-                    {label}
-                </Typography>
-                {isSelected && (
-                    <Stack
-                        direction="row"
-                        sx={{
-                            alignItems: "center",
-                            ml: 1,
-                            gap: 0.75,
-                            color: "text.muted",
-                        }}
-                    >
-                        {directionLabel && <Typography>•</Typography>}
-                        {directionLabel && (
-                            <Typography sx={{ fontSize: "0.9rem" }}>
-                                {directionLabel}
-                            </Typography>
-                        )}
-                        <HugeiconsIcon
-                            icon={arrowIcon}
-                            size={19}
-                            color="currentColor"
-                        />
-                    </Stack>
-                )}
-            </Stack>
-        </StyledMenuItem>
-    );
-};
-
-const StyledMenu = styled(Menu)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        backgroundColor: theme.vars.palette.background.elevatedPaper,
-        minWidth: 220,
-        width: 220,
-        borderRadius: 12,
-        boxShadow: theme.vars.palette.boxShadow.menu,
-        marginTop: 6,
-    },
-    "& .MuiList-root": { padding: theme.spacing(1) },
-}));
-
-const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    borderRadius: 10,
-    "& + &": { marginTop: 4 },
-    "&.Mui-selected": { backgroundColor: theme.vars.palette.fill.faint },
-}));
 
 interface AllPeopleContentProps {
     people: Person[];
@@ -978,54 +775,3 @@ const PersonPickerCard: React.FC<PersonPickerCardProps> = ({
         </LargeTileTextOverlay>
     </ItemCard>
 );
-
-const personComparator =
-    (sortBy: PeopleSortBy) =>
-    (a: Person, b: Person): number => {
-        if (a.isPinned !== b.isPinned) {
-            return a.isPinned ? -1 : 1;
-        }
-
-        const sectionRankDiff = personSectionRank(a) - personSectionRank(b);
-
-        if (sortBy.startsWith("name")) {
-            const aName = a.name?.trim();
-            const bName = b.name?.trim();
-            if (!!aName !== !!bName) {
-                return aName ? -1 : 1;
-            }
-            if (aName && bName) {
-                const cmp = aName.localeCompare(bName, undefined, {
-                    sensitivity: "base",
-                });
-                if (cmp) {
-                    return sortBy === "name-asc" ? cmp : -cmp;
-                }
-            }
-            return b.fileIDs.length - a.fileIDs.length;
-        }
-
-        if (sectionRankDiff) {
-            return sectionRankDiff;
-        }
-
-        const countDiff = a.fileIDs.length - b.fileIDs.length;
-        if (countDiff) {
-            return sortBy === "count-asc" ? countDiff : -countDiff;
-        }
-
-        const aName = a.name?.trim();
-        const bName = b.name?.trim();
-        if (!!aName !== !!bName) {
-            return aName ? -1 : 1;
-        }
-        if (aName && bName) {
-            return aName.localeCompare(bName, undefined, {
-                sensitivity: "base",
-            });
-        }
-        return 0;
-    };
-
-const personSectionRank = (person: Person) =>
-    person.type === "cgroup" ? 0 : 1;
