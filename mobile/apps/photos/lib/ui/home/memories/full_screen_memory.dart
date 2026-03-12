@@ -570,6 +570,9 @@ class BottomIcons extends StatelessWidget {
     final inheritedData = FullScreenMemoryData.of(context)!;
     final fullScreenState =
         context.findAncestorStateOfType<_FullScreenMemoryState>();
+    final memoryTitle =
+        context.findAncestorWidgetOfExactType<FullScreenMemory>()?.title ??
+            AppLocalizations.of(context).memories;
 
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
@@ -630,7 +633,11 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await _showMemoryShareSheet(context, inheritedData);
+              await _showMemoryShareSheet(
+                context,
+                inheritedData,
+                memoryTitle,
+              );
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
@@ -828,6 +835,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
 Future<void> _showMemoryShareSheet(
   BuildContext context,
   FullScreenMemoryData inheritedData,
+  String memoryTitle,
 ) async {
   final l10n = AppLocalizations.of(context);
   final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
@@ -877,7 +885,7 @@ Future<void> _showMemoryShareSheet(
   }
 
   if (shouldShareLink) {
-    await _showMemoryLinkDetailsSheet(context, inheritedData);
+    await _showMemoryLinkDetailsSheet(context, inheritedData, memoryTitle);
     return;
   }
 
@@ -889,10 +897,12 @@ Future<void> _showMemoryShareSheet(
 Future<void> _showMemoryLinkDetailsSheet(
   BuildContext context,
   FullScreenMemoryData inheritedData,
+  String memoryTitle,
 ) async {
   final shareLinkData = await _getOrCreateMemoryLink(
     context,
     inheritedData,
+    memoryTitle,
   );
   if (!context.mounted || shareLinkData == null) {
     return;
@@ -924,7 +934,7 @@ Future<void> _showMemoryLinkDetailsSheet(
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 16, 44, 16),
+                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
                     child: SelectableText(shareUrl, style: textTheme.small),
                   ),
                   Positioned(
@@ -1015,15 +1025,17 @@ Future<void> _showMemoryLinkDetailsSheet(
 Future<(String, int)?> _getOrCreateMemoryLink(
   BuildContext context,
   FullScreenMemoryData inheritedData,
+  String memoryTitle,
 ) async {
   final l10n = AppLocalizations.of(context);
   final dialog = createProgressDialog(context, l10n.creatingLink);
   await dialog.show();
   try {
+    final normalizedTitle = memoryTitle.trim();
     final shareLinkData =
         await MemoryShareService.instance.getOrCreateMemoryLink(
       memories: inheritedData.memories,
-      title: l10n.memories,
+      title: normalizedTitle.isNotEmpty ? normalizedTitle : l10n.memories,
     );
     await dialog.hide();
     return shareLinkData;

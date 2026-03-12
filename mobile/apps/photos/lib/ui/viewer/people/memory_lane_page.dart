@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
@@ -17,10 +17,17 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memory_lane/memory_lane_service.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/base_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
@@ -57,7 +64,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   // Wait for this many frames (or the available total) before auto-starting playback.
   static const int _initialFrameTarget = 120;
   static const int _frameBuildConcurrency = 6;
-  static const double _appBarSideWidth = kToolbarHeight;
 
   final Logger _logger = Logger("MemoryLanePage");
   late final AnimationController _cardTransitionController;
@@ -89,6 +95,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
   int _maxCaptionDigits = 1;
   bool get _featureEnabled => flagService.facesTimeline;
+  bool get _showShareAction =>
+      _featureEnabled && flagService.enableMemoryShareLink && !isOfflineMode;
 
   @override
   void initState() {
@@ -580,7 +588,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
           final title = l10n.facesTimelineAppBarTitle;
           final colorScheme = getEnteColorScheme(context);
           final textTheme = getEnteTextTheme(context);
-          final titleStyle = textTheme.h2Bold.copyWith(
+          final titleStyle = textTheme.h3Bold.copyWith(
             letterSpacing: -2,
           );
           return DecoratedBox(
@@ -594,29 +602,47 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                centerTitle: false,
                 foregroundColor: colorScheme.textBase,
                 automaticallyImplyLeading: false,
-                title: Row(
-                  children: [
-                    const SizedBox(
-                      width: _appBarSideWidth,
-                      height: kToolbarHeight,
-                      child: BackButton(),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          title,
-                          style: titleStyle,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: _appBarSideWidth),
-                  ],
+                titleSpacing: 24,
+                title: Text(
+                  title,
+                  style: titleStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_showShareAction)
+                          _buildAppBarActionButton(
+                            context: context,
+                            icon: Icons.share,
+                            tooltip: l10n.shareLink,
+                            onTap: () async {
+                              _pausePlayback();
+                              await _showMemoryLaneLinkDetailsSheet(context);
+                            },
+                          ),
+                        if (_showShareAction) const SizedBox(width: 12),
+                        _buildAppBarActionButton(
+                          context: context,
+                          icon: Icons.close,
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
+                          onTap: () async {
+                            await Navigator.of(context).maybePop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               body: Stack(
                 children: [
@@ -1015,6 +1041,202 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         ),
       ],
     );
+  }
+
+  Widget _buildAppBarActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required Future<void> Function() onTap,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () async {
+          await onTap();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.fillFaint,
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 20,
+            color: colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showMemoryLaneLinkDetailsSheet(BuildContext context) async {
+    final shareLinkData = await _getOrCreateMemoryLaneLinkData(context);
+    if (!context.mounted || shareLinkData == null) {
+      return;
+    }
+    final l10n = context.l10n;
+    final shareUrl = shareLinkData.$1;
+    final int shareId = shareLinkData.$2;
+    await showBaseBottomSheet<void>(
+      context,
+      title: l10n.shareLink,
+      padding: const EdgeInsets.all(16),
+      child: Builder(
+        builder: (context) {
+          final colorScheme = getEnteColorScheme(context);
+          final textTheme = getEnteTextTheme(context);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.memoryShareLinkDescription,
+                style: textTheme.smallMuted,
+              ),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colorScheme.fillDark,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 16, 44, 16),
+                      child: SelectableText(shareUrl, style: textTheme.small),
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: IconButton(
+                        tooltip: l10n.copyLink,
+                        iconSize: 20,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: shareUrl),
+                          );
+                          if (context.mounted) {
+                            showShortToast(
+                              context,
+                              l10n.linkCopiedToClipboard,
+                            );
+                          }
+                        },
+                        icon: Icon(
+                          Icons.copy_rounded,
+                          color: colorScheme.textBase,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: l10n.shareLink,
+                shouldSurfaceExecutionStates: false,
+                onTap: () async {
+                  await shareText(shareUrl, context: context);
+                },
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: ButtonWidgetV2(
+                  buttonType: ButtonTypeV2.critical,
+                  labelText: l10n.deleteLink,
+                  onTap: () async {
+                    final shouldDelete = await showAlertBottomSheet<bool>(
+                      context,
+                      title: l10n.deleteLinkQuestion,
+                      message: l10n.deleteMemoryLinkMessage,
+                      assetPath: "assets/warning-grey.png",
+                      buttons: [
+                        ButtonWidgetV2(
+                          buttonType: ButtonTypeV2.critical,
+                          labelText: l10n.deleteLink,
+                          onTap: () async {
+                            try {
+                              await MemoryShareService.instance
+                                  .deleteMemoryShare(
+                                shareId,
+                              );
+                              if (context.mounted) {
+                                showShortToast(
+                                  context,
+                                  l10n.linkDeletedSuccessfully,
+                                );
+                                Navigator.of(context).pop(true);
+                              }
+                            } catch (_) {
+                              if (context.mounted) {
+                                showShortToast(
+                                  context,
+                                  l10n.somethingWentWrong,
+                                );
+                                Navigator.of(context).pop(false);
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                    if (shouldDelete != true) {
+                      return;
+                    }
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<(String, int)?> _getOrCreateMemoryLaneLinkData(
+    BuildContext context,
+  ) async {
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.creatingLink);
+    await dialog.show();
+    try {
+      final timeline = await MemoryLaneService.instance.getTimeline(
+        widget.person.remoteID,
+      );
+      if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          showShortToast(context, l10n.somethingWentWrong);
+        }
+        return null;
+      }
+      final shareLinkData =
+          await MemoryShareService.instance.getOrCreateMemoryLaneLink(
+        entries: timeline.entries,
+        title: l10n.facesTimelineAppBarTitle,
+        personId: widget.person.remoteID,
+        personName: widget.person.data.name,
+        birthDate: widget.person.data.birthDate,
+      );
+      await dialog.hide();
+      return shareLinkData;
+    } catch (e) {
+      await dialog.hide();
+      if (context.mounted) {
+        await showGenericErrorBottomSheet(context: context, error: e);
+      }
+      return null;
+    }
   }
 
   void _togglePlayback() {

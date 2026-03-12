@@ -1,20 +1,25 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
-import "package:logging/logging.dart";
+import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
-import "package:photos/db/files_db.dart";
+import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memory_shares_db.dart';
-import "package:photos/gateways/entity/models/type.dart";
+import 'package:photos/db/ml/db.dart';
+import 'package:photos/gateways/entity/models/type.dart';
 import 'package:photos/models/api/memory_share/memory_share.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/memories/memory.dart';
-import "package:photos/models/metadata/file_magic.dart";
+import 'package:photos/models/memory_lane/memory_lane_models.dart';
+import 'package:photos/models/metadata/file_magic.dart';
+import 'package:photos/models/ml/face/face.dart';
 import 'package:photos/service_locator.dart' show entityService;
+import 'package:photos/utils/face_crop_util.dart';
 import 'package:photos/utils/file_key.dart';
 
 class MemoryShareService {
@@ -111,6 +116,77 @@ class MemoryShareService {
     } catch (e, s) {
       _logger.severe("Failed to create memory share", e, s);
 
+      rethrow;
+    }
+  }
+
+  Future<(String, int)> _createMemoryLaneLink({
+    required List<_MemoryLaneShareItem> laneItems,
+    required Map<String, dynamic> metadata,
+    String? memoryHash,
+  }) async {
+    List<_MemoryLaneShareItem> uploadedItems = const [];
+    try {
+      uploadedItems =
+          laneItems.where((item) => item.file.uploadedFileID != null).toList();
+      final resolvedMemoryHash = memoryHash ?? _getMemoryLaneHash(metadata);
+      final secretPayload = await _prepareShareSecret();
+      final shareKey = secretPayload.shareKey;
+      final metadataBytes =
+          Uint8List.fromList(utf8.encode(jsonEncode(metadata)));
+      final compressedMetadataBytes = Uint8List.fromList(
+        GZipCodec().encode(metadataBytes),
+      );
+      final encryptedMetadata = CryptoUtil.encryptSync(
+        compressedMetadataBytes,
+        shareKey,
+      );
+
+      final fileItems = <Map<String, dynamic>>[];
+      for (var i = 0; i < uploadedItems.length; i++) {
+        final item = uploadedItems[i];
+        final file = item.file;
+        final fileKey = getFileKey(file);
+        final reEncryptedKey = CryptoUtil.encryptSync(fileKey, shareKey);
+        fileItems.add({
+          'fileID': file.uploadedFileID,
+          'position': i,
+          'encryptedKey': CryptoUtil.bin2base64(reEncryptedKey.encryptedData!),
+          'keyDecryptionNonce': CryptoUtil.bin2base64(reEncryptedKey.nonce!),
+        });
+      }
+
+      final requestData = {
+        'type': MemoryShareType.lane.name,
+        'metadataCipher':
+            CryptoUtil.bin2base64(encryptedMetadata.encryptedData!),
+        'metadataNonce': CryptoUtil.bin2base64(encryptedMetadata.nonce!),
+        ...secretPayload.metadata(),
+        'memoryHash': resolvedMemoryHash,
+        'files': fileItems,
+      };
+
+      final response = await _enteDio.post('/memory-share', data: requestData);
+      final memoryShare = MemoryShare.fromJson(response.data['memoryShare']);
+
+      final shareUrl = "${memoryShare.url}#${secretPayload.secret}";
+      final uniqueUploadedFileCount = uploadedItems
+          .map((item) => item.file.uploadedFileID)
+          .whereType<int>()
+          .toSet()
+          .length;
+      final localShare = memoryShare.copyWith(
+        url: shareUrl,
+        memoryHash: resolvedMemoryHash,
+        previewUploadedFileID: uploadedItems.first.file.uploadedFileID,
+        fileCount: uniqueUploadedFileCount,
+      );
+      await _db.upsert(localShare);
+      _updateMemoryShareCache(localShare);
+
+      return (shareUrl, memoryShare.id);
+    } catch (e, s) {
+      _logger.severe("Failed to create memory lane link", e, s);
       rethrow;
     }
   }
@@ -247,7 +323,10 @@ class MemoryShareService {
         shareKey,
         CryptoUtil.base642bin(metadataNonce),
       );
-      final parsed = jsonDecode(utf8.decode(decryptedMetadata));
+      final parsed = _decodeMemoryShareMetadata(
+        decryptedMetadata,
+        share.type,
+      );
       if (parsed is! Map<String, dynamic>) {
         return null;
       }
@@ -523,6 +602,59 @@ class MemoryShareService {
     }
   }
 
+  Future<(String, int)> getOrCreateMemoryLaneLink({
+    required List<MemoryLaneEntry> entries,
+    required String title,
+    String? personId,
+    String? personName,
+    String? birthDate,
+  }) async {
+    try {
+      if (entries.isEmpty) {
+        throw Exception("No uploaded files to share");
+      }
+      final uniqueFileIDs =
+          entries.map((entry) => entry.fileId).toSet().toList();
+      final filesByID =
+          await FilesDB.instance.getFileIDToFileFromIDs(uniqueFileIDs);
+      final laneItems = <_MemoryLaneShareItem>[];
+      for (final entry in entries) {
+        final file = filesByID[entry.fileId];
+        if (file == null || file.uploadedFileID == null) {
+          continue;
+        }
+        laneItems.add(_MemoryLaneShareItem(file: file, entry: entry));
+      }
+      if (laneItems.isEmpty) {
+        throw Exception("No uploaded files to share");
+      }
+      final facesByFileID = await _loadLaneFacesByFileID(laneItems);
+      final metadata = _buildMemoryLaneMetadata(
+        laneItems,
+        title: title,
+        personId: personId,
+        personName: personName,
+        birthDate: birthDate,
+        facesByFileID: facesByFileID,
+      );
+      final memoryHash = _getMemoryLaneHash(metadata);
+      final existingShare = await _findMemoryShareByHash(memoryHash);
+      if (existingShare != null &&
+          existingShare.type == MemoryShareType.lane &&
+          Uri.parse(existingShare.url).fragment.isNotEmpty) {
+        return (existingShare.url, existingShare.id);
+      }
+      return _createMemoryLaneLink(
+        laneItems: laneItems,
+        metadata: metadata,
+        memoryHash: memoryHash,
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to create memory lane share link data", e, s);
+      rethrow;
+    }
+  }
+
   Future<MemoryShare?> _findMemoryShareByHash(String memoryHash) async {
     final cachedShare = _memoryShareByHashCache[memoryHash];
     if (cachedShare != null && !cachedShare.isDeleted) {
@@ -584,11 +716,133 @@ class MemoryShareService {
     if (uploadedFileIDs.isEmpty) {
       throw Exception("No uploaded files to share");
     }
-    final uniqueSortedFileIDs = uploadedFileIDs.toSet().toList()..sort();
-    final hashInput =
-        "${uploadedFileIDs.length}:${uniqueSortedFileIDs.length}:${uniqueSortedFileIDs.join(',')}";
+    final hashInput = "${uploadedFileIDs.length}:${uploadedFileIDs.join(',')}";
     return sha256.convert(utf8.encode(hashInput)).toString();
   }
+
+  String _getMemoryLaneHash(Map<String, dynamic> metadata) {
+    final frames = metadata['frames'];
+    final stableFrames = <Map<String, dynamic>>[];
+    if (frames is List) {
+      for (final frame in frames) {
+        stableFrames.add({
+          'fileID': frame['fileID'],
+          'position': frame['position'],
+          'faceID': frame['faceID'],
+        });
+      }
+    }
+
+    final hashMetadata = <String, dynamic>{
+      if (metadata['personID'] != null) 'personID': metadata['personID'],
+      if (metadata['personName'] != null) 'personName': metadata['personName'],
+      if (metadata['birthDate'] != null) 'birthDate': metadata['birthDate'],
+      'frames': stableFrames,
+    };
+    final hashInput = jsonEncode(hashMetadata);
+    return sha256.convert(utf8.encode(hashInput)).toString();
+  }
+
+  Map<String, dynamic> _buildMemoryLaneMetadata(
+    List<_MemoryLaneShareItem> laneItems, {
+    required String title,
+    String? personId,
+    String? personName,
+    String? birthDate,
+    Map<int, List<Face>>? facesByFileID,
+  }) {
+    if (laneItems.isEmpty) {
+      throw Exception("No uploaded files to share");
+    }
+    final normalizedPersonId = personId?.trim();
+    final normalizedPersonName = personName?.trim();
+    final normalizedBirthDate = birthDate?.trim();
+    final captionType =
+        (normalizedBirthDate != null && normalizedBirthDate.isNotEmpty)
+            ? 'age'
+            : 'yearsAgo';
+
+    return {
+      'name': title,
+      'kind': MemoryShareType.lane.name,
+      'captionType': captionType,
+      if (normalizedPersonId != null && normalizedPersonId.isNotEmpty)
+        'personID': normalizedPersonId,
+      if (normalizedPersonName != null && normalizedPersonName.isNotEmpty)
+        'personName': normalizedPersonName,
+      if (normalizedBirthDate != null && normalizedBirthDate.isNotEmpty)
+        'birthDate': normalizedBirthDate,
+      'frames': [
+        for (var i = 0; i < laneItems.length; i++)
+          {
+            'fileID': laneItems[i].file.uploadedFileID,
+            'position': i,
+            ..._buildLaneFaceMetadata(
+              laneItems[i].entry,
+              faces: facesByFileID?[laneItems[i].entry.fileId],
+            ),
+          },
+      ],
+    };
+  }
+
+  Future<Map<int, List<Face>>> _loadLaneFacesByFileID(
+    List<_MemoryLaneShareItem> laneItems,
+  ) async {
+    final uniqueFileIDs = laneItems.map((item) => item.entry.fileId).toSet();
+    final faceEntries = await Future.wait(
+      uniqueFileIDs.map((fileID) async {
+        try {
+          final faces = await MLDataDB.instance.getFacesForGivenFileID(fileID);
+          return MapEntry(fileID, faces ?? const <Face>[]);
+        } catch (e, s) {
+          _logger.warning(
+            "Failed to load lane faces for fileID=$fileID, falling back to faceID parsing",
+            e,
+            s,
+          );
+          return MapEntry(fileID, const <Face>[]);
+        }
+      }),
+    );
+    return Map<int, List<Face>>.fromEntries(faceEntries);
+  }
+
+  Map<String, dynamic> _buildLaneFaceMetadata(
+    MemoryLaneEntry entry, {
+    List<Face>? faces,
+  }) {
+    final faceBox = resolveLaneFaceBox(entry.faceId, faces: faces);
+    final crop = computePaddedFaceCropBox(faceBox);
+    return {
+      'faceID': entry.faceId,
+      'faceBox': faceBox.toJson(),
+      'crop': crop.toJson(),
+      'creationTime': entry.creationTimeMicros,
+      'year': entry.year,
+    };
+  }
+
+  dynamic _decodeMemoryShareMetadata(
+    Uint8List decryptedMetadata,
+    MemoryShareType shareType,
+  ) {
+    if (shareType == MemoryShareType.lane) {
+      final decompressed = GZipCodec().decode(decryptedMetadata);
+      return jsonDecode(utf8.decode(decompressed));
+    }
+    return jsonDecode(utf8.decode(decryptedMetadata));
+  }
+}
+
+class _MemoryLaneShareItem {
+  final EnteFile file;
+  final MemoryLaneEntry entry;
+
+  const _MemoryLaneShareItem({
+    required this.file,
+    required this.entry,
+  });
 }
 
 class _MemoryShareSecretPayload {
