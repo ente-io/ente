@@ -89,8 +89,10 @@ pub fn extract_crop(
     let img_w = decoded.dimensions.width;
     let img_h = decoded.dimensions.height;
 
-    let x1 = (box_xyxy[0] * img_w as f32).round().clamp(0.0, img_w as f32) as u32;
-    let y1 = (box_xyxy[1] * img_h as f32).round().clamp(0.0, img_h as f32) as u32;
+    let max_x = if img_w > 0 { img_w - 1 } else { 0 };
+    let max_y = if img_h > 0 { img_h - 1 } else { 0 };
+    let x1 = (box_xyxy[0] * img_w as f32).round().clamp(0.0, max_x as f32) as u32;
+    let y1 = (box_xyxy[1] * img_h as f32).round().clamp(0.0, max_y as f32) as u32;
     let x2 = (box_xyxy[2] * img_w as f32).round().clamp(0.0, img_w as f32) as u32;
     let y2 = (box_xyxy[3] * img_h as f32).round().clamp(0.0, img_h as f32) as u32;
 
@@ -103,10 +105,12 @@ pub fn extract_crop(
         ));
     }
 
-    let mut crop = Vec::with_capacity((crop_w * crop_h * 3) as usize);
+    let mut crop = Vec::with_capacity((crop_w as usize) * (crop_h as usize) * 3);
     for row in y1..y2 {
-        let row_start = ((row * img_w + x1) * 3) as usize;
-        let row_end = ((row * img_w + x2) * 3) as usize;
+        let row_start = (row as usize) * (img_w as usize) + (x1 as usize);
+        let row_end = (row as usize) * (img_w as usize) + (x2 as usize);
+        let row_start = row_start * 3;
+        let row_end = row_end * 3;
         if row_end > decoded.rgb.len() || row_start > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
                 "crop row {} out of bounds: start={}, end={}, buffer_len={}",

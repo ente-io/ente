@@ -229,7 +229,7 @@ fn normalize_embedding(embedding: &mut [f32]) {
         norm += value * value;
     }
     let norm = norm.sqrt();
-    if norm <= f32::EPSILON {
+    if norm <= 1e-12 {
         return;
     }
     for value in embedding.iter_mut() {

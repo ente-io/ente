@@ -106,6 +106,10 @@ class PetVectorDB {
     required bool isFace,
     bool offline = false,
   }) {
+    assert(
+      species == 0 || species == 1,
+      'Invalid pet species: $species (expected 0=dog or 1=cat)',
+    );
     if (offline) {
       if (species == 0) {
         return isFace ? offlineDogFace : offlineDogBody;

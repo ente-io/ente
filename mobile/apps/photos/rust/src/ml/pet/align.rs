@@ -59,8 +59,10 @@ pub fn run_pet_face_alignment(
         }
 
         // Absolute bounding box (clamped to image bounds on both sides)
-        let box_x1 = (detection.box_xyxy[0] * img_wf).clamp(0.0, img_wf) as i32;
-        let box_y1 = (detection.box_xyxy[1] * img_hf).clamp(0.0, img_hf) as i32;
+        let max_xf = (img_w as f32 - 1.0).max(0.0);
+        let max_yf = (img_h as f32 - 1.0).max(0.0);
+        let box_x1 = (detection.box_xyxy[0] * img_wf).clamp(0.0, max_xf) as i32;
+        let box_y1 = (detection.box_xyxy[1] * img_hf).clamp(0.0, max_yf) as i32;
         let box_x2 = (detection.box_xyxy[2] * img_wf).clamp(0.0, img_wf) as i32;
         let box_y2 = (detection.box_xyxy[3] * img_hf).clamp(0.0, img_hf) as i32;
 
@@ -89,8 +91,8 @@ pub fn run_pet_face_alignment(
             let region_y1 = (box_y1 - pad).max(0) as u32;
             let region_x2 = ((box_x2 + pad) as u32).min(img_w);
             let region_y2 = ((box_y2 + pad) as u32).min(img_h);
-            let region_w = region_x2 - region_x1;
-            let region_h = region_y2 - region_y1;
+            let region_w = region_x2.saturating_sub(region_x1);
+            let region_h = region_y2.saturating_sub(region_y1);
             if region_w == 0 || region_h == 0 {
                 continue;
             }
@@ -221,15 +223,24 @@ fn crop_and_resize_rgb(
 ) -> MlResult<RgbImage> {
     // Extract crop bytes
     let src_w = source.width();
-    let mut crop_bytes = Vec::with_capacity((w * h * 3) as usize);
-    for row in y..(y + h) {
-        for col in x..(x + w) {
-            let px = source.get_pixel(col.min(src_w - 1), row.min(source.height() - 1)).0;
+    let src_h = source.height();
+    // Clamp crop region to source bounds to avoid edge-replication artifacts.
+    let clamped_w = w.min(src_w.saturating_sub(x));
+    let clamped_h = h.min(src_h.saturating_sub(y));
+    if clamped_w == 0 || clamped_h == 0 {
+        return Err(MlError::Preprocess(
+            "crop_and_resize_rgb: crop region extends beyond source image".to_string(),
+        ));
+    }
+    let mut crop_bytes = Vec::with_capacity((clamped_w as usize) * (clamped_h as usize) * 3);
+    for row in y..(y + clamped_h) {
+        for col in x..(x + clamped_w) {
+            let px = source.get_pixel(col, row).0;
             crop_bytes.extend_from_slice(&px);
         }
     }
 
-    let src_img = FirImage::from_vec_u8(w, h, crop_bytes, PixelType::U8x3)
+    let src_img = FirImage::from_vec_u8(clamped_w, clamped_h, crop_bytes, PixelType::U8x3)
         .map_err(|e| MlError::Preprocess(format!("FIR source: {e}")))?;
 
     let mut dst_img = FirImage::new(PET_FACE_CROP_SIZE, PET_FACE_CROP_SIZE, PixelType::U8x3);
@@ -253,11 +264,11 @@ fn extract_rgb_region(
     w: u32,
     h: u32,
 ) -> MlResult<RgbImage> {
-    let img_w = decoded.dimensions.width;
-    let mut buf = Vec::with_capacity((w * h * 3) as usize);
+    let img_w = decoded.dimensions.width as usize;
+    let mut buf = Vec::with_capacity((w as usize) * (h as usize) * 3);
     for row in y..(y + h) {
-        let start = ((row * img_w + x) * 3) as usize;
-        let end = start + (w * 3) as usize;
+        let start = ((row as usize) * img_w + (x as usize)) * 3;
+        let end = start + (w as usize) * 3;
         if end > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
                 "region row {row} out of bounds (end={end}, len={})", decoded.rgb.len()
@@ -278,11 +289,11 @@ fn crop_and_resize_decoded(
     w: u32,
     h: u32,
 ) -> MlResult<RgbImage> {
-    let img_w = decoded.dimensions.width;
-    let mut crop_bytes = Vec::with_capacity((w * h * 3) as usize);
+    let img_w = decoded.dimensions.width as usize;
+    let mut crop_bytes = Vec::with_capacity((w as usize) * (h as usize) * 3);
     for row in y..(y + h) {
-        let start = ((row * img_w + x) * 3) as usize;
-        let end = start + (w * 3) as usize;
+        let start = ((row as usize) * img_w + (x as usize)) * 3;
+        let end = start + (w as usize) * 3;
         if end > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
                 "crop row {row} out of bounds (end={end}, len={})", decoded.rgb.len()
@@ -320,14 +331,12 @@ fn aligned_face_to_tensor(face_image: &RgbImage) -> Vec<f32> {
     let g_off = pixel_count;
     let b_off = 2 * pixel_count;
 
-    for y in 0..h {
-        for x in 0..w {
-            let px = face_image.get_pixel(x as u32, y as u32).0;
-            let idx = y * w + x;
-            output[r_off + idx] = (px[0] as f32 / 255.0 - MEAN[0]) / STD[0];
-            output[g_off + idx] = (px[1] as f32 / 255.0 - MEAN[1]) / STD[1];
-            output[b_off + idx] = (px[2] as f32 / 255.0 - MEAN[2]) / STD[2];
-        }
+    let raw = face_image.as_raw();
+    for i in 0..pixel_count {
+        let src_idx = i * 3;
+        output[r_off + i] = (raw[src_idx] as f32 / 255.0 - MEAN[0]) / STD[0];
+        output[g_off + i] = (raw[src_idx + 1] as f32 / 255.0 - MEAN[1]) / STD[1];
+        output[b_off + i] = (raw[src_idx + 2] as f32 / 255.0 - MEAN[2]) / STD[2];
     }
 
     output

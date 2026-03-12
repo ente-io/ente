@@ -35,6 +35,7 @@ class DBPetFace {
       faceDetectionColumn: detection,
       faceVectorIdColumn: faceVectorId,
       speciesColumn: species,
+      // Use string literals for keys that collide with instance member names.
       'score': faceScore,
       'height': imageHeight,
       'width': imageWidth,
@@ -106,6 +107,7 @@ class DBPetBody {
       detectionColumn: detection,
       bodyVectorIdColumn: bodyVectorId,
       speciesColumn: species,
+      // Use string literals for keys that collide with instance member names.
       'score': score,
       'height': imageHeight,
       'width': imageWidth,

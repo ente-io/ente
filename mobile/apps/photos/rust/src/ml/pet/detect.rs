@@ -16,9 +16,14 @@ const PET_FACE_MIN_SCORE: f32 = 0.3;
 const BODY_IOU_THRESHOLD: f32 = 0.5;
 const BODY_MIN_SCORE: f32 = 0.3;
 
-// COCO class IDs
+// COCO class IDs (used by body detection)
 const COCO_CAT: u8 = 15;
 const COCO_DOG: u8 = 16;
+
+// Species IDs used across both Rust and Dart:
+//   0 = dog (face detection class_id=0, COCO_DOG=16)
+//   1 = cat (face detection class_id=1, COCO_CAT=15)
+// Dart maps COCO → species via: cocoClass == 15 ? 1 : 0
 
 /// Run pet face detection using YOLOv5-face model with 3 keypoints.
 ///
@@ -47,18 +52,27 @@ pub fn run_pet_face_detection(
         *output_shape.last().unwrap() as usize
     } else if output_shape.len() == 1 {
         // Flat output: total_elements, must infer row_len.
-        // Prefer the smallest valid row length to avoid false matches
-        // (e.g. 143 is divisible by both 11 and 13).
+        // Prefer 13 (2-class model) as the expected format, then fall back.
         let total = output_data.len();
-        if total % 11 == 0 { 11 }
+        let inferred = if total % 13 == 0 { 13 }
         else if total % 12 == 0 { 12 }
-        else if total % 13 == 0 { 13 }
+        else if total % 11 == 0 { 11 }
         else {
             return Err(MlError::Postprocess(format!(
                 "unexpected pet face detector output size: {} (shape: {:?})",
                 total, output_shape
             )));
+        };
+        // Warn if the total is ambiguously divisible by multiple candidates.
+        let candidates = [11usize, 12, 13];
+        let valid_count = candidates.iter().filter(|&&c| total % c == 0).count();
+        if valid_count > 1 {
+            eprintln!(
+                "[ml][pet] WARNING: flat output len={total} is divisible by {valid_count} row-length candidates; using {inferred}. \
+                 Prefer a model with 2D output shape for reliability."
+            );
         }
+        inferred
     } else {
         return Err(MlError::Postprocess(
             "pet face detector output shape is empty".to_string(),

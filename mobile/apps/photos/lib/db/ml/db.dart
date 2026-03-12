@@ -306,10 +306,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<DBPetFace> dbPetFaces,
     List<PetFaceResult> petFaces,
   ) async {
-    assert(
-      dbPetFaces.length == petFaces.length,
-      'dbPetFaces.length (${dbPetFaces.length}) != petFaces.length (${petFaces.length})',
-    );
+    if (dbPetFaces.length != petFaces.length) {
+      throw StateError(
+        'dbPetFaces.length (${dbPetFaces.length}) != petFaces.length (${petFaces.length})',
+      );
+    }
     try {
       final db = await asyncDB;
       // Group by species
@@ -371,10 +372,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     List<DBPetBody> dbPetBodies,
     List<PetBodyResult> petBodies,
   ) async {
-    assert(
-      dbPetBodies.length == petBodies.length,
-      'dbPetBodies.length (${dbPetBodies.length}) != petBodies.length (${petBodies.length})',
-    );
+    if (dbPetBodies.length != petBodies.length) {
+      throw StateError(
+        'dbPetBodies.length (${dbPetBodies.length}) != petBodies.length (${petBodies.length})',
+      );
+    }
     try {
       final db = await asyncDB;
       // Group by species (0 = dog, 1 = cat)
@@ -772,7 +774,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await asyncDB;
     const String query = '''
       SELECT * FROM $petBodiesTable
-      WHERE $fileIDColumn = ?
+      WHERE $fileIDColumn = ? AND $speciesColumn != -1
     ''';
     final List<Map<String, dynamic>> maps = await db.getAll(
       query,
@@ -2359,12 +2361,13 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     int minimumMlVersion = petMlVersion,
   }) async {
     final db = await asyncDB;
-    final String query = '''
+    const String query = '''
       SELECT DISTINCT $fileIDColumn, $mlVersionColumn
       FROM $petFacesTable
-      WHERE $mlVersionColumn >= $minimumMlVersion
+      WHERE $mlVersionColumn >= ?
     ''';
-    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    final List<Map<String, dynamic>> maps =
+        await db.getAll(query, [minimumMlVersion]);
     final Map<int, int> result = {};
     for (final map in maps) {
       result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
@@ -2377,9 +2380,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     int minimumMlVersion = petMlVersion,
   }) async {
     final db = await asyncDB;
-    final String query =
-        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $petFacesTable WHERE $mlVersionColumn >= $minimumMlVersion';
-    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    const String query =
+        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $petFacesTable WHERE $mlVersionColumn >= ?';
+    final List<Map<String, dynamic>> maps =
+        await db.getAll(query, [minimumMlVersion]);
     return maps.first['count'] as int;
   }
 

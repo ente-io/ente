@@ -178,6 +178,8 @@ fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
     let p = &config.provider_policy;
     // Pet models use CPU-only to avoid NNAPI/CoreML driver issues with
     // FP16 models on some devices.
+    // TODO: Make pet EP policy configurable so hardware acceleration can be
+    // re-enabled once driver issues are resolved.
     let pet_policy = ExecutionProviderPolicy {
         prefer_coreml: false,
         prefer_nnapi: false,
