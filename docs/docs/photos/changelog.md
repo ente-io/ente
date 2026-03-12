@@ -7,6 +7,24 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v1.3.22 (mobile) - Mar 2026
+
+- Gallery mode to use Ente Photos without an account
+- New shared albums card in feed
+- Shared albums and shared photos notifications redirect to feed
+- Friendlier help & support page
+- Better people suggestions in person overview
+- Bug fixes and performance improvements
+
+## v1.7.21 (desktop) - Mar 2026
+
+- Masonry layout for public albums
+- Quick links
+- Full viewer experience for single-photo/video links
+- Update album cover
+- Public album improvements
+- Catalan language support
+
 ## v1.3.16 (mobile) - Feb 2026
 
 - Fix broken map view
@@ -29,15 +47,6 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Delete hidden files from device
 - Hide shared albums
 - Search in device albums
-
-## v1.7.21 (desktop) - Feb 2026
-
-- Masonry layout for public albums
-- Quick links
-- Full viewer experience for single-photo/video links
-- Update album cover
-- Public album improvements
-- Catalan language support
 
 ## v1.3.10 (mobile) - Feb 2026
 
