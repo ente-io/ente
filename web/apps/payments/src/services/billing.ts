@@ -263,7 +263,10 @@ const handlePaymentIntentRedirect = async (
         );
     }
 
-    const stripe = await getStripe(redirectURL, pendingPaymentContext.accountCountry);
+    const stripe = await getStripe(
+        redirectURL,
+        pendingPaymentContext.accountCountry,
+    );
     const result = await stripe.retrievePaymentIntent(clientSecret);
     if (result.error) throw ensureError(result.error);
     const status = await waitForTerminalPaymentIntentStatus(
