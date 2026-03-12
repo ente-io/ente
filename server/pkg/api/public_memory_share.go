@@ -71,13 +71,9 @@ func (h *PublicMemoryShareHandler) GetFileData(c *gin.Context) {
 	}
 
 	accessCtx := auth.MustGetMemoryShareAccessContext(c)
-	exists, ownerID, err := h.PublicCtrl.Repo.FileExistsInShare(c, accessCtx.ShareID, req.FileID)
+	ownerID, err := h.PublicCtrl.GetAccessibleFileOwnerID(c, accessCtx.ShareID, req.FileID)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to check file existence"))
-		return
-	}
-	if !exists {
-		handler.Error(c, ente.ErrNotFound)
+		handler.Error(c, stacktrace.Propagate(err, "failed to validate file access"))
 		return
 	}
 
@@ -102,13 +98,9 @@ func (h *PublicMemoryShareHandler) GetPreviewURL(c *gin.Context) {
 	}
 
 	accessCtx := auth.MustGetMemoryShareAccessContext(c)
-	exists, ownerID, err := h.PublicCtrl.Repo.FileExistsInShare(c, accessCtx.ShareID, req.FileID)
+	ownerID, err := h.PublicCtrl.GetAccessibleFileOwnerID(c, accessCtx.ShareID, req.FileID)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "failed to check file existence"))
-		return
-	}
-	if !exists {
-		handler.Error(c, ente.ErrNotFound)
+		handler.Error(c, stacktrace.Propagate(err, "failed to validate file access"))
 		return
 	}
 

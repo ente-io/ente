@@ -439,7 +439,7 @@ func main() {
 	}
 
 	memoryShareController := memoryShareCtrl.NewController(memoryShareRepo, fileRepo, accessCtrl)
-	memorySharePublicController := publicCtrl.NewMemoryShareController(memoryShareRepo, fileRepo, fileController)
+	memorySharePublicController := publicCtrl.NewMemoryShareController(memoryShareRepo, fileRepo, collectionRepo, fileController)
 
 	passkeyCtrl := &controller.PasskeyController{
 		Repo:     passkeysRepo,

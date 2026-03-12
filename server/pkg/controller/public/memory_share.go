@@ -17,6 +17,7 @@ import (
 type MemoryShareController struct {
 	Repo           *repo.MemoryShareRepository
 	FileRepo       *repo.FileRepository
+	CollectionRepo *repo.CollectionRepository
 	FileController *controller.FileController
 }
 
@@ -24,11 +25,13 @@ type MemoryShareController struct {
 func NewMemoryShareController(
 	repo *repo.MemoryShareRepository,
 	fileRepo *repo.FileRepository,
+	collectionRepo *repo.CollectionRepository,
 	fileController *controller.FileController,
 ) *MemoryShareController {
 	return &MemoryShareController{
 		Repo:           repo,
 		FileRepo:       fileRepo,
+		CollectionRepo: collectionRepo,
 		FileController: fileController,
 	}
 }
@@ -59,6 +62,15 @@ func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int6
 	publicFiles := make([]ente.PublicMemoryShareFile, 0, len(shareFiles))
 
 	for _, sf := range shareFiles {
+		collectionCount, err := c.CollectionRepo.GetCollectionCount(sf.FileID)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to verify file activity")
+		}
+		if collectionCount == 0 {
+			logrus.WithField("fileID", sf.FileID).Info("skipping inactive file")
+			continue
+		}
+
 		file, err := c.FileRepo.GetFileAttributes(sf.FileID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -87,14 +99,31 @@ func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int6
 	return &ente.PublicMemoryShareFilesResponse{Files: publicFiles}, nil
 }
 
-// GetPublicFileURL returns a signed URL for accessing a file in a public memory share
-func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64, fileID int64, objType ente.ObjectType) (string, error) {
-	exists, _, err := c.Repo.FileExistsInShare(ctx, shareID, fileID)
+func (c *MemoryShareController) GetAccessibleFileOwnerID(ctx context.Context, shareID int64, fileID int64) (int64, error) {
+	exists, ownerID, err := c.Repo.FileExistsInShare(ctx, shareID, fileID)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "failed to check file existence")
+		return 0, stacktrace.Propagate(err, "failed to check file existence")
 	}
 	if !exists {
-		return "", stacktrace.Propagate(ente.ErrNotFound, "file not found in memory share")
+		return 0, stacktrace.Propagate(ente.ErrNotFound, "file not found in memory share")
+	}
+
+	collectionCount, err := c.CollectionRepo.GetCollectionCount(fileID)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to verify file activity")
+	}
+	if collectionCount == 0 {
+		return 0, stacktrace.Propagate(ente.ErrNotFound, "file not available")
+	}
+
+	return ownerID, nil
+}
+
+// GetPublicFileURL returns a signed URL for accessing a file in a public memory share
+func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	_, err := c.GetAccessibleFileOwnerID(ctx, shareID, fileID)
+	if err != nil {
+		return "", err
 	}
 
 	file, err := c.FileRepo.GetFileAttributes(fileID)
