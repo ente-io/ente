@@ -86,6 +86,12 @@ export const appLockConfigFromSafeStorage = ():
     | PersistedAppLockConfig
     | undefined => {
     const config = appLockConfigStringFromSafeStorage();
+
+    /*
+     * if a key is not found then it will naturally return undefined, so
+     * therefore if the config is not present returning undefined
+     */
+
     if (!config) return undefined;
 
     return parsePersistedAppLockConfig(config);
