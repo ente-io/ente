@@ -112,6 +112,10 @@ pub enum AuthError {
     #[error("Invalid key attributes")]
     InvalidKeyAttributes,
 
+    /// The device could not derive a sensitive key with the required policy.
+    #[error("Failed to derive key (insufficient memory)")]
+    InsufficientMemory,
+
     /// A required field is missing from the key attributes.
     #[error("Missing required field: {0}")]
     MissingField(&'static str),

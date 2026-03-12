@@ -1,6 +1,7 @@
 //! WASM bindings for pure-Rust cryptography.
 
 use ente_core::crypto as core_crypto;
+use md5::{Digest, Md5};
 use wasm_bindgen::prelude::*;
 
 /// Crypto error.
@@ -83,10 +84,104 @@ pub fn crypto_generate_stream_key() -> String {
     core_crypto::encode_b64(&core_crypto::keys::generate_stream_key())
 }
 
+/// Incremental chunk encryptor for large file uploads.
+///
+/// The browser reads the file in chunks and passes each chunk to this object,
+/// which keeps the secretstream state in Rust and returns encrypted bytes for
+/// the caller to upload.
+#[wasm_bindgen]
+pub struct CryptoStreamEncryptor {
+    encryptor: core_crypto::stream::StreamEncryptor,
+    key: String,
+    decryption_header: String,
+}
+
+#[wasm_bindgen]
+impl CryptoStreamEncryptor {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<CryptoStreamEncryptor, CryptoError> {
+        let key = core_crypto::keys::generate_stream_key();
+        let encryptor = core_crypto::stream::StreamEncryptor::new(&key)?;
+        let decryption_header = core_crypto::encode_b64(&encryptor.header);
+
+        Ok(Self {
+            encryptor,
+            key: core_crypto::encode_b64(&key),
+            decryption_header,
+        })
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn key(&self) -> String {
+        self.key.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn decryption_header(&self) -> String {
+        self.decryption_header.clone()
+    }
+
+    pub fn encrypt_chunk(
+        &mut self,
+        plaintext: Vec<u8>,
+        is_final: bool,
+    ) -> Result<Vec<u8>, CryptoError> {
+        self.encryptor.push(&plaintext, is_final).map_err(Into::into)
+    }
+}
+
+/// Incremental chunk decryptor for large file downloads.
+#[wasm_bindgen]
+pub struct CryptoStreamDecryptor {
+    decryptor: core_crypto::stream::StreamDecryptor,
+    finalized: bool,
+}
+
+#[wasm_bindgen]
+impl CryptoStreamDecryptor {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        decryption_header_b64: &str,
+        key_b64: &str,
+    ) -> Result<CryptoStreamDecryptor, CryptoError> {
+        let header = core_crypto::decode_b64(decryption_header_b64)?;
+        let key = core_crypto::decode_b64(key_b64)?;
+        let decryptor = core_crypto::stream::StreamDecryptor::new(&header, &key)?;
+
+        Ok(Self {
+            decryptor,
+            finalized: false,
+        })
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn decryption_chunk_size(&self) -> usize {
+        core_crypto::stream::DECRYPTION_CHUNK_SIZE
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn is_finalized(&self) -> bool {
+        self.finalized
+    }
+
+    pub fn decrypt_chunk(&mut self, ciphertext: Vec<u8>) -> Result<Vec<u8>, CryptoError> {
+        let (plaintext, tag) = self.decryptor.pull(&ciphertext)?;
+        self.finalized = tag == core_crypto::stream::TAG_FINAL;
+        Ok(plaintext)
+    }
+}
+
 /// Generate a random 16-byte salt and return it as base64.
 #[wasm_bindgen]
 pub fn crypto_generate_salt() -> String {
     core_crypto::encode_b64(&core_crypto::keys::generate_salt())
+}
+
+/// Compute the MD5 digest of the provided bytes and return it as base64.
+#[wasm_bindgen]
+pub fn crypto_md5_base64(data: Vec<u8>) -> String {
+    let digest = Md5::digest(&data);
+    core_crypto::encode_b64(&digest)
 }
 
 /// A X25519 public/secret keypair.
@@ -224,6 +319,47 @@ pub fn crypto_decrypt_blob(
     Ok(core_crypto::encode_b64(&plaintext))
 }
 
+/// Legacy decrypt for SecretStream (blob) ciphertext that may not carry
+/// a final tag.
+///
+/// Prefer using [`crypto_decrypt_blob`]. This function exists as a migration
+/// fallback for older data written without the final secretstream tag.
+#[wasm_bindgen]
+pub fn crypto_decrypt_blob_legacy(
+    encrypted_data_b64: &str,
+    decryption_header_b64: &str,
+    key_b64: &str,
+) -> Result<String, CryptoError> {
+    let ciphertext = core_crypto::decode_b64(encrypted_data_b64)?;
+    let header = core_crypto::decode_b64(decryption_header_b64)?;
+    let key = core_crypto::decode_b64(key_b64)?;
+
+    let mut decryptor = core_crypto::stream::StreamDecryptor::new(&header, &key)?;
+    let (plaintext, _tag) = decryptor.pull(&ciphertext)?;
+    Ok(core_crypto::encode_b64(&plaintext))
+}
+
+/// Decrypt chunked SecretStream data (file content).
+///
+/// Unlike `crypto_decrypt_blob` which handles single-message blobs, this
+/// function handles multi-chunk streaming data encrypted with 4 MB chunks
+/// (the format used for encrypted file content).
+///
+/// Returns the plaintext as base64.
+#[wasm_bindgen]
+pub fn crypto_decrypt_stream(
+    encrypted_data_b64: &str,
+    decryption_header_b64: &str,
+    key_b64: &str,
+) -> Result<String, CryptoError> {
+    let ciphertext = core_crypto::decode_b64(encrypted_data_b64)?;
+    let header = core_crypto::decode_b64(decryption_header_b64)?;
+    let key = core_crypto::decode_b64(key_b64)?;
+
+    let plaintext = core_crypto::stream::decrypt_file_data(&ciphertext, &header, &key)?;
+    Ok(core_crypto::encode_b64(&plaintext))
+}
+
 /// Seal (anonymous public-key encrypt) `data_b64` for `recipient_public_key_b64`.
 ///
 /// Wire format matches libsodium `crypto_box_seal`.
@@ -282,6 +418,100 @@ pub fn crypto_derive_subkey(
     let key = core_crypto::decode_b64(key_b64)?;
     let subkey = core_crypto::kdf::derive_subkey(&key, subkey_len, subkey_id, context.as_bytes())?;
     Ok(core_crypto::encode_b64(&subkey))
+}
+
+/// A chunked SecretStream encryption result (for file content).
+///
+/// Unlike [`EncryptedBlob`] which encrypts data as a single message, this
+/// encrypts data in 4 MB chunks using the streaming API — the same format used
+/// for encrypted file content throughout Ente.
+#[wasm_bindgen]
+pub struct EncryptedStreamResult {
+    encrypted_data: String,
+    decryption_header: String,
+    md5_hash: String,
+    key: String,
+}
+
+#[wasm_bindgen]
+impl EncryptedStreamResult {
+    /// The encrypted ciphertext as base64.
+    #[wasm_bindgen(getter)]
+    pub fn encrypted_data(&self) -> String {
+        self.encrypted_data.clone()
+    }
+
+    /// The decryption header as base64.
+    #[wasm_bindgen(getter)]
+    pub fn decryption_header(&self) -> String {
+        self.decryption_header.clone()
+    }
+
+    /// MD5 hash of the encrypted data as base64.
+    #[wasm_bindgen(getter)]
+    pub fn md5_hash(&self) -> String {
+        self.md5_hash.clone()
+    }
+
+    /// The file encryption key (32 bytes) as base64.
+    ///
+    /// A new random key is generated for each encryption.
+    #[wasm_bindgen(getter)]
+    pub fn key(&self) -> String {
+        self.key.clone()
+    }
+}
+
+/// Encrypt file data using chunked SecretStream (4 MB chunks) and compute MD5.
+///
+/// Generates a new random stream key, encrypts the data in 4 MB chunks (the
+/// same format produced by the mobile and desktop clients), and computes the
+/// MD5 hash of the ciphertext.
+///
+/// Returns the encrypted data, decryption header, MD5 hash, and generated key
+/// — all as base64 strings.
+#[wasm_bindgen]
+pub fn crypto_encrypt_stream(data_b64: &str) -> Result<EncryptedStreamResult, CryptoError> {
+    let plaintext = core_crypto::decode_b64(data_b64)?;
+
+    let mut reader = std::io::Cursor::new(&plaintext);
+    let mut writer = Vec::new();
+
+    let (key, header, md5) =
+        core_crypto::stream::encrypt_file_with_md5(&mut reader, &mut writer, None)?;
+
+    Ok(EncryptedStreamResult {
+        encrypted_data: core_crypto::encode_b64(&writer),
+        decryption_header: core_crypto::encode_b64(&header),
+        md5_hash: core_crypto::encode_b64(&md5),
+        key: core_crypto::encode_b64(&key),
+    })
+}
+
+/// Encrypt data using chunked SecretStream with an existing key.
+///
+/// Same as [`crypto_encrypt_stream`] but uses the provided key instead of
+/// generating a new one. Useful for encrypting thumbnails with the same file key.
+#[wasm_bindgen]
+pub fn crypto_encrypt_stream_with_key(
+    data_b64: &str,
+    key_b64: &str,
+) -> Result<EncryptedStreamResult, CryptoError> {
+    let plaintext = core_crypto::decode_b64(data_b64)?;
+    let key = core_crypto::decode_b64(key_b64)?;
+
+    let mut reader = std::io::Cursor::new(&plaintext);
+    let mut writer = Vec::new();
+
+    let (out_key, header, md5) =
+        core_crypto::stream::encrypt_file_with_md5(&mut reader, &mut writer, Some(&key))?;
+
+    Ok(EncryptedStreamResult {
+        encrypted_data: core_crypto::encode_b64(&writer),
+        decryption_header: core_crypto::encode_b64(&header),
+        md5_hash: core_crypto::encode_b64(&md5),
+        key: core_crypto::encode_b64(&out_key),
+    })
 }
 
 /// Derive the SRP login key from a 32-byte master key.
