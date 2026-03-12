@@ -19,10 +19,22 @@ export const parseAndHandleRequest = async () => {
 
     try {
         const urlParams = new URLSearchParams(window.location.search);
+        const paymentIntentClientSecret = urlParams.get(
+            "payment_intent_client_secret",
+        );
         const productID = urlParams.get("productID");
         const paymentToken = urlParams.get("paymentToken");
         const action = urlParams.get("action");
         const redirectURL = urlParams.get("redirectURL");
+
+        if (paymentIntentClientSecret) {
+            await handlePaymentIntentRedirect(
+                paymentIntentClientSecret,
+                paymentToken,
+                redirectURL,
+            );
+            return;
+        }
 
         if (!action && !paymentToken && !productID && !redirectURL) {
             // Maybe someone attempted to directly open this page in their
@@ -55,6 +67,10 @@ export const parseAndHandleRequest = async () => {
 };
 
 const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
+const paymentIntentPollIntervalMs = 2_000;
+const paymentIntentPollTimeoutMs = 60_000;
+
+type StripeJS = NonNullable<Awaited<ReturnType<typeof loadStripe>>>;
 
 type StripeAccountCountry = "US" | "IN";
 
@@ -168,11 +184,14 @@ const updateSubscription = async (
                 return;
 
             case "requires_action": {
-                const { error } = await stripe.confirmCardPayment(clientSecret);
-                if (!error) {
-                    redirectToApp(redirectURL, "success");
-                } else {
-                    console.error("Failed to confirm card payment", error);
+                const result = await stripe.confirmPayment({
+                    clientSecret,
+                    confirmParams: { return_url: window.location.href },
+                    redirect: "if_required",
+                });
+                if (result.error) {
+                    const { error } = result;
+                    console.error("Failed to confirm payment", error);
                     if (error.type == "card_error") {
                         redirectToApp(
                             redirectURL,
@@ -191,6 +210,13 @@ const updateSubscription = async (
                     } else {
                         redirectToApp(redirectURL, "fail");
                     }
+                } else if (result.paymentIntent) {
+                    const status = await waitForTerminalPaymentIntentStatus(
+                        stripe,
+                        clientSecret,
+                        result.paymentIntent.status,
+                    );
+                    redirectForPaymentIntentStatus(redirectURL, status);
                 }
                 return;
             }
@@ -210,6 +236,75 @@ interface UpdateStripeSubscriptionResponse {
     status: PaymentStatus;
     clientSecret: string;
 }
+
+const handlePaymentIntentRedirect = async (
+    clientSecret: string,
+    paymentToken: string | null,
+    redirectURL: string | null,
+) => {
+    if (!paymentToken || !redirectURL) {
+        throw new Error(
+            "Required query parameter was not provided for payment confirmation",
+        );
+    }
+
+    const accountCountry = await getUserStripeAccountCountry(paymentToken);
+    const stripe = await getStripe(redirectURL, accountCountry);
+    const result = await stripe.retrievePaymentIntent(clientSecret);
+    if (result.error) throw result.error;
+    const status = await waitForTerminalPaymentIntentStatus(
+        stripe,
+        clientSecret,
+        result.paymentIntent.status,
+    );
+    redirectForPaymentIntentStatus(redirectURL, status);
+};
+
+const waitForTerminalPaymentIntentStatus = async (
+    stripe: StripeJS,
+    clientSecret: string,
+    initialStatus: string,
+) => {
+    let status = initialStatus;
+    const deadline = Date.now() + paymentIntentPollTimeoutMs;
+
+    while (status == "processing" && Date.now() < deadline) {
+        await delay(paymentIntentPollIntervalMs);
+        const result = await stripe.retrievePaymentIntent(clientSecret);
+        if (result.error) throw result.error;
+        status = result.paymentIntent.status;
+    }
+
+    return status;
+};
+
+const delay = (ms: number) =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+
+const redirectForPaymentIntentStatus = (
+    redirectURL: string,
+    status: string,
+) => {
+    switch (status) {
+        case "succeeded":
+            redirectToApp(redirectURL, "success");
+            return;
+        case "requires_payment_method":
+            redirectToApp(redirectURL, "fail", "requires_payment_method");
+            return;
+        case "requires_action":
+            redirectToApp(redirectURL, "fail", "authentication_failed");
+            return;
+        case "canceled":
+            redirectToApp(redirectURL, "fail", "canceled");
+            return;
+        default:
+            console.error("Unhandled PaymentIntent status", status);
+            redirectToApp(redirectURL, "fail");
+    }
+};
 
 /**
  * Make a request to museum to update an existing Stripe subscription with
@@ -249,13 +344,13 @@ type RedirectStatus = "success" | "fail";
 
 type FailureReason =
     /**
-     * Unable to authenticate card or 3DS.
+     * Unable to authenticate the payment method.
      *
      * User should be shown button for fixing card via customer portal.
      */
     | "authentication_failed"
     /**
-     * Card declined results in this error.
+     * Payment method declined results in this error.
      *
      * Show button to the customer portal.
      */
