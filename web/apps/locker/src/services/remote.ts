@@ -35,7 +35,6 @@ import {
 import {
     authenticatedRequestHeaders,
     ensureOk,
-    isHTTPErrorWithStatus,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
 } from "ente-base/http";
@@ -288,10 +287,6 @@ export interface LockerFileShareLinkSummary {
     passwordEnabled: boolean;
 }
 
-const RemoteFileShareLinkDiffResponse = z.object({
-    diff: z.array(RemoteFileShareLink),
-});
-
 interface DecryptAllDataResult {
     collections: LockerCollection[];
     failedCollectionIDs: number[];
@@ -299,7 +294,6 @@ interface DecryptAllDataResult {
 }
 
 const utf8Decoder = new TextDecoder();
-let lockerFileShareLinksUnavailable = false;
 
 const toLockerCollectionParticipant = (
     user: z.infer<typeof RemoteCollectionUser>,
@@ -1134,48 +1128,8 @@ export const downloadLockerFile = async (
 export const fetchLockerFileShareLinks = async (): Promise<
     Map<number, LockerFileShareLinkSummary>
 > => {
-    if (lockerFileShareLinksUnavailable) {
-        return new Map();
-    }
-
-    try {
-        const res = await fetch(
-            await apiURL("/files/share-url", {
-                sinceTime: 0,
-                limit: 5000,
-            }),
-            {
-                headers: await authenticatedRequestHeaders(),
-            },
-        );
-        ensureOk(res);
-
-        const parsed = RemoteFileShareLinkDiffResponse.parse(await res.json());
-        const linksByFileID = new Map<number, LockerFileShareLinkSummary>();
-
-        for (const link of parsed.diff) {
-            if (link.isDisabled) {
-                continue;
-            }
-            if (linksByFileID.has(link.fileID)) {
-                continue;
-            }
-            linksByFileID.set(link.fileID, {
-                linkID: link.linkID,
-                fileID: link.fileID,
-                validTill: link.validTill,
-                enableDownload: link.enableDownload,
-                passwordEnabled: link.passwordEnabled,
-            });
-        }
-
-        return linksByFileID;
-    } catch (error) {
-        if (isHTTPErrorWithStatus(error, 404)) {
-            lockerFileShareLinksUnavailable = true;
-        }
-        return new Map();
-    }
+    // TODO: Re-enable this after GET /files/share-url is deployed on the API.
+    return new Map();
 };
 
 /**
