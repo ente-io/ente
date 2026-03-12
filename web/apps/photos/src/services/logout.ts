@@ -3,7 +3,10 @@ import {
     logoutClearStateAgain,
 } from "ente-accounts/services/logout";
 import log from "ente-base/log";
-import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
+import { resetSaveGroups } from "ente-gallery/components/utils/save-groups";
+import {
+    logoutFileViewerDataSource,
+} from "ente-gallery/components/viewer/data-source";
 import { downloadManager } from "ente-gallery/services/download";
 import { clearFilesDB } from "ente-gallery/services/files-db";
 import { resetUploadState } from "ente-gallery/services/upload";
@@ -80,6 +83,12 @@ export const photosLogout = async () => {
         downloadManager.logout();
     } catch (e) {
         ignoreError("Download", e);
+    }
+
+    try {
+        resetSaveGroups();
+    } catch (e) {
+        ignoreError("Download UI", e);
     }
 
     try {
