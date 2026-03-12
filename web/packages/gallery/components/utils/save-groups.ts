@@ -235,3 +235,14 @@ export const useSaveGroups = () => {
         onRemoveSaveGroup: removeSaveGroup,
     };
 };
+
+/**
+ * Return save-group actions without subscribing to progress updates.
+ *
+ * Use this in components that only need to initiate or dismiss downloads,
+ * otherwise every save progress update will re-render the caller.
+ */
+export const useSaveGroupsActions = () => ({
+    onAddSaveGroup: addSaveGroup,
+    onRemoveSaveGroup: removeSaveGroup,
+});
