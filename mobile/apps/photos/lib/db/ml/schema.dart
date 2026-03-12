@@ -236,38 +236,6 @@ const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
 
 const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
 
-// ── Clustering Tables ──
-
-const petFaceClustersTable = 'pet_face_clusters';
-
-const createPetFaceClustersTable = '''
-CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
-  $petFaceIDColumn TEXT NOT NULL,
-  $clusterIDColumn TEXT NOT NULL,
-  PRIMARY KEY($petFaceIDColumn)
-);
-''';
-
-const petFcClusterIDIndex =
-    '''CREATE INDEX IF NOT EXISTS idx_petFcClusterID ON $petFaceClustersTable($clusterIDColumn);''';
-
-const dropPetFaceClustersTable = 'DROP TABLE IF EXISTS $petFaceClustersTable';
-
-const petClusterSummaryTable = 'pet_cluster_summary';
-
-const createPetClusterSummaryTable = '''
-CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
-  $clusterIDColumn TEXT NOT NULL,
-  $avgColumn BLOB NOT NULL,
-  $countColumn INTEGER NOT NULL,
-  $speciesColumn INTEGER NOT NULL,
-  PRIMARY KEY($clusterIDColumn)
-);
-''';
-
-const dropPetClusterSummaryTable =
-    'DROP TABLE IF EXISTS $petClusterSummaryTable';
-
 // ── Vector ID Mapping Tables ──
 
 /// Maps pet_face_id (string) → integer for face usearch index
@@ -297,20 +265,3 @@ CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
 
 const deletePetBodyVectorIdMappingTable =
     'DELETE FROM $petBodyVectorIdMappingTable';
-
-// ── Pet Indexing Tracking Table ──
-
-const petIndexedFilesTable = 'pet_indexed_files';
-
-const createPetIndexedFilesTable = '''
-CREATE TABLE IF NOT EXISTS $petIndexedFilesTable (
-  $fileIDColumn INTEGER NOT NULL PRIMARY KEY,
-  $mlVersionColumn INTEGER NOT NULL DEFAULT -1
-);
-''';
-
-const dropPetIndexedFilesTable = 'DROP TABLE IF EXISTS $petIndexedFilesTable';
-
-// ── Recreate pet tables with UNIQUE vector ID columns ──
-const dropPetFacesTable = 'DROP TABLE IF EXISTS $petFacesTable';
-const dropPetBodiesTable = 'DROP TABLE IF EXISTS $petBodiesTable';
