@@ -113,6 +113,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       await mlDataDB.clipIndexedFileWithVersion();
   final bool petEnabled = flagService.internalUser &&
       localSettings.petRecognitionEnabled &&
+      localSettings.isMLLocalIndexingEnabled &&
       (flagService.useRustForML || isOfflineMode);
   final Map<int, int> petIndexedFileIDs =
       petEnabled ? await mlDataDB.petIndexedFileIds() : const {};
