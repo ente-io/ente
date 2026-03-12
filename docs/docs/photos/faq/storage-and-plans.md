@@ -268,6 +268,12 @@ When you join a family plan, your individual plan (including any referral bonuse
 
 (Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
 
+### Are duplicate photos deduplicated across family members? {#family-plan-deduplication}
+
+No. Family plans are a way to share storage, but each family member has their own separate account. Ente cannot deduplicate files across different accounts.
+
+If you and a family member both upload the same photo (for example, from Google Takeout), it will be counted separately in each account's storage usage. Unlike [deduplication within a single account](#deduplication), which avoids counting the same file twice, deduplication does not apply across different accounts in a family plan.
+
 ## Student Discounts
 
 ### Does Ente offer discounts to students? {#student-discount}
