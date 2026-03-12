@@ -28,10 +28,11 @@ export const parseAndHandleRequest = async () => {
         const redirectURL = urlParams.get("redirectURL");
 
         if (paymentIntentClientSecret) {
+            const pendingPaymentContext = getPendingPaymentContext();
             await handlePaymentIntentRedirect(
                 paymentIntentClientSecret,
-                paymentToken,
-                redirectURL,
+                pendingPaymentContext,
+                redirectURL ?? pendingPaymentContext?.redirectURL ?? null,
             );
             return;
         }
@@ -68,7 +69,7 @@ export const parseAndHandleRequest = async () => {
 
 const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
 const paymentIntentPollIntervalMs = 2_000;
-const paymentIntentPollTimeoutMs = 60_000;
+const pendingPaymentContextStorageKey = "ente.payments.pending-context";
 
 type StripeJS = NonNullable<Awaited<ReturnType<typeof loadStripe>>>;
 
@@ -76,6 +77,11 @@ const ensureError = (error: unknown) =>
     error instanceof Error ? error : new Error(String(error));
 
 type StripeAccountCountry = "US" | "IN";
+
+interface PendingPaymentContext {
+    accountCountry: StripeAccountCountry;
+    redirectURL: string;
+}
 
 const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry =>
     c == "US" || c == "IN";
@@ -187,12 +193,16 @@ const updateSubscription = async (
                 return;
 
             case "requires_action": {
+                setPendingPaymentContext({ accountCountry, redirectURL });
                 const result = await stripe.confirmPayment({
                     clientSecret,
-                    confirmParams: { return_url: window.location.href },
+                    confirmParams: {
+                        return_url: stripeConfirmationReturnURL(redirectURL),
+                    },
                     redirect: "if_required",
                 });
                 if (result.error) {
+                    clearPendingPaymentContext();
                     const { error } = result;
                     console.error("Failed to confirm payment", error);
                     if (error.type == "card_error") {
@@ -221,6 +231,7 @@ const updateSubscription = async (
                     clientSecret,
                     result.paymentIntent.status,
                 );
+                clearPendingPaymentContext();
                 redirectForPaymentIntentStatus(redirectURL, status);
                 return;
             }
@@ -243,17 +254,16 @@ interface UpdateStripeSubscriptionResponse {
 
 const handlePaymentIntentRedirect = async (
     clientSecret: string,
-    paymentToken: string | null,
+    pendingPaymentContext: PendingPaymentContext | null,
     redirectURL: string | null,
 ) => {
-    if (!paymentToken || !redirectURL) {
+    if (!pendingPaymentContext || !redirectURL) {
         throw new Error(
             "Required query parameter was not provided for payment confirmation",
         );
     }
 
-    const accountCountry = await getUserStripeAccountCountry(paymentToken);
-    const stripe = await getStripe(redirectURL, accountCountry);
+    const stripe = await getStripe(redirectURL, pendingPaymentContext.accountCountry);
     const result = await stripe.retrievePaymentIntent(clientSecret);
     if (result.error) throw ensureError(result.error);
     const status = await waitForTerminalPaymentIntentStatus(
@@ -261,6 +271,7 @@ const handlePaymentIntentRedirect = async (
         clientSecret,
         result.paymentIntent.status,
     );
+    clearPendingPaymentContext();
     redirectForPaymentIntentStatus(redirectURL, status);
 };
 
@@ -270,9 +281,8 @@ const waitForTerminalPaymentIntentStatus = async (
     initialStatus: string,
 ) => {
     let status = initialStatus;
-    const deadline = Date.now() + paymentIntentPollTimeoutMs;
 
-    while (status == "processing" && Date.now() < deadline) {
+    while (status == "processing") {
         await delay(paymentIntentPollIntervalMs);
         const result = await stripe.retrievePaymentIntent(clientSecret);
         if (result.error) throw ensureError(result.error);
@@ -286,6 +296,59 @@ const delay = (ms: number) =>
     new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
+
+const stripeConfirmationReturnURL = (redirectURL: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("paymentToken");
+    url.searchParams.delete("productID");
+    url.searchParams.delete("action");
+    url.searchParams.set("redirectURL", redirectURL);
+    return url.href;
+};
+
+const getPendingPaymentContext = (): PendingPaymentContext | null => {
+    try {
+        const value = sessionStorage.getItem(pendingPaymentContextStorageKey);
+        if (!value) return null;
+        const json: unknown = JSON.parse(value);
+        if (
+            json &&
+            typeof json == "object" &&
+            "accountCountry" in json &&
+            "redirectURL" in json &&
+            isStripeAccountCountry(json.accountCountry) &&
+            typeof json.redirectURL == "string"
+        ) {
+            return {
+                accountCountry: json.accountCountry,
+                redirectURL: json.redirectURL,
+            };
+        }
+    } catch (error) {
+        console.error("Failed to read pending payment context", error);
+    }
+
+    return null;
+};
+
+const setPendingPaymentContext = (context: PendingPaymentContext) => {
+    try {
+        sessionStorage.setItem(
+            pendingPaymentContextStorageKey,
+            JSON.stringify(context),
+        );
+    } catch (error) {
+        console.error("Failed to persist pending payment context", error);
+    }
+};
+
+const clearPendingPaymentContext = () => {
+    try {
+        sessionStorage.removeItem(pendingPaymentContextStorageKey);
+    } catch (error) {
+        console.error("Failed to clear pending payment context", error);
+    }
+};
 
 const redirectForPaymentIntentStatus = (
     redirectURL: string,
