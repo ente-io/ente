@@ -1,5 +1,6 @@
 // TODO: Audit this file
 import { AllAlbums } from "components/Collections/AllAlbums";
+import { AllPeople, type PeopleSortBy } from "components/Collections/AllPeople";
 import {
     CollectionShare,
     type CollectionShareIntent,
@@ -45,6 +46,7 @@ type GalleryBarAndListHeaderProps = Omit<
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
     | "onShowAllAlbums"
+    | "onShowAllPeople"
 > & {
     /**
      * When `true`, the bar is be hidden altogether.
@@ -126,6 +128,8 @@ export const GalleryBarAndListHeader: React.FC<
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
+    const { show: showAllPeople, props: allPeopleVisibilityProps } =
+        useModalVisibility();
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
@@ -150,6 +154,8 @@ export const GalleryBarAndListHeader: React.FC<
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
+    const [peopleSortBy, setPeopleSortBy] =
+        useState<PeopleSortBy>("count-desc");
 
     const shouldBeHidden = useMemo(
         () =>
@@ -280,6 +286,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllAlbums={showAllAlbums}
+                onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (cs) => !cs.attributes.has("hideFromCollectionBar"),
                 )}
@@ -295,6 +302,13 @@ export const GalleryBarAndListHeader: React.FC<
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
                 onRemotePull={onRemotePull}
+            />
+            <AllPeople
+                {...allPeopleVisibilityProps}
+                people={people}
+                onSelectPerson={onSelectPerson}
+                peopleSortBy={peopleSortBy}
+                onChangePeopleSortBy={setPeopleSortBy}
             />
             {activeCollection && (
                 <>
