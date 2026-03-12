@@ -1219,31 +1219,10 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.10.1", "@tauri-apps/api@^2.8.0":
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.10.1.tgz#57c1bae6114ec33d977eb2b50dfefc25fa84fc93"
-  integrity sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw==
-
-"@tauri-apps/plugin-dialog@^2.0.0":
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.6.0.tgz#e09bb26ab7008bfc4a1a044a5fb29ac0575f8898"
-  integrity sha512-q4Uq3eY87TdcYzXACiYSPhmpBA76shgmQswGkSVio4C82Sz2W4iehe9TnKYwbq7weHiL88Yw19XZm7v28+Micg==
-  dependencies:
-    "@tauri-apps/api" "^2.8.0"
-
-"@tauri-apps/plugin-fs@^2.0.0":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-fs/-/plugin-fs-2.4.5.tgz#4b32b6de32e2ee735632bff356fab09fcc281b42"
-  integrity sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==
-  dependencies:
-    "@tauri-apps/api" "^2.8.0"
-
-"@tauri-apps/plugin-shell@^2.0.0":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-shell/-/plugin-shell-2.3.5.tgz#ec7b5c2aedaae9e4641cd3ccf1106e443e193919"
-  integrity sha512-jewtULhiQ7lI7+owCKAjc8tYLJr92U16bPOeAa472LHJdgaibLP83NcfAF2e+wkEcA53FxKQAZ7byDzs2eeizg==
-  dependencies:
-    "@tauri-apps/api" "^2.10.1"
+"@tauri-apps/api@^1.5.0":
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-1.6.0.tgz"
+  integrity sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==
 
 "@tokenizer/inflate@^0.2.7":
   version "0.2.7"
