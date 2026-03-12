@@ -731,6 +731,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       // Invalidate cached runtime args so pet model paths are rebuilt
       // with the new toggle state on the next indexing run.
       await MLIndexingIsolate.instance.releaseRustRuntime();
+      MLIndexingIsolate.instance.invalidateModelDownloadCache();
       logger.info(
         'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
       );

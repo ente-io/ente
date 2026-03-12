@@ -337,6 +337,7 @@ class MLService {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
       await MLIndexingIsolate.instance.releaseRustRuntime();
+      MLIndexingIsolate.instance.invalidateModelDownloadCache();
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
     }
