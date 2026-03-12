@@ -324,10 +324,6 @@ interface RowSwitchProps {
      */
     checked?: boolean;
     /**
-     * If true, then the contained {@link EnteSwitch} will be disabled.
-     */
-    disabled?: boolean;
-    /**
      * Called when the user activates the contained {@link EnteSwitch}.
      */
     onClick: () => void;
@@ -350,7 +346,6 @@ interface RowSwitchProps {
  */
 export const RowSwitch: React.FC<RowSwitchProps> = ({
     checked,
-    disabled,
     label,
     onClick,
 }) => (
@@ -364,17 +359,10 @@ export const RowSwitch: React.FC<RowSwitchProps> = ({
             pr: "12px",
         }}
     >
-        <Typography
-            sx={{
-                py: "14px",
-                px: "2px",
-                fontWeight: "medium",
-                ...(disabled ? { color: "text.muted" } : undefined),
-            }}
-        >
+        <Typography sx={{ py: "14px", px: "2px", fontWeight: "medium" }}>
             {label}
         </Typography>
-        <EnteSwitch {...{ checked, disabled, onClick }} />
+        <EnteSwitch {...{ checked, onClick }} />
     </Stack>
 );
 

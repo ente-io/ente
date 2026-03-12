@@ -13,7 +13,6 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
@@ -197,17 +196,9 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         <RowSwitch
                             label={t("enabled")}
                             checked={state.enabled}
-                            disabled={!state.supported}
                             onClick={handleToggleEnabled}
                         />
                     </RowButtonGroup>
-                    {!state.supported && (
-                        <RowButtonGroupHint>
-                            {t("app_lock_not_supported", {
-                                defaultValue: "App lock is not supported",
-                            })}
-                        </RowButtonGroupHint>
-                    )}
 
                     {state.enabled && (
                         <>
