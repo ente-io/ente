@@ -59,7 +59,10 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 		FileIDs:     fileIDs,
 	})
 	if err != nil {
-		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "user cannot access all files")
+		if errors.Is(err, ente.ErrPermissionDenied) {
+			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "user cannot access all files")
+		}
+		return nil, stacktrace.Propagate(err, "failed to validate file access")
 	}
 
 	ownerMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, fileIDs)
