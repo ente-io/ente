@@ -203,6 +203,13 @@ const App: React.FC<PhotosAppProps> = ({ Component, pageProps }) => {
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
             <BaseContext value={baseContext}>
+                {
+                    // The web and desktop components are rendered separately
+                    // because the desktop currently supports app-lock,
+                    // for which we have certain hooks and components.
+                    // We don't want this to load in the web as well, since there
+                    // is no particular purpose it would serve.
+                }
                 <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
