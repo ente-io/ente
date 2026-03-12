@@ -608,3 +608,31 @@ After cancellation, you'll have access to your data for 30 days, after which it 
 ### How can I earn free storage? {#earn-free-storage}
 
 Use our [referral program](/photos/features/account/referral-program/). When friends sign up using your referral code and subscribe to a paid plan, both you and your friend earn additional free storage.
+
+## Inactive Account Email
+
+### Why did I receive this email? {#inactive-account-email}
+
+We recently sent an email to accounts that have not shown activity for 12
+months as part of our inactive-account policy.
+
+### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
+
+The email includes the email address associated with the inactive account.
+
+If you are using Ente regularly, check the registered email address shown inside
+the app to confirm which account you are currently using.
+
+Open `Settings > Account`. The registered email address will appear in a green
+box.
+
+### What should I do if I received this email? {#inactive-account-action}
+
+Simply sign in to the account mentioned in the email before the date specified.
+This will mark the account as active.
+
+### I think this email was sent by mistake {#inactive-account-mistake}
+
+Contact support at [support@ente.io](mailto:support@ente.io) and share a
+screenshot of the `Settings > Account` page showing the registered email address
+(green box), so we can verify the account.
