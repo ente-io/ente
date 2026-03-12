@@ -4,9 +4,7 @@ import {
 } from "ente-accounts/services/logout";
 import log from "ente-base/log";
 import { resetSaveGroups } from "ente-gallery/components/utils/save-groups";
-import {
-    logoutFileViewerDataSource,
-} from "ente-gallery/components/viewer/data-source";
+import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
 import { downloadManager } from "ente-gallery/services/download";
 import { clearFilesDB } from "ente-gallery/services/files-db";
 import { resetUploadState } from "ente-gallery/services/upload";

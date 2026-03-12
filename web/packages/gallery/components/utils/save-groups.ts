@@ -170,12 +170,15 @@ type SaveGroupsListener = () => void;
 let saveGroupsSnapshot: SaveGroup[] = [];
 const listeners = new Set<SaveGroupsListener>();
 
+// Notify subscribers after the snapshot changes.
 const emitChange = () => {
     for (const listener of listeners) listener();
 };
 
+// Return the current snapshot for external-store consumers.
 const getSnapshot = () => saveGroupsSnapshot;
 
+// Register a listener and return its unsubscribe cleanup.
 const subscribe = (listener: SaveGroupsListener) => {
     listeners.add(listener);
     return () => {
@@ -184,9 +187,7 @@ const subscribe = (listener: SaveGroupsListener) => {
 };
 
 const setSaveGroupsSnapshot = (
-    next:
-        | SaveGroup[]
-        | ((currentSaveGroups: SaveGroup[]) => SaveGroup[]),
+    next: SaveGroup[] | ((currentSaveGroups: SaveGroup[]) => SaveGroup[]),
 ) => {
     saveGroupsSnapshot =
         typeof next == "function" ? next(saveGroupsSnapshot) : next;
