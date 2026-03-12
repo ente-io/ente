@@ -79,6 +79,7 @@ Future<IndexStatus> getIndexStatus() async {
     int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
     if (flagService.internalUser &&
         localSettings.petRecognitionEnabled &&
+        localSettings.isMLLocalIndexingEnabled &&
         (flagService.useRustForML || isOfflineMode)) {
       final int petIndexedFiles = await mlDataDB.getPetIndexedFileCount();
       indexedFiles = math.min(indexedFiles, petIndexedFiles);
