@@ -62,7 +62,7 @@ export const parseAndHandleRequest = async () => {
         }
     } catch (e) {
         console.error(e);
-        throw e;
+        throw ensureError(e);
     }
 };
 
@@ -71,6 +71,9 @@ const paymentIntentPollIntervalMs = 2_000;
 const paymentIntentPollTimeoutMs = 60_000;
 
 type StripeJS = NonNullable<Awaited<ReturnType<typeof loadStripe>>>;
+
+const ensureError = (error: unknown) =>
+    error instanceof Error ? error : new Error(String(error));
 
 type StripeAccountCountry = "US" | "IN";
 
@@ -117,7 +120,7 @@ const getStripe = async (
         return stripe;
     } catch (e) {
         redirectToApp(redirectURL, "fail", "stripe_error");
-        throw e;
+        throw ensureError(e);
     }
 };
 
@@ -138,7 +141,7 @@ const buySubscription = async (
         await stripe.redirectToCheckout({ sessionId });
     } catch (e) {
         redirectToApp(redirectURL, "fail", "server_error");
-        throw e;
+        throw ensureError(e);
     }
 };
 
@@ -210,20 +213,21 @@ const updateSubscription = async (
                     } else {
                         redirectToApp(redirectURL, "fail");
                     }
-                } else if (result.paymentIntent) {
-                    const status = await waitForTerminalPaymentIntentStatus(
-                        stripe,
-                        clientSecret,
-                        result.paymentIntent.status,
-                    );
-                    redirectForPaymentIntentStatus(redirectURL, status);
+                    return;
                 }
+
+                const status = await waitForTerminalPaymentIntentStatus(
+                    stripe,
+                    clientSecret,
+                    result.paymentIntent.status,
+                );
+                redirectForPaymentIntentStatus(redirectURL, status);
                 return;
             }
         }
     } catch (e) {
         redirectToApp(redirectURL, "fail", "server_error");
-        throw e;
+        throw ensureError(e);
     }
 };
 
@@ -251,7 +255,7 @@ const handlePaymentIntentRedirect = async (
     const accountCountry = await getUserStripeAccountCountry(paymentToken);
     const stripe = await getStripe(redirectURL, accountCountry);
     const result = await stripe.retrievePaymentIntent(clientSecret);
-    if (result.error) throw result.error;
+    if (result.error) throw ensureError(result.error);
     const status = await waitForTerminalPaymentIntentStatus(
         stripe,
         clientSecret,
@@ -271,7 +275,7 @@ const waitForTerminalPaymentIntentStatus = async (
     while (status == "processing" && Date.now() < deadline) {
         await delay(paymentIntentPollIntervalMs);
         const result = await stripe.retrievePaymentIntent(clientSecret);
-        if (result.error) throw result.error;
+        if (result.error) throw ensureError(result.error);
         status = result.paymentIntent.status;
     }
 
