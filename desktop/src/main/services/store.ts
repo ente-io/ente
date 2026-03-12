@@ -38,12 +38,17 @@ export const masterKeyFromSafeStorage = (): string | undefined => {
     return safeStorage.decryptString(encryptedKeyBuffer);
 };
 
-const encryptStringForSafeStorageStore = (value: string) => {
-    return Buffer.from(safeStorage.encryptString(value)).toString("base64");
+const saveAppLockConfigStringInSafeStorage = (value: string) => {
+    const encryptedValueBuffer = safeStorage.encryptString(value);
+    const encryptedValue = Buffer.from(encryptedValueBuffer).toString("base64");
+    safeStorageStore.set("appLockConfig", encryptedValue);
 };
 
-const decryptStringFromSafeStorageStore = (value: string) => {
-    return safeStorage.decryptString(Buffer.from(value, "base64"));
+const appLockConfigStringFromSafeStorage = (): string | undefined => {
+    const encryptedValue = safeStorageStore.get("appLockConfig");
+    if (!encryptedValue) return undefined;
+    const encryptedValueBuffer = Buffer.from(encryptedValue, "base64");
+    return safeStorage.decryptString(encryptedValueBuffer);
 };
 
 const parsePersistedAppLockConfig = (json: string): PersistedAppLockConfig => {
@@ -74,21 +79,16 @@ const parsePersistedAppLockConfig = (json: string): PersistedAppLockConfig => {
 export const saveAppLockConfigInSafeStorage = (
     config: PersistedAppLockConfig,
 ) => {
-    const encryptedConfig = encryptStringForSafeStorageStore(
-        JSON.stringify(config),
-    );
-    safeStorageStore.set("appLockConfig", encryptedConfig);
+    saveAppLockConfigStringInSafeStorage(JSON.stringify(config));
 };
 
 export const appLockConfigFromSafeStorage = ():
     | PersistedAppLockConfig
     | undefined => {
-    const encryptedConfig = safeStorageStore.get("appLockConfig");
-    if (!encryptedConfig) return undefined;
+    const config = appLockConfigStringFromSafeStorage();
+    if (!config) return undefined;
 
-    return parsePersistedAppLockConfig(
-        decryptStringFromSafeStorageStore(encryptedConfig),
-    );
+    return parsePersistedAppLockConfig(config);
 };
 
 export const clearAppLockConfigFromSafeStorage = () => {
