@@ -103,7 +103,7 @@ export const LockerCollectionShareDrawer: React.FC<
                     setSharees(nextSharees);
                 }
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 log.error(
                     `[LockerCollectionShareDrawer] Failed to refresh sharees for ${collection.id}`,
                     error,
@@ -123,8 +123,10 @@ export const LockerCollectionShareDrawer: React.FC<
     const sortedSharees = useMemo(
         () =>
             [...sharees].sort((a, b) => {
-                if (a.id === currentUser.id && b.id !== currentUser.id) return -1;
-                if (a.id !== currentUser.id && b.id === currentUser.id) return 1;
+                if (a.id === currentUser.id && b.id !== currentUser.id)
+                    return -1;
+                if (a.id !== currentUser.id && b.id === currentUser.id)
+                    return 1;
                 return (a.email ?? "").localeCompare(b.email ?? "");
             }),
         [currentUser.id, sharees],
@@ -209,7 +211,10 @@ export const LockerCollectionShareDrawer: React.FC<
                     text: t("remove"),
                     color: "critical",
                     action: async () => {
-                        await onUnshareCollection(collection.id, participant.email!);
+                        await onUnshareCollection(
+                            collection.id,
+                            participant.email!,
+                        );
                         setSharees((current) =>
                             current.filter(
                                 (sharee) =>
@@ -240,7 +245,9 @@ export const LockerCollectionShareDrawer: React.FC<
         ...sortedSharees.map((participant) => ({
             participant,
             subtitle:
-                participant.id === currentUser.id ? t("sharedWithYou") : undefined,
+                participant.id === currentUser.id
+                    ? t("sharedWithYou")
+                    : undefined,
             action:
                 canManageParticipants &&
                 participant.id !== currentUser.id &&
@@ -248,9 +255,7 @@ export const LockerCollectionShareDrawer: React.FC<
                     <OverflowMenu
                         ariaID={`sharee-${participant.id}`}
                         triggerButtonIcon={<MoreVertIcon />}
-                        triggerButtonSxProps={{
-                            color: "text.faint",
-                        }}
+                        triggerButtonSxProps={{ color: "text.faint" }}
                     >
                         <OverflowMenuOption
                             color="critical"
@@ -276,13 +281,12 @@ export const LockerCollectionShareDrawer: React.FC<
                         }}
                     >
                         <Box sx={{ px: 1, pt: 1.5 }}>
-                            <Typography variant="h3">{collection.name}</Typography>
+                            <Typography variant="h3">
+                                {collection.name}
+                            </Typography>
                             <Typography
                                 variant="small"
-                                sx={{
-                                    mt: 0.5,
-                                    color: "text.muted",
-                                }}
+                                sx={{ mt: 0.5, color: "text.muted" }}
                             >
                                 {t("sharedWith")}
                             </Typography>
@@ -456,11 +460,7 @@ const ParticipantRow: React.FC<{
                 {avatarLetter}
             </Avatar>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                    variant="body"
-                    sx={{ fontWeight: "medium" }}
-                    noWrap
-                >
+                <Typography variant="body" sx={{ fontWeight: "medium" }} noWrap>
                     {email}
                 </Typography>
                 {subtitle && (

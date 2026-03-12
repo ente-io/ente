@@ -31,7 +31,9 @@ export const LockerAboutDrawer: React.FC<
                 <RowButton
                     label={t("we_are_open_source")}
                     endIcon={<OpenInNewOutlinedIcon />}
-                    onClick={() => openExternal("https://github.com/ente-io/ente")}
+                    onClick={() =>
+                        openExternal("https://github.com/ente-io/ente")
+                    }
                 />
                 <RowButtonDivider />
                 <RowButton

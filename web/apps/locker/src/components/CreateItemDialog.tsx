@@ -19,13 +19,19 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { visibleLockerCollections } from "types";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import type { LockerCollection, LockerItemType } from "types";
+import { visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
 
@@ -58,7 +64,9 @@ const CREATABLE_TYPES: {
         type: "physicalRecord",
         labelKey: "thing",
         descriptionKey: "physicalRecordsDescription",
-        icon: <LocationOnOutlinedIcon sx={{ fontSize: 28, color: "#4CAF50" }} />,
+        icon: (
+            <LocationOnOutlinedIcon sx={{ fontSize: 28, color: "#4CAF50" }} />
+        ),
         bgColor: "rgba(76, 175, 80, 0.15)",
     },
     {
@@ -136,9 +144,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setSelectedCollectionID(
             editItem?.collectionID ?? defaultCollectionID ?? null,
         );
-        setFormData(
-            editItem ? (editItem.data as Record<string, string>) : {},
-        );
+        setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
         setSelectedFile(null);
         setError(null);
@@ -195,7 +201,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         try {
             const cleanData = Object.fromEntries(
                 Object.entries(formData)
-                    .filter(([, value]) => value?.trim())
+                    .filter(([, value]) => value.trim())
                     .map(([key, value]) => [key, value.trim()]),
             );
             await onSave(selectedType, cleanData, selectedCollectionID);
@@ -203,7 +209,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } catch (error) {
             log.error("Failed to save Locker item", error);
             setError(
-                error instanceof Error ? error.message : t("failedToSaveRecord"),
+                error instanceof Error
+                    ? error.message
+                    : t("failedToSaveRecord"),
             );
         } finally {
             setSaving(false);
@@ -231,7 +239,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const canSave =
         selectedType !== null &&
         selectedCollectionID !== null &&
-        getRequiredFields(selectedType).every((field) => formData[field]?.trim());
+        getRequiredFields(selectedType).every((field) =>
+            formData[field]?.trim(),
+        );
 
     const canUpload =
         isFileMode && selectedCollectionID !== null && selectedFile !== null;
@@ -244,10 +254,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             maxWidth="sm"
             slotProps={{
                 paper: {
-                    sx: {
-                        maxHeight: "min(720px, 90vh)",
-                        borderRadius: "16px",
-                    },
+                    sx: { maxHeight: "min(720px, 90vh)", borderRadius: "16px" },
                 },
             }}
         >
@@ -290,7 +297,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                     description={t(option.descriptionKey)}
                                     icon={option.icon}
                                     bgColor={option.bgColor}
-                                    onClick={() => handleSelectOption(option.type)}
+                                    onClick={() =>
+                                        handleSelectOption(option.type)
+                                    }
                                 />
                             ))}
                         </Box>
@@ -317,7 +326,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                     p: 4,
                                     borderRadius: "16px",
                                     border: `2px dashed ${theme.vars.palette.divider}`,
-                                    backgroundColor: theme.vars.palette.fill.faint,
+                                    backgroundColor:
+                                        theme.vars.palette.fill.faint,
                                     transition: "background-color 0.15s",
                                     "&:hover": {
                                         backgroundColor:
@@ -435,7 +445,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             data={formData}
                             onChange={handleFieldChange}
                             showPassword={showPassword}
-                            onTogglePassword={() => setShowPassword((value) => !value)}
+                            onTogglePassword={() =>
+                                setShowPassword((value) => !value)
+                            }
                         />
 
                         <CollectionSelector
@@ -499,9 +511,7 @@ const TypeCard: React.FC<{
             backgroundColor: theme.vars.palette.fill.faint,
             transition: "background-color 0.15s",
             textAlign: "center",
-            "&:hover": {
-                backgroundColor: theme.vars.palette.fill.faintHover,
-            },
+            "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
         })}
     >
         <Box
@@ -543,7 +553,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("noteName")}
                         value={data.title ?? ""}
-                        onChange={(event) => onChange("title", event.target.value)}
+                        onChange={(event) =>
+                            onChange("title", event.target.value)
+                        }
                         fullWidth
                         required
                         autoFocus
@@ -568,7 +580,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("credentialName")}
                         value={data.name ?? ""}
-                        onChange={(event) => onChange("name", event.target.value)}
+                        onChange={(event) =>
+                            onChange("name", event.target.value)
+                        }
                         fullWidth
                         required
                         autoFocus
@@ -614,7 +628,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("credentialNotes")}
                         value={data.notes ?? ""}
-                        onChange={(event) => onChange("notes", event.target.value)}
+                        onChange={(event) =>
+                            onChange("notes", event.target.value)
+                        }
                         fullWidth
                         multiline
                         minRows={2}
@@ -628,7 +644,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("recordName")}
                         value={data.name ?? ""}
-                        onChange={(event) => onChange("name", event.target.value)}
+                        onChange={(event) =>
+                            onChange("name", event.target.value)
+                        }
                         fullWidth
                         required
                         autoFocus
@@ -645,7 +663,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("recordNotes")}
                         value={data.notes ?? ""}
-                        onChange={(event) => onChange("notes", event.target.value)}
+                        onChange={(event) =>
+                            onChange("notes", event.target.value)
+                        }
                         fullWidth
                         multiline
                         minRows={2}
@@ -659,7 +679,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("contactName")}
                         value={data.name ?? ""}
-                        onChange={(event) => onChange("name", event.target.value)}
+                        onChange={(event) =>
+                            onChange("name", event.target.value)
+                        }
                         fullWidth
                         required
                         autoFocus
@@ -676,7 +698,9 @@ const ItemForm: React.FC<{
                     <TextField
                         label={t("contactNotes")}
                         value={data.notes ?? ""}
-                        onChange={(event) => onChange("notes", event.target.value)}
+                        onChange={(event) =>
+                            onChange("notes", event.target.value)
+                        }
                         fullWidth
                         multiline
                         minRows={2}
@@ -818,7 +842,8 @@ const CollectionSelector: React.FC<{
                                         : theme.vars.palette.fill.faint,
                                 color:
                                     selectedID === collection.id
-                                        ? theme.vars.palette.primary.contrastText
+                                        ? theme.vars.palette.primary
+                                              .contrastText
                                         : theme.vars.palette.text.base,
                             })}
                         >
@@ -836,7 +861,10 @@ const CollectionSelector: React.FC<{
 
             {createOpen && onCreateCollection && (
                 <Stack sx={{ gap: 1, mt: 1.5 }}>
-                    <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
+                    <Stack
+                        direction="row"
+                        sx={{ gap: 1, alignItems: "center" }}
+                    >
                         <TextField
                             size="small"
                             fullWidth

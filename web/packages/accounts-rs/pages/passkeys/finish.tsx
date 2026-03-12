@@ -2,6 +2,7 @@ import {
     saveKeyAttributes,
     updateSavedLocalUser,
 } from "ente-accounts-rs/services/accounts-db";
+import { fromB64URLSafeNoPadding } from "ente-accounts-rs/services/crypto";
 import { clearInflightPasskeySessionID } from "ente-accounts-rs/services/passkey";
 import { unstashRedirect } from "ente-accounts-rs/services/redirect";
 import {
@@ -9,7 +10,6 @@ import {
     TwoFactorAuthorizationResponse,
 } from "ente-accounts-rs/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { fromB64URLSafeNoPadding } from "ente-accounts-rs/services/crypto";
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { useRouter } from "next/router";

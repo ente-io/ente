@@ -11,7 +11,12 @@ import {
     savedPartialLocalUser,
     saveJustSignedUp,
 } from "ente-accounts-rs/services/accounts-db";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-accounts-rs/services/crypto";
 import { appHomeRoute } from "ente-accounts-rs/services/redirect";
+import {
+    haveMasterKeyInSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-accounts-rs/services/session-storage";
 import {
     generateSRPSetupAttributes,
     getAndSaveSRPAttributes,
@@ -25,12 +30,7 @@ import {
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
-import { deriveKeyInsufficientMemoryErrorMessage } from "ente-accounts-rs/services/crypto";
 import log from "ente-base/log";
-import {
-    haveMasterKeyInSession,
-    saveMasterKeyInSessionAndSafeStore,
-} from "ente-accounts-rs/services/session-storage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";

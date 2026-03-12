@@ -1,26 +1,30 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Snackbar, Stack, Typography } from "@mui/material";
-import { Fab } from "@mui/material";
-import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
-import { stashRedirect } from "ente-accounts-rs/services/redirect";
-import { LoadingIndicator } from "ente-base/components/loaders";
-import { useBaseContext } from "ente-base/context";
-import { authenticatedRequestHeaders, ensureOk, isHTTP401Error } from "ente-base/http";
-import log from "ente-base/log";
-import { apiURL } from "ente-base/origins";
-import { masterKeyFromSession } from "ente-base/session";
-import { t } from "i18next";
-import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
 import { LockerNavbar } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
-import { useSetupLockerI18n } from "i18n/locker";
+import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
+import { stashRedirect } from "ente-accounts-rs/services/redirect";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { useBaseContext } from "ente-base/context";
 import {
-    createInfoItem,
+    authenticatedRequestHeaders,
+    ensureOk,
+    isHTTP401Error,
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { masterKeyFromSession } from "ente-base/session";
+import { useSetupLockerI18n } from "i18n/locker";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import React, { useCallback, useEffect, useState } from "react";
+import type { LockerFileShareLinkSummary } from "services/remote";
+import {
     createCollection as createCollectionAPI,
+    createInfoItem,
     deleteCollection as deleteCollectionAPI,
     emptyTrash as emptyTrashAPI,
     fetchCollectionSharees,
@@ -36,9 +40,8 @@ import {
     updateInfoItem,
     uploadLockerFile,
 } from "services/remote";
-import type { LockerFileShareLinkSummary } from "services/remote";
-import { getItemTitle } from "types";
 import type { LockerCollection, LockerItem, LockerItemType } from "types";
+import { getItemTitle } from "types";
 
 /** Subset of /users/details/v2 we need for the sidebar. */
 interface UserDetails {
@@ -54,16 +57,9 @@ const LOCKER_FILE_LIMIT_FREE = 100;
 const LOCKER_FILE_LIMIT_PAID = 1000;
 
 const hasPaidLockerAccess = (json: {
-    subscription?: {
-        productID?: string;
-        expiryTime?: number;
-    };
-    familyData?: {
-        members?: unknown[];
-    };
-    bonusData?: {
-        storageBonuses?: unknown[];
-    };
+    subscription?: { productID?: string; expiryTime?: number };
+    familyData?: { members?: unknown[] };
+    bonusData?: { storageBonuses?: unknown[] };
 }) => {
     const hasActivePaidSubscription =
         json.subscription?.productID !== "free" &&
@@ -82,7 +78,9 @@ const Page: React.FC = () => {
     const [collections, setCollections] = useState<LockerCollection[]>([]);
     const [masterKey, setMasterKey] = useState<string | undefined>();
     const [hasFetched, setHasFetched] = useState(false);
-    const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
+    const [initialLoadError, setInitialLoadError] = useState<string | null>(
+        null,
+    );
     const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
 
     // Sidebar state
@@ -153,21 +151,15 @@ const Page: React.FC = () => {
             // Fetch user details for sidebar (non-blocking on failure).
             try {
                 const res = await fetch(
-                    await apiURL("/users/details/v2", {
-                        memoryCount: true,
-                    }),
-                    {
-                    headers: await authenticatedRequestHeaders(),
-                    },
+                    await apiURL("/users/details/v2", { memoryCount: true }),
+                    { headers: await authenticatedRequestHeaders() },
                 );
                 ensureOk(res);
                 const json = (await res.json()) as {
                     email?: string;
                     usage?: number;
                     fileCount?: number;
-                    lockerFamilyUsage?: {
-                        familyFileCount?: number;
-                    };
+                    lockerFamilyUsage?: { familyFileCount?: number };
                     familyData?: { members?: unknown[] };
                     bonusData?: { storageBonuses?: unknown[] };
                     subscription?: {
@@ -216,15 +208,12 @@ const Page: React.FC = () => {
         void load();
     }, [router, logout, showMiniDialog]);
 
-    const handleSelectCollection = useCallback(
-        (id: number | null) => {
-            setSelectedCollectionID(id);
-            setIsTrashView(false);
-            setIsCollectionsView(false);
-            setSidebarOpen(false);
-        },
-        [],
-    );
+    const handleSelectCollection = useCallback((id: number | null) => {
+        setSelectedCollectionID(id);
+        setIsTrashView(false);
+        setIsCollectionsView(false);
+        setSidebarOpen(false);
+    }, []);
 
     const handleSelectCollections = useCallback(() => {
         setIsCollectionsView(true);
@@ -270,12 +259,9 @@ const Page: React.FC = () => {
     );
 
     const handleUpdateItem = useCallback(
-        async (
-            type: LockerItemType,
-            data: Record<string, unknown>,
-            _collectionID: number,
-        ) => {
-            if (!masterKey || !editItem) throw new Error("No master key or item");
+        async (type: LockerItemType, data: Record<string, unknown>) => {
+            if (!masterKey || !editItem)
+                throw new Error("No master key or item");
             await updateInfoItem(editItem.id, type, data, masterKey);
             await refreshData();
             setToast(t("fileUpdatedSuccessfully"));
@@ -321,9 +307,13 @@ const Page: React.FC = () => {
                         const fileIDsByCollection = new Map<number, number[]>();
                         for (const item of items) {
                             const existing =
-                                fileIDsByCollection.get(item.collectionID) ?? [];
+                                fileIDsByCollection.get(item.collectionID) ??
+                                [];
                             existing.push(item.id);
-                            fileIDsByCollection.set(item.collectionID, existing);
+                            fileIDsByCollection.set(
+                                item.collectionID,
+                                existing,
+                            );
                         }
 
                         for (const [
@@ -440,9 +430,7 @@ const Page: React.FC = () => {
                     ?.name ?? "";
             showMiniDialog({
                 title: t("deleteCollection"),
-                message: t("deleteCollectionConfirmation", {
-                    collectionName,
-                }),
+                message: t("deleteCollectionConfirmation", { collectionName }),
                 continue: {
                     text: t("delete"),
                     color: "critical",
@@ -487,8 +475,9 @@ const Page: React.FC = () => {
     const sharedCollection =
         shareCollectionID === null
             ? null
-            : collections.find((collection) => collection.id === shareCollectionID) ??
-              null;
+            : (collections.find(
+                  (collection) => collection.id === shareCollectionID,
+              ) ?? null);
 
     if (!hasFetched || !isLockerI18nReady) {
         return <LoadingIndicator />;
@@ -522,7 +511,10 @@ const Page: React.FC = () => {
                         <Typography variant="body" sx={{ color: "text.muted" }}>
                             {initialLoadError}
                         </Typography>
-                        <Button variant="contained" onClick={() => router.reload()}>
+                        <Button
+                            variant="contained"
+                            onClick={() => router.reload()}
+                        >
                             {t("retry")}
                         </Button>
                     </Stack>

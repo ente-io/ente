@@ -21,26 +21,14 @@ const socialLinks = [
         label: "YouTube",
         url: "https://www.youtube.com/@entestudio",
     },
-    {
-        icon: GitHubIcon,
-        label: "GitHub",
-        url: "https://github.com/ente-io",
-    },
-    {
-        icon: XIcon,
-        label: "X",
-        url: "https://twitter.com/enteio",
-    },
+    { icon: GitHubIcon, label: "GitHub", url: "https://github.com/ente-io" },
+    { icon: XIcon, label: "X", url: "https://twitter.com/enteio" },
     {
         icon: AlternateEmailIcon,
         label: "Mastodon",
         url: "https://fosstodon.org/@ente",
     },
-    {
-        icon: RedditIcon,
-        label: "Reddit",
-        url: "https://reddit.com/r/enteio",
-    },
+    { icon: RedditIcon, label: "Reddit", url: "https://reddit.com/r/enteio" },
 ] as const;
 
 const buildLabel = () => {
@@ -53,18 +41,17 @@ export const LockerSocialFooter: React.FC = () => {
 
     return (
         <Stack sx={{ alignItems: "center", gap: 1, px: 1, pb: 1 }}>
-            <Stack direction="row" sx={{ gap: 0.5, flexWrap: "wrap", justifyContent: "center" }}>
+            <Stack
+                direction="row"
+                sx={{ gap: 0.5, flexWrap: "wrap", justifyContent: "center" }}
+            >
                 {socialLinks.map(({ icon: Icon, label, url }) => (
                     <IconButton
                         key={label}
                         color="secondary"
                         aria-label={label}
                         onClick={() => openExternal(url)}
-                        sx={{
-                            width: 36,
-                            height: 36,
-                            color: "text.muted",
-                        }}
+                        sx={{ width: 36, height: 36, color: "text.muted" }}
                     >
                         <Icon fontSize="small" />
                     </IconButton>

@@ -55,7 +55,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     const [copiedField, setCopiedField] = useState<string | null>(null);
     const [downloadError, setDownloadError] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+    const [downloadProgress, setDownloadProgress] = useState<number | null>(
+        null,
+    );
 
     const copyToClipboard = useCallback((value: string, fieldName: string) => {
         void navigator.clipboard.writeText(value).then(() => {
@@ -98,12 +100,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             anchor="right"
             open={item !== null}
             onClose={onClose}
-            sx={{
-                "& .MuiDrawer-paper": {
-                    width: "min(420px, 90vw)",
-                    p: 0,
-                },
-            }}
+            sx={{ "& .MuiDrawer-paper": { width: "min(420px, 90vw)", p: 0 } }}
         >
             {item && (
                 <Stack sx={{ height: "100%" }}>
@@ -119,7 +116,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         }}
                     >
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography variant="h3" noWrap sx={{ lineHeight: 1.3 }}>
+                            <Typography
+                                variant="h3"
+                                noWrap
+                                sx={{ lineHeight: 1.3 }}
+                            >
                                 {getItemTitle(item)}
                             </Typography>
                             <Typography
@@ -213,7 +214,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                             startIcon={
                                                 <FileDownloadOutlinedIcon />
                                             }
-                                            onClick={() => void handleDownload()}
+                                            onClick={() =>
+                                                void handleDownload()
+                                            }
                                             disabled={downloading}
                                             fullWidth
                                         >
@@ -226,8 +229,12 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                         {onShareLink && (
                                             <Button
                                                 variant="outlined"
-                                                startIcon={<ShareOutlinedIcon />}
-                                                onClick={() => onShareLink(item)}
+                                                startIcon={
+                                                    <ShareOutlinedIcon />
+                                                }
+                                                onClick={() =>
+                                                    onShareLink(item)
+                                                }
                                                 fullWidth
                                             >
                                                 {t("shareLink")}
@@ -248,8 +255,12 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 borderColor: "divider",
                             }}
                         >
-                            <Typography variant="mini" sx={{ color: "text.faint" }}>
-                                {t("lastUpdated")}: {formattedDateTime(item.updatedAt)}
+                            <Typography
+                                variant="mini"
+                                sx={{ color: "text.faint" }}
+                            >
+                                {t("lastUpdated")}:{" "}
+                                {formattedDateTime(item.updatedAt)}
                             </Typography>
                         </Box>
                     )}
@@ -261,9 +272,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 message={
                     downloadError
                         ? t("downloadFailed")
-                        : t("copiedToClipboard", {
-                              fieldName: copiedField,
-                          })
+                        : t("copiedToClipboard", { fieldName: copiedField })
                 }
                 autoHideDuration={2000}
                 onClose={() => {
@@ -316,7 +325,9 @@ const FieldRow: React.FC<FieldRowProps> = ({
     }
 
     const displayValue =
-        secret && !revealed ? "\u2022".repeat(Math.min(value.length, 16)) : value;
+        secret && !revealed
+            ? "\u2022".repeat(Math.min(value.length, 16))
+            : value;
 
     return (
         <Stack sx={{ gap: 0.5 }}>
@@ -346,7 +357,9 @@ const FieldRow: React.FC<FieldRowProps> = ({
                     {displayValue}
                 </Typography>
                 {secret && (
-                    <Tooltip title={revealed ? t("hidePassword") : t("showPassword")}>
+                    <Tooltip
+                        title={revealed ? t("hidePassword") : t("showPassword")}
+                    >
                         <IconButton
                             size="small"
                             onClick={() => setRevealed((value) => !value)}
@@ -360,7 +373,10 @@ const FieldRow: React.FC<FieldRowProps> = ({
                     </Tooltip>
                 )}
                 <Tooltip title={t("copy")}>
-                    <IconButton size="small" onClick={() => onCopy(value, label)}>
+                    <IconButton
+                        size="small"
+                        onClick={() => onCopy(value, label)}
+                    >
                         <ContentCopyIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
@@ -386,11 +402,7 @@ const CredentialDetail: React.FC<{
     onCopy: (value: string, field: string) => void;
 }> = ({ data, onCopy }) => (
     <>
-        <FieldRow
-            label={t("username")}
-            value={data.username}
-            onCopy={onCopy}
-        />
+        <FieldRow label={t("username")} value={data.username} onCopy={onCopy} />
         <Divider />
         <FieldRow
             label={t("password")}
@@ -465,9 +477,5 @@ const FileDetail: React.FC<{
     data: GenericFileData;
     onCopy: (value: string, field: string) => void;
 }> = ({ data, onCopy }) => (
-    <FieldRow
-        label={t("fileTitle")}
-        value={data.name}
-        onCopy={onCopy}
-    />
+    <FieldRow label={t("fileTitle")} value={data.name} onCopy={onCopy} />
 );

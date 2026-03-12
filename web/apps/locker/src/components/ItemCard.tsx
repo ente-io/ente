@@ -38,11 +38,7 @@ import { t } from "i18next";
 import React, { useCallback, useState } from "react";
 import type { LockerFileShareLinkSummary } from "services/remote";
 import { downloadLockerFile } from "services/remote";
-import type {
-    AccountCredentialData,
-    GenericFileData,
-    LockerItem,
-} from "types";
+import type { AccountCredentialData, GenericFileData, LockerItem } from "types";
 import { getItemTitle, hasDownloadableObject } from "types";
 
 interface ItemCardProps {
@@ -95,19 +91,18 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     const [copiedField, setCopiedField] = useState<string | null>(null);
     const [downloadError, setDownloadError] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+    const [downloadProgress, setDownloadProgress] = useState<number | null>(
+        null,
+    );
     const longPressTimerRef = React.useRef<number | null>(null);
     const longPressTriggeredRef = React.useRef(false);
 
-    const copyToClipboard = useCallback(
-        (value: string, fieldName: string) => {
-            void navigator.clipboard.writeText(value).then(() => {
-                setCopiedField(fieldName);
-                setDownloadError(false);
-            });
-        },
-        [],
-    );
+    const copyToClipboard = useCallback((value: string, fieldName: string) => {
+        void navigator.clipboard.writeText(value).then(() => {
+            setCopiedField(fieldName);
+            setDownloadError(false);
+        });
+    }, []);
 
     const handleDownload = useCallback(async () => {
         if (!masterKey || downloading || !hasDownloadableObject(item)) return;
@@ -115,11 +110,18 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         setDownloadProgress(null);
         try {
             const fileName = getItemTitle(item);
-            await downloadLockerFile(item.id, fileName, masterKey, ({ loaded, total }) => {
-                if (total && total > 0) {
-                    setDownloadProgress(Math.min(100, Math.round((loaded / total) * 100)));
-                }
-            });
+            await downloadLockerFile(
+                item.id,
+                fileName,
+                masterKey,
+                ({ loaded, total }) => {
+                    if (total && total > 0) {
+                        setDownloadProgress(
+                            Math.min(100, Math.round((loaded / total) * 100)),
+                        );
+                    }
+                },
+            );
         } catch (e) {
             log.error(`Failed to download file ${item.id}`, e);
             setDownloadError(true);
@@ -129,7 +131,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         }
     }, [item, masterKey, downloading]);
 
-const title = getItemTitle(item);
+    const title = getItemTitle(item);
     const downloadable = hasDownloadableObject(item);
     const isExpiredShareLink =
         !!fileShareLink?.validTill &&
@@ -324,7 +326,9 @@ const title = getItemTitle(item);
                         onClick={(e) => e.stopPropagation()}
                     >
                         {fileShareLink && onShareLink && (
-                            <Tooltip title={shareLinkTooltipLabel(fileShareLink)}>
+                            <Tooltip
+                                title={shareLinkTooltipLabel(fileShareLink)}
+                            >
                                 <IconButton
                                     size="small"
                                     onClick={() => onShareLink(item)}
@@ -414,9 +418,7 @@ const title = getItemTitle(item);
                 message={
                     downloadError
                         ? t("downloadFailed")
-                        : t("copiedToClipboard", {
-                              fieldName: copiedField,
-                          })
+                        : t("copiedToClipboard", { fieldName: copiedField })
                 }
                 autoHideDuration={2000}
                 onClose={() => {
@@ -550,11 +552,10 @@ const CredentialActions: React.FC<{
     const [showPassword, setShowPassword] = useState(false);
 
     return (
-        <Stack
-            direction="row"
-            sx={{ gap: 0.25, flexShrink: 0 }}
-        >
-            <Tooltip title={showPassword ? t("hidePassword") : t("showPassword")}>
+        <Stack direction="row" sx={{ gap: 0.25, flexShrink: 0 }}>
+            <Tooltip
+                title={showPassword ? t("hidePassword") : t("showPassword")}
+            >
                 <IconButton
                     size="small"
                     onClick={() => setShowPassword(!showPassword)}
@@ -596,20 +597,25 @@ const iconBgColor = (item: LockerItem): string => {
             const ext = name.split(".").pop()?.toLowerCase() ?? "";
             if (
                 [
-                    "pdf", "doc", "docx", "txt", "rtf", "xlsx", "pptx", "csv",
+                    "pdf",
+                    "doc",
+                    "docx",
+                    "txt",
+                    "rtf",
+                    "xlsx",
+                    "pptx",
+                    "csv",
                 ].includes(ext)
             )
                 return "rgba(244, 67, 54, 0.12)";
             if (
-                [
-                    "jpg", "jpeg", "png", "gif", "heic", "webp", "svg",
-                ].includes(ext)
+                ["jpg", "jpeg", "png", "gif", "heic", "webp", "svg"].includes(
+                    ext,
+                )
             )
                 return "rgba(76, 175, 80, 0.12)";
             if (
-                [
-                    "mp3", "m4a", "wav", "ogg", "flac", "aac", "wma",
-                ].includes(ext)
+                ["mp3", "m4a", "wav", "ogg", "flac", "aac", "wma"].includes(ext)
             )
                 return "rgba(156, 39, 176, 0.12)";
             if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
@@ -670,13 +676,9 @@ const fileIcon = (name: string) => {
         )
     )
         return (
-            <DescriptionOutlinedIcon
-                sx={{ fontSize: 20, color: "#F44336" }}
-            />
+            <DescriptionOutlinedIcon sx={{ fontSize: 20, color: "#F44336" }} />
         );
     return (
-        <InsertDriveFileOutlinedIcon
-            sx={{ fontSize: 20, color: "#9E9E9E" }}
-        />
+        <InsertDriveFileOutlinedIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
     );
 };

@@ -28,7 +28,7 @@ const ensureLockerBundle = (locale: LockerLocale) => {
  * This keeps the Locker parity work scoped to the app instead of modifying the
  * shared i18n package.
  */
-export const setupLockerI18n = async () => {
+export const setupLockerI18n = () => {
     ensureLockerBundle("en-US");
 
     const locale = i18n.language as LockerLocale;
@@ -41,7 +41,8 @@ export const useSetupLockerI18n = () => {
     const [isLockerI18nReady, setIsLockerI18nReady] = useState(false);
 
     useEffect(() => {
-        void setupLockerI18n().finally(() => setIsLockerI18nReady(true));
+        setupLockerI18n();
+        setIsLockerI18nReady(true);
     }, []);
 
     return isLockerI18nReady;

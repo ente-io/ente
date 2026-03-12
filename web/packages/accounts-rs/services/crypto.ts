@@ -35,19 +35,19 @@ interface WasmGeneratedSRPSetup {
 
 const b64ToBinary = (b64: string) => atob(b64);
 
-export const fromB64 = async (b64String: string): Promise<Uint8Array> => {
+export const fromB64 = (b64String: string): Promise<Uint8Array> => {
     const binary = b64ToBinary(b64String);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
         bytes[i] = binary.charCodeAt(i);
     }
-    return bytes;
+    return Promise.resolve(bytes);
 };
 
-export const toB64 = async (bytes: Uint8Array): Promise<string> => {
+export const toB64 = (bytes: Uint8Array): Promise<string> => {
     let binary = "";
     for (const byte of bytes) binary += String.fromCharCode(byte);
-    return btoa(binary);
+    return Promise.resolve(btoa(binary));
 };
 
 export const toB64URLSafe = async (bytes: Uint8Array): Promise<string> =>
@@ -134,10 +134,7 @@ export const generateKeyPair = async (): Promise<KeyPair> => {
     await ensureCryptoInit();
     const wasm = await enteWasm();
     const keyPair = wasm.crypto_generate_keypair();
-    return {
-        publicKey: keyPair.public_key,
-        privateKey: keyPair.secret_key,
-    };
+    return { publicKey: keyPair.public_key, privateKey: keyPair.secret_key };
 };
 
 export const encryptBox = async (
@@ -147,10 +144,7 @@ export const encryptBox = async (
     await ensureCryptoInit();
     const wasm = await enteWasm();
     const box = wasm.crypto_encrypt_box(dataB64, keyB64);
-    return {
-        encryptedData: box.encrypted_data,
-        nonce: box.nonce,
-    };
+    return { encryptedData: box.encrypted_data, nonce: box.nonce };
 };
 
 export const decryptBox = async (
@@ -186,7 +180,12 @@ export const deriveSubKeyBytes = async (
     await ensureCryptoInit();
     const wasm = await enteWasm();
     return fromB64(
-        wasm.crypto_derive_subkey(keyB64, subKeyLength, BigInt(subKeyID), context),
+        wasm.crypto_derive_subkey(
+            keyB64,
+            subKeyLength,
+            BigInt(subKeyID),
+            context,
+        ),
     );
 };
 

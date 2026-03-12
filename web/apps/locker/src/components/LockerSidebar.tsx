@@ -1,15 +1,10 @@
-import CloseIcon from "@mui/icons-material/Close";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import {
-    Box,
-    IconButton,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import {
     RowButton,
     RowButtonDivider,
@@ -19,12 +14,12 @@ import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { LockerAccountDrawer } from "./LockerAccountDrawer";
+import type { LockerCollection } from "types";
+import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
+import { LockerAccountDrawer } from "./LockerAccountDrawer";
 import { LockerSocialFooter } from "./LockerSocialFooter";
 import { LockerSupportDrawer } from "./LockerSupportDrawer";
-import { visibleLockerCollections } from "types";
-import type { LockerCollection } from "types";
 
 interface LockerSidebarProps {
     open: boolean;
@@ -87,13 +82,9 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         : 0;
     const showFamilyBreakup =
         typeof userDetails?.lockerFamilyFileCount === "number";
-    const familyProgress =
-        showFamilyBreakup && userDetails
-            ? Math.min(
-                  (userDetails.lockerFamilyFileCount ?? 0) / maxFileCount,
-                  1,
-              )
-            : 0;
+    const familyProgress = showFamilyBreakup
+        ? Math.min((userDetails.lockerFamilyFileCount ?? 0) / maxFileCount, 1)
+        : 0;
     const formattedUsed = new Intl.NumberFormat().format(
         userDetails?.fileCount ?? 0,
     );
@@ -264,7 +255,8 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                                 width: 8,
                                                 height: 8,
                                                 borderRadius: "50%",
-                                                bgcolor: "rgba(255,255,255,0.92)",
+                                                bgcolor:
+                                                    "rgba(255,255,255,0.92)",
                                             }}
                                         />
                                         <Typography

@@ -4,11 +4,14 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts-rs/components/layouts/centered-paper";
-import { appHomeRoute, stashRedirect } from "ente-accounts-rs/services/redirect";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-accounts-rs/services/crypto";
+import {
+    appHomeRoute,
+    stashRedirect,
+} from "ente-accounts-rs/services/redirect";
 import { changePassword, type LocalUser } from "ente-accounts-rs/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { deriveKeyInsufficientMemoryErrorMessage } from "ente-accounts-rs/services/crypto";
 import log from "ente-base/log";
 import { t } from "i18next";
 import { useRouter } from "next/router";

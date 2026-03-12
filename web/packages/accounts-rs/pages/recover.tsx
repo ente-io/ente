@@ -7,8 +7,16 @@ import {
     savedKeyAttributes,
     savedPartialLocalUser,
 } from "ente-accounts-rs/services/accounts-db";
+import { decryptBox } from "ente-accounts-rs/services/crypto";
 import { recoveryKeyFromMnemonic } from "ente-accounts-rs/services/recovery-key";
-import { appHomeRoute, stashRedirect } from "ente-accounts-rs/services/redirect";
+import {
+    appHomeRoute,
+    stashRedirect,
+} from "ente-accounts-rs/services/redirect";
+import {
+    haveMasterKeyInSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-accounts-rs/services/session-storage";
 import type { KeyAttributes } from "ente-accounts-rs/services/user";
 import {
     decryptAndStoreTokenIfNeeded,
@@ -20,12 +28,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { decryptBox } from "ente-accounts-rs/services/crypto";
 import log from "ente-base/log";
-import {
-    haveMasterKeyInSession,
-    saveMasterKeyInSessionAndSafeStore,
-} from "ente-accounts-rs/services/session-storage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";

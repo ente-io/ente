@@ -25,6 +25,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -32,7 +33,6 @@ import {
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import { formattedDate } from "ente-base/i18n-date";
 import log from "ente-base/log";
-import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -41,6 +41,7 @@ import {
     getOrCreateLockerFileShareLink,
     type LockerFileShareLinkSummary,
 } from "services/remote";
+import type { LockerCollection, LockerItem } from "types";
 import {
     canEditCollection,
     canOpenCollectionSharing,
@@ -50,7 +51,6 @@ import {
     isImportantCollection,
     visibleLockerCollections,
 } from "types";
-import type { LockerCollection, LockerItem } from "types";
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
 import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
@@ -123,9 +123,8 @@ export const ItemList: React.FC<ItemListProps> = ({
         completed: number;
         total: number;
     } | null>(null);
-    const [activeFileLinkItem, setActiveFileLinkItem] = useState<
-        LockerItem | null
-    >(null);
+    const [activeFileLinkItem, setActiveFileLinkItem] =
+        useState<LockerItem | null>(null);
     const [activeFileLink, setActiveFileLink] = useState<{
         linkID: string;
         url: string;
@@ -173,13 +172,19 @@ export const ItemList: React.FC<ItemListProps> = ({
         () =>
             selectedCollectionID === null
                 ? null
-                : collections.find(
+                : (collections.find(
                       (collection) => collection.id === selectedCollectionID,
-                  ) ?? null,
+                  ) ?? null),
         [collections, selectedCollectionID],
     );
     const collectionNameByID = useMemo(
-        () => new Map(collections.map((collection) => [collection.id, collection.name])),
+        () =>
+            new Map(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.name,
+                ]),
+            ),
         [collections],
     );
 
@@ -235,7 +240,9 @@ export const ItemList: React.FC<ItemListProps> = ({
     const sortedItems = useMemo(
         () =>
             [...filteredItems].sort(
-                (a, b) => (b.updatedAt ?? b.createdAt ?? 0) - (a.updatedAt ?? a.createdAt ?? 0),
+                (a, b) =>
+                    (b.updatedAt ?? b.createdAt ?? 0) -
+                    (a.updatedAt ?? a.createdAt ?? 0),
             ),
         [filteredItems],
     );
@@ -286,9 +293,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         [selectedItemIDs],
     );
     const canBulkSelectVisibleItems =
-        !isTrashView &&
-        !isCollectionsView &&
-        visibleSelectableItems.length > 0;
+        !isTrashView && !isCollectionsView && visibleSelectableItems.length > 0;
     const skippedSharedSelectionCount =
         selectedVisibleItems.length - selectedOwnedItems.length;
     const skippedDownloadSelectionCount =
@@ -302,7 +307,7 @@ export const ItemList: React.FC<ItemListProps> = ({
 
     const handleRestoreConfirm = useCallback(() => {
         if (restoreItem && restoreCollectionID !== null && onRestoreItem) {
-            void onRestoreItem(restoreItem, restoreCollectionID);
+            onRestoreItem(restoreItem, restoreCollectionID);
         }
         setRestoreItem(null);
         setRestoreCollectionID(null);
@@ -314,7 +319,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             renameValue.trim() &&
             onRenameCollection
         ) {
-            void onRenameCollection(renameCollectionID, renameValue.trim());
+            onRenameCollection(renameCollectionID, renameValue.trim());
         }
         setRenameCollectionID(null);
         setRenameValue("");
@@ -351,6 +356,11 @@ export const ItemList: React.FC<ItemListProps> = ({
     const canShareSelectedCollection =
         selectedCollection !== null &&
         canOpenCollectionSharing(selectedCollection);
+    const handleShareSelectedCollection = useCallback(() => {
+        if (selectedCollection && onShareCollection) {
+            onShareCollection(selectedCollection);
+        }
+    }, [onShareCollection, selectedCollection]);
     const itemTypeLabel = useCallback((item: LockerItem) => {
         switch (item.type) {
             case "note":
@@ -369,7 +379,9 @@ export const ItemList: React.FC<ItemListProps> = ({
         (item: LockerItem) => {
             const parts = [itemTypeLabel(item)];
             if (selectedCollectionID === null) {
-                const collectionName = collectionNameByID.get(item.collectionID);
+                const collectionName = collectionNameByID.get(
+                    item.collectionID,
+                );
                 if (collectionName) {
                     parts.push(collectionName);
                 }
@@ -457,7 +469,10 @@ export const ItemList: React.FC<ItemListProps> = ({
                     return next;
                 });
             } catch (error) {
-                log.error(`Failed to create share link for file ${item.id}`, error);
+                log.error(
+                    `Failed to create share link for file ${item.id}`,
+                    error,
+                );
                 setFeedbackMessage(
                     isHTTPErrorWithStatus(error, 402)
                         ? t("sharingRequiresPaidPlan")
@@ -482,7 +497,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             return;
         }
 
-        if (navigator.share) {
+        if (canNativeShare) {
             try {
                 await navigator.share({
                     title: activeFileLinkItem
@@ -503,7 +518,7 @@ export const ItemList: React.FC<ItemListProps> = ({
 
         await navigator.clipboard.writeText(activeFileLink.url);
         setFeedbackMessage(t("linkCopiedToClipboard"));
-    }, [activeFileLink?.url, activeFileLinkItem]);
+    }, [activeFileLink?.url, activeFileLinkItem, canNativeShare]);
     const deleteActiveFileLink = useCallback(async () => {
         if (!activeFileLinkItem) {
             return;
@@ -556,7 +571,11 @@ export const ItemList: React.FC<ItemListProps> = ({
         });
         try {
             for (const [index, item] of selectedDownloadableItems.entries()) {
-                await downloadLockerFile(item.id, getItemTitle(item), masterKey);
+                await downloadLockerFile(
+                    item.id,
+                    getItemTitle(item),
+                    masterKey,
+                );
                 setBulkDownloadProgress({
                     completed: index + 1,
                     total: selectedDownloadableItems.length,
@@ -605,11 +624,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
 
         onDeleteItems?.(selectedOwnedItems);
-    }, [
-        onDeleteItems,
-        selectedOwnedItems,
-        skippedSharedSelectionCount,
-    ]);
+    }, [onDeleteItems, selectedOwnedItems, skippedSharedSelectionCount]);
 
     React.useEffect(() => {
         if (!isHomeView && homeSelectedCollectionIDs.length > 0) {
@@ -622,7 +637,11 @@ export const ItemList: React.FC<ItemListProps> = ({
         }
     }, [selectedItemIDs.length, selectionMode]);
     React.useEffect(() => {
-        if (isTrashView || isCollectionsView || visibleSelectableItemIDs.length === 0) {
+        if (
+            isTrashView ||
+            isCollectionsView ||
+            visibleSelectableItemIDs.length === 0
+        ) {
             setSelectionMode(false);
             setSelectedItemIDs([]);
             return;
@@ -651,7 +670,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                             size="small"
                             placeholder={t("searchHint")}
                             value={searchTerm}
-                            onChange={(event) => setSearchTerm(event.target.value)}
+                            onChange={(event) =>
+                                setSearchTerm(event.target.value)
+                            }
                             variant="outlined"
                             fullWidth
                             slotProps={{
@@ -713,7 +734,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         selectedCollectionIDs={
                                             homeSelectedCollectionIDs
                                         }
-                                        onToggleCollection={toggleHomeCollection}
+                                        onToggleCollection={
+                                            toggleHomeCollection
+                                        }
                                     />
                                     {homeSelectedCollectionIDs.length > 0 && (
                                         <Tooltip title={t("clearSelection")}>
@@ -726,8 +749,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                     width: 32,
                                                     height: 32,
                                                     color: "text.muted",
-                                                    border:
-                                                        "1px solid rgba(255, 255, 255, 0.08)",
+                                                    border: "1px solid rgba(255, 255, 255, 0.08)",
                                                     backgroundColor:
                                                         "rgba(255, 255, 255, 0.035)",
                                                     "&:hover": {
@@ -778,7 +800,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         }
                                         subtitle={
                                             homeSelectedCollectionIDs.length > 0
-                                                ? t("noItemsMatchSelectedFilters")
+                                                ? t(
+                                                      "noItemsMatchSelectedFilters",
+                                                  )
                                                 : t("homeLockerEmptySubtitle")
                                         }
                                     />
@@ -817,8 +841,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                     height: 40,
                                                     color: "#FFFFFF",
                                                     background: "#0E6BFF",
-                                                    border:
-                                                        "1px solid rgba(160, 199, 255, 0.18)",
+                                                    border: "1px solid rgba(160, 199, 255, 0.18)",
                                                     boxShadow:
                                                         "0 10px 24px rgba(0, 66, 173, 0.20)",
                                                     "&:hover": {
@@ -838,19 +861,17 @@ export const ItemList: React.FC<ItemListProps> = ({
                             />
 
                             {displayCollections.length > 0 ? (
-                                    <CollectionGrid
-                                        collections={displayCollections}
-                                        onSelectCollection={onSelectCollection}
-                                        onShareCollection={onShareCollection}
-                                        onRequestRenameCollection={(
-                                            collection,
-                                        ) => {
-                                            setRenameCollectionID(collection.id);
-                                            setRenameValue(collection.name);
-                                        }}
-                                        onDeleteCollection={onDeleteCollection}
-                                    />
-                                ) : (
+                                <CollectionGrid
+                                    collections={displayCollections}
+                                    onSelectCollection={onSelectCollection}
+                                    onShareCollection={onShareCollection}
+                                    onRequestRenameCollection={(collection) => {
+                                        setRenameCollectionID(collection.id);
+                                        setRenameValue(collection.name);
+                                    }}
+                                    onDeleteCollection={onDeleteCollection}
+                                />
+                            ) : (
                                 <EmptyState
                                     title={t("noCollections")}
                                     subtitle={t("createCollection")}
@@ -865,9 +886,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 <>
                                     <SectionHeader
                                         title={t("collections")}
-                                        countLabel={t("lockerCollectionsCount", {
-                                            count: filteredCollections.length,
-                                        })}
+                                        countLabel={t(
+                                            "lockerCollectionsCount",
+                                            {
+                                                count: filteredCollections.length,
+                                            },
+                                        )}
                                     />
                                     <CollectionGrid
                                         collections={filteredCollections}
@@ -876,7 +900,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         onRequestRenameCollection={(
                                             collection,
                                         ) => {
-                                            setRenameCollectionID(collection.id);
+                                            setRenameCollectionID(
+                                                collection.id,
+                                            );
                                             setRenameValue(collection.name);
                                         }}
                                         onDeleteCollection={onDeleteCollection}
@@ -931,7 +957,8 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 title={
                                     isTrashView
                                         ? t("trash")
-                                        : selectedCollection?.name ?? t("allItems")
+                                        : (selectedCollection?.name ??
+                                          t("allItems"))
                                 }
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
@@ -957,7 +984,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         {selectedCollection &&
                                             canShareSelectedCollection &&
                                             onShareCollection && (
-                                                <Tooltip title={t("sharedWith")}>
+                                                <Tooltip
+                                                    title={t("sharedWith")}
+                                                >
                                                     <IconButton
                                                         color="secondary"
                                                         onClick={() =>
@@ -965,7 +994,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                                 selectedCollection,
                                                             )
                                                         }
-                                                        sx={{ color: "text.muted" }}
+                                                        sx={{
+                                                            color: "text.muted",
+                                                        }}
                                                     >
                                                         <ShareOutlinedIcon />
                                                     </IconButton>
@@ -974,13 +1005,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         {canEditSelectedCollection && (
                                             <CollectionHeaderMenu
                                                 onShare={
-                                                    selectedCollection &&
                                                     canShareSelectedCollection &&
                                                     onShareCollection
-                                                        ? () =>
-                                                              onShareCollection(
-                                                                  selectedCollection,
-                                                              )
+                                                        ? handleShareSelectedCollection
                                                         : undefined
                                                 }
                                                 onRename={
@@ -1043,8 +1070,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         />
                                     ) : (
                                         <EmptyState
-                                            title={t("collectionEmptyStateTitle")}
-                                            subtitle={t("collectionEmptyStateSubtitle")}
+                                            title={t(
+                                                "collectionEmptyStateTitle",
+                                            )}
+                                            subtitle={t(
+                                                "collectionEmptyStateSubtitle",
+                                            )}
                                         />
                                     )
                                 }
@@ -1063,9 +1094,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     canDownload={
                         !!masterKey && selectedDownloadableItems.length > 0
                     }
-                    canDelete={
-                        !!onDeleteItems && selectedOwnedItems.length > 0
-                    }
+                    canDelete={!!onDeleteItems && selectedOwnedItems.length > 0}
                     onToggleSelectAll={toggleSelectAllVisibleItems}
                     onDownload={downloadSelectedFiles}
                     onDelete={deleteSelectedFiles}
@@ -1184,7 +1213,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                     <Stack sx={{ gap: 2, py: 1 }}>
                         <TextField
                             value={renameValue}
-                            onChange={(event) => setRenameValue(event.target.value)}
+                            onChange={(event) =>
+                                setRenameValue(event.target.value)
+                            }
                             label={t("enterCollectionName")}
                             fullWidth
                             autoFocus
@@ -1253,7 +1284,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={() => void handleCreateCollectionConfirm()}
+                                onClick={() =>
+                                    void handleCreateCollectionConfirm()
+                                }
                                 disabled={
                                     creatingCollection ||
                                     !createCollectionName.trim()
@@ -1365,7 +1398,9 @@ const ItemsSection: React.FC<{
                     }
                     onPermanentlyDelete={onPermanentlyDelete}
                     onRestore={
-                        isTrashView ? (trashItem) => onRequestRestore(trashItem) : undefined
+                        isTrashView
+                            ? (trashItem) => onRequestRestore(trashItem)
+                            : undefined
                     }
                     onShareLink={
                         onShareLink &&
@@ -1462,7 +1497,11 @@ const SelectionActionBar: React.FC<{
                         }}
                     >
                         <CheckCircleRoundedIcon
-                            sx={{ fontSize: 18, color: "#7FB3FF", flexShrink: 0 }}
+                            sx={{
+                                fontSize: 18,
+                                color: "#7FB3FF",
+                                flexShrink: 0,
+                            }}
                         />
                         <Typography
                             variant="body"
@@ -1584,7 +1623,8 @@ const CollectionGrid: React.FC<{
                     collection={collection}
                     onClick={() => onSelectCollection(collection.id)}
                     onShare={
-                        onShareCollection && canOpenCollectionSharing(collection)
+                        onShareCollection &&
+                        canOpenCollectionSharing(collection)
                             ? () => onShareCollection(collection)
                             : undefined
                     }
@@ -1613,12 +1653,7 @@ const CollectionChipFilters: React.FC<{
 }> = ({ collections, selectedCollectionIDs, onToggleCollection }) => (
     <Stack
         direction="row"
-        sx={{
-            maxWidth: 760,
-            flexWrap: "wrap",
-            gap: 1,
-            mt: 0.5,
-        }}
+        sx={{ maxWidth: 760, flexWrap: "wrap", gap: 1, mt: 0.5 }}
     >
         {collections.map((collection) => {
             const isSelected = selectedCollectionIDs.includes(collection.id);
@@ -1633,7 +1668,9 @@ const CollectionChipFilters: React.FC<{
                         height: 36,
                         borderRadius: "999px",
                         fontWeight: 600,
-                        color: isSelected ? "#FFFFFF" : theme.vars.palette.text.base,
+                        color: isSelected
+                            ? "#FFFFFF"
+                            : theme.vars.palette.text.base,
                         background: isSelected
                             ? "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)"
                             : "rgba(18, 36, 63, 0.72)",
@@ -1643,9 +1680,7 @@ const CollectionChipFilters: React.FC<{
                         boxShadow: isSelected
                             ? "0 8px 18px rgba(0, 66, 173, 0.22)"
                             : "none",
-                        "& .MuiChip-label": {
-                            px: 1.5,
-                        },
+                        "& .MuiChip-label": { px: 1.5 },
                         "&:hover": {
                             background: isSelected
                                 ? "linear-gradient(135deg, #1A7AFF 0%, #004DB8 100%)"
@@ -1757,7 +1792,9 @@ const CollectionCard: React.FC<{
                         variant="small"
                         sx={{ color: "text.muted", mt: 0.25 }}
                     >
-                        {t("lockerItemsCount", { count: collection.items.length })}
+                        {t("lockerItemsCount", {
+                            count: collection.items.length,
+                        })}
                     </Typography>
                 </Box>
             </Stack>

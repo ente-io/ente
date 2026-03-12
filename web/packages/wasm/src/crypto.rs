@@ -126,7 +126,9 @@ impl CryptoStreamEncryptor {
         plaintext: Vec<u8>,
         is_final: bool,
     ) -> Result<Vec<u8>, CryptoError> {
-        self.encryptor.push(&plaintext, is_final).map_err(Into::into)
+        self.encryptor
+            .push(&plaintext, is_final)
+            .map_err(Into::into)
     }
 }
 

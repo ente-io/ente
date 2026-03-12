@@ -9,7 +9,12 @@
  * handled by the Rust/WASM module.
  */
 
-import type { EncryptedBlob, EncryptedBox, EncryptedFile, KeyPair } from "ente-base/crypto/types";
+import type {
+    EncryptedBlob,
+    EncryptedBox,
+    EncryptedFile,
+    KeyPair,
+} from "ente-base/crypto/types";
 import { ensureCryptoInit, enteWasm } from "./wasm";
 
 const shouldFallbackToLegacyBlobDecrypt = (error: unknown): boolean => {
@@ -39,8 +44,8 @@ const toB64String = (v: Uint8Array | string): string => {
     if (typeof v === "string") return v;
     // Standard base64 encoding (matches libsodium ORIGINAL variant)
     let binary = "";
-    for (let i = 0; i < v.length; i++) {
-        binary += String.fromCharCode(v[i]!);
+    for (const byte of v) {
+        binary += String.fromCharCode(byte);
     }
     return btoa(binary);
 };
@@ -180,10 +185,7 @@ export const encryptBox = async (
     await ensureCryptoInit();
     const wasm = await enteWasm();
     const result = wasm.crypto_encrypt_box(dataB64, keyB64);
-    return {
-        encryptedData: result.encrypted_data,
-        nonce: result.nonce,
-    };
+    return { encryptedData: result.encrypted_data, nonce: result.nonce };
 };
 
 /**
@@ -212,7 +214,7 @@ export const stringToB64 = (s: string): string => {
     return toB64String(bytes);
 };
 
-export { toB64String, fromB64String };
+export { fromB64String, toB64String };
 
 // ---------------------------------------------------------------------------
 // File encryption helpers (for file upload)
@@ -232,19 +234,20 @@ export interface StreamDecryptorHandle {
     free: () => void;
 }
 
-export const createStreamEncryptor = async (): Promise<StreamEncryptorHandle> => {
-    await ensureCryptoInit();
-    const wasm = await enteWasm();
-    const encryptor = new wasm.CryptoStreamEncryptor();
+export const createStreamEncryptor =
+    async (): Promise<StreamEncryptorHandle> => {
+        await ensureCryptoInit();
+        const wasm = await enteWasm();
+        const encryptor = new wasm.CryptoStreamEncryptor();
 
-    return {
-        key: encryptor.key,
-        decryptionHeader: encryptor.decryption_header,
-        encryptChunk: async (data: Uint8Array, isFinal: boolean) =>
-            encryptor.encrypt_chunk(data, isFinal),
-        free: () => encryptor.free(),
+        return {
+            key: encryptor.key,
+            decryptionHeader: encryptor.decryption_header,
+            encryptChunk: (data: Uint8Array, isFinal: boolean) =>
+                Promise.resolve(encryptor.encrypt_chunk(data, isFinal)),
+            free: () => encryptor.free(),
+        };
     };
-};
 
 export const createStreamDecryptor = async (
     decryptionHeader: string,
@@ -252,14 +255,12 @@ export const createStreamDecryptor = async (
 ): Promise<StreamDecryptorHandle> => {
     await ensureCryptoInit();
     const wasm = await enteWasm();
-    const decryptor = new wasm.CryptoStreamDecryptor(
-        decryptionHeader,
-        keyB64,
-    );
+    const decryptor = new wasm.CryptoStreamDecryptor(decryptionHeader, keyB64);
 
     return {
         decryptionChunkSize: decryptor.decryption_chunk_size,
-        decryptChunk: async (data: Uint8Array) => decryptor.decrypt_chunk(data),
+        decryptChunk: (data: Uint8Array) =>
+            Promise.resolve(decryptor.decrypt_chunk(data)),
         isFinalized: () => decryptor.is_finalized,
         free: () => decryptor.free(),
     };

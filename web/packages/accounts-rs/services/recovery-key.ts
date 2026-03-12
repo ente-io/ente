@@ -19,9 +19,8 @@ import { putUserRecoveryKeyAttributes, type KeyAttributes } from "./user";
  *
  * @returns A base64 string representing the underlying bytes of the recovery key.
  */
-export const recoveryKeyFromMnemonic = (
-    recoveryKeyMnemonicOrHex: string,
-) => recoveryKeyFromMnemonicOrHex(recoveryKeyMnemonicOrHex);
+export const recoveryKeyFromMnemonic = (recoveryKeyMnemonicOrHex: string) =>
+    recoveryKeyFromMnemonicOrHex(recoveryKeyMnemonicOrHex);
 
 /**
  * Convert the provided base64 encoded recovery key into its BIP-39 mnemonic.

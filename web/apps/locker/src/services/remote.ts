@@ -10,12 +10,29 @@
  *   masterKey → collectionKey → fileKey → file metadata (pubMagicMetadata)
  */
 
+import { deriveInteractiveKey } from "ente-accounts-rs/services/crypto";
 import {
     ensureLocalUser,
     ensureUserKeyPair,
     getPublicKey,
 } from "ente-accounts-rs/services/user";
-import { deriveInteractiveKey } from "ente-accounts-rs/services/crypto";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    publicRequestHeaders,
+    retryEnsuringHTTPOk,
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL, customAPIOrigin } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
+import type {
+    LockerCollection,
+    LockerCollectionParticipant,
+    LockerCollectionParticipantRole,
+    LockerItem,
+    LockerItemType,
+} from "types";
+import { z } from "zod";
 import {
     b64ToBytes,
     boxSeal,
@@ -32,23 +49,6 @@ import {
     md5Base64,
     stringToB64,
 } from "./crypto";
-import {
-    authenticatedRequestHeaders,
-    ensureOk,
-    publicRequestHeaders,
-    retryEnsuringHTTPOk,
-} from "ente-base/http";
-import log from "ente-base/log";
-import { apiURL, customAPIOrigin } from "ente-base/origins";
-import { ensureAuthToken } from "ente-base/token";
-import type {
-    LockerItem,
-    LockerItemType,
-    LockerCollection,
-    LockerCollectionParticipant,
-    LockerCollectionParticipantRole,
-} from "types";
-import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Zod schemas for API responses
@@ -96,9 +96,7 @@ const RemoteEncryptedMetadata = z.object({
     decryptionHeader: z.string(),
 });
 
-const RemoteFileObjectAttributes = z.object({
-    decryptionHeader: z.string(),
-});
+const RemoteFileObjectAttributes = z.object({ decryptionHeader: z.string() });
 
 const RemoteFile = z.object({
     id: z.number(),
@@ -109,18 +107,22 @@ const RemoteFile = z.object({
     file: RemoteFileObjectAttributes,
     thumbnail: RemoteFileObjectAttributes.optional(),
     metadata: RemoteEncryptedMetadata,
-    magicMetadata: z.object({
-        version: z.number(),
-        count: z.number().optional(),
-        data: z.string(),
-        header: z.string(),
-    }).nullish(),
-    pubMagicMetadata: z.object({
-        version: z.number(),
-        count: z.number().optional(),
-        data: z.string(),
-        header: z.string(),
-    }).nullish(),
+    magicMetadata: z
+        .object({
+            version: z.number(),
+            count: z.number().optional(),
+            data: z.string(),
+            header: z.string(),
+        })
+        .nullish(),
+    pubMagicMetadata: z
+        .object({
+            version: z.number(),
+            count: z.number().optional(),
+            data: z.string(),
+            header: z.string(),
+        })
+        .nullish(),
     updationTime: z.number(),
     isDeleted: z.boolean(),
     info: z.object({ fileSize: z.number().optional() }).nullish(),
@@ -234,9 +236,13 @@ const getAllEncryptedFileRecords = (): EncryptedFileRecord[] =>
     [...encryptedFiles.values()].flatMap((records) => [...records.values()]);
 
 const describeCryptoError = (e: unknown): string => {
-    const errObj = e as { code?: string; message?: string };
-    if (errObj?.code) {
-        return `code=${errObj.code}, msg=${errObj.message ?? "unknown"}`;
+    if (typeof e === "object" && e && "code" in e) {
+        const code = typeof e.code === "string" ? e.code : "unknown";
+        const message =
+            "message" in e && typeof e.message === "string"
+                ? e.message
+                : "unknown";
+        return `code=${code}, msg=${message}`;
     }
     if (e instanceof Error) {
         return e.message;
@@ -380,10 +386,9 @@ export const clearLockerCache = () => {
 // ---------------------------------------------------------------------------
 
 const fetchEncryptedCollections = async () => {
-    const res = await fetch(
-        await apiURL("/collections/v2", { sinceTime: 0 }),
-        { headers: await authenticatedRequestHeaders() },
-    );
+    const res = await fetch(await apiURL("/collections/v2", { sinceTime: 0 }), {
+        headers: await authenticatedRequestHeaders(),
+    });
     ensureOk(res);
     const { collections } = CollectionsResponse.parse(await res.json());
 
@@ -395,10 +400,7 @@ const fetchEncryptedCollections = async () => {
         }
         nextCollections.set(c.id, {
             id: c.id,
-            owner: {
-                ...toLockerCollectionParticipant(c.owner),
-                role: "OWNER",
-            },
+            owner: { ...toLockerCollectionParticipant(c.owner), role: "OWNER" },
             ownerID: c.owner.id,
             sharees: (c.sharees ?? []).map(toLockerCollectionParticipant),
             encryptedKey: c.encryptedKey,
@@ -561,7 +563,10 @@ const decryptFileKeyForRecord = async (
         throw new Error(`Collection ${record.collectionID} not found in cache`);
     }
 
-    const collectionKey = await decryptCollectionKey(collectionRecord, masterKey);
+    const collectionKey = await decryptCollectionKey(
+        collectionRecord,
+        masterKey,
+    );
     return decryptBox(
         {
             encryptedData: record.encryptedKey,
@@ -575,8 +580,10 @@ const generateBase62Secret = (length: number) => {
     const charset =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const randomValues = crypto.getRandomValues(new Uint8Array(length));
-    return Array.from(randomValues, (value) => charset[value % charset.length]!)
-        .join("");
+    return Array.from(
+        randomValues,
+        (value) => charset[value % charset.length]!,
+    ).join("");
 };
 
 const prepareFileLinkSecretPayload = async (fileKey: string) => {
@@ -698,7 +705,7 @@ const decryptFileToLockerItem = async (
 
         // Check for structured info item
         const info = pubMM?.info as
-            | { type: string; data: Record<string, unknown> }
+            | { type?: string; data?: Record<string, unknown> }
             | undefined;
 
         const validInfoTypes = new Set<string>([
@@ -708,7 +715,7 @@ const decryptFileToLockerItem = async (
             "emergencyContact",
         ]);
 
-        if (info?.type && info?.data && validInfoTypes.has(info.type)) {
+        if (info?.type && info.data && validInfoTypes.has(info.type)) {
             return {
                 id: record.id,
                 type: info.type as LockerItemType,
@@ -722,10 +729,13 @@ const decryptFileToLockerItem = async (
         }
 
         // Fall back to generic file item
-        const displayName =
-            (pubMM?.editedName as string) ??
-            (metadata?.title as string) ??
-            "File";
+        const editedName =
+            typeof pubMM?.editedName === "string"
+                ? pubMM.editedName
+                : undefined;
+        const metadataTitle =
+            typeof metadata?.title === "string" ? metadata.title : undefined;
+        const displayName = editedName ?? metadataTitle ?? "File";
 
         return {
             id: record.id,
@@ -742,13 +752,7 @@ const decryptFileToLockerItem = async (
             updatedAt: record.updationTime,
         };
     } catch (e: unknown) {
-        // Extract details from WASM CryptoError (not a standard Error)
-        const errObj = e as { code?: string; message?: string };
-        const detail = errObj?.code
-            ? `code=${errObj.code}, msg=${errObj.message}`
-            : e instanceof Error
-              ? e.message
-              : String(e);
+        const detail = describeCryptoError(e);
         log.error(`Failed to decrypt file ${record.id}: ${detail}`);
         return undefined;
     }
@@ -826,7 +830,10 @@ const decryptAllData = async (
         encryptedFiles = new Map(
             [...encryptedFiles.entries()]
                 .map(
-                    ([fileID, records]): [number, Map<number, EncryptedFileRecord>] => [
+                    ([fileID, records]): [
+                        number,
+                        Map<number, EncryptedFileRecord>,
+                    ] => [
                         fileID,
                         new Map(
                             [...records.entries()].filter(
@@ -843,11 +850,7 @@ const decryptAllData = async (
     // Sort collections alphabetically by name
     result.sort((a, b) => a.name.localeCompare(b.name));
 
-    return {
-        collections: result,
-        failedCollectionIDs,
-        totalCollectionCount,
-    };
+    return { collections: result, failedCollectionIDs, totalCollectionCount };
 };
 
 // ---------------------------------------------------------------------------
@@ -880,10 +883,9 @@ export const fetchLockerTrash = async (
     let hasMore = true;
 
     while (hasMore) {
-        const res = await fetch(
-            await apiURL("/trash/v2/diff", { sinceTime }),
-            { headers: await authenticatedRequestHeaders() },
-        );
+        const res = await fetch(await apiURL("/trash/v2/diff", { sinceTime }), {
+            headers: await authenticatedRequestHeaders(),
+        });
         ensureOk(res);
         const parsed = TrashDiffResponse.parse(await res.json());
 
@@ -986,9 +988,7 @@ export const downloadLockerFile = async (
     const fileRecord = getEncryptedFileRecord(fileID);
     if (!fileRecord) throw new Error(`File ${fileID} not found in cache`);
 
-    const collectionRecord = encryptedCollections.get(
-        fileRecord.collectionID,
-    );
+    const collectionRecord = encryptedCollections.get(fileRecord.collectionID);
     if (!collectionRecord)
         throw new Error(
             `Collection ${fileRecord.collectionID} not found in cache`,
@@ -1056,17 +1056,24 @@ export const downloadLockerFile = async (
                         downloadedBytes += value.length;
                         onProgress?.({
                             loaded: downloadedBytes,
-                            total: contentLength > 0 ? contentLength : undefined,
+                            total:
+                                contentLength > 0 ? contentLength : undefined,
                         });
-                        data = new Uint8Array(leftoverBytes.length + value.length);
+                        data = new Uint8Array(
+                            leftoverBytes.length + value.length,
+                        );
                         data.set(leftoverBytes, 0);
                         data.set(value, leftoverBytes.length);
                     }
 
                     while (data.length >= streamDecryptor.decryptionChunkSize) {
-                        const decryptedChunk = await streamDecryptor.decryptChunk(
-                            data.slice(0, streamDecryptor.decryptionChunkSize),
-                        );
+                        const decryptedChunk =
+                            await streamDecryptor.decryptChunk(
+                                data.slice(
+                                    0,
+                                    streamDecryptor.decryptionChunkSize,
+                                ),
+                            );
                         controller.enqueue(decryptedChunk);
                         didEnqueue = true;
                         data = data.slice(streamDecryptor.decryptionChunkSize);
@@ -1084,8 +1091,12 @@ export const downloadLockerFile = async (
                             );
                         }
                         onProgress?.({
-                            loaded: contentLength > 0 ? contentLength : downloadedBytes,
-                            total: contentLength > 0 ? contentLength : undefined,
+                            loaded:
+                                contentLength > 0
+                                    ? contentLength
+                                    : downloadedBytes,
+                            total:
+                                contentLength > 0 ? contentLength : undefined,
                         });
                         streamDecryptor.free();
                         controller.close();
@@ -1125,11 +1136,11 @@ export const downloadLockerFile = async (
  * The backend endpoint is user-wide rather than per-file, so the client
  * filters to the latest non-disabled record per file.
  */
-export const fetchLockerFileShareLinks = async (): Promise<
+export const fetchLockerFileShareLinks = (): Promise<
     Map<number, LockerFileShareLinkSummary>
 > => {
     // TODO: Re-enable this after GET /files/share-url is deployed on the API.
-    return new Map();
+    return Promise.resolve(new Map<number, LockerFileShareLinkSummary>());
 };
 
 /**
@@ -1153,11 +1164,7 @@ export const getOrCreateLockerFileShareLink = async (
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            fileID,
-            app: "locker",
-            ...payload.metadata,
-        }),
+        body: JSON.stringify({ fileID, app: "locker", ...payload.metadata }),
     });
     ensureOk(res);
 
@@ -1190,10 +1197,7 @@ export const deleteLockerFileShareLink = async (
     for (const candidateID of candidateIDs) {
         const res = await fetch(
             await apiURL(`/files/share-url/${candidateID}`),
-            {
-                method: "DELETE",
-                headers: await authenticatedRequestHeaders(),
-            },
+            { method: "DELETE", headers: await authenticatedRequestHeaders() },
         );
         if (res.ok) {
             return;
@@ -1201,8 +1205,8 @@ export const deleteLockerFileShareLink = async (
         lastError = new Error(
             `Failed to delete link ${candidateID}: ${res.status} ${res.statusText}`,
         );
-        if (res.status !== 404 || candidateID === String(fileID)) {
-            break;
+        if (candidateID !== String(fileID)) {
+            continue;
         }
     }
 
@@ -1256,14 +1260,14 @@ export const createInfoItem = async (
         fileType: 4, // FileType.info
     };
     const metadataJSON = JSON.stringify(metadata);
-    const encryptedMetadata = await encryptBlob(stringToB64(metadataJSON), fileKey);
+    const encryptedMetadata = await encryptBlob(
+        stringToB64(metadataJSON),
+        fileKey,
+    );
 
     // Build pubMagicMetadata with info field
     const pubMagicMetadata = {
-        info: {
-            type: infoType,
-            data: infoData,
-        },
+        info: { type: infoType, data: infoData },
         noThumb: true,
     };
     const pubMMJSON = JSON.stringify(pubMagicMetadata);
@@ -1348,10 +1352,7 @@ export const updateInfoItem = async (
     const title = infoItemTitle(infoType, infoData);
     const pubMagicMetadata = {
         ...existingPubMagicMetadata,
-        info: {
-            type: infoType,
-            data: infoData,
-        },
+        info: { type: infoType, data: infoData },
         noThumb: true,
         editedName: title,
         editedTime: Date.now(),
@@ -1425,10 +1426,7 @@ export const trashFiles = async (
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            collectionID,
-            fileIDs,
-        }),
+        body: JSON.stringify({ collectionID, fileIDs }),
     });
     ensureOk(res);
 };
@@ -1489,7 +1487,11 @@ export const restoreFromTrash = async (
     );
 
     // For each file, re-encrypt the file key with the target collection key
-    const files: { id: number; encryptedKey: string; keyDecryptionNonce: string }[] = [];
+    const files: {
+        id: number;
+        encryptedKey: string;
+        keyDecryptionNonce: string;
+    }[] = [];
     const skippedFileIDs: number[] = [];
     for (const fileID of fileIDs) {
         const fileRecord = getEncryptedFileRecord(fileID);
@@ -1499,7 +1501,9 @@ export const restoreFromTrash = async (
         }
 
         // Decrypt file key using original collection key
-        const origCollectionRecord = encryptedCollections.get(fileRecord.collectionID);
+        const origCollectionRecord = encryptedCollections.get(
+            fileRecord.collectionID,
+        );
         if (!origCollectionRecord) {
             skippedFileIDs.push(fileID);
             continue;
@@ -1618,13 +1622,14 @@ export const renameCollection = async (
     const nameB64 = stringToB64(newName);
     const encryptedName = await encryptBox(nameB64, collectionKey);
 
-    const res = await fetch(await apiURL(`/collections/rename/${collectionID}`), {
+    const res = await fetch(await apiURL("/collections/rename"), {
         method: "POST",
         headers: {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
+            collectionID,
             encryptedName: encryptedName.encryptedData,
             nameDecryptionNonce: encryptedName.nonce,
         }),
@@ -1637,9 +1642,7 @@ export const renameCollection = async (
  *
  * @param collectionID The collection to delete.
  */
-export const deleteCollection = async (
-    collectionID: number,
-): Promise<void> => {
+export const deleteCollection = async (collectionID: number): Promise<void> => {
     const res = await fetch(await apiURL(`/collections/v3/${collectionID}`), {
         method: "DELETE",
         headers: await authenticatedRequestHeaders(),
@@ -1676,7 +1679,10 @@ export const shareCollection = async (
     if (!collectionRecord)
         throw new Error(`Collection ${collectionID} not in cache`);
 
-    const collectionKey = await decryptCollectionKey(collectionRecord, masterKey);
+    const collectionKey = await decryptCollectionKey(
+        collectionRecord,
+        masterKey,
+    );
     const publicKey = await getPublicKey(email);
     const encryptedKey = await boxSeal(collectionKey, publicKey);
 
@@ -1794,8 +1800,7 @@ const fetchMultipartUploadURLs = async ({
     contentLength: number;
     partLength: number;
     partMd5s: string[];
-},
-): Promise<z.infer<typeof MultipartUploadURLs>> => {
+}): Promise<z.infer<typeof MultipartUploadURLs>> => {
     const headers = new Headers(await authenticatedRequestHeaders());
     headers.set("Content-Type", "application/json");
     const res = await fetch(
@@ -1864,10 +1869,7 @@ const putFilePartToS3 = async (
     const res = await retryEnsuringHTTPOk(() =>
         fetch(url, {
             method: "PUT",
-            headers: {
-                ...publicRequestHeaders(),
-                "Content-MD5": contentMd5,
-            },
+            headers: { ...publicRequestHeaders(), "Content-MD5": contentMd5 },
             body: data,
         }),
     );
@@ -1894,10 +1896,7 @@ const completeMultipartUpload = async (
     await retryEnsuringHTTPOk(() =>
         fetch(completionURL, {
             method: "POST",
-            headers: {
-                ...publicRequestHeaders(),
-                "Content-Type": "text/xml",
-            },
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
             body,
         }),
     );
@@ -1955,9 +1954,12 @@ export const uploadLockerFile = async (
             const partMd5s: string[] = [];
             let pendingEncryptedChunks: Uint8Array[] = [];
 
-            for (let chunkIndex = 0; chunkIndex < plaintextChunkCount; chunkIndex++) {
-                const chunkStart =
-                    chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
+            for (
+                let chunkIndex = 0;
+                chunkIndex < plaintextChunkCount;
+                chunkIndex++
+            ) {
+                const chunkStart = chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
                 const chunkEnd = Math.min(
                     file.size,
                     chunkStart + STREAM_ENCRYPTION_CHUNK_SIZE,
@@ -1973,7 +1975,8 @@ export const uploadLockerFile = async (
                 pendingEncryptedChunks.push(encryptedChunk);
 
                 if (
-                    pendingEncryptedChunks.length === MULTIPART_CHUNKS_PER_PART ||
+                    pendingEncryptedChunks.length ===
+                        MULTIPART_CHUNKS_PER_PART ||
                     isFinalChunk
                 ) {
                     const partData = mergeUint8Arrays(pendingEncryptedChunks);
@@ -2007,10 +2010,7 @@ export const uploadLockerFile = async (
                     partData,
                     partMd5,
                 );
-                completedParts.push({
-                    partNumber: index + 1,
-                    eTag,
-                });
+                completedParts.push({ partNumber: index + 1, eTag });
                 parts[index] = new Uint8Array(0);
             }
 
@@ -2022,9 +2022,12 @@ export const uploadLockerFile = async (
         } else {
             const encryptedChunks: Uint8Array[] = [];
 
-            for (let chunkIndex = 0; chunkIndex < plaintextChunkCount; chunkIndex++) {
-                const chunkStart =
-                    chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
+            for (
+                let chunkIndex = 0;
+                chunkIndex < plaintextChunkCount;
+                chunkIndex++
+            ) {
+                const chunkStart = chunkIndex * STREAM_ENCRYPTION_CHUNK_SIZE;
                 const chunkEnd = Math.min(
                     file.size,
                     chunkStart + STREAM_ENCRYPTION_CHUNK_SIZE,
@@ -2084,7 +2087,8 @@ export const uploadLockerFile = async (
     const now = Date.now();
     // The browser exposes only lastModified, so preserve that instead of
     // replacing file times with upload time.
-    const sourceModificationTime = file.lastModified > 0 ? file.lastModified : now;
+    const sourceModificationTime =
+        file.lastModified > 0 ? file.lastModified : now;
     const metadata = {
         title: file.name,
         creationTime: sourceModificationTime,

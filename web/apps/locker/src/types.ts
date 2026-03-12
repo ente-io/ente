@@ -150,7 +150,8 @@ export const canEditCollection = (
     !isUncategorizedCollection(collection);
 
 export const canOpenCollectionSharing = (collection: LockerCollection) =>
-    !isImportantCollection(collection) && !isUncategorizedCollection(collection);
+    !isImportantCollection(collection) &&
+    !isUncategorizedCollection(collection);
 
 export const canShareLockerFileLink = (
     item: LockerItem,
@@ -177,7 +178,9 @@ export const sortLockerCollections = (collections: LockerCollection[]) =>
 
 export const visibleLockerCollections = (collections: LockerCollection[]) =>
     sortLockerCollections(
-        collections.filter((collection) => !isUncategorizedCollection(collection)),
+        collections.filter(
+            (collection) => !isUncategorizedCollection(collection),
+        ),
     );
 
 /**
@@ -209,5 +212,4 @@ export const getItemTitle = (item: LockerItem): string => {
 };
 
 export const hasDownloadableObject = (item: LockerItem) =>
-    item.type === "file" &&
-    (item.data as GenericFileData).hasObject !== false;
+    item.type === "file" && (item.data as GenericFileData).hasObject !== false;

@@ -2,10 +2,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
 import { Stack, Tooltip, Typography } from "@mui/material";
-import { savedLogs } from "ente-base/log-web";
-import log from "ente-base/log";
-import { saveStringAsFile } from "ente-base/utils/web";
-import { openURL, initiateEmail } from "ente-new/photos/utils/web";
 import {
     RowButton,
     RowButtonDivider,
@@ -16,9 +12,13 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { savedLogs } from "ente-base/log-web";
+import { saveStringAsFile } from "ente-base/utils/web";
+import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
-import { Trans } from "react-i18next";
 import React from "react";
+import { Trans } from "react-i18next";
 
 export const LockerSupportDrawer: React.FC<
     NestedSidebarDrawerVisibilityProps

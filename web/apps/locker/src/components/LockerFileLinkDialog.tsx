@@ -39,7 +39,11 @@ export const LockerFileLinkDialog: React.FC<LockerFileLinkDialogProps> = ({
     onShare,
     onDelete,
 }) => (
-    <Dialog open={open} onClose={loading || deleting ? undefined : onClose} fullWidth>
+    <Dialog
+        open={open}
+        onClose={loading || deleting ? undefined : onClose}
+        fullWidth
+    >
         <DialogTitle sx={{ pr: 6 }}>
             {itemTitle}
             <Typography
@@ -99,7 +103,10 @@ export const LockerFileLinkDialog: React.FC<LockerFileLinkDialogProps> = ({
                         </Typography>
                     </Box>
 
-                    <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 1 }}>
+                    <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        sx={{ gap: 1 }}
+                    >
                         <Button
                             variant="contained"
                             startIcon={<ContentCopyIcon />}

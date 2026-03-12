@@ -9,7 +9,9 @@ import {
 } from "../pkg/ente_wasm.js";
 
 test("generates an interactive kek bundle", () => {
-    const generated = auth_generate_interactive_kek("correct horse battery staple");
+    const generated = auth_generate_interactive_kek(
+        "correct horse battery staple",
+    );
 
     expect(Buffer.from(generated.key, "base64")).toHaveLength(32);
     expect(Buffer.from(generated.salt, "base64")).toHaveLength(16);
@@ -18,7 +20,9 @@ test("generates an interactive kek bundle", () => {
 });
 
 test("generates a sensitive kek bundle", () => {
-    const generated = auth_generate_sensitive_kek("correct horse battery staple");
+    const generated = auth_generate_sensitive_kek(
+        "correct horse battery staple",
+    );
 
     expect(Buffer.from(generated.key, "base64")).toHaveLength(32);
     expect(Buffer.from(generated.salt, "base64")).toHaveLength(16);
@@ -32,7 +36,9 @@ test("generates SRP setup attributes from a kek", () => {
 
     expect(Buffer.from(generated.srp_salt, "base64")).toHaveLength(16);
     expect(Buffer.from(generated.login_sub_key, "base64")).toHaveLength(16);
-    expect(Buffer.from(generated.srp_verifier, "base64").length).toBeGreaterThan(0);
+    expect(
+        Buffer.from(generated.srp_verifier, "base64").length,
+    ).toBeGreaterThan(0);
 });
 
 test("round-trips recovery key mnemonic", () => {

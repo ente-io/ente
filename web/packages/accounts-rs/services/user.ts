@@ -8,13 +8,6 @@ import {
     updateSavedLocalUser,
 } from "ente-accounts-rs/services/accounts-db";
 import {
-    generateSRPSetupAttributes,
-    getAndSaveSRPAttributes,
-    getSRPAttributes,
-    updateSRPAndKeyAttributes,
-    type UpdatedKeyAttr,
-} from "ente-accounts-rs/services/srp";
-import {
     boxSealOpenBytes,
     decryptBox,
     deriveInteractiveKey,
@@ -24,13 +17,20 @@ import {
     generateKeyPair,
     toB64URLSafe,
 } from "ente-accounts-rs/services/crypto";
+import { ensureMasterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import {
+    generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
+    getSRPAttributes,
+    updateSRPAndKeyAttributes,
+    type UpdatedKeyAttr,
+} from "ente-accounts-rs/services/srp";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { ensureMasterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import {
     removeAuthToken,
     saveAuthToken,

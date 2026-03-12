@@ -20,10 +20,7 @@ import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useMemo } from "react";
 import type { LockerCollection } from "types";
-import {
-    isImportantCollection,
-    visibleLockerCollections,
-} from "types";
+import { isImportantCollection, visibleLockerCollections } from "types";
 
 /** Width of the sidebar on desktop. */
 export const SIDEBAR_WIDTH = 280;
@@ -67,7 +64,10 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
     const isHomeSelected =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
     const usageProgress = userDetails?.lockerFileLimit
-        ? Math.min((userDetails.fileCount / userDetails.lockerFileLimit) * 100, 100)
+        ? Math.min(
+              (userDetails.fileCount / userDetails.lockerFileLimit) * 100,
+              100,
+          )
         : 0;
     const formattedUsage = new Intl.NumberFormat().format(
         userDetails?.fileCount ?? 0,
@@ -90,9 +90,9 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
             }}
         >
             <Stack sx={{ px: 1.5, py: 2, gap: 2, flex: 1, minHeight: 0 }}>
-                {(userDetails?.email || userDetails) && (
+                {userDetails && (
                     <Box sx={{ px: 0.5 }}>
-                        {userDetails?.email && (
+                        {userDetails.email && (
                             <Typography
                                 variant="small"
                                 sx={{
@@ -106,94 +106,90 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
                             </Typography>
                         )}
 
-                        {userDetails && (
-                            <Box
-                                sx={{
-                                    p: 1.5,
-                                    borderRadius: "18px",
-                                    background:
-                                        "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
-                                    color: "#fff",
-                                }}
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: "18px",
+                                background:
+                                    "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
+                                color: "#fff",
+                            }}
+                        >
+                            <Stack
+                                direction="row"
+                                sx={{ gap: 1.5, alignItems: "center" }}
                             >
-                                <Stack
-                                    direction="row"
-                                    sx={{ gap: 1.5, alignItems: "center" }}
+                                <Box
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: "12px",
+                                        backgroundColor:
+                                            "rgba(255, 255, 255, 0.1)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0,
+                                    }}
                                 >
-                                    <Box
+                                    <CloudQueueOutlinedIcon
+                                        sx={{ fontSize: 20 }}
+                                    />
+                                </Box>
+                                <Stack sx={{ gap: 1, flex: 1, minWidth: 0 }}>
+                                    <Stack
+                                        direction="row"
                                         sx={{
-                                            width: 40,
-                                            height: 40,
-                                            borderRadius: "12px",
-                                            backgroundColor:
-                                                "rgba(255, 255, 255, 0.1)",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            flexShrink: 0,
+                                            alignItems: "baseline",
+                                            justifyContent: "space-between",
+                                            gap: 1,
                                         }}
                                     >
-                                        <CloudQueueOutlinedIcon
-                                            sx={{ fontSize: 20 }}
-                                        />
-                                    </Box>
-                                    <Stack sx={{ gap: 1, flex: 1, minWidth: 0 }}>
-                                        <Stack
-                                            direction="row"
+                                        <Typography
+                                            variant="small"
                                             sx={{
-                                                alignItems: "baseline",
-                                                justifyContent: "space-between",
-                                                gap: 1,
+                                                fontWeight: "bold",
+                                                color: "#fff",
                                             }}
                                         >
-                                            <Typography
-                                                variant="small"
-                                                sx={{
-                                                    fontWeight: "bold",
-                                                    color: "#fff",
-                                                }}
-                                            >
-                                                {t("usage")}
-                                            </Typography>
-                                            <Typography
-                                                variant="mini"
-                                                sx={{
-                                                    color: "rgba(255,255,255,0.72)",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                            >
-                                                {t("lockerUsageSummary", {
-                                                    used: formattedUsage,
-                                                    total: formattedUsageLimit,
-                                                })}
-                                            </Typography>
-                                        </Stack>
+                                            {t("usage")}
+                                        </Typography>
+                                        <Typography
+                                            variant="mini"
+                                            sx={{
+                                                color: "rgba(255,255,255,0.72)",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {t("lockerUsageSummary", {
+                                                used: formattedUsage,
+                                                total: formattedUsageLimit,
+                                            })}
+                                        </Typography>
+                                    </Stack>
+                                    <Box
+                                        sx={{
+                                            height: 4,
+                                            borderRadius: 999,
+                                            backgroundColor:
+                                                "rgba(255,255,255,0.22)",
+                                            overflow: "hidden",
+                                        }}
+                                    >
                                         <Box
                                             sx={{
-                                                height: 4,
+                                                width: `${usageProgress}%`,
+                                                minWidth:
+                                                    usageProgress > 0 ? 8 : 0,
+                                                height: "100%",
                                                 borderRadius: 999,
-                                                backgroundColor:
-                                                    "rgba(255,255,255,0.22)",
-                                                overflow: "hidden",
+                                                backgroundColor: "#fff",
                                             }}
-                                        >
-                                            <Box
-                                                sx={{
-                                                    width: `${usageProgress}%`,
-                                                    minWidth:
-                                                        usageProgress > 0
-                                                            ? 8
-                                                            : 0,
-                                                    height: "100%",
-                                                    borderRadius: 999,
-                                                    backgroundColor: "#fff",
-                                                }}
-                                            />
-                                        </Box>
-                                    </Stack>
+                                        />
+                                    </Box>
                                 </Stack>
-                            </Box>
-                        )}
+                            </Stack>
+                        </Box>
                     </Box>
                 )}
 
@@ -261,7 +257,9 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
                                     !isCollectionsView &&
                                     selectedCollectionID === collection.id
                                 }
-                                onClick={() => onSelectCollection(collection.id)}
+                                onClick={() =>
+                                    onSelectCollection(collection.id)
+                                }
                             />
                         ))}
                     </List>
