@@ -31,7 +31,6 @@ import {
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import { isHTTPErrorWithStatus } from "ente-base/http";
-import { formattedDate } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
@@ -76,7 +75,7 @@ interface ItemListProps {
     onShareCollection?: (collection: LockerCollection) => void;
 }
 
-const contentMaxWidth = 620;
+const contentMaxWidth = 560;
 
 export const ItemList: React.FC<ItemListProps> = ({
     collections,
@@ -352,39 +351,6 @@ export const ItemList: React.FC<ItemListProps> = ({
             onShareCollection(selectedCollection);
         }
     }, [onShareCollection, selectedCollection]);
-    const itemTypeLabel = useCallback((item: LockerItem) => {
-        switch (item.type) {
-            case "note":
-                return t("personalNote");
-            case "accountCredential":
-                return t("secret");
-            case "physicalRecord":
-                return t("thing");
-            case "emergencyContact":
-                return t("emergencyContact");
-            case "file":
-                return t("document");
-        }
-    }, []);
-    const getItemSecondaryText = useCallback(
-        (item: LockerItem) => {
-            const parts = [itemTypeLabel(item)];
-            const isSharedWithUser =
-                (item.ownerID ?? currentUserID) !== currentUserID;
-            if (isSharedWithUser) {
-                parts.push(t("sharedWithYou"));
-            }
-            if (item.updatedAt ?? item.createdAt) {
-                parts.push(
-                    formattedDate(
-                        new Date((item.updatedAt ?? item.createdAt!) / 1000),
-                    ),
-                );
-            }
-            return parts.join(" • ");
-        },
-        [currentUserID, itemTypeLabel],
-    );
     const toggleHomeCollection = useCallback((collectionID: number) => {
         setHomeSelectedCollectionIDs((current) =>
             current.includes(collectionID)
@@ -646,13 +612,16 @@ export const ItemList: React.FC<ItemListProps> = ({
             sx={{ flex: 1, minHeight: 0, overflow: "hidden", height: "100%" }}
         >
             <Box
-                sx={{
+                sx={(theme) => ({
                     flex: 1,
                     minHeight: 0,
                     overflowY: "auto",
                     overscrollBehavior: "contain",
                     WebkitOverflowScrolling: "touch",
-                }}
+                    ...theme.applyStyles("light", {
+                        backgroundColor: "#F3F4F6",
+                    }),
+                })}
             >
                 <Box
                     sx={{
@@ -689,8 +658,12 @@ export const ItemList: React.FC<ItemListProps> = ({
                             }}
                             sx={{
                                 "& .MuiOutlinedInput-root": {
+                                    minHeight: 48,
                                     borderRadius: "24px",
                                     backgroundColor: "background.paper",
+                                    "& .MuiOutlinedInput-input": {
+                                        py: 1.5,
+                                    },
                                     "& fieldset": {
                                         borderColor: "transparent",
                                     },
@@ -707,12 +680,15 @@ export const ItemList: React.FC<ItemListProps> = ({
                 </Box>
 
                 <Box
-                    sx={{
+                    sx={(theme) => ({
                         px: { xs: 2, sm: 3 },
                         pb: isTrashView
                             ? 3
                             : "calc(env(safe-area-inset-bottom) + 120px)",
-                    }}
+                        ...theme.applyStyles("light", {
+                            backgroundColor: "#F3F4F6",
+                        }),
+                    })}
                 >
                     {isHomeView && (
                         <>
@@ -752,7 +728,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                 onClick={
                                                     clearHomeCollectionSelection
                                                 }
-                                                sx={{
+                                                sx={(theme) => ({
                                                     width: 32,
                                                     height: 32,
                                                     color: "text.muted",
@@ -763,7 +739,19 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                         backgroundColor:
                                                             "rgba(255, 255, 255, 0.065)",
                                                     },
-                                                }}
+                                                    ...theme.applyStyles(
+                                                        "light",
+                                                        {
+                                                            border: "1px solid rgba(17, 24, 39, 0.08)",
+                                                            backgroundColor:
+                                                                "#FFFFFF",
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    "#FFFFFF",
+                                                            },
+                                                        },
+                                                    ),
+                                                })}
                                             >
                                                 <ClearRoundedIcon
                                                     sx={{ fontSize: 18 }}
@@ -785,11 +773,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -935,11 +921,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -1054,13 +1038,11 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={
                                     isTrashView ? undefined : openFileLinkDialog
                                 }
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -1362,11 +1344,9 @@ const ItemsSection: React.FC<{
     onDeleteItem?: (item: LockerItem) => void;
     onPermanentlyDelete?: (items: LockerItem[]) => void;
     onRequestRestore: (item: LockerItem) => void;
-    getSecondaryText: (item: LockerItem) => string;
     onSelectItem: (item: LockerItem) => void;
     currentUserID: number;
     onShareLink?: (item: LockerItem) => void;
-    fileShareLinksByFileID: Map<number, LockerFileShareLinkSummary>;
     selectionMode?: boolean;
     selectedItemIDSet?: Set<number>;
     onToggleItemSelection?: (item: LockerItem) => void;
@@ -1380,11 +1360,9 @@ const ItemsSection: React.FC<{
     onDeleteItem,
     onPermanentlyDelete,
     onRequestRestore,
-    getSecondaryText,
     onSelectItem,
     currentUserID,
     onShareLink,
-    fileShareLinksByFileID,
     selectionMode,
     selectedItemIDSet,
     onToggleItemSelection,
@@ -1393,7 +1371,7 @@ const ItemsSection: React.FC<{
 }) =>
     items.length > 0 ? (
         <Stack
-            sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 0, mt: 1 }}
+            sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 1.1, mt: 1.25 }}
         >
             {items.map((item) => {
                 const isOwnedByCurrentUser =
@@ -1404,7 +1382,9 @@ const ItemsSection: React.FC<{
                         item={item}
                         masterKey={masterKey}
                         isTrashView={isTrashView}
-                        secondaryText={getSecondaryText(item)}
+                        isIncomingShared={
+                            (item.ownerID ?? currentUserID) !== currentUserID
+                        }
                         onClick={() => onSelectItem(item)}
                         onEdit={
                             onEditItem && isOwnedByCurrentUser
@@ -1437,7 +1417,6 @@ const ItemsSection: React.FC<{
                                 ? onShareLink
                                 : undefined
                         }
-                        fileShareLink={fileShareLinksByFileID.get(item.id)}
                         selectionMode={selectionMode}
                         selectable
                         selected={selectedItemIDSet?.has(item.id)}
@@ -1735,6 +1714,13 @@ const CollectionChipFilters: React.FC<{
                                 backgroundColor:
                                     theme.vars.palette.fill.faintHover,
                             },
+                            ...theme.applyStyles("light", {
+                                backgroundColor: "#FFFFFF",
+                                border: "1px solid rgba(17, 24, 39, 0.06)",
+                                "&:hover": {
+                                    backgroundColor: "#FFFFFF",
+                                },
+                            }),
                         })}
                     />
                 );
