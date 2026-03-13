@@ -39,6 +39,7 @@ interface ItemDetailViewProps {
     onClose: () => void;
     onEdit?: (item: LockerItem) => void;
     onDelete?: (item: LockerItem) => void;
+    onDeleteDisabledHint?: string;
     isTrashView?: boolean;
     onShareLink?: (item: LockerItem) => void;
 }
@@ -49,6 +50,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     onClose,
     onEdit,
     onDelete,
+    onDeleteDisabledHint,
     isTrashView,
     onShareLink,
 }) => {
@@ -140,15 +142,32 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {!isTrashView && onDelete && (
-                            <Tooltip title={t("delete")}>
-                                <IconButton
-                                    onClick={() => onDelete(item)}
-                                    size="small"
-                                    sx={{ color: "critical.main" }}
-                                >
-                                    <DeleteOutlineIcon fontSize="small" />
-                                </IconButton>
+                        {!isTrashView && (onDelete || onDeleteDisabledHint) && (
+                            <Tooltip
+                                title={
+                                    onDelete
+                                        ? t("delete")
+                                        : (onDeleteDisabledHint ?? "")
+                                }
+                            >
+                                <Box component="span">
+                                    <IconButton
+                                        onClick={
+                                            onDelete
+                                                ? () => onDelete(item)
+                                                : undefined
+                                        }
+                                        size="small"
+                                        disabled={!onDelete}
+                                        sx={
+                                            onDelete
+                                                ? { color: "critical.main" }
+                                                : undefined
+                                        }
+                                    >
+                                        <DeleteOutlineIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
                             </Tooltip>
                         )}
                         <IconButton onClick={onClose} size="small">

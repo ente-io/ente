@@ -167,6 +167,8 @@ interface EncryptedCollectionRecord {
     type: string;
     /** Whether the collection has sharees. */
     isShared: boolean;
+    /** Whether this collection is deleted on remote (key still needed for trash restore). */
+    isDeleted: boolean;
     /** Updation time (structural metadata). */
     updationTime: number;
 }
@@ -395,9 +397,6 @@ const fetchEncryptedCollections = async () => {
     const nextCollections = new Map<number, EncryptedCollectionRecord>();
 
     for (const c of collections) {
-        if (c.isDeleted) {
-            continue;
-        }
         nextCollections.set(c.id, {
             id: c.id,
             owner: { ...toLockerCollectionParticipant(c.owner), role: "OWNER" },
@@ -410,6 +409,7 @@ const fetchEncryptedCollections = async () => {
             name: c.name ?? undefined,
             type: c.type,
             isShared: (c.sharees?.length ?? 0) > 0,
+            isDeleted: !!c.isDeleted,
             updationTime: c.updationTime,
         });
     }
@@ -422,10 +422,11 @@ const fetchEncryptedCollections = async () => {
 // ---------------------------------------------------------------------------
 
 const fetchAllEncryptedFiles = async () => {
+    const activeCollections = [...encryptedCollections.values()].filter(
+        (collection) => !collection.isDeleted,
+    );
     const fileResults = await Promise.all(
-        [...encryptedCollections.values()].map((c) =>
-            fetchEncryptedFilesForCollection(c.id),
-        ),
+        activeCollections.map((c) => fetchEncryptedFilesForCollection(c.id)),
     );
 
     const nextFiles = new Map<number, Map<number, EncryptedFileRecord>>();
@@ -766,9 +767,12 @@ const decryptFileToLockerItem = async (
 const decryptAllData = async (
     masterKey: string,
 ): Promise<DecryptAllDataResult> => {
+    const activeCollectionRecords = [...encryptedCollections.values()].filter(
+        (collection) => !collection.isDeleted,
+    );
     const result: LockerCollection[] = [];
     const failedCollectionIDs: number[] = [];
-    const totalCollectionCount = encryptedCollections.size;
+    const totalCollectionCount = activeCollectionRecords.length;
 
     // Group files by collection
     const filesByCollection = new Map<number, EncryptedFileRecord[]>();
@@ -779,7 +783,7 @@ const decryptAllData = async (
     }
 
     // Decrypt each collection and its files
-    for (const collectionRecord of encryptedCollections.values()) {
+    for (const collectionRecord of activeCollectionRecords) {
         try {
             const collectionKey = await decryptCollectionKey(
                 collectionRecord,
@@ -1420,13 +1424,15 @@ export const trashFiles = async (
     fileIDs: number[],
     collectionID: number,
 ): Promise<void> => {
-    const res = await fetch(await apiURL("/collections/v3/remove-files"), {
+    const res = await fetch(await apiURL("/files/trash"), {
         method: "POST",
         headers: {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collectionID, fileIDs }),
+        body: JSON.stringify({
+            items: fileIDs.map((fileID) => ({ fileID, collectionID })),
+        }),
     });
     ensureOk(res);
 };
@@ -1468,66 +1474,82 @@ export const emptyTrash = async (): Promise<void> => {
 /**
  * Restore files from trash to a collection.
  *
- * @param fileIDs The file IDs to restore.
- * @param collectionID The target collection.
+ * @param items The files to restore with their source collection IDs.
+ * @param targetCollectionID The target collection.
  * @param masterKey The user's master key.
  */
 export const restoreFromTrash = async (
-    fileIDs: number[],
-    collectionID: number,
+    items: Pick<LockerItem, "id" | "collectionID">[],
+    targetCollectionID: number,
     masterKey: string,
 ): Promise<void> => {
-    const collectionRecord = encryptedCollections.get(collectionID);
+    const collectionRecord = encryptedCollections.get(targetCollectionID);
     if (!collectionRecord)
-        throw new Error(`Collection ${collectionID} not in cache`);
+        throw new Error(`Collection ${targetCollectionID} not in cache`);
 
     const collectionKey = await decryptCollectionKey(
         collectionRecord,
         masterKey,
     );
 
-    // For each file, re-encrypt the file key with the target collection key
-    const files: {
-        id: number;
-        encryptedKey: string;
-        keyDecryptionNonce: string;
-    }[] = [];
-    const skippedFileIDs: number[] = [];
-    for (const fileID of fileIDs) {
-        const fileRecord = getEncryptedFileRecord(fileID);
-        if (!fileRecord) {
-            skippedFileIDs.push(fileID);
-            continue;
+    const buildRestorePayload = async (
+        candidateItems: Pick<LockerItem, "id" | "collectionID">[],
+    ) => {
+        const files: {
+            id: number;
+            encryptedKey: string;
+            keyDecryptionNonce: string;
+        }[] = [];
+        const skippedFileIDs: number[] = [];
+
+        for (const item of candidateItems) {
+            const fileRecord = getEncryptedFileRecord(
+                item.id,
+                item.collectionID,
+            );
+            if (!fileRecord) {
+                skippedFileIDs.push(item.id);
+                continue;
+            }
+
+            // Decrypt file key using original collection key
+            const origCollectionRecord = encryptedCollections.get(
+                fileRecord.collectionID,
+            );
+            if (!origCollectionRecord) {
+                skippedFileIDs.push(item.id);
+                continue;
+            }
+
+            const origCollectionKey = await decryptCollectionKey(
+                origCollectionRecord,
+                masterKey,
+            );
+            const fileKey = await decryptBox(
+                {
+                    encryptedData: fileRecord.encryptedKey,
+                    nonce: fileRecord.keyDecryptionNonce,
+                },
+                origCollectionKey,
+            );
+
+            // Re-encrypt file key with target collection key
+            const encryptedFileKey = await encryptBox(fileKey, collectionKey);
+            files.push({
+                id: item.id,
+                encryptedKey: encryptedFileKey.encryptedData,
+                keyDecryptionNonce: encryptedFileKey.nonce,
+            });
         }
 
-        // Decrypt file key using original collection key
-        const origCollectionRecord = encryptedCollections.get(
-            fileRecord.collectionID,
-        );
-        if (!origCollectionRecord) {
-            skippedFileIDs.push(fileID);
-            continue;
-        }
+        return { files, skippedFileIDs };
+    };
 
-        const origCollectionKey = await decryptCollectionKey(
-            origCollectionRecord,
-            masterKey,
-        );
-        const fileKey = await decryptBox(
-            {
-                encryptedData: fileRecord.encryptedKey,
-                nonce: fileRecord.keyDecryptionNonce,
-            },
-            origCollectionKey,
-        );
-
-        // Re-encrypt file key with target collection key
-        const encryptedFileKey = await encryptBox(fileKey, collectionKey);
-        files.push({
-            id: fileID,
-            encryptedKey: encryptedFileKey.encryptedData,
-            keyDecryptionNonce: encryptedFileKey.nonce,
-        });
+    let { files, skippedFileIDs } = await buildRestorePayload(items);
+    if (files.length === 0 && skippedFileIDs.length > 0) {
+        // Recover from stale cache by refetching trash metadata once.
+        await fetchLockerTrash(masterKey);
+        ({ files, skippedFileIDs } = await buildRestorePayload(items));
     }
 
     if (skippedFileIDs.length > 0) {
@@ -1548,7 +1570,7 @@ export const restoreFromTrash = async (
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collectionID, files }),
+        body: JSON.stringify({ collectionID: targetCollectionID, files }),
     });
     ensureOk(res);
 };

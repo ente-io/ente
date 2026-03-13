@@ -53,6 +53,8 @@ interface ItemCardProps {
     onEdit?: (item: LockerItem) => void;
     /** Called when the user wants to delete (trash) this item. */
     onDelete?: (item: LockerItem) => void;
+    /** Optional hint shown when delete is unavailable for this item. */
+    deleteDisabledHint?: string;
     /** Called when the user wants to permanently delete this item. */
     onPermanentlyDelete?: (items: LockerItem[]) => void;
     /** Called when the user wants to restore this item from trash. */
@@ -78,6 +80,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     isTrashView,
     onEdit,
     onDelete,
+    deleteDisabledHint,
     onPermanentlyDelete,
     onRestore,
     onShareLink,
@@ -313,6 +316,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                             masterKey={masterKey}
                             onEdit={onEdit}
                             onDelete={onDelete}
+                            deleteDisabledHint={deleteDisabledHint}
                             onDownload={handleDownload}
                             onShareLink={onShareLink}
                             downloading={downloading}
@@ -389,6 +393,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                             masterKey={masterKey}
                             onEdit={onEdit}
                             onDelete={onDelete}
+                            deleteDisabledHint={deleteDisabledHint}
                             onDownload={handleDownload}
                             onShareLink={onShareLink}
                             downloading={downloading}
@@ -405,6 +410,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                             masterKey={masterKey}
                             onEdit={onEdit}
                             onDelete={onDelete}
+                            deleteDisabledHint={deleteDisabledHint}
                             onDownload={handleDownload}
                             onShareLink={onShareLink}
                             downloading={downloading}
@@ -468,10 +474,11 @@ const ItemOverflowMenu: React.FC<{
     masterKey?: string;
     onEdit?: (item: LockerItem) => void;
     onDelete?: (item: LockerItem) => void;
+    deleteDisabledHint?: string;
     onDownload: () => Promise<void>;
     onShareLink?: (item: LockerItem) => void;
     downloading: boolean;
-}> = ({ item, onEdit, onDelete, onShareLink }) => (
+}> = ({ item, onEdit, onDelete, deleteDisabledHint, onShareLink }) => (
     <OverflowMenu
         ariaID={`item-menu-${item.id}`}
         triggerButtonIcon={<MoreVertIcon sx={{ fontSize: 20 }} />}
@@ -493,7 +500,7 @@ const ItemOverflowMenu: React.FC<{
                 {t("shareLink")}
             </OverflowMenuOption>
         )}
-        {onDelete && (
+        {onDelete ? (
             <OverflowMenuOption
                 startIcon={<DeleteOutlineIcon />}
                 color="critical"
@@ -501,6 +508,17 @@ const ItemOverflowMenu: React.FC<{
             >
                 {t("delete")}
             </OverflowMenuOption>
+        ) : (
+            deleteDisabledHint && (
+                <OverflowMenuOption
+                    startIcon={<DeleteOutlineIcon />}
+                    color="critical"
+                    disabled
+                    onClick={() => undefined}
+                >
+                    {t("delete")}
+                </OverflowMenuOption>
+            )
         )}
     </OverflowMenu>
 );
