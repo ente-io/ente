@@ -127,6 +127,7 @@
     "filesDeletedPermanently": "{{count, number}}件のアイテムを完全に削除しました",
     "filesDeletedPermanently_one": "1件のアイテムを完全に削除しました",
     "failedToCreateCollection": "コレクションの作成に失敗しました",
+    "edit": "編集",
     "share": "共有",
     "shared": "共有中",
     "sharedWith": "共有先",

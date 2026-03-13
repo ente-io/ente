@@ -953,13 +953,49 @@ const components: Components = {
 };
 
 const getComponents = (appName: AppName): Components => {
-    if (appName !== "ensu") return components;
+    if (appName !== "ensu" && appName !== "locker") return components;
 
     const muiButtonStyleOverrides = (components.MuiButton?.styleOverrides ??
         {}) as Record<string, unknown>;
     const muiButtonRootStyleOverrides =
         (muiButtonStyleOverrides.root as Record<string, unknown> | undefined) ??
         {};
+    const muiIconButtonStyleOverrides = (components.MuiIconButton
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiIconButtonRootStyleOverrides =
+        (muiIconButtonStyleOverrides.root as
+            | Record<string, unknown>
+            | undefined) ?? {};
+
+    if (appName === "locker") {
+        return {
+            ...components,
+            MuiButton: {
+                ...components.MuiButton,
+                styleOverrides: {
+                    ...muiButtonStyleOverrides,
+                    root: {
+                        ...muiButtonRootStyleOverrides,
+                        borderRadius: "20px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiButton"]>["styleOverrides"]
+                >,
+            },
+            MuiIconButton: {
+                ...components.MuiIconButton,
+                styleOverrides: {
+                    ...muiIconButtonStyleOverrides,
+                    root: {
+                        ...muiIconButtonRootStyleOverrides,
+                        borderRadius: "18px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiIconButton"]>["styleOverrides"]
+                >,
+            },
+        };
+    }
 
     return {
         ...components,

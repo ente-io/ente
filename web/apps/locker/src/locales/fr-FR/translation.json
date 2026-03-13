@@ -125,6 +125,7 @@
     "filesDeletedPermanently": "{{count, number}} elements supprimes definitivement",
     "filesDeletedPermanently_one": "1 element supprime definitivement",
     "failedToCreateCollection": "Echec de la creation de la collection",
+    "edit": "Modifier",
     "share": "Partager",
     "shared": "Partagee",
     "sharedWith": "Partage avec",

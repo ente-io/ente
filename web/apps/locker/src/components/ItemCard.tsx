@@ -396,7 +396,7 @@ const ItemOverflowMenu: React.FC<{
                 startIcon={<ShareOutlinedIcon />}
                 onClick={() => onShareLink(item)}
             >
-                {t("shareLink")}
+                {t("share")}
             </OverflowMenuOption>
         )}
         {onDelete ? (

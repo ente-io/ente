@@ -1,4 +1,5 @@
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -898,6 +899,16 @@ const CollectionSelector: React.FC<{
                             fullWidth
                             autoFocus
                             placeholder={t("enterCollectionName")}
+                            sx={{
+                                "& .MuiInputBase-root": {
+                                    height: 48,
+                                    borderRadius: "14px",
+                                },
+                                "& .MuiInputBase-input": {
+                                    pt: 1,
+                                    pb: 0.5,
+                                },
+                            }}
                             value={createName}
                             onChange={(event) => {
                                 setCreateName(event.target.value);
@@ -914,9 +925,18 @@ const CollectionSelector: React.FC<{
                             color="accent"
                             loading={creating}
                             disabled={!createName.trim()}
+                            aria-label={t("create")}
                             onClick={() => void handleCreateCollection()}
+                            sx={{
+                                minWidth: 0,
+                                width: 48,
+                                height: 48,
+                                p: 0,
+                                borderRadius: "14px",
+                                flexShrink: 0,
+                            }}
                         >
-                            {t("create")}
+                            <CheckRoundedIcon />
                         </LoadingButton>
                     </Stack>
                     {createError && (
