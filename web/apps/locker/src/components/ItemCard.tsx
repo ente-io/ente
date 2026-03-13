@@ -1,22 +1,13 @@
-import AudioFileOutlinedIcon from "@mui/icons-material/AudioFileOutlined";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import ContactEmergencyOutlinedIcon from "@mui/icons-material/ContactEmergencyOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import NoteOutlinedIcon from "@mui/icons-material/NoteOutlined";
 import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
 import RestoreIcon from "@mui/icons-material/Restore";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import VideoFileOutlinedIcon from "@mui/icons-material/VideoFileOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -36,6 +27,7 @@ import {
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
+import { lockerItemIcon, lockerItemIconConfig } from "components/lockerItemIcons";
 import type { LockerFileShareLinkSummary } from "services/remote";
 import { downloadLockerFile } from "services/remote";
 import type { AccountCredentialData, GenericFileData, LockerItem } from "types";
@@ -601,102 +593,20 @@ const CredentialActions: React.FC<{
  * Background color for the icon square, per item type.
  */
 const iconBgColor = (item: LockerItem): string => {
-    switch (item.type) {
-        case "note":
-            return "rgba(255, 179, 71, 0.15)";
-        case "accountCredential":
-            return "rgba(16, 113, 255, 0.15)";
-        case "physicalRecord":
-            return "rgba(76, 175, 80, 0.15)";
-        case "emergencyContact":
-            return "rgba(244, 67, 54, 0.15)";
-        case "file": {
-            const name = (item.data as GenericFileData).name;
-            const ext = name.split(".").pop()?.toLowerCase() ?? "";
-            if (
-                [
-                    "pdf",
-                    "doc",
-                    "docx",
-                    "txt",
-                    "rtf",
-                    "xlsx",
-                    "pptx",
-                    "csv",
-                ].includes(ext)
-            )
-                return "rgba(244, 67, 54, 0.12)";
-            if (
-                ["jpg", "jpeg", "png", "gif", "heic", "webp", "svg"].includes(
-                    ext,
-                )
-            )
-                return "rgba(76, 175, 80, 0.12)";
-            if (
-                ["mp3", "m4a", "wav", "ogg", "flac", "aac", "wma"].includes(ext)
-            )
-                return "rgba(156, 39, 176, 0.12)";
-            if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
-                return "rgba(33, 150, 243, 0.12)";
-            return "rgba(158, 158, 158, 0.10)";
-        }
-        default:
-            return "rgba(158, 158, 158, 0.10)";
-    }
+    return lockerItemIconConfig(
+        item.type,
+        item.type === "file" ? (item.data as GenericFileData).name : undefined,
+    ).backgroundColor;
 };
 
 /** Icon for a LockerItem. */
 const itemIcon = (item: LockerItem) => {
-    switch (item.type) {
-        case "note":
-            return <NoteOutlinedIcon sx={{ fontSize: 20, color: "#FFB347" }} />;
-        case "accountCredential":
-            return <KeyOutlinedIcon sx={{ fontSize: 20, color: "#1071FF" }} />;
-        case "physicalRecord":
-            return (
-                <LocationOnOutlinedIcon
-                    sx={{ fontSize: 20, color: "#4CAF50" }}
-                />
-            );
-        case "emergencyContact":
-            return (
-                <ContactEmergencyOutlinedIcon
-                    sx={{ fontSize: 20, color: "#F44336" }}
-                />
-            );
-        case "file":
-            return fileIcon((item.data as GenericFileData).name);
-        default:
-            return (
-                <InsertDriveFileOutlinedIcon
-                    sx={{ fontSize: 20, color: "#9E9E9E" }}
-                />
-            );
-    }
-};
-
-/** Pick an icon based on the file extension. */
-const fileIcon = (name: string) => {
-    const ext = name.split(".").pop()?.toLowerCase() ?? "";
-    if (["mp3", "m4a", "wav", "ogg", "flac", "aac", "wma"].includes(ext))
-        return (
-            <AudioFileOutlinedIcon sx={{ fontSize: 20, color: "#9C27B0" }} />
-        );
-    if (["mp4", "mov", "avi", "mkv", "webm"].includes(ext))
-        return (
-            <VideoFileOutlinedIcon sx={{ fontSize: 20, color: "#2196F3" }} />
-        );
-    if (["jpg", "jpeg", "png", "gif", "heic", "webp", "svg"].includes(ext))
-        return <ImageOutlinedIcon sx={{ fontSize: 20, color: "#4CAF50" }} />;
-    if (
-        ["pdf", "doc", "docx", "txt", "rtf", "xlsx", "pptx", "csv"].includes(
-            ext,
-        )
-    )
-        return (
-            <DescriptionOutlinedIcon sx={{ fontSize: 20, color: "#F44336" }} />
-        );
-    return (
-        <InsertDriveFileOutlinedIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
-    );
+    return lockerItemIcon(item.type, {
+        fileName:
+            item.type === "file"
+                ? (item.data as GenericFileData).name
+                : undefined,
+        size: 20,
+        strokeWidth: 1.9,
+    });
 };

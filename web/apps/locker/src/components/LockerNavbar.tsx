@@ -1,4 +1,5 @@
-import MenuIcon from "@mui/icons-material/Menu";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import React from "react";
@@ -42,7 +43,11 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
         >
             {showMenuButton ? (
                 <IconButton onClick={onOpenSidebar} sx={{ color: "#fff" }}>
-                    <MenuIcon />
+                    <HugeiconsIcon
+                        icon={Menu01Icon}
+                        size={24}
+                        strokeWidth={2.25}
+                    />
                 </IconButton>
             ) : (
                 <Box sx={{ width: 40 }} />

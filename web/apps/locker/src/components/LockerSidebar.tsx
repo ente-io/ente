@@ -1,9 +1,15 @@
+import {
+    Delete02Icon,
+    HelpCircleIcon,
+    Home01Icon,
+    InformationCircleIcon,
+    Logout05Icon,
+    UserIcon,
+    Wallet05Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Box,
     IconButton,
@@ -12,11 +18,6 @@ import {
     useTheme,
 } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-} from "ente-base/components/RowButton";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
@@ -318,64 +319,60 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         )}
 
                         <Box sx={{ px: 0.5, mt: 0.5 }}>
-                            <RowButtonGroup>
-                                <RowButton
-                                    startIcon={<HomeOutlinedIcon />}
+                            <Stack sx={{ gap: 1 }}>
+                                <SidebarCardButton
+                                    icon={Home01Icon}
                                     label={t("home")}
                                     caption={String(totalItems)}
-                                    fontWeight={isHomeView ? "bold" : "medium"}
+                                    selected={isHomeView}
                                     onClick={onSelectHome}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
-                                    startIcon={<FolderOutlinedIcon />}
+                                <SidebarCardButton
+                                    icon={Wallet05Icon}
                                     label={t("menuCollections")}
                                     caption={String(displayCollections.length)}
-                                    fontWeight={
-                                        isCollectionsView ? "bold" : "medium"
-                                    }
+                                    selected={isCollectionsView}
                                     onClick={onSelectCollections}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
-                                    startIcon={<DeleteOutlineIcon />}
+                                <SidebarCardButton
+                                    icon={Delete02Icon}
                                     label={t("menuTrash")}
                                     caption={String(trashItemCount)}
-                                    fontWeight={isTrashView ? "bold" : "medium"}
+                                    selected={isTrashView}
                                     onClick={onSelectTrash}
                                 />
-                            </RowButtonGroup>
+                            </Stack>
                         </Box>
 
                         <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
-                            <RowButtonGroup>
-                                <RowButton
+                            <Stack sx={{ gap: 1 }}>
+                                <SidebarCardButton
+                                    icon={UserIcon}
                                     label={t("account")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsAccountOpen(true)}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
+                                <SidebarCardButton
+                                    icon={HelpCircleIcon}
                                     label={t("help_and_support")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsSupportOpen(true)}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
+                                <SidebarCardButton
+                                    icon={InformationCircleIcon}
                                     label={t("about")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsAboutOpen(true)}
                                 />
-                            </RowButtonGroup>
+                            </Stack>
                         </Box>
                     </Box>
 
                     <Box sx={{ px: 0.5, pb: 1 }}>
-                        <RowButton
-                            variant="secondary"
-                            color="critical"
-                            startIcon={<LogoutOutlinedIcon />}
+                        <SidebarCardButton
+                            icon={Logout05Icon}
                             label={t("logout")}
+                            color="warning.main"
                             onClick={logout}
                         />
                     </Box>
@@ -409,3 +406,106 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         </>
     );
 };
+
+interface SidebarCardButtonProps {
+    icon: Parameters<typeof HugeiconsIcon>[0]["icon"];
+    label: string;
+    onClick: () => void;
+    caption?: string;
+    endIcon?: React.ReactNode;
+    selected?: boolean;
+    color?: string;
+}
+
+const SidebarCardButton: React.FC<SidebarCardButtonProps> = ({
+    icon,
+    label,
+    onClick,
+    caption,
+    endIcon,
+    selected = false,
+    color,
+}) => (
+    <FocusVisibleRowButton onClick={onClick}>
+        <Stack
+            direction="row"
+            sx={(theme) => ({
+                minHeight: 56,
+                px: 2,
+                gap: 1.5,
+                alignItems: "center",
+                borderRadius: "20px",
+                backgroundColor: "backdrop.base",
+                color: color ?? "text.base",
+                transition: theme.transitions.create(
+                    ["background-color", "border-color", "color"],
+                    { duration: theme.transitions.duration.shorter },
+                ),
+                ...(selected && {
+                    backgroundColor: "fill.faintHover",
+                    boxShadow: `inset 0 0 0 1px ${theme.vars.palette.accent.main}`,
+                    color: "accent.main",
+                }),
+                "&:hover": {
+                    backgroundColor: selected ? "fill.faintHover" : "fill.faint",
+                },
+            })}
+        >
+            <HugeiconsIcon
+                icon={icon}
+                size={24}
+                color="currentColor"
+                strokeWidth={1.9}
+            />
+            <Typography
+                variant="small"
+                sx={{
+                    flex: 1,
+                    color: "inherit",
+                    fontWeight: selected ? 700 : 500,
+                }}
+            >
+                {label}
+            </Typography>
+            {caption && (
+                <Typography
+                    variant="mini"
+                    sx={{
+                        color: selected ? "accent.main" : "text.muted",
+                        flexShrink: 0,
+                    }}
+                >
+                    {caption}
+                </Typography>
+            )}
+            {endIcon && (
+                <Box sx={{ color: selected ? "accent.main" : "text.muted" }}>
+                    {endIcon}
+                </Box>
+            )}
+        </Stack>
+    </FocusVisibleRowButton>
+);
+
+const FocusVisibleRowButton = ({
+    children,
+    onClick,
+}: React.PropsWithChildren<{ onClick: () => void }>) => (
+    <Box
+        component="button"
+        type="button"
+        onClick={onClick}
+        sx={{
+            width: "100%",
+            p: 0,
+            m: 0,
+            border: 0,
+            background: "transparent",
+            textAlign: "inherit",
+            cursor: "pointer",
+            borderRadius: "20px",
+        }}
+    >
+        {children}
+    </Box>
+);

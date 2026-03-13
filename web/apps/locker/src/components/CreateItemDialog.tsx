@@ -1,9 +1,5 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import NoteOutlinedIcon from "@mui/icons-material/NoteOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -19,6 +15,12 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import {
+    createDocumentIcon,
+    createDocumentIconConfig,
+    lockerItemIcon,
+    lockerItemIconConfig,
+} from "components/lockerItemIcons";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -47,35 +49,35 @@ const CREATABLE_TYPES: {
         type: "file",
         labelKey: "saveDocumentTitle",
         descriptionKey: "saveDocumentDescription",
-        icon: (
-            <InsertDriveFileOutlinedIcon
-                sx={{ fontSize: 28, color: "#E53935" }}
-            />
-        ),
-        bgColor: "rgba(229, 57, 53, 0.12)",
+        icon: createDocumentIcon(28, 1.9),
+        bgColor: createDocumentIconConfig.backgroundColor,
     },
     {
         type: "note",
         labelKey: "personalNote",
         descriptionKey: "personalNoteDescription",
-        icon: <NoteOutlinedIcon sx={{ fontSize: 28, color: "#FFB347" }} />,
-        bgColor: "rgba(255, 179, 71, 0.15)",
+        icon: lockerItemIcon("note", { size: 28, strokeWidth: 1.9 }),
+        bgColor: lockerItemIconConfig("note").backgroundColor,
     },
     {
         type: "physicalRecord",
         labelKey: "thing",
         descriptionKey: "physicalRecordsDescription",
-        icon: (
-            <LocationOnOutlinedIcon sx={{ fontSize: 28, color: "#4CAF50" }} />
-        ),
-        bgColor: "rgba(76, 175, 80, 0.15)",
+        icon: lockerItemIcon("physicalRecord", {
+            size: 28,
+            strokeWidth: 1.9,
+        }),
+        bgColor: lockerItemIconConfig("physicalRecord").backgroundColor,
     },
     {
         type: "accountCredential",
         labelKey: "secret",
         descriptionKey: "accountCredentialsDescription",
-        icon: <KeyOutlinedIcon sx={{ fontSize: 28, color: "#1071FF" }} />,
-        bgColor: "rgba(16, 113, 255, 0.15)",
+        icon: lockerItemIcon("accountCredential", {
+            size: 28,
+            strokeWidth: 1.9,
+        }),
+        bgColor: lockerItemIconConfig("accountCredential").backgroundColor,
     },
 ];
 
@@ -354,9 +356,27 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                         theme.vars.palette.fill.faint,
                                 }}
                             >
-                                <InsertDriveFileOutlinedIcon
-                                    sx={{ fontSize: 32, color: "#E53935" }}
-                                />
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: "12px",
+                                        backgroundColor: lockerItemIconConfig(
+                                            "file",
+                                            selectedFile.name,
+                                        ).backgroundColor,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {lockerItemIcon("file", {
+                                        fileName: selectedFile.name,
+                                        size: 24,
+                                        strokeWidth: 1.9,
+                                    })}
+                                </Box>
                                 <Box sx={{ flex: 1, minWidth: 0 }}>
                                     <Typography variant="body" noWrap>
                                         {selectedFile.name}
