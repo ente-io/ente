@@ -1,7 +1,6 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
-import { t } from "i18next";
 import React from "react";
 
 interface LockerNavbarProps {
@@ -89,13 +88,14 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                     flexShrink: 0,
                 }}
             >
-                ALPHA
+                WARNING
             </Typography>
             <Typography
                 variant="small"
                 sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
             >
-                {t("lockerAlphaCryptoWarning")}
+                Warning: Locker uses a new cryptography library that is still
+                being tested.
             </Typography>
         </Stack>
     </Box>

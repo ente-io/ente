@@ -189,6 +189,5 @@
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "filesSelected": "{{count, number}} items selected",
-    "filesSelected_one": "1 item selected",
-    "lockerAlphaCryptoWarning": "Alpha preview: Locker uses a new cryptography library that is still being tested."
+    "filesSelected_one": "1 item selected"
 }

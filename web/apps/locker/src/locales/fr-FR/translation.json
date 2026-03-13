@@ -182,6 +182,5 @@
     "selectAll": "Tout selectionner",
     "deselectAll": "Tout deselectionner",
     "filesSelected": "{{count, number}} elements selectionnes",
-    "filesSelected_one": "1 element selectionne",
-    "lockerAlphaCryptoWarning": "Version alpha : Locker utilise une nouvelle bibliotheque de cryptographie encore en cours de test."
+    "filesSelected_one": "1 element selectionne"
 }

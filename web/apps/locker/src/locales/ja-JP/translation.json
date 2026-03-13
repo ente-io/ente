@@ -184,6 +184,5 @@
     "selectAll": "全て選択",
     "deselectAll": "選択解除",
     "filesSelected": "{{count, number}}件を選択中",
-    "filesSelected_one": "1件を選択中",
-    "lockerAlphaCryptoWarning": "アルファ版: Locker は現在テスト中の新しい暗号ライブラリを使用しています。"
+    "filesSelected_one": "1件を選択中"
 }
