@@ -118,6 +118,10 @@ interface OverflowMenuOptionProps {
      * If true, reduce spacing and sizing for dense menus.
      */
     compact?: boolean;
+
+     * If true, the option is shown disabled and cannot be selected.
+     */
+    disabled?: boolean;
 }
 
 /**
@@ -132,6 +136,7 @@ export const OverflowMenuOption: React.FC<
     endIcon,
     selected,
     compact,
+    disabled,
     children,
 }) => {
     const menuContext = useContext(OverflowMenuContext);
@@ -150,9 +155,13 @@ export const OverflowMenuOption: React.FC<
         <MenuItem
             onClick={handleClick}
             selected={selected}
+            disabled={disabled}
             sx={(theme) => ({
                 minWidth: compact ? 176 : 220,
-                color: theme.vars.palette[color].main,
+                color: disabled
+                    ? theme.vars.palette.text.muted
+                    : theme.vars.palette[color].main,
+
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
                 "& .MuiSvgIcon-root": { fontSize: compact ? "18px" : "20px" },

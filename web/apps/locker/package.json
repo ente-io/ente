@@ -1,0 +1,13 @@
+{
+    "name": "locker",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-accounts-rs": "*",
+        "ente-base": "*",
+        "ente-wasm": "*"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

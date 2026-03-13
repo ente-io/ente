@@ -128,7 +128,7 @@ const getColors = (appName: AppName) => ({
         accent:
             appName == "auth"
                 ? _colors.accentAuth
-                : appName == "share"
+                : appName == "share" || appName == "locker"
                   ? _colors.accentShare
                   : appName == "ensu"
                     ? _colors.accentEnsu
@@ -138,7 +138,7 @@ const getColors = (appName: AppName) => ({
                 ? _colors.accentEnsuDark
                 : appName == "auth"
                   ? _colors.accentAuth
-                  : appName == "share"
+                  : appName == "share" || appName == "locker"
                     ? _colors.accentShare
                     : _colors.accentPhotos,
     },
@@ -148,7 +148,7 @@ const getColors = (appName: AppName) => ({
     },
     ...{
         light:
-            appName == "share"
+            appName == "share" || appName == "locker"
                 ? _colors.lightShare
                 : appName == "ensu"
                   ? _colors.lightEnsu
@@ -156,7 +156,7 @@ const getColors = (appName: AppName) => ({
     },
     ...{
         dark:
-            appName == "share"
+            appName == "share" || appName == "locker"
                 ? _colors.darkShare
                 : appName == "ensu"
                   ? _colors.darkEnsu
@@ -1017,3 +1017,6 @@ export const ensuTheme = getTheme("ensu");
  * The MUI {@link Theme} to use for the locker public app.
  */
 export const shareTheme = getTheme("share");
+
+/** Theme for the locker app (blue accent, matching mobile Locker app). */
+export const lockerTheme = getTheme("locker");

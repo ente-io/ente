@@ -82,6 +82,7 @@ class LocalSettings {
   static const _kAppLockEnabled = "ls.app_lock_enabled";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
+  static const _kPetRecognitionEnabled = "ls.pet_recognition_enabled";
   static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
   static const _kDefaultClusteringDistanceOverride =
       "ml_debug.default_clustering_distance";
@@ -285,6 +286,13 @@ class LocalSettings {
       return;
     }
     await _prefs.setDouble(_kDefaultClusteringDistanceOverride, value);
+  }
+
+  bool get petRecognitionEnabled =>
+      _prefs.getBool(_kPetRecognitionEnabled) ?? false;
+
+  Future<void> togglePetRecognition() async {
+    await _prefs.setBool(_kPetRecognitionEnabled, !petRecognitionEnabled);
   }
 
   bool get runMLDuringInteractionOverride =>

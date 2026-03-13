@@ -480,8 +480,9 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         };
 
         // Decrypt public magic metadata to check for edited name
-        let pub_magic_metadata = if file.pub_magic_metadata.is_some() {
-            match decrypt_magic_metadata(file.pub_magic_metadata.as_ref().unwrap(), &file_key) {
+        let pub_magic_metadata = if let Some(pub_magic_metadata) = file.pub_magic_metadata.as_ref()
+        {
+            match decrypt_magic_metadata(pub_magic_metadata, &file_key) {
                 Ok(meta) => meta,
                 Err(e) => {
                     log::debug!(

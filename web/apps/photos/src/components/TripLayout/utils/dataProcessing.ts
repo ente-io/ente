@@ -1,6 +1,10 @@
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName, fileLocation } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import React from "react";
 
 import type { JourneyPoint } from "../types";
@@ -43,7 +47,7 @@ export const processPhotosData = ({
                     name: finalName,
                     country: finalCountry,
                     timestamp: new Date(
-                        file.metadata.creationTime / 1000,
+                        fileCreationTime(file) / 1000,
                     ).toISOString(),
                     image: "",
                     fileId: file.id,
@@ -88,13 +92,14 @@ export const fetchLocationNames = async ({
     const geocodingPromises = photoClusters.map(async (cluster) => {
         if (cluster.length === 0) return null;
 
-        const avgLat =
-            cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-        const avgLng =
-            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
+        const representativePhoto = cluster[0];
+        if (!representativePhoto) return null;
 
         try {
-            const locationInfo = await getLocationName(avgLat, avgLng);
+            const locationInfo = await getLocationName(
+                representativePhoto.lat,
+                representativePhoto.lng,
+            );
             return { cluster, locationInfo };
         } catch {
             // Return null on error, will be filtered out
