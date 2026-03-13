@@ -394,7 +394,7 @@ class LocalSyncService {
       _logger.info(
         "track ${updatedLocalIDs.length}/ $updateCount files due to modification change",
       );
-      if (updatedLocalIDs.isEmpty) {
+      if (updatedLocalIDs.isNotEmpty) {
         await FileUpdationDB.instance.insertMultiple(
           updatedLocalIDs,
           FileUpdationDB.modificationTimeUpdated,
