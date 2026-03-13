@@ -654,8 +654,18 @@ export const ItemList: React.FC<ItemListProps> = ({
     }, [isCollectionsView, isTrashView, visibleSelectableItemIDs]);
 
     return (
-        <Stack sx={{ flex: 1, overflow: "hidden", height: "100%" }}>
-            <Box sx={{ flex: 1, overflowY: "auto" }}>
+        <Stack
+            sx={{ flex: 1, minHeight: 0, overflow: "hidden", height: "100%" }}
+        >
+            <Box
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
+                }}
+            >
                 <Box
                     sx={{
                         background:
@@ -708,7 +718,14 @@ export const ItemList: React.FC<ItemListProps> = ({
                     </Box>
                 </Box>
 
-                <Box sx={{ px: { xs: 2, sm: 3 }, pb: 3 }}>
+                <Box
+                    sx={{
+                        px: { xs: 2, sm: 3 },
+                        pb: isTrashView
+                            ? 3
+                            : "calc(env(safe-area-inset-bottom) + 120px)",
+                    }}
+                >
                     {isHomeView && (
                         <>
                             <SectionHeader

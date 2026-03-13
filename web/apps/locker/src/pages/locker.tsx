@@ -529,7 +529,15 @@ const Page: React.FC = () => {
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
             />
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box
+                sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
+                    display: "flex",
+                    overflow: "hidden",
+                }}
+            >
                 <ItemList
                     collections={collections}
                     masterKey={masterKey}

@@ -271,7 +271,14 @@ export const LockerCollectionShareDrawer: React.FC<
     return (
         <>
             <SidebarDrawer anchor="right" open={open} onClose={onClose}>
-                <Stack sx={{ gap: 2, py: 1 }}>
+                <Stack
+                    sx={{
+                        gap: 2,
+                        py: 1,
+                        height: "calc(100dvh - env(titlebar-area-height, 0px) - 16px)",
+                        minHeight: 0,
+                    }}
+                >
                     <Stack
                         direction="row"
                         sx={{
@@ -296,7 +303,18 @@ export const LockerCollectionShareDrawer: React.FC<
                         </IconButton>
                     </Stack>
 
-                    <Stack sx={{ px: 1.5, gap: 1.5 }}>
+                    <Stack
+                        sx={{
+                            px: 1.5,
+                            gap: 1.5,
+                            flex: 1,
+                            minHeight: 0,
+                            overflowY: "auto",
+                            overscrollBehavior: "contain",
+                            WebkitOverflowScrolling: "touch",
+                            pb: "max(16px, env(safe-area-inset-bottom))",
+                        }}
+                    >
                         {isRefreshingSharees && (
                             <Stack
                                 direction="row"
