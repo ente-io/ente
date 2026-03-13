@@ -5,7 +5,7 @@
     "dependencies": {
         "@fontsource/space-grotesk": "^5.2.10",
         "ente-base": "*",
-        "nayuki-qr-code-generator": "^1.8.0"
+        "qr": "^0.5.5"
     },
     "devDependencies": {
         "ente-build-config": "*"

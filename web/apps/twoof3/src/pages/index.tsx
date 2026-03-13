@@ -16,7 +16,10 @@ import {
     sanitizeFilename,
     shareFiles,
 } from "features/twoof3/utils/export";
-import { createQrSvgData } from "features/twoof3/utils/qrCode";
+import {
+    createQrSvgData,
+    decodeQrFromFile,
+} from "features/twoof3/utils/qrCode";
 import {
     combineShares,
     parseShare,
@@ -64,12 +67,6 @@ interface RecoverSlotDetails {
     fingerprint: string;
     index: 1 | 2 | 3;
     length: number;
-}
-
-interface BrowserWithBarcodeDetector extends Window {
-    BarcodeDetector?: new (options?: { formats?: string[] }) => {
-        detect: (source: ImageBitmap) => Promise<{ rawValue?: string }[]>;
-    };
 }
 
 const todayLabel = () =>
@@ -156,11 +153,13 @@ const QrPreview = ({
         viewBox={`0 0 ${value.viewBoxSize} ${value.viewBoxSize}`}
         role="img"
         aria-label="QR code"
+        shapeRendering="crispEdges"
         style={{
             width: "100%",
             height: "100%",
             display: "block",
             background: "#ffffff",
+            imageRendering: "pixelated",
         }}
     >
         <rect
@@ -273,28 +272,7 @@ const readShareFile = async (file: File) => {
         return (await file.text()).trim();
     }
 
-    const barcodeWindow = window as BrowserWithBarcodeDetector;
-    if (!barcodeWindow.BarcodeDetector) {
-        throw new Error(
-            "This browser cannot read QR images. Paste the code instead.",
-        );
-    }
-
-    const detector = new barcodeWindow.BarcodeDetector({
-        formats: ["qr_code"],
-    });
-    const bitmap = await createImageBitmap(file);
-
-    try {
-        const matches = await detector.detect(bitmap);
-        const rawValue = matches[0]?.rawValue?.trim();
-        if (!rawValue) {
-            throw new Error("Could not find a QR code in that image.");
-        }
-        return rawValue;
-    } finally {
-        bitmap.close();
-    }
+    return decodeQrFromFile(file);
 };
 
 const copyTextToClipboard = async (value: string) => {
@@ -436,7 +414,7 @@ const Page = () => {
                 downloadBlob(file, file.name);
             }
 
-            const recovery = offlineRecoveryFile();
+            const recovery = await offlineRecoveryFile();
             downloadBlob(recovery, recovery.name);
         } catch (error) {
             setActionError(

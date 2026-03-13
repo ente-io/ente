@@ -112,7 +112,12 @@ const drawQr = (
     top: number,
     size: number,
 ) => {
-    const moduleSize = size / qrSize;
+    const moduleSize = Math.max(1, Math.floor(size / qrSize));
+    const drawnSize = moduleSize * qrSize;
+    const offsetX = Math.floor((size - drawnSize) / 2);
+    const offsetY = Math.floor((size - drawnSize) / 2);
+    const startX = left + offsetX;
+    const startY = top + offsetY;
 
     context.fillStyle = "#ffffff";
     context.fillRect(left, top, size, size);
@@ -120,8 +125,8 @@ const drawQr = (
     for (const module of modules) {
         context.fillStyle = "#111111";
         context.fillRect(
-            left + module.x * moduleSize,
-            top + module.y * moduleSize,
+            startX + module.x * moduleSize,
+            startY + module.y * moduleSize,
             moduleSize,
             moduleSize,
         );
@@ -256,7 +261,13 @@ export const canvasToBlob = async (canvas: HTMLCanvasElement) =>
         }, "image/png");
     });
 
-export const createOfflineRecoveryHtml = () => `<!doctype html>
+const escapeScriptTagContent = (value: string) =>
+    value.replace(/<\/script/giu, "<\\/script");
+
+export const createOfflineRecoveryHtml = async () => {
+    const { OFFLINE_QR_DECODER_SOURCE } = await import("./offlineQrSource");
+
+    return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -363,7 +374,7 @@ export const createOfflineRecoveryHtml = () => `<!doctype html>
     <div class="panel">
       <div class="eyebrow">Recover later</div>
       <h1>Recover with any two cards.</h1>
-      <p>This file works offline. Upload two card images if your browser can read QR codes, or paste the two code strings manually.</p>
+      <p>This file works offline. Upload two card images, or paste the two code strings manually.</p>
       <div class="grid">
         <div>
           <input id="file-a" type="file" accept="image/*,text/plain" />
@@ -379,6 +390,7 @@ export const createOfflineRecoveryHtml = () => `<!doctype html>
       <div id="result" class="result" hidden></div>
     </div>
   </main>
+  <script>${escapeScriptTagContent(OFFLINE_QR_DECODER_SOURCE)}</script>
   <script>
     const GF_POLY = 0x11b;
     const VERSION = 1;
@@ -468,27 +480,129 @@ export const createOfflineRecoveryHtml = () => `<!doctype html>
       }
       return new TextDecoder().decode(output);
     };
+    const loadImageFromFile = (file) =>
+      new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          resolve({
+            dispose: () => URL.revokeObjectURL(objectUrl),
+            height: image.naturalHeight,
+            source: image,
+            width: image.naturalWidth,
+          });
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Could not read that image."));
+        };
+        image.src = objectUrl;
+      });
+    const loadDrawableFromFile = async (file) => {
+      if (typeof createImageBitmap === "function") {
+        try {
+          const bitmap = await createImageBitmap(file);
+          return {
+            dispose: () => bitmap.close(),
+            height: bitmap.height,
+            source: bitmap,
+            width: bitmap.width,
+          };
+        } catch {}
+      }
+      return loadImageFromFile(file);
+    };
+    const imageDataFromFile = async (file) => {
+      const drawable = await loadDrawableFromFile(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = drawable.width;
+      canvas.height = drawable.height;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        drawable.dispose();
+        throw new Error("Could not read that image.");
+      }
+      try {
+        context.drawImage(drawable.source, 0, 0, canvas.width, canvas.height);
+        return context.getImageData(0, 0, canvas.width, canvas.height);
+      } finally {
+        drawable.dispose();
+      }
+    };
+    const cropImage = (image, leftRatio, topRatio, widthRatio, heightRatio) => {
+      const left = Math.max(0, Math.floor(image.width * leftRatio));
+      const top = Math.max(0, Math.floor(image.height * topRatio));
+      const width = Math.min(
+        image.width - left,
+        Math.floor(image.width * widthRatio),
+      );
+      const height = Math.min(
+        image.height - top,
+        Math.floor(image.height * heightRatio),
+      );
+      if (width < 64 || height < 64) return null;
+      const data = new Uint8ClampedArray(width * height * 4);
+      for (let row = 0; row < height; row++) {
+        const sourceOffset = ((top + row) * image.width + left) * 4;
+        const targetOffset = row * width * 4;
+        data.set(
+          image.data.slice(sourceOffset, sourceOffset + width * 4),
+          targetOffset,
+        );
+      }
+      return { data, height, width };
+    };
+    const decodeQrImage = (image) => {
+      const decodeQR = globalThis.__twoOf3DecodeQR;
+      if (typeof decodeQR !== "function") {
+        throw new Error("Offline QR decoder could not load.");
+      }
+      const attempts = [
+        { image, options: { cropToSquare: false } },
+        { image },
+      ];
+      const cardLikeCrops = [
+        [0.086, 0.213, 0.829, 0.591],
+        [0.135, 0.238, 0.73, 0.49],
+        [0.16, 0.255, 0.68, 0.52],
+      ];
+      for (const crop of cardLikeCrops) {
+        const cropped = cropImage(image, ...crop);
+        if (!cropped) continue;
+        attempts.push(
+          { image: cropped, options: { cropToSquare: false } },
+          { image: cropped },
+        );
+      }
+      let lastError = null;
+      for (const attempt of attempts) {
+        try {
+          return decodeQR(attempt.image, attempt.options).trim();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("Could not read that QR code.");
+    };
     const fileToText = async (file) => {
-      if (file.type.startsWith("text/")) return file.text();
-      if (!("BarcodeDetector" in window)) throw new Error("QR image upload is not supported in this browser. Paste the code instead.");
-      const detector = new BarcodeDetector({ formats: ["qr_code"] });
-      const bitmap = await createImageBitmap(file);
-      const results = await detector.detect(bitmap);
-      bitmap.close();
-      const value = results[0] && results[0].rawValue;
-      if (!value) throw new Error("Could not read a QR code from that image.");
+      if (file.type.startsWith("text/")) return (await file.text()).trim();
+      const value = decodeQrImage(await imageDataFromFile(file));
+      parseShare(value);
       return value;
     };
     const bindFile = (fileId, textareaId) => {
       const fileInput = document.getElementById(fileId);
       const textarea = document.getElementById(textareaId);
+      const errorNode = document.getElementById("error");
       fileInput.addEventListener("change", async (event) => {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
         try {
           textarea.value = (await fileToText(file)).trim();
+          errorNode.textContent = "";
         } catch (error) {
-          document.getElementById("error").textContent = error.message || String(error);
+          textarea.value = "";
+          errorNode.textContent = error.message || String(error);
         }
       });
     };
@@ -499,11 +613,14 @@ export const createOfflineRecoveryHtml = () => `<!doctype html>
       const resultNode = document.getElementById("result");
       errorNode.textContent = "";
       resultNode.hidden = true;
+      const firstInput = document.getElementById("input-a").value.trim();
+      const secondInput = document.getElementById("input-b").value.trim();
+      if (!firstInput || !secondInput) {
+        errorNode.textContent = "Upload or paste two cards first.";
+        return;
+      }
       try {
-        const secret = combineShares(
-          document.getElementById("input-a").value,
-          document.getElementById("input-b").value
-        );
+        const secret = combineShares(firstInput, secondInput);
         resultNode.textContent = secret;
         resultNode.hidden = false;
       } catch (error) {
@@ -513,9 +630,10 @@ export const createOfflineRecoveryHtml = () => `<!doctype html>
   </script>
 </body>
 </html>`;
+};
 
-export const offlineRecoveryFile = () =>
-    new File([createOfflineRecoveryHtml()], "2of3-recovery.html", {
+export const offlineRecoveryFile = async () =>
+    new File([await createOfflineRecoveryHtml()], "2of3-recovery.html", {
         type: "text/html;charset=utf-8",
     });
 

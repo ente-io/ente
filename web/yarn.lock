@@ -4235,11 +4235,6 @@ natural-compare@^1.4.0:
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-nayuki-qr-code-generator@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/nayuki-qr-code-generator/-/nayuki-qr-code-generator-1.8.0.tgz#dbeebd7b3d2b53119c51a596ad43199ef6798916"
-  integrity sha512-wnpXdJ+zJ+8QzzGJTEnESaRYfNIUHSgX4ykvYuaomqqUbhJdun3v0sK/39BQjw3on/vf7ujPKIg2V07WejjmLw==
-
 next@^15.5.9:
   version "15.5.9"
   resolved "https://registry.npmjs.org/next/-/next-15.5.9.tgz"
@@ -4560,6 +4555,11 @@ qr-code-styling@^1.9.2:
   integrity sha512-RgJaZJ1/RrXJ6N0j7a+pdw3zMBmzZU4VN2dtAZf8ZggCfRB5stEQ3IoDNGaNhYY3nnZKYlYSLl5YkfWN5dPutg==
   dependencies:
     qrcode-generator "^1.4.4"
+
+qr@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/qr/-/qr-0.5.5.tgz#0fbe55a97a8641b04ace23d3a07052f8db7d8827"
+  integrity sha512-iQBvKj7MRKO+co+MY0IZpyLO+ezvttxsmV86WywrgPuAmgBkv0pytyi03wourniSoPgzffeBW6cBgIkpqcvjTg==
 
 qrcode-generator@^1.4.4:
   version "1.5.2"
