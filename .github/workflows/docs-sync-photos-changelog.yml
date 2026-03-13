@@ -72,8 +72,8 @@ jobs:
               if: steps.sync.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'
               uses: peter-evans/create-pull-request@v7
               with:
-                  commit-message: docs(photos): sync changelog for v${{ steps.sync.outputs.version }}
-                  title: docs(photos): sync changelog for v${{ steps.sync.outputs.version }}
+                  commit-message: "docs(photos): sync changelog for v${{ steps.sync.outputs.version }}"
+                  title: "docs(photos): sync changelog for v${{ steps.sync.outputs.version }}"
                   body: |
                       Sync [docs/docs/photos/changelog.md](docs/docs/photos/changelog.md) from the GitHub release `${{ steps.sync.outputs.tag_name }}`.
 
