@@ -1488,48 +1488,59 @@ export const restoreFromTrash = async (
         masterKey,
     );
 
-    // For each file, re-encrypt the file key with the target collection key
-    const files: {
-        id: number;
-        encryptedKey: string;
-        keyDecryptionNonce: string;
-    }[] = [];
-    const skippedFileIDs: number[] = [];
-    for (const fileID of fileIDs) {
-        const fileRecord = getEncryptedFileRecord(fileID);
-        if (!fileRecord) {
-            skippedFileIDs.push(fileID);
-            continue;
+    const buildRestorePayload = async (candidateFileIDs: number[]) => {
+        const files: {
+            id: number;
+            encryptedKey: string;
+            keyDecryptionNonce: string;
+        }[] = [];
+        const skippedFileIDs: number[] = [];
+
+        for (const fileID of candidateFileIDs) {
+            const fileRecord = getEncryptedFileRecord(fileID);
+            if (!fileRecord) {
+                skippedFileIDs.push(fileID);
+                continue;
+            }
+
+            // Decrypt file key using original collection key
+            const origCollectionRecord = encryptedCollections.get(
+                fileRecord.collectionID,
+            );
+            if (!origCollectionRecord) {
+                skippedFileIDs.push(fileID);
+                continue;
+            }
+
+            const origCollectionKey = await decryptCollectionKey(
+                origCollectionRecord,
+                masterKey,
+            );
+            const fileKey = await decryptBox(
+                {
+                    encryptedData: fileRecord.encryptedKey,
+                    nonce: fileRecord.keyDecryptionNonce,
+                },
+                origCollectionKey,
+            );
+
+            // Re-encrypt file key with target collection key
+            const encryptedFileKey = await encryptBox(fileKey, collectionKey);
+            files.push({
+                id: fileID,
+                encryptedKey: encryptedFileKey.encryptedData,
+                keyDecryptionNonce: encryptedFileKey.nonce,
+            });
         }
 
-        // Decrypt file key using original collection key
-        const origCollectionRecord = encryptedCollections.get(
-            fileRecord.collectionID,
-        );
-        if (!origCollectionRecord) {
-            skippedFileIDs.push(fileID);
-            continue;
-        }
+        return { files, skippedFileIDs };
+    };
 
-        const origCollectionKey = await decryptCollectionKey(
-            origCollectionRecord,
-            masterKey,
-        );
-        const fileKey = await decryptBox(
-            {
-                encryptedData: fileRecord.encryptedKey,
-                nonce: fileRecord.keyDecryptionNonce,
-            },
-            origCollectionKey,
-        );
-
-        // Re-encrypt file key with target collection key
-        const encryptedFileKey = await encryptBox(fileKey, collectionKey);
-        files.push({
-            id: fileID,
-            encryptedKey: encryptedFileKey.encryptedData,
-            keyDecryptionNonce: encryptedFileKey.nonce,
-        });
+    let { files, skippedFileIDs } = await buildRestorePayload(fileIDs);
+    if (files.length === 0 && skippedFileIDs.length > 0) {
+        // Recover from stale cache by refetching trash metadata once.
+        await fetchLockerTrash(masterKey);
+        ({ files, skippedFileIDs } = await buildRestorePayload(fileIDs));
     }
 
     if (skippedFileIDs.length > 0) {

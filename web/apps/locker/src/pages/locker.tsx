@@ -177,8 +177,11 @@ const Page: React.FC = () => {
             if (!key) return;
             try {
                 void loadUserDetails();
-                const [data, trash, fileLinks] = await Promise.all([
-                    fetchLockerData(key),
+                // fetchLockerTrash depends on the encrypted caches populated by
+                // fetchLockerData; running both in parallel can race and drop
+                // trash key metadata needed for restore.
+                const data = await fetchLockerData(key);
+                const [trash, fileLinks] = await Promise.all([
                     fetchLockerTrash(key),
                     fetchLockerFileShareLinks(),
                 ]);
@@ -208,8 +211,10 @@ const Page: React.FC = () => {
             void loadUserDetails();
 
             try {
-                const [data, trash, fileLinks] = await Promise.all([
-                    fetchLockerData(mk),
+                // See note in refreshData: fetchLockerTrash must run after
+                // fetchLockerData has populated encrypted caches.
+                const data = await fetchLockerData(mk);
+                const [trash, fileLinks] = await Promise.all([
                     fetchLockerTrash(mk),
                     fetchLockerFileShareLinks(),
                 ]);
