@@ -660,6 +660,11 @@
   resolved "https://registry.npmjs.org/@fontsource/source-serif-4/-/source-serif-4-5.2.9.tgz"
   integrity sha512-er/Pym9emsEVJNf947umJ4kXarXfsiN6CN7kTYinefKRaHLwiquiiHOZvKvxWgkV8JMCf3pV3g0NcsPFpVCH9w==
 
+"@fontsource/space-grotesk@^5.2.10":
+  version "5.2.10"
+  resolved "https://registry.yarnpkg.com/@fontsource/space-grotesk/-/space-grotesk-5.2.10.tgz#36eef6a105be125d1025c206eb48f1a3d37ad512"
+  integrity sha512-XNXEbT74OIITPqw2H6HXwPDp85fy43uxfBwFR5PU+9sLnjuLj12KlhVM9nZVN6q6dlKjkuN8JisW/OBxwxgUew==
+
 "@hugeicons/core-free-icons@^1.0.5", "@hugeicons/core-free-icons@^1.1.0":
   version "1.2.1"
   resolved "https://registry.npmjs.org/@hugeicons/core-free-icons/-/core-free-icons-1.2.1.tgz"
@@ -4550,6 +4555,11 @@ qr-code-styling@^1.9.2:
   integrity sha512-RgJaZJ1/RrXJ6N0j7a+pdw3zMBmzZU4VN2dtAZf8ZggCfRB5stEQ3IoDNGaNhYY3nnZKYlYSLl5YkfWN5dPutg==
   dependencies:
     qrcode-generator "^1.4.4"
+
+qr@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/qr/-/qr-0.5.5.tgz#0fbe55a97a8641b04ace23d3a07052f8db7d8827"
+  integrity sha512-iQBvKj7MRKO+co+MY0IZpyLO+ezvttxsmV86WywrgPuAmgBkv0pytyi03wourniSoPgzffeBW6cBgIkpqcvjTg==
 
 qrcode-generator@^1.4.4:
   version "1.5.2"
