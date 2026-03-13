@@ -113,8 +113,8 @@ class PubMagicMetadata {
       uploaderName: map[uploaderNameKey],
       w: safeParseInt(map[widthKey], widthKey),
       h: safeParseInt(map[heightKey], heightKey),
-      lat: map[latKey],
-      long: map[longKey],
+      lat: safeParseDouble(map[latKey], latKey),
+      long: safeParseDouble(map[longKey], longKey),
       mvi: map[motionVideoIndexKey],
       noThumb: map[noThumbKey],
       mediaType: map[mediaTypeKey],
@@ -128,8 +128,16 @@ class PubMagicMetadata {
   static int? safeParseInt(dynamic value, String key) {
     if (value == null) return null;
     if (value is int) return value;
-    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
     if (value is String) return int.tryParse(value);
+    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
+    return null;
+  }
+
+  static double? safeParseDouble(dynamic value, String key) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
     return null;
   }
 }
