@@ -21,6 +21,11 @@ import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
+import {
+    isEnteProductionEndpoint,
+    LOCKER_FILE_LIMIT_FREE,
+    LOCKER_FILE_LIMIT_PAID,
+} from "services/locker-limits";
 import type { LockerFileShareLinkSummary } from "services/remote";
 import {
     createCollection as createCollectionAPI,
@@ -53,9 +58,6 @@ interface UserDetails {
     isPartOfFamily: boolean;
     lockerFamilyFileCount?: number;
 }
-
-const LOCKER_FILE_LIMIT_FREE = 100;
-const LOCKER_FILE_LIMIT_PAID = 1000;
 
 interface LockerBonus {
     type?: string;
@@ -106,6 +108,7 @@ const Page: React.FC = () => {
     const [initialLoadError, setInitialLoadError] = useState<string | null>(
         null,
     );
+    const [isProductionEndpoint, setIsProductionEndpoint] = useState(true);
     const [userDetails, setUserDetails] = useState<UserDetails | undefined>();
 
     // Sidebar state
@@ -141,11 +144,14 @@ const Page: React.FC = () => {
 
     const loadUserDetails = useCallback(async () => {
         try {
-            const res = await fetch(
-                await apiURL("/users/details/v2", { memoryCount: true }),
-                { headers: await authenticatedRequestHeaders() },
-            );
+            const [res, isProduction] = await Promise.all([
+                fetch(await apiURL("/users/details/v2", { memoryCount: true }), {
+                    headers: await authenticatedRequestHeaders(),
+                }),
+                isEnteProductionEndpoint(),
+            ]);
             ensureOk(res);
+            setIsProductionEndpoint(isProduction);
             const json = (await res.json()) as LockerUserDetailsResponse;
             setUserDetails({
                 email: json.email ?? "",
@@ -588,6 +594,7 @@ const Page: React.FC = () => {
                 isHomeView={isHomeView}
                 isTrashView={isTrashView}
                 isCollectionsView={isCollectionsView}
+                isProductionEndpoint={isProductionEndpoint}
                 userDetails={userDetails}
             />
             <LockerCollectionShareDrawer

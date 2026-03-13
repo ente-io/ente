@@ -14,6 +14,7 @@ import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { effectiveLockerFileLimit } from "services/locker-limits";
 import type { LockerCollection } from "types";
 import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
@@ -32,6 +33,7 @@ interface LockerSidebarProps {
     isHomeView: boolean;
     isTrashView: boolean;
     isCollectionsView: boolean;
+    isProductionEndpoint: boolean;
     userDetails?: {
         email: string;
         usage: number;
@@ -60,6 +62,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     isHomeView,
     isTrashView,
     isCollectionsView,
+    isProductionEndpoint,
     userDetails,
 }) => {
     const { logout } = useBaseContext();
@@ -73,10 +76,10 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     const [isAboutOpen, setIsAboutOpen] = useState(false);
 
     const maxFileCount = userDetails
-        ? process.env.NODE_ENV !== "production" &&
-          userDetails.lockerFileLimit < 1000
-            ? 1000
-            : Math.max(userDetails.lockerFileLimit, 1)
+        ? effectiveLockerFileLimit(
+              userDetails.lockerFileLimit,
+              isProductionEndpoint,
+          )
         : 1;
     const userProgress = userDetails
         ? Math.min(userDetails.fileCount / maxFileCount, 1)
