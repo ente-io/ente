@@ -7,6 +7,11 @@ description: Release notes of recent updates to Ente Auth
 
 A short summary list of changes to the Ente Auth mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v4.4.17 - Feb 2026
+
+- New login/sign up screens
+- Bug fixes and improvements
+
 ## v4.4.15 - Dec 2025
 
 - Icon picker
