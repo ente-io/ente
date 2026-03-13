@@ -1420,13 +1420,15 @@ export const trashFiles = async (
     fileIDs: number[],
     collectionID: number,
 ): Promise<void> => {
-    const res = await fetch(await apiURL("/collections/v3/remove-files"), {
+    const res = await fetch(await apiURL("/files/trash"), {
         method: "POST",
         headers: {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collectionID, fileIDs }),
+        body: JSON.stringify({
+            items: fileIDs.map((fileID) => ({ fileID, collectionID })),
+        }),
     });
     ensureOk(res);
 };
