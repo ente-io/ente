@@ -208,13 +208,8 @@ const peopleListInnerStyle = (
     };
 };
 
-const peopleRowStyle = (
-    style: React.CSSProperties,
-): React.CSSProperties => {
-    return {
-        ...style,
-        top: addTopSpacing(style.top),
-    };
+const peopleRowStyle = (style: React.CSSProperties): React.CSSProperties => {
+    return { ...style, top: addTopSpacing(style.top) };
 };
 
 const PeopleListInner = React.forwardRef<
@@ -690,12 +685,12 @@ const ActionMenuContainer = styled(Box)`
     }
 `;
 
-type AddPersonDialogProps = {
+interface AddPersonDialogProps {
     open: boolean;
     onClose: () => void;
     people: Person[];
     cluster: FaceCluster | undefined;
-};
+}
 
 const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     open,
