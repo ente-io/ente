@@ -117,18 +117,37 @@ let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
  * implicitly use a default "shared" web worker (unless we're already running in
  * the context of a web worker).
  */
-const sharedWorker = () =>
-    (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
+const sharedWorker = async () => {
+    try {
+        return await (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
+    } catch (e) {
+        _comlinkWorker?.terminate();
+        _comlinkWorker = undefined;
+        return await (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
+    }
+};
 
 /**
  * Create a new instance of a comlink worker that wraps a {@link CryptoWorker}
  * web worker.
  */
-export const createComlinkCryptoWorker = () =>
-    new ComlinkWorker<typeof CryptoWorker>(
+export const createComlinkCryptoWorker = () => {
+    let comlinkWorker: ComlinkWorker<typeof CryptoWorker>;
+    const handleWorkerError = () => {
+        if (_comlinkWorker === comlinkWorker) {
+            _comlinkWorker = undefined;
+        }
+        comlinkWorker.terminate();
+    };
+
+    comlinkWorker = new ComlinkWorker<typeof CryptoWorker>(
         "crypto",
         new Worker(new URL("worker.ts", import.meta.url)),
+        handleWorkerError,
     );
+
+    return comlinkWorker;
+};
 
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
