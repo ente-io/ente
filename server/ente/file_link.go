@@ -86,6 +86,7 @@ type FileUrl struct {
 	URL             string `json:"url" binding:"required"`
 	OwnerID         int64  `json:"ownerID" binding:"required"`
 	FileID          int64  `json:"fileID" binding:"required"`
+	IsDisabled      bool   `json:"isDisabled"`
 	ValidTill       int64  `json:"validTill"`
 	DeviceLimit     int    `json:"deviceLimit"`
 	PasswordEnabled bool   `json:"passwordEnabled"`

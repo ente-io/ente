@@ -133,6 +133,7 @@ abstract class SuperIsolate {
           logger.severe("Received isolate message with wrong taskID");
           return;
         }
+        _activeTasks--;
         final logs = receivedMessage['logs'] as List<String>;
         IsolateLogger.handLogStringsToMainLogger(logs);
         final data = receivedMessage['data'];
@@ -147,7 +148,6 @@ abstract class SuperIsolate {
           completer.complete(data);
         }
       });
-      _activeTasks--;
 
       return completer.future;
     });

@@ -58,6 +58,11 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { showMiniDialog } = useBaseContext();
 
     useEffect(() => {
+        if (!state.supported) {
+            setShowDeviceLockOption(false);
+            return;
+        }
+
         isDeviceLockOptionRequestCancelled.current = false;
 
         void (async () => {
@@ -80,7 +85,7 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         return () => {
             isDeviceLockOptionRequestCancelled.current = true;
         };
-    }, []);
+    }, [state.supported]);
 
     useEffect(() => {
         if (!open) {
@@ -135,6 +140,8 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         }, [isSettingDeviceLock, showMiniDialog]);
 
     const handleToggleEnabled = useCallback(() => {
+        if (!state.supported) return;
+
         if (state.enabled) {
             showMiniDialog({
                 title: t("disable"),
@@ -884,14 +891,18 @@ const AutoLockOptionsDrawer: React.FC<AutoLockOptionsDrawerProps> = ({
             if (pendingAutoLockMs !== null || ms === currentValue) return;
 
             setPendingAutoLockMs(ms);
-            try {
-                setAutoLockTime(ms);
-                onClose();
-            } finally {
-                setPendingAutoLockMs((pending) =>
-                    pending === ms ? null : pending,
-                );
-            }
+            void (async () => {
+                try {
+                    await setAutoLockTime(ms);
+                    onClose();
+                } catch (e) {
+                    log.error("Failed to update app lock auto-lock time", e);
+                } finally {
+                    setPendingAutoLockMs((pending) =>
+                        pending === ms ? null : pending,
+                    );
+                }
+            })();
         },
         [pendingAutoLockMs, currentValue, onClose],
     );
