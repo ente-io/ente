@@ -1,0 +1,13 @@
+{
+    "name": "twoof3",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@fontsource/space-grotesk": "^5.2.10",
+        "ente-base": "*",
+        "nayuki-qr-code-generator": "^1.8.0"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}
