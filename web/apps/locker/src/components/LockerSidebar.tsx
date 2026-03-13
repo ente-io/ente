@@ -101,234 +101,254 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     return (
         <>
             <SidebarDrawer open={open} onClose={onClose} anchor="left">
-                <Stack sx={{ height: "100%", minHeight: "100dvh" }}>
-                    {/* Header */}
-                    <Stack
-                        direction="row"
+                <Stack
+                    sx={{
+                        height: "calc(100dvh - env(titlebar-area-height, 0px) - 16px)",
+                        minHeight: 0,
+                    }}
+                >
+                    <Box
                         sx={{
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            px: 1,
-                            pt: 1,
-                            pb: 0.5,
+                            flex: 1,
+                            minHeight: 0,
+                            overflowY: "auto",
+                            overscrollBehavior: "contain",
+                            WebkitOverflowScrolling: "touch",
                         }}
                     >
-                        <Box
-                            component="img"
-                            src="/images/ente-locker-white.svg"
-                            alt="Ente Locker"
-                            sx={{ height: 24, width: "auto", px: 1 }}
-                        />
-                        <IconButton onClick={onClose} color="secondary">
-                            <CloseIcon />
-                        </IconButton>
-                    </Stack>
-
-                    {userDetails?.email && (
-                        <Typography
-                            variant="small"
+                        {/* Header */}
+                        <Stack
+                            direction="row"
                             sx={{
-                                px: 2,
-                                pb: 1,
-                                color: "text.muted",
-                                wordBreak: "break-all",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                px: 1,
+                                pt: 1,
+                                pb: 0.5,
                             }}
                         >
-                            {userDetails.email}
-                        </Typography>
-                    )}
+                            <Box
+                                component="img"
+                                src="/images/ente-locker-white.svg"
+                                alt="Ente Locker"
+                                sx={{ height: 24, width: "auto", px: 1 }}
+                            />
+                            <IconButton onClick={onClose} color="secondary">
+                                <CloseIcon />
+                            </IconButton>
+                        </Stack>
 
-                    {userDetails && (
-                        <Box
-                            sx={{
-                                mx: 1.5,
-                                mb: 1.5,
-                                p: 2,
-                                borderRadius: "20px",
-                                color: "rgba(255,255,255,0.92)",
-                                background:
-                                    "radial-gradient(circle at 12px 12px, rgba(255,255,255,0.03) 0 2px, transparent 2px) 0 0 / 24px 24px, linear-gradient(180deg, #2B2B2B 0%, #151515 100%)",
-                                overflow: "hidden",
-                            }}
-                        >
+                        {userDetails?.email && (
                             <Typography
                                 variant="small"
                                 sx={{
-                                    color: "rgba(255,255,255,0.68)",
-                                    mb: 0.5,
-                                    display: "block",
-                                    fontSize: 16,
-                                    lineHeight: "20px",
+                                    px: 2,
+                                    pb: 1,
+                                    color: "text.muted",
+                                    wordBreak: "break-all",
                                 }}
                             >
-                                {t("itemsStored")}
+                                {userDetails.email}
                             </Typography>
-                            <Typography
-                                sx={{
-                                    mb: 2,
-                                    display: "block",
-                                    fontSize: 32,
-                                    lineHeight: "39px",
-                                    fontWeight: 500,
-                                }}
-                            >
-                                {formattedUsed}
-                                <Box
-                                    component="span"
-                                    sx={{
-                                        color: "rgba(255,255,255,0.68)",
-                                        fontWeight: 500,
-                                    }}
-                                >
-                                    {` ${t("of_")} `}
-                                </Box>
-                                {formattedMax}
-                            </Typography>
+                        )}
+
+                        {userDetails && (
                             <Box
                                 sx={{
-                                    position: "relative",
-                                    height: 8,
-                                    borderRadius: 999,
-                                    bgcolor: "rgba(193, 193, 193, 0.11)",
+                                    mx: 1.5,
+                                    mb: 1.5,
+                                    p: 2,
+                                    borderRadius: "20px",
+                                    color: "rgba(255,255,255,0.92)",
+                                    background:
+                                        "radial-gradient(circle at 12px 12px, rgba(255,255,255,0.03) 0 2px, transparent 2px) 0 0 / 24px 24px, linear-gradient(180deg, #2B2B2B 0%, #151515 100%)",
                                     overflow: "hidden",
                                 }}
                             >
-                                {showFamilyBreakup && (
-                                    <Box
-                                        sx={{
-                                            position: "absolute",
-                                            inset: 0,
-                                            width: `${familyProgress * 100}%`,
-                                            borderRadius: 999,
-                                            bgcolor: "rgba(255,255,255,0.92)",
-                                        }}
-                                    />
-                                )}
-                                <Box
+                                <Typography
+                                    variant="small"
                                     sx={{
-                                        position: "absolute",
-                                        inset: 0,
-                                        width: `${userProgress * 100}%`,
-                                        borderRadius: 999,
-                                        bgcolor: "#1071FF",
-                                    }}
-                                />
-                            </Box>
-                            {showFamilyBreakup ? (
-                                <Stack
-                                    direction="row"
-                                    sx={{
-                                        gap: 2,
-                                        mt: 1.5,
-                                        alignItems: "center",
-                                        color: "rgba(255,255,255,0.92)",
+                                        color: "rgba(255,255,255,0.68)",
+                                        mb: 0.5,
+                                        display: "block",
+                                        fontSize: 16,
+                                        lineHeight: "20px",
                                     }}
                                 >
-                                    <Stack
-                                        direction="row"
-                                        sx={{ gap: 0.75, alignItems: "center" }}
+                                    {t("itemsStored")}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        mb: 2,
+                                        display: "block",
+                                        fontSize: 32,
+                                        lineHeight: "39px",
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    {formattedUsed}
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            color: "rgba(255,255,255,0.68)",
+                                            fontWeight: 500,
+                                        }}
                                     >
+                                        {` ${t("of_")} `}
+                                    </Box>
+                                    {formattedMax}
+                                </Typography>
+                                <Box
+                                    sx={{
+                                        position: "relative",
+                                        height: 8,
+                                        borderRadius: 999,
+                                        bgcolor: "rgba(193, 193, 193, 0.11)",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    {showFamilyBreakup && (
                                         <Box
                                             sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: "50%",
-                                                bgcolor: "#1071FF",
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="mini"
-                                            sx={{
-                                                color: "inherit",
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            {t("usageYou")}
-                                        </Typography>
-                                    </Stack>
-                                    <Stack
-                                        direction="row"
-                                        sx={{ gap: 0.75, alignItems: "center" }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: "50%",
+                                                position: "absolute",
+                                                inset: 0,
+                                                width: `${familyProgress * 100}%`,
+                                                borderRadius: 999,
                                                 bgcolor:
                                                     "rgba(255,255,255,0.92)",
                                             }}
                                         />
-                                        <Typography
-                                            variant="mini"
+                                    )}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            inset: 0,
+                                            width: `${userProgress * 100}%`,
+                                            borderRadius: 999,
+                                            bgcolor: "#1071FF",
+                                        }}
+                                    />
+                                </Box>
+                                {showFamilyBreakup ? (
+                                    <Stack
+                                        direction="row"
+                                        sx={{
+                                            gap: 2,
+                                            mt: 1.5,
+                                            alignItems: "center",
+                                            color: "rgba(255,255,255,0.92)",
+                                        }}
+                                    >
+                                        <Stack
+                                            direction="row"
                                             sx={{
-                                                color: "inherit",
-                                                fontWeight: "bold",
+                                                gap: 0.75,
+                                                alignItems: "center",
                                             }}
                                         >
-                                            {t("usageFamily")}
-                                        </Typography>
+                                            <Box
+                                                sx={{
+                                                    width: 8,
+                                                    height: 8,
+                                                    borderRadius: "50%",
+                                                    bgcolor: "#1071FF",
+                                                }}
+                                            />
+                                            <Typography
+                                                variant="mini"
+                                                sx={{
+                                                    color: "inherit",
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
+                                                {t("usageYou")}
+                                            </Typography>
+                                        </Stack>
+                                        <Stack
+                                            direction="row"
+                                            sx={{
+                                                gap: 0.75,
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: 8,
+                                                    height: 8,
+                                                    borderRadius: "50%",
+                                                    bgcolor:
+                                                        "rgba(255,255,255,0.92)",
+                                                }}
+                                            />
+                                            <Typography
+                                                variant="mini"
+                                                sx={{
+                                                    color: "inherit",
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
+                                                {t("usageFamily")}
+                                            </Typography>
+                                        </Stack>
                                     </Stack>
-                                </Stack>
-                            ) : (
-                                <Box sx={{ height: 4 }} />
-                            )}
+                                ) : (
+                                    <Box sx={{ height: 4 }} />
+                                )}
+                            </Box>
+                        )}
+
+                        <Box sx={{ px: 0.5, mt: 0.5 }}>
+                            <RowButtonGroup>
+                                <RowButton
+                                    startIcon={<HomeOutlinedIcon />}
+                                    label={t("home")}
+                                    caption={String(totalItems)}
+                                    fontWeight={isHomeView ? "bold" : "medium"}
+                                    onClick={onSelectHome}
+                                />
+                                <RowButtonDivider />
+                                <RowButton
+                                    startIcon={<FolderOutlinedIcon />}
+                                    label={t("menuCollections")}
+                                    caption={String(displayCollections.length)}
+                                    fontWeight={
+                                        isCollectionsView ? "bold" : "medium"
+                                    }
+                                    onClick={onSelectCollections}
+                                />
+                                <RowButtonDivider />
+                                <RowButton
+                                    startIcon={<DeleteOutlineIcon />}
+                                    label={t("menuTrash")}
+                                    caption={String(trashItemCount)}
+                                    fontWeight={isTrashView ? "bold" : "medium"}
+                                    onClick={onSelectTrash}
+                                />
+                            </RowButtonGroup>
                         </Box>
-                    )}
 
-                    <Box sx={{ px: 0.5, mt: 0.5 }}>
-                        <RowButtonGroup>
-                            <RowButton
-                                startIcon={<HomeOutlinedIcon />}
-                                label={t("home")}
-                                caption={String(totalItems)}
-                                fontWeight={isHomeView ? "bold" : "medium"}
-                                onClick={onSelectHome}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                startIcon={<FolderOutlinedIcon />}
-                                label={t("menuCollections")}
-                                caption={String(displayCollections.length)}
-                                fontWeight={
-                                    isCollectionsView ? "bold" : "medium"
-                                }
-                                onClick={onSelectCollections}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                startIcon={<DeleteOutlineIcon />}
-                                label={t("menuTrash")}
-                                caption={String(trashItemCount)}
-                                fontWeight={isTrashView ? "bold" : "medium"}
-                                onClick={onSelectTrash}
-                            />
-                        </RowButtonGroup>
+                        <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
+                            <RowButtonGroup>
+                                <RowButton
+                                    label={t("account")}
+                                    endIcon={<ChevronRightIcon />}
+                                    onClick={() => setIsAccountOpen(true)}
+                                />
+                                <RowButtonDivider />
+                                <RowButton
+                                    label={t("help_and_support")}
+                                    endIcon={<ChevronRightIcon />}
+                                    onClick={() => setIsSupportOpen(true)}
+                                />
+                                <RowButtonDivider />
+                                <RowButton
+                                    label={t("about")}
+                                    endIcon={<ChevronRightIcon />}
+                                    onClick={() => setIsAboutOpen(true)}
+                                />
+                            </RowButtonGroup>
+                        </Box>
                     </Box>
-
-                    <Box sx={{ px: 0.5, mt: 2 }}>
-                        <RowButtonGroup>
-                            <RowButton
-                                label={t("account")}
-                                endIcon={<ChevronRightIcon />}
-                                onClick={() => setIsAccountOpen(true)}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                label={t("help_and_support")}
-                                endIcon={<ChevronRightIcon />}
-                                onClick={() => setIsSupportOpen(true)}
-                            />
-                            <RowButtonDivider />
-                            <RowButton
-                                label={t("about")}
-                                endIcon={<ChevronRightIcon />}
-                                onClick={() => setIsAboutOpen(true)}
-                            />
-                        </RowButtonGroup>
-                    </Box>
-
-                    <Box sx={{ flex: 1 }} />
 
                     <Box sx={{ px: 0.5, pb: 1 }}>
                         <RowButton
@@ -340,7 +360,14 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         />
                     </Box>
 
-                    <LockerSocialFooter />
+                    <Box
+                        sx={{
+                            pb: "max(8px, env(safe-area-inset-bottom))",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <LockerSocialFooter />
+                    </Box>
                 </Stack>
             </SidebarDrawer>
 
