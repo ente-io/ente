@@ -214,7 +214,8 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                                 inset: 0,
                                                 width: `${familyProgress * 100}%`,
                                                 borderRadius: 999,
-                                                bgcolor: "rgba(255,255,255,0.92)",
+                                                bgcolor:
+                                                    "rgba(255,255,255,0.92)",
                                             }}
                                         />
                                     )}
