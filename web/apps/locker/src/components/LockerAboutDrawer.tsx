@@ -1,4 +1,8 @@
-import { Github01Icon, LicenseIcon, Shield01Icon } from "@hugeicons/core-free-icons";
+import {
+    Github01Icon,
+    LicenseIcon,
+    Shield01Icon,
+} from "@hugeicons/core-free-icons";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
 import { Stack, useTheme } from "@mui/material";
 import { t } from "i18next";

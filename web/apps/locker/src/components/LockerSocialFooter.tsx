@@ -27,7 +27,12 @@ const socialLinks = [
         url: "https://github.com/ente-io",
         buttonSize: 36,
     },
-    { icon: XIcon, label: "X", url: "https://twitter.com/enteio", buttonSize: 36 },
+    {
+        icon: XIcon,
+        label: "X",
+        url: "https://twitter.com/enteio",
+        buttonSize: 36,
+    },
     {
         icon: MastodonBrandIcon,
         label: "Mastodon",

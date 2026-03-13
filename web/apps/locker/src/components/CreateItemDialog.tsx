@@ -63,10 +63,7 @@ const CREATABLE_TYPES: {
         type: "physicalRecord",
         labelKey: "thing",
         descriptionKey: "physicalRecordsDescription",
-        icon: lockerItemIcon("physicalRecord", {
-            size: 28,
-            strokeWidth: 1.9,
-        }),
+        icon: lockerItemIcon("physicalRecord", { size: 28, strokeWidth: 1.9 }),
         bgColor: lockerItemIconConfig("physicalRecord").backgroundColor,
     },
     {
@@ -279,10 +276,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             </DialogTitle>
 
             <DialogContent
-                sx={{
-                    px: { xs: 4, sm: 5 },
-                    py: { xs: 2.5, sm: 3 },
-                }}
+                sx={{ px: { xs: 4, sm: 5 }, py: { xs: 2.5, sm: 3 } }}
             >
                 {!isEditMode && !selectedOption && (
                     <Stack sx={{ gap: 2, pt: 1 }}>

@@ -17,33 +17,40 @@ export const LockerSidebarDrawer: React.FC<DrawerProps> = ({
     slotProps,
     children,
     ...rest
-}) => (
-    <Drawer
-        {...rest}
-        slotProps={{
-            ...(slotProps ?? {}),
-            paper: {
-                ...(slotProps?.paper ?? {}),
-                sx: [
-                    {
-                        maxWidth: "375px",
-                        width: "100%",
-                        scrollbarWidth: "thin",
-                        backgroundColor: "background.default",
-                        "&&": { padding: 0 },
-                    },
-                    (theme) => theme.applyStyles("dark", {
-                        backgroundColor: theme.vars.palette.background.paper,
-                    }),
-                    (slotProps?.paper as { sx?: unknown } | undefined)?.sx as never,
-                ],
-            },
-        }}
-    >
-        {isDesktop && <LockerTitlebarBackdrop />}
-        <Box sx={{ p: 1 }}>{children}</Box>
-    </Drawer>
-);
+}) => {
+    const paperSlotProps =
+        typeof slotProps?.paper === "function" ? undefined : slotProps?.paper;
+
+    return (
+        <Drawer
+            {...rest}
+            slotProps={{
+                ...(slotProps ?? {}),
+                paper: {
+                    ...(paperSlotProps ?? {}),
+                    sx: [
+                        {
+                            maxWidth: "375px",
+                            width: "100%",
+                            scrollbarWidth: "thin",
+                            backgroundColor: "background.default",
+                            "&&": { padding: 0 },
+                        },
+                        (theme) =>
+                            theme.applyStyles("dark", {
+                                backgroundColor:
+                                    theme.vars.palette.background.paper,
+                            }),
+                        paperSlotProps?.sx as never,
+                    ],
+                },
+            }}
+        >
+            {isDesktop && <LockerTitlebarBackdrop />}
+            <Box sx={{ p: 1 }}>{children}</Box>
+        </Drawer>
+    );
+};
 
 const LockerTitlebarBackdrop = styled("div")(({ theme }) => ({
     position: "sticky",
@@ -146,10 +153,7 @@ export const LockerTitledNestedSidebarDrawer: React.FC<
         {...{ open, onClose, onRootClose, anchor, slotProps }}
     >
         <Stack sx={{ gap: "4px", py: "12px" }}>
-            <LockerSidebarTitlebar
-                {...{ onClose, onRootClose }}
-                {...rest}
-            />
+            <LockerSidebarTitlebar {...{ onClose, onRootClose }} {...rest} />
             {children}
         </Stack>
     </LockerNestedSidebarDrawer>

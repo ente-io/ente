@@ -15,12 +15,12 @@ import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { LockerSessionsDrawer } from "./LockerSessionsDrawer";
 import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
 import {
     LockerTitledNestedSidebarDrawer,
     type LockerNestedSidebarDrawerVisibilityProps,
 } from "./LockerSidebarShell";
-import { LockerSessionsDrawer } from "./LockerSessionsDrawer";
 
 export const LockerAccountDrawer: React.FC<
     LockerNestedSidebarDrawerVisibilityProps
@@ -117,13 +117,7 @@ export const LockerAccountDrawer: React.FC<
                         />
                     </Stack>
 
-                    <Box
-                        sx={{
-                            borderTop: 1,
-                            borderColor: "divider",
-                            mx: 1,
-                        }}
-                    />
+                    <Box sx={{ borderTop: 1, borderColor: "divider", mx: 1 }} />
 
                     <Stack sx={{ gap: 1 }}>
                         <LockerSidebarCardButton

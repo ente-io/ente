@@ -38,7 +38,6 @@ import {
     deleteLockerFileShareLink,
     downloadLockerFile,
     getOrCreateLockerFileShareLink,
-    type LockerFileShareLinkSummary,
 } from "services/remote";
 import type { LockerCollection, LockerItem } from "types";
 import {
@@ -61,7 +60,6 @@ interface ItemListProps {
     isTrashView: boolean;
     isCollectionsView: boolean;
     selectedCollectionID: number | null;
-    fileShareLinksByFileID: Map<number, LockerFileShareLinkSummary>;
     onSelectCollection: (id: number | null) => void;
     onEditItem?: (item: LockerItem) => void;
     onDeleteItem?: (item: LockerItem) => void;
@@ -84,7 +82,6 @@ export const ItemList: React.FC<ItemListProps> = ({
     isTrashView,
     isCollectionsView,
     selectedCollectionID,
-    fileShareLinksByFileID,
     onSelectCollection,
     onEditItem,
     onDeleteItem,
@@ -133,13 +130,6 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [isCreatingFileLink, setIsCreatingFileLink] = useState(false);
     const [isDeletingFileLink, setIsDeletingFileLink] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-    const [knownFileShareLinksByID, setKnownFileShareLinksByID] = useState(
-        fileShareLinksByFileID,
-    );
-
-    React.useEffect(() => {
-        setKnownFileShareLinksByID(fileShareLinksByFileID);
-    }, [fileShareLinksByFileID]);
 
     const displayCollections = useMemo(
         () => visibleLockerCollections(collections),
@@ -411,17 +401,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                     masterKey,
                 );
                 setActiveFileLink(link);
-                setKnownFileShareLinksByID((current) => {
-                    const next = new Map(current);
-                    next.set(item.id, {
-                        linkID: link.linkID,
-                        fileID: item.id,
-                        validTill: link.validTill,
-                        enableDownload: link.enableDownload ?? true,
-                        passwordEnabled: link.passwordEnabled ?? false,
-                    });
-                    return next;
-                });
             } catch (error) {
                 log.error(
                     `Failed to create share link for file ${item.id}`,
@@ -491,11 +470,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                 activeFileLinkItem.id,
                 activeFileLink?.linkID,
             );
-            setKnownFileShareLinksByID((current) => {
-                const next = new Map(current);
-                next.delete(activeFileLinkItem.id);
-                return next;
-            });
             setFeedbackMessage(t("shareLinkDeletedSuccessfully"));
             setActiveFileLinkItem(null);
             setActiveFileLink(null);
@@ -661,9 +635,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     minHeight: 48,
                                     borderRadius: "24px",
                                     backgroundColor: "background.paper",
-                                    "& .MuiOutlinedInput-input": {
-                                        py: 1.5,
-                                    },
+                                    "& .MuiOutlinedInput-input": { py: 1.5 },
                                     "& fieldset": {
                                         borderColor: "transparent",
                                     },
@@ -1680,9 +1652,7 @@ const CollectionChipFilters: React.FC<{
                 gap: 1,
                 pb: 0.5,
                 scrollbarWidth: "none",
-                "&::-webkit-scrollbar": {
-                    display: "none",
-                },
+                "&::-webkit-scrollbar": { display: "none" },
             }}
         >
             {collections.map((collection) => {
@@ -1717,9 +1687,7 @@ const CollectionChipFilters: React.FC<{
                             ...theme.applyStyles("light", {
                                 backgroundColor: "#FFFFFF",
                                 border: "1px solid rgba(17, 24, 39, 0.06)",
-                                "&:hover": {
-                                    backgroundColor: "#FFFFFF",
-                                },
+                                "&:hover": { backgroundColor: "#FFFFFF" },
                             }),
                         })}
                     />

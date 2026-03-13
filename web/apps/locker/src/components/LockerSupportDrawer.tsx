@@ -95,7 +95,10 @@ export const LockerSupportDrawer: React.FC<
                     icon={HelpCircleIcon}
                     label={
                         <Tooltip title="support@ente.io">
-                            <Typography variant="small" sx={{ fontWeight: 500 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ fontWeight: 500 }}
+                            >
                                 {t("support")}
                             </Typography>
                         </Tooltip>
@@ -104,12 +107,7 @@ export const LockerSupportDrawer: React.FC<
                     onClick={handleSupport}
                 />
                 <Box
-                    sx={{
-                        borderTop: 1,
-                        borderColor: "divider",
-                        mx: 1,
-                        my: 1,
-                    }}
+                    sx={{ borderTop: 1, borderColor: "divider", mx: 1, my: 1 }}
                 />
                 <LockerSidebarCardButton
                     icon={InformationCircleIcon}

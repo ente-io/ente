@@ -14,11 +14,11 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import type { ComponentProps } from "react";
 import type { LockerItemType } from "types";
 
-type LockerIconConfig = {
+interface LockerIconConfig {
     icon: ComponentProps<typeof HugeiconsIcon>["icon"];
     color: string;
     backgroundColor: string;
-};
+}
 
 const itemTypeIconConfigs: Record<LockerItemType, LockerIconConfig> = {
     note: {
@@ -41,11 +41,7 @@ const itemTypeIconConfigs: Record<LockerItemType, LockerIconConfig> = {
         color: "rgba(244, 67, 54, 1)",
         backgroundColor: "rgba(244, 67, 54, 0.06)",
     },
-    file: {
-        icon: File02Icon,
-        color: "#757575",
-        backgroundColor: "#FAFAFA",
-    },
+    file: { icon: File02Icon, color: "#757575", backgroundColor: "#FAFAFA" },
 };
 
 const fileIconConfigs: Record<string, LockerIconConfig> = {
@@ -114,11 +110,7 @@ export const lockerItemIconConfig = (
 
 export const lockerItemIcon = (
     type: LockerItemType,
-    options?: {
-        fileName?: string;
-        size?: number;
-        strokeWidth?: number;
-    },
+    options?: { fileName?: string; size?: number; strokeWidth?: number },
 ) => {
     const { icon, color } = lockerItemIconConfig(type, options?.fileName);
     return (

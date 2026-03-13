@@ -9,13 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-    Box,
-    IconButton,
-    Stack,
-    Typography,
-    useTheme,
-} from "@mui/material";
+import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
@@ -115,11 +109,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
 
     return (
         <>
-            <LockerSidebarDrawer
-                open={open}
-                onClose={onClose}
-                anchor="left"
-            >
+            <LockerSidebarDrawer open={open} onClose={onClose} anchor="left">
                 <Stack
                     sx={{
                         height: "calc(100dvh - env(titlebar-area-height, 0px) - 16px)",

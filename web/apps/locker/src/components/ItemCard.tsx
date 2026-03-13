@@ -18,13 +18,16 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    lockerItemIcon,
+    lockerItemIconConfig,
+} from "components/lockerItemIcons";
+import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
-import { lockerItemIcon, lockerItemIconConfig } from "components/lockerItemIcons";
 import { downloadLockerFile } from "services/remote";
 import type { GenericFileData, LockerItem } from "types";
 import { getItemTitle, hasDownloadableObject } from "types";
@@ -212,9 +215,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                     },
                     ...theme.applyStyles("light", {
                         backgroundColor: "#FFFFFF",
-                        "&:hover": {
-                            backgroundColor: "#FFFFFF",
-                        },
+                        "&:hover": { backgroundColor: "#FFFFFF" },
                     }),
                 })}
             >
@@ -260,7 +261,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                             width: 40,
                             height: 40,
                             m: "6px",
-                            borderRadius: item.type === "file" ? "12px" : "10px",
+                            borderRadius:
+                                item.type === "file" ? "12px" : "10px",
                             backgroundColor: iconBgColor(item),
                         }}
                     >
@@ -278,8 +280,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                                 width: 18,
                                 height: 18,
                                 borderRadius: "50%",
-                                backgroundColor:
-                                    theme.vars.palette.fill.faint,
+                                backgroundColor: theme.vars.palette.fill.faint,
                                 p: "1px",
                                 zIndex: 2,
                             })}
