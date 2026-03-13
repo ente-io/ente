@@ -600,69 +600,77 @@ const PersonActionMenu: React.FC<PersonActionMenuProps> = ({
     onPinPerson,
     onAddName,
     onIgnorePerson,
-}) => (
-    <ActionMenuContainer>
-        <OverflowMenu
-            ariaID={`person-modal-options-${person.id}`}
-            triggerButtonIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
-            triggerButtonSxProps={{
-                color: "white",
-                minWidth: 24,
-                minHeight: 24,
-                padding: "2px",
-                opacity: 0.9,
-                "&:hover": { backgroundColor: "transparent", opacity: 1 },
-            }}
-            menuPaperSxProps={{ minWidth: 176, width: 176 }}
-        >
-            {person.type === "cgroup" ? (
-                <>
-                    <OverflowMenuOption
-                        compact
-                        startIcon={<EditIcon />}
-                        onClick={() => onRenamePerson(person)}
-                    >
-                        {t("rename")}
-                    </OverflowMenuOption>
-                    {person.isPinned ? (
-                        <OverflowMenuOption
-                            compact
-                            startIcon={<PushPinOutlinedIcon />}
-                            onClick={() => void onPinPerson(person)}
-                        >
-                            {t("unpin_person")}
-                        </OverflowMenuOption>
-                    ) : (
-                        <OverflowMenuOption
-                            compact
-                            startIcon={<PushPinIcon />}
-                            onClick={() => void onPinPerson(person)}
-                        >
-                            {t("pin_person")}
-                        </OverflowMenuOption>
-                    )}
-                </>
-            ) : (
-                <>
-                    <OverflowMenuOption
-                        compact
-                        startIcon={<AddIcon />}
-                        onClick={() => onAddName(person)}
-                    >
-                        {t("add_a_name")}
-                    </OverflowMenuOption>
-                    <OverflowMenuOption
-                        compact
-                        startIcon={<HideImageOutlinedIcon />}
-                        onClick={() => onIgnorePerson(person)}
-                    >
-                        {t("ignore")}
-                    </OverflowMenuOption>
-                </>
-            )}
-        </OverflowMenu>
-    </ActionMenuContainer>
-);
+}) => {
+    const menuOptions =
+        person.type === "cgroup"
+            ? [
+                  <OverflowMenuOption
+                      key="rename"
+                      compact
+                      startIcon={<EditIcon />}
+                      onClick={() => onRenamePerson(person)}
+                  >
+                      {t("rename")}
+                  </OverflowMenuOption>,
+                  person.isPinned ? (
+                      <OverflowMenuOption
+                          key="unpin"
+                          compact
+                          startIcon={<PushPinOutlinedIcon />}
+                          onClick={() => void onPinPerson(person)}
+                      >
+                          {t("unpin_person")}
+                      </OverflowMenuOption>
+                  ) : (
+                      <OverflowMenuOption
+                          key="pin"
+                          compact
+                          startIcon={<PushPinIcon />}
+                          onClick={() => void onPinPerson(person)}
+                      >
+                          {t("pin_person")}
+                      </OverflowMenuOption>
+                  ),
+              ]
+            : [
+                  <OverflowMenuOption
+                      key="add-name"
+                      compact
+                      startIcon={<AddIcon />}
+                      onClick={() => onAddName(person)}
+                  >
+                      {t("add_a_name")}
+                  </OverflowMenuOption>,
+                  <OverflowMenuOption
+                      key="ignore"
+                      compact
+                      startIcon={<HideImageOutlinedIcon />}
+                      onClick={() => onIgnorePerson(person)}
+                  >
+                      {t("ignore")}
+                  </OverflowMenuOption>,
+              ];
+
+    return (
+        <ActionMenuContainer>
+            <OverflowMenu
+                ariaID={`person-modal-options-${person.id}`}
+                triggerButtonIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
+                triggerButtonSxProps={{
+                    color: "white",
+                    minWidth: 24,
+                    minHeight: 24,
+                    padding: "2px",
+                    opacity: 0.9,
+                    "&:hover": { backgroundColor: "transparent", opacity: 1 },
+                }}
+                menuPaperSxProps={{ minWidth: 176, width: 176 }}
+            >
+                {menuOptions}
+            </OverflowMenu>
+        </ActionMenuContainer>
+    );
+};
 
 const ActionMenuContainer = styled(Box)`
     position: absolute;
