@@ -627,6 +627,7 @@ const Page: React.FC = () => {
                         width: 72,
                         height: 72,
                         minHeight: 72,
+                        color: "#FFFFFF",
                         background:
                             "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
                         boxShadow: "0 16px 40px rgba(0, 66, 173, 0.32)",
