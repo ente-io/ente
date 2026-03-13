@@ -5,9 +5,7 @@ type LockerMutationAction = "createItem" | "uploadFile";
 
 const museumErrorCode = async (error: HTTPError) => {
     try {
-        const payload = (await error.res.clone().json()) as {
-            code?: unknown;
-        };
+        const payload = (await error.res.clone().json()) as { code?: unknown };
         return typeof payload.code === "string" ? payload.code : undefined;
     } catch {
         return undefined;

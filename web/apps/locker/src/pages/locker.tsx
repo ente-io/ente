@@ -145,9 +145,10 @@ const Page: React.FC = () => {
     const loadUserDetails = useCallback(async () => {
         try {
             const [res, isProduction] = await Promise.all([
-                fetch(await apiURL("/users/details/v2", { memoryCount: true }), {
-                    headers: await authenticatedRequestHeaders(),
-                }),
+                fetch(
+                    await apiURL("/users/details/v2", { memoryCount: true }),
+                    { headers: await authenticatedRequestHeaders() },
+                ),
                 isEnteProductionEndpoint(),
             ]);
             ensureOk(res);
@@ -162,8 +163,7 @@ const Page: React.FC = () => {
                     ? LOCKER_FILE_LIMIT_PAID
                     : LOCKER_FILE_LIMIT_FREE,
                 isPartOfFamily: (json.familyData?.members?.length ?? 0) > 0,
-                lockerFamilyFileCount:
-                    json.lockerFamilyUsage?.familyFileCount,
+                lockerFamilyFileCount: json.lockerFamilyUsage?.familyFileCount,
             });
         } catch (e) {
             log.error("Failed to fetch user details", e);

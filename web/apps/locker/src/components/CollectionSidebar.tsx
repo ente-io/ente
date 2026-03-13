@@ -73,17 +73,12 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
           )
         : 100;
     const usageProgress = userDetails
-        ? Math.min(
-              (userDetails.fileCount / usageLimit) * 100,
-              100,
-          )
+        ? Math.min((userDetails.fileCount / usageLimit) * 100, 100)
         : 0;
     const formattedUsage = new Intl.NumberFormat().format(
         userDetails?.fileCount ?? 0,
     );
-    const formattedUsageLimit = new Intl.NumberFormat().format(
-        usageLimit,
-    );
+    const formattedUsageLimit = new Intl.NumberFormat().format(usageLimit);
 
     return (
         <Box
