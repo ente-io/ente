@@ -17,6 +17,17 @@ let decodeQrPromise: Promise<
     (typeof import("qr/decode.js"))["default"]
 > | null = null;
 
+const loadDecodeQr = () => {
+    decodeQrPromise ??= import("qr/decode.js")
+        .then(({ default: decodeQR }) => decodeQR)
+        .catch((error: unknown) => {
+            decodeQrPromise = null;
+            throw error;
+        });
+
+    return decodeQrPromise;
+};
+
 interface DecodableImage {
     data: Uint8ClampedArray | number[];
     height: number;
@@ -157,11 +168,7 @@ const cropImage = (
 };
 
 const decodeQrImage = async (image: DecodableImage) => {
-    decodeQrPromise ??= import("qr/decode.js").then(({ default: decodeQR }) => {
-        return decodeQR;
-    });
-
-    const decodeQR = await decodeQrPromise;
+    const decodeQR = await loadDecodeQr();
     const attempts: {
         image: DecodableImage;
         options?: { cropToSquare?: boolean };
