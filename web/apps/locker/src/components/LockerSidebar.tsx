@@ -4,7 +4,14 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    Stack,
+    Typography,
+    useTheme,
+} from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     RowButton,
     RowButtonDivider,
@@ -66,6 +73,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     userDetails,
 }) => {
     const { logout } = useBaseContext();
+    const theme = useTheme();
     const displayCollections = visibleLockerCollections(collections);
     const totalItems = collections.reduce(
         (sum, collection) => sum + collection.items.length,
@@ -134,11 +142,17 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                             }}
                         >
                             <Box
-                                component="img"
-                                src="/images/ente-locker-white.svg"
-                                alt="Ente Locker"
-                                sx={{ height: 24, width: "auto", px: 1 }}
-                            />
+                                sx={{
+                                    px: 1,
+                                    lineHeight: 0,
+                                    color: "#111111",
+                                    ...theme.applyStyles("dark", {
+                                        color: "rgba(255,255,255,0.92)",
+                                    }),
+                                }}
+                            >
+                                <EnteLogo height={18} />
+                            </Box>
                             <IconButton onClick={onClose} color="secondary">
                                 <CloseIcon />
                             </IconButton>

@@ -50,9 +50,13 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
 
             <Box
                 component="img"
-                src="/images/ente-locker-white.svg"
-                alt="Ente Locker"
-                sx={{ height: 26, width: "auto" }}
+                src="/images/locker.svg"
+                alt="Locker"
+                sx={{
+                    height: 20,
+                    width: "auto",
+                    filter: "brightness(0) invert(1)",
+                }}
             ></Box>
 
             <Box sx={{ width: 40 }} />
