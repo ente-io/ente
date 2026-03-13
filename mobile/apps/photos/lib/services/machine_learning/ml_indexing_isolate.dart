@@ -191,7 +191,7 @@ class MLIndexingIsolate extends SuperIsolate {
         ClipImageEncoder.instance.downloadModel(forceRefresh),
       ];
 
-      if (flagService.internalUser &&
+      if (flagService.petEnabled &&
           localSettings.petRecognitionEnabled &&
           _shouldUseRustMl) {
         modelsToDownload.addAll([
@@ -381,7 +381,7 @@ class MLIndexingIsolate extends SuperIsolate {
     String petBodyEmbeddingDogPath = "";
     String petBodyEmbeddingCatPath = "";
 
-    if (flagService.internalUser && localSettings.petRecognitionEnabled) {
+    if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
       petFaceDetectionPath =
           (await PetFaceDetectionService.instance.getModelNameAndPath()).$2;
       petFaceEmbeddingDogPath =
