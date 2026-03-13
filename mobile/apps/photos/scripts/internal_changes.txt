@@ -3,7 +3,7 @@ Latest changes:
 - Ashil: Fix album sorting state not persisting
 
 Still behind internal flag:
-- Amrithesh: (I) Pet recognition [Indexing]
+- Amrithesh: (I) ML/Pet recognition [Indexing]
 - Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust
 - Laurens: (I) Generate and compress face thumbnails in rust
