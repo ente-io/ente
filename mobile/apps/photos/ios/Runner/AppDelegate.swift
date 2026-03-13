@@ -6,6 +6,11 @@ import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  private static let backgroundAppRefreshIdentifier =
+    "io.ente.frame.iOSBackgroundAppRefresh"
+  private static let backgroundProcessingIdentifier =
+    "io.ente.frame.iOSBackgroundProcessing"
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -30,11 +35,13 @@ import workmanager_apple
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
-    var freqInMinutes = 30 * 60
-    // Register a periodic task in iOS 13+
+    let refreshFrequencyInSeconds = 15 * 60
+    // Keep native task registration in AppDelegate; Dart owns actual scheduling.
     WorkmanagerPlugin.registerPeriodicTask(
-      withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
-      frequency: NSNumber(value: freqInMinutes))
+      withIdentifier: Self.backgroundAppRefreshIdentifier,
+      frequency: NSNumber(value: refreshFrequencyInSeconds))
+    WorkmanagerPlugin.registerBGProcessingTask(
+      withIdentifier: Self.backgroundProcessingIdentifier)
 
     // Retrieve the link from parameters
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {

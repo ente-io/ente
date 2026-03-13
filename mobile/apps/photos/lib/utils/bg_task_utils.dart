@@ -10,46 +10,50 @@ import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
 
+const _kIOSBackgroundRefreshCadence = Duration(minutes: 15);
+const _kIOSBackgroundProcessingCadence = Duration(hours: 1);
+
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   workmanager.Workmanager().executeTask((taskName, inputData) async {
     final TimeLogger tlog = TimeLogger();
-    Future<bool> result = Future.error("Task didn't run");
     final prefs = await SharedPreferences.getInstance();
-
-    await runWithLogs(
-      () async {
-        try {
-          BgTaskUtils.$.info('Task started $tlog');
-          await runBackgroundTask(taskName, tlog).timeout(
-            Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
-            onTimeout: () async {
-              BgTaskUtils.$.warning(
-                "TLE, committing seppuku for taskID: $taskName",
-              );
-              await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-            },
-          );
-          BgTaskUtils.$.info('Task run successful $tlog');
-          result = Future.value(true);
-        } catch (e) {
-          BgTaskUtils.$.warning('Task error: $e');
+    final shouldRescheduleProcessingTask =
+        Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
+    try {
+      BgTaskUtils.$.info('Task started $tlog');
+      final result = await runBackgroundTask(taskName, tlog).timeout(
+        Platform.isIOS ? kBGTaskTimeout : kAndroidBackgroundTaskTimeout,
+        onTimeout: () async {
+          BgTaskUtils.$.warning("Task timed out: $taskName");
           await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-          result = Future.error(e.toString());
-        }
-      },
-      prefix: "[bg]",
-    ).onError((_, __) {
-      result = Future.error("Didn't finished correctly!");
-      return;
-    });
-
-    return result;
+          return true;
+        },
+      );
+      BgTaskUtils.$.info('Task run completed ($result) $tlog');
+      return result;
+    } catch (e) {
+      BgTaskUtils.$.warning('Task error: $e');
+      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+      return true;
+    } finally {
+      if (shouldRescheduleProcessingTask) {
+        await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
+          source: "callbackDispatcher:$taskName",
+        );
+      }
+    }
   });
 }
 
 class BgTaskUtils {
   static final $ = Logger("BgTaskUtils");
+  static const iOSBackgroundAppRefresh =
+      "io.ente.frame.iOSBackgroundAppRefresh";
+  static const iOSBackgroundProcessingTask =
+      "io.ente.frame.iOSBackgroundProcessing";
+  static const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
+  static const androidPushRetryTask = "io.ente.photos.androidPushRetryTask";
 
   static Future<void> releaseResourcesForKill(
     String taskId,
@@ -73,45 +77,121 @@ class BgTaskUtils {
       }
     }
     $.warning("Configuring Work Manager for background tasks");
-    const iOSBackgroundAppRefresh = "io.ente.frame.iOSBackgroundAppRefresh";
-    const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
-    final backgroundTaskIdentifier =
-        Platform.isIOS ? iOSBackgroundAppRefresh : androidPeriodicTask;
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
       );
-      await workmanager.Workmanager().registerPeriodicTask(
-        backgroundTaskIdentifier,
-        backgroundTaskIdentifier,
-        frequency: Platform.isIOS
-            ? const Duration(minutes: 30)
-            : const Duration(minutes: 15),
-        initialDelay: kDebugMode ? Duration.zero : const Duration(minutes: 10),
+      if (Platform.isIOS) {
+        await requeueIOSBackgroundTasks(source: "configureWorkmanager");
+      } else {
+        await workmanager.Workmanager().registerPeriodicTask(
+          androidPeriodicTask,
+          androidPeriodicTask,
+          frequency: const Duration(minutes: 15),
+          initialDelay:
+              kDebugMode ? Duration.zero : const Duration(minutes: 10),
+          constraints: workmanager.Constraints(
+            networkType: workmanager.NetworkType.connected,
+            requiresCharging: false,
+            requiresStorageNotLow: false,
+            requiresDeviceIdle: false,
+          ),
+          existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
+          backoffPolicy: workmanager.BackoffPolicy.linear,
+          backoffPolicyDelay: const Duration(minutes: 15),
+        );
+      }
+      $.info("WorkManager configured");
+
+      // Check if task is scheduled (Android only)
+      if (Platform.isAndroid) {
+        final isScheduled = await workmanager.Workmanager()
+            .isScheduledByUniqueName(androidPeriodicTask);
+        if (!isScheduled) {
+          $.warning(
+            "Background task is not scheduled: $androidPeriodicTask",
+          );
+        }
+      }
+    } catch (e) {
+      $.warning("Failed to configure WorkManager: $e");
+    }
+  }
+
+  static Future<void> requeueIOSBackgroundTasks({
+    required String source,
+  }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
+    $.info("Requeueing iOS background tasks from $source");
+
+    await workmanager.Workmanager().registerPeriodicTask(
+      iOSBackgroundAppRefresh,
+      iOSBackgroundAppRefresh,
+      frequency: _kIOSBackgroundRefreshCadence,
+      initialDelay: _kIOSBackgroundRefreshCadence,
+      constraints: workmanager.Constraints(
+        networkType: workmanager.NetworkType.connected,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+      ),
+      existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
+      backoffPolicy: workmanager.BackoffPolicy.linear,
+      backoffPolicyDelay: _kIOSBackgroundRefreshCadence,
+    );
+    await scheduleIOSBackgroundProcessingTask(source: source);
+  }
+
+  static Future<void> scheduleIOSBackgroundProcessingTask({
+    required String source,
+  }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
+    $.info("Scheduling iOS background processing task from $source");
+
+    await workmanager.Workmanager().registerProcessingTask(
+      iOSBackgroundProcessingTask,
+      iOSBackgroundProcessingTask,
+      initialDelay: _kIOSBackgroundProcessingCadence,
+      constraints: workmanager.Constraints(
+        networkType: workmanager.NetworkType.connected,
+        requiresCharging: false,
+      ),
+    );
+  }
+
+  /// Schedules an Android-only one-off retry for push-triggered background
+  /// sync. This exists to rescue the Android keep-alive path when a remote
+  /// push wake happens but the foreground-service-backed run cannot be kept
+  /// alive long enough to finish.
+  static Future<void> schedulePushRetry() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
+    try {
+      await workmanager.Workmanager().registerOneOffTask(
+        androidPushRetryTask,
+        androidPushRetryTask,
+        initialDelay: const Duration(minutes: 2),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,
           requiresStorageNotLow: false,
           requiresDeviceIdle: false,
         ),
-        existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
+        existingWorkPolicy: workmanager.ExistingWorkPolicy.update,
         backoffPolicy: workmanager.BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
-      $.info("WorkManager configured");
-
-      // Check if task is scheduled (Android only)
-      if (Platform.isAndroid) {
-        final isScheduled = await workmanager.Workmanager()
-            .isScheduledByUniqueName(backgroundTaskIdentifier);
-        if (!isScheduled) {
-          $.warning(
-            "Background task is not scheduled: $backgroundTaskIdentifier",
-          );
-        }
-      }
+      $.info("Scheduled push retry task");
     } catch (e) {
-      $.warning("Failed to configure WorkManager: $e");
+      $.warning("Failed to schedule push retry task: $e");
     }
   }
 }

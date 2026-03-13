@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
+import 'package:android_push_keep_alive/android_push_keep_alive.dart';
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,11 +26,13 @@ import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
+import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import 'package:photos/services/background_run_helper.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -49,6 +53,7 @@ import "package:photos/services/wake_lock_service.dart";
 import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
+import 'package:photos/utils/bg_task_utils.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
@@ -64,14 +69,22 @@ const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
-const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+const kAndroidBackgroundTaskTimeout = Duration(hours: 1);
+const kFGTaskDeathTimeout = Duration(seconds: 5);
 bool isProcessBg = true;
 bool _stopHearBeat = false;
+final _androidPushKeepAlive = AndroidPushKeepAlive();
+final _backgroundRunHelper = BackgroundRunHelper(
+  logger: Logger("BackgroundRunHelper"),
+  isRunningInForeground: _isRunningInForeground,
+  isAnotherBackgroundRunAlive: _isAnotherBackgroundRunAlive,
+);
 
 void main() async {
   debugRepaintRainbowEnabled = false;
   await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
@@ -129,103 +142,90 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   }
 }
 
-Future<void> runBackgroundTask(
-  String taskId,
-  TimeLogger tlog, {
-  String mode = 'normal',
-}) async {
-  // Check if foreground is recently active to avoid conflicts
-  final isRunningInFG = await _isRunningInForeground();
-
-  // If FG was active in last 30 seconds, skip BG work
-  if (isRunningInFG) {
-    _logger.info(
-      "[BG TASK] Foreground recently active, skipping background work",
-    );
-    return;
-  }
-
-  _logger.info(
-    "[BG TASK] No recent foreground activity, proceeding with background work",
+Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
+  final trigger = Platform.isIOS
+      ? BackgroundTrigger.bgAppRefresh
+      : BackgroundTrigger.workmanager;
+  bool result = true;
+  await runWithLogs(
+    () async {
+      try {
+        result = await _runBackgroundPass(
+          trigger: trigger,
+          taskId: taskId,
+          budget: Platform.isIOS
+              ? kBGTaskTimeout
+              : kAndroidBackgroundTaskTimeout,
+          allowAndroidForegroundPromotion: false,
+        );
+      } catch (e, s) {
+        result = false;
+        _logger.severe("Unhandled background task failure for $taskId", e, s);
+      }
+    },
+    prefix: _backgroundLogPrefix(trigger),
   );
-
-  // Mark BG as active
-
-  await _runMinimally(taskId, tlog);
+  return result;
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  try {
-    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await _scheduleHeartBeat(prefs, true);
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await _scheduleHeartBeat(prefs, true);
 
-    _logger.info("(for debugging) Configuration init $tlog");
-    await Configuration.instance.init();
-    _logger.info("(for debugging) Configuration done $tlog");
+  _logger.fine("Configuration init $tlog");
+  await Configuration.instance.init();
+  _logger.fine("Configuration done $tlog");
 
-    // App LifeCycle
-    AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance
-        .onAppInBackground('init via: WorkManager $tlog');
+  AppLifecycleService.instance.init(prefs);
+  AppLifecycleService.instance.onAppInBackground(
+    'init via: backgroundRunner $tlog',
+  );
 
-    // Crypto rel.
-    await Computer.shared().turnOn(workersCount: 4);
-    CryptoUtil.init();
+  await Computer.shared().turnOn(workersCount: 4);
+  CryptoUtil.init();
 
-    // Init Network Utils
-    await NetworkClient.instance.init(packageInfo);
+  await NetworkClient.instance.init(packageInfo);
+  ServiceLocator.instance.init(
+    prefs,
+    NetworkClient.instance.enteDio,
+    NetworkClient.instance.getDio(),
+    packageInfo,
+  );
 
-    // Global Services
-    ServiceLocator.instance.init(
-      prefs,
-      NetworkClient.instance.enteDio,
-      NetworkClient.instance.getDio(),
-      packageInfo,
-    );
+  _logger.fine("CollectionsService init $tlog");
+  await CollectionsService.instance.init(prefs);
+  _logger.fine("CollectionsService init done $tlog");
 
-    _logger.info("(for debugging) CollectionsService init $tlog");
-    await CollectionsService.instance.init(prefs);
-    _logger.info("(for debugging) CollectionsService init done $tlog");
+  await FileUploader.instance.init(prefs, true);
+  LocalFileUpdateService.instance.init(prefs);
+  await LocalSyncService.instance.init(prefs);
+  RemoteSyncService.instance.init(prefs);
+  await SyncService.instance.init(prefs);
 
-    // Upload & Sync Related
-    await FileUploader.instance.init(prefs, true);
-    LocalFileUpdateService.instance.init(prefs);
-    await LocalSyncService.instance.init(prefs);
-    RemoteSyncService.instance.init(prefs);
-    await SyncService.instance.init(prefs);
+  await UserService.instance.init();
+  NotificationService.instance.init(prefs);
+  SocialNotificationCoordinator.instance.init(prefs);
+  await NotificationService.instance.initializeForBackground();
 
-    // Misc Services
-    await UserService.instance.init();
-    NotificationService.instance.init(prefs);
-    SocialNotificationCoordinator.instance.init(prefs);
-    await NotificationService.instance.initializeForBackground();
+  _logger.info("[BG TASK] update notification");
+  updateService.showUpdateNotification().ignore();
 
-    // Begin Execution
-    // only runs for android
-    _logger.info("[BG TASK] update notification");
-    updateService.showUpdateNotification().ignore();
-    _logger.info("[BG TASK] sync starting");
-    await _sync('bgTaskActiveProcess');
-    _logger.info("[BG TASK] sync completed");
+  _logger.info("[BG TASK] sync starting");
+  await _sync('bgTaskActiveProcess');
+  _logger.info("[BG TASK] sync completed");
 
-    _logger.info("[BG TASK] locale fetch");
-    final locale = await getLocale();
-    await initializeDateFormatting(locale?.languageCode ?? "en");
-    // only runs for android
-    _logger.info("[BG TASK] home widget sync");
-    await _homeWidgetSync(true);
+  _logger.info("[BG TASK] locale fetch");
+  final locale = await getLocale();
+  await initializeDateFormatting(locale?.languageCode ?? "en");
 
-    // await MLService.instance.init();
-    // await PersonService.init(entityService, MLDataDB.instance, prefs);
-    // await MLService.instance.runAllML(force: true);
-    _logger.info("[BG TASK] smart albums sync");
-    await smartAlbumsService.syncSmartAlbums();
+  _logger.info("[BG TASK] home widget sync");
+  await _homeWidgetSync(true);
 
-    _logger.info("[BG TASK] $taskId completed");
-  } catch (e, s) {
-    _logger.severe("[BG TASK] $taskId error", e, s);
-  }
+  _logger.info("[BG TASK] smart albums sync");
+  await smartAlbumsService.syncSmartAlbums();
+
+  _logger.info("[BG TASK] $taskId completed");
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
@@ -321,12 +321,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       await _scheduleFGHomeWidgetSync();
     }
 
-    if (Platform.isIOS) {
-      PushService.instance.init().then((_) {
-        FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler,
-        );
-      }).ignore();
+    if (!isBackground) {
+      PushService.instance.init().ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
@@ -448,47 +444,47 @@ Future<void> _scheduleFGSync(String caller) async {
 Future<bool> _isRunningInForeground() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
-  final currentTime = DateTime.now().microsecondsSinceEpoch;
-  final lastFGHeartBeatTime = DateTime.fromMicrosecondsSinceEpoch(
-    prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0,
+  return _hasRecentHeartbeat(
+    prefs,
+    kLastFGTaskHeartBeatTime,
+    kFGTaskDeathTimeout,
   );
-  return lastFGHeartBeatTime.microsecondsSinceEpoch >
-      (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  final bool isRunningInFG = await _isRunningInForeground(); // hb
-  final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (isRunningInFG) {
-    _logger.info(
-      "Background push received when app is alive and runningInFG: $isRunningInFG inForeground: $isInForeground",
-    );
-    if (PushService.shouldSync(message)) {
-      // FG is active, let it handle the sync
-      _logger.info("Foreground is active, skipping background sync from push");
-      // Could optionally trigger a sync event that FG can handle
-    }
-  } else {
-    // App is dead or FG is not active
-    runWithLogs(
-      () async {
-        _logger.info("Background push received, no active foreground");
+Future<bool> _isAnotherBackgroundRunAlive() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  return _hasRecentHeartbeat(
+    prefs,
+    kLastBGTaskHeartBeatTime,
+    (Platform.isIOS ? kBGTaskTimeout : kAndroidBackgroundTaskTimeout) +
+        BackgroundRunHelper.activeLeaseGrace,
+  );
+}
 
-        // Mark BG as active before starting
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(
-          kLastBGTaskHeartBeatTime,
-          DateTime.now().microsecondsSinceEpoch,
-        );
-
-        await _init(true, via: 'firebasePush');
-        if (PushService.shouldSync(message)) {
-          await _sync('firebaseBgSyncNoActiveProcess');
-        }
-      },
-      prefix: "[fbg]",
-    ).ignore();
+bool _hasRecentHeartbeat(SharedPreferences prefs, String key, Duration maxAge) {
+  final lastHeartbeat = prefs.getInt(key) ?? 0;
+  if (lastHeartbeat == 0) {
+    return false;
   }
+
+  final currentTime = DateTime.now().microsecondsSinceEpoch;
+  return lastHeartbeat > currentTime - maxAge.inMicroseconds;
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await runWithLogs(
+    () => _runBackgroundPass(
+      trigger: BackgroundTrigger.remotePush,
+      taskId: "remote_push_sync",
+      budget: kBGPushTimeout,
+      pushPayload: message.data.map((key, value) => MapEntry(key, "$value")),
+      allowAndroidForegroundPromotion: true,
+    ),
+    prefix: _backgroundLogPrefix(BackgroundTrigger.remotePush),
+  );
 }
 
 Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
@@ -499,4 +495,93 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
+}
+
+Future<void> _releaseBackgroundResources(
+  String taskId,
+  SharedPreferences prefs,
+) async {
+  await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
+    ProcessType.background.toString(),
+    DateTime.now().microsecondsSinceEpoch,
+  );
+  await prefs.remove(kLastBGTaskHeartBeatTime);
+}
+
+String _backgroundLogPrefix(BackgroundTrigger trigger) {
+  return switch (trigger) {
+    BackgroundTrigger.remotePush => "[fbg]",
+    BackgroundTrigger.bgAppRefresh => "[bg-refresh]",
+    BackgroundTrigger.workmanager => "[bg]",
+  };
+}
+
+Future<bool> _startAndroidPushKeepAlive() async {
+  try {
+    if (!await _androidPushKeepAlive.isEnabled()) {
+      return false;
+    }
+
+    return _androidPushKeepAlive.start();
+  } catch (e, s) {
+    _logger.warning("Failed to start Android push keep-alive", e, s);
+    return false;
+  }
+}
+
+Future<bool> _runBackgroundPass({
+  required BackgroundTrigger trigger,
+  required String taskId,
+  required Duration budget,
+  Map<String, String>? pushPayload,
+  required bool allowAndroidForegroundPromotion,
+}) async {
+  final attempt = await _backgroundRunHelper.prepareRun(
+    trigger: trigger,
+    taskId: taskId,
+    budget: budget,
+    pushPayload: pushPayload,
+  );
+
+  if (!attempt.shouldRun) {
+    _logger.info("Skipping $taskId because ${attempt.skipReason!.name}");
+    return true;
+  }
+
+  bool success = true;
+  bool keepAliveStarted = false;
+  bool keepAliveAttempted = false;
+
+  try {
+    if (Platform.isAndroid &&
+        trigger == BackgroundTrigger.remotePush &&
+        allowAndroidForegroundPromotion) {
+      keepAliveAttempted = true;
+      keepAliveStarted = await _startAndroidPushKeepAlive();
+      if (!keepAliveStarted) {
+        _logger.warning("Push keep-alive promotion failed for $taskId");
+      }
+    }
+
+    await _runMinimally(taskId, TimeLogger());
+  } catch (e, s) {
+    success = false;
+    _logger.severe("Background run failed for $taskId", e, s);
+    await _releaseBackgroundResources(taskId, attempt.prefs);
+  } finally {
+    if (keepAliveStarted) {
+      await _androidPushKeepAlive.stop();
+    }
+    await _backgroundRunHelper.finishRun(attempt);
+
+    if (Platform.isAndroid && trigger == BackgroundTrigger.remotePush) {
+      if (!keepAliveStarted && keepAliveAttempted) {
+        await BgTaskUtils.schedulePushRetry();
+      } else if (!success) {
+        await BgTaskUtils.schedulePushRetry();
+      }
+    }
+  }
+
+  return success;
 }
