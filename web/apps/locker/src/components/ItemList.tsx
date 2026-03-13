@@ -591,6 +591,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     overflowY: "auto",
                     overscrollBehavior: "contain",
                     WebkitOverflowScrolling: "touch",
+                    backgroundColor: "#08090A",
                     ...theme.applyStyles("light", {
                         backgroundColor: "#F3F4F6",
                     }),
@@ -602,6 +603,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                         pb: isTrashView
                             ? 3
                             : "calc(env(safe-area-inset-bottom) + 120px)",
+                        backgroundColor: "#08090A",
                         ...theme.applyStyles("light", {
                             backgroundColor: "#F3F4F6",
                         }),
@@ -771,16 +773,22 @@ export const ItemList: React.FC<ItemListProps> = ({
                             />
 
                             {displayCollections.length > 0 ? (
-                                <CollectionGrid
-                                    collections={displayCollections}
-                                    onSelectCollection={onSelectCollection}
-                                    onShareCollection={onShareCollection}
-                                    onRequestRenameCollection={(collection) => {
-                                        setRenameCollectionID(collection.id);
-                                        setRenameValue(collection.name);
-                                    }}
-                                    onDeleteCollection={onDeleteCollection}
-                                />
+                                <Box sx={{ mt: 1.25 }}>
+                                    <CollectionGrid
+                                        collections={displayCollections}
+                                        onSelectCollection={onSelectCollection}
+                                        onShareCollection={onShareCollection}
+                                        onRequestRenameCollection={(
+                                            collection,
+                                        ) => {
+                                            setRenameCollectionID(
+                                                collection.id,
+                                            );
+                                            setRenameValue(collection.name);
+                                        }}
+                                        onDeleteCollection={onDeleteCollection}
+                                    />
+                                </Box>
                             ) : (
                                 <EmptyState
                                     title={t("noCollections")}
@@ -1076,7 +1084,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("restoreToCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 1, py: 1 }}>
+                    <Stack sx={{ gap: 1, pt: 0.25, pb: 1 }}>
                         {displayCollections.length > 0 ? (
                             displayCollections.map((collection) => (
                                 <Chip
@@ -1125,7 +1133,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("renameCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 2, py: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
                             value={renameValue}
                             onChange={(event) =>
@@ -1163,7 +1171,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("createNewCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 2, py: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
                             value={createCollectionName}
                             onChange={(event) => {
@@ -1536,12 +1544,12 @@ const CollectionGrid: React.FC<{
     const currentUserID = ensureLocalUser().id;
 
     return (
-        <Stack
+        <Box
             sx={{
                 width: "100%",
-                maxWidth: { xs: "100%", sm: "440px" },
+                maxWidth: contentMaxWidth,
                 mx: "auto",
-                gap: 1.25,
+                gap: 1.5,
             }}
         >
             {collections.map((collection) => (
@@ -1569,7 +1577,7 @@ const CollectionGrid: React.FC<{
                     }
                 />
             ))}
-        </Stack>
+        </Box>
     );
 };
 
@@ -1667,7 +1675,7 @@ const CollectionCard: React.FC<{
         <ButtonBase
             component="div"
             onClick={onClick}
-            sx={{
+            sx={(theme) => ({
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -1677,10 +1685,10 @@ const CollectionCard: React.FC<{
                 py: 1.5,
                 minHeight: 84,
                 borderRadius: "16px",
-                background:
+                backgroundColor:
                     collection.items.length > 0
-                        ? "linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.055) 100%)"
-                        : "linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.022) 100%)",
+                        ? "rgba(255, 255, 255, 0.06)"
+                        : "rgba(255, 255, 255, 0.03)",
                 border: 1,
                 borderStyle: "solid",
                 borderColor:
@@ -1689,11 +1697,26 @@ const CollectionCard: React.FC<{
                         : "rgba(255, 255, 255, 0.08)",
                 transition: "background-color 0.15s, border-color 0.15s",
                 "&:hover": {
-                    background:
-                        "linear-gradient(180deg, rgba(255, 255, 255, 0.090) 0%, rgba(255, 255, 255, 0.065) 100%)",
+                    backgroundColor:
+                        collection.items.length > 0
+                            ? "rgba(255, 255, 255, 0.08)"
+                            : "rgba(255, 255, 255, 0.05)",
                     borderColor: "rgba(255, 255, 255, 0.13)",
                 },
-            }}
+                ...theme.applyStyles("light", {
+                    backgroundColor:
+                        collection.items.length > 0 ? "#FFFFFF" : "#F8FAFC",
+                    borderColor:
+                        collection.items.length > 0
+                            ? "rgba(17, 24, 39, 0.08)"
+                            : "rgba(17, 24, 39, 0.06)",
+                    "&:hover": {
+                        backgroundColor:
+                            collection.items.length > 0 ? "#FFFFFF" : "#F1F5F9",
+                        borderColor: "rgba(17, 24, 39, 0.12)",
+                    },
+                }),
+            })}
         >
             <Stack
                 direction="row"

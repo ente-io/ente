@@ -966,6 +966,16 @@ const getComponents = (appName: AppName): Components => {
         (muiIconButtonStyleOverrides.root as
             | Record<string, unknown>
             | undefined) ?? {};
+    const muiInputBaseStyleOverrides = (components.MuiInputBase
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiInputBaseFormControlStyleOverrides =
+        (muiInputBaseStyleOverrides.formControl as
+            | Record<string, unknown>
+            | undefined) ?? {};
+    const muiDialogTitleStyleOverrides = (components.MuiDialogTitle
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiDialogContentStyleOverrides = (components.MuiDialogContent
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
 
     if (appName === "locker") {
         return {
@@ -992,6 +1002,72 @@ const getComponents = (appName: AppName): Components => {
                     },
                 } as NonNullable<
                     NonNullable<Components["MuiIconButton"]>["styleOverrides"]
+                >,
+            },
+            MuiInputBase: {
+                ...components.MuiInputBase,
+                styleOverrides: {
+                    ...muiInputBaseStyleOverrides,
+                    formControl: {
+                        ...muiInputBaseFormControlStyleOverrides,
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiInputBase"]>["styleOverrides"]
+                >,
+            },
+            MuiOutlinedInput: {
+                ...components.MuiOutlinedInput,
+                styleOverrides: {
+                    ...components.MuiOutlinedInput?.styleOverrides,
+                    root: {
+                        ...(components.MuiOutlinedInput?.styleOverrides
+                            ?.root as Record<string, unknown> | undefined),
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiOutlinedInput"]>["styleOverrides"]
+                >,
+            },
+            MuiFilledInput: {
+                ...components.MuiFilledInput,
+                styleOverrides: {
+                    ...components.MuiFilledInput?.styleOverrides,
+                    root: {
+                        ...(components.MuiFilledInput?.styleOverrides
+                            ?.root as Record<string, unknown> | undefined),
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiFilledInput"]>["styleOverrides"]
+                >,
+            },
+            MuiDialogTitle: {
+                ...components.MuiDialogTitle,
+                styleOverrides: {
+                    ...muiDialogTitleStyleOverrides,
+                    root: {
+                        ...(muiDialogTitleStyleOverrides.root as
+                            | Record<string, unknown>
+                            | undefined),
+                        paddingBottom: "12px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiDialogTitle"]>["styleOverrides"]
+                >,
+            },
+            MuiDialogContent: {
+                ...components.MuiDialogContent,
+                styleOverrides: {
+                    ...muiDialogContentStyleOverrides,
+                    root: {
+                        ...(muiDialogContentStyleOverrides.root as
+                            | Record<string, unknown>
+                            | undefined),
+                        paddingTop: "8px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiDialogContent"]>["styleOverrides"]
                 >,
             },
         };

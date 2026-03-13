@@ -280,7 +280,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 sx={{ px: { xs: 4, sm: 5 }, py: { xs: 2.5, sm: 3 } }}
             >
                 {!isEditMode && !selectedOption && (
-                    <Stack sx={{ gap: 2, pt: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.5 }}>
                         <Typography variant="body" sx={{ color: "text.muted" }}>
                             {t("informationDescription")}
                         </Typography>
@@ -302,7 +302,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )}
 
                 {isFileMode && (
-                    <Stack sx={{ gap: 2.5, pt: 1 }}>
+                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -454,7 +454,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )}
 
                 {selectedType && (
-                    <Stack sx={{ gap: 2.5, pt: 1 }}>
+                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <ItemForm
                             type={selectedType}
                             data={formData}
