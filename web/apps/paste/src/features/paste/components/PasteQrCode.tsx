@@ -74,8 +74,9 @@ export const PasteQrCode = ({
             if (!container) return;
 
             if (!qrCodeRef.current) {
-                const qrCodeStylingModule =
-                    (await import("qr-code-styling")) as unknown;
+                const qrCodeStylingModule = (await import(
+                    "qr-code-styling"
+                )) as unknown;
                 if (cancelled || !qrContainerRef.current) return;
                 if (!isQRCodeStylingModule(qrCodeStylingModule)) return;
 
