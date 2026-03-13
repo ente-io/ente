@@ -259,5 +259,9 @@ export const combineShares = (firstInput: string, secondInput: string) => {
         throw new Error("These shares did not reconstruct a valid secret.");
     }
 
-    return new TextDecoder().decode(output);
+    try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(output);
+    } catch {
+        throw new Error("These shares did not reconstruct readable text.");
+    }
 };

@@ -19,6 +19,34 @@ export const MAX_PRINTED_SHARE_LENGTH =
     PRINTED_SHARE_CHARS_PER_LINE * PRINTED_SHARE_LINE_COUNT;
 export const MAX_SECRET_BYTES_FOR_PRINTED_CARD =
     maxSecretBytesForEncodedShareLength(MAX_PRINTED_SHARE_LENGTH);
+const graphemeSegmenter =
+    typeof Intl !== "undefined" && "Segmenter" in Intl
+        ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+        : null;
+
+const splitGraphemes = (value: string) =>
+    graphemeSegmenter
+        ? Array.from(graphemeSegmenter.segment(value), ({ segment }) => segment)
+        : Array.from(value);
+
+const overflowBoundary = (
+    context: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number,
+) => {
+    let measured = "";
+    let offset = 0;
+
+    for (const grapheme of splitGraphemes(text)) {
+        if (context.measureText(measured + grapheme).width > maxWidth) {
+            return offset;
+        }
+        measured += grapheme;
+        offset += grapheme.length;
+    }
+
+    return -1;
+};
 
 const wrapCanvasTextToWidth = (
     context: CanvasRenderingContext2D,
@@ -39,13 +67,7 @@ const wrapCanvasTextToWidth = (
             break;
         }
 
-        let overflowIndex = -1;
-        for (let index = 0; index < remaining.length; index += 1) {
-            if (context.measureText(remaining.slice(0, index + 1)).width > maxWidth) {
-                overflowIndex = index;
-                break;
-            }
-        }
+        const overflowIndex = overflowBoundary(context, remaining, maxWidth);
 
         if (overflowIndex <= 0) return null;
 
@@ -293,6 +315,64 @@ export const canvasToBlob = async (canvas: HTMLCanvasElement) =>
         }, "image/png");
     });
 
+const blobToDataUrl = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () =>
+            reject(new Error("Could not prepare this card for printing."));
+        reader.onload = () => {
+            if (typeof reader.result !== "string") {
+                reject(new Error("Could not prepare this card for printing."));
+                return;
+            }
+            resolve(reader.result);
+        };
+        reader.readAsDataURL(blob);
+    });
+
+const setPrintDocumentState = (
+    doc: Document,
+    title: string,
+    bodyHtml: string,
+    bodyClass = "",
+) => {
+    doc.title = title;
+    doc.documentElement.innerHTML = `
+        <head>
+            <title>${title}</title>
+            <style>
+                html,body{margin:0;padding:0;background:#fff;min-height:100%}
+                body{display:grid;place-items:center;min-height:100vh;font-family:ui-sans-serif,system-ui,sans-serif;color:#111}
+                body.loading{background:#f7f7f2}
+                .status{padding:24px 28px;border:1.5px solid rgba(17,17,17,0.16);border-radius:20px;font-size:16px;font-weight:600}
+                img{display:block;max-width:100vw;max-height:100vh}
+                @page{margin:0}
+                @media print{
+                    html,body{height:auto!important}
+                    body{display:block}
+                    img{width:100%;height:auto}
+                }
+            </style>
+        </head>
+        <body class="${bodyClass}">${bodyHtml}</body>
+    `;
+};
+
+export const preparePrintWindow = (title: string) => {
+    const popup = window.open("", "_blank");
+    if (!popup) {
+        throw new Error("Allow pop-ups to print this card.");
+    }
+
+    setPrintDocumentState(
+        popup.document,
+        title,
+        '<div class="status">Preparing card for print...</div>',
+        "loading",
+    );
+    return popup;
+};
+
 const escapeScriptTagContent = (value: string) =>
     value.replace(/<\/script/giu, "<\\/script");
 
@@ -304,7 +384,11 @@ export const createOfflineRecoveryHtml = async () => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>2of3 recovery</title>
+  <title>2of3 Offline Recovery</title>
+  <meta
+    name="description"
+    content="This offline recovery page restores your secret from any 2 matching 2of3 cards."
+  />
   <style>
     :root {
       color-scheme: light;
@@ -541,7 +625,7 @@ export const createOfflineRecoveryHtml = async () => {
     </div>
     <div class="shell">
       <div class="panel">
-        <div class="eyebrow">Recover later</div>
+        <div class="eyebrow">Recover</div>
         <h1>Use any 2 cards to recover</h1>
         <p>This file works offline. Upload two card images, or paste their codes.</p>
         <div class="grid">
@@ -664,7 +748,11 @@ export const createOfflineRecoveryHtml = async () => {
           throw new Error("These shares did not reconstruct a valid secret.");
         }
       }
-      return new TextDecoder().decode(output);
+      try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(output);
+      } catch {
+        throw new Error("These shares did not reconstruct readable text.");
+      }
     };
     const loadImageFromFile = (file) =>
       new Promise((resolve, reject) => {
@@ -861,12 +949,24 @@ export const createOfflineRecoveryHtml = async () => {
     document.getElementById("copy-result").addEventListener("click", async () => {
       const button = document.getElementById("copy-result");
       const resultNode = document.getElementById("result");
+      const errorNode = document.getElementById("error");
       if (!resultNode.textContent.trim()) return;
-      await navigator.clipboard.writeText(resultNode.textContent);
-      button.textContent = "Copied";
-      window.setTimeout(() => {
-        button.textContent = "Copy";
-      }, 1600);
+      try {
+        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+          throw new Error("Could not copy here. Select the recovered secret and copy it manually.");
+        }
+        await navigator.clipboard.writeText(resultNode.textContent);
+        button.textContent = "Copied";
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1600);
+      } catch (error) {
+        errorNode.hidden = false;
+        errorNode.textContent =
+          error && error.message
+            ? error.message
+            : "Could not copy here. Select the recovered secret and copy it manually.";
+      }
     });
   </script>
 </body>
@@ -899,34 +999,88 @@ export const shareFiles = async (files: File[]) => {
     });
 };
 
-export const printBlob = (blob: Blob, title: string) => {
-    const url = URL.createObjectURL(blob);
-    const popup = window.open("", "_blank", "noopener,noreferrer");
-    if (!popup) {
-        URL.revokeObjectURL(url);
-        throw new Error("Allow pop-ups to print this card.");
-    }
+export const printBlob = (
+    blob: Blob,
+    title: string,
+    popup = preparePrintWindow(title),
+) =>
+    new Promise<void>((resolve, reject) => {
+        let settled = false;
+        let cleanupTimer = 0;
 
-    const { document } = popup;
-    document.title = title;
+        const cleanup = () => {
+            if (cleanupTimer) {
+                window.clearTimeout(cleanupTimer);
+            }
+        };
 
-    const style = document.createElement("style");
-    style.textContent =
-        "body{margin:0;background:#fff;display:grid;place-items:center;min-height:100vh}img{max-width:100vw;max-height:100vh}@media print{body{margin:0}}";
-    document.head.appendChild(style);
+        const settle = (callback: () => void) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            callback();
+        };
 
-    const image = document.createElement("img");
-    image.src = url;
-    image.alt = title;
-    image.addEventListener("load", () => {
-        popup.print();
-        popup.setTimeout(() => popup.close(), 100);
+        const run = async () => {
+            const dataUrl = await blobToDataUrl(blob);
+            const doc = popup.document;
+            setPrintDocumentState(
+                doc,
+                title,
+                `<img src="${dataUrl}" alt="${title.replace(/"/g, "&quot;")}" />`,
+            );
+
+            const imageNode = doc.querySelector("img");
+            if (!imageNode || imageNode.tagName !== "IMG") {
+                throw new Error("Could not print this card.");
+            }
+            const image = imageNode;
+
+            await new Promise<void>((resolveImage, rejectImage) => {
+                if (image.complete && image.naturalWidth > 0) {
+                    resolveImage();
+                    return;
+                }
+                image.onload = () => resolveImage();
+                image.onerror = () =>
+                    rejectImage(new Error("Could not print this card."));
+            });
+
+            if ("decode" in image) {
+                try {
+                    await image.decode();
+                } catch {
+                    // Continue; the image is already loaded enough to print.
+                }
+            }
+
+            await new Promise<void>((done) => {
+                popup.requestAnimationFrame(() => {
+                    popup.requestAnimationFrame(() => done());
+                });
+            });
+
+            const afterPrint = () => {
+                popup.close();
+                settle(resolve);
+            };
+            popup.addEventListener("afterprint", afterPrint, { once: true });
+            cleanupTimer = window.setTimeout(() => settle(resolve), 4000);
+            popup.focus();
+            popup.print();
+        };
+
+        void run().catch((error: unknown) => {
+            popup.close();
+            settle(() =>
+                reject(
+                    error instanceof Error
+                        ? error
+                        : new Error("Could not print this card."),
+                ),
+            );
+        });
     });
-    document.body.appendChild(image);
-    popup.addEventListener("beforeunload", () => {
-        URL.revokeObjectURL(url);
-    });
-};
 
 export const downloadBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);

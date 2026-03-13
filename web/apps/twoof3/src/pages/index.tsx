@@ -6,11 +6,13 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import {
     MAX_SECRET_BYTES_FOR_PRINTED_CARD,
     canvasToBlob,
     downloadBlob,
     offlineRecoveryFile,
+    preparePrintWindow,
     printBlob,
     renderShareCard,
     sanitizeFilename,
@@ -38,15 +40,25 @@ import {
 } from "react";
 
 const APP_LINK = "2of3.ente.io";
-const MAX_CARD_TITLE_LENGTH = 48;
+const MAX_CARD_TITLE_LENGTH = 80;
+const CARD_LABEL_FALLBACK = "Today";
 const textEncoder = new TextEncoder();
+const graphemeSegmenter =
+    typeof Intl !== "undefined" && "Segmenter" in Intl
+        ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+        : null;
 
 const byteLength = (value: string) => textEncoder.encode(value).length;
+
+const splitGraphemes = (value: string) =>
+    graphemeSegmenter
+        ? Array.from(graphemeSegmenter.segment(value), ({ segment }) => segment)
+        : Array.from(value);
 
 const trimToByteLength = (value: string, maxBytes: number) => {
     if (byteLength(value) <= maxBytes) return value;
 
-    const chars = Array.from(value);
+    const chars = splitGraphemes(value);
     while (chars.length > 0 && byteLength(chars.join("")) > maxBytes) {
         chars.pop();
     }
@@ -55,7 +67,7 @@ const trimToByteLength = (value: string, maxBytes: number) => {
 };
 
 const trimToCharacterLength = (value: string, maxChars: number) =>
-    Array.from(value).slice(0, maxChars).join("");
+    splitGraphemes(value).slice(0, maxChars).join("");
 
 interface ShareCardState {
     encoded: string;
@@ -140,6 +152,68 @@ const HELP_FAQS = [
         question: "Should I print the cards, download them, or both?",
         answer: "Either is fine. Printed cards are easy to store offline. Downloaded images are easier to duplicate carefully. Many people will want both.",
     },
+    {
+        question: "All this sounds magical, how does it work?",
+        answer: "It uses Shamir secret sharing. Your secret is split into three shares in a way where mathematically any two parts reconstruct it while one alone reveals nothing. Think of it like a lock which needs 2 of 3 keys to open.",
+    },
+    {
+        question: "Is the source code open?",
+        answer: (
+            <>
+                Yes! 2of3 is part of Ente&apos;s{" "}
+                <Box
+                    component="a"
+                    href="https://github.com/ente-io/ente"
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={{
+                        color: "inherit",
+                        textDecorationColor: "currentColor",
+                        textUnderlineOffset: "0.14em",
+                    }}
+                >
+                    open source
+                </Box>{" "}
+                repo.
+            </>
+        ),
+    },
+] as const;
+
+const HELP_USE_CASES = [
+    {
+        title: "Legacy account recovery",
+        detail: "You want a spouse, adult child, or executor to recover something important if you are not around to explain it. One card can stay with your documents, one in a safe place at home, and one with a trusted person. Any two are enough when the time comes.",
+        tone: "accent",
+        span: 7,
+    },
+    {
+        title: "Saving 'root' credentials",
+        detail: "You have one break-glass credential that matters a lot: a root password, a production recovery key, or the master secret behind your setup. 2of3 lets you avoid the two bad outcomes at once: one lost copy that locks you out, or one stolen copy that gives everything away.",
+        tone: "plain",
+        span: 5,
+    },
+    {
+        title: "Family emergency pack",
+        detail: "Some secrets are only needed during stressful moments: a password manager emergency kit, a wallet recovery phrase, or the one recovery code your household cannot afford to lose. Splitting it across three places means recovery stays possible even when one place fails.",
+        tone: "soft",
+        span: 12,
+    },
+] as const;
+
+const HELP_CARD_LAYOUTS = [
+    { offset: "0rem", span: 7, tone: "accent" },
+    { offset: "1.5rem", span: 5, tone: "plain" },
+    { offset: "0rem", span: 4, tone: "soft" },
+    { offset: "1rem", span: 8, tone: "plain" },
+    { offset: "1.4rem", span: 5, tone: "plain" },
+    { offset: "0rem", span: 7, tone: "soft" },
+    { offset: "0rem", span: 6, tone: "plain" },
+    { offset: "1.2rem", span: 6, tone: "accent" },
+    { offset: "0rem", span: 4, tone: "soft" },
+    { offset: "1rem", span: 8, tone: "plain" },
+    { offset: "0.45rem", span: 5, tone: "plain" },
+    { offset: "1.35rem", span: 7, tone: "soft" },
 ] as const;
 
 const recoverSlotLabel = (index: number) =>
@@ -273,10 +347,10 @@ const ShareCardPanel = memo(
             <Stack
                 sx={{
                     border: "1.5px solid",
-                    borderColor: "var(--ink)",
+                    borderColor: "var(--edge)",
                     borderRadius: "26px",
                     bgcolor: "var(--paper)",
-                    boxShadow: "0 14px 28px rgba(17,17,17,0.06)",
+                    boxShadow: "var(--shadow-card)",
                     minHeight: 0,
                     overflow: "hidden",
                 }}
@@ -287,7 +361,7 @@ const ShareCardPanel = memo(
                         py: 1.05,
                         bgcolor: "var(--accent)",
                         borderBottom: "1.5px solid",
-                        borderColor: "var(--ink)",
+                        borderColor: "var(--accent-edge)",
                     }}
                 >
                     <Stack
@@ -323,6 +397,13 @@ const ShareCardPanel = memo(
                             fontWeight: 700,
                             fontSize: "1rem",
                             lineHeight: 1.2,
+                            minHeight: "2.4em",
+                            maxHeight: "2.4em",
+                            overflow: "hidden",
+                            textOverflow: "clip",
+                            whiteSpace: "normal",
+                            wordBreak: "normal",
+                            overflowWrap: "normal",
                         }}
                     >
                         {cardLabel}
@@ -465,11 +546,16 @@ const ActionButton = ({
             borderWidth: "1.5px",
             borderColor: "var(--line-strong)",
             color: "var(--ink)",
-            bgcolor: "rgba(255,255,255,0.88)",
+            bgcolor: "transparent",
             "&:hover": {
                 borderWidth: "1.5px",
                 borderColor: "var(--ink)",
-                bgcolor: "var(--paper)",
+                bgcolor: "var(--button-surface-hover)",
+            },
+            "&.Mui-disabled": {
+                bgcolor: "transparent",
+                borderColor: "var(--line)",
+                color: "var(--disabled-ink)",
             },
         }}
     >
@@ -546,8 +632,10 @@ const copyTextToClipboard = async (value: string) => {
 };
 
 const Page = () => {
+    const { systemMode, setMode } = useColorScheme();
     const [secret, setSecret] = useState("");
-    const [title, setTitle] = useState(todayLabel);
+    const [title, setTitle] = useState("");
+    const [defaultTitle, setDefaultTitle] = useState("");
     const [busyCard, setBusyCard] = useState<number | null>(null);
     const [downloadAllBusy, setDownloadAllBusy] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
@@ -566,14 +654,18 @@ const Page = () => {
         useState<SplitSnapshot>(EMPTY_SPLIT_SNAPSHOT);
     const deferredSecret = useDeferredValue(secret);
     const isCardsStaleRef = useRef(false);
+    const isDarkMode = systemMode === "dark";
+
+    useEffect(() => {
+        setMode("system");
+    }, [setMode]);
 
     const cards = splitSnapshot.cards;
     const isCardsStale = splitSnapshot.secret !== secret;
-    const isReady = !isCardsStale && cards.length === 3;
     const splitError = isCardsStale ? null : splitSnapshot.error;
     const inputStatus = splitError ?? actionError;
     const secretLength = byteLength(secret);
-    const cardLabel = title.trim() || todayLabel();
+    const cardLabel = title.trim() || defaultTitle || CARD_LABEL_FALLBACK;
     const recoverSlotDetails = recoverSlots.map((slot) =>
         describeRecoverSlot(slot.value),
     );
@@ -606,6 +698,12 @@ const Page = () => {
             });
         }
     }, [secret]);
+
+    useEffect(() => {
+        const nextDefaultTitle = todayLabel();
+        setDefaultTitle(nextDefaultTitle);
+        setTitle((current) => current || nextDefaultTitle);
+    }, []);
 
     useEffect(() => {
         if (!deferredSecret.trim()) return;
@@ -656,6 +754,12 @@ const Page = () => {
         [],
     );
 
+    const makeCardFilename = useCallback(
+        (card: ShareCardState, label: string) =>
+            `${sanitizeFilename(label)}-set-${card.fingerprint.toLowerCase()}-card-${card.index}.png`,
+        [],
+    );
+
     const onCardAction = useCallback(
         async (
             kind: "download" | "print" | "share",
@@ -666,17 +770,31 @@ const Page = () => {
             if (isCardsStaleRef.current) return;
             setActionError(null);
             setBusyCard(displayIndex);
+            let printPopup: Window | null = null;
 
             try {
+                if (kind === "print") {
+                    printPopup = preparePrintWindow(
+                        makeCardFilename(card, label),
+                    );
+                }
                 const file = await makeCardFile(card, label);
                 if (kind === "print") {
-                    printBlob(file, file.name);
+                    await printBlob(file, file.name, printPopup ?? undefined);
                 } else if (kind === "download") {
                     downloadBlob(file, file.name);
                 } else {
                     try {
                         await shareFiles([file]);
-                    } catch {
+                    } catch (error) {
+                        if (
+                            (error instanceof DOMException &&
+                                error.name === "AbortError") ||
+                            (error instanceof Error &&
+                                /abort/i.test(error.message))
+                        ) {
+                            return;
+                        }
                         downloadBlob(file, file.name);
                     }
                 }
@@ -686,15 +804,18 @@ const Page = () => {
                         ? error.message
                         : "That action failed.",
                 );
+                if (printPopup && !printPopup.closed) {
+                    printPopup.close();
+                }
             } finally {
                 setBusyCard(null);
             }
         },
-        [makeCardFile],
+        [makeCardFile, makeCardFilename],
     );
 
     const onDownloadAll = async () => {
-        if (!isReady) return;
+        if (isCardsStaleRef.current || cards.length !== 3) return;
         setActionError(null);
         setDownloadAllBusy(true);
 
@@ -831,51 +952,71 @@ const Page = () => {
             <Head>
                 <meta
                     name="description"
-                    content="Split an Ente recovery key, master password, or another secret into three printable cards. Any two recover it."
+                    content="Turn one important secret into 3 recovery cards you can keep in different places. Any 2 cards bring it back."
                 />
-                <meta property="og:title" content="2of3" />
+                <meta property="og:title" content="2of3 by Ente" />
                 <meta
                     property="og:description"
-                    content="A direct, printable 2-of-3 split for important secrets."
+                    content="Turn one important secret into 3 recovery cards you can keep in different places. Any 2 cards bring it back."
                 />
             </Head>
 
             <Box
-                sx={(theme) => ({
-                    "--app-bg":
-                        theme.palette.mode === "dark" ? "#0b0b0b" : "#ffffff",
-                    "--shell":
-                        theme.palette.mode === "dark" ? "#111111" : "#ffffff",
-                    "--paper":
-                        theme.palette.mode === "dark" ? "#111111" : "#ffffff",
-                    "--field":
-                        theme.palette.mode === "dark"
-                            ? "rgba(252,239,93,0.16)"
-                            : "rgba(252,239,93,0.18)",
-                    "--field-soft":
-                        theme.palette.mode === "dark"
-                            ? "rgba(252,239,93,0.1)"
-                            : "rgba(252,239,93,0.12)",
-                    "--ink":
-                        theme.palette.mode === "dark" ? "#fafafa" : "#111111",
-                    "--muted":
-                        theme.palette.mode === "dark"
-                            ? "rgba(250,250,250,0.68)"
-                            : "rgba(17,17,17,0.68)",
-                    "--line":
-                        theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.18)"
-                            : "rgba(17,17,17,0.18)",
-                    "--line-strong":
-                        theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.24)"
-                            : "rgba(17,17,17,0.22)",
-                    "--accent": theme.palette.primary.main,
+                sx={{
+                    "--app-bg": isDarkMode ? "#0b0b0b" : "#ffffff",
+                    "--shell": isDarkMode ? "#101010" : "#ffffff",
+                    "--paper": isDarkMode ? "#181818" : "#ffffff",
+                    "--edge": isDarkMode ? "rgba(255,255,255,0.7)" : "#111111",
+                    "--accent-edge": "#111111",
+                    "--field": isDarkMode
+                        ? "rgba(252,239,93,0.12)"
+                        : "rgba(252,239,93,0.18)",
+                    "--field-soft": isDarkMode
+                        ? "rgba(252,239,93,0.08)"
+                        : "rgba(252,239,93,0.12)",
+                    "--ink": isDarkMode ? "#fafafa" : "#111111",
+                    "--muted": isDarkMode
+                        ? "rgba(250,250,250,0.72)"
+                        : "rgba(17,17,17,0.68)",
+                    "--line": isDarkMode
+                        ? "rgba(255,255,255,0.16)"
+                        : "rgba(17,17,17,0.18)",
+                    "--line-strong": isDarkMode
+                        ? "rgba(255,255,255,0.28)"
+                        : "rgba(17,17,17,0.22)",
+                    "--soft-card-bg": isDarkMode
+                        ? "rgba(252,239,93,0.045)"
+                        : "rgba(252,239,93,0.12)",
+                    "--button-surface": isDarkMode
+                        ? "rgba(255,255,255,0.04)"
+                        : "rgba(255,255,255,0.88)",
+                    "--button-surface-hover": isDarkMode
+                        ? "rgba(255,255,255,0.08)"
+                        : "#ffffff",
+                    "--chip-bg": isDarkMode
+                        ? "rgba(255,255,255,0.06)"
+                        : "rgba(255,255,255,0.72)",
+                    "--chip-accent-bg": isDarkMode
+                        ? "rgba(255,255,255,0.2)"
+                        : "rgba(255,255,255,0.62)",
+                    "--disabled-ink": isDarkMode
+                        ? "rgba(250,250,250,0.28)"
+                        : "rgba(17,17,17,0.28)",
+                    "--shadow-shell": isDarkMode
+                        ? "0 18px 42px rgba(0,0,0,0.38)"
+                        : "0 22px 48px rgba(17,17,17,0.06)",
+                    "--shadow-card": isDarkMode
+                        ? "0 12px 28px rgba(0,0,0,0.24)"
+                        : "0 14px 28px rgba(17,17,17,0.06)",
+                    "--shadow-accent": isDarkMode
+                        ? "0 14px 32px rgba(0,0,0,0.26)"
+                        : "0 14px 28px rgba(17,17,17,0.05)",
+                    "--accent": "rgb(252, 239, 93)",
                     minHeight: "100vh",
                     bgcolor: "var(--app-bg)",
                     color: "var(--ink)",
                     backgroundImage: "none",
-                })}
+                }}
             >
                 <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
                     <Stack spacing={3}>
@@ -926,11 +1067,11 @@ const Page = () => {
                         <Box
                             sx={{
                                 border: "2px solid",
-                                borderColor: "var(--ink)",
+                                borderColor: "var(--edge)",
                                 borderRadius: "32px",
                                 overflow: "hidden",
                                 bgcolor: "var(--shell)",
-                                boxShadow: "0 22px 48px rgba(17,17,17,0.06)",
+                                boxShadow: "var(--shadow-shell)",
                                 display: "grid",
                                 gridTemplateColumns: {
                                     xs: "1fr",
@@ -952,7 +1093,7 @@ const Page = () => {
                                         xs: "2px solid",
                                         lg: "none",
                                     },
-                                    borderColor: "var(--ink)",
+                                    borderColor: "var(--edge)",
                                 }}
                             >
                                 <Box
@@ -962,7 +1103,7 @@ const Page = () => {
                                         py: 0.7,
                                         borderRadius: "999px",
                                         border: "1.5px solid",
-                                        borderColor: "var(--ink)",
+                                        borderColor: "var(--accent-edge)",
                                         bgcolor: "var(--accent)",
                                     }}
                                 >
@@ -1026,7 +1167,9 @@ const Page = () => {
                                     <TextField
                                         label="Card label (optional)"
                                         value={title}
-                                        placeholder={todayLabel()}
+                                        placeholder={
+                                            defaultTitle || CARD_LABEL_FALLBACK
+                                        }
                                         onChange={(event) =>
                                             setTitle(
                                                 trimToCharacterLength(
@@ -1058,7 +1201,11 @@ const Page = () => {
                                     <Button
                                         variant="contained"
                                         size="large"
-                                        disabled={!isReady || downloadAllBusy}
+                                        disabled={
+                                            cards.length !== 3 ||
+                                            !!splitSnapshot.error ||
+                                            downloadAllBusy
+                                        }
                                         onClick={() => {
                                             void onDownloadAll();
                                         }}
@@ -1067,13 +1214,14 @@ const Page = () => {
                                             py: 1.25,
                                             borderRadius: "999px",
                                             border: "1.5px solid",
-                                            borderColor: "var(--line-strong)",
+                                            borderColor: "var(--accent-edge)",
                                             bgcolor: "var(--accent)",
                                             color: "#111111",
                                             boxShadow: "none",
                                             "&:hover": {
                                                 boxShadow: "none",
-                                                borderColor: "var(--ink)",
+                                                borderColor:
+                                                    "var(--accent-edge)",
                                                 bgcolor: "var(--accent)",
                                             },
                                             "&.Mui-disabled": {
@@ -1175,30 +1323,48 @@ const Page = () => {
                             >
                                 <Box
                                     sx={{
-                                        width: 12,
-                                        height: 12,
+                                        width: 11,
+                                        height: 11,
                                         borderRadius: "50%",
                                         bgcolor: "var(--accent)",
-                                        border: "1.5px solid",
-                                        borderColor: "var(--ink)",
+                                        ...(isDarkMode
+                                            ? {
+                                                  boxShadow:
+                                                      "0 0 0 2px var(--app-bg), 0 0 0 1px rgba(255,255,255,0.18)",
+                                              }
+                                            : {
+                                                  border: "1.5px solid",
+                                                  borderColor:
+                                                      "var(--accent-edge)",
+                                              }),
                                     }}
                                 />
                                 <Box
                                     sx={{
-                                        width: "1.5px",
+                                        width: isDarkMode ? "1px" : "1.5px",
                                         flex: 1,
                                         minHeight: { xs: 28, md: 44 },
-                                        bgcolor: "var(--line-strong)",
+                                        bgcolor: isDarkMode
+                                            ? "var(--line)"
+                                            : "var(--line-strong)",
                                     }}
                                 />
                                 <Box
                                     sx={{
-                                        width: 12,
-                                        height: 12,
+                                        width: 11,
+                                        height: 11,
                                         borderRadius: "50%",
                                         bgcolor: "var(--accent)",
-                                        border: "1.5px solid",
-                                        borderColor: "var(--ink)",
+                                        ...(isDarkMode
+                                            ? {
+                                                  boxShadow:
+                                                      "0 0 0 2px var(--app-bg), 0 0 0 1px rgba(255,255,255,0.18)",
+                                              }
+                                            : {
+                                                  border: "1.5px solid",
+                                                  borderColor:
+                                                      "var(--accent-edge)",
+                                              }),
                                     }}
                                 />
                             </Stack>
@@ -1207,11 +1373,11 @@ const Page = () => {
                         <Box
                             sx={{
                                 border: "2px solid",
-                                borderColor: "var(--ink)",
+                                borderColor: "var(--edge)",
                                 borderRadius: "28px",
                                 overflow: "hidden",
                                 bgcolor: "var(--shell)",
-                                boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
+                                boxShadow: "var(--shadow-card)",
                             }}
                         >
                             <Stack
@@ -1407,7 +1573,7 @@ const Page = () => {
                                                     }}
                                                 >
                                                     {slotDetails
-                                                        ? `${slot.fileName ? `${slot.fileName} · ` : ""}Card ${slotDetails.index} from ID ${slotDetails.fingerprint}`
+                                                        ? `${slot.fileName ? `${slot.fileName} - ` : ""}Card ${slotDetails.index} from ID ${slotDetails.fingerprint}`
                                                         : slot.fileName
                                                           ? slot.fileName
                                                           : "Drop a saved card image here, or paste a copied code."}
@@ -1470,12 +1636,13 @@ const Page = () => {
                                             py: 1.15,
                                             borderRadius: "999px",
                                             borderWidth: "1.5px",
-                                            borderColor: "var(--ink)",
+                                            borderColor: "var(--accent-edge)",
                                             color: "#111111",
                                             bgcolor: "var(--accent)",
                                             "&:hover": {
                                                 borderWidth: "1.5px",
-                                                borderColor: "var(--ink)",
+                                                borderColor:
+                                                    "var(--accent-edge)",
                                                 bgcolor: "var(--accent)",
                                             },
                                             "&.Mui-disabled": {
@@ -1496,9 +1663,9 @@ const Page = () => {
                                         sx={{
                                             p: 1.45,
                                             border: "1.5px solid",
-                                            borderColor: "var(--ink)",
+                                            borderColor: "var(--edge)",
                                             borderRadius: "24px",
-                                            bgcolor: "var(--field-soft)",
+                                            bgcolor: "var(--paper)",
                                         }}
                                     >
                                         <Stack
@@ -1548,13 +1715,14 @@ const Page = () => {
                                                 }}
                                                 sx={{
                                                     borderWidth: "1.5px",
-                                                    borderColor: "var(--ink)",
+                                                    borderColor:
+                                                        "var(--accent-edge)",
                                                     color: "#111111",
                                                     bgcolor: "var(--accent)",
                                                     "&:hover": {
                                                         borderWidth: "1.5px",
                                                         borderColor:
-                                                            "var(--ink)",
+                                                            "var(--accent-edge)",
                                                         bgcolor:
                                                             "var(--accent)",
                                                     },
@@ -1582,64 +1750,94 @@ const Page = () => {
 
                         <Box
                             sx={{
-                                border: "2px solid",
-                                borderColor: "var(--ink)",
-                                borderRadius: "28px",
-                                overflow: "hidden",
-                                bgcolor: "var(--shell)",
-                                boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
+                                pt: { xs: 5.2, md: 8.3 },
+                                pb: { xs: 2.8, md: 4.7 },
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    width: "auto",
+                                    ml: "calc(50% - 50vw)",
+                                    mr: "calc(50% - 50vw)",
+                                    height: "1.5px",
+                                    bgcolor: "var(--line-strong)",
+                                }}
+                            />
+                        </Box>
+
+                        <Box
+                            sx={{
+                                px: { xs: 0.4, md: 1 },
+                                pt: { xs: 2.8, md: 4.7 },
+                                pb: { xs: 1.5, md: 2.5 },
+                                position: "relative",
+                                "&::before": {
+                                    content: '""',
+                                    position: "absolute",
+                                    inset: {
+                                        xs: "18px auto auto 6%",
+                                        md: "22px auto auto 12%",
+                                    },
+                                    width: { xs: 180, md: 240 },
+                                    height: { xs: 180, md: 240 },
+                                    borderRadius: "50%",
+                                    background: isDarkMode
+                                        ? "radial-gradient(circle, rgba(252,239,93,0.08) 0%, rgba(252,239,93,0.03) 34%, rgba(252,239,93,0) 72%)"
+                                        : "radial-gradient(circle, rgba(252,239,93,0.14) 0%, rgba(252,239,93,0.05) 36%, rgba(252,239,93,0) 72%)",
+                                    pointerEvents: "none",
+                                    filter: "blur(8px)",
+                                },
                             }}
                         >
                             <Stack
-                                spacing={2.4}
-                                sx={{ p: { xs: 2.1, md: 2.6 } }}
+                                spacing={3.8}
+                                sx={{
+                                    width: "min(100%, 980px)",
+                                    mx: "auto",
+                                    position: "relative",
+                                }}
                             >
-                                <Stack spacing={0.7} sx={{ maxWidth: 720 }}>
-                                    <Box
-                                        sx={{
-                                            width: "fit-content",
-                                            px: 1.1,
-                                            py: 0.45,
-                                            borderRadius: "999px",
-                                            border: "1.5px solid",
-                                            borderColor: "var(--ink)",
-                                            bgcolor: "var(--accent)",
-                                        }}
+                                <Stack spacing={0.9} sx={{ maxWidth: 680 }}>
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        spacing={0.8}
                                     >
-                                        <Typography
+                                        <Box
                                             sx={{
-                                                fontWeight: 700,
-                                                fontSize: "0.82rem",
-                                                color: "#111111",
+                                                width: "fit-content",
+                                                px: 1.05,
+                                                py: 0.42,
+                                                borderRadius: "999px",
+                                                border: "1.5px solid",
+                                                borderColor: "var(--accent-edge)",
+                                                bgcolor: "var(--accent)",
                                             }}
                                         >
-                                            Help
+                                            <Typography
+                                                sx={{
+                                                    fontSize: "0.8rem",
+                                                    fontWeight: 700,
+                                                    color: "#111111",
+                                                    letterSpacing: "0.06em",
+                                                    textTransform: "uppercase",
+                                                }}
+                                            >
+                                                Help
+                                            </Typography>
+                                        </Box>
+                                        <Typography
+                                            sx={{
+                                                color: "var(--muted)",
+                                                fontSize: "0.82rem",
+                                                fontWeight: 700,
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.08em",
+                                            }}
+                                        >
+                                            Why & What
                                         </Typography>
-                                    </Box>
-                                    <Typography
-                                        variant="h2"
-                                        sx={{
-                                            fontSize: {
-                                                xs: "1.95rem",
-                                                md: "2.45rem",
-                                            },
-                                            lineHeight: 0.94,
-                                            maxWidth: 620,
-                                        }}
-                                    >
-                                        Questions people usually have
-                                    </Typography>
-                                    <Typography
-                                        sx={{
-                                            color: "var(--muted)",
-                                            maxWidth: 660,
-                                        }}
-                                    >
-                                        2of3 is for moments where one copy feels
-                                        too risky, but a complicated setup feels
-                                        worse. This is the plain-language
-                                        version.
-                                    </Typography>
+                                    </Stack>
                                 </Stack>
 
                                 <Box
@@ -1647,65 +1845,272 @@ const Page = () => {
                                         display: "grid",
                                         gridTemplateColumns: {
                                             xs: "1fr",
-                                            md: "repeat(2, minmax(0, 1fr))",
+                                            md: "repeat(12, minmax(0, 1fr))",
                                         },
-                                        gap: 1.5,
+                                        gap: 1.35,
+                                        alignItems: "start",
                                     }}
                                 >
-                                    {HELP_FAQS.map((item) => (
-                                        <Stack
-                                            key={item.question}
-                                            spacing={0.9}
+                                    <Stack
+                                        spacing={0.65}
+                                        sx={{
+                                            gridColumn: {
+                                                xs: "span 1",
+                                                md: "span 12",
+                                            },
+                                            pt: { xs: 1, md: 1.6 },
+                                            pb: { xs: 1.7, md: 2.5 },
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="h2"
                                             sx={{
-                                                p: 1.55,
-                                                border: "1.5px solid",
-                                                borderColor: "var(--line-strong)",
-                                                borderRadius: "24px",
-                                                bgcolor: "var(--paper)",
+                                                fontSize: {
+                                                    xs: "1.95rem",
+                                                    md: "2.35rem",
+                                                },
+                                                lineHeight: 0.96,
+                                                maxWidth: 620,
                                             }}
                                         >
-                                            <Box
+                                            Use cases
+                                        </Typography>
+                                    </Stack>
+                                    {HELP_USE_CASES.map((item) => {
+                                        const isAccent = item.tone === "accent";
+                                        const isSoft = item.tone === "soft";
+
+                                        return (
+                                            <Stack
+                                                key={item.title}
+                                                spacing={1}
                                                 sx={{
-                                                    width: "fit-content",
-                                                    px: 0.95,
-                                                    py: 0.38,
-                                                    borderRadius: "999px",
+                                                    gridColumn: {
+                                                        xs: "span 1",
+                                                        md: `span ${item.span}`,
+                                                    },
+                                                    p: { xs: 1.6, md: 1.9 },
                                                     border: "1.5px solid",
-                                                    borderColor:
-                                                        "var(--line-strong)",
-                                                    bgcolor: "var(--field-soft)",
+                                                    borderColor: isAccent
+                                                        ? "var(--accent-edge)"
+                                                        : "var(--line-strong)",
+                                                    borderRadius: "28px",
+                                                    bgcolor: isAccent
+                                                        ? "var(--accent)"
+                                                        : isSoft
+                                                          ? "var(--soft-card-bg)"
+                                                          : "var(--paper)",
+                                                    boxShadow: isAccent
+                                                        ? "var(--shadow-accent)"
+                                                        : "none",
                                                 }}
                                             >
-                                                <Typography
+                                                <Box
                                                     sx={{
-                                                        fontSize: "0.77rem",
-                                                        fontWeight: 700,
-                                                        color: "var(--muted)",
+                                                        width: "fit-content",
+                                                        px: 0.82,
+                                                        py: 0.34,
+                                                        borderRadius: "999px",
+                                                        border: "1.5px solid",
+                                                        borderColor: isAccent
+                                                            ? "rgba(17,17,17,0.2)"
+                                                            : "var(--line-strong)",
+                                                        bgcolor: isAccent
+                                                            ? "var(--chip-accent-bg)"
+                                                            : "var(--chip-bg)",
                                                     }}
                                                 >
-                                                    Q&A
+                                                    <Typography
+                                                        sx={{
+                                                        fontSize: "0.75rem",
+                                                        fontWeight: 700,
+                                                        color: isAccent
+                                                            ? "#111111"
+                                                            : "var(--ink)",
+                                                        letterSpacing:
+                                                            "0.04em",
+                                                        textTransform:
+                                                                "uppercase",
+                                                        }}
+                                                    >
+                                                        Scenario
+                                                    </Typography>
+                                                </Box>
+                                                <Typography
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        fontSize: {
+                                                            xs: "1.1rem",
+                                                            md: "1.18rem",
+                                                        },
+                                                        lineHeight: 1.25,
+                                                        color: isAccent
+                                                            ? "#111111"
+                                                            : "var(--ink)",
+                                                        maxWidth: 520,
+                                                    }}
+                                                >
+                                                    {item.title}
                                                 </Typography>
-                                            </Box>
-                                            <Typography
+                                                <Typography
+                                                    sx={{
+                                                        color: isAccent
+                                                            ? "rgba(17,17,17,0.76)"
+                                                            : "var(--muted)",
+                                                        fontSize: "0.98rem",
+                                                        lineHeight: 1.7,
+                                                        maxWidth: 760,
+                                                    }}
+                                                >
+                                                    {item.detail}
+                                                </Typography>
+                                            </Stack>
+                                        );
+                                    })}
+                                    <Stack
+                                        spacing={0.65}
+                                        sx={{
+                                            gridColumn: {
+                                                xs: "span 1",
+                                                md: "span 12",
+                                            },
+                                            pt: { xs: 4.2, md: 7.2 },
+                                            pb: { xs: 1.7, md: 2.5 },
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="h2"
+                                            sx={{
+                                                fontSize: {
+                                                    xs: "1.95rem",
+                                                    md: "2.35rem",
+                                                },
+                                                lineHeight: 0.96,
+                                                maxWidth: 620,
+                                            }}
+                                        >
+                                            FAQ
+                                        </Typography>
+                                    </Stack>
+                                    {HELP_FAQS.map((item, index) => {
+                                        const layout = HELP_CARD_LAYOUTS[index]!;
+                                        const isAccent = layout.tone === "accent";
+                                        const isSoft = layout.tone === "soft";
+
+                                        return (
+                                            <Stack
+                                                key={item.question}
+                                                spacing={0.95}
                                                 sx={{
-                                                    fontWeight: 700,
-                                                    fontSize: "1rem",
-                                                    lineHeight: 1.25,
+                                                    gridColumn: {
+                                                        xs: "span 1",
+                                                        md: `span ${layout.span}`,
+                                                    },
+                                                    mt: {
+                                                        xs: 0,
+                                                        md: layout.offset,
+                                                    },
+                                                    p: { xs: 1.45, md: 1.7 },
+                                                    border: "1.5px solid",
+                                                    borderColor: isAccent
+                                                        ? "var(--accent-edge)"
+                                                        : "var(--line-strong)",
+                                                    borderRadius: "26px",
+                                                    bgcolor: isAccent
+                                                        ? "var(--accent)"
+                                                        : isSoft
+                                                          ? "var(--soft-card-bg)"
+                                                          : "var(--paper)",
+                                                    boxShadow: isAccent
+                                                        ? "var(--shadow-accent)"
+                                                        : "none",
                                                 }}
                                             >
-                                                {item.question}
-                                            </Typography>
-                                            <Typography
-                                                sx={{
-                                                    color: "var(--muted)",
-                                                    fontSize: "0.95rem",
-                                                    lineHeight: 1.6,
-                                                }}
-                                            >
-                                                {item.answer}
-                                            </Typography>
-                                        </Stack>
-                                    ))}
+                                                <Stack
+                                                    direction="row"
+                                                    justifyContent="space-between"
+                                                    alignItems="center"
+                                                    spacing={1}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            width: "fit-content",
+                                                            px: 0.8,
+                                                            py: 0.32,
+                                                            borderRadius: "999px",
+                                                            border: "1.5px solid",
+                                                            borderColor: isAccent
+                                                                ? "rgba(17,17,17,0.2)"
+                                                                : "var(--line-strong)",
+                                                            bgcolor: isAccent
+                                                                ? "var(--chip-accent-bg)"
+                                                                : "var(--chip-bg)",
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            sx={{
+                                                                fontSize:
+                                                                    "0.75rem",
+                                                                fontWeight: 700,
+                                                                color: isAccent
+                                                                    ? "#111111"
+                                                                    : "var(--ink)",
+                                                                letterSpacing:
+                                                                    "0.04em",
+                                                                textTransform:
+                                                                    "uppercase",
+                                                            }}
+                                                        >
+                                                            Q&A
+                                                        </Typography>
+                                                    </Box>
+                                                    <Typography
+                                                        sx={{
+                                                            color: isAccent
+                                                                ? "rgba(17,17,17,0.6)"
+                                                                : "var(--muted)",
+                                                            fontSize: "0.76rem",
+                                                            fontWeight: 700,
+                                                            letterSpacing:
+                                                                "0.06em",
+                                                            textTransform:
+                                                                "uppercase",
+                                                        }}
+                                                    >
+                                                        2of3
+                                                    </Typography>
+                                                </Stack>
+                                                <Typography
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        fontSize: {
+                                                            xs: "1.02rem",
+                                                            md: "1.08rem",
+                                                        },
+                                                        lineHeight: 1.28,
+                                                        color: isAccent
+                                                            ? "#111111"
+                                                            : "var(--ink)",
+                                                        maxWidth: 620,
+                                                    }}
+                                                >
+                                                    {item.question}
+                                                </Typography>
+                                                <Typography
+                                                    sx={{
+                                                        color: isAccent
+                                                            ? "rgba(17,17,17,0.74)"
+                                                            : "var(--muted)",
+                                                        fontSize: "0.96rem",
+                                                        lineHeight: 1.68,
+                                                        maxWidth: 720,
+                                                    }}
+                                                >
+                                                    {item.answer}
+                                                </Typography>
+                                            </Stack>
+                                        );
+                                    })}
                                 </Box>
                             </Stack>
                         </Box>
@@ -1713,29 +2118,114 @@ const Page = () => {
                         <Box
                             component="footer"
                             sx={{
-                                pt: { xs: 0.5, md: 1 },
-                                pb: { xs: 1, md: 1.5 },
+                                pt: { xs: 7, md: 11 },
+                                pb: { xs: 4, md: 6.5 },
                                 display: "flex",
                                 justifyContent: "center",
                             }}
                         >
                             <Box
-                                component="a"
-                                href="https://ente.io"
-                                target="_blank"
-                                rel="noreferrer"
                                 sx={{
-                                    color: "var(--ink)",
-                                    fontWeight: 700,
-                                    letterSpacing: "-0.04em",
-                                    fontSize: { xs: "1rem", md: "1.08rem" },
-                                    textDecoration: "none",
-                                    "&:hover": {
-                                        textDecoration: "underline",
-                                    },
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: { xs: 1, md: 1.25 },
                                 }}
                             >
-                                Ente
+                                <Box
+                                    component="a"
+                                    href="https://ente.io"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    sx={{
+                                        color: "var(--ink)",
+                                        fontWeight: 500,
+                                        fontSize: { xs: "0.98rem", md: "1.06rem" },
+                                        textDecoration: "none",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 0.45,
+                                        opacity: 0.58,
+                                        transition: "opacity 140ms ease",
+                                        "&:hover": {
+                                            opacity: 1,
+                                            textDecoration: "none",
+                                        },
+                                    }}
+                                >
+                                    <Box component="span">Made with</Box>
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <Box
+                                            component="svg"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                            sx={{
+                                                width: 16,
+                                                height: 16,
+                                                display: "block",
+                                                fill: "#d84a4a",
+                                            }}
+                                        >
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                        </Box>
+                                    </Box>
+                                    <Box component="span">by</Box>
+                                    <Box component="span" sx={{ fontWeight: 700 }}>
+                                        Ente
+                                    </Box>
+                                </Box>
+                                <Box
+                                    component="svg"
+                                    aria-hidden="true"
+                                    viewBox="0 0 6 6"
+                                    sx={{
+                                        width: 4,
+                                        height: 4,
+                                        display: "block",
+                                        fill: "var(--line-strong)",
+                                        opacity: 0.55,
+                                    }}
+                                >
+                                    <circle cx="3" cy="3" r="3" />
+                                </Box>
+                                <Box
+                                    component="a"
+                                    href="https://github.com/ente-io/ente"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    aria-label="View source on GitHub"
+                                    sx={{
+                                        color: "var(--ink)",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        opacity: 0.58,
+                                        transition: "opacity 140ms ease",
+                                        "&:hover": {
+                                            opacity: 1,
+                                        },
+                                    }}
+                                >
+                                    <Box
+                                        component="svg"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                        sx={{
+                                            width: 19,
+                                            height: 19,
+                                            display: "block",
+                                            fill: "currentColor",
+                                        }}
+                                    >
+                                        <path d="M12 .5C5.65.5.5 5.65.5 12A11.5 11.5 0 0 0 8.36 22.9c.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.71.08-.71 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.27 1.17-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.8 10.8 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.73.8 1.17 1.82 1.17 3.07 0 4.41-2.69 5.39-5.25 5.68.41.35.78 1.05.78 2.11v3.12c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+                                    </Box>
+                                </Box>
                             </Box>
                         </Box>
                     </Stack>
