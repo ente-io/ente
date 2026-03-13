@@ -108,6 +108,10 @@ Want to get aboard the Ente hype train? Welcome along! Don't hesitate if you're
 not a developer, there are many other important ways in which [you can
 contribute](CONTRIBUTING.md).
 
+These are the tech stack used:
+
+![Stack Fingerprint](https://stackfingerprint.vercel.app/api/card?repo=ente-io/ente&theme=slate&layout=banner&size=md&icons=icononly&pills=round)
+
 ## Support
 
 We are never more than an email away. For the various ways to ask for help,
