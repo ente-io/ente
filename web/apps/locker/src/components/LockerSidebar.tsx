@@ -7,7 +7,6 @@ import {
     UserIcon,
     Wallet05Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -18,7 +17,6 @@ import {
     useTheme,
 } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
@@ -27,6 +25,8 @@ import type { LockerCollection } from "types";
 import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
 import { LockerAccountDrawer } from "./LockerAccountDrawer";
+import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
+import { LockerSidebarDrawer } from "./LockerSidebarShell";
 import { LockerSocialFooter } from "./LockerSocialFooter";
 import { LockerSupportDrawer } from "./LockerSupportDrawer";
 
@@ -115,11 +115,19 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
 
     return (
         <>
-            <SidebarDrawer open={open} onClose={onClose} anchor="left">
+            <LockerSidebarDrawer
+                open={open}
+                onClose={onClose}
+                anchor="left"
+            >
                 <Stack
                     sx={{
                         height: "calc(100dvh - env(titlebar-area-height, 0px) - 16px)",
                         minHeight: 0,
+                        backgroundColor: "background.default",
+                        ...theme.applyStyles("dark", {
+                            backgroundColor: "background.paper",
+                        }),
                     }}
                 >
                     <Box
@@ -132,31 +140,30 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         }}
                     >
                         {/* Header */}
-                        <Stack
-                            direction="row"
-                            sx={{
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                px: 1,
-                                pt: 1,
-                                pb: 0.5,
-                            }}
-                        >
-                            <Box
+                        <Stack sx={{ px: 1, pt: 0.5, pb: 0.5 }}>
+                            <Stack
+                                direction="row"
                                 sx={{
-                                    px: 1,
-                                    lineHeight: 0,
-                                    color: "#111111",
-                                    ...theme.applyStyles("dark", {
-                                        color: "rgba(255,255,255,0.92)",
-                                    }),
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
                                 }}
                             >
-                                <EnteLogo height={18} />
-                            </Box>
-                            <IconButton onClick={onClose} color="secondary">
-                                <CloseIcon />
-                            </IconButton>
+                                <Box
+                                    sx={{
+                                        px: 1,
+                                        lineHeight: 0,
+                                        color: "#111111",
+                                        ...theme.applyStyles("dark", {
+                                            color: "rgba(255,255,255,0.92)",
+                                        }),
+                                    }}
+                                >
+                                    <EnteLogo height={18} />
+                                </Box>
+                                <IconButton onClick={onClose} color="secondary">
+                                    <CloseIcon />
+                                </IconButton>
+                            </Stack>
                         </Stack>
 
                         {userDetails?.email && (
@@ -320,21 +327,21 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
 
                         <Box sx={{ px: 0.5, mt: 0.5 }}>
                             <Stack sx={{ gap: 1 }}>
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={Home01Icon}
                                     label={t("home")}
                                     caption={String(totalItems)}
                                     selected={isHomeView}
                                     onClick={onSelectHome}
                                 />
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={Wallet05Icon}
                                     label={t("menuCollections")}
                                     caption={String(displayCollections.length)}
                                     selected={isCollectionsView}
                                     onClick={onSelectCollections}
                                 />
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={Delete02Icon}
                                     label={t("menuTrash")}
                                     caption={String(trashItemCount)}
@@ -343,22 +350,30 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                 />
                             </Stack>
                         </Box>
+                        <Box
+                            sx={{
+                                mx: 1.5,
+                                mt: 2,
+                                borderTop: 1,
+                                borderColor: "divider",
+                            }}
+                        />
 
                         <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
                             <Stack sx={{ gap: 1 }}>
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={UserIcon}
                                     label={t("account")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsAccountOpen(true)}
                                 />
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={HelpCircleIcon}
                                     label={t("help_and_support")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsSupportOpen(true)}
                                 />
-                                <SidebarCardButton
+                                <LockerSidebarCardButton
                                     icon={InformationCircleIcon}
                                     label={t("about")}
                                     endIcon={<ChevronRightIcon />}
@@ -366,15 +381,24 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                                 />
                             </Stack>
                         </Box>
-                    </Box>
-
-                    <Box sx={{ px: 0.5, pb: 1 }}>
-                        <SidebarCardButton
-                            icon={Logout05Icon}
-                            label={t("logout")}
-                            color="warning.main"
-                            onClick={logout}
+                        <Box
+                            sx={{
+                                mx: 1.5,
+                                mt: 1,
+                                borderTop: 1,
+                                borderColor: "divider",
+                            }}
                         />
+                        <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
+                            <Stack sx={{ gap: 1 }}>
+                                <LockerSidebarCardButton
+                                    icon={Logout05Icon}
+                                    label={t("logout")}
+                                    color="critical.main"
+                                    onClick={logout}
+                                />
+                            </Stack>
+                        </Box>
                     </Box>
 
                     <Box
@@ -386,7 +410,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         <LockerSocialFooter />
                     </Box>
                 </Stack>
-            </SidebarDrawer>
+            </LockerSidebarDrawer>
 
             <LockerAccountDrawer
                 open={isAccountOpen}
@@ -406,106 +430,3 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         </>
     );
 };
-
-interface SidebarCardButtonProps {
-    icon: Parameters<typeof HugeiconsIcon>[0]["icon"];
-    label: string;
-    onClick: () => void;
-    caption?: string;
-    endIcon?: React.ReactNode;
-    selected?: boolean;
-    color?: string;
-}
-
-const SidebarCardButton: React.FC<SidebarCardButtonProps> = ({
-    icon,
-    label,
-    onClick,
-    caption,
-    endIcon,
-    selected = false,
-    color,
-}) => (
-    <FocusVisibleRowButton onClick={onClick}>
-        <Stack
-            direction="row"
-            sx={(theme) => ({
-                minHeight: 56,
-                px: 2,
-                gap: 1.5,
-                alignItems: "center",
-                borderRadius: "20px",
-                backgroundColor: "backdrop.base",
-                color: color ?? "text.base",
-                transition: theme.transitions.create(
-                    ["background-color", "border-color", "color"],
-                    { duration: theme.transitions.duration.shorter },
-                ),
-                ...(selected && {
-                    backgroundColor: "fill.faintHover",
-                    boxShadow: `inset 0 0 0 1px ${theme.vars.palette.accent.main}`,
-                    color: "accent.main",
-                }),
-                "&:hover": {
-                    backgroundColor: selected ? "fill.faintHover" : "fill.faint",
-                },
-            })}
-        >
-            <HugeiconsIcon
-                icon={icon}
-                size={24}
-                color="currentColor"
-                strokeWidth={1.9}
-            />
-            <Typography
-                variant="small"
-                sx={{
-                    flex: 1,
-                    color: "inherit",
-                    fontWeight: selected ? 700 : 500,
-                }}
-            >
-                {label}
-            </Typography>
-            {caption && (
-                <Typography
-                    variant="mini"
-                    sx={{
-                        color: selected ? "accent.main" : "text.muted",
-                        flexShrink: 0,
-                    }}
-                >
-                    {caption}
-                </Typography>
-            )}
-            {endIcon && (
-                <Box sx={{ color: selected ? "accent.main" : "text.muted" }}>
-                    {endIcon}
-                </Box>
-            )}
-        </Stack>
-    </FocusVisibleRowButton>
-);
-
-const FocusVisibleRowButton = ({
-    children,
-    onClick,
-}: React.PropsWithChildren<{ onClick: () => void }>) => (
-    <Box
-        component="button"
-        type="button"
-        onClick={onClick}
-        sx={{
-            width: "100%",
-            p: 0,
-            m: 0,
-            border: 0,
-            background: "transparent",
-            textAlign: "inherit",
-            cursor: "pointer",
-            borderRadius: "20px",
-        }}
-    >
-        {children}
-    </Box>
-);
