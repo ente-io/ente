@@ -72,7 +72,8 @@ const wrapCanvasTextToWidth = (
         if (overflowIndex <= 0) return null;
 
         const whitespaceIndex = remaining.lastIndexOf(" ", overflowIndex - 1);
-        const splitIndex = whitespaceIndex > 0 ? whitespaceIndex : overflowIndex;
+        const splitIndex =
+            whitespaceIndex > 0 ? whitespaceIndex : overflowIndex;
         const line = remaining.slice(0, splitIndex).trimEnd();
         if (!line) return null;
 
@@ -96,18 +97,16 @@ const fitTitleLayout = (
         const lines = wrapCanvasTextToWidth(context, title, maxWidth, maxLines);
         if (!lines) continue;
 
-        return {
-            fontSize,
-            lineHeight: Math.round(fontSize * 1.14),
-            lines,
-        };
+        return { fontSize, lineHeight: Math.round(fontSize * 1.14), lines };
     }
 
     context.font = '700 34px "Space Grotesk", sans-serif';
     return {
         fontSize: 34,
         lineHeight: 39,
-        lines: wrapCanvasTextToWidth(context, title, maxWidth, maxLines) ?? [title],
+        lines: wrapCanvasTextToWidth(context, title, maxWidth, maxLines) ?? [
+            title,
+        ],
     };
 };
 

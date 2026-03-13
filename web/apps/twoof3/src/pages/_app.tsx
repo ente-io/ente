@@ -13,31 +13,16 @@ const twoOf3Theme = createTheme({
     colorSchemes: {
         light: {
             palette: {
-                primary: {
-                    main: "rgb(252, 239, 93)",
-                    contrastText: "#111111",
-                },
-                background: {
-                    default: "#ffffff",
-                    paper: "#ffffff",
-                },
-                text: {
-                    primary: "#111111",
-                    secondary: "rgba(17,17,17,0.68)",
-                },
+                primary: { main: "rgb(252, 239, 93)", contrastText: "#111111" },
+                background: { default: "#ffffff", paper: "#ffffff" },
+                text: { primary: "#111111", secondary: "rgba(17,17,17,0.68)" },
                 divider: "rgba(17,17,17,0.18)",
             },
         },
         dark: {
             palette: {
-                primary: {
-                    main: "rgb(252, 239, 93)",
-                    contrastText: "#111111",
-                },
-                background: {
-                    default: "#0b0b0b",
-                    paper: "#111111",
-                },
+                primary: { main: "rgb(252, 239, 93)", contrastText: "#111111" },
+                background: { default: "#0b0b0b", paper: "#111111" },
                 text: {
                     primary: "#fafafa",
                     secondary: "rgba(250,250,250,0.68)",
@@ -56,16 +41,8 @@ const twoOf3Theme = createTheme({
         h1: { fontWeight: 700, letterSpacing: "-0.05em" },
         h2: { fontWeight: 700, letterSpacing: "-0.04em" },
         h3: { fontWeight: 700, letterSpacing: "-0.04em" },
-        body1: {
-            fontWeight: 500,
-            lineHeight: 1.55,
-            letterSpacing: "-0.012em",
-        },
-        body2: {
-            fontWeight: 500,
-            lineHeight: 1.55,
-            letterSpacing: "-0.012em",
-        },
+        body1: { fontWeight: 500, lineHeight: 1.55, letterSpacing: "-0.012em" },
+        body2: { fontWeight: 500, lineHeight: 1.55, letterSpacing: "-0.012em" },
         subtitle1: { fontWeight: 500 },
         subtitle2: { fontWeight: 500 },
         button: {
@@ -76,9 +53,7 @@ const twoOf3Theme = createTheme({
     },
     components: {
         MuiButton: {
-            styleOverrides: {
-                root: { borderRadius: 18, boxShadow: "none" },
-            },
+            styleOverrides: { root: { borderRadius: 18, boxShadow: "none" } },
         },
     },
 });

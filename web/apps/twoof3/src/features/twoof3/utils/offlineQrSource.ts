@@ -19,7 +19,10 @@ const toStandaloneDecodeSource = (source: string) =>
     [
         "const decodeQR = (() => {",
         stripSourceMapComment(source)
-            .replace(/^import \{ Bitmap, utils \} from "\.\/index\.js";\n?/mu, "")
+            .replace(
+                /^import \{ Bitmap, utils \} from "\.\/index\.js";\n?/mu,
+                "",
+            )
             .replace(/^export function decodeQR\(/mu, "function decodeQR(")
             .replace(/^export default decodeQR;\n?/mu, "")
             .replace(/^export const _tests = /mu, "const qrDecodeTests = "),
@@ -31,6 +34,6 @@ export const OFFLINE_QR_DECODER_SOURCE = [
     "(() => {",
     toStandaloneIndexSource(qrIndexModuleSource),
     toStandaloneDecodeSource(qrDecodeModuleSource),
-    'globalThis.__twoOf3DecodeQR = decodeQR;',
+    "globalThis.__twoOf3DecodeQR = decodeQR;",
     "})();",
 ].join("\n\n");

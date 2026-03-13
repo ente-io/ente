@@ -148,10 +148,10 @@ const HELP_FAQS = [
         question: "What if 2of3.ente.io is unavailable?",
         answer: (
             <>
-                A fully offline HTML recovery page is included when you use
-                {" "}&quot;Download all cards&quot;. Open that file locally,
-                add any two matching cards, and recover without needing the
-                site. 2of3 is also{" "}
+                A fully offline HTML recovery page is included when you use{" "}
+                &quot;Download all cards&quot;. Open that file locally, add any
+                two matching cards, and recover without needing the site. 2of3
+                is also{" "}
                 <Box
                     component="a"
                     href="https://github.com/ente-io/ente"
@@ -165,8 +165,8 @@ const HELP_FAQS = [
                 >
                     open source
                 </Box>
-                , so the format is inspectable and recovery is not locked to
-                one hosted service.
+                , so the format is inspectable and recovery is not locked to one
+                hosted service.
             </>
         ),
     },
@@ -310,43 +310,41 @@ const Note = ({
     </Box>
 );
 
-const QrPreview = memo(({
-    value,
-}: {
-    value: NonNullable<ReturnType<typeof createQrSvgData>>;
-}) => (
-    <svg
-        viewBox={`0 0 ${value.viewBoxSize} ${value.viewBoxSize}`}
-        role="img"
-        aria-label="QR code"
-        shapeRendering="crispEdges"
-        style={{
-            width: "100%",
-            height: "100%",
-            display: "block",
-            background: "#ffffff",
-            imageRendering: "pixelated",
-        }}
-    >
-        <rect
-            width={value.viewBoxSize}
-            height={value.viewBoxSize}
-            rx="2.5"
-            fill="#ffffff"
-        />
-        {value.modules.map((module) => (
+const QrPreview = memo(
+    ({ value }: { value: NonNullable<ReturnType<typeof createQrSvgData>> }) => (
+        <svg
+            viewBox={`0 0 ${value.viewBoxSize} ${value.viewBoxSize}`}
+            role="img"
+            aria-label="QR code"
+            shapeRendering="crispEdges"
+            style={{
+                width: "100%",
+                height: "100%",
+                display: "block",
+                background: "#ffffff",
+                imageRendering: "pixelated",
+            }}
+        >
             <rect
-                key={`${module.x}-${module.y}`}
-                x={module.x}
-                y={module.y}
-                width="1"
-                height="1"
-                rx="0.08"
-                fill="#111111"
+                width={value.viewBoxSize}
+                height={value.viewBoxSize}
+                rx="2.5"
+                fill="#ffffff"
             />
-        ))}
-    </svg>
-));
+            {value.modules.map((module) => (
+                <rect
+                    key={`${module.x}-${module.y}`}
+                    x={module.x}
+                    y={module.y}
+                    width="1"
+                    height="1"
+                    rx="0.08"
+                    fill="#111111"
+                />
+            ))}
+        </svg>
+    ),
+);
 
 interface ShareCardPanelProps {
     busy: boolean;
@@ -515,7 +513,12 @@ const ShareCardPanel = memo(
                         </Stack>
                     )}
 
-                    <Stack direction="row" spacing={0.8} useFlexGap flexWrap="wrap">
+                    <Stack
+                        direction="row"
+                        spacing={0.8}
+                        useFlexGap
+                        flexWrap="wrap"
+                    >
                         <ActionButton
                             disabled={!card || busy}
                             onClick={() => {
@@ -529,7 +532,12 @@ const ShareCardPanel = memo(
                             disabled={!card || busy}
                             onClick={() => {
                                 if (!card) return;
-                                onCardAction("download", card, index, cardLabel);
+                                onCardAction(
+                                    "download",
+                                    card,
+                                    index,
+                                    cardLabel,
+                                );
                             }}
                         >
                             Download
@@ -656,7 +664,9 @@ const readShareFile = async (file: File) => {
         const text = (await file.text()).trim();
         if (!text) {
             if (file.type.startsWith("text/") || /\.txt$/iu.test(file.name)) {
-                throw new Error("That text file does not look like a 2of3 share.");
+                throw new Error(
+                    "That text file does not look like a 2of3 share.",
+                );
             }
         } else {
             try {
@@ -950,10 +960,7 @@ const Page = () => {
         [],
     );
 
-    const onRecoverFile = async (
-        slotIndex: number,
-        file: File,
-    ) => {
+    const onRecoverFile = async (slotIndex: number, file: File) => {
         try {
             const value = await readShareFile(file);
             parseShare(value);
@@ -1246,7 +1253,8 @@ const Page = () => {
                                         }
                                         slotProps={{
                                             htmlInput: {
-                                                maxLength: MAX_CARD_TITLE_LENGTH,
+                                                maxLength:
+                                                    MAX_CARD_TITLE_LENGTH,
                                             },
                                         }}
                                         sx={fieldSx}
@@ -1364,7 +1372,9 @@ const Page = () => {
                                                 busy={busyCard === index}
                                                 card={card}
                                                 cardLabel={cardLabel}
-                                                copied={copiedCardIndex === index}
+                                                copied={
+                                                    copiedCardIndex === index
+                                                }
                                                 index={index}
                                                 onCardAction={onCardAction}
                                                 onCopyCardCode={onCopyCardCode}
@@ -1876,7 +1886,8 @@ const Page = () => {
                                                 py: 0.42,
                                                 borderRadius: "999px",
                                                 border: "1.5px solid",
-                                                borderColor: "var(--accent-edge)",
+                                                borderColor:
+                                                    "var(--accent-edge)",
                                                 bgcolor: "var(--accent)",
                                             }}
                                         >
@@ -1988,14 +1999,14 @@ const Page = () => {
                                                 >
                                                     <Typography
                                                         sx={{
-                                                        fontSize: "0.75rem",
-                                                        fontWeight: 700,
-                                                        color: isAccent
-                                                            ? "#111111"
-                                                            : "var(--ink)",
-                                                        letterSpacing:
-                                                            "0.04em",
-                                                        textTransform:
+                                                            fontSize: "0.75rem",
+                                                            fontWeight: 700,
+                                                            color: isAccent
+                                                                ? "#111111"
+                                                                : "var(--ink)",
+                                                            letterSpacing:
+                                                                "0.04em",
+                                                            textTransform:
                                                                 "uppercase",
                                                         }}
                                                     >
@@ -2059,8 +2070,10 @@ const Page = () => {
                                         </Typography>
                                     </Stack>
                                     {HELP_FAQS.map((item, index) => {
-                                        const layout = HELP_CARD_LAYOUTS[index]!;
-                                        const isAccent = layout.tone === "accent";
+                                        const layout =
+                                            HELP_CARD_LAYOUTS[index]!;
+                                        const isAccent =
+                                            layout.tone === "accent";
                                         const isSoft = layout.tone === "soft";
 
                                         return (
@@ -2103,11 +2116,13 @@ const Page = () => {
                                                             width: "fit-content",
                                                             px: 0.8,
                                                             py: 0.32,
-                                                            borderRadius: "999px",
+                                                            borderRadius:
+                                                                "999px",
                                                             border: "1.5px solid",
-                                                            borderColor: isAccent
-                                                                ? "rgba(17,17,17,0.2)"
-                                                                : "var(--line-strong)",
+                                                            borderColor:
+                                                                isAccent
+                                                                    ? "rgba(17,17,17,0.2)"
+                                                                    : "var(--line-strong)",
                                                             bgcolor: isAccent
                                                                 ? "var(--chip-accent-bg)"
                                                                 : "var(--chip-bg)",
@@ -2205,7 +2220,10 @@ const Page = () => {
                                     sx={{
                                         color: "var(--ink)",
                                         fontWeight: 500,
-                                        fontSize: { xs: "0.98rem", md: "1.06rem" },
+                                        fontSize: {
+                                            xs: "0.98rem",
+                                            md: "1.06rem",
+                                        },
                                         textDecoration: "none",
                                         display: "inline-flex",
                                         alignItems: "center",
@@ -2242,7 +2260,10 @@ const Page = () => {
                                         </Box>
                                     </Box>
                                     <Box component="span">by</Box>
-                                    <Box component="span" sx={{ fontWeight: 700 }}>
+                                    <Box
+                                        component="span"
+                                        sx={{ fontWeight: 700 }}
+                                    >
                                         Ente
                                     </Box>
                                 </Box>
@@ -2273,9 +2294,7 @@ const Page = () => {
                                         justifyContent: "center",
                                         opacity: 0.58,
                                         transition: "opacity 140ms ease",
-                                        "&:hover": {
-                                            opacity: 1,
-                                        },
+                                        "&:hover": { opacity: 1 },
                                     }}
                                 >
                                     <Box

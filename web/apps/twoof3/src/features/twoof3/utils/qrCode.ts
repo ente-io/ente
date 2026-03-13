@@ -165,10 +165,7 @@ const decodeQrImage = async (image: DecodableImage) => {
     const attempts: {
         image: DecodableImage;
         options?: { cropToSquare?: boolean };
-    }[] = [
-        { image, options: { cropToSquare: false } },
-        { image },
-    ];
+    }[] = [{ image, options: { cropToSquare: false } }, { image }];
     const cardLikeCrops = [
         [0.086, 0.213, 0.829, 0.591],
         [0.135, 0.238, 0.73, 0.49],
