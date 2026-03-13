@@ -179,17 +179,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                   ) ?? null),
         [collections, selectedCollectionID],
     );
-    const collectionNameByID = useMemo(
-        () =>
-            new Map(
-                collections.map((collection) => [
-                    collection.id,
-                    collection.name,
-                ]),
-            ),
-        [collections],
-    );
-
     const trimmedSearch = searchTerm.trim();
     const searchQuery = trimmedSearch.toLowerCase();
     const searchActive = searchQuery.length > 0;
@@ -380,13 +369,10 @@ export const ItemList: React.FC<ItemListProps> = ({
     const getItemSecondaryText = useCallback(
         (item: LockerItem) => {
             const parts = [itemTypeLabel(item)];
-            if (selectedCollectionID === null) {
-                const collectionName = collectionNameByID.get(
-                    item.collectionID,
-                );
-                if (collectionName) {
-                    parts.push(collectionName);
-                }
+            const isSharedWithUser =
+                (item.ownerID ?? currentUserID) !== currentUserID;
+            if (isSharedWithUser) {
+                parts.push(t("sharedWithYou"));
             }
             if (item.updatedAt ?? item.createdAt) {
                 parts.push(
@@ -397,7 +383,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             }
             return parts.join(" • ");
         },
-        [collectionNameByID, itemTypeLabel, selectedCollectionID],
+        [currentUserID, itemTypeLabel],
     );
     const toggleHomeCollection = useCallback((collectionID: number) => {
         setHomeSelectedCollectionIDs((current) =>
@@ -1115,7 +1101,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                     canDownload={
                         !!masterKey && selectedDownloadableItems.length > 0
                     }
-                    canDelete={!!onDeleteItems && selectedOwnedItems.length > 0}
+                    canDelete={
+                        !!onDeleteItems && selectedVisibleItems.length > 0
+                    }
                     onToggleSelectAll={toggleSelectAllVisibleItems}
                     onDownload={downloadSelectedFiles}
                     onDelete={deleteSelectedFiles}
@@ -1147,6 +1135,13 @@ export const ItemList: React.FC<ItemListProps> = ({
                               setSelectedItem(null);
                               onDeleteItem(item);
                           }
+                        : undefined
+                }
+                onDeleteDisabledHint={
+                    !isTrashView &&
+                    selectedItem &&
+                    (selectedItem.ownerID ?? currentUserID) !== currentUserID
+                        ? t("actionNotSupportedForSharedFiles", { count: 1 })
                         : undefined
                 }
                 isTrashView={isTrashView}
@@ -1400,46 +1395,57 @@ const ItemsSection: React.FC<{
         <Stack
             sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 0, mt: 1 }}
         >
-            {items.map((item) => (
-                <ItemCard
-                    key={item.id}
-                    item={item}
-                    masterKey={masterKey}
-                    isTrashView={isTrashView}
-                    secondaryText={getSecondaryText(item)}
-                    onClick={() => onSelectItem(item)}
-                    onEdit={
-                        onEditItem &&
-                        (item.ownerID ?? currentUserID) === currentUserID
-                            ? onEditItem
-                            : undefined
-                    }
-                    onDelete={
-                        onDeleteItem &&
-                        (item.ownerID ?? currentUserID) === currentUserID
-                            ? onDeleteItem
-                            : undefined
-                    }
-                    onPermanentlyDelete={onPermanentlyDelete}
-                    onRestore={
-                        isTrashView
-                            ? (trashItem) => onRequestRestore(trashItem)
-                            : undefined
-                    }
-                    onShareLink={
-                        onShareLink &&
-                        canShareLockerFileLink(item, currentUserID)
-                            ? onShareLink
-                            : undefined
-                    }
-                    fileShareLink={fileShareLinksByFileID.get(item.id)}
-                    selectionMode={selectionMode}
-                    selectable
-                    selected={selectedItemIDSet?.has(item.id)}
-                    onToggleSelection={onToggleItemSelection}
-                    onLongPressSelect={onStartSelection}
-                />
-            ))}
+            {items.map((item) => {
+                const isOwnedByCurrentUser =
+                    (item.ownerID ?? currentUserID) === currentUserID;
+                return (
+                    <ItemCard
+                        key={item.id}
+                        item={item}
+                        masterKey={masterKey}
+                        isTrashView={isTrashView}
+                        secondaryText={getSecondaryText(item)}
+                        onClick={() => onSelectItem(item)}
+                        onEdit={
+                            onEditItem && isOwnedByCurrentUser
+                                ? onEditItem
+                                : undefined
+                        }
+                        onDelete={
+                            onDeleteItem && isOwnedByCurrentUser
+                                ? onDeleteItem
+                                : undefined
+                        }
+                        deleteDisabledHint={
+                            onDeleteItem &&
+                            !isTrashView &&
+                            !isOwnedByCurrentUser
+                                ? t("actionNotSupportedForSharedFiles", {
+                                      count: 1,
+                                  })
+                                : undefined
+                        }
+                        onPermanentlyDelete={onPermanentlyDelete}
+                        onRestore={
+                            isTrashView
+                                ? (trashItem) => onRequestRestore(trashItem)
+                                : undefined
+                        }
+                        onShareLink={
+                            onShareLink &&
+                            canShareLockerFileLink(item, currentUserID)
+                                ? onShareLink
+                                : undefined
+                        }
+                        fileShareLink={fileShareLinksByFileID.get(item.id)}
+                        selectionMode={selectionMode}
+                        selectable
+                        selected={selectedItemIDSet?.has(item.id)}
+                        onToggleSelection={onToggleItemSelection}
+                        onLongPressSelect={onStartSelection}
+                    />
+                );
+            })}
         </Stack>
     ) : (
         <Box sx={{ maxWidth: contentMaxWidth, mx: "auto" }}>{emptyState}</Box>
@@ -1760,6 +1766,7 @@ const CollectionCard: React.FC<{
 }> = ({ collection, onClick, onShare, onRename, onDelete }) => {
     return (
         <ButtonBase
+            component="div"
             onClick={onClick}
             sx={{
                 width: "100%",
