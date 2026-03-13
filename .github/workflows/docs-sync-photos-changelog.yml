@@ -1,4 +1,4 @@
-name: "Sync Photos Changelog"
+name: "Sync photos help changelog"
 
 on:
     release:
