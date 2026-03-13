@@ -1,5 +1,7 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, IconButton, Stack } from "@mui/material";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { t } from "i18next";
 import React from "react";
 
 interface LockerNavbarProps {
@@ -53,6 +55,28 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
             ></Box>
 
             <Box sx={{ width: 40 }} />
+        </Stack>
+        <Stack
+            direction="row"
+            role="status"
+            aria-live="polite"
+            sx={{
+                mt: 0.75,
+                px: 1.25,
+                py: 0.75,
+                gap: 0.75,
+                alignItems: "center",
+                borderRadius: "10px",
+                backgroundColor: "rgba(255, 188, 77, 0.18)",
+                border: "1px solid rgba(255, 220, 153, 0.45)",
+            }}
+        >
+            <WarningAmberRoundedIcon
+                sx={{ fontSize: 16, color: "#FFE3A8", flexShrink: 0 }}
+            />
+            <Typography variant="mini" sx={{ color: "#FFF5E0", lineHeight: 1.4 }}>
+                {t("lockerAlphaCryptoWarning")}
+            </Typography>
         </Stack>
     </Box>
 );
