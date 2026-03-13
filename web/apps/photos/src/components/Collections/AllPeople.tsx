@@ -185,7 +185,46 @@ export const AllPeople: React.FC<AllPeopleProps> = ({
 
 const Column3To2Breakpoint = 559;
 const PeopleRowItemSize = 154;
+const PeopleListTopSpacing = 16;
 const personCardShellClassName = "all-people-person-card";
+
+const addTopSpacing = (
+    value: React.CSSProperties["top"] | React.CSSProperties["height"],
+) =>
+    typeof value == "number"
+        ? value + PeopleListTopSpacing
+        : value
+          ? `calc(${value} + ${PeopleListTopSpacing}px)`
+          : undefined;
+
+const peopleListInnerStyle = (
+    style: React.CSSProperties | undefined,
+): React.CSSProperties => {
+    return {
+        ...style,
+        boxSizing: "border-box",
+        position: "relative",
+        height: addTopSpacing(style?.height),
+    };
+};
+
+const peopleRowStyle = (
+    style: React.CSSProperties,
+): React.CSSProperties => {
+    return {
+        ...style,
+        top: addTopSpacing(style.top),
+    };
+};
+
+const PeopleListInner = React.forwardRef<
+    HTMLDivElement,
+    React.ComponentPropsWithoutRef<"div">
+>(({ style, ...props }, ref) => (
+    <div ref={ref} {...props} style={peopleListInnerStyle(style)} />
+));
+
+PeopleListInner.displayName = "PeopleListInner";
 
 const AllPeopleDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": { justifyContent: "flex-end" },
@@ -384,10 +423,16 @@ const PeopleRow = React.memo(
         const peopleRow = personRows[index]!;
 
         return (
-            <div style={style}>
+            <div style={peopleRowStyle(style)}>
                 <Stack
                     direction="row"
-                    sx={{ px: 2, pt: index === 0 ? "16px" : 0, gap: 0.5 }}
+                    sx={{
+                        boxSizing: "border-box",
+                        height: "100%",
+                        px: 2,
+                        pb: 0.5,
+                        gap: 0.5,
+                    }}
                 >
                     {peopleRow.map((person) => (
                         <PersonCard
@@ -457,6 +502,7 @@ const AllPeopleContent: React.FC<AllPeopleContentProps> = ({
                         itemCount={personRows.length}
                         itemSize={PeopleRowItemSize}
                         itemData={itemData}
+                        innerElementType={PeopleListInner}
                     >
                         {PeopleRow}
                     </FixedSizeList>
