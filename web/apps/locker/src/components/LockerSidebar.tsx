@@ -38,6 +38,7 @@ interface LockerSidebarProps {
         storageLimit: number;
         fileCount: number;
         lockerFileLimit: number;
+        isPartOfFamily: boolean;
         lockerFamilyFileCount?: number;
     };
 }
@@ -81,7 +82,9 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
         ? Math.min(userDetails.fileCount / maxFileCount, 1)
         : 0;
     const showFamilyBreakup =
-        typeof userDetails?.lockerFamilyFileCount === "number";
+        !!userDetails &&
+        userDetails.isPartOfFamily &&
+        typeof userDetails.lockerFamilyFileCount === "number";
     const familyProgress = showFamilyBreakup
         ? Math.min((userDetails.lockerFamilyFileCount ?? 0) / maxFileCount, 1)
         : 0;

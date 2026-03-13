@@ -50,22 +50,47 @@ interface UserDetails {
     storageLimit: number;
     fileCount: number;
     lockerFileLimit: number;
+    isPartOfFamily: boolean;
     lockerFamilyFileCount?: number;
 }
 
 const LOCKER_FILE_LIMIT_FREE = 100;
 const LOCKER_FILE_LIMIT_PAID = 1000;
 
+interface LockerBonus {
+    type?: string;
+}
+
+interface LockerUserDetailsResponse {
+    email?: string;
+    usage?: number;
+    fileCount?: number;
+    lockerFamilyUsage?: { familyFileCount?: number };
+    familyData?: { members?: unknown[] };
+    bonusData?: { storageBonuses?: LockerBonus[] };
+    subscription?: {
+        storage?: number;
+        productID?: string;
+        expiryTime?: number;
+    };
+}
+
 const hasPaidLockerAccess = (json: {
     subscription?: { productID?: string; expiryTime?: number };
     familyData?: { members?: unknown[] };
-    bonusData?: { storageBonuses?: unknown[] };
+    bonusData?: { storageBonuses?: LockerBonus[] };
 }) => {
     const hasActivePaidSubscription =
         json.subscription?.productID !== "free" &&
         (json.subscription?.expiryTime ?? 0) > Date.now() * 1000;
     const isPartOfFamily = (json.familyData?.members?.length ?? 0) > 0;
-    const hasPaidAddon = (json.bonusData?.storageBonuses?.length ?? 0) > 0;
+    const hasPaidAddon =
+        json.bonusData?.storageBonuses?.some(
+            (bonus) =>
+                bonus.type !== undefined &&
+                bonus.type !== "SIGN_UP" &&
+                bonus.type !== "REFERRAL",
+        ) ?? false;
 
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
@@ -114,6 +139,31 @@ const Page: React.FC = () => {
         new Map<number, LockerFileShareLinkSummary>(),
     );
 
+    const loadUserDetails = useCallback(async () => {
+        try {
+            const res = await fetch(
+                await apiURL("/users/details/v2", { memoryCount: true }),
+                { headers: await authenticatedRequestHeaders() },
+            );
+            ensureOk(res);
+            const json = (await res.json()) as LockerUserDetailsResponse;
+            setUserDetails({
+                email: json.email ?? "",
+                usage: json.usage ?? 0,
+                storageLimit: json.subscription?.storage ?? 0,
+                fileCount: json.fileCount ?? 0,
+                lockerFileLimit: hasPaidLockerAccess(json)
+                    ? LOCKER_FILE_LIMIT_PAID
+                    : LOCKER_FILE_LIMIT_FREE,
+                isPartOfFamily: (json.familyData?.members?.length ?? 0) > 0,
+                lockerFamilyFileCount:
+                    json.lockerFamilyUsage?.familyFileCount,
+            });
+        } catch (e) {
+            log.error("Failed to fetch user details", e);
+        }
+    }, []);
+
     // Refresh data from remote
     const refreshData = useCallback(
         async (mk?: string) => {
@@ -124,6 +174,7 @@ const Page: React.FC = () => {
                     fetchLockerData(key),
                     fetchLockerTrash(key),
                     fetchLockerFileShareLinks(),
+                    loadUserDetails(),
                 ]);
                 setCollections(data);
                 setTrashItems(trash);
@@ -135,7 +186,7 @@ const Page: React.FC = () => {
                     showMiniDialog(sessionExpiredDialogAttributes(logout));
             }
         },
-        [masterKey, logout, showMiniDialog],
+        [loadUserDetails, masterKey, logout, showMiniDialog],
     );
 
     useEffect(() => {
@@ -148,40 +199,7 @@ const Page: React.FC = () => {
             }
             setMasterKey(mk);
 
-            // Fetch user details for sidebar (non-blocking on failure).
-            try {
-                const res = await fetch(
-                    await apiURL("/users/details/v2", { memoryCount: true }),
-                    { headers: await authenticatedRequestHeaders() },
-                );
-                ensureOk(res);
-                const json = (await res.json()) as {
-                    email?: string;
-                    usage?: number;
-                    fileCount?: number;
-                    lockerFamilyUsage?: { familyFileCount?: number };
-                    familyData?: { members?: unknown[] };
-                    bonusData?: { storageBonuses?: unknown[] };
-                    subscription?: {
-                        storage?: number;
-                        productID?: string;
-                        expiryTime?: number;
-                    };
-                };
-                setUserDetails({
-                    email: json.email ?? "",
-                    usage: json.usage ?? 0,
-                    storageLimit: json.subscription?.storage ?? 0,
-                    fileCount: json.fileCount ?? 0,
-                    lockerFileLimit: hasPaidLockerAccess(json)
-                        ? LOCKER_FILE_LIMIT_PAID
-                        : LOCKER_FILE_LIMIT_FREE,
-                    lockerFamilyFileCount:
-                        json.lockerFamilyUsage?.familyFileCount,
-                });
-            } catch (e) {
-                log.error("Failed to fetch user details", e);
-            }
+            void loadUserDetails();
 
             try {
                 const [data, trash, fileLinks] = await Promise.all([
@@ -206,7 +224,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void load();
-    }, [router, logout, showMiniDialog]);
+    }, [loadUserDetails, router, logout, showMiniDialog]);
 
     const handleSelectCollection = useCallback((id: number | null) => {
         setSelectedCollectionID(id);
