@@ -117,11 +117,11 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                             borderColor: "transparent",
                         },
                         "&.Mui-focused fieldset": {
-                            borderColor: "rgba(16, 113, 255, 0.35)",
+                            borderColor: "rgba(255, 255, 255, 0.28)",
                             borderWidth: "1px",
                         },
                         "&.Mui-focused": {
-                            boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.12)",
+                            boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.1)",
                         },
                     },
                 }}
