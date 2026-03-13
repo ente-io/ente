@@ -61,20 +61,40 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
             role="status"
             aria-live="polite"
             sx={{
-                mt: 0.75,
-                px: 1.25,
-                py: 0.75,
-                gap: 0.75,
+                mt: 1,
+                px: 1.5,
+                py: 1,
+                gap: 1,
                 alignItems: "center",
-                borderRadius: "10px",
-                backgroundColor: "rgba(255, 188, 77, 0.18)",
-                border: "1px solid rgba(255, 220, 153, 0.45)",
+                borderRadius: "12px",
+                backgroundColor: "#FFE08A",
+                border: "1px solid #FFD057",
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
             }}
         >
             <WarningAmberRoundedIcon
-                sx={{ fontSize: 16, color: "#FFE3A8", flexShrink: 0 }}
+                sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
             />
-            <Typography variant="mini" sx={{ color: "#FFF5E0", lineHeight: 1.4 }}>
+            <Typography
+                variant="mini"
+                sx={{
+                    px: 0.75,
+                    py: 0.25,
+                    borderRadius: "999px",
+                    border: "1px solid rgba(92, 58, 0, 0.3)",
+                    backgroundColor: "rgba(255, 255, 255, 0.45)",
+                    color: "#5C3A00",
+                    fontWeight: 800,
+                    letterSpacing: "0.03em",
+                    flexShrink: 0,
+                }}
+            >
+                ALPHA
+            </Typography>
+            <Typography
+                variant="small"
+                sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
+            >
                 {t("lockerAlphaCryptoWarning")}
             </Typography>
         </Stack>
