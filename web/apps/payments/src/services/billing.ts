@@ -81,7 +81,7 @@ export const parseAndHandleRequest = async () => {
 
 const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
 const paymentIntentPollIntervalMs = 2_000;
-const paymentIntentPollTimeoutMs = 180_000;
+const paymentIntentPollTimeoutMs = 300_000;
 const pendingPaymentContextStorageKey = "ente.payments.pending-context";
 
 type StripeJS = NonNullable<Awaited<ReturnType<typeof loadStripe>>>;
