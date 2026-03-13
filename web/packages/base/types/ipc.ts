@@ -34,6 +34,18 @@ export interface NativeDeviceLockCapability {
 }
 
 /**
+ * Persisted desktop app-lock configuration.
+ *
+ * This excludes the passphrase hash material, which continues to live in the
+ * renderer KV DB.
+ */
+export interface PersistedAppLockConfig {
+    enabled: boolean;
+    lockType: "pin" | "password" | "device" | "none";
+    autoLockTimeMs: number;
+}
+
+/**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
  *
@@ -129,6 +141,31 @@ export interface Electron {
      * persistent safe storage accessible to the desktop app.
      */
     saveMasterKeyInSafeStorage: (masterKey: string) => Promise<void>;
+
+    /**
+     * Return true when the desktop app can currently use OS safe storage.
+     */
+    isSafeStorageAvailable: () => Promise<boolean>;
+
+    /**
+     * Return the persisted desktop app-lock configuration from safe storage, if
+     * any.
+     */
+    appLockConfigFromSafeStorage: () => Promise<
+        PersistedAppLockConfig | undefined
+    >;
+
+    /**
+     * Save the given desktop app-lock configuration to safe storage.
+     */
+    saveAppLockConfigInSafeStorage: (
+        config: PersistedAppLockConfig,
+    ) => Promise<void>;
+
+    /**
+     * Remove any persisted desktop app-lock configuration from safe storage.
+     */
+    clearAppLockConfigFromSafeStorage: () => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes
