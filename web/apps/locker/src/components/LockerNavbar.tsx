@@ -1,7 +1,16 @@
 import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    InputAdornment,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { t } from "i18next";
 import React from "react";
 
 const contentMaxWidth = 560;
@@ -11,6 +20,10 @@ interface LockerNavbarProps {
     onOpenSidebar: () => void;
     /** True when the mobile drawer trigger should be shown. */
     showMenuButton: boolean;
+    /** Current value of the Locker search query. */
+    searchTerm: string;
+    /** Update callback for the Locker search query. */
+    onSearchTermChange: (value: string) => void;
 }
 
 /**
@@ -23,6 +36,8 @@ interface LockerNavbarProps {
 export const LockerNavbar: React.FC<LockerNavbarProps> = ({
     onOpenSidebar,
     showMenuButton,
+    searchTerm,
+    onSearchTermChange,
 }) => (
     <Box
         sx={{
@@ -66,50 +81,102 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
 
             <Box sx={{ width: 40 }} />
         </Stack>
-        <Stack
-            direction="row"
-            role="status"
-            aria-live="polite"
+
+        <Box sx={{ maxWidth: contentMaxWidth, mx: "auto", mt: 0.5, pb: 1.5 }}>
+            <TextField
+                size="small"
+                placeholder={t("searchHint")}
+                value={searchTerm}
+                onChange={(event) => onSearchTermChange(event.target.value)}
+                variant="outlined"
+                fullWidth
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon
+                                    sx={{
+                                        fontSize: 20,
+                                        color: "text.faint",
+                                    }}
+                                />
+                            </InputAdornment>
+                        ),
+                    },
+                }}
+                sx={{
+                    "& .MuiOutlinedInput-root": {
+                        minHeight: 48,
+                        borderRadius: "24px",
+                        backgroundColor: "background.paper",
+                        "& .MuiOutlinedInput-input": { py: 1.5 },
+                        "& fieldset": {
+                            borderColor: "transparent",
+                        },
+                        "&:hover fieldset": {
+                            borderColor: "transparent",
+                        },
+                        "&.Mui-focused fieldset": {
+                            borderColor: "rgba(16, 113, 255, 0.35)",
+                            borderWidth: "1px",
+                        },
+                        "&.Mui-focused": {
+                            boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.12)",
+                        },
+                    },
+                }}
+            />
+        </Box>
+    </Box>
+);
+
+export const LockerUnstableToast: React.FC = () => (
+    <Stack
+        direction="row"
+        role="status"
+        aria-live="polite"
+        sx={{
+            position: "fixed",
+            left: "50%",
+            bottom: { xs: 16, sm: 24 },
+            transform: "translateX(-50%)",
+            width: "calc(100% - 32px)",
+            maxWidth: contentMaxWidth,
+            px: 1.5,
+            py: 1,
+            gap: 1,
+            alignItems: "center",
+            borderRadius: "16px",
+            backgroundColor: "#FFE08A",
+            border: "1px solid #FFD057",
+            boxShadow: "0 12px 30px rgba(0, 0, 0, 0.24)",
+            zIndex: 1400,
+        }}
+    >
+        <WarningAmberRoundedIcon
+            sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
+        />
+        <Typography
+            variant="mini"
             sx={{
-                width: "100%",
-                maxWidth: contentMaxWidth,
-                mx: "auto",
-                mt: 1,
-                px: 1.5,
-                py: 1,
-                gap: 1,
-                alignItems: "center",
-                borderRadius: "12px",
-                backgroundColor: "#FFE08A",
-                border: "1px solid #FFD057",
-                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
+                px: 0.75,
+                py: 0.25,
+                borderRadius: "999px",
+                border: "1px solid rgba(92, 58, 0, 0.3)",
+                backgroundColor: "rgba(255, 255, 255, 0.45)",
+                color: "#5C3A00",
+                fontWeight: 800,
+                letterSpacing: "0.03em",
+                flexShrink: 0,
             }}
         >
-            <WarningAmberRoundedIcon
-                sx={{ fontSize: 20, color: "#5C3A00", flexShrink: 0 }}
-            />
-            <Typography
-                variant="mini"
-                sx={{
-                    px: 0.75,
-                    py: 0.25,
-                    borderRadius: "999px",
-                    border: "1px solid rgba(92, 58, 0, 0.3)",
-                    backgroundColor: "rgba(255, 255, 255, 0.45)",
-                    color: "#5C3A00",
-                    fontWeight: 800,
-                    letterSpacing: "0.03em",
-                    flexShrink: 0,
-                }}
-            >
-                WARNING
-            </Typography>
-            <Typography
-                variant="small"
-                sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
-            >
-                You are using an unstable version of Locker.
-            </Typography>
-        </Stack>
-    </Box>
+            WARNING
+        </Typography>
+        <Typography
+            variant="small"
+            sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
+        >
+            You are using an unstable version of Locker.
+        </Typography>
+    </Stack>
 );

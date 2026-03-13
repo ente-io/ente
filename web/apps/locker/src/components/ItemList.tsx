@@ -6,7 +6,6 @@ import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import {
@@ -18,7 +17,6 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    InputAdornment,
     Snackbar,
     Stack,
     TextField,
@@ -71,6 +69,7 @@ interface ItemListProps {
     onDeleteCollection?: (collectionID: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
+    searchTerm: string;
 }
 
 const contentMaxWidth = 560;
@@ -93,9 +92,9 @@ export const ItemList: React.FC<ItemListProps> = ({
     onDeleteCollection,
     onCreateCollection,
     onShareCollection,
+    searchTerm,
 }) => {
     const currentUserID = ensureLocalUser().id;
-    const [searchTerm, setSearchTerm] = useState("");
     const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
     const [restoreItem, setRestoreItem] = useState<LockerItem | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
@@ -597,60 +596,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                     }),
                 })}
             >
-                <Box
-                    sx={{
-                        background:
-                            "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
-                        px: { xs: 2, sm: 3 },
-                        pb: 1.75,
-                        pt: 0.25,
-                    }}
-                >
-                    <Box sx={{ maxWidth: contentMaxWidth, mx: "auto" }}>
-                        <TextField
-                            size="small"
-                            placeholder={t("searchHint")}
-                            value={searchTerm}
-                            onChange={(event) =>
-                                setSearchTerm(event.target.value)
-                            }
-                            variant="outlined"
-                            fullWidth
-                            slotProps={{
-                                input: {
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon
-                                                sx={{
-                                                    fontSize: 20,
-                                                    color: "text.faint",
-                                                }}
-                                            />
-                                        </InputAdornment>
-                                    ),
-                                },
-                            }}
-                            sx={{
-                                "& .MuiOutlinedInput-root": {
-                                    minHeight: 48,
-                                    borderRadius: "24px",
-                                    backgroundColor: "background.paper",
-                                    "& .MuiOutlinedInput-input": { py: 1.5 },
-                                    "& fieldset": {
-                                        borderColor: "transparent",
-                                    },
-                                    "&:hover fieldset": {
-                                        borderColor: "transparent",
-                                    },
-                                    "&.Mui-focused fieldset": {
-                                        borderColor: "primary.main",
-                                    },
-                                },
-                            }}
-                        />
-                    </Box>
-                </Box>
-
                 <Box
                     sx={(theme) => ({
                         px: { xs: 2, sm: 3 },

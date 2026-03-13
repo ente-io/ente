@@ -54,15 +54,13 @@ export const LockerSidebarCardButton: React.FC<
                     ["background-color", "border-color", "color"],
                     { duration: theme.transitions.duration.shorter },
                 ),
+                border: "1px solid transparent",
                 ...(selected && {
-                    backgroundColor: "fill.faintHover",
                     boxShadow: `inset 0 0 0 1px ${theme.vars.palette.accent.main}`,
                     color: "accent.main",
                 }),
                 "&:hover": {
-                    backgroundColor: selected
-                        ? "fill.faintHover"
-                        : "fill.faint",
+                    backgroundColor: "fill.faint",
                 },
             })}
         >

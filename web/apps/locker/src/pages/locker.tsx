@@ -3,7 +3,7 @@ import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
-import { LockerNavbar } from "components/LockerNavbar";
+import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
@@ -121,6 +121,7 @@ const Page: React.FC = () => {
     const [selectedCollectionID, setSelectedCollectionID] = useState<
         number | null
     >(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -508,7 +509,10 @@ const Page: React.FC = () => {
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
                 />
+                <LockerUnstableToast />
                 <Box
                     sx={{
                         flex: 1,
@@ -548,7 +552,10 @@ const Page: React.FC = () => {
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
             />
+            <LockerUnstableToast />
             <Box
                 sx={{
                     flex: 1,
@@ -576,6 +583,7 @@ const Page: React.FC = () => {
                     onDeleteCollection={handleDeleteCollection}
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
+                    searchTerm={searchTerm}
                 />
             </Box>
             <LockerSidebar
