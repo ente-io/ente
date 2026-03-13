@@ -30,6 +30,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { formatLockerMutationError } from "services/locker-errors";
 import type { LockerCollection, LockerItemType } from "types";
 import { visibleLockerCollections } from "types";
 
@@ -208,11 +209,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             handleClose();
         } catch (error) {
             log.error("Failed to save Locker item", error);
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : t("failedToSaveRecord"),
-            );
+            setError(await formatLockerMutationError(error, "createItem"));
         } finally {
             setSaving(false);
         }
@@ -230,7 +227,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             handleClose();
         } catch (error) {
             log.error("Failed to upload Locker file", error);
-            setError(error instanceof Error ? error.message : t("uploadError"));
+            setError(await formatLockerMutationError(error, "uploadFile"));
         } finally {
             setUploading(false);
         }

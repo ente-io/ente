@@ -19,6 +19,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useMemo } from "react";
+import { effectiveLockerFileLimit } from "services/locker-limits";
 import type { LockerCollection } from "types";
 import { isImportantCollection, visibleLockerCollections } from "types";
 
@@ -34,6 +35,7 @@ interface CollectionSidebarProps {
     onSelectCollections: () => void;
     onSelectTrash: () => void;
     trashItemCount: number;
+    isProductionEndpoint: boolean;
     userDetails?: {
         email: string;
         usage: number;
@@ -52,6 +54,7 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
     onSelectCollections,
     onSelectTrash,
     trashItemCount,
+    isProductionEndpoint,
     userDetails,
 }) => {
     const { logout } = useBaseContext();
@@ -63,18 +66,19 @@ export const CollectionSidebar: React.FC<CollectionSidebarProps> = ({
     const totalItems = collections.reduce((sum, c) => sum + c.items.length, 0);
     const isHomeSelected =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
-    const usageProgress = userDetails?.lockerFileLimit
-        ? Math.min(
-              (userDetails.fileCount / userDetails.lockerFileLimit) * 100,
-              100,
+    const usageLimit = userDetails
+        ? effectiveLockerFileLimit(
+              userDetails.lockerFileLimit,
+              isProductionEndpoint,
           )
+        : 100;
+    const usageProgress = userDetails
+        ? Math.min((userDetails.fileCount / usageLimit) * 100, 100)
         : 0;
     const formattedUsage = new Intl.NumberFormat().format(
         userDetails?.fileCount ?? 0,
     );
-    const formattedUsageLimit = new Intl.NumberFormat().format(
-        userDetails?.lockerFileLimit ?? 100,
-    );
+    const formattedUsageLimit = new Intl.NumberFormat().format(usageLimit);
 
     return (
         <Box
