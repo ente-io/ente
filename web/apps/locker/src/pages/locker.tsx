@@ -16,7 +16,7 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { masterKeyFromSession } from "ente-base/session";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
