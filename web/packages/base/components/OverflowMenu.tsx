@@ -118,7 +118,7 @@ interface OverflowMenuOptionProps {
      * If true, reduce spacing and sizing for dense menus.
      */
     compact?: boolean;
-
+    /**
      * If true, the option is shown disabled and cannot be selected.
      */
     disabled?: boolean;
