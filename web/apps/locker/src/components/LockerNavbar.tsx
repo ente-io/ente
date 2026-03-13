@@ -3,6 +3,8 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import React from "react";
 
+const contentMaxWidth = 620;
+
 interface LockerNavbarProps {
     /** Called when the user taps the hamburger menu icon. */
     onOpenSidebar: () => void;
@@ -60,6 +62,9 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
             role="status"
             aria-live="polite"
             sx={{
+                width: "100%",
+                maxWidth: contentMaxWidth,
+                mx: "auto",
                 mt: 1,
                 px: 1.5,
                 py: 1,
@@ -94,8 +99,7 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                 variant="small"
                 sx={{ color: "#3B2500", lineHeight: 1.4, fontWeight: 700 }}
             >
-                Warning: Locker uses a new cryptography library that is still
-                being tested.
+                The web version of Locker is unstable
             </Typography>
         </Stack>
     </Box>

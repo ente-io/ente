@@ -76,6 +76,8 @@ interface ItemListProps {
     onShareCollection?: (collection: LockerCollection) => void;
 }
 
+const contentMaxWidth = 620;
+
 export const ItemList: React.FC<ItemListProps> = ({
     collections,
     masterKey,
@@ -675,7 +677,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                         pt: 0.25,
                     }}
                 >
-                    <Box sx={{ maxWidth: 760 }}>
+                    <Box sx={{ maxWidth: contentMaxWidth, mx: "auto" }}>
                         <TextField
                             size="small"
                             placeholder={t("searchHint")}
@@ -739,7 +741,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 <Stack
                                     direction="row"
                                     sx={{
-                                        maxWidth: 760,
+                                        width: "100%",
+                                        maxWidth: contentMaxWidth,
+                                        mx: "auto",
                                         alignItems: "center",
                                         gap: 1,
                                         mt: -0.25,
@@ -1337,7 +1341,8 @@ const SectionHeader: React.FC<{
             alignItems: "center",
             justifyContent: "space-between",
             gap: 2,
-            maxWidth: 760,
+            maxWidth: contentMaxWidth,
+            mx: "auto",
             mt: 3,
             mb: 1.5,
         }}
@@ -1392,7 +1397,9 @@ const ItemsSection: React.FC<{
     emptyState,
 }) =>
     items.length > 0 ? (
-        <Stack sx={{ maxWidth: 760, gap: 0, mt: 1 }}>
+        <Stack
+            sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 0, mt: 1 }}
+        >
             {items.map((item) => (
                 <ItemCard
                     key={item.id}
@@ -1435,7 +1442,7 @@ const ItemsSection: React.FC<{
             ))}
         </Stack>
     ) : (
-        <Box sx={{ maxWidth: 760 }}>{emptyState}</Box>
+        <Box sx={{ maxWidth: contentMaxWidth, mx: "auto" }}>{emptyState}</Box>
     );
 
 const SelectionActionBar: React.FC<{
@@ -1631,6 +1638,7 @@ const CollectionGrid: React.FC<{
             sx={{
                 width: "100%",
                 maxWidth: { xs: "100%", sm: "440px" },
+                mx: "auto",
                 gap: 1.25,
             }}
         >
@@ -1668,46 +1676,65 @@ const CollectionChipFilters: React.FC<{
     selectedCollectionIDs: number[];
     onToggleCollection: (collectionID: number) => void;
 }> = ({ collections, selectedCollectionIDs, onToggleCollection }) => (
-    <Stack
-        direction="row"
-        sx={{ maxWidth: 760, flexWrap: "wrap", gap: 1, mt: 0.5 }}
+    <Box
+        sx={{
+            position: "relative",
+            width: "100%",
+            maxWidth: contentMaxWidth,
+            mx: "auto",
+            mt: 0.5,
+        }}
     >
-        {collections.map((collection) => {
-            const isSelected = selectedCollectionIDs.includes(collection.id);
+        <Stack
+            direction="row"
+            sx={{
+                flexWrap: "nowrap",
+                overflowX: "auto",
+                overflowY: "hidden",
+                justifyContent: "flex-start",
+                gap: 1,
+                pb: 0.5,
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": {
+                    display: "none",
+                },
+            }}
+        >
+            {collections.map((collection) => {
+                const isSelected = selectedCollectionIDs.includes(
+                    collection.id,
+                );
 
-            return (
-                <Chip
-                    key={collection.id}
-                    clickable
-                    label={collection.name}
-                    onClick={() => onToggleCollection(collection.id)}
-                    sx={(theme) => ({
-                        height: 36,
-                        borderRadius: "999px",
-                        fontWeight: 600,
-                        color: isSelected
-                            ? "#FFFFFF"
-                            : theme.vars.palette.text.base,
-                        background: isSelected
-                            ? "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)"
-                            : "rgba(18, 36, 63, 0.72)",
-                        border: isSelected
-                            ? "1px solid rgba(160, 199, 255, 0.18)"
-                            : "1px solid rgba(159, 193, 255, 0.12)",
-                        boxShadow: isSelected
-                            ? "0 8px 18px rgba(0, 66, 173, 0.22)"
-                            : "none",
-                        "& .MuiChip-label": { px: 1.5 },
-                        "&:hover": {
-                            background: isSelected
-                                ? "linear-gradient(135deg, #1A7AFF 0%, #004DB8 100%)"
-                                : "rgba(25, 47, 81, 0.82)",
-                        },
-                    })}
-                />
-            );
-        })}
-    </Stack>
+                return (
+                    <Chip
+                        key={collection.id}
+                        clickable
+                        label={collection.name}
+                        onClick={() => onToggleCollection(collection.id)}
+                        sx={(theme) => ({
+                            height: 36,
+                            flexShrink: 0,
+                            borderRadius: "999px",
+                            fontWeight: 600,
+                            color: isSelected
+                                ? theme.vars.palette.text.base
+                                : theme.vars.palette.text.base,
+                            backgroundColor: theme.vars.palette.fill.faint,
+                            border: "1px solid transparent",
+                            boxShadow: isSelected
+                                ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
+                                : "none",
+                            "& .MuiChip-label": { px: 1.5 },
+                            "&:hover": {
+                                backgroundColor:
+                                    theme.vars.palette.fill.faintHover,
+                            },
+                        })}
+                    />
+                );
+            })}
+        </Stack>
+    </Box>
 );
 
 const EmptyState: React.FC<{ title: string; subtitle: string }> = ({
