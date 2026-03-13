@@ -434,9 +434,7 @@ export const LockerCollectionShareDrawer: React.FC<
                                 "& .MuiInputLabel-root.Mui-focused": {
                                     color: "#FFFFFF",
                                 },
-                                "& .MuiInputBase-input": {
-                                    color: "#FFFFFF",
-                                },
+                                "& .MuiInputBase-input": { color: "#FFFFFF" },
                                 "& .MuiFormHelperText-root": {
                                     color: viewerEmailError
                                         ? theme.vars.palette.critical.main

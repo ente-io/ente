@@ -1026,7 +1026,9 @@ const getComponents = (appName: AppName): Components => {
                         borderRadius: "16px",
                     },
                 } as NonNullable<
-                    NonNullable<Components["MuiOutlinedInput"]>["styleOverrides"]
+                    NonNullable<
+                        Components["MuiOutlinedInput"]
+                    >["styleOverrides"]
                 >,
             },
             MuiFilledInput: {
@@ -1034,8 +1036,9 @@ const getComponents = (appName: AppName): Components => {
                 styleOverrides: {
                     ...components.MuiFilledInput?.styleOverrides,
                     root: {
-                        ...(components.MuiFilledInput?.styleOverrides
-                            ?.root as Record<string, unknown> | undefined),
+                        ...(components.MuiFilledInput?.styleOverrides?.root as
+                            | Record<string, unknown>
+                            | undefined),
                         borderRadius: "16px",
                     },
                 } as NonNullable<
@@ -1067,7 +1070,9 @@ const getComponents = (appName: AppName): Components => {
                         paddingTop: "8px",
                     },
                 } as NonNullable<
-                    NonNullable<Components["MuiDialogContent"]>["styleOverrides"]
+                    NonNullable<
+                        Components["MuiDialogContent"]
+                    >["styleOverrides"]
                 >,
             },
         };

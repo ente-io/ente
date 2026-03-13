@@ -1,5 +1,5 @@
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -904,10 +904,7 @@ const CollectionSelector: React.FC<{
                                     height: 48,
                                     borderRadius: "14px",
                                 },
-                                "& .MuiInputBase-input": {
-                                    pt: 1,
-                                    pb: 0.5,
-                                },
+                                "& .MuiInputBase-input": { pt: 1, pb: 0.5 },
                             }}
                             value={createName}
                             onChange={(event) => {

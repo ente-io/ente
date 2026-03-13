@@ -44,13 +44,7 @@ export const LockerFileLinkDialog: React.FC<LockerFileLinkDialogProps> = ({
         onClose={loading || deleting ? undefined : onClose}
         fullWidth
         maxWidth="xs"
-        slotProps={{
-            paper: {
-                sx: {
-                    width: "min(100%, 420px)",
-                },
-            },
-        }}
+        slotProps={{ paper: { sx: { width: "min(100%, 420px)" } } }}
     >
         <DialogTitle sx={{ pr: 6 }}>
             {itemTitle}

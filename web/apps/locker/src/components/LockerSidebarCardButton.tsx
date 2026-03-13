@@ -59,9 +59,7 @@ export const LockerSidebarCardButton: React.FC<
                     boxShadow: `inset 0 0 0 1px ${theme.vars.palette.accent.main}`,
                     color: "accent.main",
                 }),
-                "&:hover": {
-                    backgroundColor: "fill.faint",
-                },
+                "&:hover": { backgroundColor: "fill.faint" },
             })}
         >
             {iconNode ? (

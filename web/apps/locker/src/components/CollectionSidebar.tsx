@@ -313,12 +313,8 @@ const SidebarRow: React.FC<{
                 borderColor: theme.vars.palette.primary.main,
                 backgroundColor: "transparent",
             }),
-            "&.Mui-selected": {
-                backgroundColor: "transparent",
-            },
-            "&.Mui-selected:hover": {
-                backgroundColor: "transparent",
-            },
+            "&.Mui-selected": { backgroundColor: "transparent" },
+            "&.Mui-selected:hover": { backgroundColor: "transparent" },
         })}
     >
         <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>

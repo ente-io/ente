@@ -95,10 +95,7 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                         startAdornment: (
                             <InputAdornment position="start">
                                 <SearchIcon
-                                    sx={{
-                                        fontSize: 20,
-                                        color: "text.faint",
-                                    }}
+                                    sx={{ fontSize: 20, color: "text.faint" }}
                                 />
                             </InputAdornment>
                         ),
@@ -110,12 +107,8 @@ export const LockerNavbar: React.FC<LockerNavbarProps> = ({
                         borderRadius: "24px",
                         backgroundColor: "background.paper",
                         "& .MuiOutlinedInput-input": { py: 1.5 },
-                        "& fieldset": {
-                            borderColor: "transparent",
-                        },
-                        "&:hover fieldset": {
-                            borderColor: "transparent",
-                        },
+                        "& fieldset": { borderColor: "transparent" },
+                        "&:hover fieldset": { borderColor: "transparent" },
                         "&.Mui-focused fieldset": {
                             borderColor: "rgba(255, 255, 255, 0.28)",
                             borderWidth: "1px",
