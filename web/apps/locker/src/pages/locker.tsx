@@ -406,7 +406,11 @@ const Page: React.FC = () => {
     const handleRestoreItem = useCallback(
         async (item: LockerItem, collectionID: number) => {
             if (!masterKey) return;
-            await restoreFromTrash([item.id], collectionID, masterKey);
+            await restoreFromTrash(
+                [{ id: item.id, collectionID: item.collectionID }],
+                collectionID,
+                masterKey,
+            );
             await refreshData();
             setToast(t("filesRestoredSuccessfully", { count: 1 }));
         },
