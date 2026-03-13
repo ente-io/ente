@@ -31,26 +31,15 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public worker: Worker;
     /** An arbitrary name associated with this ComlinkWorker for debugging. */
     private name: string;
-    /** Optional callback invoked when the worker emits an error event. */
-    private onError?: (event: ErrorEvent) => void;
 
-    constructor(name: string, worker: Worker, onError?: (event: ErrorEvent) => void) {
+    constructor(name: string, worker: Worker) {
         this.name = name;
         this.worker = worker;
-        this.onError = onError;
 
         worker.onerror = (event) => {
             log.error(
-                `Got error event from worker: ${JSON.stringify({
-                    name,
-                    message: event.message,
-                    filename: event.filename,
-                    lineno: event.lineno,
-                    colno: event.colno,
-                    isTrusted: event.isTrusted,
-                })}`,
+                `Got error event from worker: ${JSON.stringify({ event, name })}`,
             );
-            this.onError?.(event);
         };
         log.debug(() => `Created ${name} web worker`);
         const comlink = wrap<T>(worker);
