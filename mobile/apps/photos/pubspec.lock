@@ -41,13 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.0"
-  android_push_keep_alive:
-    dependency: "direct main"
-    description:
-      path: "plugins/android_push_keep_alive"
-      relative: true
-    source: path
-    version: "1.0.0"
   animated_list_plus:
     dependency: "direct main"
     description:

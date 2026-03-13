@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
-import 'package:android_push_keep_alive/android_push_keep_alive.dart';
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:ente_pure_utils/ente_pure_utils.dart";
@@ -73,7 +72,6 @@ const kAndroidBackgroundTaskTimeout = Duration(hours: 1);
 const kFGTaskDeathTimeout = Duration(seconds: 5);
 bool isProcessBg = true;
 bool _stopHearBeat = false;
-final _androidPushKeepAlive = AndroidPushKeepAlive();
 final _backgroundRunHelper = BackgroundRunHelper(
   logger: Logger("BackgroundRunHelper"),
   isRunningInForeground: _isRunningInForeground,
@@ -84,7 +82,9 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  if (Platform.isIOS) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
   FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
@@ -156,7 +156,6 @@ Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
           budget: Platform.isIOS
               ? kBGTaskTimeout
               : kAndroidBackgroundTaskTimeout,
-          allowAndroidForegroundPromotion: false,
         );
       } catch (e, s) {
         result = false;
@@ -321,7 +320,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       await _scheduleFGHomeWidgetSync();
     }
 
-    if (!isBackground) {
+    if (Platform.isIOS) {
       PushService.instance.init().ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
@@ -474,6 +473,10 @@ bool _hasRecentHeartbeat(SharedPreferences prefs, String key, Duration maxAge) {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (!Platform.isIOS) {
+    return;
+  }
+
   await Firebase.initializeApp();
   await runWithLogs(
     () => _runBackgroundPass(
@@ -481,7 +484,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       taskId: "remote_push_sync",
       budget: kBGPushTimeout,
       pushPayload: message.data.map((key, value) => MapEntry(key, "$value")),
-      allowAndroidForegroundPromotion: true,
     ),
     prefix: _backgroundLogPrefix(BackgroundTrigger.remotePush),
   );
@@ -516,25 +518,11 @@ String _backgroundLogPrefix(BackgroundTrigger trigger) {
   };
 }
 
-Future<bool> _startAndroidPushKeepAlive() async {
-  try {
-    if (!await _androidPushKeepAlive.isEnabled()) {
-      return false;
-    }
-
-    return _androidPushKeepAlive.start();
-  } catch (e, s) {
-    _logger.warning("Failed to start Android push keep-alive", e, s);
-    return false;
-  }
-}
-
 Future<bool> _runBackgroundPass({
   required BackgroundTrigger trigger,
   required String taskId,
   required Duration budget,
   Map<String, String>? pushPayload,
-  required bool allowAndroidForegroundPromotion,
 }) async {
   final attempt = await _backgroundRunHelper.prepareRun(
     trigger: trigger,
@@ -549,38 +537,15 @@ Future<bool> _runBackgroundPass({
   }
 
   bool success = true;
-  bool keepAliveStarted = false;
-  bool keepAliveAttempted = false;
 
   try {
-    if (Platform.isAndroid &&
-        trigger == BackgroundTrigger.remotePush &&
-        allowAndroidForegroundPromotion) {
-      keepAliveAttempted = true;
-      keepAliveStarted = await _startAndroidPushKeepAlive();
-      if (!keepAliveStarted) {
-        _logger.warning("Push keep-alive promotion failed for $taskId");
-      }
-    }
-
     await _runMinimally(taskId, TimeLogger());
   } catch (e, s) {
     success = false;
     _logger.severe("Background run failed for $taskId", e, s);
     await _releaseBackgroundResources(taskId, attempt.prefs);
   } finally {
-    if (keepAliveStarted) {
-      await _androidPushKeepAlive.stop();
-    }
     await _backgroundRunHelper.finishRun(attempt);
-
-    if (Platform.isAndroid && trigger == BackgroundTrigger.remotePush) {
-      if (!keepAliveStarted && keepAliveAttempted) {
-        await BgTaskUtils.schedulePushRetry();
-      } else if (!success) {
-        await BgTaskUtils.schedulePushRetry();
-      }
-    }
   }
 
   return success;

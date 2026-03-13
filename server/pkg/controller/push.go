@@ -46,8 +46,6 @@ const taskLockName = "fcm-push-lock"
 
 const taskLockDurationInMinutes = 5
 
-const syncPushCollapseKey = "sync"
-
 // As proposed by https://firebase.google.com/docs/cloud-messaging/manage-tokens#ensuring-registration-token-freshness
 const tokenExpiryDurationInDays = 61
 
@@ -167,18 +165,14 @@ func (c *PushController) sendFCMPushes(pushTokens []ente.PushToken, payload map[
 	}
 
 	message := &messaging.MulticastMessage{
-		Tokens: fcmTokens,
-		Data:   payload,
-		Android: &messaging.AndroidConfig{
-			Priority:    "high",
-			CollapseKey: syncPushCollapseKey,
-		},
+		Tokens:  fcmTokens,
+		Data:    payload,
+		Android: &messaging.AndroidConfig{Priority: "high"},
 		APNS: &messaging.APNSConfig{
 			Headers: map[string]string{
-				"apns-push-type":   "background",
-				"apns-priority":    "5",             // Must be `5` when `contentAvailable` is set to true.
-				"apns-topic":       "io.ente.frame", // bundle identifier
-				"apns-collapse-id": syncPushCollapseKey,
+				"apns-push-type": "background",
+				"apns-priority":  "5",             // Must be `5` when `contentAvailable` is set to true.
+				"apns-topic":     "io.ente.frame", // bundle identifier
 			},
 			Payload: &messaging.APNSPayload{Aps: &messaging.Aps{ContentAvailable: true}},
 		},

@@ -53,7 +53,6 @@ class BgTaskUtils {
   static const iOSBackgroundProcessingTask =
       "io.ente.frame.iOSBackgroundProcessing";
   static const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
-  static const androidPushRetryTask = "io.ente.photos.androidPushRetryTask";
 
   static Future<void> releaseResourcesForKill(
     String taskId,
@@ -163,35 +162,5 @@ class BgTaskUtils {
         requiresCharging: false,
       ),
     );
-  }
-
-  /// Schedules an Android-only one-off retry for push-triggered background
-  /// sync. This exists to rescue the Android keep-alive path when a remote
-  /// push wake happens but the foreground-service-backed run cannot be kept
-  /// alive long enough to finish.
-  static Future<void> schedulePushRetry() async {
-    if (!Platform.isAndroid) {
-      return;
-    }
-
-    try {
-      await workmanager.Workmanager().registerOneOffTask(
-        androidPushRetryTask,
-        androidPushRetryTask,
-        initialDelay: const Duration(minutes: 2),
-        constraints: workmanager.Constraints(
-          networkType: workmanager.NetworkType.connected,
-          requiresCharging: false,
-          requiresStorageNotLow: false,
-          requiresDeviceIdle: false,
-        ),
-        existingWorkPolicy: workmanager.ExistingWorkPolicy.update,
-        backoffPolicy: workmanager.BackoffPolicy.linear,
-        backoffPolicyDelay: const Duration(minutes: 15),
-      );
-      $.info("Scheduled push retry task");
-    } catch (e) {
-      $.warning("Failed to schedule push retry task: $e");
-    }
   }
 }
