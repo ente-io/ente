@@ -20,42 +20,73 @@ export const MAX_PRINTED_SHARE_LENGTH =
 export const MAX_SECRET_BYTES_FOR_PRINTED_CARD =
     maxSecretBytesForEncodedShareLength(MAX_PRINTED_SHARE_LENGTH);
 
-const wrapCanvasText = (
+const wrapCanvasTextToWidth = (
     context: CanvasRenderingContext2D,
     text: string,
     maxWidth: number,
     maxLines: number,
 ) => {
-    const words = text.trim().split(/\s+/u).filter(Boolean);
-    if (words.length === 0) return [""];
+    const normalized = text.trim().replace(/\s+/gu, " ");
+    if (!normalized) return [""];
 
     const lines: string[] = [];
-    let current = "";
+    let remaining = normalized;
 
-    for (const word of words) {
-        const candidate = current ? `${current} ${word}` : word;
-        if (context.measureText(candidate).width <= maxWidth) {
-            current = candidate;
-            continue;
+    while (remaining && lines.length < maxLines) {
+        if (context.measureText(remaining).width <= maxWidth) {
+            lines.push(remaining);
+            remaining = "";
+            break;
         }
 
-        if (current) lines.push(current);
-        current = word;
+        let overflowIndex = -1;
+        for (let index = 0; index < remaining.length; index += 1) {
+            if (context.measureText(remaining.slice(0, index + 1)).width > maxWidth) {
+                overflowIndex = index;
+                break;
+            }
+        }
 
-        if (lines.length === maxLines - 1) break;
+        if (overflowIndex <= 0) return null;
+
+        const whitespaceIndex = remaining.lastIndexOf(" ", overflowIndex - 1);
+        const splitIndex = whitespaceIndex > 0 ? whitespaceIndex : overflowIndex;
+        const line = remaining.slice(0, splitIndex).trimEnd();
+        if (!line) return null;
+
+        lines.push(line);
+        remaining = remaining
+            .slice(whitespaceIndex > 0 ? splitIndex + 1 : splitIndex)
+            .trimStart();
     }
 
-    if (current && lines.length < maxLines) {
-        lines.push(current);
+    return remaining ? null : lines;
+};
+
+const fitTitleLayout = (
+    context: CanvasRenderingContext2D,
+    title: string,
+    maxWidth: number,
+    maxLines: number,
+) => {
+    for (let fontSize = 54; fontSize >= 34; fontSize -= 2) {
+        context.font = `700 ${fontSize}px "Space Grotesk", sans-serif`;
+        const lines = wrapCanvasTextToWidth(context, title, maxWidth, maxLines);
+        if (!lines) continue;
+
+        return {
+            fontSize,
+            lineHeight: Math.round(fontSize * 1.14),
+            lines,
+        };
     }
 
-    const consumedWords = lines.join(" ").split(/\s+/u).filter(Boolean).length;
-    if (consumedWords < words.length && lines.length > 0) {
-        const lastLine = lines[lines.length - 1]!;
-        lines[lines.length - 1] = `${lastLine.replace(/[. ]+$/u, "")}…`;
-    }
-
-    return lines;
+    context.font = '700 34px "Space Grotesk", sans-serif';
+    return {
+        fontSize: 34,
+        lineHeight: 39,
+        lines: wrapCanvasTextToWidth(context, title, maxWidth, maxLines) ?? [title],
+    };
 };
 
 const balanceCanvasText = (
@@ -138,6 +169,7 @@ const ensureShareCardFonts = async () => {
 
     await Promise.allSettled([
         document.fonts.load('700 54px "Space Grotesk"'),
+        document.fonts.load('700 34px "Space Grotesk"'),
         document.fonts.load('700 36px "Space Grotesk"'),
         document.fonts.load('500 32px "Space Grotesk"'),
         document.fonts.load('700 22px "Space Grotesk"'),
@@ -193,10 +225,10 @@ export const renderShareCard = async ({
     context.fillText(APP_LINK, CARD_WIDTH - 124 - appLinkWidth, 166);
 
     context.fillStyle = "#111111";
-    context.font = '700 54px "Space Grotesk", sans-serif';
-    const titleLines = wrapCanvasText(context, title, 940, 2);
-    titleLines.forEach((line, index) => {
-        context.fillText(line, 120, 304 + index * 66);
+    const titleLayout = fitTitleLayout(context, title, 940, 2);
+    context.font = `700 ${titleLayout.fontSize}px "Space Grotesk", sans-serif`;
+    titleLayout.lines.forEach((line, index) => {
+        context.fillText(line, 120, 304 + index * titleLayout.lineHeight);
     });
 
     context.fillStyle = "#ffffff";
@@ -215,7 +247,7 @@ export const renderShareCard = async ({
 
     context.fillStyle = "rgba(17,17,17,0.45)";
     context.font = '500 22px "Space Grotesk", sans-serif';
-    const fingerprintLabel = `#${fingerprint}`;
+    const fingerprintLabel = `ID ${fingerprint}`;
     const fingerprintWidth = context.measureText(fingerprintLabel).width;
     context.fillText(
         fingerprintLabel,
@@ -277,87 +309,193 @@ export const createOfflineRecoveryHtml = async () => {
     :root {
       color-scheme: light;
       --bg: #ffffff;
+      --shell: #ffffff;
       --paper: #ffffff;
-      --field: rgba(252, 239, 93, 0.12);
+      --field-soft: rgba(252, 239, 93, 0.1);
       --ink: #111111;
       --muted: rgba(17,17,17,0.72);
       --yellow: rgb(252, 239, 93);
       --line: rgba(17, 17, 17, 0.18);
       --line-strong: rgba(17, 17, 17, 0.22);
     }
+    [hidden] { display: none !important; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Space Grotesk", "Helvetica Neue", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--ink);
     }
     main {
-      width: min(960px, calc(100vw - 32px));
+      width: min(1120px, calc(100vw - 32px));
       margin: 0 auto;
-      padding: 32px 0 56px;
+      padding: 20px 0 40px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 0 4px 18px;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: -0.07em;
+      font-size: clamp(1.7rem, 4vw, 2rem);
+    }
+    .byline {
+      color: var(--muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .byline a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .byline a:hover {
+      text-decoration: underline;
+    }
+    .shell {
+      background: var(--shell);
+      border: 2px solid var(--ink);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 16px 34px rgba(17,17,17,0.04);
     }
     .panel {
-      background: var(--paper);
-      border: 2px solid var(--ink);
-      border-radius: 24px;
       padding: 24px;
     }
     h1 {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      font-size: clamp(2rem, 5vw, 2.7rem);
       line-height: 0.92;
       letter-spacing: -0.06em;
       margin: 0 0 12px;
     }
-    p { color: var(--muted); line-height: 1.6; }
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
     .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-      padding: 10px 14px;
+      margin-bottom: 18px;
+      padding: 7px 14px;
       border-radius: 999px;
-      background: var(--yellow);
-      border: 2px solid var(--ink);
+      background: var(--paper);
+      border: 1.5px solid var(--line-strong);
       font-weight: 700;
+      font-size: 0.82rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
       margin-top: 24px;
     }
-    textarea, input[type="file"] {
+    .slot {
+      padding: 16px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 24px;
+      background: var(--paper);
+      transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+    }
+    .slot.dragover {
+      border-color: var(--ink);
+      background: var(--field-soft);
+      transform: translateY(-1px);
+    }
+    .slot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .slot-chip {
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1.5px solid var(--line-strong);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .slot-copy {
+      min-height: 2.8em;
+      margin-top: 12px;
+      font-size: 0.88rem;
+    }
+    textarea {
       width: 100%;
       border-radius: 18px;
-      border: 2px solid var(--ink);
-      background: white;
+      border: 1.5px solid var(--line-strong);
+      background: var(--paper);
       padding: 14px 16px;
       font: inherit;
+      color: var(--ink);
     }
     textarea {
       min-height: 180px;
       resize: vertical;
+      margin-top: 8px;
     }
-    button {
-      margin-top: 18px;
-      border: 0;
+    textarea:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+    .upload,
+    .action,
+    .copy {
+      appearance: none;
+      border: 1.5px solid var(--line-strong);
       border-radius: 999px;
-      padding: 14px 20px;
-      background: var(--yellow);
+      padding: 10px 14px;
+      background: var(--paper);
       color: var(--ink);
       font: inherit;
       font-weight: 700;
       cursor: pointer;
+      text-decoration: none;
+    }
+    .upload:hover,
+    .copy:hover {
+      border-color: var(--ink);
+    }
+    .upload input {
+      display: none;
+    }
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .action {
+      padding: 14px 20px;
+      border-color: var(--ink);
+      background: var(--yellow);
+      color: #111111;
+    }
+    .action[disabled] {
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--line-strong);
+      cursor: default;
+    }
+    .helper {
+      color: var(--muted);
+      font-size: 0.9rem;
     }
     .result {
-      margin-top: 18px;
       white-space: pre-wrap;
       background: var(--paper);
-      border: 2px solid var(--ink);
-      padding: 16px;
+      border: 1.5px solid var(--line-strong);
+      padding: 14px 16px;
       border-radius: 18px;
+      min-height: 132px;
     }
     .error {
       color: var(--ink);
@@ -367,27 +505,75 @@ export const createOfflineRecoveryHtml = async () => {
       padding: 12px 14px;
       margin-top: 12px;
     }
+    .result-card {
+      margin-top: 12px;
+      padding: 16px;
+      border: 1.5px solid var(--ink);
+      border-radius: 24px;
+      background: var(--field-soft);
+    }
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .result-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    @media (max-width: 720px) {
+      .topbar {
+        padding-bottom: 14px;
+      }
+      .panel {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
   <main>
-    <div class="panel">
-      <div class="eyebrow">Recover later</div>
-      <h1>Recover with any two cards.</h1>
-      <p>This file works offline. Upload two card images, or paste the two code strings manually.</p>
-      <div class="grid">
-        <div>
-          <input id="file-a" type="file" accept="image/*,text/plain" />
-          <textarea id="input-a" placeholder="Paste share 1"></textarea>
+    <div class="topbar">
+      <div class="brand">2of3</div>
+      <div class="byline">by <a href="https://ente.io" target="_blank" rel="noreferrer">Ente</a></div>
+    </div>
+    <div class="shell">
+      <div class="panel">
+        <div class="eyebrow">Recover later</div>
+        <h1>Use any 2 cards to recover</h1>
+        <p>This file works offline. Upload two card images, or paste their codes.</p>
+        <div class="grid">
+          <div class="slot" id="slot-a">
+            <div class="slot-head">
+              <div class="slot-chip">Card A</div>
+              <label class="upload">Upload image<input id="file-a" type="file" accept="image/*,text/plain" /></label>
+            </div>
+            <p class="slot-copy" id="meta-a">Drop a saved card image here, or paste a copied code.</p>
+            <textarea id="input-a" placeholder="Paste code A"></textarea>
+          </div>
+          <div class="slot" id="slot-b">
+            <div class="slot-head">
+              <div class="slot-chip">Card B</div>
+              <label class="upload">Upload image<input id="file-b" type="file" accept="image/*,text/plain" /></label>
+            </div>
+            <p class="slot-copy" id="meta-b">Drop a saved card image here, or paste a copied code.</p>
+            <textarea id="input-b" placeholder="Paste code B"></textarea>
+          </div>
         </div>
-        <div>
-          <input id="file-b" type="file" accept="image/*,text/plain" />
-          <textarea id="input-b" placeholder="Paste share 2"></textarea>
+        <div id="error" class="error" hidden></div>
+        <div class="actions">
+          <button id="recover" class="action">Recover secret</button>
+        </div>
+        <div id="result-card" class="result-card" hidden>
+          <div class="result-head">
+            <div class="result-title">Recovered secret</div>
+            <button id="copy-result" class="copy" type="button">Copy</button>
+          </div>
+          <div id="result" class="result"></div>
         </div>
       </div>
-      <button id="recover">Recover secret</button>
-      <div id="error" class="error"></div>
-      <div id="result" class="result" hidden></div>
     </div>
   </main>
   <script>${escapeScriptTagContent(OFFLINE_QR_DECODER_SOURCE)}</script>
@@ -463,7 +649,7 @@ export const createOfflineRecoveryHtml = async () => {
     const combineShares = (firstInput, secondInput) => {
       const first = parseShare(firstInput);
       const second = parseShare(secondInput);
-      if (first.id !== second.id || first.length !== second.length) throw new Error("These two cards are from different sets. Match the # on both cards.");
+      if (first.id !== second.id || first.length !== second.length) throw new Error("These two cards are from different sets. Match the ID on both cards.");
       if (first.index === second.index) throw new Error("Use two different cards from the same set.");
       const output = new Uint8Array(first.length);
       const denominator = first.index ^ second.index;
@@ -584,48 +770,103 @@ export const createOfflineRecoveryHtml = async () => {
       }
       throw lastError || new Error("Could not read that QR code.");
     };
+    const describeSlotValue = (value, fileName = "") => {
+      if (!value.trim()) return "Drop a saved card image here, or paste a copied code.";
+      try {
+        const parsed = parseShare(value);
+        const fingerprint = parsed.id.slice(0, 8).toUpperCase();
+        return (fileName ? fileName + " · " : "") + "Card " + parsed.index + " from ID " + fingerprint;
+      } catch {
+        return fileName || "Drop a saved card image here, or paste a copied code.";
+      }
+    };
     const fileToText = async (file) => {
       if (file.type.startsWith("text/")) return (await file.text()).trim();
       const value = decodeQrImage(await imageDataFromFile(file));
       parseShare(value);
       return value;
     };
-    const bindFile = (fileId, textareaId) => {
+    const bindSlot = (slotId, fileId, textareaId, metaId) => {
+      const slot = document.getElementById(slotId);
       const fileInput = document.getElementById(fileId);
       const textarea = document.getElementById(textareaId);
+      const meta = document.getElementById(metaId);
       const errorNode = document.getElementById("error");
-      fileInput.addEventListener("change", async (event) => {
-        const file = event.target.files && event.target.files[0];
+      const applyFile = async (file) => {
         if (!file) return;
         try {
-          textarea.value = (await fileToText(file)).trim();
+          const value = (await fileToText(file)).trim();
+          textarea.value = value;
+          meta.textContent = describeSlotValue(value, file.name);
+          errorNode.hidden = true;
           errorNode.textContent = "";
         } catch (error) {
           textarea.value = "";
+          meta.textContent = describeSlotValue("");
+          errorNode.hidden = false;
           errorNode.textContent = error.message || String(error);
         }
+      };
+      fileInput.addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        await applyFile(file);
+      });
+      textarea.addEventListener("input", (event) => {
+        meta.textContent = describeSlotValue(event.target.value.trim());
+      });
+      slot.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        slot.classList.add("dragover");
+      });
+      slot.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        slot.classList.add("dragover");
+      });
+      slot.addEventListener("dragleave", () => {
+        slot.classList.remove("dragover");
+      });
+      slot.addEventListener("drop", async (event) => {
+        event.preventDefault();
+        slot.classList.remove("dragover");
+        const file = event.dataTransfer.files && event.dataTransfer.files[0];
+        await applyFile(file);
       });
     };
-    bindFile("file-a", "input-a");
-    bindFile("file-b", "input-b");
+    bindSlot("slot-a", "file-a", "input-a", "meta-a");
+    bindSlot("slot-b", "file-b", "input-b", "meta-b");
     document.getElementById("recover").addEventListener("click", () => {
       const errorNode = document.getElementById("error");
       const resultNode = document.getElementById("result");
+      const resultCard = document.getElementById("result-card");
+      errorNode.hidden = true;
       errorNode.textContent = "";
-      resultNode.hidden = true;
+      resultCard.hidden = true;
       const firstInput = document.getElementById("input-a").value.trim();
       const secondInput = document.getElementById("input-b").value.trim();
       if (!firstInput || !secondInput) {
+        errorNode.hidden = false;
         errorNode.textContent = "Upload or paste two cards first.";
         return;
       }
       try {
         const secret = combineShares(firstInput, secondInput);
         resultNode.textContent = secret;
-        resultNode.hidden = false;
+        resultCard.hidden = false;
       } catch (error) {
+        errorNode.hidden = false;
         errorNode.textContent = error.message || String(error);
       }
+    });
+    document.getElementById("copy-result").addEventListener("click", async () => {
+      const button = document.getElementById("copy-result");
+      const resultNode = document.getElementById("result");
+      if (!resultNode.textContent.trim()) return;
+      await navigator.clipboard.writeText(resultNode.textContent);
+      button.textContent = "Copied";
+      window.setTimeout(() => {
+        button.textContent = "Copy";
+      }, 1600);
     });
   </script>
 </body>

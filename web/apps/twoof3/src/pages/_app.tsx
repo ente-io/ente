@@ -1,5 +1,6 @@
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
 import {
     CssBaseline,
@@ -39,9 +40,24 @@ const App = ({ Component, pageProps }: AppProps) => {
         typography: {
             fontFamily:
                 '"Space Grotesk", "Inter Variable", "Helvetica Neue", sans-serif',
+            fontWeightRegular: 500,
+            fontWeightMedium: 600,
+            fontWeightBold: 700,
             h1: { fontWeight: 700, letterSpacing: "-0.05em" },
             h2: { fontWeight: 700, letterSpacing: "-0.04em" },
             h3: { fontWeight: 700, letterSpacing: "-0.04em" },
+            body1: {
+                fontWeight: 500,
+                lineHeight: 1.55,
+                letterSpacing: "-0.012em",
+            },
+            body2: {
+                fontWeight: 500,
+                lineHeight: 1.55,
+                letterSpacing: "-0.012em",
+            },
+            subtitle1: { fontWeight: 500 },
+            subtitle2: { fontWeight: 500 },
             button: {
                 fontWeight: 700,
                 letterSpacing: "-0.01em",

@@ -26,10 +26,19 @@ import {
     splitSecret,
 } from "features/twoof3/utils/shamir";
 import Head from "next/head";
-import type { ChangeEvent, ReactNode } from "react";
-import { useDeferredValue, useEffect, useState } from "react";
+import type { ChangeEvent, DragEvent, ReactNode } from "react";
+import {
+    memo,
+    startTransition,
+    useCallback,
+    useDeferredValue,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
 const APP_LINK = "2of3.ente.io";
+const MAX_CARD_TITLE_LENGTH = 48;
 const textEncoder = new TextEncoder();
 
 const byteLength = (value: string) => textEncoder.encode(value).length;
@@ -44,6 +53,9 @@ const trimToByteLength = (value: string, maxBytes: number) => {
 
     return chars.join("");
 };
+
+const trimToCharacterLength = (value: string, maxChars: number) =>
+    Array.from(value).slice(0, maxChars).join("");
 
 interface ShareCardState {
     encoded: string;
@@ -84,6 +96,11 @@ const EMPTY_SPLIT_SNAPSHOT: SplitSnapshot = {
     error: null,
     secret: "",
 };
+
+const RECOVER_SLOT_LABELS = ["A", "B"] as const;
+
+const recoverSlotLabel = (index: number) =>
+    RECOVER_SLOT_LABELS[index] ?? String(index + 1);
 
 const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -144,7 +161,7 @@ const Note = ({
     </Box>
 );
 
-const QrPreview = ({
+const QrPreview = memo(({
     value,
 }: {
     value: NonNullable<ReturnType<typeof createQrSvgData>>;
@@ -180,6 +197,207 @@ const QrPreview = ({
             />
         ))}
     </svg>
+));
+
+interface ShareCardPanelProps {
+    busy: boolean;
+    card: ShareCardState | undefined;
+    cardLabel: string;
+    copied: boolean;
+    index: number;
+    onCardAction: (
+        kind: "download" | "print" | "share",
+        card: ShareCardState,
+        displayIndex: number,
+        label: string,
+    ) => void;
+    onCopyCardCode: (card: ShareCardState, displayIndex: number) => void;
+}
+
+const ShareCardPanel = memo(
+    ({
+        busy,
+        card,
+        cardLabel,
+        copied,
+        index,
+        onCardAction,
+        onCopyCardCode,
+    }: ShareCardPanelProps) => {
+        const fingerprint = card ? `ID ${card.fingerprint}` : null;
+
+        return (
+            <Stack
+                sx={{
+                    border: "1.5px solid",
+                    borderColor: "var(--ink)",
+                    borderRadius: "26px",
+                    bgcolor: "var(--paper)",
+                    boxShadow: "0 14px 28px rgba(17,17,17,0.06)",
+                    minHeight: 0,
+                    overflow: "hidden",
+                }}
+            >
+                <Box
+                    sx={{
+                        px: 1.35,
+                        py: 1.05,
+                        bgcolor: "var(--accent)",
+                        borderBottom: "1.5px solid",
+                        borderColor: "var(--ink)",
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        spacing={1}
+                    >
+                        <Typography
+                            sx={{
+                                fontWeight: 700,
+                                fontSize: "0.92rem",
+                                color: "#111111",
+                            }}
+                        >
+                            Card {index + 1}
+                        </Typography>
+                        <Typography
+                            sx={{
+                                color: "rgba(17,17,17,0.62)",
+                                fontSize: "0.8rem",
+                                fontWeight: 500,
+                            }}
+                        >
+                            {APP_LINK}
+                        </Typography>
+                    </Stack>
+                </Box>
+
+                <Stack spacing={1.2} sx={{ p: 1.35 }}>
+                    <Typography
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: "1rem",
+                            lineHeight: 1.2,
+                        }}
+                    >
+                        {cardLabel}
+                    </Typography>
+
+                    <Box
+                        sx={{
+                            aspectRatio: "1 / 1",
+                            border: "1.5px solid",
+                            borderColor: "var(--line-strong)",
+                            bgcolor: "#ffffff",
+                            borderRadius: "22px",
+                            overflow: "hidden",
+                            p: 1.35,
+                            display: "grid",
+                            placeItems: "center",
+                        }}
+                    >
+                        {card ? (
+                            <QrPreview value={card.qr} />
+                        ) : (
+                            <Typography
+                                sx={{
+                                    textAlign: "center",
+                                    color: "#111111",
+                                    opacity: 0.6,
+                                    px: 3,
+                                    fontSize: "0.95rem",
+                                }}
+                            >
+                                Enter a secret to generate card {index + 1}.
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {card && (
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            spacing={1}
+                            sx={{ mt: 0.15 }}
+                        >
+                            <Button
+                                variant="text"
+                                size="small"
+                                disabled={busy}
+                                onClick={() => {
+                                    onCopyCardCode(card, index);
+                                }}
+                                sx={{
+                                    minWidth: 0,
+                                    px: 0,
+                                    py: 0,
+                                    color: "var(--muted)",
+                                    fontSize: "0.8rem",
+                                    fontWeight: 700,
+                                    textTransform: "none",
+                                    "&:hover": {
+                                        bgcolor: "transparent",
+                                        color: "var(--ink)",
+                                    },
+                                }}
+                            >
+                                {copied ? "Copied" : "Copy code"}
+                            </Button>
+                            <Typography
+                                sx={{
+                                    color: "var(--muted)",
+                                    fontSize: "0.78rem",
+                                    fontWeight: 500,
+                                    textAlign: "right",
+                                }}
+                            >
+                                {fingerprint}
+                            </Typography>
+                        </Stack>
+                    )}
+
+                    <Stack direction="row" spacing={0.8} useFlexGap flexWrap="wrap">
+                        <ActionButton
+                            disabled={!card || busy}
+                            onClick={() => {
+                                if (!card) return;
+                                onCardAction("print", card, index, cardLabel);
+                            }}
+                        >
+                            Print
+                        </ActionButton>
+                        <ActionButton
+                            disabled={!card || busy}
+                            onClick={() => {
+                                if (!card) return;
+                                onCardAction("download", card, index, cardLabel);
+                            }}
+                        >
+                            Download
+                        </ActionButton>
+                        <ActionButton
+                            disabled={!card || busy}
+                            onClick={() => {
+                                if (!card) return;
+                                onCardAction("share", card, index, cardLabel);
+                            }}
+                        >
+                            Share
+                        </ActionButton>
+                    </Stack>
+                </Stack>
+            </Stack>
+        );
+    },
+    (previous, next) =>
+        previous.busy === next.busy &&
+        previous.card?.encoded === next.card?.encoded &&
+        previous.cardLabel === next.cardLabel &&
+        previous.copied === next.copied &&
+        previous.index === next.index,
 );
 
 const ActionButton = ({
@@ -298,9 +516,13 @@ const Page = () => {
     const [recoverError, setRecoverError] = useState<string | null>(null);
     const [recoveredSecret, setRecoveredSecret] = useState("");
     const [copiedRecoveredSecret, setCopiedRecoveredSecret] = useState(false);
+    const [recoverDropTarget, setRecoverDropTarget] = useState<number | null>(
+        null,
+    );
     const [splitSnapshot, setSplitSnapshot] =
         useState<SplitSnapshot>(EMPTY_SPLIT_SNAPSHOT);
     const deferredSecret = useDeferredValue(secret);
+    const isCardsStaleRef = useRef(false);
 
     const cards = splitSnapshot.cards;
     const isCardsStale = splitSnapshot.secret !== secret;
@@ -327,20 +549,26 @@ const Page = () => {
     const canRecover =
         hasTwoRecoverValues && !recoverMismatch && !recoverDuplicateCards;
     const recoverStatus = recoverMismatch
-        ? "These two cards are from different sets. Match the # on both cards."
+        ? "These two cards are from different sets. Match the ID on both cards."
         : recoverDuplicateCards
           ? "Use two different cards from the same set."
           : recoverError;
 
+    isCardsStaleRef.current = isCardsStale;
+
     useEffect(() => {
         if (!secret.trim()) {
-            setSplitSnapshot(EMPTY_SPLIT_SNAPSHOT);
+            startTransition(() => {
+                setSplitSnapshot(EMPTY_SPLIT_SNAPSHOT);
+            });
         }
     }, [secret]);
 
     useEffect(() => {
         if (!deferredSecret.trim()) return;
-        setSplitSnapshot(splitIfPossible(deferredSecret));
+        startTransition(() => {
+            setSplitSnapshot(splitIfPossible(deferredSecret));
+        });
     }, [deferredSecret]);
 
     useEffect(() => {
@@ -369,39 +597,58 @@ const Page = () => {
         return () => window.clearTimeout(timer);
     }, [copiedRecoveredSecret]);
 
-    const makeCardFile = async (card: ShareCardState) => {
-        const canvas = await renderShareCard({
-            qrModules: card.qr.modules,
-            qrSize: card.qr.viewBoxSize,
-            shareIndex: card.index,
-            shareText: card.encoded,
-            title: cardLabel,
-        });
-        const blob = await canvasToBlob(canvas);
-        const filename = `${sanitizeFilename(cardLabel)}-set-${card.fingerprint.toLowerCase()}-card-${card.index}.png`;
-        return new File([blob], filename, { type: "image/png" });
-    };
+    const makeCardFile = useCallback(
+        async (card: ShareCardState, label: string) => {
+            const canvas = await renderShareCard({
+                qrModules: card.qr.modules,
+                qrSize: card.qr.viewBoxSize,
+                shareIndex: card.index,
+                shareText: card.encoded,
+                title: label,
+            });
+            const blob = await canvasToBlob(canvas);
+            const filename = `${sanitizeFilename(label)}-set-${card.fingerprint.toLowerCase()}-card-${card.index}.png`;
+            return new File([blob], filename, { type: "image/png" });
+        },
+        [],
+    );
 
-    const runCardAction = async (
-        index: number,
-        action: (file: File, card: ShareCardState) => Promise<void> | void,
-    ) => {
-        const card = cards[index];
-        if (!card || isCardsStale) return;
-        setActionError(null);
-        setBusyCard(index);
+    const onCardAction = useCallback(
+        async (
+            kind: "download" | "print" | "share",
+            card: ShareCardState,
+            displayIndex: number,
+            label: string,
+        ) => {
+            if (isCardsStaleRef.current) return;
+            setActionError(null);
+            setBusyCard(displayIndex);
 
-        try {
-            const file = await makeCardFile(card);
-            await action(file, card);
-        } catch (error) {
-            setActionError(
-                error instanceof Error ? error.message : "That action failed.",
-            );
-        } finally {
-            setBusyCard(null);
-        }
-    };
+            try {
+                const file = await makeCardFile(card, label);
+                if (kind === "print") {
+                    printBlob(file, file.name);
+                } else if (kind === "download") {
+                    downloadBlob(file, file.name);
+                } else {
+                    try {
+                        await shareFiles([file]);
+                    } catch {
+                        downloadBlob(file, file.name);
+                    }
+                }
+            } catch (error) {
+                setActionError(
+                    error instanceof Error
+                        ? error.message
+                        : "That action failed.",
+                );
+            } finally {
+                setBusyCard(null);
+            }
+        },
+        [makeCardFile],
+    );
 
     const onDownloadAll = async () => {
         if (!isReady) return;
@@ -410,7 +657,7 @@ const Page = () => {
 
         try {
             for (const card of cards) {
-                const file = await makeCardFile(card);
+                const file = await makeCardFile(card, cardLabel);
                 downloadBlob(file, file.name);
             }
 
@@ -439,7 +686,7 @@ const Page = () => {
 
         if (recoverMismatch) {
             setRecoverError(
-                "These two cards are from different sets. Match the # on both cards.",
+                "These two cards are from different sets. Match the ID on both cards.",
             );
             return;
         }
@@ -464,29 +711,29 @@ const Page = () => {
         }
     };
 
-    const onCopyCardCode = async (card: ShareCardState) => {
-        if (isCardsStale) return;
-        setActionError(null);
+    const onCopyCardCode = useCallback(
+        async (card: ShareCardState, displayIndex: number) => {
+            if (isCardsStaleRef.current) return;
+            setActionError(null);
 
-        try {
-            await copyTextToClipboard(card.encoded);
-            setCopiedCardIndex(card.index - 1);
-        } catch (error) {
-            setActionError(
-                error instanceof Error
-                    ? error.message
-                    : "Could not copy that code.",
-            );
-        }
-    };
+            try {
+                await copyTextToClipboard(card.encoded);
+                setCopiedCardIndex(displayIndex);
+            } catch (error) {
+                setActionError(
+                    error instanceof Error
+                        ? error.message
+                        : "Could not copy that code.",
+                );
+            }
+        },
+        [],
+    );
 
     const onRecoverFile = async (
         slotIndex: number,
-        event: ChangeEvent<HTMLInputElement>,
+        file: File,
     ) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
         try {
             const value = await readShareFile(file);
             parseShare(value);
@@ -503,8 +750,37 @@ const Page = () => {
                     : "Could not read that share.",
             );
         } finally {
+            setRecoverDropTarget((current) =>
+                current === slotIndex ? null : current,
+            );
+        }
+    };
+
+    const onRecoverFileChange = async (
+        slotIndex: number,
+        event: ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            await onRecoverFile(slotIndex, file);
+        } finally {
             event.target.value = "";
         }
+    };
+
+    const onRecoverDrop = async (
+        slotIndex: number,
+        event: DragEvent<HTMLDivElement>,
+    ) => {
+        event.preventDefault();
+        setRecoverDropTarget(null);
+
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+
+        await onRecoverFile(slotIndex, file);
     };
 
     return (
@@ -709,8 +985,18 @@ const Page = () => {
                                         value={title}
                                         placeholder={todayLabel()}
                                         onChange={(event) =>
-                                            setTitle(event.target.value)
+                                            setTitle(
+                                                trimToCharacterLength(
+                                                    event.target.value,
+                                                    MAX_CARD_TITLE_LENGTH,
+                                                ),
+                                            )
                                         }
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: MAX_CARD_TITLE_LENGTH,
+                                            },
+                                        }}
                                         sx={fieldSx}
                                     />
                                     <Typography
@@ -814,257 +1100,18 @@ const Page = () => {
                                 >
                                     {Array.from({ length: 3 }, (_, index) => {
                                         const card = cards[index];
-                                        const fingerprint = card
-                                            ? `#${card.fingerprint}`
-                                            : null;
 
                                         return (
-                                            <Stack
+                                            <ShareCardPanel
                                                 key={index}
-                                                sx={{
-                                                    border: "1.5px solid",
-                                                    borderColor: "var(--ink)",
-                                                    borderRadius: "26px",
-                                                    bgcolor: "var(--paper)",
-                                                    boxShadow:
-                                                        "0 14px 28px rgba(17,17,17,0.06)",
-                                                    minHeight: 0,
-                                                    overflow: "hidden",
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        px: 1.35,
-                                                        py: 1.05,
-                                                        bgcolor:
-                                                            "var(--accent)",
-                                                        borderBottom:
-                                                            "1.5px solid",
-                                                        borderColor:
-                                                            "var(--ink)",
-                                                    }}
-                                                >
-                                                    <Stack
-                                                        direction="row"
-                                                        justifyContent="space-between"
-                                                        alignItems="center"
-                                                        spacing={1}
-                                                    >
-                                                        <Typography
-                                                            sx={{
-                                                                fontWeight: 700,
-                                                                fontSize:
-                                                                    "0.92rem",
-                                                                color: "#111111",
-                                                            }}
-                                                        >
-                                                            Card {index + 1}
-                                                        </Typography>
-                                                        <Typography
-                                                            sx={{
-                                                                color: "rgba(17,17,17,0.62)",
-                                                                fontSize:
-                                                                    "0.8rem",
-                                                                fontWeight: 500,
-                                                            }}
-                                                        >
-                                                            {APP_LINK}
-                                                        </Typography>
-                                                    </Stack>
-                                                </Box>
-
-                                                <Stack
-                                                    spacing={1.2}
-                                                    sx={{ p: 1.35 }}
-                                                >
-                                                    <Typography
-                                                        sx={{
-                                                            fontWeight: 700,
-                                                            fontSize: "1rem",
-                                                            lineHeight: 1.2,
-                                                        }}
-                                                    >
-                                                        {cardLabel}
-                                                    </Typography>
-
-                                                    <Box
-                                                        sx={{
-                                                            aspectRatio:
-                                                                "1 / 1",
-                                                            border: "1.5px solid",
-                                                            borderColor:
-                                                                "var(--line-strong)",
-                                                            bgcolor: "#ffffff",
-                                                            borderRadius:
-                                                                "22px",
-                                                            overflow: "hidden",
-                                                            p: 1.35,
-                                                            display: "grid",
-                                                            placeItems:
-                                                                "center",
-                                                        }}
-                                                    >
-                                                        {card ? (
-                                                            <QrPreview
-                                                                value={card.qr}
-                                                            />
-                                                        ) : (
-                                                            <Typography
-                                                                sx={{
-                                                                    textAlign:
-                                                                        "center",
-                                                                    color: "#111111",
-                                                                    opacity: 0.6,
-                                                                    px: 3,
-                                                                    fontSize:
-                                                                        "0.95rem",
-                                                                }}
-                                                            >
-                                                                Enter a secret
-                                                                to generate card{" "}
-                                                                {index + 1}.
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-
-                                                    {card && (
-                                                        <Stack
-                                                            direction="row"
-                                                            justifyContent="space-between"
-                                                            alignItems="center"
-                                                            spacing={1}
-                                                            sx={{ mt: 0.15 }}
-                                                        >
-                                                            <Button
-                                                                variant="text"
-                                                                size="small"
-                                                                disabled={
-                                                                    isCardsStale
-                                                                }
-                                                                onClick={() => {
-                                                                    void onCopyCardCode(
-                                                                        card,
-                                                                    );
-                                                                }}
-                                                                sx={{
-                                                                    minWidth: 0,
-                                                                    px: 0,
-                                                                    py: 0,
-                                                                    color: "var(--muted)",
-                                                                    fontSize:
-                                                                        "0.8rem",
-                                                                    fontWeight: 700,
-                                                                    textTransform:
-                                                                        "none",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "transparent",
-                                                                        color: "var(--ink)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                {copiedCardIndex ===
-                                                                index
-                                                                    ? "Copied"
-                                                                    : "Copy code"}
-                                                            </Button>
-                                                            <Typography
-                                                                sx={{
-                                                                    color: "var(--muted)",
-                                                                    fontSize:
-                                                                        "0.78rem",
-                                                                    fontWeight: 500,
-                                                                    textAlign:
-                                                                        "right",
-                                                                }}
-                                                            >
-                                                                {fingerprint}
-                                                            </Typography>
-                                                        </Stack>
-                                                    )}
-
-                                                    <Stack
-                                                        direction="row"
-                                                        spacing={0.8}
-                                                        useFlexGap
-                                                        flexWrap="wrap"
-                                                    >
-                                                        <ActionButton
-                                                            disabled={
-                                                                !card ||
-                                                                isCardsStale ||
-                                                                busyCard ===
-                                                                    index
-                                                            }
-                                                            onClick={() => {
-                                                                void runCardAction(
-                                                                    index,
-                                                                    (file) => {
-                                                                        printBlob(
-                                                                            file,
-                                                                            file.name,
-                                                                        );
-                                                                    },
-                                                                );
-                                                            }}
-                                                        >
-                                                            Print
-                                                        </ActionButton>
-                                                        <ActionButton
-                                                            disabled={
-                                                                !card ||
-                                                                isCardsStale ||
-                                                                busyCard ===
-                                                                    index
-                                                            }
-                                                            onClick={() => {
-                                                                void runCardAction(
-                                                                    index,
-                                                                    (file) => {
-                                                                        downloadBlob(
-                                                                            file,
-                                                                            file.name,
-                                                                        );
-                                                                    },
-                                                                );
-                                                            }}
-                                                        >
-                                                            Download
-                                                        </ActionButton>
-                                                        <ActionButton
-                                                            disabled={
-                                                                !card ||
-                                                                isCardsStale ||
-                                                                busyCard ===
-                                                                    index
-                                                            }
-                                                            onClick={() => {
-                                                                void runCardAction(
-                                                                    index,
-                                                                    async (
-                                                                        file,
-                                                                    ) => {
-                                                                        try {
-                                                                            await shareFiles(
-                                                                                [
-                                                                                    file,
-                                                                                ],
-                                                                            );
-                                                                        } catch {
-                                                                            downloadBlob(
-                                                                                file,
-                                                                                file.name,
-                                                                            );
-                                                                        }
-                                                                    },
-                                                                );
-                                                            }}
-                                                        >
-                                                            Share
-                                                        </ActionButton>
-                                                    </Stack>
-                                                </Stack>
-                                            </Stack>
+                                                busy={busyCard === index}
+                                                card={card}
+                                                cardLabel={cardLabel}
+                                                copied={copiedCardIndex === index}
+                                                index={index}
+                                                onCardAction={onCardAction}
+                                                onCopyCardCode={onCopyCardCode}
+                                            />
                                         );
                                     })}
                                 </Box>
@@ -1126,8 +1173,8 @@ const Page = () => {
                                             maxWidth: 680,
                                         }}
                                     >
-                                        Upload two card images, or paste two
-                                        codes if you copied them earlier.
+                                        Upload two card images, or paste their
+                                        codes.
                                     </Typography>
                                 </Box>
 
@@ -1144,18 +1191,54 @@ const Page = () => {
                                     {recoverSlots.map((slot, index) => {
                                         const slotDetails =
                                             recoverSlotDetails[index];
+                                        const slotLabel =
+                                            recoverSlotLabel(index);
+                                        const isDropActive =
+                                            recoverDropTarget === index;
 
                                         return (
                                             <Stack
                                                 key={index}
                                                 spacing={1.15}
+                                                onDragEnter={(event) => {
+                                                    event.preventDefault();
+                                                    setRecoverDropTarget(index);
+                                                }}
+                                                onDragLeave={() => {
+                                                    setRecoverDropTarget(
+                                                        (current) =>
+                                                            current === index
+                                                                ? null
+                                                                : current,
+                                                    );
+                                                }}
+                                                onDragOver={(event) => {
+                                                    event.preventDefault();
+                                                    event.dataTransfer.dropEffect =
+                                                        "copy";
+                                                    setRecoverDropTarget(index);
+                                                }}
+                                                onDrop={(event) => {
+                                                    void onRecoverDrop(
+                                                        index,
+                                                        event,
+                                                    );
+                                                }}
                                                 sx={{
                                                     p: 1.45,
                                                     border: "1.5px solid",
-                                                    borderColor:
-                                                        "var(--line-strong)",
+                                                    borderColor: isDropActive
+                                                        ? "var(--ink)"
+                                                        : "var(--line-strong)",
                                                     borderRadius: "24px",
-                                                    bgcolor: "var(--paper)",
+                                                    bgcolor: isDropActive
+                                                        ? "var(--field-soft)"
+                                                        : "var(--paper)",
+                                                    transition:
+                                                        "border-color 140ms ease, background-color 140ms ease, transform 140ms ease",
+                                                    transform: isDropActive
+                                                        ? "translateY(-1px)"
+                                                        : "translateY(0)",
                                                 }}
                                             >
                                                 <Stack
@@ -1183,7 +1266,7 @@ const Page = () => {
                                                                     "0.84rem",
                                                             }}
                                                         >
-                                                            Card {index + 1}
+                                                            Card {slotLabel}
                                                         </Typography>
                                                     </Box>
                                                     <Button
@@ -1218,7 +1301,7 @@ const Page = () => {
                                                             onChange={(
                                                                 event,
                                                             ) => {
-                                                                void onRecoverFile(
+                                                                void onRecoverFileChange(
                                                                     index,
                                                                     event,
                                                                 );
@@ -1238,13 +1321,13 @@ const Page = () => {
                                                     }}
                                                 >
                                                     {slotDetails
-                                                        ? `${slot.fileName ? `${slot.fileName} · ` : ""}Card ${slotDetails.index} from #${slotDetails.fingerprint}`
+                                                        ? `${slot.fileName ? `${slot.fileName} · ` : ""}Card ${slotDetails.index} from ID ${slotDetails.fingerprint}`
                                                         : slot.fileName
                                                           ? slot.fileName
-                                                          : "Upload a saved card image, or paste a copied code."}
+                                                          : "Drop a saved card image here, or paste a copied code."}
                                                 </Typography>
                                                 <TextField
-                                                    label={`Code ${index + 1}`}
+                                                    label={`Code ${slotLabel}`}
                                                     multiline
                                                     minRows={6}
                                                     value={slot.value}
@@ -1270,7 +1353,7 @@ const Page = () => {
                                                                 ),
                                                         )
                                                     }
-                                                    placeholder={`Paste code ${index + 1}`}
+                                                    placeholder={`Paste code ${slotLabel}`}
                                                     sx={fieldSx}
                                                 />
                                             </Stack>

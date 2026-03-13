@@ -225,7 +225,7 @@ export const combineShares = (firstInput: string, secondInput: string) => {
 
     if (first.id !== second.id || first.length !== second.length) {
         throw new Error(
-            "These two cards are from different sets. Match the # on both cards.",
+            "These two cards are from different sets. Match the ID on both cards.",
         );
     }
 
