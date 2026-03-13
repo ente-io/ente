@@ -403,6 +403,7 @@
     "thumbnail_generation_failed": "Thumbnail generatie mislukt",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Deze bestanden zijn geüpload, maar helaas konden we geen thumbnails voor ze genereren.",
+    "learn_how": "",
     "unsupported_files": "Niet-ondersteunde bestanden",
     "unsupported_files_hint": "Ente ondersteunt deze bestandsformaten nog niet",
     "zero_size_files": "Lege bestanden",

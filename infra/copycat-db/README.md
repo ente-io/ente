@@ -55,6 +55,13 @@ on a shell prompt in the container (using `./test.sh sh`)
 The UUID of the Scalway RDB instance that we wish to backup. If this is missing,
 then the Docker image falls back to using `pg_dump` (as outlined next).
 
+##### SCW_RDB_USE_SNAPSHOT_BACKUP
+
+Optional. Set this to `true` to make copycat-db restore the latest existing
+Scaleway snapshot into a temporary single-node instance named
+`copycat-db-temp`, take the backup from that temporary instance, and delete it
+after the backup has been downloaded. See the **Snapshot Mode** section below for more details.
+
 ##### PGUSER, PGPASSWORD, PGHOST
 
 Not needed in production when taking a backup (since we use the Scaleway CLI to
@@ -101,6 +108,28 @@ remote that the crypt remote wraps.
 
 The service logs to its standard out/error. The systemd unit is configured to
 route these to `/var/logs/copycat-db.log`.
+
+## Snapshot Mode
+
+By default, copycat-db keeps the old behaviour and backs up the instance
+specified by `SCW_RDB_INSTANCE_ID` directly.
+
+If `SCW_RDB_USE_SNAPSHOT_BACKUP=true`, it instead:
+
+1. Finds the latest existing Scaleway snapshot for `SCW_RDB_INSTANCE_ID`.
+2. Restores it into a temporary non-HA instance named `copycat-db-temp`.
+3. Takes the backup from that restored instance.
+4. Deletes that temporary instance after the backup has been downloaded.
+
+To trigger this path in production, set `SCW_RDB_USE_SNAPSHOT_BACKUP=true` in
+`/root/copycat-db.env` and then start the service or let the timer run it.
+
+This path is intentionally conservative about cleanup. If something fails before
+the final explicit delete, the script leaves the temporary instance behind
+instead of attempting automatic cleanup during error handling. This is done to
+avoid accidental deletions if the script ends up in an unexpected state.
+
+If that happens, clean it up manually in the Scaleway dashboard by deleting the DB instance named  `copycat-db-temp`.
 
 ## Local testing
 

@@ -403,6 +403,7 @@
     "thumbnail_generation_failed": "Küçük resim oluşturulamadı",
     "canvas_blocked_upload_description": "",
     "thumbnail_generation_failed_hint": "Bu dosyalar yüklendi, ancak ne yazık ki küçük resimleri oluşturulamadı.",
+    "learn_how": "",
     "unsupported_files": "Desteklenmeyen dosyalar",
     "unsupported_files_hint": "Ente bu dosya formatlarını henüz desteklemiyor",
     "zero_size_files": "",

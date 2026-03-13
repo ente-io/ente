@@ -77,7 +77,8 @@ class FileAppBarState extends State<FileAppBar> {
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.file.generatedID != widget.file.generatedID) {
+    if (detailPageFileIdentifier(oldWidget.file) !=
+        detailPageFileIdentifier(widget.file)) {
       _getActions();
     }
   }
@@ -226,7 +227,9 @@ class FileAppBarState extends State<FileAppBar> {
     final fallbackFileId = InheritedDetailPageState.maybeOf(context)
         ?.showingThumbnailFallbackNotifier
         .value;
-    final showingFallback = fallbackFileId == widget.file.generatedID;
+    final currentFileId = detailPageFileIdentifier(widget.file);
+    final showingFallback =
+        fallbackFileId != null && fallbackFileId == currentFileId;
     if (showingFallback) {
       _actions.add(
         Tooltip(
