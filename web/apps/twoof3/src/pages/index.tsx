@@ -145,6 +145,32 @@ const HELP_FAQS = [
         answer: "No. Your secret is split and recovered in your browser. The downloaded recovery page also works fully offline.",
     },
     {
+        question: "What if 2of3.ente.io is unavailable?",
+        answer: (
+            <>
+                A fully offline HTML recovery page is included when you use
+                {" "}&quot;Download all cards&quot;. Open that file locally,
+                add any two matching cards, and recover without needing the
+                site. 2of3 is also{" "}
+                <Box
+                    component="a"
+                    href="https://github.com/ente-io/ente"
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={{
+                        color: "inherit",
+                        textDecorationColor: "currentColor",
+                        textUnderlineOffset: "0.14em",
+                    }}
+                >
+                    open source
+                </Box>
+                , so the format is inspectable and recovery is not locked to
+                one hosted service.
+            </>
+        ),
+    },
+    {
         question: "What if I need to change the secret?",
         answer: "Treat it as a new set. Make three fresh cards and replace the old ones together. Do not mix cards from different IDs.",
     },
@@ -155,6 +181,10 @@ const HELP_FAQS = [
     {
         question: "All this sounds magical, how does it work?",
         answer: "It uses Shamir secret sharing. Your secret is split into three shares in a way where mathematically any two parts reconstruct it while one alone reveals nothing. Think of it like a lock which needs 2 of 3 keys to open.",
+    },
+    {
+        question: "Should I test recovery before storing the cards?",
+        answer: "Yes. Before you put the cards away, try recovering the secret once with any two of them. It is the quickest way to catch a bad print, a saving mistake, or a card from the wrong set.",
     },
     {
         question: "Is the source code open?",
@@ -210,10 +240,12 @@ const HELP_CARD_LAYOUTS = [
     { offset: "0rem", span: 7, tone: "soft" },
     { offset: "0rem", span: 6, tone: "plain" },
     { offset: "1.2rem", span: 6, tone: "accent" },
-    { offset: "0rem", span: 4, tone: "soft" },
     { offset: "1rem", span: 8, tone: "plain" },
+    { offset: "0rem", span: 4, tone: "soft" },
     { offset: "0.45rem", span: 5, tone: "plain" },
     { offset: "1.35rem", span: 7, tone: "soft" },
+    { offset: "0.25rem", span: 6, tone: "plain" },
+    { offset: "0.95rem", span: 6, tone: "accent" },
 ] as const;
 
 const recoverSlotLabel = (index: number) =>
@@ -615,8 +647,32 @@ const describeRecoverSlot = (value: string): RecoverSlotDetails | null => {
 };
 
 const readShareFile = async (file: File) => {
-    if (file.type.startsWith("text/")) {
-        return (await file.text()).trim();
+    const canBeText =
+        file.type.startsWith("text/") ||
+        !file.type ||
+        /\.txt$/iu.test(file.name);
+
+    if (canBeText) {
+        const text = (await file.text()).trim();
+        if (!text) {
+            if (file.type.startsWith("text/") || /\.txt$/iu.test(file.name)) {
+                throw new Error("That text file does not look like a 2of3 share.");
+            }
+        } else {
+            try {
+                parseShare(text);
+                return text;
+            } catch {
+                if (
+                    file.type.startsWith("text/") ||
+                    /\.txt$/iu.test(file.name)
+                ) {
+                    throw new Error(
+                        "That text file does not look like a 2of3 share.",
+                    );
+                }
+            }
+        }
     }
 
     return decodeQrFromFile(file);
@@ -1146,6 +1202,16 @@ const Page = () => {
                                     different places.
                                 </Typography>
 
+                                <Typography
+                                    sx={{
+                                        color: "var(--muted)",
+                                        maxWidth: 360,
+                                        fontSize: "0.98rem",
+                                    }}
+                                >
+                                    Your secret never leaves your browser.
+                                </Typography>
+
                                 <TextField
                                     label="Secret"
                                     multiline
@@ -1401,7 +1467,7 @@ const Page = () => {
                                             fontSize: "0.82rem",
                                         }}
                                     >
-                                        Recover later
+                                        Recover
                                     </Typography>
                                 </Box>
 

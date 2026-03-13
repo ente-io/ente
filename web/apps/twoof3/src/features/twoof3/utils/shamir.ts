@@ -179,7 +179,7 @@ export const splitSecret = (secret: string): SplitShare[] => {
 };
 
 export const parseShare = (input: string): ParsedShare => {
-    const encoded = input.trim();
+    const encoded = input.replace(/\s+/gu, "");
     if (!encoded.startsWith(SHARE_PREFIX)) {
         throw new Error("That code does not look like a 2of3 share.");
     }

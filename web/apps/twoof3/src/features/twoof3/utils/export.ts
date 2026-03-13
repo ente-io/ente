@@ -712,7 +712,7 @@ export const createOfflineRecoveryHtml = async () => {
       return Uint8Array.from(binary, (char) => char.charCodeAt(0));
     };
     const parseShare = (input) => {
-      const encoded = input.trim();
+      const encoded = input.replace(/\\s+/gu, "");
       if (!encoded.startsWith("2of3-")) throw new Error("That code does not look like a 2of3 share.");
       const payload = base64UrlDecode(encoded.slice(5));
       if (payload.length <= HEADER_LENGTH) throw new Error("That share looks incomplete.");
@@ -869,7 +869,25 @@ export const createOfflineRecoveryHtml = async () => {
       }
     };
     const fileToText = async (file) => {
-      if (file.type.startsWith("text/")) return (await file.text()).trim();
+      const canBeText =
+        file.type.startsWith("text/") ||
+        !file.type ||
+        /\\.txt$/iu.test(file.name);
+      if (canBeText) {
+        const text = (await file.text()).trim();
+        if (text) {
+          try {
+            parseShare(text);
+            return text;
+          } catch {
+            if (file.type.startsWith("text/") || /\\.txt$/iu.test(file.name)) {
+              throw new Error("That text file does not look like a 2of3 share.");
+            }
+          }
+        } else if (file.type.startsWith("text/") || /\\.txt$/iu.test(file.name)) {
+          throw new Error("That text file does not look like a 2of3 share.");
+        }
+      }
       const value = decodeQrImage(await imageDataFromFile(file));
       parseShare(value);
       return value;
@@ -897,7 +915,11 @@ export const createOfflineRecoveryHtml = async () => {
       };
       fileInput.addEventListener("change", async (event) => {
         const file = event.target.files && event.target.files[0];
-        await applyFile(file);
+        try {
+          await applyFile(file);
+        } finally {
+          event.target.value = "";
+        }
       });
       textarea.addEventListener("input", (event) => {
         meta.textContent = describeSlotValue(event.target.value.trim());
