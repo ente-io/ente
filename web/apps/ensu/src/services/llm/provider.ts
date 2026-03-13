@@ -374,7 +374,7 @@ export class LlmProvider {
         }
 
         try {
-            const { invoke } = await import("@tauri-apps/api/tauri");
+            const { invoke } = await import("@tauri-apps/api/core");
             const info = await invoke<{
                 platform?: string;
                 totalMemoryBytes?: number | null;
@@ -541,10 +541,13 @@ export class LlmProvider {
             totalBytes: 0,
         });
 
-        const { createDir, exists, removeFile, renameFile } = await import(
-            "@tauri-apps/api/fs"
-        );
-        const { invoke } = await import("@tauri-apps/api/tauri");
+        const {
+            mkdir: createDir,
+            exists,
+            remove: removeFile,
+            rename: renameFile,
+        } = await import("@tauri-apps/plugin-fs");
+        const { invoke } = await import("@tauri-apps/api/core");
         const { dirname } = await import("@tauri-apps/api/path");
 
         log.info("LLM download start", { url, destPath });

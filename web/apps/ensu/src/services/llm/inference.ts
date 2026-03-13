@@ -1,5 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/tauri";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,
@@ -535,7 +535,7 @@ class TauriInference implements InferenceBackend {
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
-        const { exists } = await import("@tauri-apps/api/fs");
+        const { exists } = await import("@tauri-apps/plugin-fs");
         if (!(await exists(modelPath))) return false;
         try {
             const size = await invoke<number | null>("fs_file_size", {

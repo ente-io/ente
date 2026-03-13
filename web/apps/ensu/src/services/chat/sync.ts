@@ -161,7 +161,7 @@ const syncChatNative = async (chatKey: string, token: string) => {
     const masterKey = await masterKeyFromSession();
     if (!masterKey) return;
 
-    const { invoke } = await import("@tauri-apps/api/tauri");
+    const { invoke } = await import("@tauri-apps/api/core");
     const { getName, getVersion } = await import("@tauri-apps/api/app");
 
     const [baseUrl, clientPackage, clientVersion] = await Promise.all([
