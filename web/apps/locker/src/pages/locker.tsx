@@ -176,11 +176,11 @@ const Page: React.FC = () => {
             const key = mk ?? masterKey;
             if (!key) return;
             try {
+                void loadUserDetails();
                 const [data, trash, fileLinks] = await Promise.all([
                     fetchLockerData(key),
                     fetchLockerTrash(key),
                     fetchLockerFileShareLinks(),
-                    loadUserDetails(),
                 ]);
                 setCollections(data);
                 setTrashItems(trash);
