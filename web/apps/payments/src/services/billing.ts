@@ -29,11 +29,23 @@ export const parseAndHandleRequest = async () => {
 
         if (paymentIntentClientSecret) {
             const pendingPaymentContext = getPendingPaymentContext();
-            await handlePaymentIntentRedirect(
-                paymentIntentClientSecret,
-                pendingPaymentContext,
-                redirectURL ?? pendingPaymentContext?.redirectURL ?? null,
-            );
+            const clientRedirectURL =
+                redirectURL ?? pendingPaymentContext?.redirectURL ?? null;
+            try {
+                await handlePaymentIntentRedirect(
+                    paymentIntentClientSecret,
+                    pendingPaymentContext,
+                    clientRedirectURL,
+                );
+            } catch (error) {
+                console.error(error);
+                clearPendingPaymentContext();
+                if (clientRedirectURL) {
+                    redirectToApp(clientRedirectURL, "fail", "server_error");
+                    return;
+                }
+                throw ensureError(error);
+            }
             return;
         }
 
@@ -69,6 +81,7 @@ export const parseAndHandleRequest = async () => {
 
 const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
 const paymentIntentPollIntervalMs = 2_000;
+const paymentIntentPollTimeoutMs = 180_000;
 const pendingPaymentContextStorageKey = "ente.payments.pending-context";
 
 type StripeJS = NonNullable<Awaited<ReturnType<typeof loadStripe>>>;
@@ -284,8 +297,9 @@ const waitForTerminalPaymentIntentStatus = async (
     initialStatus: string,
 ) => {
     let status = initialStatus;
+    const deadline = Date.now() + paymentIntentPollTimeoutMs;
 
-    while (status == "processing") {
+    while (status == "processing" && Date.now() < deadline) {
         await delay(paymentIntentPollIntervalMs);
         const result = await stripe.retrievePaymentIntent(clientSecret);
         if (result.error) throw ensureError(result.error);
@@ -360,6 +374,9 @@ const redirectForPaymentIntentStatus = (
     switch (status) {
         case "succeeded":
             redirectToApp(redirectURL, "success");
+            return;
+        case "processing":
+            redirectToApp(redirectURL, "fail", "server_error");
             return;
         case "requires_payment_method":
             redirectToApp(redirectURL, "fail", "requires_payment_method");
