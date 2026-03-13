@@ -99,6 +99,49 @@ const EMPTY_SPLIT_SNAPSHOT: SplitSnapshot = {
 
 const RECOVER_SLOT_LABELS = ["A", "B"] as const;
 
+const HELP_FAQS = [
+    {
+        question: "What is 2of3, exactly?",
+        answer: "It turns one secret into three recovery cards. Any two cards can bring the secret back. One card by itself is not enough.",
+    },
+    {
+        question: "When is this useful?",
+        answer: "Use it for something important that feels risky to keep in one place: an Ente recovery key, a password manager master password, a wallet recovery phrase, or another recovery code you do not want to lose.",
+    },
+    {
+        question: "Why not keep the secret in one note?",
+        answer: "A single note is a single point of failure. If that one place is lost, stolen, or forgotten, recovery becomes hard. 2of3 lets you spread the risk without making recovery too difficult.",
+    },
+    {
+        question: "Where should the cards go?",
+        answer: "Keep the three cards in different safe places. Home, a safe, a trusted family member, or a document locker are all reasonable options. The important part is separation.",
+    },
+    {
+        question: "Do I need all three cards later?",
+        answer: "No. Any two are enough. The third card is there so one missing card does not lock you out.",
+    },
+    {
+        question: "Can one card reveal my secret?",
+        answer: "No. A single card cannot recover the original secret.",
+    },
+    {
+        question: "How do I recover later?",
+        answer: "Open 2of3 again, or use the offline recovery page that downloads with the cards. Upload any two card images, or paste their codes, and the secret appears on your device.",
+    },
+    {
+        question: "Does this send my secret to Ente?",
+        answer: "No. Your secret is split and recovered in your browser. The downloaded recovery page also works fully offline.",
+    },
+    {
+        question: "What if I need to change the secret?",
+        answer: "Treat it as a new set. Make three fresh cards and replace the old ones together. Do not mix cards from different IDs.",
+    },
+    {
+        question: "Should I print the cards, download them, or both?",
+        answer: "Either is fine. Printed cards are easy to store offline. Downloaded images are easier to duplicate carefully. Many people will want both.",
+    },
+] as const;
+
 const recoverSlotLabel = (index: number) =>
     RECOVER_SLOT_LABELS[index] ?? String(index + 1);
 
@@ -1120,6 +1163,49 @@ const Page = () => {
 
                         <Box
                             sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                py: { xs: 0.35, md: 0.8 },
+                            }}
+                        >
+                            <Stack
+                                alignItems="center"
+                                spacing={0.75}
+                                sx={{ minHeight: { xs: 54, md: 72 } }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 12,
+                                        height: 12,
+                                        borderRadius: "50%",
+                                        bgcolor: "var(--accent)",
+                                        border: "1.5px solid",
+                                        borderColor: "var(--ink)",
+                                    }}
+                                />
+                                <Box
+                                    sx={{
+                                        width: "1.5px",
+                                        flex: 1,
+                                        minHeight: { xs: 28, md: 44 },
+                                        bgcolor: "var(--line-strong)",
+                                    }}
+                                />
+                                <Box
+                                    sx={{
+                                        width: 12,
+                                        height: 12,
+                                        borderRadius: "50%",
+                                        bgcolor: "var(--accent)",
+                                        border: "1.5px solid",
+                                        borderColor: "var(--ink)",
+                                    }}
+                                />
+                            </Stack>
+                        </Box>
+
+                        <Box
+                            sx={{
                                 border: "2px solid",
                                 borderColor: "var(--ink)",
                                 borderRadius: "28px",
@@ -1492,6 +1578,165 @@ const Page = () => {
                                     </Stack>
                                 )}
                             </Stack>
+                        </Box>
+
+                        <Box
+                            sx={{
+                                border: "2px solid",
+                                borderColor: "var(--ink)",
+                                borderRadius: "28px",
+                                overflow: "hidden",
+                                bgcolor: "var(--shell)",
+                                boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
+                            }}
+                        >
+                            <Stack
+                                spacing={2.4}
+                                sx={{ p: { xs: 2.1, md: 2.6 } }}
+                            >
+                                <Stack spacing={0.7} sx={{ maxWidth: 720 }}>
+                                    <Box
+                                        sx={{
+                                            width: "fit-content",
+                                            px: 1.1,
+                                            py: 0.45,
+                                            borderRadius: "999px",
+                                            border: "1.5px solid",
+                                            borderColor: "var(--ink)",
+                                            bgcolor: "var(--accent)",
+                                        }}
+                                    >
+                                        <Typography
+                                            sx={{
+                                                fontWeight: 700,
+                                                fontSize: "0.82rem",
+                                                color: "#111111",
+                                            }}
+                                        >
+                                            Help
+                                        </Typography>
+                                    </Box>
+                                    <Typography
+                                        variant="h2"
+                                        sx={{
+                                            fontSize: {
+                                                xs: "1.95rem",
+                                                md: "2.45rem",
+                                            },
+                                            lineHeight: 0.94,
+                                            maxWidth: 620,
+                                        }}
+                                    >
+                                        Questions people usually have
+                                    </Typography>
+                                    <Typography
+                                        sx={{
+                                            color: "var(--muted)",
+                                            maxWidth: 660,
+                                        }}
+                                    >
+                                        2of3 is for moments where one copy feels
+                                        too risky, but a complicated setup feels
+                                        worse. This is the plain-language
+                                        version.
+                                    </Typography>
+                                </Stack>
+
+                                <Box
+                                    sx={{
+                                        display: "grid",
+                                        gridTemplateColumns: {
+                                            xs: "1fr",
+                                            md: "repeat(2, minmax(0, 1fr))",
+                                        },
+                                        gap: 1.5,
+                                    }}
+                                >
+                                    {HELP_FAQS.map((item) => (
+                                        <Stack
+                                            key={item.question}
+                                            spacing={0.9}
+                                            sx={{
+                                                p: 1.55,
+                                                border: "1.5px solid",
+                                                borderColor: "var(--line-strong)",
+                                                borderRadius: "24px",
+                                                bgcolor: "var(--paper)",
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: "fit-content",
+                                                    px: 0.95,
+                                                    py: 0.38,
+                                                    borderRadius: "999px",
+                                                    border: "1.5px solid",
+                                                    borderColor:
+                                                        "var(--line-strong)",
+                                                    bgcolor: "var(--field-soft)",
+                                                }}
+                                            >
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: "0.77rem",
+                                                        fontWeight: 700,
+                                                        color: "var(--muted)",
+                                                    }}
+                                                >
+                                                    Q&A
+                                                </Typography>
+                                            </Box>
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: "1rem",
+                                                    lineHeight: 1.25,
+                                                }}
+                                            >
+                                                {item.question}
+                                            </Typography>
+                                            <Typography
+                                                sx={{
+                                                    color: "var(--muted)",
+                                                    fontSize: "0.95rem",
+                                                    lineHeight: 1.6,
+                                                }}
+                                            >
+                                                {item.answer}
+                                            </Typography>
+                                        </Stack>
+                                    ))}
+                                </Box>
+                            </Stack>
+                        </Box>
+
+                        <Box
+                            component="footer"
+                            sx={{
+                                pt: { xs: 0.5, md: 1 },
+                                pb: { xs: 1, md: 1.5 },
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Box
+                                component="a"
+                                href="https://ente.io"
+                                target="_blank"
+                                rel="noreferrer"
+                                sx={{
+                                    color: "var(--ink)",
+                                    fontWeight: 700,
+                                    letterSpacing: "-0.04em",
+                                    fontSize: { xs: "1rem", md: "1.08rem" },
+                                    textDecoration: "none",
+                                    "&:hover": {
+                                        textDecoration: "underline",
+                                    },
+                                }}
+                            >
+                                Ente
+                            </Box>
                         </Box>
                     </Stack>
                 </Container>
