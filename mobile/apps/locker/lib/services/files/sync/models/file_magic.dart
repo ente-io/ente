@@ -75,9 +75,9 @@ class PubMagicMetadata {
   // 1 -> panorama
   int? mediaType;
 
-  // JSON containing information data for info files
-  // Contains type (note, physical-record, account-credential, emergency-contact)
-  // and data (the actual information content)
+  // JSON containing information data for info files.
+  // Locker currently writes camelCase type values
+  // (note, physicalRecord, accountCredential, emergencyContact).
   Map<String, dynamic>? info;
 
   PubMagicMetadata({
