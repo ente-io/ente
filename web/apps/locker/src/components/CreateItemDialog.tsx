@@ -22,6 +22,7 @@ import {
     lockerItemIcon,
     lockerItemIconConfig,
 } from "components/lockerItemIcons";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -35,7 +36,7 @@ import React, {
 } from "react";
 import { formatLockerMutationError } from "services/locker-errors";
 import type { LockerCollection, LockerItemType } from "types";
-import { visibleLockerCollections } from "types";
+import { isCollectionOwner, visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
 
@@ -110,9 +111,14 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     editItem,
 }) => {
     const isEditMode = !!editItem;
+    const currentUserID = ensureLocalUser().id;
     const displayCollections = useMemo(
-        () => visibleLockerCollections(collections),
-        [collections],
+        () =>
+            visibleLockerCollections(collections).filter(
+                (collection) =>
+                    isEditMode || isCollectionOwner(collection, currentUserID),
+            ),
+        [collections, currentUserID, isEditMode],
     );
     const [selectedOption, setSelectedOption] = useState<CreateOption | null>(
         editItem?.type ?? null,
@@ -136,6 +142,18 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             ? (selectedOption as LockerItemType)
             : null;
 
+    const normalizeSelectedCollectionID = useCallback(
+        (collectionID: number | null | undefined) =>
+            collectionID !== null &&
+            collectionID !== undefined &&
+            displayCollections.some(
+                (collection) => collection.id === collectionID,
+            )
+                ? collectionID
+                : null,
+        [displayCollections],
+    );
+
     useEffect(() => {
         if (!open) {
             return;
@@ -143,13 +161,36 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
         setSelectedOption(editItem?.type ?? null);
         setSelectedCollectionID(
-            editItem?.collectionID ?? defaultCollectionID ?? null,
+            isEditMode
+                ? (editItem?.collectionID ?? null)
+                : normalizeSelectedCollectionID(defaultCollectionID),
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
         setSelectedFile(null);
         setError(null);
-    }, [defaultCollectionID, editItem, open]);
+    }, [
+        defaultCollectionID,
+        editItem,
+        isEditMode,
+        normalizeSelectedCollectionID,
+        open,
+    ]);
+
+    useEffect(() => {
+        if (
+            !open ||
+            isEditMode ||
+            selectedCollectionID === null ||
+            displayCollections.some(
+                (collection) => collection.id === selectedCollectionID,
+            )
+        ) {
+            return;
+        }
+
+        setSelectedCollectionID(null);
+    }, [displayCollections, isEditMode, open, selectedCollectionID]);
 
     const handleClose = useCallback(() => {
         if (saving || uploading) {
