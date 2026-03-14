@@ -333,10 +333,19 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     }
 
     final l10n = AppLocalizations.of(context);
+    final colorScheme = getEnteColorScheme(context);
     final colorMap = _memberColorMap(_legendMembers());
     await showBaseBottomSheet<void>(
       context,
       title: member.email,
+      titleStyle: getEnteTextTheme(context).large,
+      headerSpacing: 16,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      topCornerRadius: 24,
+      modalBackgroundColor: Colors.transparent,
+      closeButtonBackgroundColor: colorScheme.fillFaint,
+      closeButtonSize: 36,
+      closeIconSize: 20,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -376,8 +385,8 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
                           EditStorageLimitPage(
                             member: member,
                             totalStorageInBytes: _userDetails.getTotalStorage(),
-                            avatarColor: colorMap[member.email] ??
-                                getEnteColorScheme(context).greenBase,
+                            avatarColor:
+                                colorMap[member.email] ?? colorScheme.greenBase,
                           ),
                         );
                         await _refreshUserDetails();
@@ -930,7 +939,7 @@ class _ActionGroup extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: colorScheme.strokeSolid,
+                color: colorScheme.fillMuted,
               ),
           ],
         ],
@@ -966,37 +975,41 @@ class _ActionTile extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: foregroundColor),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textTheme.body.copyWith(color: foregroundColor),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: foregroundColor),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      subtitle!,
-                      style: textTheme.smallMuted,
+                      title,
+                      style: textTheme.body.copyWith(color: foregroundColor),
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: textTheme.smallMuted,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (trailingChevron)
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: colorScheme.contentLighter,
-              ),
-          ],
+              if (trailingChevron)
+                Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: colorScheme.contentLighter,
+                ),
+            ],
+          ),
         ),
       ),
     );
