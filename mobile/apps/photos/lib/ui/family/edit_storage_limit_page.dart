@@ -28,28 +28,51 @@ class EditStorageLimitPage extends StatefulWidget {
 
 class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
   static const _gigabyte = 1024 * 1024 * 1024;
+  static const _sliderStepInGigabytes = 5;
 
-  late double _sliderValue;
+  late final List<int> _sliderOptionsInGigabytes;
+  late double _sliderIndex;
 
-  double get _maxSliderValue =>
-      math.max(1, (widget.totalStorageInBytes / _gigabyte).ceilToDouble());
+  int get _maxSliderValueInGigabytes =>
+      math.max(1, (widget.totalStorageInBytes / _gigabyte).ceil());
 
-  double get _minimumLimitedSliderValue =>
-      (widget.member.usage / _gigabyte).ceilToDouble();
+  int get _minimumLimitedSliderValueInGigabytes =>
+      (widget.member.usage / _gigabyte).ceil();
 
-  int? get _selectedStorageLimit {
-    if (_sliderValue <= 0) {
+  int get _selectedSliderIndex =>
+      _sliderIndex.round().clamp(0, _sliderOptionsInGigabytes.length - 1);
+
+  int get _selectedSliderValueInGigabytes =>
+      _sliderOptionsInGigabytes[_selectedSliderIndex];
+
+  int? get _existingStorageLimitInGigabytes =>
+      _storageLimitInGigabytes(widget.member.storageLimit);
+
+  int? get _initialCustomSliderValueInGigabytes {
+    final existingStorageLimitInGigabytes = _existingStorageLimitInGigabytes;
+    if (existingStorageLimitInGigabytes == null ||
+        _isStandardSliderValue(existingStorageLimitInGigabytes)) {
       return null;
     }
-    return (_sliderValue * _gigabyte).round();
+    return existingStorageLimitInGigabytes;
+  }
+
+  bool get _hasChangedStorageLimit =>
+      _selectedSliderValueInGigabytes !=
+      (_existingStorageLimitInGigabytes ?? 0);
+
+  int? get _selectedStorageLimit {
+    if (_selectedSliderValueInGigabytes <= 0) {
+      return null;
+    }
+    return _selectedSliderValueInGigabytes * _gigabyte;
   }
 
   @override
   void initState() {
     super.initState();
-    _sliderValue = widget.member.storageLimit == null
-        ? 0
-        : (widget.member.storageLimit! / _gigabyte).roundToDouble();
+    _sliderOptionsInGigabytes = _buildSliderOptionsInGigabytes();
+    _sliderIndex = _indexForStorageLimit(widget.member.storageLimit).toDouble();
   }
 
   @override
@@ -148,20 +171,25 @@ class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
                                 colorScheme.greenBase.withValues(alpha: 0.14),
                           ),
                           child: Slider(
-                            value: _sliderValue.clamp(0, _maxSliderValue),
+                            value: _sliderIndex.clamp(
+                              0,
+                              (_sliderOptionsInGigabytes.length - 1).toDouble(),
+                            ),
                             min: 0,
-                            max: _maxSliderValue,
-                            divisions: _maxSliderValue <= 500
-                                ? _maxSliderValue.toInt()
-                                : 500,
+                            max: (_sliderOptionsInGigabytes.length - 1)
+                                .toDouble(),
+                            divisions: _sliderOptionsInGigabytes.length - 1,
                             onChanged: (value) {
-                              final roundedValue = value.roundToDouble();
-                              final effectiveValue = roundedValue > 0 &&
-                                      roundedValue < _minimumLimitedSliderValue
-                                  ? _minimumLimitedSliderValue
-                                  : roundedValue;
+                              final roundedIndex = value.round();
+                              final roundedValue =
+                                  _sliderOptionsInGigabytes[roundedIndex];
+                              final effectiveIndex = roundedValue > 0 &&
+                                      roundedValue <
+                                          _minimumLimitedSliderValueInGigabytes
+                                  ? _minimumSelectableIndex().toDouble()
+                                  : roundedIndex.toDouble();
                               setState(() {
-                                _sliderValue = effectiveValue;
+                                _sliderIndex = effectiveIndex;
                               });
                             },
                           ),
@@ -203,6 +231,7 @@ class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
           ButtonWidgetV2(
             buttonType: ButtonTypeV2.primary,
             labelText: l10n.save,
+            isDisabled: !_hasChangedStorageLimit,
             onTap: _saveLimit,
           ),
         ],
@@ -211,6 +240,9 @@ class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
   }
 
   Future<void> _saveLimit() async {
+    if (!_hasChangedStorageLimit) {
+      return;
+    }
     try {
       await FamilyService.instance.updateMemberStorageLimit(
         member: widget.member,
@@ -226,6 +258,62 @@ class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
       await showGenericErrorDialog(context: context, error: error);
       throw const _HandledStorageLimitException();
     }
+  }
+
+  List<int> _buildSliderOptionsInGigabytes() {
+    final options = <int>[0];
+    for (var value = _sliderStepInGigabytes;
+        value < _maxSliderValueInGigabytes;
+        value += _sliderStepInGigabytes) {
+      options.add(value);
+    }
+    if (options.last != _maxSliderValueInGigabytes) {
+      options.add(_maxSliderValueInGigabytes);
+    }
+    final initialCustomSliderValueInGigabytes =
+        _initialCustomSliderValueInGigabytes;
+    if (initialCustomSliderValueInGigabytes != null) {
+      options.add(initialCustomSliderValueInGigabytes);
+    }
+    return options.toSet().toList()..sort();
+  }
+
+  int _indexForStorageLimit(int? storageLimit) {
+    final limitInGigabytes = _storageLimitInGigabytes(storageLimit);
+    if (limitInGigabytes == null) {
+      return 0;
+    }
+    for (var index = 1; index < _sliderOptionsInGigabytes.length; index++) {
+      if (_sliderOptionsInGigabytes[index] >= limitInGigabytes) {
+        return index;
+      }
+    }
+
+    return _sliderOptionsInGigabytes.length - 1;
+  }
+
+  int _minimumSelectableIndex() {
+    for (var index = 1; index < _sliderOptionsInGigabytes.length; index++) {
+      if (_sliderOptionsInGigabytes[index] >=
+          _minimumLimitedSliderValueInGigabytes) {
+        return index;
+      }
+    }
+
+    return _sliderOptionsInGigabytes.length - 1;
+  }
+
+  int? _storageLimitInGigabytes(int? storageLimit) {
+    if (storageLimit == null) {
+      return null;
+    }
+    return (storageLimit / _gigabyte).ceil();
+  }
+
+  bool _isStandardSliderValue(int valueInGigabytes) {
+    return valueInGigabytes == 0 ||
+        valueInGigabytes == _maxSliderValueInGigabytes ||
+        valueInGigabytes % _sliderStepInGigabytes == 0;
   }
 }
 
