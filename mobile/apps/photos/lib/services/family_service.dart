@@ -78,7 +78,7 @@ class FamilyService {
     await usersGateway.removeFamilyMember(member.id);
   }
 
-  Future<void> updateMemberStorageLimit({
+  Future<UserDetails> updateMemberStorageLimit({
     required FamilyMember member,
     int? storageLimit,
   }) async {
@@ -86,6 +86,7 @@ class FamilyService {
       id: member.id,
       storageLimit: storageLimit,
     );
+    return refreshUserDetails();
   }
 
   Future<void> leaveFamily() async {

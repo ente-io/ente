@@ -244,12 +244,13 @@ class _EditStorageLimitPageState extends State<EditStorageLimitPage> {
       return;
     }
     try {
-      await FamilyService.instance.updateMemberStorageLimit(
+      final updatedUserDetails =
+          await FamilyService.instance.updateMemberStorageLimit(
         member: widget.member,
         storageLimit: _selectedStorageLimit,
       );
       if (mounted) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(updatedUserDetails);
       }
     } catch (error) {
       if (!mounted) {

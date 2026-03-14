@@ -263,7 +263,7 @@ class UsersGateway {
     String? authToken,
   }) async {
     final familiesToken = authToken ?? await getFamiliesAuthToken();
-    await _enteDio.put(
+    await _enteDio.post(
       "/family/modify-storage",
       data: {
         "id": id,

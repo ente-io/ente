@@ -380,7 +380,8 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
                       trailingChevron: true,
                       onTap: () async {
                         Navigator.of(context).pop();
-                        await routeToPage(
+                        final updatedUserDetails =
+                            await routeToPage<UserDetails>(
                           context,
                           EditStorageLimitPage(
                             member: member,
@@ -389,7 +390,14 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
                                 colorMap[member.email] ?? colorScheme.greenBase,
                           ),
                         );
-                        await _refreshUserDetails();
+                        if (!mounted) {
+                          return;
+                        }
+                        if (updatedUserDetails != null) {
+                          setState(() => _userDetails = updatedUserDetails);
+                        } else {
+                          await _refreshUserDetails();
+                        }
                       },
                     ),
                     _ActionTile(
