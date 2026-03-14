@@ -162,6 +162,11 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                   color: colorScheme.contentLighter,
                 ),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 18,
