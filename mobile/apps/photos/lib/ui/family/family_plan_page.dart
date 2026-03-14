@@ -42,10 +42,14 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
       _userDetails.subscription.productID == freeProductID &&
       !_userDetails.hasPaidAddon();
 
-  bool get _showsDashboard => _userDetails.hasConfiguredFamily();
+  bool get _isFamilyAdmin =>
+      _userDetails.currentFamilyMember()?.isAdmin ?? false;
 
-  bool get _isAdmin =>
-      (_userDetails.currentFamilyMember()?.isAdmin ?? false) && _showsDashboard;
+  bool get _shouldRedirectMemberToSubscription =>
+      _userDetails.isPartOfFamily() && !_isFamilyAdmin;
+
+  bool get _showsDashboard =>
+      _isFamilyAdmin && _userDetails.hasConfiguredFamily();
 
   int get _remainingSlots {
     final memberCount = _userDetails.familyData?.members
@@ -60,6 +64,15 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   @override
   void initState() {
     super.initState();
+    if (_shouldRedirectMemberToSubscription) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        replacePage(context, getSubscriptionPage());
+      });
+      return;
+    }
     unawaited(_refreshUserDetails());
     if (_isFreeUser) {
       unawaited(_loadStartingPrice());
@@ -68,6 +81,12 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_shouldRedirectMemberToSubscription) {
+      return const FamilyPageScaffold(
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final content = _showsDashboard
         ? _buildDashboard(context)
         : _isFreeUser
@@ -224,11 +243,11 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
             members: members,
             userDetails: _userDetails,
             colorMap: colorMap,
-            isAdminView: _isAdmin,
+            isAdminView: true,
             onMemberTap: _showMemberActions,
           ),
           const SizedBox(height: 24),
-          if (_isAdmin && _remainingSlots > 0) ...[
+          if (_remainingSlots > 0) ...[
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.primary,
               labelText: l10n.addMember,
@@ -250,20 +269,12 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
               },
             ),
           ],
-          if (_isAdmin && _remainingSlots == 0)
+          if (_remainingSlots == 0)
             ButtonWidgetV2(
               buttonType: ButtonTypeV2.tertiaryCritical,
               labelText: l10n.closeFamilyPlan,
               onTap: () async {
                 unawaited(_confirmCloseFamily());
-              },
-            ),
-          if (!_isAdmin)
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.tertiaryCritical,
-              labelText: l10n.leaveFamilyPlan,
-              onTap: () async {
-                unawaited(_confirmLeaveFamily());
               },
             ),
           const SizedBox(height: 16),
@@ -328,7 +339,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
   Future<void> _showMemberActions(FamilyMember member) async {
     final isCurrentUser = member.email.trim() == _userDetails.email.trim();
-    if (!_isAdmin || isCurrentUser) {
+    if (!_isFamilyAdmin || isCurrentUser) {
       return;
     }
 
@@ -479,35 +490,6 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     await _handleDialogResult(choice);
   }
 
-  Future<void> _confirmLeaveFamily() async {
-    final choice = await showChoiceDialog(
-      context,
-      title: AppLocalizations.of(context).leaveFamilyConfirmTitle,
-      body: AppLocalizations.of(context).leaveFamilyConfirmBody,
-      firstButtonLabel: AppLocalizations.of(context).leave,
-      secondButtonLabel: AppLocalizations.of(context).cancel,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await FamilyService.instance.leaveFamily();
-      },
-    );
-
-    if (!mounted || choice == null) {
-      return;
-    }
-    if (choice.action == ButtonAction.error) {
-      await showGenericErrorDialog(context: context, error: choice.exception);
-      return;
-    }
-    if (choice.action == ButtonAction.first) {
-      await _refreshUserDetails();
-      if (!mounted) {
-        return;
-      }
-      replacePage(context, getSubscriptionPage());
-    }
-  }
-
   Future<void> _handleDialogResult(ButtonResult? choice) async {
     if (!mounted || choice == null) {
       return;
@@ -522,22 +504,12 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   }
 
   List<FamilyMember> _sortedMembersForList() {
-    final Iterable<FamilyMember> sourceMembers = _isAdmin
-        ? (_userDetails.familyData?.members ?? const <FamilyMember>[])
-        : (_userDetails.familyData?.members ?? const <FamilyMember>[])
-            .where((member) => member.isActive);
-    final members = List<FamilyMember>.from(sourceMembers);
+    final members = List<FamilyMember>.from(
+      _userDetails.familyData?.members ?? const <FamilyMember>[],
+    );
     final currentEmail = _userDetails.email.trim().toLowerCase();
 
     members.sort((a, b) {
-      if (_isAdmin) {
-        if (a.email.trim().toLowerCase() == currentEmail) return -1;
-        if (b.email.trim().toLowerCase() == currentEmail) return 1;
-        if (a.isPending != b.isPending) return a.isPending ? 1 : -1;
-        return a.email.compareTo(b.email);
-      }
-
-      if (a.isAdmin != b.isAdmin) return a.isAdmin ? -1 : 1;
       if (a.email.trim().toLowerCase() == currentEmail) return -1;
       if (b.email.trim().toLowerCase() == currentEmail) return 1;
       if (a.isPending != b.isPending) return a.isPending ? 1 : -1;
