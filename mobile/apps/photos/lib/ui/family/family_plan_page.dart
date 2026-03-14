@@ -199,7 +199,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   Widget _buildDashboard(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final members = _sortedMembersForList();
-    final activeMembers = _legendMembers();
+    final activeMembers = members.where((member) => member.isActive).toList();
     final colorMap = _memberColorMap(activeMembers);
 
     return RefreshIndicator(
@@ -730,54 +730,9 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: [
-              for (final member in members)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorMap[member.email],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _legendLabel(
-                        currentEmail: userDetails.email,
-                        member: member,
-                        l10n: l10n,
-                      ),
-                      style: textTheme.miniMuted,
-                    ),
-                  ],
-                ),
-            ],
-          ),
         ],
       ),
     );
-  }
-
-  String _legendLabel({
-    required String currentEmail,
-    required FamilyMember member,
-    required AppLocalizations l10n,
-  }) {
-    if (member.email.trim().toLowerCase() ==
-        currentEmail.trim().toLowerCase()) {
-      return l10n.you;
-    }
-    if (member.isAdmin) {
-      return l10n.admin;
-    }
-    return _emailLabel(member.email);
   }
 }
 
@@ -1055,13 +1010,4 @@ class _MonthlyPrice {
 
   final String displayPrice;
   final double value;
-}
-
-String _emailLabel(String email) {
-  final localPart = email.split("@").first.trim();
-  if (localPart.isEmpty) {
-    return email;
-  }
-  return localPart.substring(0, 1).toUpperCase() +
-      (localPart.length > 1 ? localPart.substring(1) : "");
 }
