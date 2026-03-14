@@ -695,37 +695,35 @@ class _FamilyStorageOverviewCard extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 var currentLeft = 0.0;
-                return Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.fillMuted,
-                        borderRadius: BorderRadius.circular(7),
+                final segmentWidgets = <Widget>[];
+                for (final member in members) {
+                  final width = totalStorage == 0
+                      ? 0.0
+                      : constraints.maxWidth * (member.usage / totalStorage);
+                  if (width <= 0) {
+                    continue;
+                  }
+                  segmentWidgets.add(
+                    Positioned(
+                      left: currentLeft,
+                      child: Container(
+                        width: width,
+                        height: 14,
+                        color: colorMap[member.email] ?? colorScheme.primary500,
                       ),
                     ),
-                    for (final member in members)
-                      Builder(
-                        builder: (context) {
-                          final width = totalStorage == 0
-                              ? 0.0
-                              : constraints.maxWidth *
-                                  (member.usage / totalStorage);
-                          final segment = Positioned(
-                            left: currentLeft,
-                            child: Container(
-                              width: width,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: colorMap[member.email],
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                            ),
-                          );
-                          currentLeft += width;
-                          return segment;
-                        },
-                      ),
-                  ],
+                  );
+                  currentLeft += width;
+                }
+
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(7),
+                  child: Stack(
+                    children: [
+                      Container(color: colorScheme.fillMuted),
+                      ...segmentWidgets,
+                    ],
+                  ),
                 );
               },
             ),
