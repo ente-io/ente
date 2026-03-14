@@ -21,6 +21,7 @@ import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import {
     isEnteProductionEndpoint,
     LOCKER_FILE_LIMIT_FREE,
@@ -290,9 +291,20 @@ const Page: React.FC = () => {
         (item: LockerItem) => {
             showMiniDialog({
                 title: t("delete"),
-                message: t("deleteFileConfirmation", {
-                    fileName: getItemTitle(item),
-                }),
+                message: (
+                    <Trans
+                        i18nKey="deleteFileConfirmation"
+                        values={{ fileName: getItemTitle(item) }}
+                        components={{
+                            strong: (
+                                <Box
+                                    component="span"
+                                    sx={{ fontWeight: 700, color: "text.base" }}
+                                />
+                            ),
+                        }}
+                    />
+                ),
                 continue: {
                     text: t("delete"),
                     color: "critical",

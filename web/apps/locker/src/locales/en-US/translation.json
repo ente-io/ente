@@ -88,7 +88,7 @@
     "close": "Close",
     "logout": "Logout",
     "failedToLoadCollections": "Failed to load collections: {error}",
-    "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
+    "deleteFileConfirmation": "Are you sure you want to delete <strong>{{fileName}}</strong>?",
     "allItems": "All Items",
     "lockerCollectionsCount": "{{count, number}} collections",
     "lockerCollectionsCount_one": "1 collection",

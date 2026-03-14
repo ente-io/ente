@@ -77,7 +77,7 @@
     "close": "閉じる",
     "logout": "ログアウト",
     "failedToLoadCollections": "コレクションの読み込みに失敗しました: {error}",
-    "deleteFileConfirmation": "「{fileName}」を削除してもよろしいですか？",
+    "deleteFileConfirmation": "<strong>{{fileName}}</strong> を削除してもよろしいですか？",
     "document": "ドキュメント",
     "thing": "物品",
     "secret": "シークレット",
