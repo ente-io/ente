@@ -3,10 +3,11 @@ import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
-import { LockerNavbar } from "components/LockerNavbar";
+import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -16,7 +17,6 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { masterKeyFromSession } from "ente-base/session";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -26,7 +26,6 @@ import {
     LOCKER_FILE_LIMIT_FREE,
     LOCKER_FILE_LIMIT_PAID,
 } from "services/locker-limits";
-import type { LockerFileShareLinkSummary } from "services/remote";
 import {
     createCollection as createCollectionAPI,
     createInfoItem,
@@ -34,7 +33,6 @@ import {
     emptyTrash as emptyTrashAPI,
     fetchCollectionSharees,
     fetchLockerData,
-    fetchLockerFileShareLinks,
     fetchLockerTrash,
     permanentlyDeleteFromTrash,
     renameCollection as renameCollectionAPI,
@@ -123,6 +121,7 @@ const Page: React.FC = () => {
     const [selectedCollectionID, setSelectedCollectionID] = useState<
         number | null
     >(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -137,9 +136,6 @@ const Page: React.FC = () => {
     const [toast, setToast] = useState<string | null>(null);
     const [shareCollectionID, setShareCollectionID] = useState<number | null>(
         null,
-    );
-    const [fileShareLinksByFileID, setFileShareLinksByFileID] = useState(
-        new Map<number, LockerFileShareLinkSummary>(),
     );
 
     const loadUserDetails = useCallback(async () => {
@@ -181,13 +177,9 @@ const Page: React.FC = () => {
                 // fetchLockerData; running both in parallel can race and drop
                 // trash key metadata needed for restore.
                 const data = await fetchLockerData(key);
-                const [trash, fileLinks] = await Promise.all([
-                    fetchLockerTrash(key),
-                    fetchLockerFileShareLinks(),
-                ]);
+                const trash = await fetchLockerTrash(key);
                 setCollections(data);
                 setTrashItems(trash);
-                setFileShareLinksByFileID(fileLinks);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to refresh locker data", e);
@@ -214,13 +206,9 @@ const Page: React.FC = () => {
                 // See note in refreshData: fetchLockerTrash must run after
                 // fetchLockerData has populated encrypted caches.
                 const data = await fetchLockerData(mk);
-                const [trash, fileLinks] = await Promise.all([
-                    fetchLockerTrash(mk),
-                    fetchLockerFileShareLinks(),
-                ]);
+                const trash = await fetchLockerTrash(mk);
                 setCollections(data);
                 setTrashItems(trash);
-                setFileShareLinksByFileID(fileLinks);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to fetch locker data", e);
@@ -521,7 +509,10 @@ const Page: React.FC = () => {
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
                 />
+                <LockerUnstableToast />
                 <Box
                     sx={{
                         flex: 1,
@@ -561,7 +552,10 @@ const Page: React.FC = () => {
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
             />
+            <LockerUnstableToast />
             <Box
                 sx={{
                     flex: 1,
@@ -578,7 +572,6 @@ const Page: React.FC = () => {
                     isTrashView={isTrashView}
                     isCollectionsView={isCollectionsView}
                     selectedCollectionID={selectedCollectionID}
-                    fileShareLinksByFileID={fileShareLinksByFileID}
                     onSelectCollection={handleSelectCollection}
                     onEditItem={handleEditItem}
                     onDeleteItem={handleDeleteItem}
@@ -590,6 +583,7 @@ const Page: React.FC = () => {
                     onDeleteCollection={handleDeleteCollection}
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
+                    searchTerm={searchTerm}
                 />
             </Box>
             <LockerSidebar
@@ -627,6 +621,7 @@ const Page: React.FC = () => {
                         width: 72,
                         height: 72,
                         minHeight: 72,
+                        color: "#FFFFFF",
                         background:
                             "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
                         boxShadow: "0 16px 40px rgba(0, 66, 173, 0.32)",

@@ -1,16 +1,12 @@
+import {
+    HelpCircleIcon,
+    InformationCircleIcon,
+    MessageQuestionIcon,
+    NewsIcon,
+} from "@hugeicons/core-free-icons";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import { Stack, Tooltip, Typography } from "@mui/material";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-} from "ente-base/components/RowButton";
-import {
-    TitledNestedSidebarDrawer,
-    type NestedSidebarDrawerVisibilityProps,
-} from "ente-base/components/mui/SidebarDrawer";
+import { Box, Stack, Tooltip, Typography, useTheme } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
@@ -19,11 +15,17 @@ import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import React from "react";
 import { Trans } from "react-i18next";
+import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
+import {
+    LockerTitledNestedSidebarDrawer,
+    type LockerNestedSidebarDrawerVisibilityProps,
+} from "./LockerSidebarShell";
 
 export const LockerSupportDrawer: React.FC<
-    NestedSidebarDrawerVisibilityProps
+    LockerNestedSidebarDrawerVisibilityProps
 > = ({ open, onClose, onRootClose }) => {
     const { showMiniDialog } = useBaseContext();
+    const theme = useTheme();
 
     const handleRootClose = () => {
         onClose();
@@ -54,53 +56,66 @@ export const LockerSupportDrawer: React.FC<
         });
 
     return (
-        <TitledNestedSidebarDrawer
+        <LockerTitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={t("help")}
+            title={t("help_and_support")}
+            hideRootCloseButton
         >
-            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
-                <RowButtonGroup>
-                    <RowButton
-                        endIcon={<InfoOutlinedIcon />}
-                        label={t("ente_help")}
-                        onClick={handleHelp}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        endIcon={<NorthEastIcon />}
-                        label={t("blog")}
-                        onClick={handleBlog}
-                    />
-                    <RowButtonDivider />
-                    <RowButton
-                        endIcon={<NorthEastIcon />}
-                        label={t("request_feature")}
-                        onClick={handleRequestFeature}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={
-                            <Tooltip title="support@ente.io">
-                                <Typography sx={{ fontWeight: "medium" }}>
-                                    {t("support")}
-                                </Typography>
-                            </Tooltip>
-                        }
-                        onClick={handleSupport}
-                    />
-                </RowButtonGroup>
-                <RowButtonGroup>
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("view_logs")}
-                        onClick={confirmViewLogs}
-                    />
-                </RowButtonGroup>
+            <Stack
+                sx={{
+                    px: 2,
+                    py: 1,
+                    gap: 1,
+                    backgroundColor: "background.default",
+                    ...theme.applyStyles("dark", {
+                        backgroundColor: "background.paper",
+                    }),
+                }}
+            >
+                <LockerSidebarCardButton
+                    icon={InformationCircleIcon}
+                    label={t("help")}
+                    endIcon={<NorthEastIcon />}
+                    onClick={handleHelp}
+                />
+                <LockerSidebarCardButton
+                    icon={NewsIcon}
+                    label={t("blog")}
+                    endIcon={<NorthEastIcon />}
+                    onClick={handleBlog}
+                />
+                <LockerSidebarCardButton
+                    icon={MessageQuestionIcon}
+                    label={t("request_feature")}
+                    endIcon={<NorthEastIcon />}
+                    onClick={handleRequestFeature}
+                />
+                <LockerSidebarCardButton
+                    icon={HelpCircleIcon}
+                    label={
+                        <Tooltip title="support@ente.io">
+                            <Typography
+                                variant="small"
+                                sx={{ fontWeight: 500 }}
+                            >
+                                {t("support")}
+                            </Typography>
+                        </Tooltip>
+                    }
+                    endIcon={<ChevronRightIcon />}
+                    onClick={handleSupport}
+                />
+                <Box
+                    sx={{ borderTop: 1, borderColor: "divider", mx: 1, my: 1 }}
+                />
+                <LockerSidebarCardButton
+                    icon={InformationCircleIcon}
+                    label={t("view_logs")}
+                    endIcon={<ChevronRightIcon />}
+                    onClick={confirmViewLogs}
+                />
             </Stack>
-        </TitledNestedSidebarDrawer>
+        </LockerTitledNestedSidebarDrawer>
     );
 };

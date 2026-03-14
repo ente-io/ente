@@ -303,7 +303,19 @@ const SidebarRow: React.FC<{
     <ListItemButton
         selected={selected}
         onClick={onClick}
-        sx={{ borderRadius: 2, px: 1.25, color }}
+        sx={(theme) => ({
+            borderRadius: 2,
+            px: 1.25,
+            color,
+            border: "1px solid transparent",
+            ...(selected && {
+                color: color ?? "primary.main",
+                borderColor: theme.vars.palette.primary.main,
+                backgroundColor: "transparent",
+            }),
+            "&.Mui-selected": { backgroundColor: "transparent" },
+            "&.Mui-selected:hover": { backgroundColor: "transparent" },
+        })}
     >
         <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
             {icon}

@@ -374,6 +374,7 @@ export const LockerCollectionShareDrawer: React.FC<
                                 sx={{
                                     minHeight: 48,
                                     borderRadius: "14px",
+                                    color: "#FFFFFF",
                                     background:
                                         "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
                                     boxShadow:
@@ -399,9 +400,16 @@ export const LockerCollectionShareDrawer: React.FC<
                 fullWidth
                 maxWidth="xs"
             >
-                <DialogTitle>{t("addEmail")}</DialogTitle>
+                <DialogTitle
+                    sx={(theme) => ({
+                        ...theme.applyStyles("light", {}),
+                        color: "#FFFFFF",
+                    })}
+                >
+                    {t("addEmail")}
+                </DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 2, py: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
                             type="email"
                             label={t("enterEmail")}
@@ -419,6 +427,36 @@ export const LockerCollectionShareDrawer: React.FC<
                                     void handleAddViewer();
                                 }
                             }}
+                            sx={(theme) => ({
+                                "& .MuiInputLabel-root": {
+                                    color: "rgba(255, 255, 255, 0.72)",
+                                },
+                                "& .MuiInputLabel-root.Mui-focused": {
+                                    color: "#FFFFFF",
+                                },
+                                "& .MuiInputBase-input": { color: "#FFFFFF" },
+                                "& .MuiFormHelperText-root": {
+                                    color: viewerEmailError
+                                        ? theme.vars.palette.critical.main
+                                        : "rgba(255, 255, 255, 0.64)",
+                                },
+                                ...theme.applyStyles("light", {
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.vars.palette.text.muted,
+                                    },
+                                    "& .MuiInputLabel-root.Mui-focused": {
+                                        color: theme.vars.palette.text.base,
+                                    },
+                                    "& .MuiInputBase-input": {
+                                        color: theme.vars.palette.text.base,
+                                    },
+                                    "& .MuiFormHelperText-root": {
+                                        color: viewerEmailError
+                                            ? theme.vars.palette.critical.main
+                                            : theme.vars.palette.text.muted,
+                                    },
+                                }),
+                            })}
                         />
                         <Stack direction="row" sx={{ gap: 1 }}>
                             <Button
@@ -426,6 +464,12 @@ export const LockerCollectionShareDrawer: React.FC<
                                 color="secondary"
                                 onClick={handleCloseAddViewer}
                                 disabled={isSubmittingViewer}
+                                sx={(theme) => ({
+                                    color: "#FFFFFF",
+                                    ...theme.applyStyles("light", {
+                                        color: theme.vars.palette.text.base,
+                                    }),
+                                })}
                             >
                                 {t("cancel")}
                             </Button>
@@ -434,6 +478,7 @@ export const LockerCollectionShareDrawer: React.FC<
                                 variant="contained"
                                 onClick={() => void handleAddViewer()}
                                 disabled={isSubmittingViewer}
+                                sx={{ color: "#FFFFFF" }}
                             >
                                 {isSubmittingViewer
                                     ? t("sharing")

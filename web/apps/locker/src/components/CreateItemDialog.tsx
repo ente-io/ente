@@ -1,9 +1,6 @@
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import NoteOutlinedIcon from "@mui/icons-material/NoteOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -19,6 +16,12 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import {
+    createDocumentIcon,
+    createDocumentIconConfig,
+    lockerItemIcon,
+    lockerItemIconConfig,
+} from "components/lockerItemIcons";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -47,35 +50,32 @@ const CREATABLE_TYPES: {
         type: "file",
         labelKey: "saveDocumentTitle",
         descriptionKey: "saveDocumentDescription",
-        icon: (
-            <InsertDriveFileOutlinedIcon
-                sx={{ fontSize: 28, color: "#E53935" }}
-            />
-        ),
-        bgColor: "rgba(229, 57, 53, 0.12)",
+        icon: createDocumentIcon(28, 1.9),
+        bgColor: createDocumentIconConfig.backgroundColor,
     },
     {
         type: "note",
         labelKey: "personalNote",
         descriptionKey: "personalNoteDescription",
-        icon: <NoteOutlinedIcon sx={{ fontSize: 28, color: "#FFB347" }} />,
-        bgColor: "rgba(255, 179, 71, 0.15)",
+        icon: lockerItemIcon("note", { size: 28, strokeWidth: 1.9 }),
+        bgColor: lockerItemIconConfig("note").backgroundColor,
     },
     {
         type: "physicalRecord",
         labelKey: "thing",
         descriptionKey: "physicalRecordsDescription",
-        icon: (
-            <LocationOnOutlinedIcon sx={{ fontSize: 28, color: "#4CAF50" }} />
-        ),
-        bgColor: "rgba(76, 175, 80, 0.15)",
+        icon: lockerItemIcon("physicalRecord", { size: 28, strokeWidth: 1.9 }),
+        bgColor: lockerItemIconConfig("physicalRecord").backgroundColor,
     },
     {
         type: "accountCredential",
         labelKey: "secret",
         descriptionKey: "accountCredentialsDescription",
-        icon: <KeyOutlinedIcon sx={{ fontSize: 28, color: "#1071FF" }} />,
-        bgColor: "rgba(16, 113, 255, 0.15)",
+        icon: lockerItemIcon("accountCredential", {
+            size: 28,
+            strokeWidth: 1.9,
+        }),
+        bgColor: lockerItemIconConfig("accountCredential").backgroundColor,
     },
 ];
 
@@ -251,15 +251,20 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             maxWidth="sm"
             slotProps={{
                 paper: {
-                    sx: { maxHeight: "min(720px, 90vh)", borderRadius: "16px" },
+                    sx: {
+                        maxHeight: "min(720px, 90vh)",
+                        borderRadius: "16px",
+                        width: "min(100%, 520px)",
+                    },
                 },
             }}
         >
             <DialogTitle
                 sx={{
-                    borderBottom: 1,
-                    borderColor: "divider",
                     fontWeight: "bold",
+                    px: { xs: 4, sm: 5 },
+                    pt: { xs: 4, sm: 4.5 },
+                    pb: { xs: 2, sm: 2.5 },
                 }}
             >
                 {isEditMode
@@ -271,22 +276,15 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         : t("saveToLocker")}
             </DialogTitle>
 
-            <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: 2.5 }}>
+            <DialogContent
+                sx={{ px: { xs: 4, sm: 5 }, py: { xs: 2.5, sm: 3 } }}
+            >
                 {!isEditMode && !selectedOption && (
-                    <Stack sx={{ gap: 2, pt: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.5 }}>
                         <Typography variant="body" sx={{ color: "text.muted" }}>
                             {t("informationDescription")}
                         </Typography>
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: {
-                                    xs: "repeat(2, minmax(0, 1fr))",
-                                    sm: "repeat(4, minmax(0, 1fr))",
-                                },
-                                gap: 1.5,
-                            }}
-                        >
+                        <Stack sx={{ gap: 1 }}>
                             {CREATABLE_TYPES.map((option) => (
                                 <TypeCard
                                     key={option.type}
@@ -299,12 +297,12 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                     }
                                 />
                             ))}
-                        </Box>
+                        </Stack>
                     </Stack>
                 )}
 
                 {isFileMode && (
-                    <Stack sx={{ gap: 2.5, pt: 1 }}>
+                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -354,9 +352,27 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                         theme.vars.palette.fill.faint,
                                 }}
                             >
-                                <InsertDriveFileOutlinedIcon
-                                    sx={{ fontSize: 32, color: "#E53935" }}
-                                />
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: "12px",
+                                        backgroundColor: lockerItemIconConfig(
+                                            "file",
+                                            selectedFile.name,
+                                        ).backgroundColor,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {lockerItemIcon("file", {
+                                        fileName: selectedFile.name,
+                                        size: 24,
+                                        strokeWidth: 1.9,
+                                    })}
+                                </Box>
                                 <Box sx={{ flex: 1, minWidth: 0 }}>
                                     <Typography variant="body" noWrap>
                                         {selectedFile.name}
@@ -419,6 +435,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 color="secondary"
                                 onClick={handleClose}
                                 disabled={uploading}
+                                sx={{ borderRadius: "16px", py: 1.25 }}
                             >
                                 {t("cancel")}
                             </FocusVisibleButton>
@@ -427,6 +444,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 color="accent"
                                 loading={uploading}
                                 disabled={!canUpload}
+                                sx={{ borderRadius: "16px", py: 1.25 }}
                                 onClick={() => void handleUpload()}
                             >
                                 {t("upload")}
@@ -436,7 +454,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )}
 
                 {selectedType && (
-                    <Stack sx={{ gap: 2.5, pt: 1 }}>
+                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
                         <ItemForm
                             type={selectedType}
                             data={formData}
@@ -500,14 +518,15 @@ const TypeCard: React.FC<{
         onClick={onClick}
         sx={(theme) => ({
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
-            gap: 1.25,
-            p: 2,
-            borderRadius: "16px",
-            backgroundColor: theme.vars.palette.fill.faint,
+            justifyContent: "space-between",
+            width: "100%",
+            gap: 2,
+            px: 1,
+            py: 1.25,
+            borderRadius: "12px",
             transition: "background-color 0.15s",
-            textAlign: "center",
+            textAlign: "left",
             "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
         })}
     >
@@ -515,24 +534,38 @@ const TypeCard: React.FC<{
             sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                width: 56,
-                height: 56,
-                borderRadius: "50%",
-                backgroundColor: bgColor,
+                gap: 2,
+                minWidth: 0,
+                flex: 1,
             }}
         >
-            {icon}
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 48,
+                    height: 48,
+                    borderRadius: "50%",
+                    backgroundColor: bgColor,
+                    flexShrink: 0,
+                }}
+            >
+                {icon}
+            </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography variant="body" sx={{ fontWeight: "medium" }}>
+                    {label}
+                </Typography>
+                <Typography
+                    variant="small"
+                    sx={{ color: "text.muted", textWrap: "balance" }}
+                >
+                    {description}
+                </Typography>
+            </Box>
         </Box>
-        <Typography variant="body" sx={{ fontWeight: "medium" }}>
-            {label}
-        </Typography>
-        <Typography
-            variant="small"
-            sx={{ color: "text.muted", textWrap: "balance" }}
-        >
-            {description}
-        </Typography>
+        <ChevronRightRoundedIcon sx={{ color: "text.faint", flexShrink: 0 }} />
     </ButtonBase>
 );
 
@@ -783,7 +816,7 @@ const CollectionSelector: React.FC<{
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: 1,
-                    mb: 1,
+                    mb: 1.5,
                 }}
             >
                 <Typography
@@ -798,41 +831,40 @@ const CollectionSelector: React.FC<{
                 >
                     {t("collections")}
                 </Typography>
-                {onCreateCollection && (
-                    <ButtonBase
-                        onClick={() => {
-                            setCreateOpen((open) => !open);
-                            setCreateError(null);
-                        }}
-                        sx={(theme) => ({
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: "999px",
-                            backgroundColor: theme.vars.palette.fill.faint,
-                            color: theme.vars.palette.text.muted,
-                        })}
-                    >
-                        <AddOutlinedIcon sx={{ fontSize: 16 }} />
-                        <Typography variant="small">
-                            {t("createCollection")}
-                        </Typography>
-                    </ButtonBase>
-                )}
             </Stack>
 
-            {collections.length > 0 ? (
-                <Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
+            {collections.length > 0 || onCreateCollection ? (
+                <Stack direction="row" sx={{ gap: 1.5, flexWrap: "wrap" }}>
+                    {onCreateCollection && (
+                        <ButtonBase
+                            onClick={() => {
+                                setCreateOpen((open) => !open);
+                                setCreateError(null);
+                            }}
+                            sx={(theme) => ({
+                                borderRadius: "999px",
+                                px: 1.5,
+                                py: 0.875,
+                                border: `1px dotted ${theme.vars.palette.stroke.muted}`,
+                                color: theme.vars.palette.text.muted,
+                                backgroundColor: createOpen
+                                    ? theme.vars.palette.fill.faint
+                                    : "transparent",
+                            })}
+                        >
+                            <Typography variant="small">
+                                + {t("collection")}
+                            </Typography>
+                        </ButtonBase>
+                    )}
                     {collections.map((collection) => (
                         <ButtonBase
                             key={collection.id}
                             onClick={() => onSelect(collection.id)}
                             sx={(theme) => ({
                                 borderRadius: "999px",
-                                px: 1.25,
-                                py: 0.75,
+                                px: 1.5,
+                                py: 0.875,
                                 backgroundColor:
                                     selectedID === collection.id
                                         ? theme.vars.palette.primary.main
@@ -867,6 +899,13 @@ const CollectionSelector: React.FC<{
                             fullWidth
                             autoFocus
                             placeholder={t("enterCollectionName")}
+                            sx={{
+                                "& .MuiInputBase-root": {
+                                    height: 48,
+                                    borderRadius: "14px",
+                                },
+                                "& .MuiInputBase-input": { pt: 1, pb: 0.5 },
+                            }}
                             value={createName}
                             onChange={(event) => {
                                 setCreateName(event.target.value);
@@ -883,9 +922,18 @@ const CollectionSelector: React.FC<{
                             color="accent"
                             loading={creating}
                             disabled={!createName.trim()}
+                            aria-label={t("create")}
                             onClick={() => void handleCreateCollection()}
+                            sx={{
+                                minWidth: 0,
+                                width: 48,
+                                height: 48,
+                                p: 0,
+                                borderRadius: "14px",
+                                flexShrink: 0,
+                            }}
                         >
-                            {t("create")}
+                            <CheckRoundedIcon />
                         </LoadingButton>
                     </Stack>
                     {createError && (

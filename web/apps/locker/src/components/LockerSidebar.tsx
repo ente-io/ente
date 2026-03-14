@@ -1,16 +1,16 @@
+import {
+    Delete02Icon,
+    HelpCircleIcon,
+    Home01Icon,
+    InformationCircleIcon,
+    Logout05Icon,
+    UserIcon,
+    Wallet05Icon,
+} from "@hugeicons/core-free-icons";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-} from "ente-base/components/RowButton";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { useBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
@@ -19,6 +19,8 @@ import type { LockerCollection } from "types";
 import { visibleLockerCollections } from "types";
 import { LockerAboutDrawer } from "./LockerAboutDrawer";
 import { LockerAccountDrawer } from "./LockerAccountDrawer";
+import { LockerSidebarCardButton } from "./LockerSidebarCardButton";
+import { LockerSidebarDrawer } from "./LockerSidebarShell";
 import { LockerSocialFooter } from "./LockerSocialFooter";
 import { LockerSupportDrawer } from "./LockerSupportDrawer";
 
@@ -66,6 +68,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
     userDetails,
 }) => {
     const { logout } = useBaseContext();
+    const theme = useTheme();
     const displayCollections = visibleLockerCollections(collections);
     const totalItems = collections.reduce(
         (sum, collection) => sum + collection.items.length,
@@ -106,11 +109,15 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
 
     return (
         <>
-            <SidebarDrawer open={open} onClose={onClose} anchor="left">
+            <LockerSidebarDrawer open={open} onClose={onClose} anchor="left">
                 <Stack
                     sx={{
                         height: "calc(100dvh - env(titlebar-area-height, 0px) - 16px)",
                         minHeight: 0,
+                        backgroundColor: "background.default",
+                        ...theme.applyStyles("dark", {
+                            backgroundColor: "background.paper",
+                        }),
                     }}
                 >
                     <Box
@@ -123,25 +130,30 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         }}
                     >
                         {/* Header */}
-                        <Stack
-                            direction="row"
-                            sx={{
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                px: 1,
-                                pt: 1,
-                                pb: 0.5,
-                            }}
-                        >
-                            <Box
-                                component="img"
-                                src="/images/ente-locker-white.svg"
-                                alt="Ente Locker"
-                                sx={{ height: 24, width: "auto", px: 1 }}
-                            />
-                            <IconButton onClick={onClose} color="secondary">
-                                <CloseIcon />
-                            </IconButton>
+                        <Stack sx={{ px: 1, pt: 0.5, pb: 0.5 }}>
+                            <Stack
+                                direction="row"
+                                sx={{
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        px: 1,
+                                        lineHeight: 0,
+                                        color: "#111111",
+                                        ...theme.applyStyles("dark", {
+                                            color: "rgba(255,255,255,0.92)",
+                                        }),
+                                    }}
+                                >
+                                    <EnteLogo height={18} />
+                                </Box>
+                                <IconButton onClick={onClose} color="secondary">
+                                    <CloseIcon />
+                                </IconButton>
+                            </Stack>
                         </Stack>
 
                         {userDetails?.email && (
@@ -304,66 +316,79 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         )}
 
                         <Box sx={{ px: 0.5, mt: 0.5 }}>
-                            <RowButtonGroup>
-                                <RowButton
-                                    startIcon={<HomeOutlinedIcon />}
+                            <Stack sx={{ gap: 1 }}>
+                                <LockerSidebarCardButton
+                                    icon={Home01Icon}
                                     label={t("home")}
                                     caption={String(totalItems)}
-                                    fontWeight={isHomeView ? "bold" : "medium"}
+                                    selected={isHomeView}
                                     onClick={onSelectHome}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
-                                    startIcon={<FolderOutlinedIcon />}
+                                <LockerSidebarCardButton
+                                    icon={Wallet05Icon}
                                     label={t("menuCollections")}
                                     caption={String(displayCollections.length)}
-                                    fontWeight={
-                                        isCollectionsView ? "bold" : "medium"
-                                    }
+                                    selected={isCollectionsView}
                                     onClick={onSelectCollections}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
-                                    startIcon={<DeleteOutlineIcon />}
+                                <LockerSidebarCardButton
+                                    icon={Delete02Icon}
                                     label={t("menuTrash")}
                                     caption={String(trashItemCount)}
-                                    fontWeight={isTrashView ? "bold" : "medium"}
+                                    selected={isTrashView}
                                     onClick={onSelectTrash}
                                 />
-                            </RowButtonGroup>
+                            </Stack>
                         </Box>
+                        <Box
+                            sx={{
+                                mx: 1.5,
+                                mt: 2,
+                                borderTop: 1,
+                                borderColor: "divider",
+                            }}
+                        />
 
                         <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
-                            <RowButtonGroup>
-                                <RowButton
+                            <Stack sx={{ gap: 1 }}>
+                                <LockerSidebarCardButton
+                                    icon={UserIcon}
                                     label={t("account")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsAccountOpen(true)}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
+                                <LockerSidebarCardButton
+                                    icon={HelpCircleIcon}
                                     label={t("help_and_support")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsSupportOpen(true)}
                                 />
-                                <RowButtonDivider />
-                                <RowButton
+                                <LockerSidebarCardButton
+                                    icon={InformationCircleIcon}
                                     label={t("about")}
                                     endIcon={<ChevronRightIcon />}
                                     onClick={() => setIsAboutOpen(true)}
                                 />
-                            </RowButtonGroup>
+                            </Stack>
                         </Box>
-                    </Box>
-
-                    <Box sx={{ px: 0.5, pb: 1 }}>
-                        <RowButton
-                            variant="secondary"
-                            color="critical"
-                            startIcon={<LogoutOutlinedIcon />}
-                            label={t("logout")}
-                            onClick={logout}
+                        <Box
+                            sx={{
+                                mx: 1.5,
+                                mt: 1,
+                                borderTop: 1,
+                                borderColor: "divider",
+                            }}
                         />
+                        <Box sx={{ px: 0.5, mt: 2, pb: 1 }}>
+                            <Stack sx={{ gap: 1 }}>
+                                <LockerSidebarCardButton
+                                    icon={Logout05Icon}
+                                    label={t("logout")}
+                                    color="critical.main"
+                                    onClick={logout}
+                                />
+                            </Stack>
+                        </Box>
                     </Box>
 
                     <Box
@@ -375,7 +400,7 @@ export const LockerSidebar: React.FC<LockerSidebarProps> = ({
                         <LockerSocialFooter />
                     </Box>
                 </Stack>
-            </SidebarDrawer>
+            </LockerSidebarDrawer>
 
             <LockerAccountDrawer
                 open={isAccountOpen}

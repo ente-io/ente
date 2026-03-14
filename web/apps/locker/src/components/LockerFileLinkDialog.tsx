@@ -43,15 +43,11 @@ export const LockerFileLinkDialog: React.FC<LockerFileLinkDialogProps> = ({
         open={open}
         onClose={loading || deleting ? undefined : onClose}
         fullWidth
+        maxWidth="xs"
+        slotProps={{ paper: { sx: { width: "min(100%, 420px)" } } }}
     >
         <DialogTitle sx={{ pr: 6 }}>
             {itemTitle}
-            <Typography
-                variant="small"
-                sx={{ color: "text.muted", mt: 0.5, display: "block" }}
-            >
-                {t("shareLink")}
-            </Typography>
             <IconButton
                 onClick={onClose}
                 size="small"
