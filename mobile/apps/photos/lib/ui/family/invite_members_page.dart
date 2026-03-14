@@ -338,19 +338,21 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
       context,
       title: l10n.inviteToEnte,
       headerSpacing: 20,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.emailNeedsEnteAccountForFamily(email: email),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.start,
             style: getEnteTextTheme(context).smallMuted,
           ),
           const SizedBox(height: 20),
           ButtonWidgetV2(
-            buttonType: ButtonTypeV2.primary,
+            buttonType: ButtonTypeV2.neutral,
             labelText: l10n.sendInvite,
+            leadingWidget: const Icon(Icons.ios_share_outlined),
             onTap: () async {
               await shareText(l10n.shareTextRecommendUsingEnte);
               if (mounted) {
