@@ -401,12 +401,6 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
                         {uploading && (
                             <Box sx={{ width: "100%" }}>
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted", mb: 0.5 }}
-                                >
-                                    {t("uploading")}
-                                </Typography>
                                 <LinearProgress />
                             </Box>
                         )}

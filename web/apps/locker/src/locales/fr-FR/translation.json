@@ -72,7 +72,7 @@
     "close": "Fermer",
     "logout": "Déconnexion",
     "failedToLoadCollections": "Echec du chargement des collections : {error}",
-    "deleteFileConfirmation": "Es-tu sur de vouloir supprimer \"{fileName}\" ?",
+    "deleteFileConfirmation": "Es-tu sur de vouloir supprimer <strong>{{fileName}}</strong> ?",
     "personalNote": "Note",
     "saveDocumentTitle": "Document",
     "document": "Document",
