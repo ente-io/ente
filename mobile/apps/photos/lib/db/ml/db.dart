@@ -117,6 +117,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetFaceClustersTable, // 26: recreate (dropped in step 20)
     petFcClusterIDIndex, // 27
     createPetClusterSummaryTable, // 28: recreate (dropped in step 21)
+    createPetNamesTable, // 29: pet name persistence
+    createNotPetFeedbackTable, // 30: not-pet feedback for manual reassignment
   ];
   static const List<String> _offlineMigrationScripts = [
     ..._defaultMigrationScripts,
@@ -2471,21 +2473,28 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
 
-    // Delete mapping table entries and detection rows atomically.
+    // Delete mapping table entries, cluster assignments, and detection rows
+    // atomically. Also clean up cluster summaries that become empty.
     await db.writeTransaction((tx) async {
       if (faceIdsToRemove.isNotEmpty) {
-        final placeholders = List.filled(faceIdsToRemove.length, '?').join(',');
+        final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
         await tx.execute(
           'DELETE FROM $petFaceVectorIdMappingTable '
-          'WHERE $petFaceIDColumn IN ($placeholders)',
+          'WHERE $petFaceIDColumn IN ($fpH)',
+          faceIdsToRemove,
+        );
+        // Remove cluster assignments for deleted faces
+        await tx.execute(
+          'DELETE FROM $petFaceClustersTable '
+          'WHERE $petFaceIDColumn IN ($fpH)',
           faceIdsToRemove,
         );
       }
       if (bodyIdsToRemove.isNotEmpty) {
-        final placeholders = List.filled(bodyIdsToRemove.length, '?').join(',');
+        final bpH = List.filled(bodyIdsToRemove.length, '?').join(',');
         await tx.execute(
           'DELETE FROM $petBodyVectorIdMappingTable '
-          'WHERE $petBodyIDColumn IN ($placeholders)',
+          'WHERE $petBodyIDColumn IN ($bpH)',
           bodyIdsToRemove,
         );
       }
@@ -2496,6 +2505,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await tx.execute(
         'DELETE FROM $petBodiesTable WHERE $fileIDColumn IN ($placeholders)',
         fileIDs,
+      );
+      // Clean up cluster summaries that no longer have any face assignments
+      await tx.execute(
+        'DELETE FROM $petClusterSummaryTable '
+        'WHERE $clusterIDColumn NOT IN '
+        '(SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable)',
       );
     });
   }

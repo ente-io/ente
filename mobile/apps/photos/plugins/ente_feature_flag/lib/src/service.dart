@@ -106,6 +106,8 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
+  bool get petEnabled => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();

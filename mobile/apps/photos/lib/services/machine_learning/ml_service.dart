@@ -13,6 +13,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -220,8 +221,10 @@ class MLService {
         _logger.info("App mode changed during ML run, stopping");
         return;
       }
-      // Pet clustering
-      await _clusterPets(mlDataDB, mode);
+      // Pet clustering (internal users only)
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        await _clusterPets(mlDataDB, mode);
+      }
       if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
           _logger.info("App mode changed during ML run, stopping");
@@ -547,6 +550,7 @@ class MLService {
         mlDataDB: mlDataDB,
         isOffline: mode == MLMode.offline,
       );
+      Bus.instance.fire(PetsChangedEvent(source: "clustering"));
     } catch (e, s) {
       _logger.severe("Pet clustering failed", e, s);
     }

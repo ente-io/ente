@@ -9,13 +9,13 @@ import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
@@ -252,12 +252,7 @@ extension SectionTypeExtensions on SectionType {
   }) {
     switch (this) {
       case SectionType.face:
-        return SearchService.instance.getAllFace(
-          limit,
-          minClusterSize: limit == null
-              ? kMinimumClusterSizeAllFaces
-              : kMinimumClusterSizeSearchResult,
-        );
+        return SearchService.instance.getAllPeopleAndPets(limit);
       case SectionType.magic:
         return SearchService.instance.getMagicSectionResults(context!);
       case SectionType.wrapped:
@@ -290,7 +285,10 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
-        return [Bus.instance.on<PeopleChangedEvent>()];
+        return [
+          Bus.instance.on<PeopleChangedEvent>(),
+          Bus.instance.on<PetsChangedEvent>(),
+        ];
       case SectionType.contacts:
         return [Bus.instance.on<PeopleChangedEvent>()];
       default:
@@ -302,6 +300,8 @@ extension SectionTypeExtensions on SectionType {
   ///events listened to in AllSectionsExampleState.
   List<Stream<Event>> sectionUpdateEvents() {
     switch (this) {
+      case SectionType.face:
+        return [Bus.instance.on<PetsChangedEvent>()];
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
       case SectionType.magic:

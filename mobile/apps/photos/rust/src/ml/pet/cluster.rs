@@ -293,7 +293,7 @@ pub fn run_pet_clustering_incremental(
         let sub_result = run_pet_clustering(&sub_inputs, config);
 
         // Merge sub-results back, offset cluster IDs
-        let offset = cluster_name_map.len() as i32;
+        let mut next_label = cluster_name_map.keys().copied().max().unwrap_or(-1) + 1;
         for (sub_idx, &global_idx) in unassigned.iter().enumerate() {
             let pet_face_id = &sub_inputs[sub_idx].pet_face_id;
             if let Some(cluster_id) = sub_result.face_to_cluster.get(pet_face_id) {
@@ -303,9 +303,10 @@ pub fn run_pet_clustering_incremental(
                     .find(|(_, v)| *v == cluster_id)
                     .map(|(k, _)| *k)
                     .unwrap_or_else(|| {
-                        let new_label = offset + cluster_name_map.len() as i32;
-                        cluster_name_map.insert(new_label, cluster_id.clone());
-                        new_label
+                        let label = next_label;
+                        next_label += 1;
+                        cluster_name_map.insert(label, cluster_id.clone());
+                        label
                     });
                 labels[global_idx] = numeric;
             }
