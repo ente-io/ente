@@ -221,10 +221,22 @@ class PetClusteringService {
       );
     }
 
-    // Delete stale summaries for this species that are no longer in the result,
-    // then upsert the current ones.
-    final staleIds = existingSummaries.keys
-        .where((id) => !clusterSummaries.containsKey(id))
+    // In incremental mode the Rust side only returns summaries for newly
+    // formed or modified clusters. Merge with existing summaries so that
+    // still-active clusters are not mistakenly treated as stale.
+    final mergedSummaries = <String, (Uint8List, int, int)>{
+      ...existingSummaries,
+      ...clusterSummaries,
+    };
+
+    // Collect IDs actually referenced by assignments so we can detect
+    // clusters that no longer have any faces assigned.
+    final activeClusterIds = faceToCluster.values.toSet();
+
+    // Delete summaries for clusters that exist in the DB but are no longer
+    // referenced by any face assignment.
+    final staleIds = mergedSummaries.keys
+        .where((id) => !activeClusterIds.contains(id))
         .toList();
     for (final staleId in staleIds) {
       await mlDataDB.deletePetClusterSummary(staleId);
@@ -488,15 +500,6 @@ extension PetClusteringDB on MLDataDB {
            $petNameColumn = excluded.$petNameColumn,
            $speciesColumn = excluded.$speciesColumn''',
       [clusterId, name, species],
-    );
-  }
-
-  /// Delete a pet name.
-  Future<void> deletePetName(String clusterId) async {
-    final db = await asyncDB;
-    await db.execute(
-      'DELETE FROM $petNamesTable WHERE $clusterIDColumn = ?',
-      [clusterId],
     );
   }
 
