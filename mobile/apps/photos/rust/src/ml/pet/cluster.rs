@@ -2,10 +2,10 @@
 //!
 //! Translates the Python `ClusterEngine` from `pet_pipeline.py` into Rust.
 //! Phases:
-//!   1. Face-based density clustering (HDBSCAN-style via mutual reachability)
-//!   2. Body rescue — assign unclustered images to existing clusters
-//!   2b. Body-only clustering for remaining unclustered images
-//!   3. Cross-cluster merge — merge clusters similar in body space
+//! - Phase 1: Face-based density clustering (HDBSCAN-style via mutual reachability)
+//! - Phase 2: Body rescue — assign unclustered images to existing clusters
+//! - Phase 2b: Body-only clustering for remaining unclustered images
+//! - Phase 3: Cross-cluster merge — merge clusters similar in body space
 //!
 //! All embeddings are assumed L2-normalized (cosine distance = 1 − dot).
 
@@ -226,19 +226,19 @@ pub fn run_pet_clustering_incremental(
             let mut score = 0.0f32;
             let mut n_modalities = 0u32;
 
-            if inp.has_face() {
-                if let Some(centroid) = existing_centroids_face.get(*cluster_id) {
-                    let sim = dot(&inp.face_embedding, centroid);
-                    score += fw * sim;
-                    n_modalities += 1;
-                }
+            if inp.has_face()
+                && let Some(centroid) = existing_centroids_face.get(*cluster_id)
+            {
+                let sim = dot(&inp.face_embedding, centroid);
+                score += fw * sim;
+                n_modalities += 1;
             }
-            if inp.has_body() {
-                if let Some(centroid) = existing_centroids_body.get(*cluster_id) {
-                    let sim = dot(&inp.body_embedding, centroid);
-                    score += bw * sim;
-                    n_modalities += 1;
-                }
+            if inp.has_body()
+                && let Some(centroid) = existing_centroids_body.get(*cluster_id)
+            {
+                let sim = dot(&inp.body_embedding, centroid);
+                score += bw * sim;
+                n_modalities += 1;
             }
 
             if n_modalities == 0 {
@@ -266,20 +266,20 @@ pub fn run_pet_clustering_incremental(
             }
         }
 
-        if best_score > threshold {
-            if let Some(cid) = best_id {
-                // Assign a temporary numeric label and record the mapping
-                let numeric = cluster_name_map
-                    .iter()
-                    .find(|(_, v)| *v == cid)
-                    .map(|(k, _)| *k)
-                    .unwrap_or_else(|| {
-                        let new_label = cluster_name_map.len() as i32;
-                        cluster_name_map.insert(new_label, cid.clone());
-                        new_label
-                    });
-                labels[i] = numeric;
-            }
+        if best_score > threshold
+            && let Some(cid) = best_id
+        {
+            // Assign a temporary numeric label and record the mapping
+            let numeric = cluster_name_map
+                .iter()
+                .find(|(_, v)| *v == cid)
+                .map(|(k, _)| *k)
+                .unwrap_or_else(|| {
+                    let new_label = cluster_name_map.len() as i32;
+                    cluster_name_map.insert(new_label, cid.clone());
+                    new_label
+                });
+            labels[i] = numeric;
         }
     }
 
@@ -333,7 +333,7 @@ pub fn run_pet_clustering_incremental(
     }
 
     // Compute centroids for newly formed clusters
-    for (cluster_id, _) in &result.cluster_counts {
+    for cluster_id in result.cluster_counts.keys() {
         if existing_centroids_face.contains_key(cluster_id) {
             continue; // Already has a centroid
         }
@@ -484,12 +484,12 @@ fn phase2_body_rescue(
         if has_face[img_idx] {
             let face_emb = &inputs[img_idx].face_embedding;
             let norm = l2_norm(face_emb);
-            if norm > 0.1 {
-                if let Some(centroid) = face_centroids.get(&best_cluster) {
-                    let face_sim = dot(face_emb, centroid);
-                    if face_sim < config.face_veto_threshold {
-                        continue; // Vetoed
-                    }
+            if norm > 0.1
+                && let Some(centroid) = face_centroids.get(&best_cluster)
+            {
+                let face_sim = dot(face_emb, centroid);
+                if face_sim < config.face_veto_threshold {
+                    continue; // Vetoed
                 }
             }
         }
@@ -654,20 +654,20 @@ fn phase3_cross_merge(
         // Face contradiction check
         let f1 = cluster_face_embs.get(&c1);
         let f2 = cluster_face_embs.get(&c2);
-        if let (Some(f1m), Some(f2m)) = (f1, f2) {
-            if !f1m.is_empty() && !f2m.is_empty() {
-                let mut face_sum = 0.0f32;
-                let face_total = f1m.len() * f2m.len();
-                for &i in f1m {
-                    for &j in f2m {
-                        face_sum +=
-                            dot(&inputs[i].face_embedding, &inputs[j].face_embedding);
-                    }
+        if let (Some(f1m), Some(f2m)) = (f1, f2)
+            && !f1m.is_empty()
+            && !f2m.is_empty()
+        {
+            let mut face_sum = 0.0f32;
+            let face_total = f1m.len() * f2m.len();
+            for &i in f1m {
+                for &j in f2m {
+                    face_sum += dot(&inputs[i].face_embedding, &inputs[j].face_embedding);
                 }
-                let avg_face = face_sum / face_total as f32;
-                if avg_face < config.face_contradiction_threshold {
-                    continue; // Blocked by face contradiction
-                }
+            }
+            let avg_face = face_sum / face_total as f32;
+            if avg_face < config.face_contradiction_threshold {
+                continue; // Blocked by face contradiction
             }
         }
 
@@ -924,9 +924,9 @@ fn propagate_cluster(
     cluster_id: i32,
     n: usize,
 ) {
-    for i in 0..n {
+    for (i, cluster) in node_cluster.iter_mut().enumerate().take(n) {
         if find_root(parent, i) == root {
-            node_cluster[i] = cluster_id;
+            *cluster = cluster_id;
         }
     }
 }

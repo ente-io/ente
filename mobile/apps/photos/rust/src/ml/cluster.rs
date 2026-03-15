@@ -120,7 +120,7 @@ pub fn median_centroid(embs: &[&Vec<f32>], dim: usize) -> Vec<f32> {
         let mut vals: Vec<f32> = embs.iter().map(|e| e[d]).collect();
         vals.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
         let mid = vals.len() / 2;
-        centroid[d] = if vals.len() % 2 == 0 {
+        centroid[d] = if vals.len().is_multiple_of(2) {
             (vals[mid - 1] + vals[mid]) / 2.0
         } else {
             vals[mid]
@@ -171,10 +171,10 @@ pub fn renumber_labels(labels: &mut [i32]) {
         .map(|(new, &old)| (old, new as i32))
         .collect();
     for label in labels.iter_mut() {
-        if *label >= 0 {
-            if let Some(&new) = mapping.get(label) {
-                *label = new;
-            }
+        if *label >= 0
+            && let Some(&new) = mapping.get(label)
+        {
+            *label = new;
         }
     }
 }
@@ -284,11 +284,11 @@ pub fn run_face_clustering(
         if labels[i] < 0 || inputs[i].rejected_cluster_ids.is_empty() {
             continue;
         }
-        if let Some(existing_id) = label_to_existing.get(&labels[i]) {
-            if inputs[i].rejected_cluster_ids.contains(existing_id) {
-                labels[i] = next_label;
-                next_label += 1;
-            }
+        if let Some(existing_id) = label_to_existing.get(&labels[i])
+            && inputs[i].rejected_cluster_ids.contains(existing_id)
+        {
+            labels[i] = next_label;
+            next_label += 1;
         }
     }
 
