@@ -362,7 +362,7 @@ class _PetClusterPicker extends StatelessWidget {
                     ? l10n.dog
                     : species == 1
                         ? l10n.cat
-                        : "Pet";
+                        : l10n.pet;
                 final label =
                     (name != null && name.isNotEmpty) ? name : speciesLabel;
                 return ListTile(
@@ -374,7 +374,7 @@ class _PetClusterPicker extends StatelessWidget {
                     ),
                   ),
                   title: Text(label),
-                  subtitle: Text("$count photos"),
+                  subtitle: Text(l10n.photosCount(count: count)),
                   onTap: () => Navigator.pop(context, clusterId),
                 );
               },

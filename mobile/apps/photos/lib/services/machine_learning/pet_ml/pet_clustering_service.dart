@@ -422,9 +422,11 @@ extension PetClusteringDB on MLDataDB {
     int? species,
   }) async {
     final db = await asyncDB;
-    final where = species != null ? ' WHERE $speciesColumn = $species' : '';
+    final where = species != null ? ' WHERE $speciesColumn = ?' : '';
+    final params = species != null ? [species] : <Object>[];
     final rows = await db.getAll(
       'SELECT * FROM $petClusterSummaryTable$where',
+      params,
     );
     final result = <String, (Uint8List, int, int)>{};
     for (final r in rows) {
@@ -635,5 +637,17 @@ extension PetClusteringDB on MLDataDB {
         names[cid],
       );
     }).toList();
+  }
+
+  /// Mark a file as having completed pet indexing at a given ML version.
+  Future<void> markPetIndexed(int fileId, int mlVersion) async {
+    final db = await asyncDB;
+    await db.execute(
+      '''INSERT INTO $petIndexedFilesTable ($fileIDColumn, $mlVersionColumn)
+         VALUES (?, ?)
+         ON CONFLICT($fileIDColumn) DO UPDATE SET
+           $mlVersionColumn = excluded.$mlVersionColumn''',
+      [fileId, mlVersion],
+    );
   }
 }

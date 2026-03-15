@@ -2906,6 +2906,7 @@
   "signUp": "Sign up",
   "dog": "Dog",
   "cat": "Cat",
+  "pet": "Pet",
   "moveTo": "Move to",
   "notThisPet": "Not this pet"
 }

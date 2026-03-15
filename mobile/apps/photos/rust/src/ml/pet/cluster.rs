@@ -388,6 +388,12 @@ fn phase1_face_cluster(
 
     let nf = face_indices.len();
 
+    // Guard against excessive memory usage: n^2 * 4 bytes.
+    // 5000^2 * 4 = ~100MB, which is the upper bound for mobile devices.
+    if nf > 5000 {
+        return labels;
+    }
+
     // Compute pairwise cosine distance matrix: dist = 1 - dot(a, b)
     let mut dist = vec![0.0f32; nf * nf];
     for i in 0..nf {
@@ -510,6 +516,12 @@ fn phase2b_body_cluster(
     }
 
     let nf = still_unclustered.len();
+
+    // Guard against excessive memory usage on mobile devices.
+    if nf > 5000 {
+        return;
+    }
+
     let mut dist = vec![0.0f32; nf * nf];
     for i in 0..nf {
         for j in (i + 1)..nf {

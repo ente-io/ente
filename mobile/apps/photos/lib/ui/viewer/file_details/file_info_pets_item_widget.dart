@@ -208,7 +208,7 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
         ? l10n.dog
         : info.species == 1
             ? l10n.cat
-            : "Pet";
+            : l10n.pet;
 
     return SizedBox(
       width: thumbnailWidth,

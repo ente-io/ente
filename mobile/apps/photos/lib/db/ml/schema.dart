@@ -212,6 +212,7 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
 ''';
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
+const dropPetFacesTable = 'DROP TABLE IF EXISTS $petFacesTable';
 
 // ── Pet Bodies Table ──
 
@@ -235,6 +236,7 @@ const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
 ''';
 
 const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
+const dropPetBodiesTable = 'DROP TABLE IF EXISTS $petBodiesTable';
 
 // ── Vector ID Mapping Tables ──
 
@@ -265,3 +267,73 @@ CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
 
 const deletePetBodyVectorIdMappingTable =
     'DELETE FROM $petBodyVectorIdMappingTable';
+
+// ── Pet Face Clusters Table ──
+
+const petFaceClustersTable = 'pet_face_clusters';
+
+const createPetFaceClustersTable = '''
+CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
+  $petFaceIDColumn TEXT NOT NULL PRIMARY KEY,
+  $clusterIDColumn TEXT NOT NULL
+);
+''';
+
+const dropPetFaceClustersTable = 'DROP TABLE IF EXISTS $petFaceClustersTable';
+
+const petFcClusterIDIndex =
+    'CREATE INDEX IF NOT EXISTS idx_pet_fc_cluster ON $petFaceClustersTable ($clusterIDColumn)';
+
+// ── Pet Cluster Summary Table ──
+
+const petClusterSummaryTable = 'pet_cluster_summary';
+
+const createPetClusterSummaryTable = '''
+CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
+  $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
+  $avgColumn BLOB NOT NULL,
+  $countColumn INTEGER NOT NULL DEFAULT 0,
+  $speciesColumn INTEGER NOT NULL DEFAULT -1
+);
+''';
+
+const dropPetClusterSummaryTable =
+    'DROP TABLE IF EXISTS $petClusterSummaryTable';
+
+// ── Pet Names Table ──
+
+const petNamesTable = 'pet_names';
+const petNameColumn = 'name';
+
+const createPetNamesTable = '''
+CREATE TABLE IF NOT EXISTS $petNamesTable (
+  $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
+  $petNameColumn TEXT NOT NULL DEFAULT '',
+  $speciesColumn INTEGER NOT NULL DEFAULT -1
+);
+''';
+
+// ── Not-Pet Feedback Table ──
+
+const notPetFeedbackTable = 'not_pet_feedback';
+
+const createNotPetFeedbackTable = '''
+CREATE TABLE IF NOT EXISTS $notPetFeedbackTable (
+  $clusterIDColumn TEXT NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL,
+  PRIMARY KEY($clusterIDColumn, $petFaceIDColumn)
+);
+''';
+
+// ── Pet Indexing Tracking Table ──
+
+const petIndexedFilesTable = 'pet_indexed_files';
+
+const createPetIndexedFilesTable = '''
+CREATE TABLE IF NOT EXISTS $petIndexedFilesTable (
+  $fileIDColumn INTEGER NOT NULL PRIMARY KEY,
+  $mlVersionColumn INTEGER NOT NULL DEFAULT -1
+);
+''';
+
+const dropPetIndexedFilesTable = 'DROP TABLE IF EXISTS $petIndexedFilesTable';
