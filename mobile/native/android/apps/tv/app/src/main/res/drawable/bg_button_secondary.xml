@@ -1,0 +1,38 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ssaver_surface" />
+            <stroke
+                android:width="2dp"
+                android:color="@color/ssaver_green_dark" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ssaver_surface_focus" />
+            <stroke
+                android:width="2dp"
+                android:color="@color/ssaver_green" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ssaver_surface_focus" />
+            <stroke
+                android:width="2dp"
+                android:color="@color/ssaver_green" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ssaver_surface" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/ssaver_surface_border" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</selector>

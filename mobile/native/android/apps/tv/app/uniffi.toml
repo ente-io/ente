@@ -1,0 +1,5 @@
+[bindings.kotlin]
+package_name = "io.ente.photos.screensaver.ente.uniffi"
+cdylib_name = "ente_core"
+android = true
+kotlin_target_version = "1.9.22"
