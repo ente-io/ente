@@ -13,6 +13,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -24,6 +25,7 @@ import "package:photos/services/machine_learning/face_ml/face_detection/detectio
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -214,6 +216,14 @@ class MLService {
       }
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
+      }
+      if (_hasModeChanged(mode)) {
+        _logger.info("App mode changed during ML run, stopping");
+        return;
+      }
+      // Pet clustering (internal users only)
+      if (flagService.petEnabled && localSettings.petRecognitionEnabled) {
+        await _clusterPets(mlDataDB, mode);
       }
       if (_mlControllerStatus == true) {
         if (_hasModeChanged(mode)) {
@@ -457,13 +467,32 @@ class MLService {
             }
           }
 
-          final clusteringResult =
-              await FaceClusteringService.instance.predictLinearIsolate(
-            faceInfoForClustering.toSet(),
-            fileIDToCreationTime: fileIDToCreationTime,
-            offset: offset,
-            oldClusterSummaries: oldClusterSummaries,
-          );
+          ClusteringResult? clusteringResult;
+          try {
+            clusteringResult =
+                await FaceClusteringService.instance.predictLinearIsolate(
+              faceInfoForClustering.toSet(),
+              fileIDToCreationTime: fileIDToCreationTime,
+              offset: offset,
+              oldClusterSummaries: oldClusterSummaries,
+            );
+          } catch (e, s) {
+            _logger.severe("Linear clustering failed for bucket $bucket", e, s);
+          }
+
+          // Fallback: Rust agglomerative clustering
+          if (clusteringResult == null &&
+              (flagService.useRustForML || isOfflineMode)) {
+            _logger.info(
+              "Falling back to Rust agglomerative clustering for bucket $bucket",
+            );
+            clusteringResult =
+                await FaceClusteringService.instance.predictAgglomerativeRust(
+              faceInfoForClustering.toSet(),
+              oldClusterSummaries: oldClusterSummaries,
+            );
+          }
+
           if (clusteringResult == null) {
             _logger.warning("faceIdToCluster is null");
             return;
@@ -494,13 +523,29 @@ class MLService {
         }
       } else {
         final clusterStartTime = DateTime.now();
-        // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final clusteringResult =
-            await FaceClusteringService.instance.predictLinearIsolate(
-          allFaceInfoForClustering.toSet(),
-          fileIDToCreationTime: fileIDToCreationTime,
-          oldClusterSummaries: oldClusterSummaries,
-        );
+        ClusteringResult? clusteringResult;
+        try {
+          clusteringResult =
+              await FaceClusteringService.instance.predictLinearIsolate(
+            allFaceInfoForClustering.toSet(),
+            fileIDToCreationTime: fileIDToCreationTime,
+            oldClusterSummaries: oldClusterSummaries,
+          );
+        } catch (e, s) {
+          _logger.severe("Linear clustering failed", e, s);
+        }
+
+        // Fallback: Rust agglomerative clustering
+        if (clusteringResult == null &&
+            (flagService.useRustForML || isOfflineMode)) {
+          _logger.info("Falling back to Rust agglomerative clustering");
+          clusteringResult =
+              await FaceClusteringService.instance.predictAgglomerativeRust(
+            allFaceInfoForClustering.toSet(),
+            oldClusterSummaries: oldClusterSummaries,
+          );
+        }
+
         if (clusteringResult == null) {
           _logger.warning("faceIdToCluster is null");
           return;
@@ -530,6 +575,19 @@ class MLService {
       _clusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
+    }
+  }
+
+  Future<void> _clusterPets(MLDataDB mlDataDB, MLMode mode) async {
+    if (_shouldPauseIndexingAndClustering) return;
+    try {
+      await PetClusteringService.instance.clusterPets(
+        mlDataDB: mlDataDB,
+        isOffline: mode == MLMode.offline,
+      );
+      Bus.instance.fire(PetsChangedEvent(source: "clustering"));
+    } catch (e, s) {
+      _logger.severe("Pet clustering failed", e, s);
     }
   }
 

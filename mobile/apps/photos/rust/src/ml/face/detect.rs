@@ -11,12 +11,12 @@ const IOU_THRESHOLD: f32 = 0.4;
 const MIN_SCORE_THRESHOLD: f32 = 0.5;
 
 pub fn run_face_detection(
-    runtime: &MlRuntime,
+    runtime: &mut MlRuntime,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<FaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
-    let face_detection = runtime.face_detection_session()?;
+    let face_detection = runtime.face_detection_session_mut()?;
     let output_data = onnx::run_f32_data(
         face_detection,
         input,

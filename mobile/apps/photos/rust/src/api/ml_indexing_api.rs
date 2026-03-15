@@ -1,15 +1,64 @@
+use std::collections::HashMap;
+
 use crate::image::decode::decode_image_from_path;
 use crate::ml::{
     clip::{image::run_clip_image, text::run_clip_text_query, tokenizer::tokenize_clip_text},
+    cluster as face_cluster,
     error::{MlError, MlResult},
     face::{align::run_face_alignment, detect::run_face_detection, embed::run_face_embedding},
     pet::{
         align::run_pet_face_alignment,
+        cluster::{self, ClusterConfig, PetClusterInput, Species},
         detect::{run_pet_body_detection, run_pet_face_detection},
         embed::{run_pet_body_embedding, run_pet_face_embedding},
     },
     runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
 };
+
+/// No-op in release builds; logs to logcat/stderr in debug builds.
+macro_rules! ml_log {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            let msg = format!($($arg)*);
+            #[cfg(target_os = "android")]
+            {
+                unsafe extern "C" {
+                    unsafe fn __android_log_write(
+                        prio: std::ffi::c_int,
+                        tag: *const std::ffi::c_char,
+                        text: *const std::ffi::c_char,
+                    ) -> std::ffi::c_int;
+                }
+                use std::ffi::CString;
+                let tag = CString::new("ml_mem").unwrap();
+                let cmsg = CString::new(msg).unwrap_or_else(|_| CString::new("(invalid msg)").unwrap());
+                unsafe { __android_log_write(4, tag.as_ptr(), cmsg.as_ptr()); }
+            }
+            #[cfg(not(target_os = "android"))]
+            { eprintln!("{msg}"); }
+        }
+    };
+}
+
+/// No-op in release builds.
+#[cfg(debug_assertions)]
+fn vm_rss_kb() -> u64 {
+    std::fs::read_to_string("/proc/self/status")
+        .ok()
+        .and_then(|s| {
+            s.lines()
+                .find(|l| l.starts_with("VmRSS:"))
+                .and_then(|l| l.split_whitespace().nth(1))
+                .and_then(|v| v.parse::<u64>().ok())
+        })
+        .unwrap_or(0)
+}
+
+#[cfg(not(debug_assertions))]
+fn vm_rss_kb() -> u64 {
+    0
+}
 
 #[derive(Clone, Debug)]
 pub struct RustExecutionProviderPolicy {
@@ -182,21 +231,42 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
         provider_policy: to_provider_policy(&req.provider_policy),
     };
 
+    #[allow(unused_variables)]
+    let t0 = std::time::Instant::now();
+
     runtime::with_runtime(&runtime_config, |runtime| {
+        // Decode inside the lock so only one image is in memory at a time.
+        // Without this, all queued images decode simultaneously, wasting memory.
+        #[allow(unused_variables)]
+        let rss0 = vm_rss_kb();
+        ml_log!(
+            "file={} start rss={}MB (faces={}, clip={}, pets={})",
+            req.file_id, rss0 / 1024, req.run_faces, req.run_clip, req.run_pets
+        );
         let decoded = decode_image_from_path(&req.image_path)?;
         let dims = RustDimensions {
             width: decoded.dimensions.width as i32,
             height: decoded.dimensions.height as i32,
         };
-
+        ml_log!(
+            "file={} decoded {}x{} in {:?} rss={}MB (+{}MB)",
+            req.file_id, dims.width, dims.height, t0.elapsed(),
+            vm_rss_kb() / 1024, (vm_rss_kb() as i64 - rss0 as i64) / 1024
+        );
         let faces = if req.run_faces {
+            let t = std::time::Instant::now();
             let detections = run_face_detection(runtime, &decoded)?;
+            ml_log!("file={} face detection: {} faces in {:?} rss={}MB", req.file_id, detections.len(), t.elapsed(), vm_rss_kb() / 1024);
             if detections.is_empty() {
                 Some(Vec::new())
             } else {
+                let t = std::time::Instant::now();
                 let (aligned, mut face_results) =
                     run_face_alignment(req.file_id, &decoded, detections)?;
+                ml_log!("file={} face alignment: {} faces in {:?} rss={}MB", req.file_id, face_results.len(), t.elapsed(), vm_rss_kb() / 1024);
+                let t = std::time::Instant::now();
                 run_face_embedding(runtime, &aligned, &mut face_results)?;
+                ml_log!("file={} face embedding done in {:?} rss={}MB", req.file_id, t.elapsed(), vm_rss_kb() / 1024);
                 Some(face_results.into_iter().map(to_api_face_result).collect())
             }
         } else {
@@ -204,7 +274,9 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
         };
 
         let clip = if req.run_clip {
+            let t = std::time::Instant::now();
             let clip = run_clip_image(runtime, &decoded)?;
+            ml_log!("file={} clip done in {:?} rss={}MB", req.file_id, t.elapsed(), vm_rss_kb() / 1024);
             Some(RustClipResult {
                 embedding: clip.embedding,
             })
@@ -213,13 +285,22 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
         };
 
         let (pet_faces, pet_bodies) = if req.run_pets {
+            ml_log!("file={} pet pipeline start rss={}MB", req.file_id, vm_rss_kb() / 1024);
+            let t = std::time::Instant::now();
             let pet_face_detections = run_pet_face_detection(runtime, &decoded)?;
+            ml_log!("file={} pet face detection: {} faces in {:?} rss={}MB", req.file_id, pet_face_detections.len(), t.elapsed(), vm_rss_kb() / 1024);
+
+            let t = std::time::Instant::now();
             let body_detections = run_pet_body_detection(runtime, &decoded)?;
+            ml_log!("file={} pet body detection: {} bodies in {:?} rss={}MB", req.file_id, body_detections.len(), t.elapsed(), vm_rss_kb() / 1024);
 
             let pet_face_results = if !pet_face_detections.is_empty() {
+                let t = std::time::Instant::now();
                 let (aligned, mut pet_results) =
                     run_pet_face_alignment(req.file_id, &decoded, &pet_face_detections)?;
+                ml_log!("file={} pet face aligned rss={}MB", req.file_id, vm_rss_kb() / 1024);
                 run_pet_face_embedding(runtime, &aligned, &mut pet_results)?;
+                ml_log!("file={} pet face embedding: {} faces in {:?} rss={}MB", req.file_id, pet_results.len(), t.elapsed(), vm_rss_kb() / 1024);
                 pet_results
             } else {
                 Vec::new()
@@ -238,16 +319,32 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
                 })
                 .collect();
             if !body_results.is_empty() {
+                let t = std::time::Instant::now();
                 run_pet_body_embedding(runtime, &decoded, &mut body_results)?;
+                ml_log!("file={} pet body embedding: {} bodies in {:?} rss={}MB", req.file_id, body_results.len(), t.elapsed(), vm_rss_kb() / 1024);
             }
+
+            // Free decoded image RGB buffer now that all processing is done.
+            drop(decoded);
+            ml_log!("file={} decoded dropped rss={}MB", req.file_id, vm_rss_kb() / 1024);
 
             (
                 Some(pet_face_results.into_iter().map(to_api_pet_face_result).collect()),
                 Some(body_results.into_iter().map(to_api_pet_body_result).collect()),
             )
         } else {
+            drop(decoded);
             (None, None)
         };
+
+        let n_faces = faces.as_ref().map_or(0, Vec::len);
+        let n_clip = if clip.is_some() { 1 } else { 0 };
+        let n_pet_faces = pet_faces.as_ref().map_or(0, Vec::len);
+        let n_pet_bodies = pet_bodies.as_ref().map_or(0, Vec::len);
+        ml_log!(
+            "file={} COMPLETE in {:?} (faces={}, clip={}, pet_faces={}, pet_bodies={}) rss={}MB",
+            req.file_id, t0.elapsed(), n_faces, n_clip, n_pet_faces, n_pet_bodies, vm_rss_kb() / 1024
+        );
 
         Ok(AnalyzeImageResult {
             file_id: req.file_id,
@@ -459,5 +556,282 @@ fn to_api_pet_body_result(result: crate::ml::types::PetBodyResult) -> RustPetBod
         coco_class: result.detection.coco_class,
         pet_body_id: result.pet_body_id,
         body_embedding: result.body_embedding.into_iter().map(|v| v as f64).collect(),
+    }
+}
+
+// -- Pet Clustering API --
+
+/// A single pet face/body entry for clustering, passed from Dart.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterInput {
+    pub pet_face_id: String,
+    /// L2-normalized face embedding. Empty if no face detected.
+    pub face_embedding: Vec<f64>,
+    /// L2-normalized body embedding. Empty if no body detected.
+    pub body_embedding: Vec<f64>,
+    /// 0 = dog, 1 = cat.
+    pub species: u8,
+    pub file_id: i64,
+}
+
+/// Result entry: one pet_face_id mapped to a cluster.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterEntry {
+    pub pet_face_id: String,
+    pub cluster_id: String,
+}
+
+/// Cluster summary: centroid + count.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterSummary {
+    pub cluster_id: String,
+    pub centroid: Vec<f64>,
+    pub count: i32,
+}
+
+/// Full clustering result returned to Dart.
+#[derive(Clone, Debug)]
+pub struct RustPetClusterResult {
+    pub assignments: Vec<RustPetClusterEntry>,
+    pub summaries: Vec<RustPetClusterSummary>,
+    pub n_unclustered: i32,
+}
+
+/// Run batch pet clustering on all provided inputs.
+pub fn run_pet_clustering_rust(
+    inputs: Vec<RustPetClusterInput>,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+
+    let cluster_inputs: Vec<PetClusterInput> = inputs
+        .into_iter()
+        .map(|i| PetClusterInput {
+            pet_face_id: i.pet_face_id,
+            face_embedding: i.face_embedding.into_iter().map(|v| v as f32).collect(),
+            body_embedding: i.body_embedding.into_iter().map(|v| v as f32).collect(),
+            species: i.species,
+            file_id: i.file_id,
+        })
+        .collect();
+
+    let result = cluster::run_pet_clustering(&cluster_inputs, &config);
+
+    Ok(to_api_cluster_result(result))
+}
+
+/// Run incremental pet clustering: assign new inputs to existing clusters,
+/// then cluster remainder among themselves.
+pub fn run_pet_clustering_incremental_rust(
+    new_inputs: Vec<RustPetClusterInput>,
+    existing_face_centroids: Vec<RustPetClusterSummary>,
+    existing_body_centroids: Vec<RustPetClusterSummary>,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+
+    let cluster_inputs: Vec<PetClusterInput> = new_inputs
+        .into_iter()
+        .map(|i| PetClusterInput {
+            pet_face_id: i.pet_face_id,
+            face_embedding: i.face_embedding.into_iter().map(|v| v as f32).collect(),
+            body_embedding: i.body_embedding.into_iter().map(|v| v as f32).collect(),
+            species: i.species,
+            file_id: i.file_id,
+        })
+        .collect();
+
+    let face_centroids: HashMap<String, Vec<f32>> = existing_face_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
+
+    let body_centroids: HashMap<String, Vec<f32>> = existing_body_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
+
+    let result = cluster::run_pet_clustering_incremental(
+        &cluster_inputs,
+        &face_centroids,
+        &body_centroids,
+        &config,
+    );
+
+    Ok(to_api_cluster_result(result))
+}
+
+fn to_api_cluster_result(result: cluster::PetClusterResult) -> RustPetClusterResult {
+    let assignments: Vec<RustPetClusterEntry> = result
+        .face_to_cluster
+        .into_iter()
+        .map(|(face_id, cluster_id)| RustPetClusterEntry {
+            pet_face_id: face_id,
+            cluster_id,
+        })
+        .collect();
+
+    let summaries: Vec<RustPetClusterSummary> = result
+        .cluster_centroids
+        .into_iter()
+        .map(|(cluster_id, centroid)| {
+            let count = result
+                .cluster_counts
+                .get(&cluster_id)
+                .copied()
+                .unwrap_or(0) as i32;
+            RustPetClusterSummary {
+                cluster_id,
+                centroid: centroid.into_iter().map(|v| v as f64).collect(),
+                count,
+            }
+        })
+        .collect();
+
+    RustPetClusterResult {
+        assignments,
+        summaries,
+        n_unclustered: result.n_unclustered as i32,
+    }
+}
+
+// -- Human Face Clustering API --
+
+/// Input for human face clustering, passed from Dart.
+#[derive(Clone, Debug)]
+pub struct RustFaceClusterInput {
+    pub face_id: String,
+    /// L2-normalized face embedding (128-d).
+    pub embedding: Vec<f64>,
+    /// Existing cluster ID (empty string if unclustered).
+    pub existing_cluster_id: String,
+    /// Cluster IDs that this face has been rejected from.
+    pub rejected_cluster_ids: Vec<String>,
+}
+
+/// Result entry: one face_id mapped to a cluster.
+#[derive(Clone, Debug)]
+pub struct RustFaceClusterEntry {
+    pub face_id: String,
+    pub cluster_id: String,
+}
+
+/// Cluster summary for human faces.
+#[derive(Clone, Debug)]
+pub struct RustFaceClusterSummary {
+    pub cluster_id: String,
+    pub centroid: Vec<f64>,
+    pub count: i32,
+}
+
+/// Full face clustering result returned to Dart.
+#[derive(Clone, Debug)]
+pub struct RustFaceClusterResult {
+    pub assignments: Vec<RustFaceClusterEntry>,
+    pub summaries: Vec<RustFaceClusterSummary>,
+    pub n_unclustered: i32,
+}
+
+/// Run batch agglomerative clustering on human face embeddings.
+///
+/// Returns an error string if the input exceeds the memory guard (>5000 faces).
+pub fn run_face_clustering_rust(
+    inputs: Vec<RustFaceClusterInput>,
+    threshold: f64,
+) -> Result<RustFaceClusterResult, String> {
+    let cluster_inputs: Vec<face_cluster::FaceClusterInput> = inputs
+        .into_iter()
+        .map(|i| face_cluster::FaceClusterInput {
+            face_id: i.face_id,
+            embedding: i.embedding.into_iter().map(|v| v as f32).collect(),
+            existing_cluster_id: i.existing_cluster_id,
+            rejected_cluster_ids: i.rejected_cluster_ids,
+        })
+        .collect();
+
+    match face_cluster::run_face_clustering(&cluster_inputs, threshold as f32) {
+        Some(result) => Ok(to_face_cluster_result(result)),
+        None => Err("Input exceeds 5000-face limit for agglomerative clustering".to_string()),
+    }
+}
+
+/// Run incremental face clustering: assign new faces to existing clusters,
+/// then cluster the remainder among themselves.
+pub fn run_face_clustering_incremental_rust(
+    new_inputs: Vec<RustFaceClusterInput>,
+    existing_centroids: Vec<RustFaceClusterSummary>,
+    threshold: f64,
+) -> Result<RustFaceClusterResult, String> {
+    let cluster_inputs: Vec<face_cluster::FaceClusterInput> = new_inputs
+        .into_iter()
+        .map(|i| face_cluster::FaceClusterInput {
+            face_id: i.face_id,
+            embedding: i.embedding.into_iter().map(|v| v as f32).collect(),
+            existing_cluster_id: i.existing_cluster_id,
+            rejected_cluster_ids: i.rejected_cluster_ids,
+        })
+        .collect();
+
+    let centroids: HashMap<String, Vec<f32>> = existing_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
+
+    match face_cluster::run_face_clustering_incremental(
+        &cluster_inputs,
+        &centroids,
+        threshold as f32,
+    ) {
+        Some(result) => Ok(to_face_cluster_result(result)),
+        None => Err("Input exceeds 5000-face limit for agglomerative clustering".to_string()),
+    }
+}
+
+fn to_face_cluster_result(result: face_cluster::FaceClusterResult) -> RustFaceClusterResult {
+    let assignments: Vec<RustFaceClusterEntry> = result
+        .face_to_cluster
+        .into_iter()
+        .map(|(face_id, cluster_id)| RustFaceClusterEntry {
+            face_id,
+            cluster_id,
+        })
+        .collect();
+
+    let summaries: Vec<RustFaceClusterSummary> = result
+        .cluster_centroids
+        .into_iter()
+        .map(|(cluster_id, centroid)| {
+            let count = result
+                .cluster_counts
+                .get(&cluster_id)
+                .copied()
+                .unwrap_or(0) as i32;
+            RustFaceClusterSummary {
+                cluster_id,
+                centroid: centroid.into_iter().map(|v| v as f64).collect(),
+                count,
+            }
+        })
+        .collect();
+
+    RustFaceClusterResult {
+        assignments,
+        summaries,
+        n_unclustered: result.n_unclustered as i32,
     }
 }

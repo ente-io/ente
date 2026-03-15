@@ -1,6 +1,6 @@
 use std::sync::RwLock;
 
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
 use ort::Session;
 
 use crate::ml::{
@@ -109,16 +109,11 @@ pub struct MlRuntimeConfig {
     pub provider_policy: ExecutionProviderPolicy,
 }
 
-/// A lazily-initialized ONNX session that is thread-safe for concurrent reads.
-///
-/// `OnceLock` ensures the session is loaded exactly once (on first use) and
-/// then shared via `&Session` for concurrent inference — `ort::Session::run()`
-/// takes `&self` and is `Send + Sync`.
 #[derive(Debug)]
 struct LazySession {
     path: String,
     policy: ExecutionProviderPolicy,
-    session: OnceCell<Session>,
+    session: Option<Session>,
 }
 
 impl LazySession {
@@ -126,23 +121,33 @@ impl LazySession {
         Self {
             path,
             policy,
-            session: OnceCell::new(),
+            session: None,
         }
     }
 
-    fn get(&self, error_msg: &str) -> MlResult<&Session> {
+    fn get_mut(&mut self, error_msg: &str) -> MlResult<&mut Session> {
         if self.path.trim().is_empty() {
             return Err(MlError::InvalidRequest(error_msg.to_string()));
         }
-        self.session
-            .get_or_try_init(|| {
-                let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
-                rt_log(&format!("loading {model_name}"));
-                let t = std::time::Instant::now();
-                let s = onnx::build_session(&self.path, &self.policy)?;
-                rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
-                Ok(s)
-            })
+        if self.session.is_none() {
+            let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
+            rt_log(&format!("loading {model_name}"));
+            let t = std::time::Instant::now();
+            // Lazy sessions load while the runtime mutex is held (inside func()),
+            // so the with_runtime_mut_inner EP fallback cannot catch hangs or OOM
+            // during session building. Use CPU-friendly policy to avoid NNAPI/CoreML
+            // driver issues (e.g. NNAPI on some MTK devices hangs or OOMs even when
+            // it only accelerates <1% of graph nodes).
+            let load_policy = ExecutionProviderPolicy {
+                prefer_coreml: false,
+                prefer_nnapi: false,
+                prefer_xnnpack: self.policy.prefer_xnnpack,
+                allow_cpu_fallback: true,
+            };
+            self.session = Some(onnx::build_session(&self.path, &load_policy)?);
+            rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
+        }
+        Ok(self.session.as_mut().unwrap())
     }
 }
 
@@ -201,60 +206,60 @@ fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
 }
 
 impl MlRuntime {
-    pub fn face_detection_session(&self) -> MlResult<&Session> {
-        self.face_detection.get(
+    pub fn face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.face_detection.get_mut(
             "missing model path: faceDetectionModelPath is required when runFaces is true",
         )
     }
 
-    pub fn face_embedding_session(&self) -> MlResult<&Session> {
-        self.face_embedding.get(
+    pub fn face_embedding_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.face_embedding.get_mut(
             "missing model path: faceEmbeddingModelPath is required when runFaces is true",
         )
     }
 
-    pub fn clip_image_session(&self) -> MlResult<&Session> {
-        self.clip_image.get(
+    pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.clip_image.get_mut(
             "missing model path: clipImageModelPath is required when runClip is true",
         )
     }
 
-    pub fn clip_text_session(&self) -> MlResult<&Session> {
-        self.clip_text.get(
+    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.clip_text.get_mut(
             "missing model path: clipTextModelPath is required when running clip text",
         )
     }
 
-    pub fn pet_face_detection_session(&self) -> MlResult<&Session> {
-        self.pet_face_detection.get(
+    pub fn pet_face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_face_detection.get_mut(
             "missing model path: petFaceDetectionModelPath is required when runPets is true",
         )
     }
 
-    pub fn pet_face_embedding_dog_session(&self) -> MlResult<&Session> {
+    pub fn pet_face_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
         self.pet_face_embedding_dog
-            .get("missing model path: petFaceEmbeddingDogModelPath is required")
+            .get_mut("missing model path: petFaceEmbeddingDogModelPath is required")
     }
 
-    pub fn pet_face_embedding_cat_session(&self) -> MlResult<&Session> {
+    pub fn pet_face_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
         self.pet_face_embedding_cat
-            .get("missing model path: petFaceEmbeddingCatModelPath is required")
+            .get_mut("missing model path: petFaceEmbeddingCatModelPath is required")
     }
 
-    pub fn pet_body_detection_session(&self) -> MlResult<&Session> {
-        self.pet_body_detection.get(
+    pub fn pet_body_detection_session_mut(&mut self) -> MlResult<&mut Session> {
+        self.pet_body_detection.get_mut(
             "missing model path: petBodyDetectionModelPath is required when runPets is true",
         )
     }
 
-    pub fn pet_body_embedding_dog_session(&self) -> MlResult<&Session> {
+    pub fn pet_body_embedding_dog_session_mut(&mut self) -> MlResult<&mut Session> {
         self.pet_body_embedding_dog
-            .get("missing model path: petBodyEmbeddingDogModelPath is required")
+            .get_mut("missing model path: petBodyEmbeddingDogModelPath is required")
     }
 
-    pub fn pet_body_embedding_cat_session(&self) -> MlResult<&Session> {
+    pub fn pet_body_embedding_cat_session_mut(&mut self) -> MlResult<&mut Session> {
         self.pet_body_embedding_cat
-            .get("missing model path: petBodyEmbeddingCatModelPath is required")
+            .get_mut("missing model path: petBodyEmbeddingCatModelPath is required")
     }
 }
 
@@ -352,23 +357,22 @@ fn ensure_runtime_inner(config: &MlRuntimeConfig, mark_as_fallback: bool) -> MlR
     Ok(())
 }
 
-/// Run a function with a shared (read) reference to the runtime.
+/// Run a function with an exclusive (write) reference to the runtime.
 ///
-/// Multiple callers can hold the read lock concurrently, so CLIP text
-/// queries no longer block on image indexing and vice versa. The write
-/// lock is only acquired during `ensure_runtime` to swap the config.
+/// The write lock is needed because `LazySession` uses mutable access
+/// for lazy loading and `unload()` support.
 pub fn with_runtime<F, R>(config: &MlRuntimeConfig, func: F) -> MlResult<R>
 where
-    F: Fn(&MlRuntime) -> MlResult<R>,
+    F: Fn(&mut MlRuntime) -> MlResult<R>,
 {
     ensure_runtime(config)?;
 
     let first_result = {
-        let guard = read_runtime();
+        let mut guard = write_runtime();
         let state = guard
-            .as_ref()
+            .as_mut()
             .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-        func(&state.runtime)
+        func(&mut state.runtime)
     };
 
     match first_result {
@@ -386,11 +390,11 @@ where
             ensure_runtime_inner(&fallback_config, true)?;
 
             {
-                let guard = read_runtime();
+                let mut guard = write_runtime();
                 let state = guard
-                    .as_ref()
+                    .as_mut()
                     .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-                func(&state.runtime)
+                func(&mut state.runtime)
             }
         }
     }

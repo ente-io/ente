@@ -1,0 +1,677 @@
+import "dart:math" show min, sqrt;
+import "dart:typed_data" show Float32List, Float64List, Uint8List;
+
+import "package:logging/logging.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/db_pet_model_mappers.dart";
+import "package:photos/db/ml/pet_vector_db.dart";
+import "package:photos/db/ml/schema.dart";
+import "package:photos/src/rust/api/ml_indexing_api.dart";
+import "package:uuid/uuid.dart";
+
+final _logger = Logger("PetClusteringService");
+
+/// Orchestrates pet clustering by reading indexed pet data from the DB,
+/// fetching embeddings from the vector DB, calling the Rust 3-phase
+/// clustering engine, and storing the results.
+class PetClusteringService {
+  PetClusteringService._();
+  static final instance = PetClusteringService._();
+
+  bool _isRunning = false;
+
+  /// Run pet clustering on all unclustered pet faces.
+  ///
+  /// Groups by species (dog=0, cat=1) and clusters each independently.
+  /// Supports both batch (first run) and incremental (subsequent runs).
+  Future<void> clusterPets({
+    required MLDataDB mlDataDB,
+    bool isOffline = false,
+  }) async {
+    if (_isRunning) {
+      _logger.info("Pet clustering already running, skipping");
+      return;
+    }
+    _isRunning = true;
+    try {
+      final unclusteredCount =
+          await mlDataDB.getUnclusteredPetFaceCount(isOffline: isOffline);
+      if (unclusteredCount == 0) {
+        _logger.info("No unclustered pet faces, skipping");
+        return;
+      }
+      _logger.info("Starting pet clustering: $unclusteredCount unclustered");
+
+      // Get all pet faces grouped by species
+      for (final species in [0, 1]) {
+        await _clusterSpecies(
+          species: species,
+          mlDataDB: mlDataDB,
+          isOffline: isOffline,
+        );
+      }
+    } catch (e, s) {
+      _logger.severe("Pet clustering failed", e, s);
+    } finally {
+      _isRunning = false;
+    }
+  }
+
+  Future<void> _clusterSpecies({
+    required int species,
+    required MLDataDB mlDataDB,
+    required bool isOffline,
+  }) async {
+    final speciesName = species == 0 ? "dog" : "cat";
+    _logger.info("Clustering $speciesName faces...");
+
+    // 1. Read all pet faces for this species
+    final faces =
+        await mlDataDB.getPetFacesForClustering(species, isOffline: isOffline);
+    if (faces.isEmpty) {
+      _logger.info("No $speciesName faces to cluster");
+      return;
+    }
+
+    // 2. Read all pet bodies for this species (for body rescue + merge)
+    final bodies =
+        await mlDataDB.getPetBodiesForClustering(species, isOffline: isOffline);
+
+    // 3. Build a map from fileId to body info for pairing
+    final bodyByFileId = <int, PetBodyClusterInfo>{};
+    for (final body in bodies) {
+      // Keep the first (highest-scoring) body per file
+      bodyByFileId.putIfAbsent(body.fileId, () => body);
+    }
+
+    // 4. Fetch face embeddings from vector DB
+    final faceVdb = PetVectorDB.forModel(
+      species: species,
+      isFace: true,
+      offline: isOffline,
+    );
+    final bodyVdb = PetVectorDB.forModel(
+      species: species,
+      isFace: false,
+      offline: isOffline,
+    );
+
+    // Build cluster inputs
+    final List<RustPetClusterInput> clusterInputs = [];
+    final List<String> petFaceIds = [];
+
+    for (final face in faces) {
+      if (face.faceVectorId == null) continue;
+
+      Float64List faceEmb;
+      try {
+        final embs = await faceVdb.getEmbeddings([face.faceVectorId!]);
+        if (embs.isEmpty) continue;
+        faceEmb = _float32ToFloat64(embs.first);
+      } catch (e) {
+        _logger.warning("Failed to get face embedding for ${face.petFaceId}");
+        continue;
+      }
+
+      // Try to get matching body embedding
+      Float64List bodyEmb = Float64List(0);
+      final body = bodyByFileId[face.fileId];
+      if (body != null && body.bodyVectorId != null) {
+        try {
+          final bodyEmbs = await bodyVdb.getEmbeddings([body.bodyVectorId!]);
+          if (bodyEmbs.isNotEmpty) {
+            bodyEmb = _float32ToFloat64(bodyEmbs.first);
+          }
+        } catch (e) {
+          _logger
+              .warning("Failed to get body embedding for file ${face.fileId}");
+        }
+      }
+
+      clusterInputs.add(
+        RustPetClusterInput(
+          petFaceId: face.petFaceId,
+          faceEmbedding: faceEmb,
+          bodyEmbedding: bodyEmb,
+          species: species,
+          fileId: face.fileId,
+        ),
+      );
+      petFaceIds.add(face.petFaceId);
+    }
+
+    if (clusterInputs.length < 2) {
+      _logger.info("Not enough $speciesName faces to cluster "
+          "(${clusterInputs.length})");
+      return;
+    }
+
+    // 5. Check for existing clusters (incremental mode)
+    final existingSummaries =
+        await mlDataDB.getAllPetClusterSummary(species: species);
+
+    _logger.info(
+      "Clustering ${clusterInputs.length} $speciesName faces "
+      "(${existingSummaries.length} existing clusters)",
+    );
+
+    late RustPetClusterResult result;
+
+    if (existingSummaries.isEmpty) {
+      // Batch mode
+      result = await runPetClusteringRust(
+        inputs: clusterInputs,
+        species: species,
+      );
+    } else {
+      // Incremental mode — pass existing centroids
+      final faceCentroids = existingSummaries.entries
+          .map(
+            (e) => RustPetClusterSummary(
+              clusterId: e.key,
+              centroid: _uint8ListToFloat64(e.value.$1),
+              count: e.value.$2,
+            ),
+          )
+          .toList();
+
+      // Body centroids require a separate DB table + Rust struct changes.
+      // The Rust incremental path handles missing body centroids gracefully
+      // by skipping body rescue — face centroids alone drive assignment.
+      result = await runPetClusteringIncrementalRust(
+        newInputs: clusterInputs,
+        existingFaceCentroids: faceCentroids,
+        existingBodyCentroids: [],
+        species: species,
+      );
+    }
+
+    // 6. Store results — respect user feedback
+    final faceToCluster = <String, String>{};
+    for (final assignment in result.assignments) {
+      faceToCluster[assignment.petFaceId] = assignment.clusterId;
+    }
+
+    // Check not-pet feedback and override violating assignments
+    if (faceToCluster.isNotEmpty) {
+      final allRejected = <String, Set<String>>{};
+      for (final clusterId in faceToCluster.values.toSet()) {
+        final rejected = await mlDataDB.getRejectedPetFaceIds(clusterId);
+        if (rejected.isNotEmpty) {
+          allRejected[clusterId] = rejected;
+        }
+      }
+      if (allRejected.isNotEmpty) {
+        for (final entry in faceToCluster.entries.toList()) {
+          final rejected = allRejected[entry.value];
+          if (rejected != null && rejected.contains(entry.key)) {
+            faceToCluster[entry.key] = const Uuid().v4();
+          }
+        }
+      }
+      await mlDataDB.updatePetFaceIdToClusterId(faceToCluster);
+    }
+
+    // Recompute summaries from the final assignments (after feedback
+    // overrides) so that centroids and counts reflect the actual cluster
+    // membership, not the pre-override Rust output.
+    final embeddingByFaceId = <String, Float64List>{};
+    for (final input in clusterInputs) {
+      if (input.faceEmbedding.isNotEmpty) {
+        embeddingByFaceId[input.petFaceId] = Float64List.fromList(
+          input.faceEmbedding,
+        );
+      }
+    }
+
+    final clusterSummaries = <String, (Uint8List, int, int)>{};
+    final clusterMembers = <String, List<Float64List>>{};
+    for (final entry in faceToCluster.entries) {
+      final emb = embeddingByFaceId[entry.key];
+      if (emb != null) {
+        clusterMembers.putIfAbsent(entry.value, () => []).add(emb);
+      }
+    }
+    for (final entry in clusterMembers.entries) {
+      final centroid = _meanCentroid(entry.value);
+      clusterSummaries[entry.key] = (
+        _doublesToUint8List(centroid),
+        entry.value.length,
+        species,
+      );
+    }
+
+    // Delete existing summaries for clusters that no longer have any face
+    // assignments.
+    final activeClusterIds = faceToCluster.values.toSet();
+    final staleIds = existingSummaries.keys
+        .where((id) => !activeClusterIds.contains(id))
+        .toList();
+    for (final staleId in staleIds) {
+      await mlDataDB.deletePetClusterSummary(staleId);
+    }
+
+    if (clusterSummaries.isNotEmpty) {
+      await mlDataDB.petClusterSummaryUpdate(clusterSummaries);
+    }
+
+    _logger.info(
+      "$speciesName clustering done: ${faceToCluster.length} assigned, "
+      "${result.nUnclustered} unclustered, "
+      "${result.summaries.length} clusters",
+    );
+  }
+
+  static Float64List _uint8ListToFloat64(Uint8List bytes) {
+    final f32 = Float32List.view(bytes.buffer);
+    final f64 = Float64List(f32.length);
+    for (int i = 0; i < f32.length; i++) {
+      f64[i] = f32[i];
+    }
+    return f64;
+  }
+
+  static Float64List _float32ToFloat64(Float32List f32) {
+    final f64 = Float64List(f32.length);
+    for (int i = 0; i < f32.length; i++) {
+      f64[i] = f32[i];
+    }
+    return f64;
+  }
+
+  static Uint8List _doublesToUint8List(List<double> values) {
+    final floats = Float32List(values.length);
+    for (int i = 0; i < values.length; i++) {
+      floats[i] = values[i];
+    }
+    return floats.buffer.asUint8List();
+  }
+
+  /// Compute the L2-normalized mean centroid of a list of embeddings.
+  static List<double> _meanCentroid(List<Float64List> embeddings) {
+    final dim = embeddings.first.length;
+    final centroid = Float64List(dim);
+    for (final emb in embeddings) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] += emb[i];
+      }
+    }
+    final n = embeddings.length.toDouble();
+    double norm = 0;
+    for (int i = 0; i < dim; i++) {
+      centroid[i] /= n;
+      norm += centroid[i] * centroid[i];
+    }
+    norm = sqrt(norm);
+    if (norm > 0) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] /= norm;
+      }
+    }
+    return centroid;
+  }
+}
+
+/// Lightweight holder for pet face data needed for clustering.
+class PetFaceClusterInfo {
+  final int fileId;
+  final String petFaceId;
+  final int? faceVectorId;
+  final int species;
+  final String? clusterId;
+
+  PetFaceClusterInfo({
+    required this.fileId,
+    required this.petFaceId,
+    required this.faceVectorId,
+    required this.species,
+    this.clusterId,
+  });
+}
+
+/// Lightweight holder for pet body data needed for clustering.
+class PetBodyClusterInfo {
+  final int fileId;
+  final String petBodyId;
+  final int? bodyVectorId;
+  final int species;
+
+  PetBodyClusterInfo({
+    required this.fileId,
+    required this.petBodyId,
+    required this.bodyVectorId,
+    required this.species,
+  });
+}
+
+// ── DB helper methods (extension on MLDataDB) ───────────────────────────
+
+extension PetClusteringDB on MLDataDB {
+  /// Count pet faces that don't have a cluster assignment yet.
+  Future<int> getUnclusteredPetFaceCount({bool isOffline = false}) async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT COUNT(*) as count
+      FROM $petFacesTable f
+      LEFT JOIN $petFaceClustersTable fc ON f.$petFaceIDColumn = fc.$petFaceIDColumn
+      WHERE f.$speciesColumn >= 0
+        AND f.$faceVectorIdColumn IS NOT NULL
+        AND fc.$petFaceIDColumn IS NULL
+    ''';
+    final rows = await db.getAll(query);
+    return rows.first['count'] as int;
+  }
+
+  /// Get all pet faces for a given species, with their existing cluster IDs.
+  Future<List<PetFaceClusterInfo>> getPetFacesForClustering(
+    int species, {
+    bool isOffline = false,
+  }) async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT f.$fileIDColumn, f.$petFaceIDColumn, f.$faceVectorIdColumn,
+             f.$speciesColumn, fc.$clusterIDColumn
+      FROM $petFacesTable f
+      LEFT JOIN $petFaceClustersTable fc ON f.$petFaceIDColumn = fc.$petFaceIDColumn
+      WHERE f.$speciesColumn = ?
+        AND f.$faceVectorIdColumn IS NOT NULL
+      ORDER BY f.$fileIDColumn
+    ''';
+    final rows = await db.getAll(query, [species]);
+    return rows
+        .map(
+          (r) => PetFaceClusterInfo(
+            fileId: r[fileIDColumn] as int,
+            petFaceId: r[petFaceIDColumn] as String,
+            faceVectorId: r[faceVectorIdColumn] as int?,
+            species: r[speciesColumn] as int,
+            clusterId: r[clusterIDColumn] as String?,
+          ),
+        )
+        .toList();
+  }
+
+  /// Get all pet bodies for a given species.
+  Future<List<PetBodyClusterInfo>> getPetBodiesForClustering(
+    int species, {
+    bool isOffline = false,
+  }) async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT $fileIDColumn, $petBodyIDColumn, $bodyVectorIdColumn, $speciesColumn
+      FROM $petBodiesTable
+      WHERE $speciesColumn = ?
+        AND $bodyVectorIdColumn IS NOT NULL
+      ORDER BY score DESC
+    ''';
+    final rows = await db.getAll(query, [species]);
+    return rows
+        .map(
+          (r) => PetBodyClusterInfo(
+            fileId: r[fileIDColumn] as int,
+            petBodyId: r[petBodyIDColumn] as String,
+            bodyVectorId: r[bodyVectorIdColumn] as int?,
+            species: r[speciesColumn] as int,
+          ),
+        )
+        .toList();
+  }
+
+  /// Store pet face → cluster assignments.
+  Future<void> updatePetFaceIdToClusterId(
+    Map<String, String> faceIdToClusterId,
+  ) async {
+    if (faceIdToClusterId.isEmpty) return;
+    final db = await asyncDB;
+    const batchSize = 500;
+    final entries = faceIdToClusterId.entries.toList();
+    for (int i = 0; i < entries.length; i += batchSize) {
+      final batch = entries.sublist(i, min(i + batchSize, entries.length));
+      const String sql = '''
+        INSERT INTO $petFaceClustersTable ($petFaceIDColumn, $clusterIDColumn)
+        VALUES (?, ?)
+        ON CONFLICT($petFaceIDColumn) DO UPDATE SET $clusterIDColumn = excluded.$clusterIDColumn
+      ''';
+      final params = batch.map((e) => [e.key, e.value]).toList();
+      await db.executeBatch(sql, params);
+    }
+  }
+
+  /// Update pet cluster summaries (centroid + count + species).
+  Future<void> petClusterSummaryUpdate(
+    Map<String, (Uint8List, int, int)> summaries,
+  ) async {
+    if (summaries.isEmpty) return;
+    final db = await asyncDB;
+    const String sql = '''
+      INSERT INTO $petClusterSummaryTable ($clusterIDColumn, $avgColumn, $countColumn, $speciesColumn)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT($clusterIDColumn) DO UPDATE SET
+        $avgColumn = excluded.$avgColumn,
+        $countColumn = excluded.$countColumn,
+        $speciesColumn = excluded.$speciesColumn
+    ''';
+    const batchSize = 400;
+    final entries = summaries.entries.toList();
+    for (int i = 0; i < entries.length; i += batchSize) {
+      final batch = entries.sublist(i, min(i + batchSize, entries.length));
+      final params = batch
+          .map((e) => [e.key, e.value.$1, e.value.$2, e.value.$3])
+          .toList();
+      await db.executeBatch(sql, params);
+    }
+  }
+
+  /// Get all existing pet cluster summaries, optionally filtered by species.
+  Future<Map<String, (Uint8List, int, int)>> getAllPetClusterSummary({
+    int? species,
+  }) async {
+    final db = await asyncDB;
+    final where = species != null ? ' WHERE $speciesColumn = ?' : '';
+    final params = species != null ? [species] : <Object>[];
+    final rows = await db.getAll(
+      'SELECT * FROM $petClusterSummaryTable$where',
+      params,
+    );
+    final result = <String, (Uint8List, int, int)>{};
+    for (final r in rows) {
+      result[r[clusterIDColumn] as String] = (
+        r[avgColumn] as Uint8List,
+        r[countColumn] as int,
+        r[speciesColumn] as int,
+      );
+    }
+    return result;
+  }
+
+  // ── Cover face for cluster (face crops) ──
+
+  /// Get the highest-scoring pet face in a cluster.
+  Future<DBPetFace?> getCoverPetFaceForCluster(String clusterId) async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT f.*
+      FROM $petFaceClustersTable fc
+      INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn
+      WHERE fc.$clusterIDColumn = ?
+        AND f.$speciesColumn >= 0
+      ORDER BY f.$faceScore DESC
+      LIMIT 1
+    ''';
+    final rows = await db.getAll(query, [clusterId]);
+    if (rows.isEmpty) return null;
+    return DBPetFace.fromMap(rows.first);
+  }
+
+  // ── Pet names (editable names) ──
+
+  /// Get all pet names: clusterId → name.
+  Future<Map<String, String>> getAllPetNames() async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      "SELECT $clusterIDColumn, $petNameColumn FROM $petNamesTable "
+      "WHERE $petNameColumn != ''",
+    );
+    final result = <String, String>{};
+    for (final r in rows) {
+      result[r[clusterIDColumn] as String] = r[petNameColumn] as String;
+    }
+    return result;
+  }
+
+  /// Set or update a pet name for a cluster.
+  Future<void> setPetName(
+    String clusterId,
+    String name,
+    int species,
+  ) async {
+    final db = await asyncDB;
+    await db.execute(
+      '''INSERT INTO $petNamesTable ($clusterIDColumn, $petNameColumn, $speciesColumn)
+         VALUES (?, ?, ?)
+         ON CONFLICT($clusterIDColumn) DO UPDATE SET
+           $petNameColumn = excluded.$petNameColumn,
+           $speciesColumn = excluded.$speciesColumn''',
+      [clusterId, name, species],
+    );
+  }
+
+  // ── Manual reassignment helpers ──
+
+  /// Get petFaceIds for given fileIds within a specific cluster.
+  Future<List<String>> getPetFaceIdsForFilesInCluster(
+    List<int> fileIds,
+    String clusterId,
+  ) async {
+    final db = await asyncDB;
+    final placeholders = List.filled(fileIds.length, '?').join(',');
+    final query = '''
+      SELECT fc.$petFaceIDColumn
+      FROM $petFaceClustersTable fc
+      INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn
+      WHERE fc.$clusterIDColumn = ?
+        AND f.$fileIDColumn IN ($placeholders)
+    ''';
+    final rows = await db.getAll(query, [clusterId, ...fileIds]);
+    return rows.map((r) => r[petFaceIDColumn] as String).toList();
+  }
+
+  /// Force-update pet face cluster assignments.
+  Future<void> forceUpdatePetFaceClusterIds(
+    Map<String, String> petFaceIdToClusterId,
+  ) async {
+    if (petFaceIdToClusterId.isEmpty) return;
+    final db = await asyncDB;
+    const String sql = '''
+      INSERT INTO $petFaceClustersTable ($petFaceIDColumn, $clusterIDColumn)
+      VALUES (?, ?)
+      ON CONFLICT($petFaceIDColumn) DO UPDATE SET
+        $clusterIDColumn = excluded.$clusterIDColumn
+    ''';
+    const batchSize = 500;
+    final entries = petFaceIdToClusterId.entries.toList();
+    for (int i = 0; i < entries.length; i += batchSize) {
+      final batch = entries.sublist(i, min(i + batchSize, entries.length));
+      final params = batch.map((e) => [e.key, e.value]).toList();
+      await db.executeBatch(sql, params);
+    }
+  }
+
+  /// Record "not this pet" feedback.
+  Future<void> bulkInsertNotPetFeedback(
+    List<(String clusterId, String petFaceId)> feedback,
+  ) async {
+    if (feedback.isEmpty) return;
+    final db = await asyncDB;
+    const String sql = '''
+      INSERT OR IGNORE INTO $notPetFeedbackTable
+        ($clusterIDColumn, $petFaceIDColumn)
+      VALUES (?, ?)
+    ''';
+    final params = feedback.map((e) => [e.$1, e.$2]).toList();
+    await db.executeBatch(sql, params);
+  }
+
+  /// Get all rejected petFaceIds for a cluster.
+  Future<Set<String>> getRejectedPetFaceIds(String clusterId) async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      'SELECT $petFaceIDColumn FROM $notPetFeedbackTable '
+      'WHERE $clusterIDColumn = ?',
+      [clusterId],
+    );
+    return rows.map((r) => r[petFaceIDColumn] as String).toSet();
+  }
+
+  /// Delete a pet cluster summary row.
+  Future<void> deletePetClusterSummary(String clusterId) async {
+    final db = await asyncDB;
+    await db.execute(
+      'DELETE FROM $petClusterSummaryTable WHERE $clusterIDColumn = ?',
+      [clusterId],
+    );
+  }
+
+  /// Reassign all pet faces in one cluster to another.
+  Future<void> reassignAllPetFacesInCluster(
+    String sourceClusterId,
+    String targetClusterId,
+  ) async {
+    final db = await asyncDB;
+    await db.execute(
+      'UPDATE $petFaceClustersTable SET $clusterIDColumn = ? '
+      'WHERE $clusterIDColumn = ?',
+      [targetClusterId, sourceClusterId],
+    );
+  }
+
+  /// Get a mapping from cluster ID to the list of file IDs in that cluster.
+  Future<Map<String, List<int>>> getPetClusterFileIds() async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT fc.$clusterIDColumn, f.$fileIDColumn
+      FROM $petFaceClustersTable fc
+      INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn
+      WHERE f.$speciesColumn >= 0
+      ORDER BY fc.$clusterIDColumn
+    ''';
+    final rows = await db.getAll(query);
+    final result = <String, Set<int>>{};
+    for (final r in rows) {
+      final cid = r[clusterIDColumn] as String;
+      final fid = r[fileIDColumn] as int;
+      result.putIfAbsent(cid, () => {}).add(fid);
+    }
+    return result.map((k, v) => MapEntry(k, v.toList()));
+  }
+
+  /// Get all pet clusters with their file counts.
+  /// Returns list of (clusterId, species, fileCount, name?).
+  Future<List<(String, int, int, String?)>> getAllPetClustersWithInfo() async {
+    final db = await asyncDB;
+    const String query = '''
+      SELECT fc.$clusterIDColumn,
+             f.$speciesColumn,
+             COUNT(DISTINCT f.$fileIDColumn) as file_count
+      FROM $petFaceClustersTable fc
+      INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn
+      WHERE f.$speciesColumn >= 0
+      GROUP BY fc.$clusterIDColumn
+      ORDER BY file_count DESC
+    ''';
+    final rows = await db.getAll(query);
+
+    // Fetch names separately
+    final names = await getAllPetNames();
+
+    return rows.map((r) {
+      final cid = r[clusterIDColumn] as String;
+      return (
+        cid,
+        r[speciesColumn] as int,
+        r['file_count'] as int,
+        names[cid],
+      );
+    }).toList();
+  }
+}

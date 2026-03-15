@@ -21,7 +21,9 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import 'package:photos/ui/viewer/people/person_face_widget.dart';
+import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/people/pet_face_widget.dart";
+import "package:photos/ui/viewer/people/save_or_edit_pet.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
@@ -84,6 +86,12 @@ class _PeopleSectionState extends State<PeopleSection> {
     final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final hasPets = _examples.any(
+      (e) => e.params.containsKey(kPetClusterParamId),
+    );
+    final sectionTitle = hasPets
+        ? AppLocalizations.of(context).peopleAndPets
+        : widget.sectionType.sectionTitle(context);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -104,7 +112,7 @@ class _PeopleSectionState extends State<PeopleSection> {
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Text(
-                        widget.sectionType.sectionTitle(context),
+                        sectionTitle,
                         style: textTheme.largeBold,
                       ),
                     ),
@@ -202,6 +210,8 @@ class PersonSearchExample extends StatelessWidget {
     this.size = 102,
   });
 
+  bool get _isPet => searchResult.params.containsKey(kPetClusterParamId);
+
   void toggleSelection() {
     selectedPeople
         ?.toggleSelection(searchResult.params[kPersonParamID]! as String);
@@ -209,6 +219,87 @@ class PersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_isPet) return _buildPetItem(context);
+    return _buildPersonItem(context);
+  }
+
+  Widget _buildPetItem(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final clusterId = searchResult.params[kPetClusterParamId] as String?;
+    final hasCustomName =
+        searchResult.params[kPetHasCustomName] as bool? ?? false;
+    final species = searchResult.params[kPetSpecies] as int? ?? -1;
+
+    return GestureDetector(
+      onTap: () {
+        RecentSearches().add(searchResult.name());
+        if (searchResult.onResultTap != null) {
+          searchResult.onResultTap!(context);
+        } else {
+          routeToPage(context, SearchResultPage(searchResult));
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: clusterId != null
+                ? FaceThumbnailSquircleClip(
+                    child: PetFaceWidget(petClusterId: clusterId),
+                  )
+                : FaceThumbnailSquircleClip(
+                    child: Container(
+                      color: getEnteColorScheme(context).strokeFaint,
+                      child: const Icon(Icons.pets, size: 40),
+                    ),
+                  ),
+          ),
+          hasCustomName
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: SizedBox(
+                    width: size,
+                    child: Text(
+                      searchResult.name(),
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.small,
+                    ),
+                  ),
+                )
+              : GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    if (clusterId != null) {
+                      routeToPage(
+                        context,
+                        SaveOrEditPet(
+                          clusterId: clusterId,
+                          species: species,
+                        ),
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      AppLocalizations.of(context).addName,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.small,
+                    ),
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonItem(BuildContext context) {
     final bool isCluster = searchResult.type() == ResultType.faces &&
         searchResult.params.containsKey(kClusterParamId);
 

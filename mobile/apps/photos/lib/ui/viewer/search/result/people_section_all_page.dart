@@ -467,6 +467,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       minClusterSize: kMinimumClusterSizeAllFaces,
       showIgnoredOnly: _showingIgnoredPeople,
     );
+    if (!_showingIgnoredPeople && flagService.petEnabled) {
+      allFaces.addAll(await SearchService.instance.getAllPets(null));
+    }
     normalFaces.clear();
     extraFaces.clear();
     if (_showingIgnoredPeople) {

@@ -204,7 +204,11 @@ class _PetsItemWidgetState extends State<PetsItemWidget> {
     EnteTextTheme textTheme,
   ) {
     final l10n = AppLocalizations.of(context);
-    final speciesLabel = info.species == 0 ? l10n.dog : l10n.cat;
+    final speciesLabel = info.species == 0
+        ? l10n.dog
+        : info.species == 1
+            ? l10n.cat
+            : l10n.pet;
 
     return SizedBox(
       width: thumbnailWidth,

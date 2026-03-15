@@ -1,4 +1,5 @@
 pub mod clip;
+pub mod cluster;
 pub mod error;
 pub mod face;
 pub mod onnx;

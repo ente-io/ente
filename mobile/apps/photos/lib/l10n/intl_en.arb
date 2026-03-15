@@ -1508,6 +1508,7 @@
   },
   "faces": "Faces",
   "people": "People",
+  "peopleAndPets": "People & Pets",
   "contents": "Contents",
   "addNew": "Add new",
   "@addNew": {
@@ -2904,5 +2905,8 @@
   "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
   "signUp": "Sign up",
   "dog": "Dog",
-  "cat": "Cat"
+  "cat": "Cat",
+  "pet": "Pet",
+  "moveTo": "Move to",
+  "notThisPet": "Not this pet"
 }

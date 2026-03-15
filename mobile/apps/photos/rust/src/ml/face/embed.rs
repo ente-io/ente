@@ -10,7 +10,7 @@ const FACE_INPUT_HEIGHT: i64 = 112;
 const FACE_INPUT_CHANNELS: i64 = 3;
 
 pub fn run_face_embedding(
-    runtime: &MlRuntime,
+    runtime: &mut MlRuntime,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [FaceResult],
 ) -> MlResult<()> {
@@ -38,7 +38,7 @@ pub fn run_face_embedding(
         input.extend_from_slice(aligned);
     }
 
-    let face_embedding = runtime.face_embedding_session()?;
+    let face_embedding = runtime.face_embedding_session_mut()?;
     let (shape, output) = onnx::run_f32(
         face_embedding,
         input,
