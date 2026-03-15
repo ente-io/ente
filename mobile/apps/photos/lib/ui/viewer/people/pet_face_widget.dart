@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/box.dart";
@@ -14,6 +15,7 @@ import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("PetFaceWidget");
@@ -61,8 +63,20 @@ class _PetFaceWidgetState extends State<PetFaceWidget> {
           await mlDataDB.getCoverPetFaceForCluster(widget.petClusterId);
       if (dbPetFace == null) return null;
 
-      final EnteFile? enteFile =
-          await FilesDB.instance.getAnyUploadedFile(dbPetFace.fileId);
+      EnteFile? enteFile;
+      if (isOfflineMode) {
+        final localId =
+            await OfflineFilesDB.instance.getLocalIdForIntId(dbPetFace.fileId);
+        if (localId != null) {
+          final allFiles = await SearchService.instance.getAllFilesForSearch();
+          enteFile = allFiles.cast<EnteFile?>().firstWhere(
+                (f) => f!.localID == localId,
+                orElse: () => null,
+              );
+        }
+      } else {
+        enteFile = await FilesDB.instance.getAnyUploadedFile(dbPetFace.fileId);
+      }
       if (enteFile == null) return null;
 
       final json = jsonDecode(dbPetFace.detection) as Map<String, dynamic>;

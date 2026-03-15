@@ -1,4 +1,4 @@
-import "dart:math" show min;
+import "dart:math" show min, sqrt;
 import "dart:typed_data" show Float32List, Float64List, Uint8List;
 
 import "package:logging/logging.dart";
@@ -212,18 +212,37 @@ class PetClusteringService {
       await mlDataDB.updatePetFaceIdToClusterId(faceToCluster);
     }
 
+    // Recompute summaries from the final assignments (after feedback
+    // overrides) so that centroids and counts reflect the actual cluster
+    // membership, not the pre-override Rust output.
+    final embeddingByFaceId = <String, Float64List>{};
+    for (final input in clusterInputs) {
+      if (input.faceEmbedding.isNotEmpty) {
+        embeddingByFaceId[input.petFaceId] = Float64List.fromList(
+          input.faceEmbedding,
+        );
+      }
+    }
+
     final clusterSummaries = <String, (Uint8List, int, int)>{};
-    for (final summary in result.summaries) {
-      clusterSummaries[summary.clusterId] = (
-        _doublesToUint8List(summary.centroid),
-        summary.count,
+    final clusterMembers = <String, List<Float64List>>{};
+    for (final entry in faceToCluster.entries) {
+      final emb = embeddingByFaceId[entry.key];
+      if (emb != null) {
+        clusterMembers.putIfAbsent(entry.value, () => []).add(emb);
+      }
+    }
+    for (final entry in clusterMembers.entries) {
+      final centroid = _meanCentroid(entry.value);
+      clusterSummaries[entry.key] = (
+        _doublesToUint8List(centroid),
+        entry.value.length,
         species,
       );
     }
 
-    // The Rust side returns updated summaries for all clusters (existing
-    // and new). Use the full assignment map to detect existing summaries
-    // that are truly stale (no faces assigned).
+    // Delete existing summaries for clusters that no longer have any face
+    // assignments.
     final activeClusterIds = faceToCluster.values.toSet();
     final staleIds = existingSummaries.keys
         .where((id) => !activeClusterIds.contains(id))
@@ -266,6 +285,30 @@ class PetClusteringService {
       floats[i] = values[i];
     }
     return floats.buffer.asUint8List();
+  }
+
+  /// Compute the L2-normalized mean centroid of a list of embeddings.
+  static List<double> _meanCentroid(List<Float64List> embeddings) {
+    final dim = embeddings.first.length;
+    final centroid = Float64List(dim);
+    for (final emb in embeddings) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] += emb[i];
+      }
+    }
+    final n = embeddings.length.toDouble();
+    double norm = 0;
+    for (int i = 0; i < dim; i++) {
+      centroid[i] /= n;
+      norm += centroid[i] * centroid[i];
+    }
+    norm = sqrt(norm);
+    if (norm > 0) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] /= norm;
+      }
+    }
+    return centroid;
   }
 }
 
