@@ -27,6 +27,11 @@ type UserLockerUsage struct {
 	Usage     int64
 }
 
+type StorageWarningCandidate struct {
+	RecipientID  int64
+	IsFamilyPlan bool
+}
+
 // GetUsage  gets the Storage usage of a user
 func (repo *UsageRepository) GetUsage(userID int64) (int64, error) {
 	row := repo.DB.QueryRow(`SELECT storage_consumed FROM usage WHERE user_id = $1`,
@@ -58,6 +63,43 @@ func (repo *UsageRepository) GetCombinedUsage(ctx context.Context, userIDs []int
 		return 0, nil
 	}
 	return totalUsage, stacktrace.Propagate(err, "")
+}
+
+func (repo *UsageRepository) GetStorageWarningCandidates(ctx context.Context, usageThreshold int64) ([]StorageWarningCandidate, error) {
+	rows, err := repo.DB.QueryContext(ctx, `
+		SELECT
+			COALESCE(u.family_admin_id, u.user_id) AS recipient_id,
+			u.family_admin_id IS NOT NULL AS is_family_plan
+		FROM users u
+		INNER JOIN usage us
+			ON us.user_id = u.user_id
+		WHERE
+			us.storage_consumed > $1
+			AND u.encrypted_email IS NOT NULL
+		ORDER BY recipient_id
+	`, usageThreshold)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to fetch storage warning candidates")
+	}
+	defer rows.Close()
+
+	candidates := make([]StorageWarningCandidate, 0)
+	seenRecipients := make(map[int64]struct{})
+	for rows.Next() {
+		var candidate StorageWarningCandidate
+		if err := rows.Scan(&candidate.RecipientID, &candidate.IsFamilyPlan); err != nil {
+			return nil, stacktrace.Propagate(err, "failed to scan storage warning candidate")
+		}
+		if _, ok := seenRecipients[candidate.RecipientID]; ok {
+			continue
+		}
+		seenRecipients[candidate.RecipientID] = struct{}{}
+		candidates = append(candidates, candidate)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to iterate storage warning candidates")
+	}
+	return candidates, nil
 }
 
 func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64) (*LockerUsage, error) {
