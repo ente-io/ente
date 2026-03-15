@@ -11,6 +11,10 @@
 
 use std::collections::HashMap;
 
+use crate::ml::cluster::{
+    agglomerative_precomputed, dot, l2_norm, median_centroid, renumber_labels, unique_cluster_ids,
+};
+
 // ── Species-specific configuration ──────────────────────────────────────
 
 /// Species identifier for threshold lookup.
@@ -706,104 +710,7 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
     }
 }
 
-// ── Agglomerative clustering (average linkage, precomputed) ─────────────
-
-/// Hierarchical agglomerative clustering with average linkage on a
-/// precomputed distance matrix. Cuts the dendrogram at `threshold`.
-///
-/// Mirrors Python's `sklearn.cluster.AgglomerativeClustering(
-///     metric="precomputed", linkage="average", distance_threshold=threshold)`.
-fn agglomerative_precomputed(dist: &[f32], n: usize, threshold: f32) -> Vec<i32> {
-    if n == 0 {
-        return vec![];
-    }
-    if n == 1 {
-        return vec![0];
-    }
-
-    // Each node starts as its own cluster.
-    // We track which original points belong to each active cluster.
-    let mut clusters: Vec<Option<Vec<usize>>> = (0..n).map(|i| Some(vec![i])).collect();
-    let mut active: Vec<usize> = (0..n).collect();
-
-    // Precompute inter-cluster distances (initially = pairwise distances).
-    // We'll update these using the average-linkage formula on merge.
-    // Store as a flat upper-triangular matrix indexed by cluster ID.
-    let mut cdist: Vec<f32> = dist.to_vec();
-    let cap = n; // max cluster index we'll use (we reuse slots)
-
-    loop {
-        if active.len() < 2 {
-            break;
-        }
-
-        // Find the closest pair of active clusters
-        let mut best_d = f32::INFINITY;
-        let mut best_i = 0;
-        let mut best_j = 0;
-        for ai in 0..active.len() {
-            for aj in (ai + 1)..active.len() {
-                let ci = active[ai];
-                let cj = active[aj];
-                let d = cdist[ci * cap + cj];
-                if d < best_d {
-                    best_d = d;
-                    best_i = ai;
-                    best_j = aj;
-                }
-            }
-        }
-
-        // Stop if the closest pair exceeds the threshold
-        if best_d > threshold {
-            break;
-        }
-
-        let ci = active[best_i];
-        let cj = active[best_j];
-
-        let size_i = clusters[ci].as_ref().unwrap().len();
-        let size_j = clusters[cj].as_ref().unwrap().len();
-        let merged_size = size_i + size_j;
-
-        // Update distances from the merged cluster to all other active clusters
-        // using the average-linkage formula:
-        //   d(i∪j, k) = (size_i * d(i,k) + size_j * d(j,k)) / (size_i + size_j)
-        for &ck in &active {
-            if ck == ci || ck == cj {
-                continue;
-            }
-            let d_ik = cdist[ci.min(ck) * cap + ci.max(ck)];
-            let d_jk = cdist[cj.min(ck) * cap + cj.max(ck)];
-            let new_d = (size_i as f32 * d_ik + size_j as f32 * d_jk) / merged_size as f32;
-            // Store in ci's slot (ci will be the surviving cluster)
-            let (lo, hi) = (ci.min(ck), ci.max(ck));
-            cdist[lo * cap + hi] = new_d;
-            cdist[hi * cap + lo] = new_d;
-        }
-
-        // Merge cj into ci
-        let cj_members = clusters[cj].take().unwrap();
-        clusters[ci].as_mut().unwrap().extend(cj_members);
-
-        // Remove cj from active list
-        active.remove(best_j);
-    }
-
-    // Assign labels: each active cluster gets a contiguous label
-    let mut labels = vec![-1i32; n];
-    let mut next_label = 0i32;
-    for &ci in &active {
-        if let Some(members) = &clusters[ci] {
-            for &m in members {
-                labels[m] = next_label;
-            }
-            next_label += 1;
-        }
-    }
-
-    labels
-}
+// Agglomerative clustering imported from crate::ml::cluster
 
 // ── HDBSCAN implementation (precomputed distance matrix) ────────────────
 
@@ -1031,44 +938,8 @@ fn find_root(parent: &[usize], mut x: usize) -> usize {
     x
 }
 
-// ── Helper functions ────────────────────────────────────────────────────
-
-fn dot(a: &[f32], b: &[f32]) -> f32 {
-    a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
-}
-
-fn l2_norm(v: &[f32]) -> f32 {
-    dot(v, v).sqrt()
-}
-
-fn normalize(v: &mut [f32]) {
-    let n = l2_norm(v);
-    if n > 1e-8 {
-        for x in v.iter_mut() {
-            *x /= n;
-        }
-    }
-}
-
-/// Compute L2-normalized median centroid from a list of embeddings.
-fn median_centroid(embs: &[&Vec<f32>], dim: usize) -> Vec<f32> {
-    if embs.is_empty() {
-        return vec![0.0; dim];
-    }
-    let mut centroid = vec![0.0f32; dim];
-    for d in 0..dim {
-        let mut vals: Vec<f32> = embs.iter().map(|e| e[d]).collect();
-        vals.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        let mid = vals.len() / 2;
-        centroid[d] = if vals.len() % 2 == 0 {
-            (vals[mid - 1] + vals[mid]) / 2.0
-        } else {
-            vals[mid]
-        };
-    }
-    normalize(&mut centroid);
-    centroid
-}
+// Helper functions (dot, l2_norm, normalize, median_centroid) imported
+// from crate::ml::cluster
 
 fn compute_face_centroids(
     inputs: &[PetClusterInput],
@@ -1108,33 +979,7 @@ fn compute_face_centroids(
     centroids
 }
 
-fn unique_cluster_ids(labels: &[i32]) -> Vec<i32> {
-    let mut ids: Vec<i32> = labels
-        .iter()
-        .copied()
-        .filter(|&l| l >= 0)
-        .collect::<std::collections::HashSet<_>>()
-        .into_iter()
-        .collect();
-    ids.sort();
-    ids
-}
-
-fn renumber_labels(labels: &mut [i32]) {
-    let unique = unique_cluster_ids(labels);
-    let mapping: HashMap<i32, i32> = unique
-        .iter()
-        .enumerate()
-        .map(|(new, &old)| (old, new as i32))
-        .collect();
-    for label in labels.iter_mut() {
-        if *label >= 0 {
-            if let Some(&new) = mapping.get(label) {
-                *label = new;
-            }
-        }
-    }
-}
+// unique_cluster_ids and renumber_labels imported from crate::ml::cluster
 
 fn build_result(
     inputs: &[PetClusterInput],

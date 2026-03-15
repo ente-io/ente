@@ -638,16 +638,4 @@ extension PetClusteringDB on MLDataDB {
       );
     }).toList();
   }
-
-  /// Mark a file as having completed pet indexing at a given ML version.
-  Future<void> markPetIndexed(int fileId, int mlVersion) async {
-    final db = await asyncDB;
-    await db.execute(
-      '''INSERT INTO $petIndexedFilesTable ($fileIDColumn, $mlVersionColumn)
-         VALUES (?, ?)
-         ON CONFLICT($fileIDColumn) DO UPDATE SET
-           $mlVersionColumn = excluded.$mlVersionColumn''',
-      [fileId, mlVersion],
-    );
-  }
 }

@@ -324,16 +324,3 @@ CREATE TABLE IF NOT EXISTS $notPetFeedbackTable (
   PRIMARY KEY($clusterIDColumn, $petFaceIDColumn)
 );
 ''';
-
-// ── Pet Indexing Tracking Table ──
-
-const petIndexedFilesTable = 'pet_indexed_files';
-
-const createPetIndexedFilesTable = '''
-CREATE TABLE IF NOT EXISTS $petIndexedFilesTable (
-  $fileIDColumn INTEGER NOT NULL PRIMARY KEY,
-  $mlVersionColumn INTEGER NOT NULL DEFAULT -1
-);
-''';
-
-const dropPetIndexedFilesTable = 'DROP TABLE IF EXISTS $petIndexedFilesTable';

@@ -106,8 +106,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createPetBodiesTable,
     createPetFaceVectorIdMappingTable,
     createPetBodyVectorIdMappingTable,
-    createPetIndexedFilesTable,
-    dropPetIndexedFilesTable,
     dropPetFaceClustersTable,
     dropPetClusterSummaryTable,
     dropPetFacesTable, // 23: recreate with UNIQUE faceVectorId
