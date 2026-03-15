@@ -6,26 +6,37 @@ import "dart:ui";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/events/resume_video_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/memory_share_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
+import "package:photos/ui/components/base_bottom_sheet.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -152,8 +163,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
   AnimationController? _zoomAnimationController;
-  final ValueNotifier<Duration> durationNotifier =
-      ValueNotifier(const Duration(seconds: 5));
+  final ValueNotifier<Duration> durationNotifier = ValueNotifier(
+    const Duration(seconds: 5),
+  );
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
@@ -169,24 +181,23 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
-    hasPointerOnScreenNotifier.addListener(
-      _hasPointerListener,
+    hasPointerOnScreenNotifier.addListener(_hasPointerListener);
+
+    _detailSheetEventSubscription = Bus.instance.on<DetailsSheetEvent>().listen(
+      (event) {
+        final inheritedData = FullScreenMemoryData.of(context);
+        if (inheritedData == null) return;
+        final index = inheritedData.indexNotifier.value;
+        final currentFile = inheritedData.memories[index].file;
+
+        if (event.isSameFile(
+          uploadedFileID: currentFile.uploadedFileID,
+          localID: currentFile.localID,
+        )) {
+          _toggleAnimation(pause: event.opened);
+        }
+      },
     );
-
-    _detailSheetEventSubscription =
-        Bus.instance.on<DetailsSheetEvent>().listen((event) {
-      final inheritedData = FullScreenMemoryData.of(context);
-      if (inheritedData == null) return;
-      final index = inheritedData.indexNotifier.value;
-      final currentFile = inheritedData.memories[index].file;
-
-      if (event.isSameFile(
-        uploadedFileID: currentFile.uploadedFileID,
-        localID: currentFile.localID,
-      )) {
-        _toggleAnimation(pause: event.opened);
-      }
-    });
   }
 
   @override
@@ -306,17 +317,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final showStepProgressIndicator = inheritedData.memories.length < 60;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 4.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: SafeArea(
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: strokeFainterDark,
-              width: 1,
-            ),
+            border: Border.all(color: strokeFainterDark, width: 1),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -333,11 +339,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     onTap: () => Navigator.pop(context),
                     child: const Padding(
                       padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: Icon(Icons.close, color: Colors.white, size: 20),
                     ),
                   ),
                   builder: (context, value, child) {
@@ -353,8 +355,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                     totalSteps: inheritedData.memories.length,
                                     currentIndex: value,
                                     selectedColor: Colors.white,
-                                    unselectedColor:
-                                        Colors.white.withValues(alpha: 0.4),
+                                    unselectedColor: Colors.white.withValues(
+                                      alpha: 0.4,
+                                    ),
                                     duration: duration,
                                     animationController: (controller) {
                                       _progressAnimationController = controller;
@@ -375,9 +378,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 final fullScreenState =
                                     context.findAncestorStateOfType<
                                         _FullScreenMemoryState>();
-                                fullScreenState?._toggleAnimation(
-                                  pause: true,
-                                );
+                                fullScreenState?._toggleAnimation(pause: true);
                                 Bus.instance.fire(PauseVideoEvent());
                                 await routeToPage(
                                   context,
@@ -387,9 +388,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                   ),
                                 );
                                 Bus.instance.fire(ResumeVideoEvent());
-                                fullScreenState?._toggleAnimation(
-                                  pause: false,
-                                );
+                                fullScreenState?._toggleAnimation(pause: false);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -429,6 +428,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 ),
                               ),
                             ),
+                            const Spacer(),
                           ],
                         ),
                       ],
@@ -495,8 +495,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             currentFile,
                             autoPlay: false,
                             tagPrefix: "memories",
-                            backgroundDecoration:
-                                const BoxDecoration(color: Colors.transparent),
+                            backgroundDecoration: const BoxDecoration(
+                              color: Colors.transparent,
+                            ),
                             isFromMemories: true,
                             playbackCallback: (shouldEnable, _) {
                               _toggleAnimation(pause: !shouldEnable);
@@ -569,6 +570,9 @@ class BottomIcons extends StatelessWidget {
     final inheritedData = FullScreenMemoryData.of(context)!;
     final fullScreenState =
         context.findAncestorStateOfType<_FullScreenMemoryState>();
+    final memoryTitle =
+        context.findAncestorWidgetOfExactType<FullScreenMemory>()?.title ??
+            AppLocalizations.of(context).memories;
 
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
@@ -608,9 +612,7 @@ class BottomIcons extends StatelessWidget {
                   onFileRemoved: (file) => {
                     inheritedData.removeCurrentMemory.call(),
                     if (inheritedData.memories.isEmpty)
-                      {
-                        Navigator.of(context).pop(),
-                      },
+                      {Navigator.of(context).pop()},
                   },
                 );
                 fullScreenState?._toggleAnimation(pause: false);
@@ -619,10 +621,7 @@ class BottomIcons extends StatelessWidget {
           ]);
           if (!isOfflineMode) {
             rowChildren.add(
-              SizedBox(
-                height: 32,
-                child: FavoriteWidget(currentFile),
-              ),
+              SizedBox(height: 32, child: FavoriteWidget(currentFile)),
             );
           }
         }
@@ -634,12 +633,15 @@ class BottomIcons extends StatelessWidget {
             ),
             onPressed: () async {
               fullScreenState?._toggleAnimation(pause: true);
-              await share(context, [currentFile]);
+              await _showMemoryShareSheet(
+                context,
+                inheritedData,
+                memoryTitle,
+              );
               fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         );
-
         return Container(
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
@@ -724,10 +726,7 @@ class _MemoryBlur extends StatelessWidget {
           switchOutCurve: Curves.easeInExpo,
           child: ImageFiltered(
             key: ValueKey(inheritedData.indexNotifier.value),
-            imageFilter: ImageFilter.blur(
-              sigmaX: 100,
-              sigmaY: 100,
-            ),
+            imageFilter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
             child: ThumbnailWidget(
               currentFile,
               shouldShowSyncStatus: false,
@@ -775,9 +774,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
   void _initAnimation() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(
-        seconds: 5,
-      ),
+      duration: const Duration(seconds: 5),
       animationBehavior: AnimationBehavior.preserve,
     );
 
@@ -792,22 +789,12 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
     _scaleAnimation = Tween<double>(
       begin: startScale,
       end: endScale,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _panAnimation = Tween<Offset>(
       begin: Offset(startX, startY),
       end: Offset(endX, endY),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.scaleController != null) {
       widget.scaleController!(_controller);
@@ -842,5 +829,221 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
               },
             ),
           );
+  }
+}
+
+Future<void> _showMemoryShareSheet(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+  String memoryTitle,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final canShowMemoryShareLinkOption = flagService.enableMemoryShareLink &&
+      !(isOfflineMode && !Configuration.instance.hasConfiguredAccount());
+  final shouldShareLink = await showBaseBottomSheet<bool>(
+    context,
+    backgroundColor: getEnteColorScheme(context).backgroundColour,
+    padding: const EdgeInsets.all(16),
+    title: l10n.shareMemory,
+    child: Builder(
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        return SettingsGroupedCard(
+          children: [
+            if (canShowMemoryShareLinkOption)
+              MenuItemWidgetNew(
+                title: l10n.shareALinkToThisMemory,
+                trailingWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedLink02,
+                  color: colorScheme.textBase,
+                  size: 20,
+                ),
+                borderRadius: 0,
+                onTap: () async {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            MenuItemWidgetNew(
+              title: l10n.shareThisPhoto,
+              trailingWidget: HugeIcon(
+                icon: HugeIcons.strokeRoundedShare04,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              borderRadius: 0,
+              onTap: () async {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    ),
+  );
+  if (!context.mounted || shouldShareLink == null) {
+    return;
+  }
+
+  if (shouldShareLink) {
+    await _showMemoryLinkDetailsSheet(context, inheritedData, memoryTitle);
+    return;
+  }
+
+  final currentFile =
+      inheritedData.memories[inheritedData.indexNotifier.value].file;
+  await share(context, [currentFile]);
+}
+
+Future<void> _showMemoryLinkDetailsSheet(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+  String memoryTitle,
+) async {
+  final shareLinkData = await _getOrCreateMemoryLink(
+    context,
+    inheritedData,
+    memoryTitle,
+  );
+  if (!context.mounted || shareLinkData == null) {
+    return;
+  }
+  final shareUrl = shareLinkData.$1;
+  final int shareId = shareLinkData.$2;
+
+  final l10n = AppLocalizations.of(context);
+  await showBaseBottomSheet<void>(
+    context,
+    title: l10n.shareLink,
+    padding: const EdgeInsets.all(16),
+    child: Builder(
+      builder: (context) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.memoryShareLinkDescription, style: textTheme.smallMuted),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorScheme.fillDark,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                    child: SelectableText(shareUrl, style: textTheme.small),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      tooltip: l10n.copyLink,
+                      iconSize: 20,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: shareUrl));
+                        if (context.mounted) {
+                          showShortToast(context, l10n.linkCopiedToClipboard);
+                        }
+                      },
+                      icon: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCopy01,
+                        color: colorScheme.textBase,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: l10n.shareLink,
+              shouldSurfaceExecutionStates: false,
+              onTap: () async {
+                await shareText(shareUrl, context: context);
+              },
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ButtonWidgetV2(
+                buttonType: ButtonTypeV2.critical,
+                labelText: l10n.deleteLink,
+                onTap: () async {
+                  final shouldDelete = await showAlertBottomSheet<bool>(
+                    context,
+                    title: l10n.deleteLinkQuestion,
+                    message: l10n.deleteMemoryLinkMessage,
+                    assetPath: "assets/warning-grey.png",
+                    buttons: [
+                      ButtonWidgetV2(
+                        buttonType: ButtonTypeV2.critical,
+                        labelText: l10n.deleteLink,
+                        onTap: () async {
+                          try {
+                            await MemoryShareService.instance.deleteMemoryShare(
+                              shareId,
+                            );
+                            if (context.mounted) {
+                              showShortToast(
+                                context,
+                                l10n.linkDeletedSuccessfully,
+                              );
+                              Navigator.of(context).pop(true);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              showShortToast(context, l10n.somethingWentWrong);
+                              Navigator.of(context).pop(false);
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                  if (shouldDelete != true) {
+                    return;
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+Future<(String, int)?> _getOrCreateMemoryLink(
+  BuildContext context,
+  FullScreenMemoryData inheritedData,
+  String memoryTitle,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final dialog = createProgressDialog(context, l10n.creatingLink);
+  await dialog.show();
+  try {
+    final normalizedTitle = memoryTitle.trim();
+    final shareLinkData =
+        await MemoryShareService.instance.getOrCreateMemoryLink(
+      memories: inheritedData.memories,
+      title: normalizedTitle.isNotEmpty ? normalizedTitle : l10n.memories,
+    );
+    await dialog.hide();
+    return shareLinkData;
+  } catch (e) {
+    await dialog.hide();
+    if (context.mounted) {
+      await showGenericErrorBottomSheet(context: context, error: e);
+    }
+    return null;
   }
 }
