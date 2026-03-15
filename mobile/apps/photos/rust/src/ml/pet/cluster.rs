@@ -332,11 +332,10 @@ pub fn run_pet_clustering_incremental(
         }
     }
 
-    // Compute centroids for newly formed clusters
+    // Recompute centroids for all clusters (existing and new). The Dart
+    // caller sends every face as input, so the assignments are comprehensive
+    // and centroids must reflect the current full membership.
     for cluster_id in result.cluster_counts.keys() {
-        if existing_centroids_face.contains_key(cluster_id) {
-            continue; // Already has a centroid
-        }
         let members: Vec<usize> = new_inputs
             .iter()
             .enumerate()

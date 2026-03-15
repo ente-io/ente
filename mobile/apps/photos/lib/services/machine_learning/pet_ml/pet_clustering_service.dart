@@ -221,21 +221,11 @@ class PetClusteringService {
       );
     }
 
-    // In incremental mode the Rust side only returns summaries for newly
-    // formed or modified clusters. Merge with existing summaries so that
-    // still-active clusters are not mistakenly treated as stale.
-    final mergedSummaries = <String, (Uint8List, int, int)>{
-      ...existingSummaries,
-      ...clusterSummaries,
-    };
-
-    // Collect IDs actually referenced by assignments so we can detect
-    // clusters that no longer have any faces assigned.
+    // The Rust side returns updated summaries for all clusters (existing
+    // and new). Use the full assignment map to detect existing summaries
+    // that are truly stale (no faces assigned).
     final activeClusterIds = faceToCluster.values.toSet();
-
-    // Delete summaries for clusters that exist in the DB but are no longer
-    // referenced by any face assignment.
-    final staleIds = mergedSummaries.keys
+    final staleIds = existingSummaries.keys
         .where((id) => !activeClusterIds.contains(id))
         .toList();
     for (final staleId in staleIds) {

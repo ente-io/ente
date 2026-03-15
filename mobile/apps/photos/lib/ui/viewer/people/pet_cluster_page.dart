@@ -300,9 +300,10 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     final clusters = await mlDataDB.getAllPetClustersWithInfo();
-    // Filter out current cluster
-    final otherClusters =
-        clusters.where((c) => c.$1 != widget.clusterId).toList();
+    // Filter out current cluster and restrict to same species
+    final otherClusters = clusters
+        .where((c) => c.$1 != widget.clusterId && c.$2 == widget.species)
+        .toList();
 
     if (!mounted) return;
 
