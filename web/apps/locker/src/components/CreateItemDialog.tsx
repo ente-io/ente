@@ -40,6 +40,10 @@ import { isCollectionOwner, visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
 
+interface LocalUser {
+    id: number;
+}
+
 const CREATABLE_TYPES: {
     type: CreateOption;
     labelKey: string;
@@ -111,7 +115,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     editItem,
 }) => {
     const isEditMode = !!editItem;
-    const currentUserID = ensureLocalUser().id;
+    const currentUserID = (ensureLocalUser as unknown as () => LocalUser)().id;
     const displayCollections = useMemo(
         () =>
             visibleLockerCollections(collections).filter(
@@ -137,21 +141,26 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
+    const editCollectionID = editItem?.collectionID ?? null;
     const selectedType =
         selectedOption && selectedOption !== "file"
             ? (selectedOption as LockerItemType)
             : null;
+    const displayCollectionsRef = useRef(displayCollections);
 
+    displayCollectionsRef.current = displayCollections;
+
+    // Keep this stable so collection refreshes do not look like dialog resets.
     const normalizeSelectedCollectionID = useCallback(
         (collectionID: number | null | undefined) =>
             collectionID !== null &&
             collectionID !== undefined &&
-            displayCollections.some(
+            displayCollectionsRef.current.some(
                 (collection) => collection.id === collectionID,
             )
                 ? collectionID
                 : null,
-        [displayCollections],
+        [],
     );
 
     useEffect(() => {
@@ -162,7 +171,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setSelectedOption(editItem?.type ?? null);
         setSelectedCollectionID(
             isEditMode
-                ? (editItem?.collectionID ?? null)
+                ? editCollectionID
                 : normalizeSelectedCollectionID(defaultCollectionID),
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
@@ -171,6 +180,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setError(null);
     }, [
         defaultCollectionID,
+        editCollectionID,
         editItem,
         isEditMode,
         normalizeSelectedCollectionID,
