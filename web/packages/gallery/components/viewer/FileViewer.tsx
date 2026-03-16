@@ -1450,23 +1450,22 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return null;
         });
     }, []);
+
     // Callback invoked when the download action is triggered by activating the
     // download menu item in the more menu.
-    //
-    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
-    const handleDownloadMenuAction = () => {
+    const handleDownloadMenuAction = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        onDownload!(activeAnnotatedFile!.file);
-    };
+        if (!activeAnnotatedFile || !onDownload) return;
+        onDownload(activeAnnotatedFile.file);
+    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onDownload]);
 
     // Callback invoked when the send link action is triggered by activating the
     // send link menu item in the more menu.
-    //
-    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
-    const handleSendLinkMenuAction = () => {
+    const handleSendLinkMenuAction = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        onSendLink!(activeAnnotatedFile!.file);
-    };
+        if (!activeAnnotatedFile || !onSendLink) return;
+        onSendLink(activeAnnotatedFile.file);
+    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onSendLink]);
 
     const handleViewerContextMenu = useCallback(
         (event: MouseEvent) => {
@@ -1479,6 +1478,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             event.preventDefault();
             handleMoreMenuCloseIfNeeded();
+
+            if (
+                event.clientX === 0 &&
+                event.clientY === 0 &&
+                event.currentTarget instanceof Element &&
+                document.activeElement instanceof Element &&
+                event.currentTarget.contains(document.activeElement)
+            ) {
+                const { bottom, left } =
+                    document.activeElement.getBoundingClientRect();
+                setContextMenuPosition({ top: bottom, left });
+                return;
+            }
+
             setContextMenuPosition({ top: event.clientY, left: event.clientX });
         },
         [handleMoreMenuCloseIfNeeded],
