@@ -1,0 +1,18 @@
+{
+  "account": "Konto",
+  "unlock": "Lås opp",
+  "recoveryKey": "Gjenopprettingsnøkkel",
+  "onBoardingGetStarted": "Kom i gang",
+  "setupFirstAccount": "Sett opp din første konto",
+  "allTabEmptyHint": "Ingenting her ennå. Trykk + for å legge til en kode eller åpne papirkurven for å gjenopprette ett.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
+  "copyEmailAction": "Kopier e-postadresse",
+  "exportLogsAction": "Eksporter logg",
+  "reportABug": "Meld fra om en feil",
+  "crashAndErrorReporting": "Krasj- og feilrapportering",
+  "reportBug": "Meld fra om feil",
+  "searchHint": "Søk …",
+  "search": "Søk"
+}

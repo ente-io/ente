@@ -130,6 +130,21 @@ Open `Settings > Preferences > Machine learning` and toggle ON face recognition 
 - ✅ ML only works on desktop and mobile apps
 - Initial indexing can take time depending on library size
 
+### Why is the People section empty even though Machine Learning shows 100%? {#people-section-empty}
+
+If Machine Learning shows 100% on both Android and Desktop, the People
+section should normally populate shortly after.
+
+Try these steps first:
+
+1. Refresh the desktop app using `Ctrl + F`
+2. Log out and log back in
+3. Check if People start showing up
+
+If the People section is still empty, please
+[send logs](/photos/faq/troubleshooting#sharing-logs) from your desktop app
+so we can investigate further.
+
 ### How do I enable face recognition? {#enable-face-recognition}
 
 Face recognition requires enabling **Machine Learning** first:

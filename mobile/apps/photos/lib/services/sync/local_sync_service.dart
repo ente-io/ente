@@ -239,7 +239,9 @@ class LocalSyncService {
     }
 
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
-    return hasUnsyncedFiles;
+    // syncAll can repair mappings without inserting new local files.
+    // We still need the follow-up remote sync to promote those entries.
+    return hasUnsyncedFiles || hasAnyMappingChanged;
   }
 
   Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
@@ -394,7 +396,7 @@ class LocalSyncService {
       _logger.info(
         "track ${updatedLocalIDs.length}/ $updateCount files due to modification change",
       );
-      if (updatedLocalIDs.isEmpty) {
+      if (updatedLocalIDs.isNotEmpty) {
         await FileUpdationDB.instance.insertMultiple(
           updatedLocalIDs,
           FileUpdationDB.modificationTimeUpdated,

@@ -182,3 +182,86 @@ CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
   $offlineFileKeyLocalIdColumn TEXT NOT NULL UNIQUE
 );
 ''';
+
+// ── PET RECOGNITION TABLES ─────────────────────────────────────────────
+
+// Shared column names
+const petFaceIDColumn = 'pet_face_id';
+const petBodyIDColumn = 'pet_body_id';
+const speciesColumn = 'species';
+const detectionColumn = 'detection';
+const faceVectorIdColumn = 'face_vector_id';
+const bodyVectorIdColumn = 'body_vector_id';
+
+// ── Pet Faces Table ──
+
+const petFacesTable = 'pet_faces';
+
+const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
+  $fileIDColumn INTEGER NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL UNIQUE,
+  $faceDetectionColumn TEXT NOT NULL,
+  $faceVectorIdColumn INTEGER UNIQUE,
+  $speciesColumn INTEGER NOT NULL,
+  $faceScore REAL NOT NULL,
+  $imageHeight INTEGER NOT NULL DEFAULT 0,
+  $imageWidth INTEGER NOT NULL DEFAULT 0,
+  $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
+  PRIMARY KEY($fileIDColumn, $petFaceIDColumn)
+);
+''';
+
+const deletePetFacesTable = 'DELETE FROM $petFacesTable';
+
+// ── Pet Bodies Table ──
+
+const petBodiesTable = 'pet_bodies';
+// Alias so pet-body code doesn't reference the face-specific constant name.
+// The underlying SQL column is the same ('score').
+const bodyScore = faceScore;
+
+const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
+  $fileIDColumn INTEGER NOT NULL,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE,
+  $detectionColumn TEXT NOT NULL,
+  $bodyVectorIdColumn INTEGER UNIQUE,
+  $speciesColumn INTEGER NOT NULL,
+  $bodyScore REAL NOT NULL,
+  $imageHeight INTEGER NOT NULL DEFAULT 0,
+  $imageWidth INTEGER NOT NULL DEFAULT 0,
+  $mlVersionColumn INTEGER NOT NULL DEFAULT -1,
+  PRIMARY KEY($fileIDColumn, $petBodyIDColumn)
+);
+''';
+
+const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
+
+// ── Vector ID Mapping Tables ──
+
+/// Maps pet_face_id (string) → integer for face usearch index
+const petFaceVectorIdMappingTable = 'pet_face_vector_id_map';
+const petFaceVectorIdColumn = 'pet_face_vector_id';
+
+const createPetFaceVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petFaceVectorIdMappingTable (
+  $petFaceVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $petFaceIDColumn TEXT NOT NULL UNIQUE
+);
+''';
+
+const deletePetFaceVectorIdMappingTable =
+    'DELETE FROM $petFaceVectorIdMappingTable';
+
+/// Maps pet_body_id (string) → integer for body usearch index
+const petBodyVectorIdMappingTable = 'pet_body_vector_id_map';
+const petBodyVectorIdColumn = 'pet_body_vector_id';
+
+const createPetBodyVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petBodyVectorIdMappingTable (
+  $petBodyVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $petBodyIDColumn TEXT NOT NULL UNIQUE
+);
+''';
+
+const deletePetBodyVectorIdMappingTable =
+    'DELETE FROM $petBodyVectorIdMappingTable';

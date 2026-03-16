@@ -120,6 +120,7 @@ impl From<core_auth::AuthError> for ApiError {
             E::IncorrectPassword => "incorrect_password",
             E::IncorrectRecoveryKey => "incorrect_recovery_key",
             E::InvalidKeyAttributes => "invalid_key_attributes",
+            E::InsufficientMemory => "insufficient_memory",
             E::MissingField(_) => "missing_field",
             E::Crypto(_) => "crypto",
             E::Decode(_) => "decode",

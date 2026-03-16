@@ -400,7 +400,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
         setManualLon(null);
     };
 
-    const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    const urlTemplate = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
         '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
