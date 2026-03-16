@@ -100,7 +100,7 @@ Future<void> deleteFilesFromEverywhere(
           .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
     }
   }
-  if (deletedLocalIDs.isNotEmpty) {
+  if (flagService.cleanupStaleDeviceFileMappings && deletedLocalIDs.isNotEmpty) {
     await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedLocalIDs);
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -257,7 +257,7 @@ Future<void> deleteFilesOnDeviceOnly(
       }
     }
   }
-  if (deletedLocalIDs.isNotEmpty) {
+  if (flagService.cleanupStaleDeviceFileMappings && deletedLocalIDs.isNotEmpty) {
     await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedLocalIDs);
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
@@ -397,7 +397,9 @@ Future<bool> deleteLocalFiles(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      if (flagService.cleanupStaleDeviceFileMappings) {
+        await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      }
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -472,7 +474,9 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      if (flagService.cleanupStaleDeviceFileMappings) {
+        await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      }
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -548,7 +552,9 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      if (flagService.cleanupStaleDeviceFileMappings) {
+        await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
+      }
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),

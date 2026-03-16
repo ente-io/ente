@@ -354,7 +354,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             _logger.info("Deleting file " + widget.file.tag);
             final localID = widget.file.localID;
             await FilesDB.instance.deleteLocalFile(widget.file);
-            if (localID != null) {
+            if (flagService.cleanupStaleDeviceFileMappings && localID != null) {
               await FilesDB.instance.deleteDeviceFilesByLocalIDs([localID]);
             }
             Bus.instance.fire(

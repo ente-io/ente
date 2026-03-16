@@ -106,6 +106,8 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
+  bool get cleanupStaleDeviceFileMappings => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();

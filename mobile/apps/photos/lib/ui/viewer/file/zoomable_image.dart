@@ -18,6 +18,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import 'package:photos/service_locator.dart';
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -366,7 +367,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
           } else {
             final localID = _photo.localID;
             FilesDB.instance.deleteLocalFile(_photo);
-            if (localID != null) {
+            if (flagService.cleanupStaleDeviceFileMappings && localID != null) {
               unawaited(
                 FilesDB.instance.deleteDeviceFilesByLocalIDs([localID]),
               );
