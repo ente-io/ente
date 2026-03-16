@@ -488,7 +488,7 @@ class RemoteSyncService {
         await _db.insertMultiple(newFilesToInsert);
         final int missingFileRows =
             isInternalUser ? postFilterCount - fileFoundForLocalIDs.length : 0;
-        if (isInternalUser && missingFileRows > 0) {
+        if (missingFileRows > 0) {
           final sample =
               localIDsToSync.difference(fileFoundForLocalIDs).take(3);
           _logger.internalWarning(
