@@ -333,18 +333,18 @@ export const DownloadStatusNotifications: React.FC<
                             </StopDownloadSubtitle>
                         </StopDownloadTitleSection>
                         <StopDownloadButtonsSection>
-                            <StopDownloadSecondaryButton
-                                fullWidth
-                                onClick={closeCancelDownloadDialog}
-                            >
-                                {t("no")}
-                            </StopDownloadSecondaryButton>
                             <StopDownloadPrimaryButton
                                 fullWidth
                                 onClick={handleConfirmCancelDownload}
                             >
                                 {t("yes_stop_downloads")}
                             </StopDownloadPrimaryButton>
+                            <StopDownloadSecondaryButton
+                                fullWidth
+                                onClick={closeCancelDownloadDialog}
+                            >
+                                {t("no")}
+                            </StopDownloadSecondaryButton>
                         </StopDownloadButtonsSection>
                     </StopDownloadDialogWrapper>
                 </StyledStopDownloadDialog>
