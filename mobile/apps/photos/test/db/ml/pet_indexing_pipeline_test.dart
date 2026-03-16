@@ -19,7 +19,7 @@ void main() {
       expect(dummy.fileId, 42);
       expect(dummy.petFaceId, '42_pet_0_0_0_0');
       expect(dummy.detection, '{}');
-      expect(dummy.faceVectorId, -1);
+      expect(dummy.faceVectorId, isNull);
       expect(dummy.species, -1);
       expect(dummy.faceScore, 0.0);
       expect(dummy.imageHeight, 0);
@@ -40,7 +40,7 @@ void main() {
     test('dummy petFaceId does not collide with real detection IDs', () {
       // Real IDs use detection coordinates like "42_pet_0.12_0.34_0.56_0.78"
       final dummy = DBPetFace.empty(42);
-      final realId = '42_pet_0.12_0.34_0.56_0.78';
+      const realId = '42_pet_0.12_0.34_0.56_0.78';
 
       expect(dummy.petFaceId, isNot(equals(realId)));
     });
@@ -397,7 +397,7 @@ void main() {
           fileId: 80,
           petFaceId: '80_pet_real',
           detection: '{"box":[0.1,0.2,0.3,0.4]}',
-          faceVectorId: -1,
+          faceVectorId: null,
           species: 1,
           faceScore: 0.85,
           imageHeight: 100,
