@@ -5,6 +5,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import StarIcon from "@mui/icons-material/Star";
@@ -17,6 +18,8 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
+    Menu,
+    MenuItem,
     Snackbar,
     Stack,
     TextField,
@@ -50,6 +53,7 @@ import {
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
 import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
+import { lockerDialogPaperSx } from "./lockerDialogStyles";
 
 interface ItemListProps {
     collections: LockerCollection[];
@@ -113,6 +117,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [homeSelectedCollectionIDs, setHomeSelectedCollectionIDs] = useState<
         number[]
     >([]);
+    const [collectionFilterAnchorEl, setCollectionFilterAnchorEl] =
+        useState<HTMLElement | null>(null);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedItemIDs, setSelectedItemIDs] = useState<number[]>([]);
     const [bulkDownloading, setBulkDownloading] = useState(false);
@@ -349,6 +355,15 @@ export const ItemList: React.FC<ItemListProps> = ({
     }, []);
     const clearHomeCollectionSelection = useCallback(() => {
         setHomeSelectedCollectionIDs([]);
+    }, []);
+    const openCollectionFilterMenu = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            setCollectionFilterAnchorEl(event.currentTarget);
+        },
+        [],
+    );
+    const closeCollectionFilterMenu = useCallback(() => {
+        setCollectionFilterAnchorEl(null);
     }, []);
     const startSelectionModeForItem = useCallback((item: LockerItem) => {
         setSelectionMode(true);
@@ -626,58 +641,29 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         maxWidth: contentMaxWidth,
                                         mx: "auto",
                                         alignItems: "center",
-                                        gap: 1,
+                                        gap: 0.75,
                                         mt: -0.25,
                                         mb: 1.75,
+                                        minWidth: 0,
                                     }}
                                 >
-                                    <CollectionChipFilters
-                                        collections={displayCollections}
-                                        selectedCollectionIDs={
-                                            homeSelectedCollectionIDs
+                                    <CollectionFilterChip
+                                        selected={
+                                            homeSelectedCollectionIDs.length > 0
                                         }
-                                        onToggleCollection={
-                                            toggleHomeCollection
-                                        }
+                                        onClick={openCollectionFilterMenu}
                                     />
-                                    {homeSelectedCollectionIDs.length > 0 && (
-                                        <Tooltip title={t("clearSelection")}>
-                                            <IconButton
-                                                size="small"
-                                                onClick={
-                                                    clearHomeCollectionSelection
-                                                }
-                                                sx={(theme) => ({
-                                                    width: 32,
-                                                    height: 32,
-                                                    color: "text.muted",
-                                                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                                                    backgroundColor:
-                                                        "rgba(255, 255, 255, 0.035)",
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "rgba(255, 255, 255, 0.065)",
-                                                    },
-                                                    ...theme.applyStyles(
-                                                        "light",
-                                                        {
-                                                            border: "1px solid rgba(17, 24, 39, 0.08)",
-                                                            backgroundColor:
-                                                                "#FFFFFF",
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    "#FFFFFF",
-                                                            },
-                                                        },
-                                                    ),
-                                                })}
-                                            >
-                                                <ClearRoundedIcon
-                                                    sx={{ fontSize: 18 }}
-                                                />
-                                            </IconButton>
-                                        </Tooltip>
-                                    )}
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <CollectionChipFilters
+                                            collections={displayCollections}
+                                            selectedCollectionIDs={
+                                                homeSelectedCollectionIDs
+                                            }
+                                            onToggleCollection={
+                                                toggleHomeCollection
+                                            }
+                                        />
+                                    </Box>
                                 </Stack>
                             )}
 
@@ -1077,6 +1063,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             />
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={restoreItem !== null}
                 onClose={() => setRestoreItem(null)}
                 fullWidth
@@ -1126,6 +1113,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             </Dialog>
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={renameCollectionID !== null}
                 onClose={() => setRenameCollectionID(null)}
                 fullWidth
@@ -1160,6 +1148,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             </Dialog>
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={createCollectionOpen}
                 onClose={() => {
                     if (!creatingCollection) {
@@ -1221,6 +1210,158 @@ export const ItemList: React.FC<ItemListProps> = ({
                     </Stack>
                 </DialogContent>
             </Dialog>
+
+            <Menu
+                anchorEl={collectionFilterAnchorEl}
+                open={!!collectionFilterAnchorEl}
+                onClose={closeCollectionFilterMenu}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            mt: 1,
+                            width: "fit-content",
+                            minWidth: 0,
+                            maxWidth: "calc(100vw - 32px)",
+                            borderRadius: "18px",
+                            overflow: "hidden",
+                        },
+                    },
+                }}
+            >
+                <Box
+                    sx={{
+                        px: 1,
+                        pt: 0,
+                        pb: 0,
+                        width: "fit-content",
+                    }}
+                >
+                    {displayCollections.map((collection) => {
+                        const isSelected = homeSelectedCollectionIDs.includes(
+                            collection.id,
+                        );
+
+                        return (
+                            <MenuItem
+                                key={collection.id}
+                                onClick={() =>
+                                    toggleHomeCollection(collection.id)
+                                }
+                                sx={(theme) => ({
+                                    gap: 1.25,
+                                    px: 1,
+                                    py: 1,
+                                    my: "6px",
+                                    borderRadius: "14px",
+                                    alignItems: "center",
+                                    width: "auto",
+                                    color: isSelected
+                                        ? "primary.main"
+                                        : "text.base",
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.10)"
+                                        : "transparent",
+                                    "&:hover": {
+                                        backgroundColor: isSelected
+                                            ? "rgba(16, 113, 255, 0.14)"
+                                            : theme.vars.palette.fill.faint,
+                                    },
+                                })}
+                            >
+                                <CheckCircleRoundedIcon
+                                    sx={{
+                                        fontSize: 20,
+                                        color: isSelected
+                                            ? "primary.main"
+                                            : "text.faint",
+                                        opacity: isSelected ? 1 : 0.22,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                                <Box sx={{ minWidth: 0, flex: 1 }}>
+                                    <Typography
+                                        variant="body"
+                                        sx={{
+                                            fontWeight: isSelected ? 700 : 500,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 0.75,
+                                            minWidth: 0,
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            {collection.name}
+                                        </Box>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                color: "text.muted",
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            {"·"}
+                                        </Box>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                color: "text.muted",
+                                                fontWeight: 500,
+                                                flexShrink: 0,
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {new Intl.NumberFormat().format(
+                                                collection.items.length,
+                                            )}
+                                        </Box>
+                                    </Typography>
+                                </Box>
+                            </MenuItem>
+                        );
+                    })}
+                    {homeSelectedCollectionIDs.length > 0 && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                pt: "12px",
+                                pb: 0,
+                            }}
+                        >
+                            <Button
+                                color="secondary"
+                                onClick={clearHomeCollectionSelection}
+                                sx={{
+                                    minWidth: "auto",
+                                    px: 1,
+                                    py: 0.5,
+                                    backgroundColor: "transparent",
+                                    color: "text.muted",
+                                    fontSize: "0.8125rem",
+                                    fontWeight: 500,
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "3px",
+                                    "&:hover": {
+                                        backgroundColor: "transparent",
+                                        color: "text.secondary",
+                                    },
+                                }}
+                            >
+                                {t("clearSelection")}
+                            </Button>
+                        </Box>
+                    )}
+                </Box>
+            </Menu>
 
             <Snackbar
                 open={feedbackMessage !== null}
@@ -1549,7 +1690,8 @@ const CollectionGrid: React.FC<{
                 width: "100%",
                 maxWidth: contentMaxWidth,
                 mx: "auto",
-                gap: 1.5,
+                display: "grid",
+                gap: 2,
             }}
         >
             {collections.map((collection) => (
@@ -1623,24 +1765,35 @@ const CollectionChipFilters: React.FC<{
                             height: 36,
                             flexShrink: 0,
                             borderRadius: "999px",
-                            fontWeight: 600,
+                            fontWeight: isSelected ? 700 : 600,
                             color: isSelected
-                                ? theme.vars.palette.text.base
+                                ? theme.vars.palette.primary.main
                                 : theme.vars.palette.text.base,
-                            backgroundColor: theme.vars.palette.fill.faint,
+                            backgroundColor: isSelected
+                                ? "rgba(16, 113, 255, 0.10)"
+                                : theme.vars.palette.fill.faint,
                             border: "1px solid transparent",
                             boxShadow: isSelected
                                 ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
                                 : "none",
                             "& .MuiChip-label": { px: 1.5 },
                             "&:hover": {
-                                backgroundColor:
-                                    theme.vars.palette.fill.faintHover,
+                                backgroundColor: isSelected
+                                    ? "rgba(16, 113, 255, 0.14)"
+                                    : theme.vars.palette.fill.faintHover,
                             },
                             ...theme.applyStyles("light", {
-                                backgroundColor: "#FFFFFF",
-                                border: "1px solid rgba(17, 24, 39, 0.06)",
-                                "&:hover": { backgroundColor: "#FFFFFF" },
+                                backgroundColor: isSelected
+                                    ? "rgba(16, 113, 255, 0.10)"
+                                    : "#FFFFFF",
+                                border: isSelected
+                                    ? "1px solid rgba(16, 113, 255, 0.24)"
+                                    : "1px solid rgba(17, 24, 39, 0.06)",
+                                "&:hover": {
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.14)"
+                                        : "#F8FAFC",
+                                },
                             }),
                         })}
                     />
@@ -1648,6 +1801,57 @@ const CollectionChipFilters: React.FC<{
             })}
         </Stack>
     </Box>
+);
+
+const CollectionFilterChip: React.FC<{
+    selected: boolean;
+    onClick: (event: React.MouseEvent<HTMLElement>) => void;
+}> = ({ selected, onClick }) => (
+    <Tooltip title={t("seeAllCollections")}>
+        <Chip
+            clickable
+            icon={<FilterListRoundedIcon sx={{ fontSize: 18 }} />}
+            onClick={onClick}
+            sx={(theme) => ({
+                height: 36,
+                flexShrink: 0,
+                borderRadius: "999px",
+                fontWeight: selected ? 700 : 600,
+                color: selected ? "primary.main" : theme.vars.palette.text.base,
+                backgroundColor: selected
+                    ? "rgba(16, 113, 255, 0.10)"
+                    : theme.vars.palette.fill.faint,
+                border: "1px solid transparent",
+                boxShadow: selected
+                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
+                    : "none",
+                "& .MuiChip-icon": {
+                    color: "inherit",
+                    m: 0,
+                },
+                "& .MuiChip-label": { display: "none" },
+                px: 1.125,
+                "&:hover": {
+                    backgroundColor: selected
+                        ? "rgba(16, 113, 255, 0.14)"
+                        : theme.vars.palette.fill.faintHover,
+                },
+                ...theme.applyStyles("light", {
+                    backgroundColor: selected
+                        ? "rgba(16, 113, 255, 0.10)"
+                        : "#FFFFFF",
+                    border: selected
+                        ? "1px solid rgba(16, 113, 255, 0.24)"
+                        : "1px solid rgba(17, 24, 39, 0.06)",
+                    "&:hover": {
+                        backgroundColor: selected
+                            ? "rgba(16, 113, 255, 0.14)"
+                            : "#F8FAFC",
+                    },
+                }),
+            })}
+        />
+    </Tooltip>
 );
 
 const EmptyState: React.FC<{ title: string; subtitle: string }> = ({
@@ -1680,26 +1884,26 @@ const CollectionCard: React.FC<{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
+                gap: 1.25,
+                px: 1.5,
+                py: 1.25,
                 minHeight: 84,
-                borderRadius: "16px",
+                borderRadius: "18px",
                 backgroundColor:
                     collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.06)"
+                        ? theme.vars.palette.fill.faint
                         : "rgba(255, 255, 255, 0.03)",
                 border: 1,
                 borderStyle: "solid",
                 borderColor:
                     collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.10)"
+                        ? "rgba(255, 255, 255, 0.08)"
                         : "rgba(255, 255, 255, 0.08)",
                 transition: "background-color 0.15s, border-color 0.15s",
                 "&:hover": {
                     backgroundColor:
                         collection.items.length > 0
-                            ? "rgba(255, 255, 255, 0.08)"
+                            ? theme.vars.palette.fill.faintHover
                             : "rgba(255, 255, 255, 0.05)",
                     borderColor: "rgba(255, 255, 255, 0.13)",
                 },
@@ -1724,29 +1928,40 @@ const CollectionCard: React.FC<{
             >
                 <Box
                     sx={{
+                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        backgroundColor: isImportantCollection(collection)
-                            ? "rgba(16, 113, 255, 0.16)"
-                            : "rgba(18, 36, 63, 0.96)",
-                        border: isImportantCollection(collection)
-                            ? "none"
-                            : "1px solid rgba(159, 193, 255, 0.12)",
+                        width: 52,
+                        height: 52,
                         flexShrink: 0,
-                        position: "relative",
                     }}
                 >
-                    {isImportantCollection(collection) ? (
-                        <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
-                    ) : (
-                        <FolderOutlinedIcon
-                            sx={{ fontSize: 18, color: "#D6E5FF" }}
-                        />
-                    )}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            m: "6px",
+                            borderRadius: "12px",
+                            backgroundColor: isImportantCollection(collection)
+                                ? "rgba(16, 113, 255, 0.16)"
+                                : "rgba(18, 36, 63, 0.96)",
+                            border: isImportantCollection(collection)
+                                ? "none"
+                                : "1px solid rgba(159, 193, 255, 0.12)",
+                        }}
+                    >
+                        {isImportantCollection(collection) ? (
+                            <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
+                        ) : (
+                            <FolderOutlinedIcon
+                                sx={{ fontSize: 20, color: "#D6E5FF" }}
+                            />
+                        )}
+                    </Box>
                     {collection.isShared && <SharedCollectionBadge />}
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -1754,8 +1969,8 @@ const CollectionCard: React.FC<{
                         variant="body"
                         sx={{
                             minWidth: 0,
-                            fontWeight: "medium",
-                            lineHeight: 1.3,
+                            fontWeight: "regular",
+                            lineHeight: 1.45,
                         }}
                         noWrap
                     >
@@ -1773,7 +1988,7 @@ const CollectionCard: React.FC<{
             </Stack>
             {(onShare || onRename || onDelete) && (
                 <Box
-                    sx={{ flexShrink: 0 }}
+                    sx={{ flexShrink: 0, ml: 0.25 }}
                     onClick={(event) => event.stopPropagation()}
                 >
                     <CollectionContextMenu

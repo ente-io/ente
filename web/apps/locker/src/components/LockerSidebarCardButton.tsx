@@ -56,10 +56,25 @@ export const LockerSidebarCardButton: React.FC<
                 ),
                 border: "1px solid transparent",
                 ...(selected && {
+                    backgroundColor: "rgba(16, 113, 255, 0.12)",
                     boxShadow: `inset 0 0 0 1px ${theme.vars.palette.accent.main}`,
                     color: "accent.main",
                 }),
-                "&:hover": { backgroundColor: "fill.faint" },
+                "&:hover": {
+                    backgroundColor: selected
+                        ? "rgba(16, 113, 255, 0.16)"
+                        : "fill.faint",
+                },
+                ...theme.applyStyles("light", {
+                    ...(selected && {
+                        backgroundColor: "rgba(16, 113, 255, 0.10)",
+                    }),
+                    "&:hover": {
+                        backgroundColor: selected
+                            ? "rgba(16, 113, 255, 0.14)"
+                            : theme.vars.palette.fill.faint,
+                    },
+                }),
             })}
         >
             {iconNode ? (

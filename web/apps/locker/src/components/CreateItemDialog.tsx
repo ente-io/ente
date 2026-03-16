@@ -22,6 +22,7 @@ import {
     lockerItemIcon,
     lockerItemIconConfig,
 } from "components/lockerItemIcons";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
@@ -303,8 +304,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             slotProps={{
                 paper: {
                     sx: {
+                        ...lockerDialogPaperSx,
                         maxHeight: "min(720px, 90vh)",
-                        borderRadius: "16px",
                         width: "min(100%, 520px)",
                     },
                 },
