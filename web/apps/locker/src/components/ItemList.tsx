@@ -1,4 +1,5 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -85,6 +86,7 @@ interface ItemListProps {
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
     searchTerm: string;
+    onNavigateBack?: () => void;
 }
 
 const contentMaxWidth = 560;
@@ -108,6 +110,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     onCreateCollection,
     onShareCollection,
     searchTerm,
+    onNavigateBack,
 }) => {
     const currentUserID = ensureLocalUser().id;
     const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
@@ -784,6 +787,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerCollectionsCount", {
                                     count: displayCollections.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     onCreateCollection ? (
                                         <Tooltip
@@ -933,6 +937,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     <Stack
                                         direction="row"
@@ -1441,7 +1446,8 @@ const SectionHeader: React.FC<{
     title: string;
     countLabel: string;
     action?: React.ReactNode;
-}> = ({ title, countLabel, action }) => (
+    onBack?: () => void;
+}> = ({ title, countLabel, action, onBack }) => (
     <Stack
         direction="row"
         sx={{
@@ -1451,17 +1457,45 @@ const SectionHeader: React.FC<{
             maxWidth: contentMaxWidth,
             mx: "auto",
             mt: 3,
-            mb: 1.5,
+            mb: 2.25,
         }}
     >
-        <Box>
-            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                {title}
-            </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {countLabel}
-            </Typography>
-        </Box>
+        <Stack
+            direction="row"
+            sx={{ minWidth: 0, gap: 1.5, alignItems: "center" }}
+        >
+            {onBack && (
+                <IconButton
+                    aria-label="Back"
+                    onClick={onBack}
+                    sx={{
+                        alignSelf: "center",
+                        width: 44,
+                        height: 44,
+                        flexShrink: 0,
+                        color: "text.secondary",
+                        border: "1px solid rgba(255, 255, 255, 0.10)",
+                        backgroundColor: "rgba(255, 255, 255, 0.03)",
+                        "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        },
+                    }}
+                >
+                    <ArrowBackRoundedIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+            )}
+            <Box sx={{ minWidth: 0 }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", minWidth: 0 }}
+                >
+                    {title}
+                </Typography>
+                <Typography variant="small" sx={{ color: "text.muted", mt: 1 }}>
+                    {countLabel}
+                </Typography>
+            </Box>
+        </Stack>
         {action}
     </Stack>
 );

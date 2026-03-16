@@ -101,7 +101,13 @@ const hasPaidLockerAccess = (json: {
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
 
-const Page: React.FC = () => {
+const isLockerAppPath = (path: string) =>
+    path === "/" ||
+    path === "/collections" ||
+    path === "/trash" ||
+    path.startsWith("/collection/");
+
+export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
@@ -121,13 +127,6 @@ const Page: React.FC = () => {
     // View mode state
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
     const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
-    const [isTrashView, setIsTrashView] = useState(false);
-    const [isCollectionsView, setIsCollectionsView] = useState(false);
-
-    // Collection filter state
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
@@ -149,6 +148,19 @@ const Page: React.FC = () => {
     );
     const [isDragActive, setIsDragActive] = useState(false);
     const dragDepthRef = useRef(0);
+    const lockerRouteStackRef = useRef<string[]>([]);
+    const isNavigatingBackRef = useRef(false);
+    const routeCollectionID =
+        router.pathname === "/collection/[id]" &&
+        typeof router.query.id === "string"
+            ? Number.parseInt(router.query.id, 10)
+            : null;
+    const selectedCollectionID =
+        routeCollectionID !== null && Number.isFinite(routeCollectionID)
+            ? routeCollectionID
+            : null;
+    const isTrashView = router.pathname === "/trash";
+    const isCollectionsView = router.pathname === "/collections";
 
     const loadUserDetails = useCallback(async () => {
         try {
@@ -204,10 +216,18 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
+        if (router.pathname !== "/locker") {
+            return;
+        }
+
+        void router.replace("/", undefined, { shallow: true });
+    }, [router]);
+
+    useEffect(() => {
         const load = async () => {
             const mk = await masterKeyFromSession();
             if (!mk) {
-                stashRedirect("/locker");
+                stashRedirect(router.asPath || "/");
                 void router.push("/login");
                 return;
             }
@@ -239,26 +259,73 @@ const Page: React.FC = () => {
         void load();
     }, [loadUserDetails, router, logout, showMiniDialog]);
 
-    const handleSelectCollection = useCallback((id: number | null) => {
-        setSelectedCollectionID(id);
-        setIsTrashView(false);
-        setIsCollectionsView(false);
+    useEffect(() => {
+        if (!router.isReady || !isLockerAppPath(router.asPath)) {
+            return;
+        }
+
+        const routeStack = lockerRouteStackRef.current;
+        const currentPath = router.asPath;
+        const lastPath = routeStack[routeStack.length - 1];
+
+        if (isNavigatingBackRef.current) {
+            isNavigatingBackRef.current = false;
+            if (lastPath !== currentPath) {
+                routeStack.push(currentPath);
+            }
+            return;
+        }
+
+        if (lastPath !== currentPath) {
+            routeStack.push(currentPath);
+        }
+    }, [router.asPath, router.isReady]);
+
+    const navigateHome = useCallback(() => {
+        void router.push("/", undefined, { shallow: true });
+    }, [router]);
+
+    const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
-    }, []);
+
+        const routeStack = lockerRouteStackRef.current;
+        if (routeStack.length > 1) {
+            routeStack.pop();
+            isNavigatingBackRef.current = true;
+            router.back();
+            return;
+        }
+
+        if (router.asPath !== "/") {
+            lockerRouteStackRef.current = ["/"];
+            isNavigatingBackRef.current = true;
+            void router.push("/", undefined, { shallow: true });
+        }
+    }, [router]);
+
+    const handleSelectCollection = useCallback(
+        (id: number | null) => {
+            if (id === null) {
+                navigateHome();
+            } else {
+                void router.push(`/collection/${id}`, undefined, {
+                    shallow: true,
+                });
+            }
+            setSidebarOpen(false);
+        },
+        [navigateHome, router],
+    );
 
     const handleSelectCollections = useCallback(() => {
-        setIsCollectionsView(true);
-        setIsTrashView(false);
-        setSelectedCollectionID(null);
+        void router.push("/collections", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const handleSelectTrash = useCallback(() => {
-        setIsTrashView(true);
-        setIsCollectionsView(false);
-        setSelectedCollectionID(null);
+        void router.push("/trash", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const isHomeView =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
@@ -534,6 +601,7 @@ const Page: React.FC = () => {
             if (
                 droppedItems.length > 0 &&
                 (droppedItems.length !== 1 ||
+                    droppedItem === undefined ||
                     droppedItem.kind !== "file" ||
                     droppedItem.webkitGetAsEntry()?.isDirectory)
             ) {
@@ -573,14 +641,14 @@ const Page: React.FC = () => {
                     color: "critical",
                     action: async () => {
                         await deleteCollectionAPI(collectionID);
-                        setSelectedCollectionID(null);
+                        navigateHome();
                         await refreshData();
                         setToast(t("collectionDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [collections, showMiniDialog, refreshData],
+        [collections, navigateHome, refreshData, showMiniDialog],
     );
 
     const handleOpenShareCollection = useCallback(
@@ -615,8 +683,13 @@ const Page: React.FC = () => {
             : (collections.find(
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
+    const isCollectionRoutePending =
+        router.pathname === "/collection/[id]" &&
+        (!router.isReady || typeof router.query.id !== "string");
+    const isViewLoading =
+        !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
-    if (!hasFetched || !isLockerI18nReady) {
+    if (isViewLoading) {
         return <LoadingIndicator />;
     }
     if (initialLoadError && collections.length === 0) {
@@ -706,6 +779,7 @@ const Page: React.FC = () => {
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
                     searchTerm={searchTerm}
+                    onNavigateBack={handleNavigateBack}
                 />
             </Box>
             <LockerSidebar
@@ -844,4 +918,4 @@ const Page: React.FC = () => {
     );
 };
 
-export default Page;
+export default LockerPage;
