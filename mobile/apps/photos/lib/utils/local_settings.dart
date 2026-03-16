@@ -256,11 +256,17 @@ class LocalSettings {
     await _setFlag(OfflineFlag.mapEnabled, value);
   }
 
+  String get _mlLocalIndexingKey => appMode == AppMode.offline
+      ? _kOfflineMLLocalIndexingEnabled
+      : _kisMLLocalIndexingEnabled;
+
+  bool get _defaultMLLocalIndexingEnabled => appMode == AppMode.offline
+      ? enoughRamForOfflineLocalIndexing
+      : enoughRamForLocalIndexing;
+
   bool get isMLLocalIndexingEnabled {
-    final key = appMode == AppMode.offline
-        ? _kOfflineMLLocalIndexingEnabled
-        : _kisMLLocalIndexingEnabled;
-    return _prefs.getBool(key) ?? enoughRamForLocalIndexing;
+    return _prefs.getBool(_mlLocalIndexingKey) ??
+        _defaultMLLocalIndexingEnabled;
   }
 
   bool get isSmartMemoriesEnabled =>
@@ -333,11 +339,9 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    final key = appMode == AppMode.offline
-        ? _kOfflineMLLocalIndexingEnabled
-        : _kisMLLocalIndexingEnabled;
-    final nextValue = !(_prefs.getBool(key) ?? enoughRamForLocalIndexing);
-    await _prefs.setBool(key, nextValue);
+    final nextValue = !(_prefs.getBool(_mlLocalIndexingKey) ??
+        _defaultMLLocalIndexingEnabled);
+    await _prefs.setBool(_mlLocalIndexingKey, nextValue);
     return nextValue;
   }
 
