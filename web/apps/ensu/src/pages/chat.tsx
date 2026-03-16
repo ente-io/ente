@@ -1895,6 +1895,7 @@ const Page: React.FC = () => {
             });
         });
 
+        // Clean up blob URLs for attachments no longer displayed.
         setAttachmentPreviews((prev) => {
             const next = { ...prev };
             Object.keys(next).forEach((id) => {
@@ -1909,7 +1910,17 @@ const Page: React.FC = () => {
             attachmentPreviewUrlsRef.current = next;
             return next;
         });
-    }, [chatKey, displayMessages]);
+
+        // Load previews for persisted image attachments that do not have blob
+        // URLs yet, such as after reopening the app.
+        for (const message of displayMessages) {
+            for (const attachment of message.attachments ?? []) {
+                if (attachment.kind === "image") {
+                    loadAttachmentPreview(attachment, message.sessionUuid);
+                }
+            }
+        }
+    }, [chatKey, displayMessages, loadAttachmentPreview]);
 
     const showDrawerToggle = isSmall || drawerCollapsed;
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
@@ -2746,8 +2757,7 @@ const Page: React.FC = () => {
 
                     await writeBinaryFile({ path: filePath, contents: bytes });
 
-                    const fileUrl = encodeURI(`file://${filePath}`);
-                    await open(fileUrl);
+                    await open(filePath);
                     return;
                 }
 

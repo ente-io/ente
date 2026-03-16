@@ -95,6 +95,47 @@ const CodeBlock = ({ children, node: _node, ...rest }: PreProps) => {
     );
 };
 
+const openExternalUrl = async (url: string) => {
+    const hasTauriBridge =
+        typeof window !== "undefined" &&
+        ("__TAURI__" in window ||
+            "__TAURI_IPC__" in window ||
+            "__TAURI_INTERNALS__" in window ||
+            "__TAURI_METADATA__" in window);
+
+    if (hasTauriBridge) {
+        try {
+            const { open } = await import("@tauri-apps/api/shell");
+            await open(url);
+            return;
+        } catch {
+            // Fall back to the browser open path below.
+        }
+    }
+
+    if (typeof window !== "undefined") {
+        const popup = window.open(url, "_blank", "noopener,noreferrer");
+        if (!popup) {
+            window.location.href = url;
+        }
+    }
+};
+
+type AnchorProps = React.ComponentPropsWithoutRef<"a"> & { node?: unknown };
+
+const ExternalLink = ({ node: _node, href, children, ...rest }: AnchorProps) => (
+    <a
+        {...rest}
+        href={href}
+        onClick={(e) => {
+            e.preventDefault();
+            if (href) void openExternalUrl(href);
+        }}
+    >
+        {children}
+    </a>
+);
+
 export const MarkdownRenderer = ({
     content,
     className,
@@ -109,7 +150,7 @@ export const MarkdownRenderer = ({
                     { strict: false, throwOnError: false, trust: true },
                 ],
             ]}
-            components={{ pre: CodeBlock }}
+            components={{ pre: CodeBlock, a: ExternalLink }}
         >
             {content}
         </ReactMarkdown>
