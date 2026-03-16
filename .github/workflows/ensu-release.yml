@@ -70,7 +70,7 @@ jobs:
               if: matrix.platform.os == 'ubuntu-24.04'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y libwebkit2gtk-4.1-dev libsoup2.4-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
             - name: Rust cache
               uses: actions/cache@v4

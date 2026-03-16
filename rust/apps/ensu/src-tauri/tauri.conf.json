@@ -1,6 +1,6 @@
 {
   "productName": "Ensu",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "identifier": "io.ente.ensu",
   "mainBinaryName": "Ensu",
   "build": {
