@@ -72,6 +72,8 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
+    final inviteLimitMessage = _inviteLimitMessage(l10n);
+    final inviteLimitTextStyle = textTheme.bodyMuted.copyWith(height: 1.5);
 
     return FamilyPageScaffold(
       title: l10n.inviteMembers,
@@ -83,9 +85,30 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _inviteLimitMessage(l10n),
-                    style: textTheme.bodyMuted.copyWith(height: 1.5),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    layoutBuilder: (currentChild, previousChildren) {
+                      return Stack(
+                        alignment: AlignmentDirectional.topStart,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: Text(
+                      inviteLimitMessage,
+                      key: ValueKey(inviteLimitMessage),
+                      style: inviteLimitTextStyle,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildInputRow(context),
