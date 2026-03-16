@@ -116,14 +116,23 @@ const viewerContextMenuBlockedTargetSelector = [
     '[role="textbox"]',
     '[role="combobox"]',
     '[contenteditable="true"]',
+    "media-controller",
+    "media-control-bar",
+    "media-loading-indicator",
     "media-play-button",
     "media-mute-button",
     "media-pip-button",
     "media-fullscreen-button",
     "media-time-range",
+    "media-time-display",
+    "media-text-display",
+    "media-settings-menu",
+    "media-settings-menu-item",
     "media-settings-menu-button",
+    "media-playback-rate-menu",
     "media-chrome-menu",
     "media-chrome-menu-button",
+    "media-chrome-menu-item",
 ].join(", ");
 
 const addFileViewerBackStateMarker = (state: unknown, marker: string) =>
