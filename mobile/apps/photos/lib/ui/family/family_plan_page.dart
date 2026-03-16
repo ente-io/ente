@@ -12,6 +12,7 @@ import 'package:photos/models/user_details.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/family_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/components/base_bottom_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/family/edit_storage_limit_page.dart';
@@ -36,6 +37,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   static const String _advertIllustrationAsset =
       "assets/family_plan_illustration.png";
   static const double _advertContentWidth = 300;
+  static const double _advertBalancedMinHeight = 560;
 
   late UserDetails _userDetails = widget.initialUserDetails;
   String? _startingPrice;
@@ -172,38 +174,117 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     String? footerText,
   }) {
     final textTheme = getEnteTextTheme(context);
+    final heroSection = _buildAdvertHero(
+      illustrationAsset: illustrationAsset,
+      title: title,
+      body: body,
+    );
+    final benefitsSection = _buildAdvertBenefits(benefits);
+    final footerSection = _buildAdvertFooter(
+      textTheme: textTheme,
+      footerText: footerText,
+      buttonLabel: buttonLabel,
+      onButtonTap: onButtonTap,
+    );
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: _advertContentWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 4),
-                    Center(
-                      child: Image.asset(
-                        illustrationAsset,
-                        width: 200,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _AdvertTitle(text: title),
-                    const SizedBox(height: 12),
-                    _AdvertBody(text: body),
-                    const SizedBox(height: 28),
-                    ...benefits,
-                  ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxHeight < _advertBalancedMinHeight) {
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      heroSection,
+                      const SizedBox(height: 28),
+                      benefitsSection,
+                    ],
+                  ),
                 ),
               ),
+              footerSection,
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              flex: 9,
+              child: Center(child: heroSection),
             ),
-          ),
+            Expanded(
+              flex: 5,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: benefitsSection,
+              ),
+            ),
+            Expanded(
+              flex: footerText != null ? 4 : 3,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: footerSection,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAdvertHero({
+    required String illustrationAsset,
+    required String title,
+    required String body,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _advertContentWidth),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 4),
+            Center(
+              child: Image.asset(
+                illustrationAsset,
+                width: 200,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _AdvertTitle(text: title),
+            const SizedBox(height: 12),
+            _AdvertBody(text: body),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAdvertBenefits(List<Widget> benefits) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _advertContentWidth),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: benefits,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvertFooter({
+    required EnteTextTheme textTheme,
+    required String? footerText,
+    required String buttonLabel,
+    required Future<void> Function() onButtonTap,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
         if (footerText != null) ...[
           Text(
             footerText,
