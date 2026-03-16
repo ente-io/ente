@@ -17,6 +17,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import 'package:photos/src/rust/api/image_processing_api.dart' as rust_image;
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -394,6 +395,21 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   void _onFileLoaded(File file) {
+    // On Android, the platform HEIC decoder can silently produce glitched
+    // output without throwing an error. Bypass it entirely using Rust.
+    // Exception: very large images (>100MP) skip Rust to avoid OOM — the Rust
+    // decoder loads the full image into memory, while the platform decoder
+    // respects cacheWidth/cacheHeight and decodes at reduced resolution.
+    if (Platform.isAndroid && _isHeic() && !isTooLargeImage) {
+      _logger.info("Using Rust HEIC decoder for ${_photo.generatedID}");
+      unawaited(_loadHeicWithRust(file));
+      return;
+    }
+
+    _loadWithPlatformDecoder(file);
+  }
+
+  void _loadWithPlatformDecoder(File file) {
     ImageProvider imageProvider;
     if (isTooLargeImage) {
       _logger.info(
@@ -432,6 +448,35 @@ class _ZoomableImageState extends State<ZoomableImage> {
           _updateViewWithFinalImage(imageProvider);
         }
       });
+    }
+  }
+
+  Future<void> _loadHeicWithRust(File file) async {
+    try {
+      final rustBytes = await rust_image.decodeToJpeg(
+        imagePath: file.path,
+      );
+      _logger.info(
+        "Rust HEIC decode succeeded for ${_photo.generatedID}",
+      );
+      final imageProvider = MemoryImage(rustBytes);
+      if (mounted) {
+        await precacheImage(imageProvider, context);
+        if (mounted && !_loadedFinalImage) {
+          await _updateViewWithFinalImage(imageProvider);
+        }
+      }
+    } catch (e) {
+      _logger.warning(
+        "Rust HEIC decode failed for ${_photo.generatedID}: $e",
+      );
+      unawaited(
+        _loadInSupportedFormat(
+          file,
+          e,
+          skipRustDecoder: true,
+        ),
+      );
     }
   }
 
@@ -479,6 +524,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
+  bool _isHeic() {
+    final ext = _photo.displayName.toLowerCase().split('.').last;
+    return ext == 'heic' || ext == 'heif';
+  }
+
   bool _isRawFile() {
     final extension = _photo.displayName.toLowerCase().split('.').last;
     const rawExtensions = {
@@ -506,8 +556,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   Future<void> _loadInSupportedFormat(
     File file,
-    Object unsupportedErr,
-  ) async {
+    Object unsupportedErr, {
+    bool skipRustDecoder = false,
+  }) async {
     // Skip compression for RAW files - FlutterImageCompress cannot process them
     // and will crash. Go directly to thumbnail fallback.
     if (_isRawFile()) {
@@ -531,6 +582,30 @@ class _ZoomableImageState extends State<ZoomableImage> {
     );
     _convertToSupportedFormat = true;
 
+    if (!skipRustDecoder && Platform.isAndroid && _isHeic()) {
+      try {
+        final rustBytes = await rust_image.decodeToJpeg(
+          imagePath: file.path,
+          quality: isTooLargeImage ? 85 : null,
+        );
+        _logger.info("Rust fallback succeeded for ${_photo.generatedID}");
+        final imageProvider = MemoryImage(rustBytes);
+        unawaited(
+          precacheImage(imageProvider, context).then((value) {
+            if (mounted) {
+              _updateViewWithFinalImage(imageProvider);
+            }
+          }),
+        );
+        return;
+      } catch (e) {
+        _logger.warning(
+          "Rust fallback failed for ${_photo.generatedID}: $e",
+        );
+      }
+    }
+
+    // Fallback to FlutterImageCompress (platform-based decoder).
     Uint8List? compressedFile;
     if (isTooLargeImage) {
       _logger.info(
