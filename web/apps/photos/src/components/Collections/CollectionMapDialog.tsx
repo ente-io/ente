@@ -1833,9 +1833,7 @@ function CollectionSidebar({
                             selected={selected}
                             setSelected={setSelected}
                             onSetOpenFileViewer={onSetOpenFileViewer}
-                            listBorderRadius={
-                                isMobile ? "0" : "0 0 32px 32px"
-                            }
+                            listBorderRadius={isMobile ? "0" : "0 0 32px 32px"}
                             header={coverHeader}
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
@@ -2435,9 +2433,7 @@ const MapCanvasContainer = styled(Box)(({ theme }) => ({
     width: "100%",
     height: "100%",
     [theme.breakpoints.down("md")]: {
-        "& .leaflet-bottom.leaflet-right": {
-            bottom: MOBILE_SIDEBAR_HEIGHT,
-        },
+        "& .leaflet-bottom.leaflet-right": { bottom: MOBILE_SIDEBAR_HEIGHT },
     },
 }));
 
