@@ -101,11 +101,26 @@ const hasPaidLockerAccess = (json: {
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
 
-const isLockerAppPath = (path: string) =>
-    path === "/" ||
-    path === "/collections" ||
-    path === "/trash" ||
-    path.startsWith("/collection/");
+const isLockerAppPath = (path: string) => {
+    const pathname = path.split("?")[0] ?? path;
+    return (
+        pathname === "/" ||
+        pathname === "/collections" ||
+        pathname === "/trash" ||
+        pathname === "/collection"
+    );
+};
+
+const getCollectionIDFromPath = (path: string) => {
+    const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
+    const id = searchParams.get("id");
+    if (id === null) {
+        return null;
+    }
+
+    const parsedID = Number.parseInt(id, 10);
+    return Number.isFinite(parsedID) ? parsedID : null;
+};
 
 export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -149,11 +164,12 @@ export const LockerPage: React.FC = () => {
     const [isDragActive, setIsDragActive] = useState(false);
     const dragDepthRef = useRef(0);
     const lockerRouteStackRef = useRef<string[]>([]);
+    const lockerRouteIndexRef = useRef(-1);
     const isNavigatingBackRef = useRef(false);
+    const isProgrammaticLockerNavigationRef = useRef(false);
     const routeCollectionID =
-        router.pathname === "/collection/[id]" &&
-        typeof router.query.id === "string"
-            ? Number.parseInt(router.query.id, 10)
+        router.pathname === "/collection"
+            ? getCollectionIDFromPath(router.asPath)
             : null;
     const selectedCollectionID =
         routeCollectionID !== null && Number.isFinite(routeCollectionID)
@@ -265,41 +281,75 @@ export const LockerPage: React.FC = () => {
         }
 
         const routeStack = lockerRouteStackRef.current;
+        const currentIndex = lockerRouteIndexRef.current;
         const currentPath = router.asPath;
-        const lastPath = routeStack[routeStack.length - 1];
 
         if (isNavigatingBackRef.current) {
             isNavigatingBackRef.current = false;
-            if (lastPath !== currentPath) {
+            const previousIndex = routeStack.lastIndexOf(currentPath);
+            if (previousIndex >= 0) {
+                lockerRouteIndexRef.current = previousIndex;
+            } else {
                 routeStack.push(currentPath);
+                lockerRouteIndexRef.current = routeStack.length - 1;
             }
             return;
         }
 
-        if (lastPath !== currentPath) {
+        if (routeStack.length === 0) {
             routeStack.push(currentPath);
+            lockerRouteIndexRef.current = 0;
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
         }
+
+        if (currentIndex >= 0 && routeStack[currentIndex] === currentPath) {
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (isProgrammaticLockerNavigationRef.current) {
+            isProgrammaticLockerNavigationRef.current = false;
+            routeStack.splice(currentIndex + 1);
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = routeStack.length - 1;
+            return;
+        }
+
+        const existingIndex = routeStack.lastIndexOf(currentPath);
+        if (existingIndex >= 0) {
+            lockerRouteIndexRef.current = existingIndex;
+            return;
+        }
+
+        routeStack.splice(currentIndex + 1);
+        routeStack.push(currentPath);
+        lockerRouteIndexRef.current = routeStack.length - 1;
     }, [router.asPath, router.isReady]);
 
     const navigateHome = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
         void router.push("/", undefined, { shallow: true });
     }, [router]);
 
     const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
 
-        const routeStack = lockerRouteStackRef.current;
-        if (routeStack.length > 1) {
-            routeStack.pop();
+        const currentIndex = lockerRouteIndexRef.current;
+        if (currentIndex > 0) {
+            lockerRouteIndexRef.current = currentIndex - 1;
             isNavigatingBackRef.current = true;
             router.back();
             return;
         }
 
         if (router.asPath !== "/") {
-            lockerRouteStackRef.current = ["/"];
+            lockerRouteStackRef.current = [router.asPath, "/"];
+            lockerRouteIndexRef.current = 1;
             isNavigatingBackRef.current = true;
+            isProgrammaticLockerNavigationRef.current = true;
             void router.push("/", undefined, { shallow: true });
+            return;
         }
     }, [router]);
 
@@ -308,9 +358,12 @@ export const LockerPage: React.FC = () => {
             if (id === null) {
                 navigateHome();
             } else {
-                void router.push(`/collection/${id}`, undefined, {
-                    shallow: true,
-                });
+                isProgrammaticLockerNavigationRef.current = true;
+                void router.push(
+                    { pathname: "/collection", query: { id: String(id) } },
+                    undefined,
+                    { shallow: true },
+                );
             }
             setSidebarOpen(false);
         },
@@ -318,11 +371,13 @@ export const LockerPage: React.FC = () => {
     );
 
     const handleSelectCollections = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
         void router.push("/collections", undefined, { shallow: true });
         setSidebarOpen(false);
     }, [router]);
 
     const handleSelectTrash = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
         void router.push("/trash", undefined, { shallow: true });
         setSidebarOpen(false);
     }, [router]);
@@ -499,8 +554,8 @@ export const LockerPage: React.FC = () => {
 
     const handleEmptyTrash = useCallback(() => {
         showMiniDialog({
-            title: t("empty_trash"),
-            message: t("confirm_empty_trash"),
+            title: t("empty_trash_title"),
+            message: t("empty_trash_message"),
             continue: {
                 text: t("empty_trash"),
                 color: "critical",
@@ -684,8 +739,9 @@ export const LockerPage: React.FC = () => {
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
     const isCollectionRoutePending =
-        router.pathname === "/collection/[id]" &&
-        (!router.isReady || typeof router.query.id !== "string");
+        router.pathname === "/collection" &&
+        (router.asPath.split("?")[0] ?? router.asPath) === "/collection" &&
+        (!router.isReady || routeCollectionID === null);
     const isViewLoading =
         !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
