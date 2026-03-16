@@ -33,6 +33,10 @@ class FamilyPlanPage extends StatefulWidget {
 }
 
 class _FamilyPlanPageState extends State<FamilyPlanPage> {
+  static const String _advertIllustrationAsset =
+      "assets/family_plan_illustration.png";
+  static const double _advertContentWidth = 300;
+
   late UserDetails _userDetails = widget.initialUserDetails;
   String? _startingPrice;
   bool _isRefreshing = false;
@@ -100,100 +104,119 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
   Widget _buildFreeAdvert(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                Image.asset(
-                  "assets/ducky_share.png",
-                  width: 200,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 16),
-                _AdvertTitle(text: l10n.designedForFamilies),
-                const SizedBox(height: 12),
-                _AdvertBody(text: l10n.shareYourSubscription),
-                const SizedBox(height: 20),
-                _BenefitItem(
-                  icon: Icons.group_outlined,
-                  text: l10n.shareStorageWith5Members,
-                ),
-                _BenefitItem(
-                  icon: Icons.lock_outline,
-                  text: l10n.privateSpaceForEveryMember,
-                ),
-                _BenefitItem(
-                  icon: Icons.forum_outlined,
-                  text: l10n.feedToEngageWithFamily,
-                ),
-                if (_startingPrice != null) ...[
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.plansStartAt(price: _startingPrice!),
-                    style: getEnteTextTheme(context).smallFaint,
-                  ),
-                ],
-              ],
-            ),
-          ),
+    return _buildAdvert(
+      context,
+      illustrationAsset: _advertIllustrationAsset,
+      title: l10n.designedForFamilies,
+      body: l10n.shareYourSubscription,
+      benefits: [
+        _BenefitItem(
+          icon: Icons.group_outlined,
+          text: l10n.shareStorageWith5Members,
         ),
-        const SizedBox(height: 16),
-        ButtonWidgetV2(
-          buttonType: ButtonTypeV2.primary,
-          labelText: l10n.viewPlans,
-          onTap: () async {
-            unawaited(routeToPage(context, getSubscriptionPage()));
-          },
+        _BenefitItem(
+          icon: Icons.lock_outline,
+          text: l10n.privateSpaceForEveryMember,
+        ),
+        _BenefitItem(
+          icon: Icons.forum_outlined,
+          text: l10n.feedToEngageWithFamily,
         ),
       ],
+      footerText: _startingPrice == null
+          ? null
+          : l10n.plansStartAt(price: _startingPrice!),
+      buttonLabel: l10n.viewPlans,
+      onButtonTap: () async {
+        unawaited(routeToPage(context, getSubscriptionPage()));
+      },
     );
   }
 
   Widget _buildPaidAdvert(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    return _buildAdvert(
+      context,
+      illustrationAsset: _advertIllustrationAsset,
+      title: l10n.bringYourFamilyAlong,
+      body: l10n.yourPlanSupportsFamily,
+      benefits: [
+        _BenefitItem(
+          icon: Icons.group_add_outlined,
+          text: l10n.addUpTo5MembersFree,
+        ),
+        _BenefitItem(
+          icon: Icons.lock_outline,
+          text: l10n.privateSpaceForEveryMember,
+        ),
+        _BenefitItem(
+          icon: Icons.forum_outlined,
+          text: l10n.feedToEngageWithFamily,
+        ),
+      ],
+      buttonLabel: l10n.addFamilyMember,
+      onButtonTap: () async {
+        unawaited(_openInvitePage());
+      },
+    );
+  }
+
+  Widget _buildAdvert(
+    BuildContext context, {
+    required String illustrationAsset,
+    required String title,
+    required String body,
+    required List<Widget> benefits,
+    required String buttonLabel,
+    required Future<void> Function() onButtonTap,
+    String? footerText,
+  }) {
+    final textTheme = getEnteTextTheme(context);
+
     return Column(
       children: [
         Expanded(
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                Image.asset(
-                  "assets/ducky_share.png",
-                  width: 200,
-                  fit: BoxFit.contain,
+            child: Center(
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(maxWidth: _advertContentWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 4),
+                    Center(
+                      child: Image.asset(
+                        illustrationAsset,
+                        width: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _AdvertTitle(text: title),
+                    const SizedBox(height: 12),
+                    _AdvertBody(text: body),
+                    const SizedBox(height: 28),
+                    ...benefits,
+                  ],
                 ),
-                const SizedBox(height: 16),
-                _AdvertTitle(text: l10n.bringYourFamilyAlong),
-                const SizedBox(height: 12),
-                _AdvertBody(text: l10n.yourPlanSupportsFamily),
-                const SizedBox(height: 20),
-                _BenefitItem(
-                  icon: Icons.group_add_outlined,
-                  text: l10n.addUpTo5MembersFree,
-                ),
-                _BenefitItem(
-                  icon: Icons.lock_outline,
-                  text: l10n.privateSpaceForEveryMember,
-                ),
-                _BenefitItem(
-                  icon: Icons.forum_outlined,
-                  text: l10n.feedToEngageWithFamily,
-                ),
-              ],
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        if (footerText != null) ...[
+          Text(
+            footerText,
+            textAlign: TextAlign.center,
+            style: textTheme.smallFaint,
+          ),
+          const SizedBox(height: 16),
+        ] else
+          const SizedBox(height: 16),
         ButtonWidgetV2(
           buttonType: ButtonTypeV2.primary,
-          labelText: l10n.addFamilyMember,
-          onTap: () async {
-            unawaited(_openInvitePage());
-          },
+          labelText: buttonLabel,
+          onTap: onButtonTap,
         ),
       ],
     );
@@ -602,7 +625,6 @@ class _BenefitItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -613,7 +635,10 @@ class _BenefitItem extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: textTheme.body,
+              style: getEnteTextTheme(context).body.copyWith(
+                    fontSize: 15,
+                    height: 21 / 15,
+                  ),
             ),
           ),
         ],
