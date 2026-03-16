@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
@@ -20,7 +21,7 @@ import { apiURL } from "ente-base/origins";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     isEnteProductionEndpoint,
@@ -127,6 +128,9 @@ const Page: React.FC = () => {
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [prefilledUploadFile, setPrefilledUploadFile] = useState<File | null>(
+        null,
+    );
     const [editItem, setEditItem] = useState<{
         id: number;
         type: LockerItemType;
@@ -139,6 +143,8 @@ const Page: React.FC = () => {
     const [shareCollectionID, setShareCollectionID] = useState<number | null>(
         null,
     );
+    const [isDragActive, setIsDragActive] = useState(false);
+    const dragDepthRef = useRef(0);
 
     const loadUserDetails = useCallback(async () => {
         try {
@@ -449,6 +455,81 @@ const Page: React.FC = () => {
         [masterKey, refreshData],
     );
 
+    const handleCreateDialogClose = useCallback(() => {
+        setCreateDialogOpen(false);
+        setPrefilledUploadFile(null);
+    }, []);
+
+    const openUploadDialogForFile = useCallback((file: File) => {
+        setPrefilledUploadFile(file);
+        setCreateDialogOpen(true);
+    }, []);
+
+    const openCreateDialog = useCallback(() => {
+        setPrefilledUploadFile(null);
+        setCreateDialogOpen(true);
+    }, []);
+
+    const handleDragEnter = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current += 1;
+            setIsDragActive(true);
+        },
+        [],
+    );
+
+    const handleDragOver = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = "copy";
+        },
+        [],
+    );
+
+    const handleDragLeave = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+            if (dragDepthRef.current === 0) {
+                setIsDragActive(false);
+            }
+        },
+        [],
+    );
+
+    const handleDrop = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.files?.length) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = 0;
+            setIsDragActive(false);
+
+            const [file] = Array.from(event.dataTransfer.files);
+            if (!file) {
+                return;
+            }
+
+            openUploadDialogForFile(file);
+        },
+        [openUploadDialogForFile],
+    );
+
     const handleRenameCollection = useCallback(
         async (collectionID: number, newName: string) => {
             if (!masterKey) return;
@@ -563,7 +644,13 @@ const Page: React.FC = () => {
     }
 
     return (
-        <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+        <Stack
+            sx={{ height: "100dvh", overflow: "hidden", position: "relative" }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
@@ -628,7 +715,7 @@ const Page: React.FC = () => {
                 <Fab
                     color="primary"
                     aria-label={t("saveToLocker")}
-                    onClick={() => setCreateDialogOpen(true)}
+                    onClick={openCreateDialog}
                     sx={{
                         position: "fixed",
                         right: "max(24px, env(safe-area-inset-right))",
@@ -655,12 +742,13 @@ const Page: React.FC = () => {
             {/* Create dialog */}
             <CreateItemDialog
                 open={createDialogOpen}
-                onClose={() => setCreateDialogOpen(false)}
+                onClose={handleCreateDialogClose}
                 collections={collections}
                 onSave={handleCreateItem}
                 onUploadFile={handleUploadFile}
                 onCreateCollection={handleCreateCollection}
                 defaultCollectionID={selectedCollectionID}
+                initialFile={prefilledUploadFile}
             />
 
             {/* Edit dialog */}
@@ -681,6 +769,58 @@ const Page: React.FC = () => {
                 autoHideDuration={3000}
                 onClose={() => setToast(null)}
             />
+            {isDragActive && (
+                <Box
+                    sx={(theme) => ({
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 1600,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        pointerEvents: "none",
+                        backgroundColor: "rgba(8, 9, 10, 0.58)",
+                        backdropFilter: "blur(8px)",
+                        ...theme.applyStyles("light", {
+                            backgroundColor: "rgba(241, 245, 249, 0.78)",
+                        }),
+                    })}
+                >
+                    <Box
+                        sx={(theme) => ({
+                            width: "min(520px, calc(100vw - 48px))",
+                            px: 4,
+                            py: 5,
+                            borderRadius: "24px",
+                            border: "2px dashed rgba(127, 179, 255, 0.48)",
+                            background:
+                                "linear-gradient(180deg, rgba(16, 113, 255, 0.16) 0%, rgba(16, 113, 255, 0.08) 100%)",
+                            boxShadow: "0 20px 48px rgba(0, 0, 0, 0.26)",
+                            textAlign: "center",
+                            ...theme.applyStyles("light", {
+                                background:
+                                    "linear-gradient(180deg, rgba(16, 113, 255, 0.10) 0%, rgba(16, 113, 255, 0.06) 100%)",
+                                boxShadow:
+                                    "0 18px 40px rgba(15, 23, 42, 0.12)",
+                            }),
+                        })}
+                    >
+                        <CloudUploadOutlinedIcon
+                            sx={{
+                                fontSize: 44,
+                                color: "primary.main",
+                                mb: 1.5,
+                            }}
+                        />
+                        <Typography variant="h4" sx={{ mb: 0.75 }}>
+                            {t("saveDocumentTitle")}
+                        </Typography>
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            {t("clickHereToUpload")}
+                        </Typography>
+                    </Box>
+                </Box>
+            )}
         </Stack>
     );
 };

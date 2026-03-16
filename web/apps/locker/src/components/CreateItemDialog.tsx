@@ -97,6 +97,7 @@ interface CreateItemDialogProps {
     onUploadFile?: (file: File, collectionID: number) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
     defaultCollectionID?: number | null;
+    initialFile?: File | null;
     editItem?: {
         id: number;
         type: LockerItemType;
@@ -113,6 +114,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onUploadFile,
     onCreateCollection,
     defaultCollectionID,
+    initialFile,
     editItem,
 }) => {
     const isEditMode = !!editItem;
@@ -169,7 +171,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             return;
         }
 
-        setSelectedOption(editItem?.type ?? null);
+        setSelectedOption(editItem?.type ?? (initialFile ? "file" : null));
         setSelectedCollectionID(
             isEditMode
                 ? editCollectionID
@@ -177,12 +179,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
-        setSelectedFile(null);
+        setSelectedFile(initialFile ?? null);
         setError(null);
     }, [
         defaultCollectionID,
         editCollectionID,
         editItem,
+        initialFile,
         isEditMode,
         normalizeSelectedCollectionID,
         open,
