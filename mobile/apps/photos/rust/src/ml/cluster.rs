@@ -363,6 +363,7 @@ pub fn run_face_clustering(
 pub fn run_face_clustering_incremental(
     new_inputs: &[FaceClusterInput],
     existing_centroids: &HashMap<String, Vec<f32>>,
+    existing_counts: &HashMap<String, usize>,
     threshold: f32,
 ) -> Option<FaceClusterResult> {
     let n = new_inputs.len();
@@ -447,13 +448,15 @@ pub fn run_face_clustering_incremental(
         result.n_unclustered = unassigned.len();
     }
 
-    // Step 3: Recompute centroids for all clusters (existing and new) so
-    // the Dart caller gets up-to-date summaries for every cluster.
+    // Step 3: Compute centroids for all clusters. For clusters that already
+    // have a historical centroid+count, merge via weighted average so that
+    // bucketed callers don't overwrite prior state with partial-bucket data.
     let dim = new_inputs
         .first()
         .map(|i| i.embedding.len())
         .unwrap_or(128);
-    for cluster_id in result.cluster_counts.keys() {
+    let all_cluster_ids: Vec<String> = result.cluster_counts.keys().cloned().collect();
+    for cluster_id in &all_cluster_ids {
         let embs: Vec<&Vec<f32>> = new_inputs
             .iter()
             .filter(|inp| {
@@ -465,10 +468,40 @@ pub fn run_face_clustering_incremental(
             })
             .map(|inp| &inp.embedding)
             .collect();
-        if !embs.is_empty() {
-            result
-                .cluster_centroids
-                .insert(cluster_id.clone(), mean_centroid(&embs, dim));
+        if embs.is_empty() {
+            continue;
+        }
+        let new_centroid = mean_centroid(&embs, dim);
+        let new_count = embs.len();
+
+        let merged = if let Some(old_centroid) = existing_centroids.get(cluster_id) {
+            let old_count = existing_counts.get(cluster_id).copied().unwrap_or(0);
+            if old_count > 0 && old_centroid.len() == dim {
+                // Weighted average of old centroid and new members
+                let total = (old_count + new_count) as f32;
+                let mut merged = vec![0.0f32; dim];
+                for i in 0..dim {
+                    merged[i] =
+                        (old_centroid[i] * old_count as f32 + new_centroid[i] * new_count as f32)
+                            / total;
+                }
+                normalize(&mut merged);
+                merged
+            } else {
+                new_centroid
+            }
+        } else {
+            new_centroid
+        };
+
+        result.cluster_centroids.insert(cluster_id.clone(), merged);
+
+        // Update count to include historical members so the persisted
+        // summary reflects the total cluster size, not just this bucket.
+        if let Some(&old_count) = existing_counts.get(cluster_id)
+            && old_count > 0
+        {
+            *result.cluster_counts.get_mut(cluster_id).unwrap() += old_count;
         }
     }
 

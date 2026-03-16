@@ -921,14 +921,15 @@ class SearchService {
         ? await getAllPets(null)
         : <GenericSearchResult>[];
     if (limit != null && people.length + pets.length > limit) {
-      // Reserve up to 1/3 of slots for pets so they aren't starved.
-      final petSlots = (limit ~/ 3).clamp(0, pets.length);
-      final peopleSlots = (limit - petSlots).clamp(0, people.length);
-      // If people don't fill their slots, give the remainder to pets.
-      final actualPetSlots = (limit - peopleSlots).clamp(0, pets.length);
+      // Reserve up to 1/3 of slots for pets, but no more than available.
+      final petReserved = (limit ~/ 3).clamp(0, pets.length);
+      // People get the rest, but no more than available.
+      final actualPeople = (limit - petReserved).clamp(0, people.length);
+      // Pets fill their reserved slots plus any people didn't use.
+      final actualPets = (limit - actualPeople).clamp(0, pets.length);
       return [
-        ...people.sublist(0, peopleSlots),
-        ...pets.sublist(0, actualPetSlots),
+        ...people.sublist(0, actualPeople),
+        ...pets.sublist(0, actualPets),
       ];
     }
     return [...people, ...pets];
