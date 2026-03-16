@@ -556,6 +556,28 @@ extension PetClusteringDB on MLDataDB {
     return rows.map((r) => r[petFaceIDColumn] as String).toList();
   }
 
+  /// Get species and faceVectorId for given petFaceIds.
+  Future<Map<String, (int species, int? vectorId)>> getPetFaceDetails(
+    List<String> petFaceIds,
+  ) async {
+    if (petFaceIds.isEmpty) return {};
+    final db = await asyncDB;
+    final placeholders = List.filled(petFaceIds.length, '?').join(',');
+    final rows = await db.getAll(
+      'SELECT $petFaceIDColumn, $speciesColumn, $faceVectorIdColumn '
+      'FROM $petFacesTable WHERE $petFaceIDColumn IN ($placeholders)',
+      petFaceIds,
+    );
+    final result = <String, (int, int?)>{};
+    for (final r in rows) {
+      result[r[petFaceIDColumn] as String] = (
+        r[speciesColumn] as int,
+        r[faceVectorIdColumn] as int?,
+      );
+    }
+    return result;
+  }
+
   /// Force-update pet face cluster assignments.
   Future<void> forceUpdatePetFaceClusterIds(
     Map<String, String> petFaceIdToClusterId,

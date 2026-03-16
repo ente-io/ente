@@ -1880,9 +1880,32 @@ class SearchService {
       // Get pet names
       final petNames = await mlDataDB.getAllPetNames();
 
-      // Get file ID -> EnteFile mapping
+      // Get file ID -> EnteFile mapping. In offline mode the ML DB stores
+      // local integer IDs, so we must convert via OfflineFilesDB first.
       final allFileIds = clusterToFileIds.values.expand((ids) => ids).toSet();
-      final fileIdToFile = await _getFileIdToFileMap(allFileIds);
+      final Map<int, EnteFile> fileIdToFile;
+      if (isOfflineMode) {
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(allFileIds);
+        final allFiles = await getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+        final map = <int, EnteFile>{};
+        for (final entry in localIdMap.entries) {
+          final file = localIdToFile[entry.value];
+          if (file != null) {
+            map[entry.key] = file;
+          }
+        }
+        fileIdToFile = map;
+      } else {
+        fileIdToFile = await _getFileIdToFileMap(allFileIds);
+      }
 
       final List<GenericSearchResult> results = [];
       final speciesCounters = <String, int>{};

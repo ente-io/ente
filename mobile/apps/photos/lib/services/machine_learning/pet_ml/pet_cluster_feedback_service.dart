@@ -1,9 +1,10 @@
 import "dart:math" show sqrt;
-import "dart:typed_data" show Float32List;
+import "dart:typed_data" show Float32List, Uint8List;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
@@ -41,6 +42,10 @@ class PetClusterFeedbackService {
     // re-clustering still respects the user's correction.
     await _db.bulkInsertNotPetFeedback(feedback);
     await _db.forceUpdatePetFaceClusterIds(updates);
+
+    // Create singleton summaries so incremental clustering recognises these
+    // user-created clusters on the next run.
+    await _createSingletonSummaries(updates);
 
     _logger.info(
       "Removed ${petFaceIds.length} faces from cluster $clusterId",
@@ -125,5 +130,46 @@ class PetClusterFeedbackService {
 
     _logger.info("Merged pet cluster $sourceId into $targetId");
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
+  }
+
+  /// Create singleton cluster summary rows for newly split-off faces.
+  ///
+  /// [faceIdToClusterId] maps each petFaceId to its new singleton cluster ID.
+  Future<void> _createSingletonSummaries(
+    Map<String, String> faceIdToClusterId,
+  ) async {
+    try {
+      final faceDetails =
+          await _db.getPetFaceDetails(faceIdToClusterId.keys.toList());
+
+      final summaries = <String, (Uint8List, int, int)>{};
+      for (final entry in faceIdToClusterId.entries) {
+        final detail = faceDetails[entry.key];
+        if (detail == null || detail.$2 == null) continue;
+        final species = detail.$1;
+        final vectorId = detail.$2!;
+
+        final vdb = PetVectorDB.forModel(
+          species: species,
+          isFace: true,
+          offline: isOfflineMode,
+        );
+        final embs = await vdb.getEmbeddings([vectorId]);
+        if (embs.isEmpty) continue;
+
+        // The single face embedding is the centroid.
+        summaries[entry.value] = (
+          embs.first.buffer.asUint8List(),
+          1,
+          species,
+        );
+      }
+
+      if (summaries.isNotEmpty) {
+        await _db.petClusterSummaryUpdate(summaries);
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to create singleton summaries", e, s);
+    }
   }
 }
