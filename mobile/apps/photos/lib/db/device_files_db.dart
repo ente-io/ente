@@ -517,4 +517,23 @@ extension DeviceFiles on FilesDB {
       parameterSets,
     );
   }
+
+  Future<void> deleteDeviceFilesByLocalIDs(List<String> localIDs) async {
+    if (localIDs.isEmpty) {
+      return;
+    }
+
+    final db = await sqliteAsyncDB;
+    for (int i = 0; i < localIDs.length; i += 400) {
+      final batch = localIDs.sublist(
+        i,
+        i + 400 > localIDs.length ? localIDs.length : i + 400,
+      );
+      final placeholders = List.filled(batch.length, '?').join(',');
+      await db.execute(
+        'DELETE FROM device_files WHERE id IN ($placeholders)',
+        batch,
+      );
+    }
+  }
 }

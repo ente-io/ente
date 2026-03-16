@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -76,11 +77,13 @@ Future<void> deleteFilesFromEverywhere(
   final updatedCollectionIDs = <int>{};
   final List<TrashRequest> uploadedFilesToBeTrashed = [];
   final List<EnteFile> deletedFiles = [];
+  final List<String> deletedLocalIDs = [];
   for (final file in files) {
     if (file.localID != null) {
       // Remove only those files that have already been removed from disk
       if (deletedIDs.contains(file.localID) ||
           alreadyDeletedIDs.contains(file.localID)) {
+        deletedLocalIDs.add(file.localID!);
         deletedFiles.add(file);
         if (file.uploadedFileID != null) {
           uploadedFilesToBeTrashed
@@ -96,6 +99,9 @@ Future<void> deleteFilesFromEverywhere(
       uploadedFilesToBeTrashed
           .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
     }
+  }
+  if (deletedLocalIDs.isNotEmpty) {
+    await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedLocalIDs);
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     try {
@@ -234,10 +240,14 @@ Future<void> deleteFilesOnDeviceOnly(
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final List<EnteFile> deletedFiles = [];
+  final List<String> deletedLocalIDs = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
     if (deletedIDs.contains(file.localID) ||
         alreadyDeletedIDs.contains(file.localID)) {
+      if (file.localID != null) {
+        deletedLocalIDs.add(file.localID!);
+      }
       deletedFiles.add(file);
       if (hasLocalOnlyFiles && localOnlyIDs.contains(file.localID)) {
         await FilesDB.instance.deleteLocalFile(file);
@@ -246,6 +256,9 @@ Future<void> deleteFilesOnDeviceOnly(
         await FilesDB.instance.update(file);
       }
     }
+  }
+  if (deletedLocalIDs.isNotEmpty) {
+    await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedLocalIDs);
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
     Bus.instance.fire(
@@ -384,6 +397,7 @@ Future<bool> deleteLocalFiles(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -458,6 +472,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -533,6 +548,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
       await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteDeviceFilesByLocalIDs(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),

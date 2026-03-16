@@ -10,6 +10,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -363,7 +364,13 @@ class _ZoomableImageState extends State<ZoomableImage> {
             FilesDB.instance.update(_photo);
             _loadNetworkImage();
           } else {
+            final localID = _photo.localID;
             FilesDB.instance.deleteLocalFile(_photo);
+            if (localID != null) {
+              unawaited(
+                FilesDB.instance.deleteDeviceFilesByLocalIDs([localID]),
+              );
+            }
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
                 [_photo],
