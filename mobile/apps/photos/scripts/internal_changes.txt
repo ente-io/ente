@@ -11,4 +11,5 @@ Still behind internal flag:
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
+- Prateek: (i) Add internal sync recovery diagnostics to classify local discovery vs remote upload-prep misses
 - Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled
