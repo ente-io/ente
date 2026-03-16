@@ -206,65 +206,61 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
     final activeMembers = members.where((member) => member.isActive).toList();
     final colorMap = _memberColorMap(activeMembers);
 
-    return RefreshIndicator(
-      onRefresh: () => _refreshUserDetails(showError: true),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          _FamilyStorageOverviewCard(
-            userDetails: _userDetails,
-            members: activeMembers,
-            colorMap: colorMap,
+    return ListView(
+      children: [
+        _FamilyStorageOverviewCard(
+          userDetails: _userDetails,
+          members: activeMembers,
+          colorMap: colorMap,
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 8),
+          child: Text(
+            l10n.members,
+            style: getEnteTextTheme(context).smallMuted,
           ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 8),
-            child: Text(
-              l10n.members,
-              style: getEnteTextTheme(context).smallMuted,
+        ),
+        _FamilyMembersCard(
+          members: members,
+          userDetails: _userDetails,
+          colorMap: colorMap,
+          isAdminView: true,
+          onMemberTap: _showMemberActions,
+        ),
+        const SizedBox(height: 24),
+        if (_remainingSlots > 0) ...[
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.primary,
+            labelText: l10n.addMember,
+            leadingWidget: const Icon(
+              Icons.person_add_outlined,
+              color: Colors.white,
+              size: 20,
             ),
+            onTap: () async {
+              unawaited(_openInvitePage());
+            },
           ),
-          _FamilyMembersCard(
-            members: members,
-            userDetails: _userDetails,
-            colorMap: colorMap,
-            isAdminView: true,
-            onMemberTap: _showMemberActions,
+          const SizedBox(height: 12),
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.tertiaryCritical,
+            labelText: l10n.closeFamilyPlan,
+            onTap: () async {
+              unawaited(_confirmCloseFamily());
+            },
           ),
-          const SizedBox(height: 24),
-          if (_remainingSlots > 0) ...[
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.primary,
-              labelText: l10n.addMember,
-              leadingWidget: const Icon(
-                Icons.person_add_outlined,
-                color: Colors.white,
-                size: 20,
-              ),
-              onTap: () async {
-                unawaited(_openInvitePage());
-              },
-            ),
-            const SizedBox(height: 12),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.tertiaryCritical,
-              labelText: l10n.closeFamilyPlan,
-              onTap: () async {
-                unawaited(_confirmCloseFamily());
-              },
-            ),
-          ],
-          if (_remainingSlots == 0)
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.tertiaryCritical,
-              labelText: l10n.closeFamilyPlan,
-              onTap: () async {
-                unawaited(_confirmCloseFamily());
-              },
-            ),
-          const SizedBox(height: 16),
         ],
-      ),
+        if (_remainingSlots == 0)
+          ButtonWidgetV2(
+            buttonType: ButtonTypeV2.tertiaryCritical,
+            labelText: l10n.closeFamilyPlan,
+            onTap: () async {
+              unawaited(_confirmCloseFamily());
+            },
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
