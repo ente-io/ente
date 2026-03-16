@@ -8,13 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:photos/gateways/billing/models/billing_plan.dart';
 import 'package:photos/gateways/billing/models/subscription.dart';
 import 'package:photos/generated/l10n.dart';
-import 'package:photos/models/button_result.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/family_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/base_bottom_sheet.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/family/edit_storage_limit_page.dart';
 import 'package:photos/ui/family/family_ui.dart';
@@ -429,64 +427,69 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
   }
 
   Future<void> _confirmRemoveMember(FamilyMember member) async {
-    final choice = await showChoiceDialog(
+    final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).removeMemberConfirmTitle,
       body: AppLocalizations.of(context).removeMemberConfirmBody(
         email: member.email,
       ),
-      firstButtonLabel: AppLocalizations.of(context).remove,
-      secondButtonLabel: AppLocalizations.of(context).cancel,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await FamilyService.instance.removeMember(member);
-      },
+      actionLabel: AppLocalizations.of(context).remove,
     );
-    await _handleDialogResult(choice);
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    try {
+      await FamilyService.instance.removeMember(member);
+      await _refreshUserDetails();
+    } catch (error) {
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: error);
+      }
+    }
   }
 
   Future<void> _confirmRevokeInvite(FamilyMember member) async {
-    final choice = await showChoiceDialog(
+    final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).revokeInviteConfirmTitle,
       body: AppLocalizations.of(context).revokeInviteConfirmBody(
         email: member.email,
       ),
-      firstButtonLabel: AppLocalizations.of(context).revoke,
-      secondButtonLabel: AppLocalizations.of(context).cancel,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await FamilyService.instance.revokeInvite(member);
-      },
+      actionLabel: AppLocalizations.of(context).revoke,
     );
-    await _handleDialogResult(choice);
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    try {
+      await FamilyService.instance.revokeInvite(member);
+      await _refreshUserDetails();
+    } catch (error) {
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: error);
+      }
+    }
   }
 
   Future<void> _confirmCloseFamily() async {
-    final choice = await showChoiceDialog(
+    final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).closeFamilyConfirmTitle,
       body: AppLocalizations.of(context).closeFamilyConfirmBody,
-      firstButtonLabel: AppLocalizations.of(context).closeFamilyPlan,
-      secondButtonLabel: AppLocalizations.of(context).cancel,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await FamilyService.instance.closeFamily(_userDetails);
-      },
+      actionLabel: AppLocalizations.of(context).closeFamilyPlan,
     );
-    await _handleDialogResult(choice);
-  }
+    if (!confirmed || !mounted) {
+      return;
+    }
 
-  Future<void> _handleDialogResult(ButtonResult? choice) async {
-    if (!mounted || choice == null) {
-      return;
-    }
-    if (choice.action == ButtonAction.error) {
-      await showGenericErrorDialog(context: context, error: choice.exception);
-      return;
-    }
-    if (choice.action == ButtonAction.first) {
+    try {
+      await FamilyService.instance.closeFamily(_userDetails);
       await _refreshUserDetails();
+    } catch (error) {
+      if (mounted) {
+        await showGenericErrorDialog(context: context, error: error);
+      }
     }
   }
 
