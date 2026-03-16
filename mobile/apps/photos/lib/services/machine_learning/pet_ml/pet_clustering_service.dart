@@ -578,6 +578,17 @@ extension PetClusteringDB on MLDataDB {
     return result;
   }
 
+  /// Get all petFaceIds assigned to a given cluster.
+  Future<List<String>> getPetFaceIdsForCluster(String clusterId) async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      'SELECT $petFaceIDColumn FROM $petFaceClustersTable '
+      'WHERE $clusterIDColumn = ?',
+      [clusterId],
+    );
+    return rows.map((r) => r[petFaceIDColumn] as String).toList();
+  }
+
   /// Force-update pet face cluster assignments.
   Future<void> forceUpdatePetFaceClusterIds(
     Map<String, String> petFaceIdToClusterId,

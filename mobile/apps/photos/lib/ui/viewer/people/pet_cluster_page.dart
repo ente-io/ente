@@ -4,6 +4,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/pets_changed_event.dart";
@@ -282,8 +283,7 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
     final selected = widget.selectedFiles.files.toList();
     if (selected.isEmpty) return;
 
-    final fileIds =
-        selected.map((f) => f.uploadedFileID).whereType<int>().toList();
+    final fileIds = await _resolveFileIds(selected);
 
     await PetClusterFeedbackService.instance.removePetFacesFromCluster(
       fileIds,
@@ -317,8 +317,7 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
 
     if (targetClusterId == null || !mounted) return;
 
-    final fileIds =
-        selected.map((f) => f.uploadedFileID).whereType<int>().toList();
+    final fileIds = await _resolveFileIds(selected);
 
     await PetClusterFeedbackService.instance.movePetFacesToCluster(
       fileIds,
@@ -327,6 +326,24 @@ class _PetSelectionBarState extends State<_PetSelectionBar> {
     );
     widget.selectedFiles.clearAll();
     widget.onFilesRemoved(selected);
+  }
+
+  /// Resolve file IDs for the pet ML DB. In offline mode, the ML tables
+  /// are keyed by OfflineFilesDB integer IDs, not uploadedFileID.
+  Future<List<int>> _resolveFileIds(List<EnteFile> files) async {
+    if (isOfflineMode) {
+      final localIds = files
+          .map((f) => f.localID)
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList();
+      if (localIds.isEmpty) return [];
+      final mapping = await OfflineFilesDB.instance.getLocalIntIdsForLocalIds(
+        localIds,
+      );
+      return mapping.values.toList();
+    }
+    return files.map((f) => f.uploadedFileID).whereType<int>().toList();
   }
 }
 

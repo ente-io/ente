@@ -43,9 +43,12 @@ class PetClusterFeedbackService {
     await _db.bulkInsertNotPetFeedback(feedback);
     await _db.forceUpdatePetFaceClusterIds(updates);
 
-    // Create singleton summaries so incremental clustering recognises these
-    // user-created clusters on the next run.
-    await _createSingletonSummaries(updates);
+    // Recompute summaries for the source cluster and the new singletons so
+    // incremental clustering recognises the user's corrections.
+    await _recomputeClusterSummaries([
+      clusterId,
+      ...updates.values,
+    ]);
 
     _logger.info(
       "Removed ${petFaceIds.length} faces from cluster $clusterId",
@@ -75,6 +78,9 @@ class PetClusterFeedbackService {
     // re-clustering still respects the user's correction.
     await _db.bulkInsertNotPetFeedback(feedback);
     await _db.forceUpdatePetFaceClusterIds(updates);
+
+    // Recompute summaries for both clusters so centroids/counts stay current.
+    await _recomputeClusterSummaries([sourceClusterId, targetClusterId]);
 
     _logger.info(
       "Moved ${petFaceIds.length} faces from $sourceClusterId to $targetClusterId",
@@ -132,44 +138,76 @@ class PetClusterFeedbackService {
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
   }
 
-  /// Create singleton cluster summary rows for newly split-off faces.
+  /// Recompute cluster summaries for the given cluster IDs.
   ///
-  /// [faceIdToClusterId] maps each petFaceId to its new singleton cluster ID.
-  Future<void> _createSingletonSummaries(
-    Map<String, String> faceIdToClusterId,
-  ) async {
+  /// Queries all faces currently assigned to each cluster, fetches their
+  /// embeddings, and writes an L2-normalized mean centroid + count. Clusters
+  /// that are now empty get their summary deleted.
+  Future<void> _recomputeClusterSummaries(List<String> clusterIds) async {
     try {
-      final faceDetails =
-          await _db.getPetFaceDetails(faceIdToClusterId.keys.toList());
-
       final summaries = <String, (Uint8List, int, int)>{};
-      for (final entry in faceIdToClusterId.entries) {
-        final detail = faceDetails[entry.key];
-        if (detail == null || detail.$2 == null) continue;
-        final species = detail.$1;
-        final vectorId = detail.$2!;
+      final emptyIds = <String>[];
+
+      for (final clusterId in clusterIds.toSet()) {
+        final faceIds = await _db.getPetFaceIdsForCluster(clusterId);
+        if (faceIds.isEmpty) {
+          emptyIds.add(clusterId);
+          continue;
+        }
+
+        final details = await _db.getPetFaceDetails(faceIds);
+        final vectorIds = <int>[];
+        int? species;
+        for (final d in details.values) {
+          species ??= d.$1;
+          if (d.$2 != null) vectorIds.add(d.$2!);
+        }
+        if (vectorIds.isEmpty || species == null) continue;
 
         final vdb = PetVectorDB.forModel(
           species: species,
           isFace: true,
           offline: isOfflineMode,
         );
-        final embs = await vdb.getEmbeddings([vectorId]);
+        final embs = await vdb.getEmbeddings(vectorIds);
         if (embs.isEmpty) continue;
 
-        // The single face embedding is the centroid.
-        summaries[entry.value] = (
-          embs.first.buffer.asUint8List(),
-          1,
+        // Mean centroid, L2-normalized.
+        final dim = embs.first.length;
+        final centroid = Float32List(dim);
+        for (final emb in embs) {
+          for (int i = 0; i < dim; i++) {
+            centroid[i] += emb[i];
+          }
+        }
+        final n = embs.length.toDouble();
+        double norm = 0;
+        for (int i = 0; i < dim; i++) {
+          centroid[i] /= n;
+          norm += centroid[i] * centroid[i];
+        }
+        norm = sqrt(norm);
+        if (norm > 0) {
+          for (int i = 0; i < dim; i++) {
+            centroid[i] /= norm;
+          }
+        }
+
+        summaries[clusterId] = (
+          centroid.buffer.asUint8List(),
+          faceIds.length,
           species,
         );
       }
 
+      for (final id in emptyIds) {
+        await _db.deletePetClusterSummary(id);
+      }
       if (summaries.isNotEmpty) {
         await _db.petClusterSummaryUpdate(summaries);
       }
     } catch (e, s) {
-      _logger.warning("Failed to create singleton summaries", e, s);
+      _logger.warning("Failed to recompute cluster summaries", e, s);
     }
   }
 }
