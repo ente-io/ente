@@ -121,7 +121,6 @@
   "importAegisGuide": "Gebruik de optie \"Kluis exporteren\" in de instellingen van Aegis.\n\nIndien uw kluis versleuteld is, dient u hiervan het wachtwoord in te voeren om de kluis te ontsleutelen.",
   "import2FasGuide": "Gebruik de optie \"Instellingen->Backup -Export\" in 2FAS.\n\nAls uw back-up is versleuteld, moet u het wachtwoord invoeren om de back-up te ontsleutelen",
   "importLastpassGuide": "Gebruik de optie \"Transfer accounts\" binnen Lastpass Authenticator instellingen en klik op \"Export accounts to file\". Importeer het gedownloade JSON bestand.",
-  "importProtonAuthGuide": "Gebruik de \"Export\" optie in je Proton Authenticator instellingen om je codes te exporteren.",
   "exportCodes": "Codes exporteren",
   "importLabel": "Importeren",
   "importInstruction": "Selecteer een bestand dat een lijst van uw codes in de volgende indeling bevat",
