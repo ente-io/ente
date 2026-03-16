@@ -17,24 +17,16 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
-    ListItemIcon,
-    ListItemText,
-    Menu,
-    MenuItem,
-    styled,
-} from "@mui/material";
+    FileActionMenu,
+    type FileActionMenuItem,
+    type ContextMenuPosition,
+} from "ente-new/photos/components/FileActionMenu";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { t } from "i18next";
 import React, { memo, useCallback, useMemo } from "react";
 
-/**
- * Position for anchoring the context menu.
- */
-export interface ContextMenuPosition {
-    top: number;
-    left: number;
-}
+export type { ContextMenuPosition } from "ente-new/photos/components/FileActionMenu";
 
 interface FileContextMenuProps {
     /** Whether the menu is open. */
@@ -100,10 +92,9 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
     ({ open, anchorPosition, onClose, actions, onAction }) => {
         const handleActionClick = useCallback(
             (action: FileContextAction) => {
-                onClose();
                 onAction(action);
             },
-            [onClose, onAction],
+            [onAction],
         );
 
         // Separate primary and destructive actions in a single pass
@@ -120,88 +111,38 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
             return [primary, destructive];
         }, [actions]);
 
+        const items = useMemo<FileActionMenuItem[]>(() => {
+            const actionToMenuItem = (
+                action: FileContextAction,
+                tone?: FileActionMenuItem["tone"],
+            ): FileActionMenuItem => {
+                const { label, Icon } = actionConfigs[action];
+                return {
+                    id: action,
+                    label: t(label),
+                    icon: Icon,
+                    onClick: () => handleActionClick(action),
+                    tone,
+                };
+            };
+
+            return [
+                ...primaryActions.map((action) => actionToMenuItem(action)),
+                ...destructiveActions.map((action) =>
+                    actionToMenuItem(action, "destructive"),
+                ),
+            ];
+        }, [destructiveActions, handleActionClick, primaryActions]);
+
         return (
-            <StyledMenu
+            <FileActionMenu
                 open={open}
                 onClose={onClose}
-                disableAutoFocusItem
-                anchorReference="anchorPosition"
                 anchorPosition={anchorPosition}
-                slotProps={{
-                    root: {
-                        onContextMenu: (e: React.MouseEvent) =>
-                            e.preventDefault(),
-                    },
-                }}
-            >
-                {primaryActions.map((action) => {
-                    const { label, Icon } = actionConfigs[action];
-                    return (
-                        <StyledMenuItem
-                            key={action}
-                            onClick={() => handleActionClick(action)}
-                        >
-                            <ListItemIcon>{Icon}</ListItemIcon>
-                            <ListItemText>{t(label)}</ListItemText>
-                        </StyledMenuItem>
-                    );
-                })}
-
-                {destructiveActions.map((action) => {
-                    const { label, Icon } = actionConfigs[action];
-                    return (
-                        <StyledMenuItem
-                            key={action}
-                            onClick={() => handleActionClick(action)}
-                            sx={{
-                                color: "critical.main",
-                                "&:hover": {
-                                    backgroundColor: "critical.main",
-                                    color: "#fff",
-                                },
-                            }}
-                        >
-                            <ListItemIcon sx={{ color: "inherit" }}>
-                                {Icon}
-                            </ListItemIcon>
-                            <ListItemText>{t(label)}</ListItemText>
-                        </StyledMenuItem>
-                    );
-                })}
-            </StyledMenu>
+                items={items}
+            />
         );
     },
 );
 
 FileContextMenu.displayName = "FileContextMenu";
-
-const StyledMenu = styled(Menu)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        backgroundColor: "#1f1f1f",
-        minWidth: 220,
-        borderRadius: 12,
-        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
-        marginTop: 6,
-    },
-    "& .MuiList-root": { padding: theme.spacing(1) },
-    ...theme.applyStyles("dark", {
-        "& .MuiPaper-root": {
-            backgroundColor: "#161616",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.6)",
-        },
-    }),
-}));
-
-const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: theme.spacing(1.5, 2),
-    borderRadius: 10,
-    color: "#f5f5f5",
-    fontSize: 15,
-    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.08)" },
-    "& .MuiListItemIcon-root": { minWidth: 0, color: "inherit" },
-    "& .MuiListItemText-root": { margin: 0 },
-    "& .MuiListItemText-primary": { color: "inherit", fontSize: "inherit" },
-}));

@@ -13,8 +13,6 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Menu,
-    MenuItem,
     Stack,
     styled,
     Typography,
@@ -56,6 +54,11 @@ import {
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
 import {
+    FileActionMenu,
+    type ContextMenuPosition,
+    type FileActionMenuItem,
+} from "ente-new/photos/components/FileActionMenu";
+import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
@@ -95,6 +98,33 @@ import {
 import { PublicLikeModal } from "./PublicLikeModal";
 
 const fileViewerBackStateKey = "__enteFileViewerBackState";
+const viewerContextMenuBlockedTargetSelector = [
+    ".pswp__top-bar",
+    ".pswp__caption",
+    ".pswp__caption-more",
+    ".pswp__action-buttons",
+    ".pswp__action-button",
+    ".pswp__button",
+    "button",
+    "a",
+    "input",
+    "textarea",
+    "select",
+    "option",
+    '[role="button"]',
+    '[role="menuitem"]',
+    '[role="textbox"]',
+    '[role="combobox"]',
+    '[contenteditable="true"]',
+    "media-play-button",
+    "media-mute-button",
+    "media-pip-button",
+    "media-fullscreen-button",
+    "media-time-range",
+    "media-settings-menu-button",
+    "media-chrome-menu",
+    "media-chrome-menu-button",
+].join(", ");
 
 const addFileViewerBackStateMarker = (state: unknown, marker: string) =>
     state && typeof state == "object"
@@ -108,6 +138,10 @@ const hasFileViewerBackStateMarker = (state: unknown, marker: string) =>
     !!state &&
     typeof state == "object" &&
     (state as Record<string, unknown>)[fileViewerBackStateKey] == marker;
+
+const shouldOpenViewerContextMenu = (target: EventTarget | null) =>
+    target instanceof Element &&
+    !target.closest(viewerContextMenuBlockedTargetSelector);
 
 /**
  * Derived data for a file that is needed to display the file viewer controls
@@ -505,6 +539,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openAddNameModal, setOpenAddNameModal] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
+    const [contextMenuPosition, setContextMenuPosition] =
+        useState<ContextMenuPosition>();
     const [openImageEditor, setOpenImageEditor] = useState(false);
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
     const [openShortcuts, setOpenShortcuts] = useState(false);
@@ -558,6 +594,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
     }, [fileNormalCollectionIDs]);
+
+    const viewerBaseMenuItemsRef = useRef<FileActionMenuItem[]>([]);
 
     // Cache for collection keys to avoid refetching during polling
     const collectionCacheRef = useRef<
@@ -657,6 +695,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
+        setContextMenuPosition(undefined);
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
@@ -1379,35 +1418,54 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [onDownload],
     );
 
-    // Callback invoked when the download action is triggered by activating the
-    // download menu item in the more menu.
-    //
-    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
-    const handleDownloadMenuAction = () => {
-        handleMoreMenuCloseIfNeeded();
-        onDownload!(activeAnnotatedFile!.file);
-    };
-
-    // Callback invoked when the send link action is triggered by activating the
-    // send link menu item in the more menu.
-    //
-    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
-    const handleSendLinkMenuAction = () => {
-        handleMoreMenuCloseIfNeeded();
-        onSendLink!(activeAnnotatedFile!.file);
-    };
-
     const handleMore = useCallback(
-        (buttonElement: HTMLElement) => setMoreMenuAnchorEl(buttonElement),
+        (buttonElement: HTMLElement) => {
+            setContextMenuPosition(undefined);
+            setMoreMenuAnchorEl(buttonElement);
+        },
         [],
     );
 
     const handleMoreMenuCloseIfNeeded = useCallback(() => {
+        setContextMenuPosition(undefined);
         setMoreMenuAnchorEl((el) => {
             if (el) resetMoreMenuButtonOnMenuClose(el);
             return null;
         });
     }, []);
+
+    // Callback invoked when the download action is triggered by activating the
+    // download menu item in the more menu.
+    const handleDownloadMenuAction = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
+        onDownload!(activeAnnotatedFile!.file);
+    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onDownload]);
+
+    // Callback invoked when the send link action is triggered by activating the
+    // send link menu item in the more menu.
+    const handleSendLinkMenuAction = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
+        onSendLink!(activeAnnotatedFile!.file);
+    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onSendLink]);
+
+    const handleViewerContextMenu = useCallback(
+        (event: MouseEvent) => {
+            if (
+                !viewerBaseMenuItemsRef.current.length ||
+                !shouldOpenViewerContextMenu(event.target)
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            handleMoreMenuCloseIfNeeded();
+            setContextMenuPosition({
+                top: event.clientY,
+                left: event.clientX,
+            });
+        },
+        [handleMoreMenuCloseIfNeeded],
+    );
 
     const handleConfirmDelete = useMemo(() => {
         return onDelete
@@ -1449,7 +1507,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleAddFileToCollection = useMemo(() => {
-        if (!onAddFileToCollection || !activeAnnotatedFile) return undefined;
+        if (
+            !onAddFileToCollection ||
+            !activeAnnotatedFile?.annotation.isOwnFile
+        ) {
+            return undefined;
+        }
+
         return () => {
             handleMoreMenuCloseIfNeeded();
             const sourceSummaryID = fileNormalCollectionIDs
@@ -1817,6 +1881,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             openLikeAlbumSelector ||
             openPublicLikeModal ||
             !!moreMenuAnchorEl ||
+            !!contextMenuPosition ||
             openImageEditor ||
             openConfirmDelete ||
             openShortcuts
@@ -1850,6 +1915,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         openLikeAlbumSelector,
         openPublicLikeModal,
         moreMenuAnchorEl,
+        contextMenuPosition,
         openImageEditor,
         openConfirmDelete,
         openShortcuts,
@@ -1910,6 +1976,127 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
         ]);
+
+    const viewerBaseMenuItems = useMemo<FileActionMenuItem[]>(() => {
+        const items: FileActionMenuItem[] = [];
+
+        if (activeAnnotatedFile?.annotation.showDownload == "menu") {
+            items.push({
+                id: "download",
+                label: t("download"),
+                icon: <FileDownloadOutlinedIcon />,
+                onClick: handleDownloadMenuAction,
+            });
+        }
+
+        if (
+            activeAnnotatedFile?.annotation.isOwnFile &&
+            !isInTrashSection &&
+            onSendLink
+        ) {
+            items.push({
+                id: "send-link",
+                label: "Send link",
+                icon: <HugeiconsIcon icon={Navigation03Icon} size={20} />,
+                onClick: handleSendLinkMenuAction,
+            });
+        }
+
+        if (activeAnnotatedFile?.annotation.showDelete && handleConfirmDelete) {
+            items.push({
+                id: "delete",
+                label: t("delete"),
+                icon: <DeleteIcon />,
+                onClick: handleConfirmDelete,
+                tone: "destructive",
+            });
+        }
+
+        if (isArchived !== undefined && toggleArchived) {
+            items.push({
+                id: "toggle-archive",
+                label: isArchived ? t("unarchive") : t("archive"),
+                icon: isArchived ? <UnArchiveIcon /> : <ArchiveOutlinedIcon />,
+                onClick: toggleArchived,
+                disabled: isPendingToggleArchive,
+            });
+        }
+
+        if (handleAddFileToCollection) {
+            items.push({
+                id: "add-to-album",
+                label: t("add_to_album"),
+                icon: <AddIcon />,
+                onClick: handleAddFileToCollection,
+            });
+        }
+
+        if (canCopyImage()) {
+            items.push({
+                id: "copy-as-png",
+                label: t("copy_as_png"),
+                icon: (
+                    <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
+                ),
+                onClick: handleCopyImage,
+            });
+        }
+
+        if (activeAnnotatedFile?.annotation.showEditImage && handleEditImage) {
+            items.push({
+                id: "edit-image",
+                label: t("edit_image"),
+                icon: <EditIcon />,
+                onClick: handleEditImage,
+            });
+        }
+
+        items.push({
+            id: "toggle-fullscreen",
+            label: isFullscreen ? t("exit_fullscreen") : t("go_fullscreen"),
+            icon: isFullscreen ? (
+                <FullscreenExitOutlinedIcon />
+            ) : (
+                <FullscreenOutlinedIcon />
+            ),
+            onClick: handleToggleFullscreen,
+        });
+
+        return items;
+    }, [
+        activeAnnotatedFile,
+        canCopyImage,
+        handleAddFileToCollection,
+        handleConfirmDelete,
+        handleCopyImage,
+        handleDownloadMenuAction,
+        handleEditImage,
+        handleSendLinkMenuAction,
+        handleToggleFullscreen,
+        isArchived,
+        isFullscreen,
+        isInTrashSection,
+        isPendingToggleArchive,
+        onSendLink,
+        toggleArchived,
+    ]);
+
+    const viewerMoreMenuItems = useMemo<FileActionMenuItem[]>(
+        () => [
+            ...viewerBaseMenuItems,
+            {
+                id: "shortcuts",
+                label: t("shortcuts"),
+                onClick: handleShortcuts,
+                tone: "muted",
+            },
+        ],
+        [handleShortcuts, viewerBaseMenuItems],
+    );
+
+    useEffect(() => {
+        viewerBaseMenuItemsRef.current = viewerBaseMenuItems;
+    }, [viewerBaseMenuItems]);
 
     const performKeyAction = useCallback<
         FileViewerPhotoSwipeDelegate["performKeyAction"]
@@ -2514,6 +2701,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onLikeClick: handleLikeClick,
                 onDownload: handleDownloadBarAction,
                 onMore: handleMore,
+                onViewerContextMenu: handleViewerContextMenu,
             });
 
             psRef.current = pswp;
@@ -2555,6 +2743,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleLikeClick,
         handleDownloadBarAction,
         handleMore,
+        handleViewerContextMenu,
     ]);
 
     useEffect(() => {
@@ -2694,100 +2883,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleAddNameModalClose}
                 onSubmit={handleAddNameSubmit}
             />
-            <MoreMenu
+            <FileActionMenu
                 open={!!moreMenuAnchorEl}
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
-                disableAutoFocusItem
-                slotProps={{ list: { "aria-labelledby": moreButtonID } }}
-            >
-                {activeAnnotatedFile.annotation.showDownload == "menu" && (
-                    <MoreMenuItem onClick={handleDownloadMenuAction}>
-                        <MoreMenuItemTitle>{t("download")}</MoreMenuItemTitle>
-                        <FileDownloadOutlinedIcon />
-                    </MoreMenuItem>
-                )}
-                {activeAnnotatedFile.annotation.isOwnFile &&
-                    !isInTrashSection &&
-                    onSendLink && (
-                        <MoreMenuItem onClick={handleSendLinkMenuAction}>
-                            <MoreMenuItemTitle>Send link</MoreMenuItemTitle>
-                            <HugeiconsIcon icon={Navigation03Icon} size={20} />
-                        </MoreMenuItem>
-                    )}
-                {activeAnnotatedFile.annotation.showDelete && (
-                    <MoreMenuItem onClick={handleConfirmDelete}>
-                        <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>
-                        <DeleteIcon />
-                    </MoreMenuItem>
-                )}
-                {isArchived !== undefined && (
-                    <MoreMenuItem
-                        onClick={toggleArchived}
-                        disabled={isPendingToggleArchive}
-                    >
-                        <MoreMenuItemTitle>
-                            {isArchived ? t("unarchive") : t("archive")}
-                        </MoreMenuItemTitle>
-                        {isArchived ? (
-                            <UnArchiveIcon />
-                        ) : (
-                            <ArchiveOutlinedIcon />
-                        )}
-                    </MoreMenuItem>
-                )}
-                {handleAddFileToCollection &&
-                    activeAnnotatedFile.annotation.isOwnFile && (
-                        <MoreMenuItem onClick={handleAddFileToCollection}>
-                            <MoreMenuItemTitle>
-                                {t("add_to_album")}
-                            </MoreMenuItemTitle>
-                            <AddIcon />
-                        </MoreMenuItem>
-                    )}
-                {canCopyImage() && (
-                    <MoreMenuItem onClick={handleCopyImage}>
-                        <MoreMenuItemTitle>
-                            {t("copy_as_png")}
-                        </MoreMenuItemTitle>
-                        {/* Tweak icon size to visually fit better with neighbours */}
-                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
-                    </MoreMenuItem>
-                )}
-
-                {activeAnnotatedFile.annotation.showEditImage && (
-                    <MoreMenuItem onClick={handleEditImage}>
-                        <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>
-                        <EditIcon />
-                    </MoreMenuItem>
-                )}
-                <MoreMenuItem
-                    onClick={handleToggleFullscreen}
-                    divider
-                    sx={{
-                        borderColor: "fixed.dark.divider",
-                        /* 12px + 2px */
-                        pb: "14px",
-                    }}
-                >
-                    <MoreMenuItemTitle>
-                        {isFullscreen
-                            ? t("exit_fullscreen")
-                            : t("go_fullscreen")}
-                    </MoreMenuItemTitle>
-                    {isFullscreen ? (
-                        <FullscreenExitOutlinedIcon />
-                    ) : (
-                        <FullscreenOutlinedIcon />
-                    )}
-                </MoreMenuItem>
-                <MoreMenuItem onClick={handleShortcuts} sx={{ mt: "2px" }}>
-                    <Typography sx={{ color: "fixed.dark.text.faint" }}>
-                        {t("shortcuts")}
-                    </Typography>
-                </MoreMenuItem>
-            </MoreMenu>
+                labelledBy={moreButtonID}
+                items={viewerMoreMenuItems}
+            />
+            <FileActionMenu
+                open={!!contextMenuPosition}
+                onClose={handleMoreMenuCloseIfNeeded}
+                anchorPosition={contextMenuPosition}
+                items={viewerBaseMenuItems}
+            />
             <ConfirmDeleteFileDialog
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
@@ -2809,49 +2918,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         </>
     );
 };
-
-const MoreMenu = styled(Menu)(
-    ({ theme }) => `
-    & .MuiPaper-root {
-        background-color: ${theme.vars.palette.fixed.dark.background.paper};
-    }
-    & .MuiList-root {
-        padding-block: 2px;
-    }
-`,
-);
-
-const MoreMenuItem = styled(MenuItem)(
-    ({ theme }) => `
-    min-width: 210px;
-
-    /* MUI MenuItem default implementation has a minHeight of "48px" below the
-       "sm" breakpoint, and auto after it. We always want the same height, so
-       set minHeight auto and use an explicit padding always to come out to 44px
-       (20px (icon or Typography height + 12 + 12) */
-    padding-block: 12px;
-    min-height: auto;
-
-    gap: 1;
-    justify-content: space-between;
-    align-items: center;
-
-    /* Same as other controls on the PhotoSwipe UI */
-    color: rgba(255 255 255 / 0.85);
-    &:hover {
-        color: rgba(255 255 255 / 1);
-        background-color: ${theme.vars.palette.fixed.dark.background.paper2}
-    }
-
-    .MuiSvgIcon-root {
-        font-size: 20px;
-    }
-`,
-);
-
-const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
-);
 
 type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
     /**

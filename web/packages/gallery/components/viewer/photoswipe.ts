@@ -203,6 +203,10 @@ type FileViewerPhotoSwipeOptions = Pick<
      * @param buttonElement The more button DOM element.
      */
     onMore: (buttonElement: HTMLElement) => void;
+    /**
+     * Called when the user right-clicks within the viewer canvas.
+     */
+    onViewerContextMenu: (event: MouseEvent) => void;
 };
 
 /**
@@ -265,6 +269,7 @@ export class FileViewerPhotoSwipe {
         onLikeClick,
         onDownload,
         onMore,
+        onViewerContextMenu,
     }: FileViewerPhotoSwipeOptions) {
         const pswp = new PhotoSwipe({
             // Opaque background.
@@ -1927,6 +1932,7 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
+            pswp.element!.addEventListener("contextmenu", onViewerContextMenu);
             document.addEventListener(
                 "fullscreenchange",
                 handleFullscreenChange,
@@ -1939,6 +1945,10 @@ export class FileViewerPhotoSwipe {
             pswp.element?.removeEventListener(
                 "mousedown",
                 blurMediaChromeFocus,
+            );
+            pswp.element?.removeEventListener(
+                "contextmenu",
+                onViewerContextMenu,
             );
             document.removeEventListener(
                 "fullscreenchange",
