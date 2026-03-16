@@ -16,13 +16,13 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import {
     createDocumentIcon,
     createDocumentIconConfig,
     lockerItemIcon,
     lockerItemIconConfig,
 } from "components/lockerItemIcons";
-import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";

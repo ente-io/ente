@@ -1,3 +1,1 @@
-export const lockerDialogPaperSx = {
-    borderRadius: "20px",
-};
+export const lockerDialogPaperSx = { borderRadius: "20px" };

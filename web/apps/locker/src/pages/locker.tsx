@@ -800,8 +800,7 @@ const Page: React.FC = () => {
                             ...theme.applyStyles("light", {
                                 background:
                                     "linear-gradient(180deg, rgba(16, 113, 255, 0.10) 0%, rgba(16, 113, 255, 0.06) 100%)",
-                                boxShadow:
-                                    "0 18px 40px rgba(15, 23, 42, 0.12)",
+                                boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
                             }),
                         })}
                     >

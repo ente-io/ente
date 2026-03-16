@@ -313,9 +313,7 @@ const SidebarRow: React.FC<{
                 borderColor: theme.vars.palette.primary.main,
                 backgroundColor: "rgba(16, 113, 255, 0.10)",
             }),
-            "&.Mui-selected": {
-                backgroundColor: "rgba(16, 113, 255, 0.10)",
-            },
+            "&.Mui-selected": { backgroundColor: "rgba(16, 113, 255, 0.10)" },
             "&.Mui-selected:hover": {
                 backgroundColor: "rgba(16, 113, 255, 0.14)",
             },

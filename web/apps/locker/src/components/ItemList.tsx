@@ -715,8 +715,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                                 },
                                                 "100%": {
                                                     opacity: 1,
-                                                    transform:
-                                                        "translateY(0)",
+                                                    transform: "translateY(0)",
                                                 },
                                             },
                                             animation:
@@ -1297,14 +1296,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                     },
                 }}
             >
-                <Box
-                    sx={{
-                        px: 1,
-                        pt: 0,
-                        pb: 0,
-                        width: "fit-content",
-                    }}
-                >
+                <Box sx={{ px: 1, pt: 0, pb: 0, width: "fit-content" }}>
                     {dropdownHomeCollections.map((collection) => {
                         const isSelected = homeSelectedCollectionIDs.includes(
                             collection.id,
@@ -1828,13 +1820,7 @@ const CollectionChipFilters: React.FC<{
                 );
 
                 return (
-                    <Box
-                        key={collection.id}
-                        sx={{
-                            pr: 1,
-                            flexShrink: 0,
-                        }}
-                    >
+                    <Box key={collection.id} sx={{ pr: 1, flexShrink: 0 }}>
                         <Chip
                             clickable
                             label={collection.name}
@@ -1906,10 +1892,7 @@ const CollectionFilterChip: React.FC<{
                 boxShadow: selected
                     ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
                     : "none",
-                "& .MuiChip-icon": {
-                    color: "inherit",
-                    m: 0,
-                },
+                "& .MuiChip-icon": { color: "inherit", m: 0 },
                 "& .MuiChip-label": { display: "none" },
                 px: 1.125,
                 "&:hover": {
