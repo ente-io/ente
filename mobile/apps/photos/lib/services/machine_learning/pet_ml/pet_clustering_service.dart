@@ -242,8 +242,10 @@ class PetClusteringService {
     }
 
     // Delete existing summaries for clusters that no longer have any face
-    // assignments.
-    final activeClusterIds = faceToCluster.values.toSet();
+    // assignments in the DB. Query the DB directly rather than relying on
+    // faceToCluster, which only covers the current Rust result and may
+    // miss clusters with retained assignments from unclustered faces.
+    final activeClusterIds = await mlDataDB.getActivePetClusterIds(species);
     final staleIds = existingSummaries.keys
         .where((id) => !activeClusterIds.contains(id))
         .toList();
@@ -577,6 +579,19 @@ extension PetClusteringDB on MLDataDB {
       );
     }
     return result;
+  }
+
+  /// Get all distinct cluster IDs that have at least one face for a species.
+  Future<Set<String>> getActivePetClusterIds(int species) async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      'SELECT DISTINCT fc.$clusterIDColumn '
+      'FROM $petFaceClustersTable fc '
+      'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+      'WHERE f.$speciesColumn = ?',
+      [species],
+    );
+    return rows.map((r) => r[clusterIDColumn] as String).toSet();
   }
 
   /// Get all petFaceIds assigned to a given cluster.
