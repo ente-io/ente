@@ -534,6 +534,7 @@ const Page: React.FC = () => {
             if (
                 droppedItems.length > 0 &&
                 (droppedItems.length !== 1 ||
+                    droppedItem === undefined ||
                     droppedItem.kind !== "file" ||
                     droppedItem.webkitGetAsEntry()?.isDirectory)
             ) {
