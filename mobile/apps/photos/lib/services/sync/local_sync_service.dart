@@ -238,7 +238,7 @@ class LocalSyncService {
         ),
       );
     }
-    if (flagService.internalUser) {
+    if (flagService.syncRecoveryDiagnostics) {
       final int newMappingCount =
           localDiffResult.newPathToLocalIDs?.values.fold<int>(
                 0,
@@ -330,7 +330,7 @@ class LocalSyncService {
     required int fromTime,
     required int toTime,
   }) async {
-    final bool isInternalUser = flagService.internalUser;
+    final bool shouldLogSyncRecovery = flagService.syncRecoveryDiagnostics;
     final Tuple2<List<LocalPathAsset>, List<EnteFile>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime);
 
@@ -361,7 +361,7 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      if (isInternalUser && allFiles.length != files.length) {
+      if (shouldLogSyncRecovery && allFiles.length != files.length) {
         final sampleLocalIDs =
             allFiles.take(3).map((file) => file.localID).toList();
         _logger.internalInfo(
