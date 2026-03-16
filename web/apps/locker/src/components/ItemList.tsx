@@ -55,6 +55,17 @@ import { ItemDetailView } from "./ItemDetailView";
 import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
 import { lockerDialogPaperSx } from "./lockerDialogStyles";
 
+const uniqueCollectionsByID = (collections: LockerCollection[]) => {
+    const seen = new Set<number>();
+    return collections.filter((collection) => {
+        if (seen.has(collection.id)) {
+            return false;
+        }
+        seen.add(collection.id);
+        return true;
+    });
+};
+
 interface ItemListProps {
     collections: LockerCollection[];
     masterKey?: string;
@@ -137,7 +148,7 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     const displayCollections = useMemo(
-        () => visibleLockerCollections(collections),
+        () => uniqueCollectionsByID(visibleLockerCollections(collections)),
         [collections],
     );
     const allItems = useMemo(() => {
@@ -242,6 +253,42 @@ export const ItemList: React.FC<ItemListProps> = ({
             ),
         );
     }, [homeSelectedCollectionIDs, isHomeView, sortedItems]);
+    const orderedHomeCollections = useMemo(() => {
+        if (!isHomeView || homeSelectedCollectionIDs.length === 0) {
+            return displayCollections;
+        }
+
+        const selectedCollectionIDSet = new Set(homeSelectedCollectionIDs);
+        const availableCollectionIDs = new Set<number>();
+        for (const item of homeFilteredItems) {
+            for (const collectionID of item.collectionIDs) {
+                availableCollectionIDs.add(collectionID);
+            }
+        }
+        for (const collectionID of homeSelectedCollectionIDs) {
+            availableCollectionIDs.add(collectionID);
+        }
+
+        const selectedCollections = displayCollections.filter((collection) =>
+            selectedCollectionIDSet.has(collection.id),
+        );
+        const remainingCollections = displayCollections.filter(
+            (collection) =>
+                availableCollectionIDs.has(collection.id) &&
+                !selectedCollectionIDSet.has(collection.id),
+        );
+
+        return [...selectedCollections, ...remainingCollections];
+    }, [
+        displayCollections,
+        homeFilteredItems,
+        homeSelectedCollectionIDs,
+        isHomeView,
+    ]);
+    const dropdownHomeCollections = useMemo(
+        () => displayCollections,
+        [displayCollections],
+    );
     const visibleItems = useMemo(() => {
         if (isCollectionsView) {
             return [];
@@ -653,9 +700,31 @@ export const ItemList: React.FC<ItemListProps> = ({
                                         }
                                         onClick={openCollectionFilterMenu}
                                     />
-                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Box
+                                        key={orderedHomeCollections
+                                            .map((collection) => collection.id)
+                                            .join("-")}
+                                        sx={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            "@keyframes chipBarRefresh": {
+                                                "0%": {
+                                                    opacity: 0.7,
+                                                    transform:
+                                                        "translateY(2px)",
+                                                },
+                                                "100%": {
+                                                    opacity: 1,
+                                                    transform:
+                                                        "translateY(0)",
+                                                },
+                                            },
+                                            animation:
+                                                "chipBarRefresh 220ms ease-out",
+                                        }}
+                                    >
                                         <CollectionChipFilters
-                                            collections={displayCollections}
+                                            collections={orderedHomeCollections}
                                             selectedCollectionIDs={
                                                 homeSelectedCollectionIDs
                                             }
@@ -1236,7 +1305,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                         width: "fit-content",
                     }}
                 >
-                    {displayCollections.map((collection) => {
+                    {dropdownHomeCollections.map((collection) => {
                         const isSelected = homeSelectedCollectionIDs.includes(
                             collection.id,
                         );
@@ -1339,7 +1408,10 @@ export const ItemList: React.FC<ItemListProps> = ({
                         >
                             <Button
                                 color="secondary"
-                                onClick={clearHomeCollectionSelection}
+                                onClick={() => {
+                                    clearHomeCollectionSelection();
+                                    closeCollectionFilterMenu();
+                                }}
                                 sx={{
                                     minWidth: "auto",
                                     px: 1,
@@ -1744,7 +1816,7 @@ const CollectionChipFilters: React.FC<{
                 overflowX: "auto",
                 overflowY: "hidden",
                 justifyContent: "flex-start",
-                gap: 1,
+                gap: 0,
                 pb: 0.5,
                 scrollbarWidth: "none",
                 "&::-webkit-scrollbar": { display: "none" },
@@ -1756,47 +1828,56 @@ const CollectionChipFilters: React.FC<{
                 );
 
                 return (
-                    <Chip
+                    <Box
                         key={collection.id}
-                        clickable
-                        label={collection.name}
-                        onClick={() => onToggleCollection(collection.id)}
-                        sx={(theme) => ({
-                            height: 36,
+                        sx={{
+                            pr: 1,
                             flexShrink: 0,
-                            borderRadius: "999px",
-                            fontWeight: isSelected ? 700 : 600,
-                            color: isSelected
-                                ? theme.vars.palette.primary.main
-                                : theme.vars.palette.text.base,
-                            backgroundColor: isSelected
-                                ? "rgba(16, 113, 255, 0.10)"
-                                : theme.vars.palette.fill.faint,
-                            border: "1px solid transparent",
-                            boxShadow: isSelected
-                                ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
-                                : "none",
-                            "& .MuiChip-label": { px: 1.5 },
-                            "&:hover": {
-                                backgroundColor: isSelected
-                                    ? "rgba(16, 113, 255, 0.14)"
-                                    : theme.vars.palette.fill.faintHover,
-                            },
-                            ...theme.applyStyles("light", {
+                        }}
+                    >
+                        <Chip
+                            clickable
+                            label={collection.name}
+                            onClick={() => onToggleCollection(collection.id)}
+                            sx={(theme) => ({
+                                height: 36,
+                                flexShrink: 0,
+                                borderRadius: "999px",
+                                fontWeight: isSelected ? 700 : 600,
+                                color: isSelected
+                                    ? theme.vars.palette.primary.main
+                                    : theme.vars.palette.text.base,
                                 backgroundColor: isSelected
                                     ? "rgba(16, 113, 255, 0.10)"
-                                    : "#FFFFFF",
-                                border: isSelected
-                                    ? "1px solid rgba(16, 113, 255, 0.24)"
-                                    : "1px solid rgba(17, 24, 39, 0.06)",
+                                    : theme.vars.palette.fill.faint,
+                                border: "1px solid transparent",
+                                boxShadow: isSelected
+                                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
+                                    : "none",
+                                transition:
+                                    "background-color 180ms ease, color 180ms ease, box-shadow 180ms ease",
+                                "& .MuiChip-label": { px: 1.5 },
                                 "&:hover": {
                                     backgroundColor: isSelected
                                         ? "rgba(16, 113, 255, 0.14)"
-                                        : "#F8FAFC",
+                                        : theme.vars.palette.fill.faintHover,
                                 },
-                            }),
-                        })}
-                    />
+                                ...theme.applyStyles("light", {
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.10)"
+                                        : "#FFFFFF",
+                                    border: isSelected
+                                        ? "1px solid rgba(16, 113, 255, 0.24)"
+                                        : "1px solid rgba(17, 24, 39, 0.06)",
+                                    "&:hover": {
+                                        backgroundColor: isSelected
+                                            ? "rgba(16, 113, 255, 0.14)"
+                                            : "#F8FAFC",
+                                    },
+                                }),
+                            })}
+                        />
+                    </Box>
                 );
             })}
         </Stack>
