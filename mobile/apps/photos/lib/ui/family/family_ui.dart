@@ -68,5 +68,5 @@ class FamilyPageScaffold extends StatelessWidget {
 }
 
 void showFamilySnackBar(BuildContext context, String message) {
-  showShortToast(context, message);
+  showToast(context, message);
 }
