@@ -874,6 +874,11 @@ const TrashDiffResponse = z.object({
     hasMore: z.boolean(),
 });
 
+interface LockerTrashData {
+    items: LockerItem[];
+    lastUpdatedAt: number;
+}
+
 /**
  * Fetch trashed Locker items from remote, decrypt them, and return them
  * ready for display. Must be called after {@link fetchLockerData} so that
@@ -881,7 +886,7 @@ const TrashDiffResponse = z.object({
  */
 export const fetchLockerTrash = async (
     masterKey: string,
-): Promise<LockerItem[]> => {
+): Promise<LockerTrashData> => {
     const trashItems: LockerItem[] = [];
     let sinceTime = 0;
     let hasMore = true;
@@ -968,7 +973,7 @@ export const fetchLockerTrash = async (
 
     // Sort by most recently trashed first
     trashItems.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-    return trashItems;
+    return { items: trashItems, lastUpdatedAt: sinceTime };
 };
 
 // ---------------------------------------------------------------------------
@@ -1459,14 +1464,14 @@ export const permanentlyDeleteFromTrash = async (
 /**
  * Empty the entire trash.
  */
-export const emptyTrash = async (): Promise<void> => {
+export const emptyTrash = async (lastUpdatedAt: number): Promise<void> => {
     const res = await fetch(await apiURL("/trash/empty"), {
         method: "POST",
         headers: {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ lastUpdatedAt }),
     });
     ensureOk(res);
 };
