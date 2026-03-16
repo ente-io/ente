@@ -314,7 +314,12 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
       return;
     }
     if (result?.invitesSent ?? false) {
-      showFamilySnackBar(context, AppLocalizations.of(context).invitesSent);
+      showFamilySnackBar(
+        context,
+        AppLocalizations.of(context).invitesSentCount(
+          count: result!.sentCount,
+        ),
+      );
     }
   }
 

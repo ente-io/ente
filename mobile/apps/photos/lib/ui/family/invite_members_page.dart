@@ -14,11 +14,13 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class InviteMembersPageResult {
-  const InviteMembersPageResult._(this.invitesSent);
+  const InviteMembersPageResult._(this.sentCount);
 
-  const InviteMembersPageResult.invitesSent() : this._(true);
+  const InviteMembersPageResult.invitesSent(int sentCount) : this._(sentCount);
 
-  final bool invitesSent;
+  final int sentCount;
+
+  bool get invitesSent => sentCount > 0;
 }
 
 class InviteMembersPage extends StatefulWidget {
@@ -339,7 +341,9 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
       }
 
       if (!result.hasFailures) {
-        Navigator.of(context).pop(const InviteMembersPageResult.invitesSent());
+        Navigator.of(context).pop(
+          InviteMembersPageResult.invitesSent(_emails.length),
+        );
         return;
       }
 

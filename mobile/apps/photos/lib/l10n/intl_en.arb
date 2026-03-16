@@ -724,7 +724,15 @@
       }
     }
   },
-  "invitesSent": "Invites sent",
+  "invitesSentCount": "{count, plural, =1 {Invite sent} other {Invites sent}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "failedToInvite": "Couldn't invite {email}",
   "@failedToInvite": {
     "placeholders": {
