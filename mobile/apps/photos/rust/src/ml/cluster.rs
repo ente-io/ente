@@ -495,14 +495,6 @@ pub fn run_face_clustering_incremental(
         };
 
         result.cluster_centroids.insert(cluster_id.clone(), merged);
-
-        // Update count to include historical members so the persisted
-        // summary reflects the total cluster size, not just this bucket.
-        if let Some(&old_count) = existing_counts.get(cluster_id)
-            && old_count > 0
-        {
-            *result.cluster_counts.get_mut(cluster_id).unwrap() += old_count;
-        }
     }
 
     Some(result)

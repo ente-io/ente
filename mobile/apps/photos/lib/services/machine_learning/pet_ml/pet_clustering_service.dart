@@ -212,9 +212,10 @@ class PetClusteringService {
       await mlDataDB.updatePetFaceIdToClusterId(faceToCluster);
     }
 
-    // Recompute summaries from the final assignments (after feedback
-    // overrides) so that centroids and counts reflect the actual cluster
-    // membership, not the pre-override Rust output.
+    // Recompute summaries from the DB's actual cluster membership (after
+    // the upsert), not just faceToCluster. Rust may leave some faces
+    // unclustered (nUnclustered > 0), and those retain their previous DB
+    // assignments which must be reflected in the summary.
     final embeddingByFaceId = <String, Float64List>{};
     for (final input in clusterInputs) {
       if (input.faceEmbedding.isNotEmpty) {
@@ -224,16 +225,16 @@ class PetClusteringService {
       }
     }
 
+    final dbClusterToFaces = await mlDataDB.getPetClusterToFaceIds(species);
     final clusterSummaries = <String, (Uint8List, int, int)>{};
-    final clusterMembers = <String, List<Float64List>>{};
-    for (final entry in faceToCluster.entries) {
-      final emb = embeddingByFaceId[entry.key];
-      if (emb != null) {
-        clusterMembers.putIfAbsent(entry.value, () => []).add(emb);
+    for (final entry in dbClusterToFaces.entries) {
+      final embs = <Float64List>[];
+      for (final faceId in entry.value) {
+        final emb = embeddingByFaceId[faceId];
+        if (emb != null) embs.add(emb);
       }
-    }
-    for (final entry in clusterMembers.entries) {
-      final centroid = _meanCentroid(entry.value);
+      if (embs.isEmpty) continue;
+      final centroid = _meanCentroid(embs);
       clusterSummaries[entry.key] = (
         _doublesToUint8List(centroid),
         entry.value.length,
@@ -557,6 +558,27 @@ extension PetClusteringDB on MLDataDB {
     ''';
     final rows = await db.getAll(query, [clusterId, ...fileIds]);
     return rows.map((r) => r[petFaceIDColumn] as String).toList();
+  }
+
+  /// Get cluster → list of petFaceIds for a given species.
+  Future<Map<String, List<String>>> getPetClusterToFaceIds(
+    int species,
+  ) async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      'SELECT fc.$clusterIDColumn, fc.$petFaceIDColumn '
+      'FROM $petFaceClustersTable fc '
+      'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+      'WHERE f.$speciesColumn = ?',
+      [species],
+    );
+    final result = <String, List<String>>{};
+    for (final r in rows) {
+      result
+          .putIfAbsent(r[clusterIDColumn] as String, () => [])
+          .add(r[petFaceIDColumn] as String);
+    }
+    return result;
   }
 
   /// Get species and faceVectorId for given petFaceIds.
