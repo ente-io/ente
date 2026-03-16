@@ -73,7 +73,7 @@ described below:
 Start by cloning Ente's repository from GitHub to your local machine.
 
 ```shell
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 ```
 
 ## Step 2: Configure PostgreSQL database

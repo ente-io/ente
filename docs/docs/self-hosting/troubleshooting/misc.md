@@ -20,7 +20,7 @@ However, your web server might be setting some CSP policy. If so, then you will
 need to ensure that all necessary CSP headers are set.
 
 You can see the current
-[\_headers](https://github.com/ente-io/ente/blob/main/web/apps/photos/public/_headers)
+[\_headers](https://github.com/ente/ente/blob/main/web/apps/photos/public/_headers)
 file contents to use a template for your CSP policy. The
 `Content-Security-Policy-Report-Only` value will show you the CSP headers in
 "dry run" report-only mode we're setting - you can use that as a template,

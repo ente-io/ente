@@ -328,7 +328,7 @@ DEPENDENCIES:
   - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente/ffmpeg-kit-custom-repo-ios.git:
     - ffmpeg_kit_custom
   trunk:
     - Firebase

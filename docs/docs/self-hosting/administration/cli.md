@@ -10,7 +10,7 @@ basic administrative actions.
 
 ::: tip Installing Ente CLI
 
-For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente-io/ente/tree/main/cli/README.md).
+For instructions on installing the Ente CLI, see the [README available on Github](https://github.com/ente/ente/tree/main/cli/README.md).
 
 :::
 
@@ -81,9 +81,9 @@ If the commands are failing, ensure:
 :::
 
 For more information, check out the documentation for setting
-[storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
+[storage and account validity](https://github.com/ente/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
 using the CLI.
 
 ## References
 
-1. [Ente CLI Documentation](https://github.com/ente-io/ente/blob/main/cli/docs/generated)
+1. [Ente CLI Documentation](https://github.com/ente/ente/blob/main/cli/docs/generated)

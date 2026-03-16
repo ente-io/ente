@@ -115,7 +115,7 @@ export default defineConfig({
         externalLinkIcon: true,
         editLink: {
             pattern:
-                "https://github.com/ente-io/ente/edit/main/docs/docs/:path",
+                "https://github.com/ente/ente/edit/main/docs/docs/:path",
         },
         search: {
             provider: "local",
@@ -128,7 +128,7 @@ export default defineConfig({
             level: [2, 3],
         },
         socialLinks: [
-            { icon: "github", link: "https://github.com/ente-io/ente/" },
+            { icon: "github", link: "https://github.com/ente/ente/" },
             { icon: "twitter", link: "https://twitter.com/enteio" },
             { icon: "discord", link: "https://discord.gg/z2YVKkycX3" },
         ],

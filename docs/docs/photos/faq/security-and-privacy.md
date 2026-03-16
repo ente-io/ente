@@ -273,6 +273,6 @@ continuously improving our security measures.
 
 If you believe you have found a security vulnerability, please responsibly
 disclose it by emailing security@ente.io or [using this
-link](https://github.com/ente-io/ente/security/advisories/new) instead of
+link](https://github.com/ente/ente/security/advisories/new) instead of
 opening a public issue. We will investigate all legitimate reports. To know
-more, please see our [security policy](https://github.com/ente-io/ente/blob/main/SECURITY.md).
+more, please see our [security policy](https://github.com/ente/ente/blob/main/SECURITY.md).

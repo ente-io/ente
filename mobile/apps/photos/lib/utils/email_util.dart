@@ -297,7 +297,7 @@ Future<bool> sendComposedEmail(
 
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
-      // https://github.com/ente-io/photos-app/pull/253
+      // https://github.com/ente/photos-app/pull/253
       final encodedSubject = Uri.encodeComponent(subject);
       final encodedBody = Uri.encodeComponent(body);
       final params = Uri(

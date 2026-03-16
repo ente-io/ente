@@ -20,7 +20,7 @@ repository, where the Compose file for running the cluster is present.
 Run the following command for the same:
 
 ```sh
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 cd ente/server/config
 ```
 

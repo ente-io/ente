@@ -62,7 +62,7 @@ independently maintained and deployed:
 - `apps/payments`: Handle subscription payments.
 
 > Apart from these, we also have the manage family portal whose code is
-> currently in a separate repository (https://github.com/ente-io/families) and
+> currently in a separate repository (https://github.com/ente/families) and
 > still needs to be brought here.
 
 The apps take use various `packages/` to share code amongst themselves.
@@ -73,7 +73,7 @@ useful.
 ## Docker images
 
 A Docker image containing all the web apps are available from
-`ghcr.io/ente-io/web`. See [docs/docker.md](docs/docker.md) for more details.
+`ghcr.io/ente/web`. See [docs/docker.md](docs/docker.md) for more details.
 
 ## Attributions
 
@@ -88,7 +88,7 @@ If you're interested in helping out with translation, please visit our
 Thank you for your support.
 
 If your language is not listed for translation, please
-[create a GitHub issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+[create a GitHub issue](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
 to have it added.
 
 ## Contribute

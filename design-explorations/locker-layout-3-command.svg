@@ -1,0 +1,66 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="24" fill="#0A0A0D"/>
+  <rect x="24" y="24" width="1392" height="852" rx="20" fill="#111317" stroke="#2A2F39"/>
+  <rect x="48" y="40" width="1344" height="76" rx="22" fill="#175FEA"/>
+  <text x="88" y="88" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="30" font-weight="700">Search anything in Locker...</text>
+  <rect x="1210" y="54" width="148" height="48" rx="16" fill="#0F1520"/>
+  <text x="1250" y="84" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">+ New</text>
+
+  <rect x="48" y="140" width="300" height="712" rx="20" fill="#0E1116"/>
+  <text x="76" y="184" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">Filters</text>
+  <text x="76" y="228" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">TYPE</text>
+  <rect x="76" y="246" width="244" height="48" rx="16" fill="#252A32"/>
+  <text x="102" y="277" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Passwords</text>
+  <rect x="76" y="306" width="244" height="48" rx="16" fill="#252A32"/>
+  <text x="102" y="337" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Documents</text>
+  <rect x="76" y="366" width="244" height="48" rx="16" fill="#252A32"/>
+  <text x="102" y="397" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Identity</text>
+  <rect x="76" y="426" width="244" height="48" rx="16" fill="#252A32"/>
+  <text x="102" y="457" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Notes</text>
+  <line x1="76" y1="520" x2="320" y2="520" stroke="#2A2F39" stroke-width="2"/>
+  <text x="76" y="564" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">TAGS</text>
+  <rect x="76" y="586" width="120" height="42" rx="21" fill="#252A32"/>
+  <text x="108" y="613" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="20">Important</text>
+  <rect x="206" y="586" width="114" height="42" rx="21" fill="#252A32"/>
+  <text x="238" y="613" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="20">Family</text>
+
+  <rect x="372" y="140" width="660" height="712" rx="20" fill="#0E1116"/>
+  <text x="404" y="184" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">Main feed</text>
+  <text x="404" y="228" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">RECENT ITEMS</text>
+  <rect x="404" y="246" width="596" height="88" rx="24" fill="#272727"/>
+  <text x="436" y="300" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Gmail</text>
+  <text x="866" y="300" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">updated 2h ago</text>
+  <rect x="404" y="350" width="596" height="88" rx="24" fill="#272727"/>
+  <text x="436" y="404" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">PolicySchedule.pdf</text>
+  <text x="850" y="404" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">insurance</text>
+  <rect x="404" y="454" width="596" height="88" rx="24" fill="#272727"/>
+  <text x="436" y="508" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">PANCard.pdf</text>
+  <text x="878" y="508" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">identity</text>
+
+  <text x="404" y="604" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">PINNED</text>
+  <rect x="404" y="624" width="180" height="150" rx="24" fill="#272727"/>
+  <rect x="604" y="624" width="180" height="150" rx="24" fill="#272727"/>
+  <rect x="804" y="624" width="180" height="150" rx="24" fill="#272727"/>
+  <text x="432" y="670" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Passport</text>
+  <text x="632" y="670" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Aadhaar</text>
+  <text x="832" y="670" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Insurance</text>
+
+  <rect x="1056" y="140" width="336" height="712" rx="20" fill="#0E1116"/>
+  <text x="1088" y="184" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="34" font-weight="700">Quick actions</text>
+  <rect x="1088" y="216" width="272" height="56" rx="18" fill="#175FEA"/>
+  <text x="1164" y="252" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24" font-weight="700">Upload file</text>
+  <rect x="1088" y="288" width="272" height="56" rx="18" fill="#252A32"/>
+  <text x="1172" y="324" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Add login</text>
+  <rect x="1088" y="360" width="272" height="56" rx="18" fill="#252A32"/>
+  <text x="1176" y="396" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Add note</text>
+  <rect x="1088" y="432" width="272" height="56" rx="18" fill="#252A32"/>
+  <text x="1170" y="468" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Scan doc</text>
+  <line x1="1088" y1="534" x2="1360" y2="534" stroke="#2A2F39" stroke-width="2"/>
+  <text x="1088" y="580" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">ALERTS</text>
+  <rect x="1088" y="600" width="272" height="116" rx="22" fill="#2D2412" stroke="#F5C14B"/>
+  <text x="1112" y="642" fill="#FBE59A" font-family="Arial, sans-serif" font-size="22" font-weight="700">Passport expiring</text>
+  <text x="1112" y="678" fill="#FBE59A" font-family="Arial, sans-serif" font-size="18">Renew within 45 days</text>
+  <rect x="1088" y="734" width="272" height="88" rx="22" fill="#171A20" stroke="#2A2F39"/>
+  <text x="1112" y="776" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22" font-weight="700">Positioning</text>
+  <text x="1112" y="806" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Feels like a life-admin dashboard.</text>
+</svg>

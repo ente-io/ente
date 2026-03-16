@@ -59,7 +59,7 @@ class AboutUsPage extends StatelessWidget {
                         trailingIconIsMuted: true,
                         onTap: () async {
                           await launchUrl(
-                            Uri.parse("https://github.com/ente-io/ente"),
+                            Uri.parse("https://github.com/ente/ente"),
                           );
                         },
                       ),

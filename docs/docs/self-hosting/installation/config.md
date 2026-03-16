@@ -136,7 +136,7 @@ by following the steps described below:
 
 ```shell
 # If you have not cloned already
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 
 # Generate the values
 cd ente/server

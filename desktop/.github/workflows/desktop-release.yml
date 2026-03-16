@@ -1,15 +1,15 @@
 name: "Release"
 
-# Build the desktop app with code from ente-io/ente and create/update a release.
+# Build the desktop app with code from ente/ente and create/update a release.
 #
-# For more details, see `docs/release.md` in ente-io/ente.
+# For more details, see `docs/release.md` in ente/ente.
 
 on:
     # Trigger manually or `gh workflow run desktop-release.yml --source=foo`.
     workflow_dispatch:
         inputs:
             source:
-                description: "Branch (ente-io/ente) to build"
+                description: "Branch (ente/ente) to build"
                 type: string
     schedule:
         # Run every weekday at ~8:00 AM IST.
@@ -43,7 +43,7 @@ jobs:
               with:
                   # If triggered by a tag, checkout photosd-$tag from the source
                   # repository. Otherwise checkout $source (default: "main").
-                  repository: ente-io/ente
+                  repository: ente/ente
                   ref: "${{ startsWith(github.ref, 'refs/tags/v') &&
                       format('photosd-{0}', github.ref_name) || ( inputs.source
                       || 'main' ) }}"
@@ -92,7 +92,7 @@ jobs:
               run: sudo apt-get update && sudo apt-get install libarchive-tools
 
             - name: Build
-              uses: ente-io/action-electron-builder@eff78a1d33bdab4c54ede0e5cdc71e0c2cf803e2
+              uses: ente/action-electron-builder@eff78a1d33bdab4c54ede0e5cdc71e0c2cf803e2
               with:
                   package_root: desktop
                   build_script_name: build:ci

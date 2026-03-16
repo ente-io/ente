@@ -333,7 +333,7 @@ Future<void> downloadToGallery(
     }
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
-    // This is a fix for https://github.com/ente-io/ente/issues/4296
+    // This is a fix for https://github.com/ente/ente/issues/4296
     await LocalSyncService.instance.getLock().synchronized(() async {
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.

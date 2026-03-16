@@ -29,7 +29,7 @@ jobs:
               with:
                   dockerfile: server/Dockerfile
                   directory: server
-                  # Resultant package name will be ghcr.io/ente-io/server
+                  # Resultant package name will be ghcr.io/ente/server
                   image: server
                   registry: ghcr.io
                   enableBuildKit: true

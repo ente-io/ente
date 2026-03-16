@@ -269,7 +269,7 @@ used to generate a new salt/nonce every time data needs to be hashed/encrypted.
 ## Further Details
 
 Thank you for reading this far! For implementation details, we request you to
-checkout [our code](https://github.com/ente-io).
+checkout [our code](https://github.com/ente).
 
 If you'd like to help us improve this document, kindly email
 [security@ente.io](mailto:security@ente.io).

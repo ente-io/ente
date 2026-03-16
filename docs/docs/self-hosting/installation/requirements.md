@@ -13,7 +13,7 @@ installed for a smooth experience.
 The server is capable of running on minimal resource requirements as a
 lightweight Go binary, since most of the intensive computational tasks are done
 on the client. It performs well on small cloud instances, old laptops, and even
-[low-end embedded devices](https://github.com/ente-io/ente/discussions/594).
+[low-end embedded devices](https://github.com/ente/ente/discussions/594).
 
 - **Storage:** An Unix-compatible filesystem such as ZFS, EXT4, BTRFS, etc. if
   using PostgreSQL container as it requires a filesystem that supports

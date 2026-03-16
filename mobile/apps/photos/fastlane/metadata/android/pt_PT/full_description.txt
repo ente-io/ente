@@ -27,7 +27,7 @@ FUNCIONALIDADES
 - e MAIS além!
 
 PERMISSÕES
-Ente pede por certas permissões para servir o propósito dum provedor de armazenamento de foto, onde pode ser revisto aqui: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+Ente pede por certas permissões para servir o propósito dum provedor de armazenamento de foto, onde pode ser revisto aqui: https://github.com/ente/ente/blob/f-droid/mobile/android/permissions.md
 
 PREÇO
 Não garantimos planos gratuitos para sempre, já que é importante a nós mantermo-nos sustentáveis e conseguirmos superar o desafio do tempo. Ao invés, garantimos planos acessíveis para poder partilhar livremente com os seus familiares. Para mais informações, consulte "ente.io"

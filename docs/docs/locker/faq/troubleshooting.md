@@ -90,7 +90,7 @@ in again with your Ente credentials.
 ### How do I report a bug? {#locker-report-bug}
 
 Report bugs on GitHub:
-[github.com/ente-io/ente/issues](https://github.com/ente-io/ente/issues)
+[github.com/ente/ente/issues](https://github.com/ente/ente/issues)
 
 Include:
 

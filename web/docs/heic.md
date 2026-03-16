@@ -84,5 +84,5 @@ option to swap libde265 with libx265 or kvazaar.
 Currently our web app uses
 [heic-convert](https://github.com/catdad-experiments/heic-convert), which
 provides packaged Wasm builds of libheif + libde265, and the desktop app uses a
-[custom build](https://github.com/ente-io/libvips-packaging) of `vips` on Linux
+[custom build](https://github.com/ente/libvips-packaging) of `vips` on Linux
 and Windows, and Apple's `sips` on macOS.

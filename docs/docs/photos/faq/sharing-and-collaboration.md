@@ -474,7 +474,7 @@ When you add a shared photo to your own album, Ente creates a hard copy that you
 2. **Ownership is clear**: There's no ambiguity about who owns which version of the photo
 3. **No dependency**: Your organized albums don't break if someone stops sharing with you
 
-We understand this uses extra storage in some use cases (like family photo sharing). We're exploring reference-based solutions in the future where storage would only count if the original is deleted. See [this discussion](https://github.com/ente-io/ente/discussions/790) for more details.
+We understand this uses extra storage in some use cases (like family photo sharing). We're exploring reference-based solutions in the future where storage would only count if the original is deleted. See [this discussion](https://github.com/ente/ente/discussions/790) for more details.
 
 ### Can I remove myself from a shared album? {#leave-shared-album}
 

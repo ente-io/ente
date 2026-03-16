@@ -1,0 +1,64 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="24" fill="#0A0A0D"/>
+  <rect x="24" y="24" width="1392" height="852" rx="20" fill="#111317" stroke="#2A2F39"/>
+  <rect x="24" y="24" width="1392" height="84" rx="20" fill="#175FEA"/>
+  <text x="64" y="72" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="32" font-weight="700">Locker</text>
+  <rect x="360" y="42" width="520" height="48" rx="24" fill="#0F1520" opacity="0.95"/>
+  <text x="396" y="72" fill="#93A4C3" font-family="Arial, sans-serif" font-size="24">Search...</text>
+  <rect x="1110" y="42" width="112" height="48" rx="16" fill="#0F1520"/>
+  <text x="1140" y="72" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="22">Sort</text>
+  <rect x="1238" y="42" width="130" height="48" rx="16" fill="#0F1520"/>
+  <text x="1272" y="72" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="22">+ Add</text>
+
+  <rect x="48" y="132" width="236" height="720" rx="20" fill="#0E1116"/>
+  <text x="74" y="176" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">BROWSE</text>
+  <rect x="64" y="198" width="204" height="54" rx="16" fill="#1A2230"/>
+  <text x="92" y="232" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="26" font-weight="700">Recents</text>
+  <text x="92" y="296" fill="#C5CEDF" font-family="Arial, sans-serif" font-size="24">Categories</text>
+  <text x="92" y="352" fill="#C5CEDF" font-family="Arial, sans-serif" font-size="24">Favorites</text>
+  <text x="92" y="408" fill="#C5CEDF" font-family="Arial, sans-serif" font-size="24">Archive</text>
+  <line x1="72" y1="466" x2="260" y2="466" stroke="#2A2F39" stroke-width="2"/>
+  <text x="74" y="510" fill="#7E91B4" font-family="Arial, sans-serif" font-size="20" font-weight="700">SMART GROUPS</text>
+  <text x="92" y="560" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="22">Important</text>
+  <text x="92" y="606" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="22">Family</text>
+  <text x="92" y="652" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="22">Tax & Legal</text>
+
+  <rect x="308" y="132" width="1076" height="720" rx="20" fill="#0E1116"/>
+  <text x="340" y="178" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="38" font-weight="700">Browse by category</text>
+  <text x="340" y="214" fill="#93A4C3" font-family="Arial, sans-serif" font-size="22">A more visual layout for mixed vault content</text>
+
+  <text x="340" y="272" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="28" font-weight="700">Important (12)</text>
+  <rect x="340" y="292" width="216" height="148" rx="24" fill="#272727"/>
+  <rect x="576" y="292" width="216" height="148" rx="24" fill="#272727"/>
+  <rect x="812" y="292" width="216" height="148" rx="24" fill="#272727"/>
+  <rect x="1048" y="292" width="216" height="148" rx="24" fill="#272727"/>
+  <text x="366" y="334" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Gmail</text>
+  <text x="366" y="366" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Password</text>
+  <text x="602" y="334" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Passport</text>
+  <text x="602" y="366" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Identity</text>
+  <text x="838" y="334" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Recovery Key</text>
+  <text x="838" y="366" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Text file</text>
+  <text x="1074" y="334" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Family Note</text>
+  <text x="1074" y="366" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Note</text>
+
+  <text x="340" y="500" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="28" font-weight="700">Documents (38)</text>
+  <rect x="340" y="520" width="216" height="148" rx="24" fill="#272727"/>
+  <rect x="576" y="520" width="216" height="148" rx="24" fill="#272727"/>
+  <rect x="812" y="520" width="216" height="148" rx="24" fill="#272727"/>
+  <text x="366" y="562" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">PolicySchedule.pdf</text>
+  <text x="366" y="594" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Insurance</text>
+  <text x="602" y="562" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">PANCard.pdf</text>
+  <text x="602" y="594" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Identity</text>
+  <text x="838" y="562" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24">Lease.pdf</text>
+  <text x="838" y="594" fill="#93A4C3" font-family="Arial, sans-serif" font-size="18">Home</text>
+
+  <text x="340" y="728" fill="#E8EDF8" font-family="Arial, sans-serif" font-size="28" font-weight="700">Passwords (22)</text>
+  <rect x="340" y="748" width="216" height="72" rx="22" fill="#272727"/>
+  <rect x="576" y="748" width="216" height="72" rx="22" fill="#272727"/>
+  <rect x="812" y="748" width="216" height="72" rx="22" fill="#272727"/>
+  <rect x="1048" y="748" width="216" height="72" rx="22" fill="#272727"/>
+  <text x="366" y="792" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Ente</text>
+  <text x="602" y="792" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Bank</text>
+  <text x="838" y="792" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">Wi-Fi</text>
+  <text x="1074" y="792" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22">GitHub</text>
+</svg>

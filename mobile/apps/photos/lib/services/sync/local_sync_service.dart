@@ -101,7 +101,7 @@ class LocalSyncService {
 
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
-    // This is a fix for https://github.com/ente-io/ente/issues/4296
+    // This is a fix for https://github.com/ente/ente/issues/4296
     await _lock.synchronized(() async {
       final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
       _logger.info("${existingLocalFileIDs.length} localIDs were discovered");

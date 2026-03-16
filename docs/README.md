@@ -20,7 +20,7 @@ it easier to run things locally.
 Clone this repository
 
 ```sh
-git clone https://github.com/ente-io/ente
+git clone https://github.com/ente/ente
 ```
 
 Change to this directory

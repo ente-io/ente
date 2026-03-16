@@ -169,7 +169,7 @@ jobs:
                   ./linux/packaging/build_rpm.sh
                   mv dist/*/*.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
                   # APPIMAGE
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  dart pub global activate --source git https://github.com/ente/fastforgefork --git-ref develop --git-path packages/fastforge
                   fastforge package --platform=linux --targets=appimage --skip-clean
                   mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
                   # DEB
@@ -230,7 +230,7 @@ jobs:
             - name: Build Windows installer
               run: |
                   flutter config --enable-windows-desktop
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  dart pub global activate --source git https://github.com/ente/fastforgefork --git-ref develop --git-path packages/fastforge
                   choco install innosetup -y
                   fastforge.bat package --platform=windows --targets=exe --skip-clean
                   shopt -s globstar
@@ -341,7 +341,7 @@ jobs:
             - name: Build macOS DMG
               run: |
                   flutter config --enable-macos-desktop
-                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  dart pub global activate --source git https://github.com/ente/fastforgefork --git-ref develop --git-path packages/fastforge
                   fastforge package --platform=macos --targets=dmg --skip-clean
                   mv dist/**/*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
 

@@ -91,7 +91,7 @@ fpm -s dir -t rpm \
   --vendor "Ente.io" \
   --maintainer "Ente.io Developers <auth@ente.io>" \
   --license "AGPLv3" \
-  --url "https://github.com/ente-io/ente" \
+  --url "https://github.com/ente/ente" \
   --description "2FA app with free end-to-end encrypted backup and sync" \
   --category "Application/Utility" \
   --depends sqlite-libs \

@@ -13,7 +13,7 @@ Other ways to get in touch are:
 
 * [Ask in our Discord](https://discord.gg/z2YVKkycX3)
 * [Start a new
-  discussion](https://github.com/ente-io/ente/discussions/new?category=q-a)
+  discussion](https://github.com/ente/ente/discussions/new?category=q-a)
 * [Open a bug report in our issue
-  tracker](https://github.com/ente-io/ente/issues/)
+  tracker](https://github.com/ente/ente/issues/)
 

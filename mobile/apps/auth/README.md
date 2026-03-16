@@ -12,7 +12,7 @@ multi-device sync.
 ### Android
 
 This repository's [GitHub
-releases](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4)
+releases](https://github.com/ente/ente/releases?q=tag%3Aauth-v4)
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 
@@ -33,7 +33,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ### Desktop
 
-You can [**download**](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4)
+You can [**download**](https://github.com/ente/ente/releases?q=tag%3Aauth-v4)
 a native desktop app from this repository's GitHub releases. The desktop app
 works on Windows, Linux and macOS.
 
@@ -88,7 +88,7 @@ project](https://crowdin.com/project/ente-authenticator-app) to get started. Tha
 for your support.
 
 If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+issue](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
 to have it added.
 
 ## 🧑‍🎨 Icons

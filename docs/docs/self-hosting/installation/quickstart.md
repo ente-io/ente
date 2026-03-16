@@ -18,7 +18,7 @@ get started.
 Run this command on your terminal to setup Ente.
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh)"
 ```
 
 The above `curl` command does the following:

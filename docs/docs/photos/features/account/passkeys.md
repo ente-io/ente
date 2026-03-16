@@ -18,7 +18,7 @@ a second factor to secure your Ente account.**
 >   [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
 > - And to know more technical details about how our passkey verification works,
 >   you can see this
->   [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
+>   [technical note in our source code](https://github.com/ente/ente/blob/main/web/docs/webauthn-passkeys.md).
 
 ## Passkeys and TOTP
 

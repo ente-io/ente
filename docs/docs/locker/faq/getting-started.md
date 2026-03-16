@@ -15,7 +15,7 @@ account.
 Install Ente Locker for Android from:
 
 - [Google Play Store](https://play.google.com/store/apps/details?id=io.ente.locker)
-- [GitHub releases](https://github.com/ente-io/ente/releases?q=locker)
+- [GitHub releases](https://github.com/ente/ente/releases?q=locker)
 
 Open the store, search for "Ente Locker", and tap Install.
 

@@ -275,7 +275,7 @@ packages:
       path: "."
       ref: "981a9e0f4a227023991af3332ef0e6ab6d14a1c2"
       resolved-ref: "981a9e0f4a227023991af3332ef0e6ab6d14a1c2"
-      url: "https://github.com/ente-io/ente_crypto_dart.git"
+      url: "https://github.com/ente/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
   ente_crypto_dart_adapter:

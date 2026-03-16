@@ -27,7 +27,7 @@ CARACTERISTICI
 - și MULTE altele!
 
 PERMISIUNI
-ente solicită anumite permisiuni pentru a servi scopului unui furnizor de stocare a fotografiilor, care poate fi revizuit aici: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+ente solicită anumite permisiuni pentru a servi scopului unui furnizor de stocare a fotografiilor, care poate fi revizuit aici: https://github.com/ente/ente/blob/f-droid/mobile/android/permissions.md
 
 PREȚURI
 Nu oferim planuri gratuite pentru totdeauna, deoarece este important pentru noi să rămânem sustenabili și să trecem testul timpului. În schimb, oferim planuri accesibile pe care le puteți distribui liber familiei dvs. Puteți afla mai multe la ente.io.

@@ -27,7 +27,7 @@ TÍNH NĂNG
 - và còn NHIỀU nữa!
 
 QUYỀN
-ente yêu cầu một số quyền nhất định để phục vụ mục đích của nhà cung cấp lưu trữ ảnh, có thể xem tại đây: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+ente yêu cầu một số quyền nhất định để phục vụ mục đích của nhà cung cấp lưu trữ ảnh, có thể xem tại đây: https://github.com/ente/ente/blob/f-droid/mobile/android/permissions.md
 
 GIÁ CẢ
 Chúng tôi không cung cấp vĩnh viễn các gói miễn phí, vì điều quan trọng với chúng tôi là chúng tôi phải duy trì tính bền vững và chịu được thử thách của thời gian. Thay vào đó, chúng tôi cung cấp các gói giá cả phải chăng mà bạn có thể tự do chia sẻ với gia đình của mình. Bạn có thể xem thêm thông tin tại ente.io.

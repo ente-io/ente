@@ -68,7 +68,7 @@ class AboutPage extends StatelessWidget {
 
   void _onOpenSourceTapped() {
     // ignore: unawaited_futures
-    launchUrl(Uri.parse("https://github.com/ente-io/ente"));
+    launchUrl(Uri.parse("https://github.com/ente/ente"));
   }
 
   Future<void> _onPrivacyTapped(BuildContext context) async {

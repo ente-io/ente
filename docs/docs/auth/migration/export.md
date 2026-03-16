@@ -62,7 +62,7 @@ using user provided password & kdf params. For encryption, we are using
 
 ## Automated backups
 
-You can use [Ente's CLI](https://github.com/ente-io/ente/tree/main/cli#readme)
+You can use [Ente's CLI](https://github.com/ente/ente/tree/main/cli#readme)
 to automatically backup your Auth codes.
 
 To export your data, add an account using `ente account add` command. In the
@@ -112,7 +112,7 @@ codes.
     > Settings -> Data -> Import Codes -> Ente Encrypted export.
 
 - **Decrypt using Ente CLI** : Download the latest version of
-  [Ente CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0), and run
+  [Ente CLI](https://github.com/ente/ente/releases?q=tag%3Acli-v0), and run
   the following command
 
 ```

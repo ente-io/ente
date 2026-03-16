@@ -27,7 +27,7 @@ FEATURES
 - and a LOT more!
 
 دسترسی‌ها
-ente requests for certain permissions to serve the purpose of a photo storage provider, which can be reviewed here: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+ente requests for certain permissions to serve the purpose of a photo storage provider, which can be reviewed here: https://github.com/ente/ente/blob/f-droid/mobile/android/permissions.md
 
 PRICING
 ما پلن‌های همیشه رایگان ارائه نمی‌دهیم، زیرا برای ما مهم است که پایدار بمانیم و در طول زمان دوام بیاوریم. در عوض، ما پلن‌های مقرون‌به‌صرفه‌ای ارائه می‌دهیم که می‌توانید آزادانه با خانواده خود به اشتراک بگذارید. You can find more information at ente.io.

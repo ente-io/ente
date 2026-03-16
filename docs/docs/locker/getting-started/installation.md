@@ -18,7 +18,7 @@ Install Ente Locker on Apple devices from the
 Ente Locker for Android can be downloaded through multiple channels:
 
 - [Play Store](https://play.google.com/store/apps/details?id=io.ente.locker)
-- [GitHub](https://github.com/ente-io/ente/releases?q=locker)
+- [GitHub](https://github.com/ente/ente/releases?q=locker)
 
 ## Next steps
 

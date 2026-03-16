@@ -534,7 +534,7 @@ const uniqueSavePath = (dirPath: string, fileName: string) => {
  */
 const allowExternalLinks = (webContents: WebContents) =>
     // By default, if the user were open a link, say
-    // https://github.com/ente-io/ente/discussions, then it would open a _new_
+    // https://github.com/ente/ente/discussions, then it would open a _new_
     // BrowserWindow within our app.
     //
     // This is not the behaviour we want; what we want is to ask the system to

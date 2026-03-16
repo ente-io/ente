@@ -2,7 +2,7 @@
 
 Source code for our flagship mobile app. For us, this is our most important
 client app. This is where Ente started. This is what had the [first
-commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5d276e37).
+commit](https://github.com/ente/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5d276e37).
 
     commit a8cdc811fd20ca4289d8e779c97f08ef5d276e37
     Author: Vishnu Mohandas <v****@****.***>
@@ -24,7 +24,7 @@ If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
 ### Android
 
 The [GitHub
-releases](https://github.com/ente-io/ente/releases?q=photos-v1) contain
+releases](https://github.com/ente/ente/releases?q=photos-v1) contain
 APKs, built straight from source. The latest build is available at
 [ente.io/apk](https://ente.io/apk). These builds keep themselves updated,
 without relying on third party stores.
@@ -95,7 +95,7 @@ project](https://crowdin.com/project/ente-photos-app) to get started. Thank you
 for your support.
 
 If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+issue](https://github.com/ente/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
 to have it added.
 
 ## Certificate Fingerprints

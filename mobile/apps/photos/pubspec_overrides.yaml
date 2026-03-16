@@ -13,7 +13,7 @@ dependency_overrides:
   ffi: 2.1.0
   flutter_sodium:
     git:
-      url: https://github.com/ente-io/flutter_sodium
+      url: https://github.com/ente/flutter_sodium
       ref: 16kb-fix
   intl: ^0.20.2
   js: ^0.6.7

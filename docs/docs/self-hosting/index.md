@@ -28,7 +28,7 @@ on your server as described in the documentation.
 Run this command on your terminal to setup Ente.
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh)"
 ```
 
 This creates a directory `my-ente` in the current working directory, prompts to
@@ -90,4 +90,4 @@ out our [migration guide](/auth/migration/) for more information.
 
 If you need support, please ask on our community
 [Discord](https://ente.io/discord) or start a discussion on
-[GitHub](https://github.com/ente-io/ente/discussions/).
+[GitHub](https://github.com/ente/ente/discussions/).

@@ -467,7 +467,7 @@ When your subscription expires, you enter a **30-day grace period** before your 
 
 2. **Export your data** during the grace period:
     - Use the desktop app's export feature
-    - Or use the [CLI tool](https://github.com/ente-io/ente/tree/main/cli#readme) for automated export
+    - Or use the [CLI tool](https://github.com/ente/ente/tree/main/cli#readme) for automated export
     - Download all photos to your computer or NAS
     - Learn more in the [Export guide](/photos/migration/export/)
 

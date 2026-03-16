@@ -54,7 +54,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	collection.Owner.ID = ownerID
 	collection.UpdationTime = time.Microseconds()
 	// [20th Dec 2022] Patch on server side untill majority of the existing mobile clients upgrade to a version higher > 0.7.0
-	// https://github.com/ente-io/photos-app/pull/725
+	// https://github.com/ente/photos-app/pull/725
 	if collection.Type == "CollectionType.album" {
 		collection.Type = "album"
 	}

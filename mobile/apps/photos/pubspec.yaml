@@ -28,7 +28,7 @@ dependencies:
   audio_session: ^0.2.2
   battery_info: # replace with battery_plus
     git:
-      url: https://github.com/ente-io/battery_info
+      url: https://github.com/ente/battery_info
       ref: 95c7a9f
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
@@ -36,7 +36,7 @@ dependencies:
   chewie: 1.13.0
   collection: #dart
   computer: # logged task name in verbose in fork
-    git: "https://github.com/ente-io/computer.git"
+    git: "https://github.com/ente/computer.git"
   connectivity_plus: ^6.0.2
   convert: ^3.1.1
   crypto: ^3.0.2
@@ -83,7 +83,7 @@ dependencies:
   fast_base58: ^0.2.1
   ffmpeg_kit_flutter:
     git:
-      url: https://github.com/ente-io/ffmpeg-kit
+      url: https://github.com/ente/ffmpeg-kit
       path: flutter/flutter
       ref: 16kb-fix
   figma_squircle: ^0.6.3
@@ -143,7 +143,7 @@ dependencies:
   maps_launcher: ^3.0.0+1
   media_extension:
     git:
-      url: "https://github.com/ente-io/media_extension.git"
+      url: "https://github.com/ente/media_extension.git"
   media_kit:
   media_kit_libs_ios_video:
   media_kit_libs_video:
@@ -152,14 +152,14 @@ dependencies:
   ml_linalg: ^13.11.31
   mobile_ocr:
     git:
-      url: https://github.com/ente-io/mobile_ocr
+      url: https://github.com/ente/mobile_ocr
       ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
   modal_bottom_sheet: ^3.0.0
   motionphoto:
-    git: "https://github.com/ente-io/motionphoto.git"
+    git: "https://github.com/ente/motionphoto.git"
   move_to_background: # no updates in git, replace package
     git:
-      url: https://github.com/ente-io/move_to_background.git
+      url: https://github.com/ente/move_to_background.git
       ref: v2-only
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
@@ -170,16 +170,16 @@ dependencies:
     path: plugins/onnx_dart
   onnxruntime:
     git:
-      url: https://github.com/ente-io/onnxruntime.git
+      url: https://github.com/ente/onnxruntime.git
       ref: ios_only
   open_mail_app: # replace plugin, git is archived
     git:
-      url: https://github.com/ente-io/open-mail-app-flutter.git
+      url: https://github.com/ente/open-mail-app-flutter.git
       ref: v2-only
   package_info_plus: ^8.2.1
   panorama:
     git:
-      url: https://github.com/ente-io/panorama_blur.git
+      url: https://github.com/ente/panorama_blur.git
       ref: blur
   password_strength: ^0.2.0
   path: #dart
@@ -192,7 +192,7 @@ dependencies:
   pointycastle: ^3.7.3
   privacy_screen: # pub.dev is behind
     git:
-      url: https://github.com/ente-io/privacy_screen.git
+      url: https://github.com/ente/privacy_screen.git
       ref: v2-only
   pro_image_editor: ^11.3.0
   receive_sharing_intent: # pub.dev is behind
@@ -224,7 +224,7 @@ dependencies:
   uuid: ^4.5.0
   video_editor: # edge cases handled in fork
     git:
-      url: https://github.com/ente-io/video_editor_fork.git
+      url: https://github.com/ente/video_editor_fork.git
       ref: master
   video_player: ^2.10.0
   video_thumbnail: ^0.5.6
@@ -241,7 +241,7 @@ dependency_overrides:
   ffi: 2.1.0
   flutter_sodium: # update source if there is any update
     git:
-      url: https://github.com/ente-io/flutter_sodium
+      url: https://github.com/ente/flutter_sodium
       ref: 16kb-fix
   intl: ^0.20.2
   js: ^0.6.7
@@ -290,7 +290,7 @@ dev_dependencies:
 # (ADAPTIVE ICONS or NON ADAPTIVE ICONS) within the `flutter_icons` section. You
 # may have to update the `icon_X.xml` generated within `res/minimap-*` folder.
 # Sample commit for adding an icon:
-# https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
+# https://github.com/ente/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
 
 # flutter_icons:
 # ADAPTIVE ICONS

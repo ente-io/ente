@@ -13,10 +13,10 @@ The complication comes from the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
 to keep a separate repository just for holding the releases.
 
-- Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
+- Source code lives here, in [ente/ente](https://github.com/ente/ente).
 
 - Releases are done from
-  [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
+  [ente/photos-desktop](https://github.com/ente/photos-desktop).
 
 ## Nightly builds
 
@@ -67,7 +67,7 @@ gh workflow run desktop-release.yml --source=<branch>
     git push upstream photosd-v1.x.x
     ```
 
-8. In the cloned release repo (https://github.com/ente-io/photos-desktop), run this command:
+8. In the cloned release repo (https://github.com/ente/photos-desktop), run this command:
 
     ```sh
     ./.github/trigger-release.sh v1.x.x
@@ -91,16 +91,16 @@ gh workflow run desktop-release.yml --source=<branch>
 
 17. Open PR (title should be "[desktop] v1.x.(x+1)-beta") and merge
 
-18. In the release repo's [releases](https://github.com/ente-io/photos-desktop/releases), delete the existing _nightly_ pre-release:
+18. In the release repo's [releases](https://github.com/ente/photos-desktop/releases), delete the existing _nightly_ pre-release:
 
-19. In the cloned release repo (https://github.com/ente-io/photos-desktop), run this command:
+19. In the cloned release repo (https://github.com/ente/photos-desktop), run this command:
 
     ```sh
     git tag v1.x.(x+1)-beta
     git push origin v1.x.(x+1)-beta
     ```
 
-20. Run this [workflow](https://github.com/ente-io/photos-desktop/actions/workflows/desktop-release.yml)
+20. Run this [workflow](https://github.com/ente/photos-desktop/actions/workflows/desktop-release.yml)
 
 21. Once the workflow creates the new v1.x.(x+1)-beta pre-release, edit its description to "Nightly builds".
 

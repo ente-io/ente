@@ -116,7 +116,7 @@ hosting is – **everything you need is here, but it is perhaps not readily
 documented, or flexible enough.**
 
 That said, we hope community members help each other out, e.g. in this
-repository's [Discussions](https://github.com/ente-io/ente/discussions), or on
+repository's [Discussions](https://github.com/ente/ente/discussions), or on
 [our Discord](https://discord.gg/z2YVKkycX3). And whenever time permits, we will
 try to clarify, and also document such FAQs. Please feel free to open
 documentation PRs around this too.

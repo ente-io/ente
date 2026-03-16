@@ -9,17 +9,17 @@ The easiest way to run the script is to copy paste the following command into
 your terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh)"
 ```
 
 > [!TIP]
 >
 > If you don't want to run via curl, you can alternatively download
-> [quickstart.sh](https://github.com/ente-io/ente/blob/main/server/quickstart.sh),
+> [quickstart.sh](https://github.com/ente/ente/blob/main/server/quickstart.sh),
 > make it executable and run the script.
 > 
 > ``` shell
-> curl -o quickstart.sh https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh
+> curl -o quickstart.sh https://raw.githubusercontent.com/ente/ente/main/server/quickstart.sh
 > chmod +x quickstart.sh
 > ./quickstart.sh
 

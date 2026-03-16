@@ -112,7 +112,7 @@ Future<void> sendLogs(
 Future<void> openSupportPage(String? subject, String? body) async {
   final baseSupportUri = Uri.https(
     "github.com",
-    "/ente-io/ente/discussions/new",
+    "/ente/ente/discussions/new",
     {"category": "q-a"},
   );
   final queryParameters =
@@ -265,7 +265,7 @@ Future<void> sendEmail(
     // );
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
-      // https://github.com/ente-io/frame/pull/253
+      // https://github.com/ente/frame/pull/253
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,

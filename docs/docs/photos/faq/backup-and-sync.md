@@ -531,7 +531,7 @@ The sync happens automatically in the background when devices are connected to t
 
 Ente supports all files that have a mime type of `image/*` or `video/*` regardless of their specific format.
 
-However, we only have limited support for RAW currently. We are working towards adding full support, and you can watch this [thread](https://github.com/ente-io/ente/discussions/625) for updates.
+However, we only have limited support for RAW currently. We are working towards adding full support, and you can watch this [thread](https://github.com/ente/ente/discussions/625) for updates.
 
 If you find an issue with ente's ability to parse a certain file type, please write to [support@ente.io](mailto:support@ente.io) with details of the unsupported file format and we will do our best to help you out.
 

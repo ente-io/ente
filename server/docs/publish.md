@@ -34,7 +34,7 @@ gh workflow run server-publish.yml
 > already seen production, we avoid externally publishing images with issues.
 
 Once the workflow completes, the resultant image will be available at
-`ghcr.io/ente-io/server`. The image will be tagged by the commit SHA. The latest
+`ghcr.io/ente/server`. The image will be tagged by the commit SHA. The latest
 image will also be tagged, well, "latest".
 
 The workflow will also update the branch `ghcr/server` to point to the commit it

@@ -59,7 +59,7 @@ items that anyone can view in a browser.
 
 Like all Ente products, Locker is fully open source. Anyone can inspect our code
 to verify our security claims. View our code on
-[GitHub](https://github.com/ente-io/ente).
+[GitHub](https://github.com/ente/ente).
 
 ## How Locker works with your other tools
 
@@ -125,7 +125,7 @@ available:
 3. **Email support**: Contact us at
    [support@ente.io](mailto:support@ente.io) for personalized help
 4. **GitHub**: Report bugs or request features on
-   [GitHub](https://github.com/ente-io/ente/issues)
+   [GitHub](https://github.com/ente/ente/issues)
 
 For security vulnerabilities, please email
 [security@ente.io](mailto:security@ente.io) directly.

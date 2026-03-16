@@ -657,7 +657,7 @@ class RemoteSyncService {
         break;
       }
       // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/photos-app/pull/187
+      // See https://github.com/ente/photos-app/pull/187
       try {
         final collectionID = file.collectionID ??
             (await _collectionsService.getOrCreateForPath(
