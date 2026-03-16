@@ -311,11 +311,18 @@ pub fn run_face_clustering(
         }
     }
 
-    // Then, assign new cluster IDs for labels without existing IDs
+    // Then, assign new cluster IDs for labels without existing IDs,
+    // using the first member's face_id for collision resistance.
     for &c in &unique {
-        label_to_cluster_id
-            .entry(c)
-            .or_insert_with(|| format!("cluster_{}", uuid_from_label(c, inputs)));
+        label_to_cluster_id.entry(c).or_insert_with(|| {
+            let first_member = inputs
+                .iter()
+                .enumerate()
+                .find(|(i, _)| labels[*i] == c)
+                .map(|(_, inp)| inp.face_id.as_str())
+                .unwrap_or("unknown");
+            format!("cluster_{first_member}")
+        });
     }
 
     let mut result = FaceClusterResult::default();
@@ -441,12 +448,6 @@ pub fn run_face_clustering_incremental(
     }
 
     Some(result)
-}
-
-/// Generate a deterministic cluster ID from the first member face.
-fn uuid_from_label(label: i32, inputs: &[FaceClusterInput]) -> String {
-    // Use a simple hash of label + first member's face_id for determinism
-    format!("{label}_{}", inputs.first().map(|i| &i.face_id[..8.min(i.face_id.len())]).unwrap_or("unknown"))
 }
 
 #[cfg(test)]

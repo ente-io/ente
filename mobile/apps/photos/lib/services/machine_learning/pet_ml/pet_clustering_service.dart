@@ -543,6 +543,7 @@ extension PetClusteringDB on MLDataDB {
     List<int> fileIds,
     String clusterId,
   ) async {
+    if (fileIds.isEmpty) return [];
     final db = await asyncDB;
     final placeholders = List.filled(fileIds.length, '?').join(',');
     final query = '''
