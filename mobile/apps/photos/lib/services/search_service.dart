@@ -741,9 +741,7 @@ class SearchService {
     }
     if (showNoLocation) {
       final noLocationFiles = allFiles.where((file) {
-        return file.isOwner &&
-            file.location?.latitude == null &&
-            file.location?.longitude == null;
+        return file.isOwner && !file.hasLocation;
       }).toList();
       if (noLocationFiles.isNotEmpty) {
         searchResults.add(
