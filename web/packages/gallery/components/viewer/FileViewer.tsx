@@ -98,6 +98,9 @@ import {
 import { PublicLikeModal } from "./PublicLikeModal";
 
 const fileViewerBackStateKey = "__enteFileViewerBackState";
+
+// Targets that should keep their native/context-specific right-click behavior
+// instead of opening the viewer-wide file action context menu.
 const viewerContextMenuBlockedTargetSelector = [
     ".pswp__top-bar",
     ".pswp__caption",
@@ -148,6 +151,11 @@ const hasFileViewerBackStateMarker = (state: unknown, marker: string) =>
     typeof state == "object" &&
     (state as Record<string, unknown>)[fileViewerBackStateKey] == marker;
 
+/**
+ * This function along with the viewerContextMenuBlockedTargetSelector decides
+ * when to open the custom menu over the native right click menu, if the current target
+ * falls in any of the listed on it opens the native one, else the cusotm one
+ */
 const shouldOpenViewerContextMenu = (target: EventTarget | null) =>
     target instanceof Element &&
     !target.closest(viewerContextMenuBlockedTargetSelector);
@@ -604,6 +612,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
     }, [fileNormalCollectionIDs]);
 
+    // Ref to store latest menu items snapshot, to be used by the viewer's native right-click handler
     const viewerBaseMenuItemsRef = useRef<FileActionMenuItem[]>([]);
 
     // Cache for collection keys to avoid refetching during polling
@@ -1427,13 +1436,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [onDownload],
     );
 
-    const handleMore = useCallback(
-        (buttonElement: HTMLElement) => {
-            setContextMenuPosition(undefined);
-            setMoreMenuAnchorEl(buttonElement);
-        },
-        [],
-    );
+    // Callback invoked when the more menu icon is clicked from the toolbar.
+    // Also ensures that the right click menu is closed.
+    const handleMore = useCallback((buttonElement: HTMLElement) => {
+        setContextMenuPosition(undefined);
+        setMoreMenuAnchorEl(buttonElement);
+    }, []);
 
     const handleMoreMenuCloseIfNeeded = useCallback(() => {
         setContextMenuPosition(undefined);
@@ -1442,20 +1450,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return null;
         });
     }, []);
-
     // Callback invoked when the download action is triggered by activating the
     // download menu item in the more menu.
-    const handleDownloadMenuAction = useCallback(() => {
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleDownloadMenuAction = () => {
         handleMoreMenuCloseIfNeeded();
         onDownload!(activeAnnotatedFile!.file);
-    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onDownload]);
+    };
 
     // Callback invoked when the send link action is triggered by activating the
     // send link menu item in the more menu.
-    const handleSendLinkMenuAction = useCallback(() => {
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleSendLinkMenuAction = () => {
         handleMoreMenuCloseIfNeeded();
         onSendLink!(activeAnnotatedFile!.file);
-    }, [activeAnnotatedFile, handleMoreMenuCloseIfNeeded, onSendLink]);
+    };
 
     const handleViewerContextMenu = useCallback(
         (event: MouseEvent) => {
@@ -1468,10 +1479,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             event.preventDefault();
             handleMoreMenuCloseIfNeeded();
-            setContextMenuPosition({
-                top: event.clientY,
-                left: event.clientX,
-            });
+            setContextMenuPosition({ top: event.clientY, left: event.clientX });
         },
         [handleMoreMenuCloseIfNeeded],
     );
@@ -2044,9 +2052,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             items.push({
                 id: "copy-as-png",
                 label: t("copy_as_png"),
-                icon: (
-                    <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
-                ),
+                icon: <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />,
                 onClick: handleCopyImage,
             });
         }
