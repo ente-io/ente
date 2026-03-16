@@ -238,30 +238,32 @@ class LocalSyncService {
         ),
       );
     }
-    final int newMappingCount =
-        localDiffResult.newPathToLocalIDs?.values.fold<int>(
-              0,
-              (sum, ids) => sum + ids.length,
-            ) ??
-            0;
-    final int deletedMappingCount =
-        localDiffResult.deletePathToLocalIDs?.values.fold<int>(
-              0,
-              (sum, ids) => sum + ids.length,
-            ) ??
-            0;
-    if (newMappingCount > 0 || deletedMappingCount > 0 || hasUnsyncedFiles) {
-      final sampleRecovered = (localDiffResult.uniqueLocalFiles ?? [])
-          .take(3)
-          .map((file) => file.localID)
-          .toList();
-      _logger.internalInfo(
-        "syncAll recovery: "
-        "newFiles=${localDiffResult.uniqueLocalFiles?.length ?? 0}, "
-        "newMappings=$newMappingCount, "
-        "deletedMappings=$deletedMappingCount, "
-        "sampleRecovered=$sampleRecovered",
-      );
+    if (flagService.internalUser) {
+      final int newMappingCount =
+          localDiffResult.newPathToLocalIDs?.values.fold<int>(
+                0,
+                (sum, ids) => sum + ids.length,
+              ) ??
+              0;
+      final int deletedMappingCount =
+          localDiffResult.deletePathToLocalIDs?.values.fold<int>(
+                0,
+                (sum, ids) => sum + ids.length,
+              ) ??
+              0;
+      if (newMappingCount > 0 || deletedMappingCount > 0 || hasUnsyncedFiles) {
+        final sampleRecovered = (localDiffResult.uniqueLocalFiles ?? [])
+            .take(3)
+            .map((file) => file.localID)
+            .toList();
+        _logger.internalInfo(
+          "syncAll recovery: "
+          "newFiles=${localDiffResult.uniqueLocalFiles?.length ?? 0}, "
+          "newMappings=$newMappingCount, "
+          "deletedMappings=$deletedMappingCount, "
+          "sampleRecovered=$sampleRecovered",
+        );
+      }
     }
 
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
