@@ -404,7 +404,6 @@ class RemoteSyncService {
     for (final deviceCollection in deviceCollections) {
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id]?.toSet() ?? {};
-      final int mappedCount = shouldLogSyncRecovery ? localIDsToSync.length : 0;
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -425,7 +424,7 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
-        if (shouldLogSyncRecovery && mappedCount == 0) {
+        if (shouldLogSyncRecovery) {
           _logger.info(
             "[${deviceCollection.name}] upload-prep empty: "
             "pathID=${deviceCollection.id} mappedFromPath=0",
@@ -464,8 +463,6 @@ class RemoteSyncService {
       // new file entries, where we can store mapping for localID and
       // corresponding collection ID
       if (localIDsToSync.isNotEmpty) {
-        final int postFilterCount =
-            shouldLogSyncRecovery ? localIDsToSync.length : 0;
         debugPrint(
           'Adding new entries for ${localIDsToSync.length} files'
           ' for ${deviceCollection.name}',
@@ -486,27 +483,30 @@ class RemoteSyncService {
           }
         }
         await _db.insertMultiple(newFilesToInsert);
-        final int missingFileRows = shouldLogSyncRecovery
-            ? postFilterCount - fileFoundForLocalIDs.length
-            : 0;
         if (fileFoundForLocalIDs.length != localIDsToSync.length) {
           _logger.warning(
             "mismatch in num of filesToSync ${localIDsToSync.length} to "
             "fileSynced ${fileFoundForLocalIDs.length}",
           );
         }
-        if (missingFileRows > 0) {
-          final sample =
-              localIDsToSync.difference(fileFoundForLocalIDs).take(3);
-          _logger.warning(
-            "[${deviceCollection.name}] upload-prep missing rows: "
-            "pathID=${deviceCollection.id} "
-            "mappedFromPath=$mappedCount "
-            "postFilter=$postFilterCount "
-            "missingFileRows=$missingFileRows "
-            "collectionID=$collectionID "
-            "sample=${sample.toList()}",
-          );
+        if (shouldLogSyncRecovery) {
+          final int mappedCount = localIDsToSync.length;
+          final int postFilterCount = localIDsToSync.length;
+          final int missingFileRows =
+              postFilterCount - fileFoundForLocalIDs.length;
+          if (missingFileRows > 0) {
+            final sample =
+                localIDsToSync.difference(fileFoundForLocalIDs).take(3);
+            _logger.warning(
+              "[${deviceCollection.name}] upload-prep missing rows: "
+              "pathID=${deviceCollection.id} "
+              "mappedFromPath=$mappedCount "
+              "postFilter=$postFilterCount "
+              "missingFileRows=$missingFileRows "
+              "collectionID=$collectionID "
+              "sample=${sample.toList()}",
+            );
+          }
         }
       }
     }
