@@ -18,7 +18,6 @@ linter:
     - prefer_const_declarations
     - prefer_const_literals_to_create_immutables
     - prefer_final_locals
-    - require_trailing_commas
     - sized_box_for_whitespace
     - use_full_hex_values_for_flutter_colors
     - use_key_in_widget_constructors
@@ -43,7 +42,6 @@ analyzer:
     exhaustive_cases: error
     curly_braces_in_flow_control_structures: error
     directives_ordering: error
-    require_trailing_commas: error
     always_use_package_imports: warning
     prefer_final_fields: error
     unused_import: error
