@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/generated/l10n.dart';
@@ -34,19 +36,25 @@ class InviteMembersPage extends StatefulWidget {
 }
 
 class _InviteMembersPageState extends State<InviteMembersPage> {
+  static const int _maxFamilyMembers = 5;
+
   final _emailController = TextEditingController();
   final _emailFocusNode = FocusNode();
   final List<String> _emails = [];
   late final Set<String> _existingEmails;
+  late int _remainingSlots;
 
   String? _errorMessage;
   bool _isCheckingEmail = false;
 
-  bool get _canAddMore => _emails.length < widget.remainingSlots;
+  int get _inviteSlotsLeft => math.max(0, _remainingSlots - _emails.length);
+
+  bool get _canAddMore => _inviteSlotsLeft > 0;
 
   @override
   void initState() {
     super.initState();
+    _remainingSlots = widget.remainingSlots;
     _existingEmails = {
       for (final member in widget.userDetails.familyData?.members ?? [])
         member.email.trim().toLowerCase(),
@@ -76,7 +84,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.enterEmailAddresses,
+                    _inviteLimitMessage(l10n),
                     style: textTheme.bodyMuted.copyWith(height: 1.5),
                   ),
                   const SizedBox(height: 16),
@@ -146,7 +154,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
               focusNode: _emailFocusNode,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
-              autofocus: true,
+              autofocus: _canAddMore,
               enabled: !_isCheckingEmail && _canAddMore,
               onChanged: (_) {
                 if (_errorMessage != null) {
@@ -213,6 +221,25 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
 
   String _sendInvitesLabel(AppLocalizations l10n) {
     return l10n.sendCountInvites(count: _emails.length);
+  }
+
+  String _inviteLimitMessage(AppLocalizations l10n) {
+    if (_inviteSlotsLeft == 0) {
+      return l10n.inviteLimitReached;
+    }
+    return l10n.inviteSlotsLeft(count: _inviteSlotsLeft);
+  }
+
+  int _remainingSlotsFor(UserDetails details) {
+    final memberCount = details.familyData?.members
+            ?.where(
+              (member) =>
+                  member.email.trim().toLowerCase() !=
+                  details.email.trim().toLowerCase(),
+            )
+            .length ??
+        0;
+    return math.max(0, _maxFamilyMembers - memberCount);
   }
 
   Future<void> _addEmail() async {
@@ -296,17 +323,36 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
       final hadAnySuccess = result.failures.length < _emails.length;
       final failedEmailSet =
           result.failures.map((failure) => failure.email).toSet();
-      _existingEmails
-          .addAll(_emails.where((email) => !failedEmailSet.contains(email)));
+      final successfulEmails =
+          _emails.where((email) => !failedEmailSet.contains(email)).toList();
+      UserDetails? refreshedDetails;
       if (hadAnySuccess) {
         try {
-          await FamilyService.instance.refreshUserDetails();
+          refreshedDetails = await FamilyService.instance.refreshUserDetails();
         } catch (_) {}
       }
 
       final failedEmails =
           result.failures.map((failure) => failure.email).toList();
       setState(() {
+        if (refreshedDetails != null) {
+          final details = refreshedDetails;
+          _remainingSlots = _remainingSlotsFor(details);
+          _existingEmails
+            ..clear()
+            ..addAll(
+              {
+                for (final member in details.familyData?.members ?? [])
+                  member.email.trim().toLowerCase(),
+              },
+            );
+        } else {
+          _remainingSlots = math.max(
+            0,
+            _remainingSlots - successfulEmails.length,
+          );
+          _existingEmails.addAll(successfulEmails);
+        }
         _emails
           ..clear()
           ..addAll(failedEmails);

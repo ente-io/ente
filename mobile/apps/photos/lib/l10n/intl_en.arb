@@ -690,6 +690,16 @@
   "addMember": "Add member",
   "inviteMembers": "Invite members",
   "enterEmailAddresses": "Enter their email addresses. They need an Ente account.",
+  "inviteSlotsLeft": "{count, plural, =1 {You can invite 1 more person.} other {You can invite {count} more people.}}",
+  "@inviteSlotsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "inviteLimitReached": "You've reached the limit of invites.",
   "emailAddress": "Email address",
   "sendInvites": "Send invites",
   "sendCountInvites": "{count, plural, =0 {Send invites} =1 {Send 1 invite} other {Send {count} invites}}",
