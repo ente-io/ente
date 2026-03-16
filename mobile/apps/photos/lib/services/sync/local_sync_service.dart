@@ -14,6 +14,7 @@ import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/db/device_files_db.dart";
 import "package:photos/db/file_updation_db.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/extensions/logger_extension.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -237,6 +238,31 @@ class LocalSyncService {
         ),
       );
     }
+    final int newMappingCount =
+        localDiffResult.newPathToLocalIDs?.values.fold<int>(
+              0,
+              (sum, ids) => sum + ids.length,
+            ) ??
+            0;
+    final int deletedMappingCount =
+        localDiffResult.deletePathToLocalIDs?.values.fold<int>(
+              0,
+              (sum, ids) => sum + ids.length,
+            ) ??
+            0;
+    if (newMappingCount > 0 || deletedMappingCount > 0 || hasUnsyncedFiles) {
+      final sampleRecovered = (localDiffResult.uniqueLocalFiles ?? [])
+          .take(3)
+          .map((file) => file.localID)
+          .toList();
+      _logger.internalInfo(
+        "syncAll recovery: "
+        "newFiles=${localDiffResult.uniqueLocalFiles?.length ?? 0}, "
+        "newMappings=$newMappingCount, "
+        "deletedMappings=$deletedMappingCount, "
+        "sampleRecovered=$sampleRecovered",
+      );
+    }
 
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
     return hasUnsyncedFiles;
@@ -332,6 +358,16 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
+      if (allFiles.length != files.length) {
+        final sampleLocalIDs =
+            allFiles.take(3).map((file) => file.localID).toList();
+        _logger.internalInfo(
+          "localSync partial materialization: "
+          "from=$fromTime to=$toTime "
+          "discovered=${allFiles.length} inserted=${files.length} "
+          "sampleLocalIDs=$sampleLocalIDs",
+        );
+      }
       _checkAndFireLocalAssetUpdateEvent(allFiles, files);
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);

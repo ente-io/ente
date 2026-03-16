@@ -10,6 +10,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/extensions/logger_extension.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/diff_sync_complete_event.dart';
@@ -403,6 +404,7 @@ class RemoteSyncService {
     for (final deviceCollection in deviceCollections) {
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id]?.toSet() ?? {};
+      final int mappedCount = localIDsToSync.length;
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -423,6 +425,12 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
+        if (mappedCount == 0) {
+          _logger.internalInfo(
+            "[${deviceCollection.name}] upload-prep empty: "
+            "pathID=${deviceCollection.id} mappedFromPath=0",
+          );
+        }
         continue;
       }
       final collectionID = await _getCollectionID(deviceCollection);
@@ -456,6 +464,7 @@ class RemoteSyncService {
       // new file entries, where we can store mapping for localID and
       // corresponding collection ID
       if (localIDsToSync.isNotEmpty) {
+        final int postFilterCount = localIDsToSync.length;
         debugPrint(
           'Adding new entries for ${localIDsToSync.length} files'
           ' for ${deviceCollection.name}',
@@ -476,10 +485,19 @@ class RemoteSyncService {
           }
         }
         await _db.insertMultiple(newFilesToInsert);
-        if (fileFoundForLocalIDs.length != localIDsToSync.length) {
-          _logger.warning(
-            "mismatch in num of filesToSync ${localIDsToSync.length} to "
-            "fileSynced ${fileFoundForLocalIDs.length}",
+        final int missingFileRows =
+            postFilterCount - fileFoundForLocalIDs.length;
+        if (missingFileRows > 0) {
+          final sample =
+              localIDsToSync.difference(fileFoundForLocalIDs).take(3);
+          _logger.internalWarning(
+            "[${deviceCollection.name}] upload-prep missing rows: "
+            "pathID=${deviceCollection.id} "
+            "mappedFromPath=$mappedCount "
+            "postFilter=$postFilterCount "
+            "missingFileRows=$missingFileRows "
+            "collectionID=$collectionID "
+            "sample=${sample.toList()}",
           );
         }
       }
