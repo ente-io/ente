@@ -378,7 +378,6 @@ class RemoteSyncService {
   Future<void> syncDeviceCollectionFilesForUpload() async {
     _logger.info("Syncing device collections to be uploaded");
     final int ownerID = _config.getUserID()!;
-    final bool shouldLogSyncRecovery = flagService.syncRecoveryDiagnostics;
 
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
@@ -424,7 +423,7 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
-        if (shouldLogSyncRecovery) {
+        if (flagService.syncRecoveryDiagnostics) {
           _logger.info(
             "[${deviceCollection.name}] upload-prep empty: "
             "pathID=${deviceCollection.id} mappedFromPath=0",
@@ -489,7 +488,7 @@ class RemoteSyncService {
             "fileSynced ${fileFoundForLocalIDs.length}",
           );
         }
-        if (shouldLogSyncRecovery) {
+        if (flagService.syncRecoveryDiagnostics) {
           final int mappedCount = localIDsToSync.length;
           final int postFilterCount = localIDsToSync.length;
           final int missingFileRows =

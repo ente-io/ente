@@ -329,7 +329,6 @@ class LocalSyncService {
     required int fromTime,
     required int toTime,
   }) async {
-    final bool shouldLogSyncRecovery = flagService.syncRecoveryDiagnostics;
     final Tuple2<List<LocalPathAsset>, List<EnteFile>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime);
 
@@ -360,7 +359,7 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      if (shouldLogSyncRecovery && allFiles.length != files.length) {
+      if (flagService.syncRecoveryDiagnostics && allFiles.length != files.length) {
         final sampleLocalIDs =
             allFiles.take(3).map((file) => file.localID).toList();
         _logger.info(
