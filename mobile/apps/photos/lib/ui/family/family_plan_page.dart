@@ -95,22 +95,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
     return FamilyPageScaffold(
       title: _showsDashboard ? AppLocalizations.of(context).family : null,
-      child: Stack(
-        children: [
-          Positioned.fill(child: content),
-          if (_isRefreshing)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(
-                minHeight: 2,
-                color: getEnteColorScheme(context).greenBase,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-        ],
-      ),
+      child: content,
     );
   }
 
