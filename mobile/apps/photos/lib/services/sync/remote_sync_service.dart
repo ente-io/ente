@@ -489,6 +489,12 @@ class RemoteSyncService {
         final int missingFileRows = shouldLogSyncRecovery
             ? postFilterCount - fileFoundForLocalIDs.length
             : 0;
+        if (fileFoundForLocalIDs.length != localIDsToSync.length) {
+          _logger.warning(
+            "mismatch in num of filesToSync ${localIDsToSync.length} to "
+            "fileSynced ${fileFoundForLocalIDs.length}",
+          );
+        }
         if (missingFileRows > 0) {
           final sample =
               localIDsToSync.difference(fileFoundForLocalIDs).take(3);
