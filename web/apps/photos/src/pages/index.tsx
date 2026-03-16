@@ -64,12 +64,15 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 try {
-                    // Format: ?joinAlbum=accessToken&collectionId=123&jwt=<jwtToken>#collectionKeyHash
+                    // Format: ?joinAlbum=accessToken&collectionId=123#collectionKeyHash&jwt=<jwtToken>
                     const accessToken = joinAlbumParam;
                     const collectionIdParam =
                         currentURL.searchParams.get("collectionId");
-                    const collectionKeyHash = currentURL.hash.slice(1);
-                    const jwtFromURL = currentURL.searchParams.get("jwt");
+                    const [collectionKeyHash, fragmentParams = ""] =
+                        currentURL.hash.slice(1).split("&", 2);
+                    const jwtFromURL =
+                        new URLSearchParams(fragmentParams).get("jwt") ??
+                        undefined;
 
                     if (accessToken && collectionKeyHash && collectionIdParam) {
                         // Import the necessary functions to convert the collection key
@@ -115,11 +118,7 @@ const Page: React.FC = () => {
                     currentURL.host == albumsURL.host) &&
                 currentURL.pathname != "/shared-albums"
             ) {
-                const end = currentURL.hash.lastIndexOf("&");
-                const hash = currentURL.hash.slice(
-                    1,
-                    end !== -1 ? end : undefined,
-                );
+                const [hash] = currentURL.hash.slice(1).split("&", 1);
                 await router.replace({
                     pathname: "/shared-albums",
                     search: currentURL.search,
