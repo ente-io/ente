@@ -640,8 +640,6 @@
   "familyPlans": "Plans familiars",
   "referrals": "Referències",
   "notifications": "Notificacions",
-  "sharedPhotoNotifications": "Noves fotos compartides",
-  "sharedPhotoNotificationsExplanation": "Rep notificacions quan algú afegeix una foto a un àlbum compartit del qual formes part",
   "socialNotifications": "M'agrada i comentaris",
   "socialNotificationsExplanation": "Rep notificacions de m'agrada a les teves fotos i comentaris als àlbums dels quals formes part",
   "advanced": "Avançat",
@@ -678,7 +676,6 @@
   "darkTheme": "Fosc",
   "systemTheme": "Sistema",
   "freeTrial": "Prova gratuïta",
-  "selectYourPlan": "Selecciona el teu pla",
   "enteSubscriptionPitch": "Ente preserva els teus records, perquè estiguin sempre disponibles per a tu, fins i tot si perds el teu dispositiu.",
   "enteSubscriptionShareWithFamily": "La teva família també es pot afegir al teu pla.",
   "currentUsageIs": "L'ús actual és ",
@@ -779,7 +776,6 @@
   "grantFullAccessPrompt": "Si us plau, permet l'accés a totes les fotos a l'aplicació de Configuració",
   "allowPermTitle": "Permet l'accés a les fotos",
   "allowPermBody": "Si us plau, permet l'accés a les teves fotos des de Configuració perquè Ente pugui mostrar i fer còpia de seguretat de la teva biblioteca.",
-  "openSettings": "Obre Configuració",
   "selectMorePhotos": "Selecciona més fotos",
   "existingUser": "Usuari existent",
   "newToEnte": "Nou a Ente",
@@ -1946,9 +1942,6 @@
   "curatedMemories": "Records seleccionats",
   "widgets": "Widgets",
   "memories": "Records",
-  "peopleWidgetDesc": "Selecciona les persones que vols veure a la teva pantalla d'inici.",
-  "albumsWidgetDesc": "Selecciona els àlbums que vols veure a la teva pantalla d'inici.",
-  "memoriesWidgetDesc": "Selecciona el tipus de records que vols veure a la teva pantalla d'inici.",
   "smartMemories": "Records intel·ligents",
   "pastYearsMemories": "Records d'anys passats",
   "deleteMultipleAlbumDialog": "Esborrar també les fotos (i vídeos) presents en aquests {count} àlbums de <bold>tots</bold> els altres àlbums dels quals formen part?",
@@ -1962,9 +1955,6 @@
   "sorryWeHadToPauseYourBackups": "Ho sentim, hem hagut de pausar les teves còpies de seguretat",
   "clickToInstallOurBestVersionYet": "Fes clic per instal·lar la nostra millor versió fins ara",
   "onThisDayNotificationExplanation": "Rep recordatoris sobre records d'aquest dia en anys anteriors.",
-  "addMemoriesWidgetPrompt": "Afegeix un widget de records a la teva pantalla d'inici i torna aquí per personalitzar.",
-  "addAlbumWidgetPrompt": "Afegeix un widget d'àlbum a la teva pantalla d'inici i torna aquí per personalitzar.",
-  "addPeopleWidgetPrompt": "Afegeix un widget de persones a la teva pantalla d'inici i torna aquí per personalitzar.",
   "birthdayNotifications": "Notificacions d'aniversari",
   "receiveRemindersOnBirthdays": "Rep recordatoris quan sigui l'aniversari d'algú. Tocar la notificació et portarà a fotos de la persona que fa anys.",
   "happyBirthday": "Per molts anys! 🥳",
@@ -2265,16 +2255,6 @@
   },
   "playfulKids": "Nens juganers",
   "coastalCliffs": "Penya-segats vora el mar",
-  "candidLaughter": "Rialles espontànies",
-  "groupSelfies": "Tots nosaltres",
-  "birthdayJoy": "Alegria d'aniversari",
-  "weddingMoments": "Brillantor de casament",
-  "goldenHourPortraits": "Rostres a l'hora daurada",
-  "concertNights": "Nits de concert",
-  "poolDays": "Dies de piscina",
-  "picnicDays": "Records de pícnic",
-  "campingMoments": "Moments d'acampada",
-  "babySmiles": "Somriures de nadó",
   "ritualsTitle": "Rituals",
   "ritualAddTooltip": "Afegeix ritual",
   "ritualActivityHeading": "Activitat",
@@ -2374,38 +2354,6 @@
   "newLikeNotificationTitle": "Tens un m'agrada",
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
-  },
-  "likedYourPhoto": "Li ha agradat la teva foto",
-  "likedAPhoto": "Li ha agradat una foto",
-  "likedYourVideo": "Li ha agradat el teu vídeo",
-  "commentedOnYourPhoto": "Ha comentat la teva foto",
-  "commentedOnAPhoto": "Ha comentat una foto",
-  "commentedOnYourVideo": "Ha comentat el teu vídeo",
-  "commentedOnAVideo": "Ha comentat un vídeo",
-  "repliedToYourComment": "Ha respost al teu comentari",
-  "repliedToAComment": "Ha respost a un comentari",
-  "likedYourComment": "Li ha agradat el teu comentari",
-  "likedAComment": "Li ha agradat un comentari",
-  "likedYourReply": "Li ha agradat la teva resposta",
-  "likedAReply": "Li ha agradat una resposta",
-  "addedAMemoryTo": "Ha afegit un record a {albumName}",
-  "@addedAMemoryTo": {
-    "placeholders": {
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
-  "addedNMemoriesTo": "Ha afegit {count} records a {albumName}",
-  "@addedNMemoriesTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "albumName": {
-        "type": "String"
-      }
-    }
   },
   "and1Other": "i 1 altre",
   "andXOthers": "i {count} altres",
