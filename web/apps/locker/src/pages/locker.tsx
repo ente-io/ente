@@ -523,8 +523,9 @@ const Page: React.FC = () => {
 
             const droppedFiles = Array.from(event.dataTransfer.files);
             const droppedItems = Array.from(
-                event.dataTransfer.items ?? [],
+                event.dataTransfer.items,
             ) as DragDataTransferItem[];
+            const [droppedItem] = droppedItems;
 
             if (droppedFiles.length !== 1) {
                 return;
@@ -533,8 +534,8 @@ const Page: React.FC = () => {
             if (
                 droppedItems.length > 0 &&
                 (droppedItems.length !== 1 ||
-                    droppedItems[0]?.kind !== "file" ||
-                    droppedItems[0].webkitGetAsEntry?.()?.isDirectory)
+                    droppedItem.kind !== "file" ||
+                    droppedItem.webkitGetAsEntry()?.isDirectory)
             ) {
                 return;
             }
