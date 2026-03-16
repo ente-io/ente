@@ -115,6 +115,7 @@ const Page: React.FC = () => {
 
     // View mode state
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
+    const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
     const [isTrashView, setIsTrashView] = useState(false);
     const [isCollectionsView, setIsCollectionsView] = useState(false);
 
@@ -180,7 +181,8 @@ const Page: React.FC = () => {
                 const data = await fetchLockerData(key);
                 const trash = await fetchLockerTrash(key);
                 setCollections(data);
-                setTrashItems(trash);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to refresh locker data", e);
@@ -209,7 +211,8 @@ const Page: React.FC = () => {
                 const data = await fetchLockerData(mk);
                 const trash = await fetchLockerTrash(mk);
                 setCollections(data);
-                setTrashItems(trash);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to fetch locker data", e);
@@ -425,13 +428,13 @@ const Page: React.FC = () => {
                 text: t("empty_trash"),
                 color: "critical",
                 action: async () => {
-                    await emptyTrashAPI();
+                    await emptyTrashAPI(trashLastUpdatedAt);
                     await refreshData();
                     setToast(t("trashClearedSuccessfully"));
                 },
             },
         });
-    }, [showMiniDialog, refreshData]);
+    }, [showMiniDialog, refreshData, trashLastUpdatedAt]);
 
     // Collection management
 
