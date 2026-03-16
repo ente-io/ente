@@ -1524,12 +1524,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleAddFileToCollection = useMemo(() => {
-        if (
-            !onAddFileToCollection ||
-            !activeAnnotatedFile?.annotation.isOwnFile
-        ) {
-            return undefined;
-        }
+        if (!onAddFileToCollection || !activeAnnotatedFile) return undefined;
 
         return () => {
             handleMoreMenuCloseIfNeeded();
@@ -2039,7 +2034,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             });
         }
 
-        if (handleAddFileToCollection) {
+        if (
+            handleAddFileToCollection &&
+            activeAnnotatedFile?.annotation.isOwnFile
+        ) {
             items.push({
                 id: "add-to-album",
                 label: t("add_to_album"),
