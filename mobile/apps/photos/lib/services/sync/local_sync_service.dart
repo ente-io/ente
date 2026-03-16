@@ -330,6 +330,7 @@ class LocalSyncService {
     required int fromTime,
     required int toTime,
   }) async {
+    final bool isInternalUser = flagService.internalUser;
     final Tuple2<List<LocalPathAsset>, List<EnteFile>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime);
 
@@ -360,7 +361,7 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      if (allFiles.length != files.length) {
+      if (isInternalUser && allFiles.length != files.length) {
         final sampleLocalIDs =
             allFiles.take(3).map((file) => file.localID).toList();
         _logger.internalInfo(

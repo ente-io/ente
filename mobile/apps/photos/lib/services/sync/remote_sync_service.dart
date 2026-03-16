@@ -379,6 +379,7 @@ class RemoteSyncService {
   Future<void> syncDeviceCollectionFilesForUpload() async {
     _logger.info("Syncing device collections to be uploaded");
     final int ownerID = _config.getUserID()!;
+    final bool isInternalUser = flagService.internalUser;
 
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
@@ -404,7 +405,7 @@ class RemoteSyncService {
     for (final deviceCollection in deviceCollections) {
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id]?.toSet() ?? {};
-      final int mappedCount = localIDsToSync.length;
+      final int mappedCount = isInternalUser ? localIDsToSync.length : 0;
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -425,7 +426,7 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
-        if (mappedCount == 0) {
+        if (isInternalUser && mappedCount == 0) {
           _logger.internalInfo(
             "[${deviceCollection.name}] upload-prep empty: "
             "pathID=${deviceCollection.id} mappedFromPath=0",
@@ -464,7 +465,7 @@ class RemoteSyncService {
       // new file entries, where we can store mapping for localID and
       // corresponding collection ID
       if (localIDsToSync.isNotEmpty) {
-        final int postFilterCount = localIDsToSync.length;
+        final int postFilterCount = isInternalUser ? localIDsToSync.length : 0;
         debugPrint(
           'Adding new entries for ${localIDsToSync.length} files'
           ' for ${deviceCollection.name}',
@@ -486,8 +487,8 @@ class RemoteSyncService {
         }
         await _db.insertMultiple(newFilesToInsert);
         final int missingFileRows =
-            postFilterCount - fileFoundForLocalIDs.length;
-        if (missingFileRows > 0) {
+            isInternalUser ? postFilterCount - fileFoundForLocalIDs.length : 0;
+        if (isInternalUser && missingFileRows > 0) {
           final sample =
               localIDsToSync.difference(fileFoundForLocalIDs).take(3);
           _logger.internalWarning(
