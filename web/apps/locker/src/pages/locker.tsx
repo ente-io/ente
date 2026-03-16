@@ -327,6 +327,16 @@ export const LockerPage: React.FC = () => {
         lockerRouteIndexRef.current = routeStack.length - 1;
     }, [router.asPath, router.isReady]);
 
+    useEffect(() => {
+        if (
+            router.pathname === "/collection" &&
+            router.isReady &&
+            routeCollectionID === null
+        ) {
+            void router.replace("/", undefined, { shallow: true });
+        }
+    }, [routeCollectionID, router]);
+
     const navigateHome = useCallback(() => {
         isProgrammaticLockerNavigationRef.current = true;
         void router.push("/", undefined, { shallow: true });
@@ -741,7 +751,7 @@ export const LockerPage: React.FC = () => {
     const isCollectionRoutePending =
         router.pathname === "/collection" &&
         (router.asPath.split("?")[0] ?? router.asPath) === "/collection" &&
-        (!router.isReady || routeCollectionID === null);
+        !router.isReady;
     const isViewLoading =
         !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
