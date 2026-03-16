@@ -14,7 +14,6 @@ import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/db/device_files_db.dart";
 import "package:photos/db/file_updation_db.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/extensions/logger_extension.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -256,7 +255,7 @@ class LocalSyncService {
             .take(3)
             .map((file) => file.localID)
             .toList();
-        _logger.internalInfo(
+        _logger.info(
           "syncAll recovery: "
           "newFiles=${localDiffResult.uniqueLocalFiles?.length ?? 0}, "
           "newMappings=$newMappingCount, "
@@ -364,7 +363,7 @@ class LocalSyncService {
       if (shouldLogSyncRecovery && allFiles.length != files.length) {
         final sampleLocalIDs =
             allFiles.take(3).map((file) => file.localID).toList();
-        _logger.internalInfo(
+        _logger.info(
           "localSync partial materialization: "
           "from=$fromTime to=$toTime "
           "discovered=${allFiles.length} inserted=${files.length} "

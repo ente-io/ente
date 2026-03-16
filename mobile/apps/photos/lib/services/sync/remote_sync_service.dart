@@ -10,7 +10,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/extensions/logger_extension.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/diff_sync_complete_event.dart';
@@ -427,7 +426,7 @@ class RemoteSyncService {
 
       if (localIDsToSync.isEmpty) {
         if (shouldLogSyncRecovery && mappedCount == 0) {
-          _logger.internalInfo(
+          _logger.info(
             "[${deviceCollection.name}] upload-prep empty: "
             "pathID=${deviceCollection.id} mappedFromPath=0",
           );
@@ -493,7 +492,7 @@ class RemoteSyncService {
         if (missingFileRows > 0) {
           final sample =
               localIDsToSync.difference(fileFoundForLocalIDs).take(3);
-          _logger.internalWarning(
+          _logger.warning(
             "[${deviceCollection.name}] upload-prep missing rows: "
             "pathID=${deviceCollection.id} "
             "mappedFromPath=$mappedCount "
