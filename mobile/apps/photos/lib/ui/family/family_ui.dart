@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/notification/toast.dart';
 
 Color familyPageBackgroundColor(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark
@@ -67,14 +68,5 @@ class FamilyPageScaffold extends StatelessWidget {
 }
 
 void showFamilySnackBar(BuildContext context, String message) {
-  final messenger = ScaffoldMessenger.of(context);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      ),
-    );
+  showShortToast(context, message);
 }
