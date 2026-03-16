@@ -38,6 +38,8 @@ struct ChatDbHolder {
     db: Arc<EnsuDb<SqliteBackend>>,
 }
 
+const SECURE_STORAGE_SERVICE: &str = "io.ente.ensu";
+
 #[derive(Debug, Serialize)]
 pub struct ApiError {
     code: String,
@@ -74,6 +76,11 @@ fn chat_db_thread_error() -> ApiError {
 
 fn fs_thread_error() -> ApiError {
     ApiError::new("io_thread", "FS task failed")
+}
+
+fn secure_storage_entry(key: &str) -> Result<keyring::Entry, ApiError> {
+    keyring::Entry::new(SECURE_STORAGE_SERVICE, key)
+        .map_err(|err| ApiError::new("secure_storage", err.to_string()))
 }
 
 fn default_llm_threads() -> i32 {
@@ -760,6 +767,7 @@ pub struct ChatMessageUpsertInput {
     sender: String,
     text: String,
     created_at: i64,
+    remote_id: Option<String>,
     deleted_at: Option<i64>,
     attachments: Option<Vec<ChatAttachmentInput>>,
 }
@@ -1029,16 +1037,38 @@ pub async fn chat_db_insert_message_with_uuid(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db_async(&state, app, key_b64, move |db| {
-        let message = db.insert_message_with_uuid(
-            message_uuid,
-            session_uuid,
-            sender,
-            &input.text,
-            parent,
-            attachments,
-            input.created_at,
-            input.deleted_at,
-        )?;
+        let attachment_metas = attachments
+            .iter()
+            .cloned()
+            .map(ensu_db::AttachmentMeta::from)
+            .collect::<Vec<_>>();
+        let message = if let Some(remote_id) = input.remote_id.as_deref() {
+            let message = db.upsert_message_from_remote(
+                message_uuid,
+                session_uuid,
+                remote_id,
+                sender,
+                &input.text,
+                parent,
+                attachment_metas,
+                input.created_at,
+            )?;
+            if let Some(deleted_at) = input.deleted_at {
+                db.apply_message_tombstone(message_uuid, deleted_at)?;
+            }
+            message
+        } else {
+            db.insert_message_with_uuid(
+                message_uuid,
+                session_uuid,
+                sender,
+                &input.text,
+                parent,
+                attachments,
+                input.created_at,
+                input.deleted_at,
+            )?
+        };
         build_message_dto(db, message)
     })
     .await
@@ -1543,6 +1573,33 @@ fn parse_entity_type(value: &str) -> Result<ensu_db::EntityType, ApiError> {
 
 fn parse_uuid(value: &str) -> Result<Uuid, ApiError> {
     Uuid::parse_str(value).map_err(|err| ApiError::new("uuid", err.to_string()))
+}
+
+#[tauri::command]
+pub fn secure_storage_get(key: String) -> Result<Option<String>, ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    match entry.get_password() {
+        Ok(value) => Ok(Some(value)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(err) => Err(ApiError::new("secure_storage", err.to_string())),
+    }
+}
+
+#[tauri::command]
+pub fn secure_storage_set(key: String, value: String) -> Result<(), ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    entry
+        .set_password(&value)
+        .map_err(|err| ApiError::new("secure_storage", err.to_string()))
+}
+
+#[tauri::command]
+pub fn secure_storage_delete(key: String) -> Result<(), ApiError> {
+    let entry = secure_storage_entry(&key)?;
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(err) => Err(ApiError::new("secure_storage", err.to_string())),
+    }
 }
 
 fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {

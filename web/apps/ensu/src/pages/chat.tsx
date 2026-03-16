@@ -19,6 +19,7 @@ import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
+import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
@@ -43,12 +44,14 @@ import {
     cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
+    initChatKeyStore,
 } from "services/chat/chatKey";
 import {
     addMessage,
     createSession,
     deleteSession,
     getBranchSelections,
+    initializeChatStorePersistence,
     listMessages,
     listSessions,
     readDecryptedAttachmentBytes,
@@ -80,8 +83,9 @@ import type {
     ModelSettings,
 } from "services/llm/types";
 import {
-    clearMasterKeyFromSession,
+    clearMasterKeyFromEverywhere,
     masterKeyFromSession,
+    updateSessionFromTauriSecureStorageIfNeeded,
 } from "services/session";
 
 const formatTime = (timestamp: number) => {
@@ -187,6 +191,8 @@ const buildChatSystemPrompt = () => {
 
 const SESSION_TITLE_PROMPT =
     "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.";
+
+const MODEL_SETTINGS_KEY = "ensu.modelSettings";
 
 const REPEAT_PENALTY = 1.18;
 const STREAMING_OUTRO_DURATION_MS = 520;
@@ -811,6 +817,7 @@ const Page: React.FC = () => {
     const [loadingPhrase, setLoadingPhrase] = useState<string | null>(null);
     const [loadingDots, setLoadingDots] = useState(1);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isChatStoreBridgeReady, setIsChatStoreBridgeReady] = useState(false);
     const [attachmentPreviews, setAttachmentPreviews] = useState<
         Record<string, string>
     >({});
@@ -933,6 +940,8 @@ const Page: React.FC = () => {
     );
 
     const refreshAuthState = useCallback(async () => {
+        await initChatKeyStore();
+        await updateSessionFromTauriSecureStorageIfNeeded();
         const token = await savedAuthToken();
         const hasToken = !!token;
 
@@ -953,7 +962,7 @@ const Page: React.FC = () => {
                 masterKey = await masterKeyFromSession();
             } catch (error) {
                 log.error("Failed to read master key from session", error);
-                clearMasterKeyFromSession();
+                await clearMasterKeyFromEverywhere();
             }
 
             if (!masterKey) {
@@ -1031,6 +1040,32 @@ const Page: React.FC = () => {
     }, [chatKey]);
 
     useEffect(() => {
+        if (!chatKey) {
+            setIsChatStoreBridgeReady(false);
+            return;
+        }
+
+        let cancelled = false;
+        const run = async () => {
+            try {
+                await initializeChatStorePersistence(chatKey);
+            } catch (error) {
+                log.error("Failed to initialize chat persistence", error);
+            } finally {
+                if (!cancelled) {
+                    setIsChatStoreBridgeReady(true);
+                }
+            }
+        };
+        run();
+
+        return () => {
+            cancelled = true;
+            setIsChatStoreBridgeReady(false);
+        };
+    }, [chatKey]);
+
+    useEffect(() => {
         isDraftSessionRef.current = isDraftSession;
     }, [isDraftSession]);
 
@@ -1050,7 +1085,7 @@ const Page: React.FC = () => {
                 masterKey = await masterKeyFromSession();
             } catch (error) {
                 log.error("Failed to read master key from session", error);
-                clearMasterKeyFromSession();
+                await clearMasterKeyFromEverywhere();
             }
 
             const remoteKey = cachedChatKey();
@@ -1199,47 +1234,49 @@ const Page: React.FC = () => {
     }, [loading]);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-        const raw = window.localStorage.getItem("ensu.modelSettings");
-        if (!raw) return;
-        try {
-            const parsed = JSON.parse(raw) as {
-                useCustomModel?: boolean;
-                modelUrl?: string;
-                mmprojUrl?: string;
-                contextLength?: string;
-                maxTokens?: string;
-            };
-            const rawContextLength = parsed.contextLength ?? "";
-            const clampedContextLength =
-                !isTauriRuntime &&
-                rawContextLength &&
-                Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
-                    ? String(DEFAULT_WEB_CONTEXT_SIZE)
-                    : rawContextLength;
-            if (clampedContextLength !== rawContextLength) {
-                const nextSettings = {
-                    useCustomModel: !!parsed.useCustomModel,
-                    modelUrl: parsed.modelUrl ?? "",
-                    mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
-                    contextLength: clampedContextLength,
-                    maxTokens: parsed.maxTokens ?? "",
+        let cancelled = false;
+        void getKV(MODEL_SETTINGS_KEY)
+            .then(async (raw) => {
+                if (!raw || typeof raw !== "object") return;
+                const parsed = raw as {
+                    useCustomModel?: boolean;
+                    modelUrl?: string;
+                    mmprojUrl?: string;
+                    contextLength?: string;
+                    maxTokens?: string;
                 };
-                window.localStorage.setItem(
-                    "ensu.modelSettings",
-                    JSON.stringify(nextSettings),
+                const rawContextLength = parsed.contextLength ?? "";
+                const clampedContextLength =
+                    !isTauriRuntime &&
+                    rawContextLength &&
+                    Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                        ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                        : rawContextLength;
+                if (clampedContextLength !== rawContextLength) {
+                    const nextSettings = {
+                        useCustomModel: !!parsed.useCustomModel,
+                        modelUrl: parsed.modelUrl ?? "",
+                        mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
+                        contextLength: clampedContextLength,
+                        maxTokens: parsed.maxTokens ?? "",
+                    };
+                    await setKV(MODEL_SETTINGS_KEY, nextSettings);
+                }
+                if (cancelled) return;
+                setUseCustomModel(
+                    MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
                 );
-            }
-            setUseCustomModel(
-                MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
-            );
-            setModelUrl(parsed.modelUrl ?? "");
-            setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
-            setContextLength(clampedContextLength);
-            setMaxTokens(parsed.maxTokens ?? "");
-        } catch (error) {
-            log.error("Failed to read model settings", error);
-        }
+                setModelUrl(parsed.modelUrl ?? "");
+                setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
+                setContextLength(clampedContextLength);
+                setMaxTokens(parsed.maxTokens ?? "");
+            })
+            .catch((error) => {
+                log.error("Failed to read model settings", error);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, [allowMmproj, isTauriRuntime]);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
@@ -1618,13 +1655,13 @@ const Page: React.FC = () => {
     }, [deleteSessionTarget]);
 
     useEffect(() => {
-        if (!chatKey) return;
+        if (!chatKey || !isChatStoreBridgeReady) return;
         if (isLoggedIn) {
             void syncNow();
             return;
         }
         void refreshSessions();
-    }, [chatKey, isLoggedIn, refreshSessions, syncNow]);
+    }, [chatKey, isChatStoreBridgeReady, isLoggedIn, refreshSessions, syncNow]);
 
     useEffect(() => {
         currentSessionIdRef.current = currentSessionId;
@@ -1772,9 +1809,23 @@ const Page: React.FC = () => {
             setBranchSelections({});
             return;
         }
-        setBranchSelections(
-            getBranchSelections(currentSession.rootSessionUuid),
-        );
+        let cancelled = false;
+        void getBranchSelections(currentSession.rootSessionUuid)
+            .then((selections) => {
+                if (!cancelled) {
+                    setBranchSelections(selections);
+                }
+            })
+            .catch((error) => {
+                log.error("Failed to load branch selections", error);
+                if (!cancelled) {
+                    setBranchSelections({});
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [currentSession?.rootSessionUuid]);
 
     useEffect(() => {
@@ -2266,7 +2317,11 @@ const Page: React.FC = () => {
     ]);
 
     const updateBranchSelectionState = useCallback(
-        (selectionKey: string, selectedMessageUuid: string, persist = true) => {
+        async (
+            selectionKey: string,
+            selectedMessageUuid: string,
+            persist = true,
+        ) => {
             setBranchSelections((prev) => ({
                 ...prev,
                 [selectionKey]: selectedMessageUuid,
@@ -2280,7 +2335,7 @@ const Page: React.FC = () => {
                 return;
             }
 
-            setBranchSelection(
+            await setBranchSelection(
                 rootSessionUuid,
                 selectionKey,
                 selectedMessageUuid,
@@ -3466,7 +3521,7 @@ const Page: React.FC = () => {
         );
     }, [contextLength, maxTokens, mmprojUrl, modelUrl, isTauriRuntime]);
 
-    const handleSaveModel = useCallback(() => {
+    const handleSaveModel = useCallback(async () => {
         if (!validateModelSettings()) return;
         setIsSavingModel(true);
         const payload = {
@@ -3476,12 +3531,7 @@ const Page: React.FC = () => {
             contextLength,
             maxTokens,
         };
-        if (typeof window !== "undefined") {
-            window.localStorage.setItem(
-                "ensu.modelSettings",
-                JSON.stringify(payload),
-            );
-        }
+        await setKV(MODEL_SETTINGS_KEY, payload);
         setUseCustomModel(true);
         setLoadedModelName(null);
         setIsSavingModel(false);
@@ -3495,10 +3545,8 @@ const Page: React.FC = () => {
         isTauriRuntime,
     ]);
 
-    const handleUseDefaultModel = useCallback(() => {
-        if (typeof window !== "undefined") {
-            window.localStorage.removeItem("ensu.modelSettings");
-        }
+    const handleUseDefaultModel = useCallback(async () => {
+        await removeKV(MODEL_SETTINGS_KEY);
         setUseCustomModel(false);
         setModelUrl("");
         setMmprojUrl("");

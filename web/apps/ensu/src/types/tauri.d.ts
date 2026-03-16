@@ -27,3 +27,7 @@ declare module "@tauri-apps/api/dialog" {
         options?: Record<string, unknown>,
     ): Promise<string | null>;
 }
+
+declare module "@tauri-apps/api/shell" {
+    export function open(path: string): Promise<void>;
+}

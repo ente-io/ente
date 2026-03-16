@@ -16,6 +16,7 @@ ensu-db = { path = "../../../ensu/db" }
 ensu-sync = { path = "../../../ensu/sync" }
 inference_rs = { path = "../../../ensu/inference" }
 uuid = { version = "1", features = ["v4"] }
+keyring = { version = "3", default-features = false, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
