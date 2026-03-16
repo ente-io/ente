@@ -18,8 +18,8 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
     FileActionMenu,
-    type FileActionMenuItem,
     type ContextMenuPosition,
+    type FileActionMenuItem,
 } from "ente-new/photos/components/FileActionMenu";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import type { FileContextAction } from "ente-new/photos/utils/file-actions";
