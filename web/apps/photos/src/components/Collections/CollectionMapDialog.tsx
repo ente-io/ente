@@ -1889,6 +1889,12 @@ interface MapCanvasProps {
     onPrefetchThumbnails: (fileIDs: number[]) => void;
 }
 
+const openStreetMapAttribution =
+    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors';
+
+const leafletAttributionPrefix =
+    '<a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>';
+
 const MapCanvas = React.memo(function MapCanvas({
     mapComponents,
     mapCenter,
@@ -1910,7 +1916,7 @@ const MapCanvas = React.memo(function MapCanvas({
             style={{ width: "100%", height: "100%" }}
         >
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution={openStreetMapAttribution}
                 url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                 maxZoom={MAX_MAP_ZOOM}
                 updateWhenZooming
@@ -1943,6 +1949,10 @@ const MapControls = React.memo(function MapControls({
     useMap,
 }: MapControlsProps) {
     const map = useMap();
+
+    useEffect(() => {
+        map.attributionControl.setPrefix(leafletAttributionPrefix);
+    }, [map]);
 
     const handleOpenInMaps = useCallback(() => {
         const center = map.getCenter();
