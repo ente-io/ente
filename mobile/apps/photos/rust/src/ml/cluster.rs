@@ -447,6 +447,31 @@ pub fn run_face_clustering_incremental(
         result.n_unclustered = unassigned.len();
     }
 
+    // Step 3: Recompute centroids for all clusters (existing and new) so
+    // the Dart caller gets up-to-date summaries for every cluster.
+    let dim = new_inputs
+        .first()
+        .map(|i| i.embedding.len())
+        .unwrap_or(128);
+    for cluster_id in result.cluster_counts.keys() {
+        let embs: Vec<&Vec<f32>> = new_inputs
+            .iter()
+            .filter(|inp| {
+                result
+                    .face_to_cluster
+                    .get(&inp.face_id)
+                    .map(|c| c == cluster_id)
+                    .unwrap_or(false)
+            })
+            .map(|inp| &inp.embedding)
+            .collect();
+        if !embs.is_empty() {
+            result
+                .cluster_centroids
+                .insert(cluster_id.clone(), mean_centroid(&embs, dim));
+        }
+    }
+
     Some(result)
 }
 
