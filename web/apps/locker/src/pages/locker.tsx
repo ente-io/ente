@@ -77,6 +77,10 @@ interface LockerUserDetailsResponse {
     };
 }
 
+type DragDataTransferItem = DataTransferItem & {
+    webkitGetAsEntry?: () => FileSystemEntry | null;
+};
+
 const hasPaidLockerAccess = (json: {
     subscription?: { productID?: string; expiryTime?: number };
     familyData?: { members?: unknown[] };
@@ -512,15 +516,30 @@ const Page: React.FC = () => {
 
     const handleDrop = useCallback(
         (event: React.DragEvent<HTMLElement>) => {
-            if (!event.dataTransfer.files.length) {
-                return;
-            }
             event.preventDefault();
             event.stopPropagation();
             dragDepthRef.current = 0;
             setIsDragActive(false);
 
-            const [file] = Array.from(event.dataTransfer.files);
+            const droppedFiles = Array.from(event.dataTransfer.files);
+            const droppedItems = Array.from(
+                event.dataTransfer.items ?? [],
+            ) as DragDataTransferItem[];
+
+            if (droppedFiles.length !== 1) {
+                return;
+            }
+
+            if (
+                droppedItems.length > 0 &&
+                (droppedItems.length !== 1 ||
+                    droppedItems[0]?.kind !== "file" ||
+                    droppedItems[0].webkitGetAsEntry?.()?.isDirectory)
+            ) {
+                return;
+            }
+
+            const [file] = droppedFiles;
             if (!file) {
                 return;
             }
