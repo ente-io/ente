@@ -246,7 +246,7 @@
   "free": "ฟรี",
   "referralStep1": "1. ปรับแต่งและแชร์โค้ดของคุณ",
   "referralStep2": "2. พวกเขาลงทะเบียน Ente โดยใช้โค้ดของคุณ",
-  "referralStep3": "3. ฟรี {storageInGB}GB สำหรับพวกเขา + ฟรี {storageInGB}GB สำหรับคุณเมื่อพวกเขาอัพเกรด",
+  "referralStep3": "3. ฟรี {storageInGB}GB สำหรับพวกเขา + ฟรี {storageINGB}GB สำหรับคุณเมื่อพวกเขาอัพเกรด",
   "faq": "คำถามที่พบบ่อย",
   "help": "ความช่วยเหลืแ",
   "oopsSomethingWentWrong": "อ๊ะ มีบางอย่างผิดพลาด",

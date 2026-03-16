@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Chào mừng bạn trở lại!",
   "emailAlreadyRegistered": "Email đã được đăng ký.",
   "emailNotRegistered": "Email chưa được đăng ký.",
+  "accountSetupIncompleteCreateAccount": "Thiết lập tài khoản chưa hoàn tất. Hãy tạo tài khoản để hoàn tất thiết lập.",
   "email": "Email",
   "cancel": "Hủy",
   "verify": "Xác minh",
@@ -32,6 +33,7 @@
   "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
   "ok": "OK",
   "createAccount": "Tạo tài khoản",
+  "createAccountTitle": "Tạo một tài khoản",
   "createNewAccount": "Tạo tài khoản mới",
   "password": "Mật khẩu",
   "confirmPassword": "Xác nhận mật khẩu",
@@ -667,8 +669,8 @@
   "familyPlans": "Gói gia đình",
   "referrals": "Giới thiệu bạn bè",
   "notifications": "Thông báo",
-  "sharedPhotoNotifications": "Ảnh chia sẻ mới",
-  "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
+  "sharedPhotoNotifications": "Ảnh và album mới chia sẻ",
+  "sharedPhotoNotificationsExplanation": "Nhận thông báo về những ảnh mới chia sẻ trong các album mà bạn tham gia hoặc những album mới chia sẻ với bạn.",
   "socialNotifications": "Thích và bình luận",
   "socialNotificationsExplanation": "Nhận thông báo khi có lượt thích trên ảnh của bạn và bình luận trên các album mà bạn tham gia",
   "advanced": "Nâng cao",
@@ -699,13 +701,69 @@
   "reportBug": "Báo lỗi",
   "suggestFeatures": "Đề xuất tính năng",
   "support": "Hỗ trợ",
+  "helpAndSupport": "Trợ giúp & Hỗ trợ",
+  "browseHelpPages": "Duyệt các trang hỗ trợ",
+  "searchAndDiscovery": "Tìm kiếm và Khám phá",
+  "searchAndDiscoveryDesc": "Gương mặt, địa điểm, miêu tả và nhiều hơn nữa",
+  "backupAndSync": "Sao lưu và đồng bộ",
+  "backupAndSyncDesc": "Tự động sao lưu, trạng thái đồng bộ và tải lên",
+  "sharingAndCollaboration": "Chia sẻ và cộng tác",
+  "sharingAndCollaborationDesc": "Album, liên kết và gói gia đình",
+  "storageAndPlans": "Dung lượng và gói",
+  "storageAndPlansDesc": "Gói, hóa đơn và dung lượng",
+  "troubleshooting": "Khắc phục sự cố",
+  "troubleshootingDesc": "Những vấn đề chung và giải pháp",
+  "viewAllHelpTopics": "Xem tất cả chủ đề trợ giúp",
+  "getInTouch": "Liên hệ",
+  "reportAnIssue": "Báo cáo sự cố",
+  "askAQuestion": "Đặt câu hỏi",
+  "requestAFeature": "Đề xuất tính năng",
+  "subject": "Tiêu đề",
+  "description": "Mô tả",
+  "oneLineAboutTheIssue": "Một dòng về vấn đề",
+  "detailsAboutTheIssue": "Những chi tiết về sự cố",
+  "yourQuestion": "Câu hỏi của bạn",
+  "anyAdditionalInformation": "Thông tin bổ sung bất kỳ",
+  "attachLogs": "Đính kèm log",
+  "attachLogsHelper": "Giúp chẩn đoán sự cố nhanh hơn",
+  "deviceInfoNote": "Chi tiết về thiết bị như phiên bản hệ điều hành, phiên bản ứng dụng và mẫu thiết bị sẽ được kèm theo tự động.",
+  "pleaseEnterASubject": "Vui lòng nhập một tiêu đề",
+  "pleaseEnterADescription": "Vui lòng nhập một mô tả",
+  "noEmailAppFound": "Không tìm thấy ứng dụng email",
+  "noEmailAppBody": "Sao chép thông điệp của bạn và gửi nó tới {email} từ bất cứ dịch vụ email nào.",
+  "@noEmailAppBody": {
+    "description": "No-mail-app fallback subtitle with the target email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "support@ente.io"
+      }
+    }
+  },
+  "message": "Nội dung tin nhắn",
+  "deviceInfo": "Thông tin thiết bị",
+  "logs": "Log",
+  "export": "Xuất",
+  "logsNotCopiedDownloadNote": "Chưa sao chép log. Xuất log và đính kèm chúng vào email.",
+  "attachedSize": "Đã đính kèm ({size})",
+  "@attachedSize": {
+    "description": "Label for attached logs with formatted file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "12.4 KB"
+      }
+    }
+  },
+  "copyAllToClipboard": "Sao chép tất cả vào clipboard",
+  "copied": "Đã sao chép",
   "appearance": "Giao diện",
   "theme": "Chủ đề",
   "lightTheme": "Sáng",
   "darkTheme": "Tối",
   "systemTheme": "Giống hệ thống",
   "freeTrial": "Dùng thử miễn phí",
-  "selectYourPlan": "Chọn gói của bạn",
+  "chooseYourPlan": "Chọn gói của bạn",
   "enteSubscriptionPitch": "Ente lưu giữ kỷ niệm của bạn, vì vậy chúng luôn có sẵn, ngay cả khi bạn mất thiết bị.",
   "enteSubscriptionShareWithFamily": "Bạn có thể thêm gia đình vào gói của mình.",
   "currentUsageIs": "Dung lượng hiện tại ",
@@ -774,6 +832,7 @@
   "appstoreSubscription": "Gói AppStore",
   "subAlreadyLinkedErrMessage": "ID {id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID {id} này với tài khoản này, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.",
   "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
+  "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
   "paymentFailed": "Thanh toán thất bại",
@@ -826,7 +885,7 @@
   "grantFullAccessPrompt": "Vui lòng cho phép truy cập vào tất cả ảnh trong ứng dụng Cài đặt",
   "allowPermTitle": "Cho phép truy cập ảnh",
   "allowPermBody": "Vui lòng cho phép truy cập vào ảnh của bạn từ Cài đặt để Ente có thể hiển thị và sao lưu thư viện của bạn.",
-  "openSettings": "Mở Cài đặt",
+  "openSettings": "Mở cài đặt",
   "selectMorePhotos": "Chọn thêm ảnh",
   "existingUser": "Người dùng hiện tại",
   "newToEnte": "Mới dùng Ente",
@@ -850,6 +909,7 @@
   "couldNotBackUpTryLater": "Chúng tôi không thể sao lưu dữ liệu của bạn.\nChúng tôi sẽ thử lại sau.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente chỉ có thể mã hóa và lưu giữ tệp nếu bạn cấp quyền truy cập chúng",
   "pleaseGrantPermissions": "Vui lòng cấp quyền",
+  "grantPermissionDesc": "Vui lòng cho phép Ente truy cập thư viện của bạn để chúng tôi có thể sắp xếp bằng nhận diện khuôn mặt. Toàn bộ quá trình này diễn ra trên thiết bị của bạn.",
   "privateSharing": "Chia sẻ riêng tư",
   "shareOnlyWithThePeopleYouWant": "Chỉ chia sẻ với những người bạn muốn",
   "usePublicLinksForPeopleNotOnEnte": "Dùng liên kết công khai cho những người không dùng Ente",
@@ -907,6 +967,9 @@
   "favorite": "Thích",
   "removeFromFavorite": "Xóa khỏi mục đã thích",
   "shareLink": "Chia sẻ liên kết",
+  "openLink": "Mở liên kết",
+  "pay": "Thanh toán",
+  "noPaymentAppFound": "Không tìm thấy ứng dụng thanh toán",
   "createCollage": "Tạo ảnh ghép",
   "saveCollage": "Lưu ảnh ghép",
   "collageSaved": "Ảnh ghép đã được lưu vào thư viện",
@@ -2144,7 +2207,7 @@
   "curatedMemories": "Kỷ niệm đáng nhớ",
   "widgets": "Widget màn hình",
   "memories": "Kỷ niệm",
-  "peopleWidgetDesc": "Chọn những người bạn muốn thấy trên màn hình chính của mình.",
+  "peopleWidgetDesc": "Chọn người muốn thấy trên màn hình chính.",
   "albumsWidgetDesc": "Chọn những album bạn muốn thấy trên màn hình chính của mình.",
   "memoriesWidgetDesc": "Chọn những loại kỷ niệm bạn muốn thấy trên màn hình chính của mình.",
   "smartMemories": "Gợi nhớ kỷ niệm",
@@ -2160,9 +2223,9 @@
   "sorryWeHadToPauseYourBackups": "Rất tiếc, chúng tôi phải dừng sao lưu cho bạn",
   "clickToInstallOurBestVersionYet": "Nhấn để cài đặt phiên bản tốt nhất",
   "onThisDayNotificationExplanation": "Nhắc về những kỷ niệm ngày này trong những năm trước.",
-  "addMemoriesWidgetPrompt": "Thêm widget kỷ niệm vào màn hình chính và quay lại đây để tùy chỉnh.",
-  "addAlbumWidgetPrompt": "Thêm widget album vào màn hình chính và quay lại đây để tùy chỉnh.",
-  "addPeopleWidgetPrompt": "Thêm widget người vào màn hình chính và quay lại đây để tùy chỉnh.",
+  "addMemoriesWidgetPrompt": "Thêm một widget kỷ niệm vào màn hình chính để tùy chỉnh nó ở đây.",
+  "addAlbumWidgetPrompt": "Thêm một widget album vào màn hình chính để tùy chỉnh nó ở đây.",
+  "addPeopleWidgetPrompt": "Thêm một widget người vào màn hình chính để tùy chỉnh nó ở đây.",
   "birthdayNotifications": "Thông báo sinh nhật",
   "receiveRemindersOnBirthdays": "Nhắc khi đến sinh nhật của ai đó. Nhấn vào thông báo sẽ đưa bạn đến ảnh của người sinh nhật.",
   "happyBirthday": "Chúc mừng sinh nhật! 🥳",
@@ -2467,16 +2530,16 @@
   },
   "playfulKids": "Trẻ em vui chơi",
   "coastalCliffs": "Vách đá bên bờ biển",
-  "candidLaughter": "Khoảnh khắc bật cười",
+  "candidLaughter": "Một tràng cười",
   "groupSelfies": "Tất cả chúng ta",
   "birthdayJoy": "Niềm vui sinh nhật",
-  "weddingMoments": "Ánh rạng ngày cưới",
-  "goldenHourPortraits": "Gương mặt trong nắng vàng",
-  "concertNights": "Những đêm hòa nhạc",
-  "poolDays": "Những ngày ở hồ bơi",
+  "weddingMoments": "Ngày cưới em",
+  "goldenHourPortraits": "Chân dung giờ vàng",
+  "concertNights": "Đêm concert",
+  "poolDays": "Bể bơi ngày",
   "picnicDays": "Kỷ niệm dã ngoại",
-  "campingMoments": "Khoảnh khắc cắm trại",
-  "babySmiles": "Nụ cười em bé",
+  "campingMoments": "Kỷ niệm cắm trại",
+  "babySmiles": "Em bé cười",
   "ritualsTitle": "Thói quen",
   "ritualAddTooltip": "Thêm thói quen",
   "ritualActivityHeading": "Hoạt động",
@@ -2577,33 +2640,83 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "Ảnh của bạn được thích",
-  "likedAPhoto": "Đã thích một ảnh",
-  "likedYourVideo": "Video của bạn được thích",
-  "commentedOnYourPhoto": "Đã bình luận ảnh của bạn",
-  "commentedOnAPhoto": "Đã bình luận một ảnh",
-  "commentedOnYourVideo": "Đã bình luận video của bạn",
-  "commentedOnAVideo": "Bình luận trên video",
-  "repliedToYourComment": "Đã trả lời bình luận của bạn",
-  "repliedToAComment": "Đã trả lời một bình luận",
-  "likedYourComment": "Đã thích bình luận của bạn",
-  "likedAComment": "Đã thích một bình luận",
-  "likedYourReply": "Đã thích trả lời của bạn",
-  "likedAReply": "Đã thích một trả lời",
-  "addedAMemoryTo": "Đã thêm một kỷ niệm vào {albumName}",
+  "likedYourPhoto": "đã thích ảnh của bạn",
+  "@likedYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAPhoto": "đã thích một ảnh",
+  "@likedAPhoto": {
+    "description": "Social action text shown after a person's name, for example 'John liked a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourVideo": "đã thích video của bạn",
+  "@likedYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourPhoto": "đã bình luận về video của bạn",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "đã bình luận về một ảnh",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "đã bình luận về video của bạn",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "đã bình luận về một video",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "đã trả lời bình luận của bạn",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "đã trả lời một bình luận",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourComment": "đã thích bình luận của bạn",
+  "@likedYourComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAComment": "đã thích một bình luận",
+  "@likedAComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourReply": "đã thích trả lời của bạn",
+  "@likedYourReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked your reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAReply": "đã thích một trả lời",
+  "@likedAReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked a reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "addedAMemoryTo": "đã thêm một kỷ niệm vào {albumName}",
   "@addedAMemoryTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added a memory to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
     "placeholders": {
       "albumName": {
         "type": "String"
       }
     }
   },
-  "addedNMemoriesTo": "Đã thêm {count} kỷ niệm vào {albumName}",
+  "addedNMemoriesTo": "đã thêm {count} kỷ niệm vào {albumName}",
   "@addedNMemoriesTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added 4 memories to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
     "placeholders": {
       "count": {
         "type": "int"
       },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "đã chia sẻ {albumName} với bạn",
+  "@sharedAlbumWithYou": {
+    "description": "Social notification action text shown after a person's name, for example 'John shared Recents with you'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
       "albumName": {
         "type": "String"
       }
@@ -2745,7 +2858,7 @@
   "deleteOnDeviceFiles": "Xóa trên các tệp thiết bị",
   "noHiddenFilesOnDevice": "Không có tệp ẩn trên thiết bị",
   "welcome": "Chào mừng",
-  "grantGalleryPermissionDesc": "Cấp quyền truy cập và sắp xếp ảnh bằng nhận dạng khuôn mặt.\n\nTất cả quá trình xử lý diễn ra trên thiết bị của bạn.",
+  "grantGalleryPermissionDesc": "Cấp quyền truy cập và sắp xếp ảnh bằng nhận dạng khuôn mặt. Tất cả quá trình xử lý diễn ra trên thiết bị của bạn.",
   "grantPermission": "Cấp quyền",
   "privateAI": "AI Riêng tư",
   "privateAIDescription": "Ente sử dụng AI trên thiết bị để phân tích ảnh của bạn nhằm tìm khuôn mặt, vật thể, vị trí và văn bản. Dữ liệu này được sử dụng để hỗ trợ các tính năng như nhận dạng khuôn mặt và tìm kiếm thông minh. Mọi thứ đều được xử lý và lưu trữ cục bộ trên thiết bị của bạn — không có gì được tải lên máy chủ của chúng tôi.",
@@ -2759,17 +2872,19 @@
   "offlineEnableSharingDesc": "Đăng ký để chia sẻ ảnh với mọi người - ngay cả những người không có trên Ente",
   "offlineEnableBackupTitle": "Album sao lưu của bạn sẽ xuất hiện ở đây",
   "offlineEnableBackupDesc": "Đăng ký để lưu giữ những kỷ niệm của bạn với Ente.",
+  "offlineEnableBackupTagLabel": "10 GB MIỄN PHÍ!",
   "offlineEnableBackupAction": "Bắt đầu với 10 GB miễn phí",
   "offlineSettingsBannerTitle": "Chúng tôi không thể nhìn thấy ảnh của bạn. Không bao giờ.",
   "offlineSettingsBannerDesc": "Mã hóa không có kiến ​​thức có nghĩa là ký ức của bạn vẫn là của bạn.",
   "alreadyHaveAnAccount": "Đã có tài khoản?",
+  "dontHaveAnAccount": "Chưa có tài khoản?",
   "loginToEnte": "Đăng nhập Ente",
   "searchAndDiscover": "Tìm kiếm và Khám phá",
-  "searchAndDiscoverDesc": "Tìm kiếm ảnh bằng văn bản hoặc tìm lại những kỷ niệm cũ bằng ML trên thiết bị",
+  "searchAndDiscoverDesc": "Tìm kiếm ảnh và khám phá những kỷ niệm với học máy trên thiết bị",
   "shareYourMemories": "Chia sẻ những kỷ niệm của bạn",
-  "shareYourMemoriesDesc": "Chia sẻ album của bạn, tạo liên kết, thu thập ảnh và gửi nhận xét",
-  "privateAndSecureBackups": "Sao lưu Riêng tư và An toàn",
-  "privateAndSecureBackupsDesc": "Được mã hóa đầu cuối, sao chép ba lần, nguồn mở và được kiểm tra độc lập",
+  "shareYourMemoriesDesc": "Chia sẻ album, thu thập ảnh và nhận bình luận bằng liên kết công khai",
+  "privateAndSecureBackups": "Sao lưu Riêng tư",
+  "privateAndSecureBackupsDesc": "Mã hóa đầu cuối, chẩn đoán độc lập và mã nguồn mở hoàn toàn",
   "mlProgressBannerTitle": "Hãy kiên nhẫn!",
   "mlProgressBannerDescription": "Ảnh của bạn đang được xử lý trên thiết bị để nhận diện khuôn mặt, sự vật và nhiều khác.",
   "mlProgressBannerStatus": "{indexed} trong {total} ảnh đã được xử lý",
@@ -2787,5 +2902,7 @@
   "offlineFacesBannerSubtitle": "Đăng ký để gắn thẻ mọi người và dễ dàng tìm họ sau.",
   "offlineNameFaceBannerTitle": "Đặt tên cho khuôn mặt này",
   "offlineNameFaceBannerSubtitle": "Đăng ký để gắn thẻ họ và dễ dàng tìm ảnh của họ sau.",
-  "signUp": "Đăng ký"
+  "signUp": "Đăng ký",
+  "dog": "Chó",
+  "cat": "Mèo"
 }

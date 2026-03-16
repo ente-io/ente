@@ -596,8 +596,6 @@
   "familyPlans": "Familjeplaner",
   "referrals": "Hänvisningar",
   "notifications": "Notiser",
-  "sharedPhotoNotifications": "Nya delade foton",
-  "sharedPhotoNotificationsExplanation": "Få notiser när någon lägger till ett foto i ett delat album som du är en del av",
   "advanced": "Avancerad",
   "general": "Allmänt",
   "security": "Säkerhet",
@@ -631,7 +629,6 @@
   "darkTheme": "Mörkt",
   "systemTheme": "System",
   "freeTrial": "Gratis provperiod",
-  "selectYourPlan": "Välj din plan",
   "enteSubscriptionPitch": "Ente bevarar dina minnen, så de är alltid tillgängliga för dig, även om du förlorar din enhet.",
   "enteSubscriptionShareWithFamily": "Din familj kan också läggas till i din plan.",
   "currentUsageIs": "Nuvarande användning är ",
@@ -724,7 +721,6 @@
   "startBackup": "Starta säkerhetskopiering",
   "preserveMore": "Bevara mer",
   "allowPermTitle": "Tillåt åtkomst till foton",
-  "openSettings": "Öppna inställningar",
   "selectMorePhotos": "Välj fler foton",
   "existingUser": "Befintlig användare",
   "pleaseLoginAgain": "Logga in igen",
@@ -1328,15 +1324,5 @@
     "description": "Tooltip or semantics label for the pause button"
   },
   "playfulKids": "Lekfulla barn",
-  "coastalCliffs": "Klippor vid havet",
-  "candidLaughter": "Skratt i stunden",
-  "groupSelfies": "Allihop",
-  "birthdayJoy": "Födelsedagsglädje",
-  "weddingMoments": "Bröllopsglans",
-  "goldenHourPortraits": "Ansikten i gyllene timmen",
-  "concertNights": "Konsertkvällar",
-  "poolDays": "Pooldagar",
-  "picnicDays": "Picknickminnen",
-  "campingMoments": "Campingstunder",
-  "babySmiles": "Bebisleenden"
+  "coastalCliffs": "Klippor vid havet"
 }
