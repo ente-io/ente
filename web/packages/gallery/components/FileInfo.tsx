@@ -966,7 +966,7 @@ interface MapBoxProps {
 }
 
 const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
-    const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    const urlTemplate = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
         '&copy; <a target="_blank" rel="noopener noreferrer" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     const zoom = 16;

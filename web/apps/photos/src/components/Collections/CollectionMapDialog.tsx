@@ -1,6 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -1911,8 +1910,8 @@ const MapCanvas = React.memo(function MapCanvas({
             style={{ width: "100%", height: "100%" }}
         >
             <TileLayer
-                attribution=""
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                 maxZoom={MAX_MAP_ZOOM}
                 updateWhenZooming
             />
@@ -1933,7 +1932,7 @@ const MapCanvas = React.memo(function MapCanvas({
 });
 
 /**
- * Floating map control buttons (open in Maps, zoom in/out, attribution)
+ * Floating map control buttons (open in Maps, zoom in/out)
  * Responsibility: Provide map navigation and external link controls
  */
 interface MapControlsProps {
@@ -1944,7 +1943,6 @@ const MapControls = React.memo(function MapControls({
     useMap,
 }: MapControlsProps) {
     const map = useMap();
-    const [showAttribution, setShowAttribution] = useState(false);
 
     const handleOpenInMaps = useCallback(() => {
         const center = map.getCenter();
@@ -1954,10 +1952,6 @@ const MapControls = React.memo(function MapControls({
 
     const handleZoomIn = useCallback(() => map.zoomIn(), [map]);
     const handleZoomOut = useCallback(() => map.zoomOut(), [map]);
-    const toggleAttribution = useCallback(
-        () => setShowAttribution((prev) => !prev),
-        [],
-    );
 
     return (
         <>
@@ -2008,108 +2002,9 @@ const MapControls = React.memo(function MapControls({
             >
                 <LocationOnIcon />
             </FloatingIconButton>
-
-            {/* Desktop: Show attribution in bottom right corner */}
-            <DesktopAttribution>
-                <a
-                    href="https://leafletjs.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Leaflet
-                </a>
-                {" | © "}
-                <a
-                    href="https://www.openstreetmap.org/copyright"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    OpenStreetMap
-                </a>
-            </DesktopAttribution>
-
-            {/* Mobile: Attribution info button */}
-            <Box
-                sx={(theme) => ({
-                    position: "absolute",
-                    left: 12,
-                    bottom: 12,
-                    zIndex: 1000,
-                    [theme.breakpoints.up("md")]: { display: "none" },
-                })}
-            >
-                {showAttribution && (
-                    <AttributionPopup>
-                        <Typography variant="mini" color="text.primary">
-                            <a
-                                href="https://leafletjs.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "inherit" }}
-                            >
-                                Leaflet
-                            </a>
-                            {" | © "}
-                            <a
-                                href="https://www.openstreetmap.org/copyright"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "inherit" }}
-                            >
-                                OpenStreetMap
-                            </a>
-                        </Typography>
-                    </AttributionPopup>
-                )}
-                <IconButton
-                    onClick={toggleAttribution}
-                    size="small"
-                    sx={{
-                        width: 24,
-                        height: 24,
-                        opacity: 0.4,
-                        "&:hover": { opacity: 0.7 },
-                    }}
-                >
-                    <InfoOutlinedIcon sx={{ fontSize: 14, color: "#fff" }} />
-                </IconButton>
-            </Box>
         </>
     );
 });
-
-const DesktopAttribution = styled(Box)(({ theme }) => ({
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-        display: "block",
-        position: "absolute",
-        right: 8,
-        bottom: 8,
-        zIndex: 1000,
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: "2px 8px",
-        borderRadius: "4px",
-        fontSize: "11px",
-        color: "#333",
-        "& a": {
-            color: "#0078A8",
-            textDecoration: "none",
-            "&:hover": { textDecoration: "underline" },
-        },
-    },
-}));
-
-const AttributionPopup = styled(Box)(({ theme }) => ({
-    position: "absolute",
-    bottom: 44,
-    left: 0,
-    backgroundColor: theme.vars.palette.background.paper,
-    padding: "8px 12px",
-    borderRadius: "8px",
-    boxShadow: theme.shadows[4],
-    whiteSpace: "nowrap",
-    "& a": { textDecoration: "underline", "&:hover": { opacity: 0.8 } },
-}));
 
 interface MapClustersProps {
     useMap: typeof import("react-leaflet").useMap;
