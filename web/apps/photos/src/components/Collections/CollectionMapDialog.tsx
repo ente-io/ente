@@ -1658,6 +1658,7 @@ interface CollectionSidebarProps {
 
 // Fixed height for the cover image container (px)
 const COVER_IMAGE_HEIGHT = 320;
+const MOBILE_SIDEBAR_HEIGHT = "50%";
 // Mobile has less padding: 8px top + 12px bottom + 2px margin = 22px
 // Desktop has more padding: 16px top + 16px bottom + 2px margin = 34px
 // Use desktop value for consistency in the virtualized list
@@ -1832,7 +1833,9 @@ function CollectionSidebar({
                             selected={selected}
                             setSelected={setSelected}
                             onSetOpenFileViewer={onSetOpenFileViewer}
-                            listBorderRadius="0 0 32px 32px"
+                            listBorderRadius={
+                                isMobile ? "0" : "0 0 32px 32px"
+                            }
                             header={coverHeader}
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
@@ -1908,32 +1911,36 @@ const MapCanvas = React.memo(function MapCanvas({
     const { MapContainer, TileLayer, Marker, useMap } = mapComponents;
 
     return (
-        <MapContainer
-            center={mapCenter}
-            zoom={optimalZoom}
-            scrollWheelZoom
-            zoomControl={false}
-            style={{ width: "100%", height: "100%" }}
-        >
-            <TileLayer
-                attribution={openStreetMapAttribution}
-                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={MAX_MAP_ZOOM}
-                updateWhenZooming
-            />
-            <MapControls useMap={useMap} />
-            {mapIndex && (
-                <MapClusters
-                    useMap={useMap}
-                    mapIndex={mapIndex}
-                    thumbByFileID={thumbByFileID}
-                    onVisiblePhotosChange={onVisiblePhotosChange}
-                    onVisiblePhotosLoadingChange={onVisiblePhotosLoadingChange}
-                    onPrefetchThumbnails={onPrefetchThumbnails}
-                    Marker={Marker}
+        <MapCanvasContainer>
+            <MapContainer
+                center={mapCenter}
+                zoom={optimalZoom}
+                scrollWheelZoom
+                zoomControl={false}
+                style={{ width: "100%", height: "100%" }}
+            >
+                <TileLayer
+                    attribution={openStreetMapAttribution}
+                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    maxZoom={MAX_MAP_ZOOM}
+                    updateWhenZooming
                 />
-            )}
-        </MapContainer>
+                <MapControls useMap={useMap} />
+                {mapIndex && (
+                    <MapClusters
+                        useMap={useMap}
+                        mapIndex={mapIndex}
+                        thumbByFileID={thumbByFileID}
+                        onVisiblePhotosChange={onVisiblePhotosChange}
+                        onVisiblePhotosLoadingChange={
+                            onVisiblePhotosLoadingChange
+                        }
+                        onPrefetchThumbnails={onPrefetchThumbnails}
+                        Marker={Marker}
+                    />
+                )}
+            </MapContainer>
+        </MapCanvasContainer>
     );
 });
 
@@ -2424,6 +2431,16 @@ const MapCover = React.memo(function MapCover({
     );
 });
 
+const MapCanvasContainer = styled(Box)(({ theme }) => ({
+    width: "100%",
+    height: "100%",
+    [theme.breakpoints.down("md")]: {
+        "& .leaflet-bottom.leaflet-right": {
+            bottom: MOBILE_SIDEBAR_HEIGHT,
+        },
+    },
+}));
+
 const CoverContainer = styled(Box)(({ theme }) => ({
     width: "100%",
     flexShrink: 0,
@@ -2496,7 +2513,7 @@ const SidebarWrapper = styled(Box)(({ theme }) => ({
     bottom: 0,
     right: 0,
     width: "100%",
-    height: "50%",
+    height: MOBILE_SIDEBAR_HEIGHT,
     zIndex: 1000,
     [theme.breakpoints.up("md")]: {
         left: 16,
@@ -2548,7 +2565,7 @@ const FileListContainer = styled(Box)(({ theme }) => ({
     paddingLeft: "8px",
     paddingRight: "8px",
     paddingTop: "0px",
-    paddingBottom: "40px",
+    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
     [theme.breakpoints.up("md")]: {
         paddingTop: "0px",
         paddingLeft: "16px",
