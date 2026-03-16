@@ -1,3 +1,4 @@
+import "dart:math" show sqrt;
 import "dart:typed_data" show Float32List;
 
 import "package:logging/logging.dart";
@@ -103,6 +104,17 @@ class PetClusterFeedbackService {
         for (int i = 0; i < merged.length; i++) {
           merged[i] = (tgtCentroid[i] * tgtCount + srcCentroid[i] * srcCount) /
               totalCount;
+        }
+        // L2-normalize so downstream dot-product comparisons remain valid.
+        double norm = 0;
+        for (int i = 0; i < merged.length; i++) {
+          norm += merged[i] * merged[i];
+        }
+        norm = sqrt(norm);
+        if (norm > 0) {
+          for (int i = 0; i < merged.length; i++) {
+            merged[i] /= norm;
+          }
         }
         final species = targetSummary.$3;
         await _db.petClusterSummaryUpdate({

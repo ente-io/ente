@@ -366,8 +366,21 @@ pub fn run_face_clustering_incremental(
     let mut result = FaceClusterResult::default();
     let mut unassigned: Vec<usize> = Vec::new();
 
-    // Step 1: Try to assign each new face to closest existing centroid
+    // Step 1: Pin faces that already have a cluster assignment, then try
+    // to assign genuinely new faces to the closest existing centroid.
     for (i, inp) in new_inputs.iter().enumerate() {
+        // Preserve existing assignments from prior clustering runs.
+        if !inp.existing_cluster_id.is_empty() {
+            result
+                .face_to_cluster
+                .insert(inp.face_id.clone(), inp.existing_cluster_id.clone());
+            *result
+                .cluster_counts
+                .entry(inp.existing_cluster_id.clone())
+                .or_insert(0) += 1;
+            continue;
+        }
+
         let mut best_sim = -1.0f32;
         let mut best_id: Option<&String> = None;
 
