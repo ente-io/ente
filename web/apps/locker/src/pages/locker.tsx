@@ -512,7 +512,7 @@ const Page: React.FC = () => {
 
     const handleDrop = useCallback(
         (event: React.DragEvent<HTMLElement>) => {
-            if (!event.dataTransfer.files?.length) {
+            if (!event.dataTransfer.files.length) {
                 return;
             }
             event.preventDefault();
