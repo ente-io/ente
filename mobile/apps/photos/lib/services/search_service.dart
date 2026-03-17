@@ -32,6 +32,7 @@ import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/ml/face/person_face_source.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/device_album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -66,6 +67,7 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/people_sort_util.dart";
 
 class SearchService {
+  static const int _initialFaceSourcePrefetchCount = 24;
   Future<List<EnteFile>>? _cachedFilesFuture;
   Future<List<EnteFile>>? _cachedFilesForSearch;
   Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
@@ -195,6 +197,75 @@ class SearchService {
     _cachedFilesForGenericGallery = null;
     _cachedHiddenFilesFuture = null;
     unawaited(memoriesCacheService.clearMemoriesCache());
+  }
+
+  Future<void> _enrichInitialFaceSources(
+    List<GenericSearchResult> results,
+  ) async {
+    final resultsToPrefetch = results.take(_initialFaceSourcePrefetchCount);
+    await Future.wait(
+      resultsToPrefetch.map((result) async {
+        try {
+          final source = await _tryBuildInitialPersonFaceSource(result);
+          if (source != null) {
+            result.params[kPersonFaceSource] = source;
+          }
+        } catch (e, s) {
+          _logger.fine(
+            "Failed to prefetch initial face source for ${result.params[kPersonParamID]}",
+            e,
+            s,
+          );
+        }
+      }),
+    );
+  }
+
+  Future<PersonFaceSource?> _tryBuildInitialPersonFaceSource(
+    GenericSearchResult result,
+  ) async {
+    final personID = result.params[kPersonParamID] as String?;
+    final avatarFaceID = result.params[kPersonAvatarFaceID] as String?;
+    final previewFile = result.previewThumbnail();
+    final previewFileID = previewFile?.uploadedFileID;
+    if (personID == null ||
+        avatarFaceID == null ||
+        avatarFaceID.isEmpty ||
+        previewFile == null ||
+        previewFileID == null) {
+      return null;
+    }
+
+    final face = await mlDataDB.getCoverFaceForPerson(
+      recentFileID: previewFileID,
+      personID: personID,
+      avatarFaceId: avatarFaceID,
+    );
+    if (face == null) {
+      return null;
+    }
+
+    EnteFile sourceFile = previewFile;
+    if (face.fileID != previewFileID) {
+      EnteFile? faceFile;
+      for (final file in result.resultFiles()) {
+        if (file.uploadedFileID == face.fileID) {
+          faceFile = file;
+          break;
+        }
+      }
+      if (faceFile == null) {
+        return null;
+      }
+      sourceFile = faceFile;
+    }
+
+    return PersonFaceSource(
+      file: sourceFile,
+      face: face,
+      resolvedFileId: face.fileID,
+      personName: result.name(),
+    );
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
@@ -1083,6 +1154,7 @@ class SearchService {
             params: {
               kPersonWidgetKey: p.data.avatarFaceID ?? p.hashCode.toString(),
               kPersonParamID: personID,
+              kPersonAvatarFaceID: p.data.avatarFaceID,
               kFileID: files.first.uploadedFileID,
               kPersonPinned: p.data.isPinned,
             },
@@ -1100,6 +1172,7 @@ class SearchService {
                       kPersonWidgetKey:
                           p.data.avatarFaceID ?? p.hashCode.toString(),
                       kPersonParamID: personID,
+                      kPersonAvatarFaceID: p.data.avatarFaceID,
                       kPersonPinned: p.data.isPinned,
                       kFileID: files.first.uploadedFileID,
                     },
@@ -1206,6 +1279,7 @@ class SearchService {
           photosSortAscending: localSettings.peoplePhotosSortAscending,
         ),
       );
+      await _enrichInitialFaceSources(facesResult);
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {

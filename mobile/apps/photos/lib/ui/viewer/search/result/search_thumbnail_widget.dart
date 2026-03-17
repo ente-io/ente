@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/ml/face/person_face_source.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
@@ -41,6 +42,14 @@ class SearchThumbnailWidget extends StatelessWidget {
                           .params[kPersonParamID],
                       clusterID: (searchResult as GenericSearchResult)
                           .params[kClusterParamId],
+                      initialFaceSource: (searchResult as GenericSearchResult)
+                          .params[kPersonFaceSource] as PersonFaceSource?,
+                      initialPersonName: searchResult!.name().isNotEmpty
+                          ? searchResult!.name()
+                          : null,
+                      initialAvatarFaceId: (searchResult as GenericSearchResult)
+                          .params[kPersonAvatarFaceID] as String?,
+                      initialPreviewFile: searchResult!.previewThumbnail(),
                     )
                   : ThumbnailWidget(
                       file!,

@@ -5,13 +5,15 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/lru_map.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ml/db.dart';
 import 'package:photos/db/offline_files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import 'package:photos/models/ml/face/box.dart';
 import 'package:photos/models/ml/face/face.dart';
-import 'package:photos/models/ml/face/person.dart';
+import 'package:photos/models/ml/face/person_face_source.dart';
 import 'package:photos/service_locator.dart' show flagService, isOfflineMode;
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -20,6 +22,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/face/face_thumbnail_cache.dart';
 import 'package:photos/utils/face/face_thumbnail_quality.dart';
+import 'package:photos/utils/thumbnail_util.dart';
 
 final _logger = Logger('PersonFaceWidget');
 const _kMinUnnamedClusterSizeForProgressiveUpgrade = 5;
@@ -27,12 +30,48 @@ const _kProgressiveUpgradeUpscaleThreshold = 1.35;
 const _kProgressiveUpgradeMinImprovementRatio = 1.2;
 const _kProgressiveUpgradeIdleWaitBudget = Duration(seconds: 2);
 
+class _PersonFaceLoadResult {
+  final Uint8List? faceCropBytes;
+  final Uint8List? thumbnailBytes;
+  final PersonFaceSource? faceSource;
+  final String? personName;
+
+  const _PersonFaceLoadResult._({
+    this.faceCropBytes,
+    this.thumbnailBytes,
+    this.faceSource,
+    this.personName,
+  });
+
+  const _PersonFaceLoadResult.faceCrop({
+    required Uint8List faceCropBytes,
+    String? personName,
+  }) : this._(
+          faceCropBytes: faceCropBytes,
+          personName: personName,
+        );
+
+  const _PersonFaceLoadResult.thumbnailPreview({
+    required Uint8List thumbnailBytes,
+    required PersonFaceSource faceSource,
+    String? personName,
+  }) : this._(
+          thumbnailBytes: thumbnailBytes,
+          faceSource: faceSource,
+          personName: personName,
+        );
+}
+
 class PersonFaceWidget extends StatefulWidget {
   final String? personId;
   final String? clusterID;
   final bool useFullFile;
   final VoidCallback? onErrorCallback;
   final bool keepAlive;
+  final PersonFaceSource? initialFaceSource;
+  final String? initialPersonName;
+  final String? initialAvatarFaceId;
+  final EnteFile? initialPreviewFile;
 
   /// Physical pixel width for image decoding optimization.
   ///
@@ -44,14 +83,16 @@ class PersonFaceWidget extends StatefulWidget {
   /// If null or <= 0, the image is decoded at full resolution.
   final int? cachedPixelWidth;
 
-  // PersonFaceWidget constructor checks that both personId and clusterID are not null
-  // and that the file is not null
   const PersonFaceWidget({
     this.personId,
     this.clusterID,
     this.useFullFile = true,
     this.onErrorCallback,
     this.keepAlive = false,
+    this.initialFaceSource,
+    this.initialPersonName,
+    this.initialAvatarFaceId,
+    this.initialPreviewFile,
     this.cachedPixelWidth,
     super.key,
   }) : assert(
@@ -65,15 +106,17 @@ class PersonFaceWidget extends StatefulWidget {
 
 class _PersonFaceWidgetState extends State<PersonFaceWidget>
     with AutomaticKeepAliveClientMixin {
-  Future<Uint8List?>? faceCropFuture;
+  Future<_PersonFaceLoadResult?>? _faceLoadFuture;
   EnteFile? fileForFaceCrop;
   Face? _faceForFaceCrop;
   int? _faceCropFileId;
+  PersonFaceSource? _resolvedFaceSource;
   String? _personName;
   bool _showingFallback = false;
   bool _fallbackEverUsed = false;
   bool _disposed = false;
   int _upgradeGeneration = 0;
+  EnteFile? _requestedThumbnailPreviewFile;
 
   static final LRUMap<String, int> _clusterToFileCountCache = LRUMap(1000);
 
@@ -91,7 +134,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   @override
   void initState() {
     super.initState();
-    faceCropFuture = _loadFaceCrop();
+    _personName = widget.initialPersonName;
+    _faceLoadFuture = _loadFace();
   }
 
   @override
@@ -105,69 +149,46 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           useFullFile: true,
         );
       }
-      if (_fallbackEverUsed) {
+      if (_fallbackEverUsed || _shouldUseProgressiveStrategy) {
         checkStopTryingToGenerateFaceThumbnails(
           _faceCropFileId!,
           useFullFile: false,
         );
       }
     }
+    if (_requestedThumbnailPreviewFile != null) {
+      removePendingGetThumbnailRequestIfAny(_requestedThumbnailPreviewFile!);
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(
-      context,
-    ); // Calling super.build for AutomaticKeepAliveClientMixin
+    super.build(context);
 
-    return FutureBuilder<Uint8List?>(
-      future: faceCropFuture,
+    return FutureBuilder<_PersonFaceLoadResult?>(
+      future: _faceLoadFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-          // Only cacheWidth (not cacheHeight) to preserve aspect ratio.
-          // Face crops are typically portrait, so constraining width ensures
-          // sufficient height for BoxFit.cover without upscaling.
-          final shouldOptimize =
-              widget.cachedPixelWidth != null && widget.cachedPixelWidth! > 0;
-          final ImageProvider imageProvider = shouldOptimize
-              ? Image.memory(
-                  snapshot.data!,
-                  cacheWidth: widget.cachedPixelWidth,
-                ).image
-              : MemoryImage(snapshot.data!);
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              Image(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
-              if (kDebugMode && _showingFallback)
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      '(T)',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+        final loadResult = snapshot.data;
+        if (loadResult?.faceCropBytes != null) {
+          return _buildFaceImage(
+            _buildImageFromBytes(loadResult!.faceCropBytes!),
           );
+        }
+        if (loadResult?.thumbnailBytes != null &&
+            loadResult?.faceSource != null) {
+          final previewDimensions = _previewImageDimensionsForSource(
+            loadResult!.faceSource!,
+          );
+          if (previewDimensions != null) {
+            return _buildFaceImage(
+              _DirectThumbnailFacePreview(
+                thumbnailBytes: loadResult.thumbnailBytes!,
+                faceBox: loadResult.faceSource!.face.detection.box,
+                imageDimensions: previewDimensions,
+              ),
+            );
+          }
         }
         if (snapshot.connectionState == ConnectionState.waiting ||
             snapshot.connectionState == ConnectionState.active) {
@@ -183,39 +204,92 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           );
         } else {
           _logger.severe(
-            'faceCropFuture is null, no cover face found for person or cluster.',
+            'No cover face found for person or cluster.',
           );
         }
         return _EmptyPersonThumbnail(
-          initial: isPerson ? _personName : null,
+          initial: isPerson ? (loadResult?.personName ?? _personName) : null,
         );
       },
     );
   }
 
-  Future<Uint8List?> _loadFaceCrop() async {
+  Widget _buildImageFromBytes(Uint8List imageBytes) {
+    final shouldOptimize =
+        widget.cachedPixelWidth != null && widget.cachedPixelWidth! > 0;
+    final ImageProvider imageProvider = shouldOptimize
+        ? Image.memory(
+            imageBytes,
+            cacheWidth: widget.cachedPixelWidth,
+          ).image
+        : MemoryImage(imageBytes);
+    return Image(
+      image: imageProvider,
+      fit: BoxFit.cover,
+    );
+  }
+
+  Widget _buildFaceImage(Widget child) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        child,
+        if (kDebugMode && _showingFallback)
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                '(T)',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<_PersonFaceLoadResult?> _loadFace() async {
     if (!widget.useFullFile) {
-      final Uint8List? thumbnailCrop =
-          await _getFaceCrop(useFullFile: widget.useFullFile);
-      if (thumbnailCrop != null) {
-        _fallbackEverUsed = true;
+      final thumbnailCrop = await _getFaceCrop(useFullFile: false);
+      if (thumbnailCrop == null) {
+        return null;
       }
+      _fallbackEverUsed = true;
       _showingFallback = false;
-      return thumbnailCrop;
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: thumbnailCrop,
+        personName: _personName,
+      );
     }
 
     if (!_shouldUseProgressiveStrategy) {
-      return _loadFaceCropLegacy();
+      return _loadFaceLegacy();
     }
 
-    return _loadFaceCropProgressive();
+    return _loadFaceProgressive();
   }
 
-  Future<Uint8List?> _loadFaceCropLegacy() async {
-    final Uint8List? fullCrop = await _getFaceCrop(useFullFile: true);
+  Future<_PersonFaceLoadResult?> _loadFaceLegacy() async {
+    final fullCrop = await _getFaceCrop(useFullFile: true);
     if (fullCrop != null) {
       _showingFallback = false;
-      return fullCrop;
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: fullCrop,
+        personName: _personName,
+      );
     }
 
     final String personOrClusterId = widget.personId ?? widget.clusterID!;
@@ -223,11 +297,14 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       'Full face crop unavailable for $personOrClusterId, attempting thumbnail fallback.',
     );
 
-    final Uint8List? fallbackCrop = await _getFaceCrop(useFullFile: false);
+    final fallbackCrop = await _getFaceCrop(useFullFile: false);
     if (fallbackCrop != null) {
       _showingFallback = true;
       _fallbackEverUsed = true;
-      return fallbackCrop;
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: fallbackCrop,
+        personName: _personName,
+      );
     }
 
     _logger
@@ -235,29 +312,377 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     return null;
   }
 
-  Future<Uint8List?> _loadFaceCropProgressive() async {
+  Future<_PersonFaceLoadResult?> _loadFaceProgressive() async {
     final String personOrClusterId = widget.personId ?? widget.clusterID!;
-    final Uint8List? thumbnailCrop = await _getFaceCrop(useFullFile: false);
-    if (thumbnailCrop == null) {
-      _logger.warning(
-        'Thumbnail face crop unavailable for $personOrClusterId, attempting full-file generation.',
-      );
-      final Uint8List? fullCrop = await _getFaceCrop(useFullFile: true);
-      if (fullCrop != null) {
-        _showingFallback = false;
-        return fullCrop;
-      }
-      _logger.warning(
-        'Full face crop also unavailable for $personOrClusterId after thumbnail miss.',
-      );
+    final faceSource = await _resolveFaceSource();
+    if (faceSource == null) {
       return null;
     }
 
-    _showingFallback = true;
-    _fallbackEverUsed = true;
-    final generation = ++_upgradeGeneration;
-    unawaited(_attemptFullQualityUpgrade(generation));
-    return thumbnailCrop;
+    if (_previewImageDimensionsForSource(faceSource) != null) {
+      final thumbnailBytes = await _loadThumbnailPreviewBytes(faceSource.file);
+      if (thumbnailBytes != null) {
+        _showingFallback = true;
+        _fallbackEverUsed = true;
+        final generation = ++_upgradeGeneration;
+        unawaited(_attemptFullQualityUpgrade(generation));
+        return _PersonFaceLoadResult.thumbnailPreview(
+          thumbnailBytes: thumbnailBytes,
+          faceSource: faceSource,
+          personName: _personName,
+        );
+      }
+    }
+
+    final thumbnailCrop = await _getFaceCrop(
+      useFullFile: false,
+      resolvedSource: faceSource,
+    );
+    if (thumbnailCrop != null) {
+      _showingFallback = true;
+      _fallbackEverUsed = true;
+      final generation = ++_upgradeGeneration;
+      unawaited(_attemptFullQualityUpgrade(generation));
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: thumbnailCrop,
+        personName: _personName,
+      );
+    }
+
+    _logger.warning(
+      'Thumbnail face crop unavailable for $personOrClusterId, attempting full-file generation.',
+    );
+    final fullCrop = await _getFaceCrop(
+      useFullFile: true,
+      resolvedSource: faceSource,
+    );
+    if (fullCrop != null) {
+      _showingFallback = false;
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: fullCrop,
+        personName: _personName,
+      );
+    }
+    _logger.warning(
+      'Full face crop also unavailable for $personOrClusterId after thumbnail miss.',
+    );
+    return null;
+  }
+
+  ImageDimensions? _previewImageDimensionsForSource(
+    PersonFaceSource faceSource,
+  ) {
+    final cachedThumbnailDimensions =
+        getCachedThumbnailSourceDimensionsForFileId(faceSource.resolvedFileId);
+    if (cachedThumbnailDimensions != null) {
+      return cachedThumbnailDimensions;
+    }
+    if (faceSource.file.width > 0 && faceSource.file.height > 0) {
+      return (
+        width: faceSource.file.width,
+        height: faceSource.file.height,
+      );
+    }
+    return null;
+  }
+
+  Future<Uint8List?> _loadThumbnailPreviewBytes(EnteFile file) async {
+    final cachedThumbnailBytes = ThumbnailInMemoryLruCache.get(file);
+    if (cachedThumbnailBytes != null) {
+      return cachedThumbnailBytes;
+    }
+
+    _requestedThumbnailPreviewFile = file;
+    try {
+      return await getThumbnail(file);
+    } finally {
+      if (_requestedThumbnailPreviewFile == file) {
+        _requestedThumbnailPreviewFile = null;
+      }
+    }
+  }
+
+  void _applyResolvedFaceSource(PersonFaceSource faceSource) {
+    _resolvedFaceSource = faceSource;
+    fileForFaceCrop = faceSource.file;
+    _faceForFaceCrop = faceSource.face;
+    _faceCropFileId = faceSource.resolvedFileId;
+    _personName = faceSource.personName ?? _personName;
+    cacheFaceSourceForPersonOrClusterID(
+      widget.personId ?? widget.clusterID!,
+      faceSource,
+    );
+  }
+
+  bool _canUseResolvedFaceSource(
+    PersonFaceSource faceSource,
+    String personOrClusterId,
+  ) {
+    final currentFaceID =
+        checkInMemoryCachedFaceIDForPersonOrClusterID(personOrClusterId);
+    return currentFaceID == null || currentFaceID == faceSource.face.faceID;
+  }
+
+  Future<PersonFaceSource?> _resolveFaceSource({
+    bool notifyOnError = true,
+  }) async {
+    final personOrClusterId = widget.personId ?? widget.clusterID!;
+
+    if (widget.initialFaceSource != null &&
+        _canUseResolvedFaceSource(
+          widget.initialFaceSource!,
+          personOrClusterId,
+        )) {
+      _applyResolvedFaceSource(widget.initialFaceSource!);
+      await cacheFaceIdForPersonOrClusterIfNeeded(
+        personOrClusterId,
+        widget.initialFaceSource!.face.faceID,
+      );
+      return widget.initialFaceSource;
+    }
+
+    if (_resolvedFaceSource != null) {
+      return _resolvedFaceSource;
+    }
+
+    final cachedFaceSource =
+        checkCachedFaceSourceForPersonOrClusterID(personOrClusterId);
+    if (cachedFaceSource != null &&
+        _canUseResolvedFaceSource(cachedFaceSource, personOrClusterId)) {
+      _applyResolvedFaceSource(cachedFaceSource);
+      await cacheFaceIdForPersonOrClusterIfNeeded(
+        personOrClusterId,
+        cachedFaceSource.face.faceID,
+      );
+      return cachedFaceSource;
+    }
+
+    try {
+      String? fixedFaceID = widget.initialAvatarFaceId;
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      if (isPerson && !isOfflineMode && fixedFaceID == null) {
+        final personEntity =
+            await PersonService.instance.getPerson(widget.personId!);
+        if (personEntity == null) {
+          _logger.severe(
+            'Person with ID ${widget.personId} not found, cannot get cover face.',
+          );
+          return null;
+        }
+        _personName = personEntity.data.name;
+        fixedFaceID = personEntity.data.avatarFaceID;
+      }
+      fixedFaceID ??= await checkUsedFaceIDForPersonOrClusterId(
+        personOrClusterId,
+      );
+
+      EnteFile? selectedFileForFaceCrop;
+      if (isOfflineMode) {
+        final allFiles = await SearchService.instance.getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+
+        if (fixedFaceID != null) {
+          final localIntId = getFileIdFromFaceId<int>(fixedFaceID);
+          final localId =
+              await OfflineFilesDB.instance.getLocalIdForIntId(localIntId);
+          if (localId == null) {
+            await checkRemoveCachedFaceIDForPersonOrClusterId(
+              personOrClusterId,
+            );
+            fixedFaceID = null;
+          } else {
+            selectedFileForFaceCrop = localIdToFile[localId];
+            if (selectedFileForFaceCrop == null) {
+              await checkRemoveCachedFaceIDForPersonOrClusterId(
+                personOrClusterId,
+              );
+              fixedFaceID = null;
+            }
+          }
+        }
+
+        if (selectedFileForFaceCrop == null) {
+          final List<String> allFaces = isPerson
+              ? await mlDataDB
+                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
+              : await mlDataDB
+                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+          final localIntIds = allFaces
+              .map((faceID) => getFileIdFromFaceId<int>(faceID))
+              .toSet();
+          final localIdMap =
+              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+          for (final faceID in allFaces) {
+            final localIntId = getFileIdFromFaceId<int>(faceID);
+            final localId = localIdMap[localIntId];
+            final candidate = localId != null ? localIdToFile[localId] : null;
+            if (candidate != null) {
+              selectedFileForFaceCrop = candidate;
+              fixedFaceID = faceID;
+              break;
+            }
+          }
+        }
+
+        if (selectedFileForFaceCrop == null) {
+          final initialPreviewFile = widget.initialPreviewFile;
+          final localId = initialPreviewFile?.localID;
+          if (localId != null && localId.isNotEmpty) {
+            selectedFileForFaceCrop = localIdToFile[localId];
+          }
+        }
+
+        if (selectedFileForFaceCrop == null) {
+          _logger.severe(
+            'No suitable local file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
+          );
+          return null;
+        }
+      } else {
+        final hiddenFileIDs =
+            await SearchService.instance.getHiddenFiles().then(
+                  (files) => files
+                      .map((file) => file.uploadedFileID)
+                      .whereType<int>()
+                      .toSet(),
+                );
+
+        final initialPreviewFile = widget.initialPreviewFile;
+        if (fixedFaceID != null) {
+          final fileID = getFileIdFromFaceId<int>(fixedFaceID);
+          if (initialPreviewFile?.uploadedFileID == fileID &&
+              !hiddenFileIDs.contains(fileID)) {
+            selectedFileForFaceCrop = initialPreviewFile;
+          } else {
+            final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
+            if (fileInDB == null) {
+              _logger.severe(
+                'File with ID $fileID not found in DB, cannot get cover face.',
+              );
+              await checkRemoveCachedFaceIDForPersonOrClusterId(
+                personOrClusterId,
+              );
+              fixedFaceID = null;
+            } else if (hiddenFileIDs.contains(fileInDB.uploadedFileID)) {
+              _logger.info(
+                'File with ID $fileID is hidden, skipping it for face crop.',
+              );
+              await checkRemoveCachedFaceIDForPersonOrClusterId(
+                personOrClusterId,
+              );
+              fixedFaceID = null;
+            } else {
+              selectedFileForFaceCrop = fileInDB;
+            }
+          }
+        }
+
+        if (selectedFileForFaceCrop == null) {
+          final List<String> allFaces = isPerson
+              ? await mlDataDB
+                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
+              : await mlDataDB
+                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
+          for (final faceID in allFaces) {
+            final fileID = getFileIdFromFaceId<int>(faceID);
+            if (hiddenFileIDs.contains(fileID)) {
+              _logger.info(
+                'File with ID $fileID is hidden, skipping it for face crop.',
+              );
+              continue;
+            }
+            selectedFileForFaceCrop =
+                await FilesDB.instance.getAnyUploadedFile(fileID);
+            if (selectedFileForFaceCrop != null) {
+              _logger.info(
+                'Using file ID $fileID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
+              );
+              fixedFaceID = faceID;
+              break;
+            }
+          }
+        }
+
+        if (selectedFileForFaceCrop == null &&
+            initialPreviewFile != null &&
+            initialPreviewFile.uploadedFileID != null &&
+            !hiddenFileIDs.contains(initialPreviewFile.uploadedFileID)) {
+          selectedFileForFaceCrop = initialPreviewFile;
+        }
+
+        if (selectedFileForFaceCrop == null) {
+          _logger.severe(
+            'No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
+          );
+          return null;
+        }
+      }
+
+      final int? recentFileID;
+      if (isOfflineMode) {
+        final localId = selectedFileForFaceCrop.localID;
+        if (localId == null || localId.isEmpty) {
+          _logger.severe(
+            'Missing local ID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
+          );
+          return null;
+        }
+        recentFileID =
+            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+      } else {
+        recentFileID = selectedFileForFaceCrop.uploadedFileID;
+      }
+      if (recentFileID == null) {
+        _logger.severe(
+          'Missing file id for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
+        );
+        return null;
+      }
+
+      final face = await mlDataDB.getCoverFaceForPerson(
+        recentFileID: recentFileID,
+        avatarFaceId: fixedFaceID,
+        personID: widget.personId,
+        clusterID: widget.clusterID,
+      );
+      if (face == null) {
+        _logger.severe(
+          'No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID',
+        );
+        await checkRemoveCachedFaceIDForPersonOrClusterId(personOrClusterId);
+        return null;
+      }
+      await cacheFaceIdForPersonOrClusterIfNeeded(
+        personOrClusterId,
+        face.faceID,
+      );
+
+      final faceSource = PersonFaceSource(
+        file: selectedFileForFaceCrop,
+        face: face,
+        resolvedFileId: recentFileID,
+        personName: _personName ?? widget.initialPersonName,
+      );
+      _applyResolvedFaceSource(faceSource);
+      return faceSource;
+    } catch (e, s) {
+      _logger.severe(
+        'Error resolving face source for person: ${widget.personId} or cluster ${widget.clusterID}',
+        e,
+        s,
+      );
+      if (notifyOnError) {
+        widget.onErrorCallback?.call();
+      }
+      return null;
+    }
   }
 
   Future<void> _attemptFullQualityUpgrade(int generation) async {
@@ -265,8 +690,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       return;
     }
 
-    final Face? face = _faceForFaceCrop;
-    final EnteFile? sourceFile = fileForFaceCrop;
+    final face = _faceForFaceCrop;
+    final sourceFile = fileForFaceCrop;
     if (face == null || sourceFile == null) {
       _logger.fine(
         'person_face_thumbnail_upgrade_skipped reason=missing_face_or_file person=${widget.personId} cluster=${widget.clusterID}',
@@ -291,7 +716,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       _logger.fine(
         'person_face_thumbnail_upgrade_skipped reason=full_crop_cached face=${face.faceID}',
       );
-      final Uint8List? fullCrop = await _getFaceCrop(
+      final fullCrop = await _getFaceCrop(
         useFullFile: true,
         notifyOnError: false,
       );
@@ -300,7 +725,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       }
       setState(() {
         _showingFallback = false;
-        faceCropFuture = Future.value(fullCrop);
+        _faceLoadFuture = Future.value(
+          _PersonFaceLoadResult.faceCrop(
+            faceCropBytes: fullCrop,
+            personName: _personName,
+          ),
+        );
       });
       return;
     }
@@ -375,7 +805,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     _logger.info(
       'person_face_thumbnail_upgrade_started person=${widget.personId} cluster=${widget.clusterID}',
     );
-    final Uint8List? fullCrop = await _getFaceCrop(
+    final fullCrop = await _getFaceCrop(
       useFullFile: true,
       notifyOnError: false,
     );
@@ -391,7 +821,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     }
     setState(() {
       _showingFallback = false;
-      faceCropFuture = Future.value(fullCrop);
+      _faceLoadFuture = Future.value(
+        _PersonFaceLoadResult.faceCrop(
+          faceCropBytes: fullCrop,
+          personName: _personName,
+        ),
+      );
     });
 
     _logger.info(
@@ -424,6 +859,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
 
   Future<Uint8List?> _getFaceCrop({
     required bool useFullFile,
+    PersonFaceSource? resolvedSource,
     bool notifyOnError = true,
   }) async {
     try {
@@ -442,194 +878,25 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           return tryInMemoryCachedThumbnailCrop;
         }
       }
-      String? fixedFaceID;
-      PersonEntity? personEntity;
-      final mlDataDB =
-          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-      if (isPerson && !isOfflineMode) {
-        personEntity = await PersonService.instance.getPerson(widget.personId!);
-        if (personEntity == null) {
-          _logger.severe(
-            'Person with ID ${widget.personId} not found, cannot get cover face.',
-          );
-          return null;
-        }
-        _personName = personEntity.data.name;
-        fixedFaceID = personEntity.data.avatarFaceID;
-      }
-      fixedFaceID ??=
-          await checkUsedFaceIDForPersonOrClusterId(personOrClusterId);
 
-      EnteFile? selectedFileForFaceCrop;
-      if (isOfflineMode) {
-        final allFiles = await SearchService.instance.getAllFilesForSearch();
-        final localIdToFile = <String, EnteFile>{};
-        for (final file in allFiles) {
-          final localId = file.localID;
-          if (localId != null && localId.isNotEmpty) {
-            localIdToFile[localId] = file;
-          }
-        }
-        if (fixedFaceID != null) {
-          final localIntId = getFileIdFromFaceId<int>(fixedFaceID);
-          final localId =
-              await OfflineFilesDB.instance.getLocalIdForIntId(localIntId);
-          if (localId == null) {
-            await checkRemoveCachedFaceIDForPersonOrClusterId(
-              personOrClusterId,
-            );
-          } else {
-            selectedFileForFaceCrop = localIdToFile[localId];
-            if (selectedFileForFaceCrop == null) {
-              await checkRemoveCachedFaceIDForPersonOrClusterId(
-                personOrClusterId,
-              );
-            }
-          }
-        }
-        if (selectedFileForFaceCrop == null) {
-          final List<String> allFaces = isPerson
-              ? await mlDataDB
-                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
-              : await mlDataDB
-                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
-          final localIntIds = allFaces
-              .map((faceID) => getFileIdFromFaceId<int>(faceID))
-              .toSet();
-          final localIdMap =
-              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
-          for (final faceID in allFaces) {
-            final localIntId = getFileIdFromFaceId<int>(faceID);
-            final localId = localIdMap[localIntId];
-            final candidate = localId != null ? localIdToFile[localId] : null;
-            if (candidate != null) {
-              selectedFileForFaceCrop = candidate;
-              fixedFaceID = faceID;
-              break;
-            }
-          }
-          if (selectedFileForFaceCrop == null) {
-            _logger.severe(
-              'No suitable local file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
-            );
-            return null;
-          }
-        }
-      } else {
-        final hiddenFileIDs =
-            await SearchService.instance.getHiddenFiles().then(
-                  (files) => files
-                      .map((file) => file.uploadedFileID)
-                      .whereType<int>()
-                      .toSet(),
-                );
-        if (fixedFaceID != null) {
-          final fileID = getFileIdFromFaceId<int>(fixedFaceID);
-          final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
-          if (fileInDB == null) {
-            _logger.severe(
-              'File with ID $fileID not found in DB, cannot get cover face.',
-            );
-            await checkRemoveCachedFaceIDForPersonOrClusterId(
-              personOrClusterId,
-            );
-          } else if (hiddenFileIDs.contains(fileInDB.uploadedFileID)) {
-            _logger.info(
-              'File with ID $fileID is hidden, skipping it for face crop.',
-            );
-            await checkRemoveCachedFaceIDForPersonOrClusterId(
-              personOrClusterId,
-            );
-          } else {
-            selectedFileForFaceCrop = fileInDB;
-          }
-        }
-        if (selectedFileForFaceCrop == null) {
-          final List<String> allFaces = isPerson
-              ? await mlDataDB
-                  .getFaceIDsForPersonOrderedByScore(widget.personId!)
-              : await mlDataDB
-                  .getFaceIDsForClusterOrderedByScore(widget.clusterID!);
-          for (final faceID in allFaces) {
-            final fileID = getFileIdFromFaceId<int>(faceID);
-            if (hiddenFileIDs.contains(fileID)) {
-              _logger.info(
-                'File with ID $fileID is hidden, skipping it for face crop.',
-              );
-              continue;
-            }
-            selectedFileForFaceCrop =
-                await FilesDB.instance.getAnyUploadedFile(fileID);
-            if (selectedFileForFaceCrop != null) {
-              _logger.info(
-                'Using file ID $fileID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
-              );
-              fixedFaceID = faceID;
-              break;
-            }
-          }
-          if (selectedFileForFaceCrop == null) {
-            _logger.severe(
-              'No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
-            );
-            return null;
-          }
-        }
-      }
-
-      int? recentFileID;
-      if (isOfflineMode) {
-        final localId = selectedFileForFaceCrop.localID;
-        if (localId == null || localId.isEmpty) {
-          _logger.severe(
-            'Missing local ID for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
-          );
-          return null;
-        }
-        recentFileID =
-            await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
-      } else {
-        recentFileID = selectedFileForFaceCrop.uploadedFileID;
-      }
-      if (recentFileID == null) {
-        _logger.severe(
-          'Missing file id for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}',
-        );
+      final faceSource = resolvedSource ??
+          await _resolveFaceSource(notifyOnError: notifyOnError);
+      if (faceSource == null) {
         return null;
       }
-
-      final Face? face = await mlDataDB.getCoverFaceForPerson(
-        recentFileID: recentFileID,
-        avatarFaceId: fixedFaceID,
-        personID: widget.personId,
-        clusterID: widget.clusterID,
-      );
-      if (face == null) {
-        _logger.severe(
-          'No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID',
-        );
-        await checkRemoveCachedFaceIDForPersonOrClusterId(personOrClusterId);
-        return null;
-      }
-      await cacheFaceIdForPersonOrClusterIfNeeded(
-        personOrClusterId,
-        face.faceID,
-      );
 
       final cropMap = await getCachedFaceCrops(
-        selectedFileForFaceCrop,
-        [face],
+        faceSource.file,
+        [faceSource.face],
         useFullFile: useFullFile,
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
-      fileForFaceCrop = selectedFileForFaceCrop;
-      _faceForFaceCrop = face;
-      _faceCropFileId = recentFileID;
-      final result = cropMap?[face.faceID];
+      _applyResolvedFaceSource(faceSource);
+      final result = cropMap?[faceSource.face.faceID];
       if (result == null) {
         _logger.severe(
-          'Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID $recentFileID',
+          'Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${faceSource.resolvedFileId}',
         );
       }
       return result;
@@ -644,6 +911,69 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       }
       return null;
     }
+  }
+}
+
+class _DirectThumbnailFacePreview extends StatelessWidget {
+  final Uint8List thumbnailBytes;
+  final FaceBox faceBox;
+  final ImageDimensions imageDimensions;
+
+  const _DirectThumbnailFacePreview({
+    required this.thumbnailBytes,
+    required this.faceBox,
+    required this.imageDimensions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final crop = computeNormalizedFaceCrop(faceBox);
+    if (crop == null) {
+      return const SizedBox.shrink();
+    }
+
+    const imageHeight = 1000.0;
+    final imageWidth =
+        imageHeight * imageDimensions.width / imageDimensions.height;
+    final cropX = crop.x * imageWidth;
+    final cropY = crop.y * imageHeight;
+    final cropWidth = crop.width * imageWidth;
+    final cropHeight = crop.height * imageHeight;
+
+    if (cropWidth <= 0 || cropHeight <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return ClipRect(
+      child: SizedBox.expand(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: cropWidth,
+            height: cropHeight,
+            child: ClipRect(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    left: -cropX,
+                    top: -cropY,
+                    width: imageWidth,
+                    height: imageHeight,
+                    child: Image.memory(
+                      thumbnailBytes,
+                      fit: BoxFit.fill,
+                      gaplessPlayback: true,
+                      filterQuality: FilterQuality.low,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

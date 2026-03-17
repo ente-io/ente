@@ -7,6 +7,7 @@ import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/ml/face/person_face_source.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -389,10 +390,16 @@ class FaceSearchResult extends StatelessWidget {
     final params = (searchResult as GenericSearchResult).params;
     final int cachedPixelWidth =
         (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
+    final previewFile = searchResult.previewThumbnail();
+    final personName = searchResult.name();
     return PersonFaceWidget(
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
       cachedPixelWidth: cachedPixelWidth,
+      initialFaceSource: params[kPersonFaceSource] as PersonFaceSource?,
+      initialPersonName: personName.isNotEmpty ? personName : null,
+      initialAvatarFaceId: params[kPersonAvatarFaceID] as String?,
+      initialPreviewFile: previewFile,
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),

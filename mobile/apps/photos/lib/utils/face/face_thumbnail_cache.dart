@@ -13,6 +13,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person_face_source.dart";
 import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
@@ -27,6 +28,8 @@ final LRUMap<int, ({int width, int height})>
     _thumbnailSourceDimensionsByFileId = LRUMap(2000);
 
 final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(2000);
+final LRUMap<String, PersonFaceSource> _personOrClusterIdToFaceSourceCache =
+    LRUMap(1000);
 
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
@@ -49,6 +52,12 @@ Uint8List? checkInMemoryCachedCropForPersonOrClusterID(
   return cachedCover;
 }
 
+String? checkInMemoryCachedFaceIDForPersonOrClusterID(
+  String personOrClusterID,
+) {
+  return _personOrClusterIdToCachedFaceID.get(personOrClusterID);
+}
+
 Uint8List? checkInMemoryCachedThumbnailCropForPersonOrClusterID(
   String personOrClusterID,
 ) {
@@ -62,6 +71,19 @@ Uint8List? checkInMemoryCachedThumbnailCropForPersonOrClusterID(
   int fileId,
 ) {
   return _thumbnailSourceDimensionsByFileId.get(fileId);
+}
+
+PersonFaceSource? checkCachedFaceSourceForPersonOrClusterID(
+  String personOrClusterID,
+) {
+  return _personOrClusterIdToFaceSourceCache.get(personOrClusterID);
+}
+
+void cacheFaceSourceForPersonOrClusterID(
+  String personOrClusterID,
+  PersonFaceSource faceSource,
+) {
+  _personOrClusterIdToFaceSourceCache.put(personOrClusterID, faceSource);
 }
 
 Uint8List? _checkInMemoryCachedCropForFaceID(String faceID) {
@@ -93,6 +115,11 @@ Future<void> putFaceIdCachedForPersonOrCluster(
     personOrClusterID,
     faceID,
   );
+  final cachedFaceSource =
+      _personOrClusterIdToFaceSourceCache.get(personOrClusterID);
+  if (cachedFaceSource != null && cachedFaceSource.face.faceID != faceID) {
+    _personOrClusterIdToFaceSourceCache.remove(personOrClusterID);
+  }
   _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
 }
 
@@ -125,6 +152,7 @@ Future<void> checkRemoveCachedFaceIDForPersonOrClusterId(
       await mlDataDB.getFaceIdUsedForPersonOrCluster(personOrClusterID);
   if (cachedFaceID != null) {
     _personOrClusterIdToCachedFaceID.remove(personOrClusterID);
+    _personOrClusterIdToFaceSourceCache.remove(personOrClusterID);
     await mlDataDB.removeFaceIdCachedForPersonOrCluster(personOrClusterID);
   }
 }

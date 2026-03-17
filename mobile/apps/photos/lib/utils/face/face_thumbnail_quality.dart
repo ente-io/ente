@@ -22,6 +22,12 @@ class FaceThumbnailUpgradeDecision {
 }
 
 typedef ImageDimensions = ({int width, int height});
+typedef NormalizedFaceCrop = ({
+  double x,
+  double y,
+  double width,
+  double height
+});
 
 ImageDimensions? estimateThumbnailDimensionsFromFullDimensions({
   required int fullWidth,
@@ -121,6 +127,49 @@ FaceThumbnailUpgradeDecision shouldUpgradeFromThumbnail({
   );
 }
 
+NormalizedFaceCrop? computeNormalizedFaceCrop(FaceBox faceBox) {
+  final widthNorm = faceBox.width;
+  final heightNorm = faceBox.height;
+  if (widthNorm <= 0 || heightNorm <= 0) {
+    return null;
+  }
+
+  final xCrop = faceBox.x - widthNorm * kFaceThumbnailRegularPadding;
+  final xOvershoot = (xCrop < 0 ? -xCrop : 0) / widthNorm;
+  final widthCrop = widthNorm * (1 + 2 * kFaceThumbnailRegularPadding) -
+      2 *
+          _min(
+            xOvershoot,
+            kFaceThumbnailRegularPadding - kFaceThumbnailMinimumPadding,
+          ) *
+          widthNorm;
+
+  final yCrop = faceBox.y - heightNorm * kFaceThumbnailRegularPadding;
+  final yOvershoot = (yCrop < 0 ? -yCrop : 0) / heightNorm;
+  final heightCrop = heightNorm * (1 + 2 * kFaceThumbnailRegularPadding) -
+      2 *
+          _min(
+            yOvershoot,
+            kFaceThumbnailRegularPadding - kFaceThumbnailMinimumPadding,
+          ) *
+          heightNorm;
+
+  final xCropSafe = xCrop.clamp(0, 1).toDouble();
+  final yCropSafe = yCrop.clamp(0, 1).toDouble();
+  final widthCropSafe = widthCrop.clamp(0, 1 - xCropSafe).toDouble();
+  final heightCropSafe = heightCrop.clamp(0, 1 - yCropSafe).toDouble();
+  if (widthCropSafe <= 0 || heightCropSafe <= 0) {
+    return null;
+  }
+
+  return (
+    x: xCropSafe,
+    y: yCropSafe,
+    width: widthCropSafe,
+    height: heightCropSafe,
+  );
+}
+
 double? _computeCropShortSide(
   FaceBox faceBox, {
   required int imageWidth,
@@ -129,45 +178,14 @@ double? _computeCropShortSide(
   if (imageWidth <= 0 || imageHeight <= 0) {
     return null;
   }
-
-  final width = imageWidth.toDouble();
-  final height = imageHeight.toDouble();
-
-  final xMinAbs = faceBox.x * width;
-  final yMinAbs = faceBox.y * height;
-  final widthAbs = faceBox.width * width;
-  final heightAbs = faceBox.height * height;
-
-  if (widthAbs <= 0 || heightAbs <= 0) {
+  final crop = computeNormalizedFaceCrop(faceBox);
+  if (crop == null) {
     return null;
   }
-
-  final xCrop = xMinAbs - widthAbs * kFaceThumbnailRegularPadding;
-  final xOvershoot = (xCrop < 0 ? -xCrop : 0) / widthAbs;
-  final widthCrop = widthAbs * (1 + 2 * kFaceThumbnailRegularPadding) -
-      2 *
-          _min(
-            xOvershoot,
-            kFaceThumbnailRegularPadding - kFaceThumbnailMinimumPadding,
-          ) *
-          widthAbs;
-
-  final yCrop = yMinAbs - heightAbs * kFaceThumbnailRegularPadding;
-  final yOvershoot = (yCrop < 0 ? -yCrop : 0) / heightAbs;
-  final heightCrop = heightAbs * (1 + 2 * kFaceThumbnailRegularPadding) -
-      2 *
-          _min(
-            yOvershoot,
-            kFaceThumbnailRegularPadding - kFaceThumbnailMinimumPadding,
-          ) *
-          heightAbs;
-
-  final xCropSafe = xCrop.clamp(0, width).toDouble();
-  final yCropSafe = yCrop.clamp(0, height).toDouble();
-  final widthCropSafe = widthCrop.clamp(0, width - xCropSafe).toDouble();
-  final heightCropSafe = heightCrop.clamp(0, height - yCropSafe).toDouble();
-
-  final shortSide = _min(widthCropSafe, heightCropSafe);
+  final shortSide = _min(
+    crop.width * imageWidth,
+    crop.height * imageHeight,
+  );
   return shortSide > 0 ? shortSide : null;
 }
 
