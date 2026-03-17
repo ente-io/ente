@@ -172,10 +172,9 @@ pub fn renumber_labels(labels: &mut [i32]) {
         .collect();
     for label in labels.iter_mut() {
         if *label >= 0
-            && let Some(&new) = mapping.get(label)
-        {
-            *label = new;
-        }
+            && let Some(&new) = mapping.get(label) {
+                *label = new;
+            }
     }
 }
 
@@ -285,11 +284,10 @@ pub fn run_face_clustering(
             continue;
         }
         if let Some(existing_id) = label_to_existing.get(&labels[i])
-            && inputs[i].rejected_cluster_ids.contains(existing_id)
-        {
-            labels[i] = next_label;
-            next_label += 1;
-        }
+            && inputs[i].rejected_cluster_ids.contains(existing_id) {
+                labels[i] = next_label;
+                next_label += 1;
+            }
     }
 
     // Build result
@@ -311,18 +309,11 @@ pub fn run_face_clustering(
         }
     }
 
-    // Then, assign new cluster IDs for labels without existing IDs,
-    // using the first member's face_id for collision resistance.
+    // Then, assign new cluster IDs for labels without existing IDs
     for &c in &unique {
-        label_to_cluster_id.entry(c).or_insert_with(|| {
-            let first_member = inputs
-                .iter()
-                .enumerate()
-                .find(|(i, _)| labels[*i] == c)
-                .map(|(_, inp)| inp.face_id.as_str())
-                .unwrap_or("unknown");
-            format!("cluster_{first_member}")
-        });
+        label_to_cluster_id
+            .entry(c)
+            .or_insert_with(|| format!("cluster_{}", uuid_from_label(c, inputs)));
     }
 
     let mut result = FaceClusterResult::default();
@@ -363,7 +354,6 @@ pub fn run_face_clustering(
 pub fn run_face_clustering_incremental(
     new_inputs: &[FaceClusterInput],
     existing_centroids: &HashMap<String, Vec<f32>>,
-    existing_counts: &HashMap<String, usize>,
     threshold: f32,
 ) -> Option<FaceClusterResult> {
     let n = new_inputs.len();
@@ -374,21 +364,8 @@ pub fn run_face_clustering_incremental(
     let mut result = FaceClusterResult::default();
     let mut unassigned: Vec<usize> = Vec::new();
 
-    // Step 1: Pin faces that already have a cluster assignment, then try
-    // to assign genuinely new faces to the closest existing centroid.
+    // Step 1: Try to assign each new face to closest existing centroid
     for (i, inp) in new_inputs.iter().enumerate() {
-        // Preserve existing assignments from prior clustering runs.
-        if !inp.existing_cluster_id.is_empty() {
-            result
-                .face_to_cluster
-                .insert(inp.face_id.clone(), inp.existing_cluster_id.clone());
-            *result
-                .cluster_counts
-                .entry(inp.existing_cluster_id.clone())
-                .or_insert(0) += 1;
-            continue;
-        }
-
         let mut best_sim = -1.0f32;
         let mut best_id: Option<&String> = None;
 
@@ -448,56 +425,13 @@ pub fn run_face_clustering_incremental(
         result.n_unclustered = unassigned.len();
     }
 
-    // Step 3: Compute centroids for all clusters. For clusters that already
-    // have a historical centroid+count, merge via weighted average so that
-    // bucketed callers don't overwrite prior state with partial-bucket data.
-    let dim = new_inputs
-        .first()
-        .map(|i| i.embedding.len())
-        .unwrap_or(128);
-    let all_cluster_ids: Vec<String> = result.cluster_counts.keys().cloned().collect();
-    for cluster_id in &all_cluster_ids {
-        let embs: Vec<&Vec<f32>> = new_inputs
-            .iter()
-            .filter(|inp| {
-                result
-                    .face_to_cluster
-                    .get(&inp.face_id)
-                    .map(|c| c == cluster_id)
-                    .unwrap_or(false)
-            })
-            .map(|inp| &inp.embedding)
-            .collect();
-        if embs.is_empty() {
-            continue;
-        }
-        let new_centroid = mean_centroid(&embs, dim);
-        let new_count = embs.len();
-
-        let merged = if let Some(old_centroid) = existing_centroids.get(cluster_id) {
-            let old_count = existing_counts.get(cluster_id).copied().unwrap_or(0);
-            if old_count > 0 && old_centroid.len() == dim {
-                // Weighted average of old centroid and new members
-                let total = (old_count + new_count) as f32;
-                let mut merged = vec![0.0f32; dim];
-                for i in 0..dim {
-                    merged[i] =
-                        (old_centroid[i] * old_count as f32 + new_centroid[i] * new_count as f32)
-                            / total;
-                }
-                normalize(&mut merged);
-                merged
-            } else {
-                new_centroid
-            }
-        } else {
-            new_centroid
-        };
-
-        result.cluster_centroids.insert(cluster_id.clone(), merged);
-    }
-
     Some(result)
+}
+
+/// Generate a deterministic cluster ID from the first member face.
+fn uuid_from_label(label: i32, inputs: &[FaceClusterInput]) -> String {
+    // Use a simple hash of label + first member's face_id for determinism
+    format!("{label}_{}", inputs.first().map(|i| &i.face_id[..8.min(i.face_id.len())]).unwrap_or("unknown"))
 }
 
 #[cfg(test)]

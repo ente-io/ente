@@ -1937,9 +1937,9 @@ class SearchService {
 
         final summary = clusterSummaries[clusterId];
         final species = summary != null
-            ? (summary.$3 == 0
+            ? (summary.$2 == 0
                 ? "Dog"
-                : summary.$3 == 1
+                : summary.$2 == 1
                     ? "Cat"
                     : "Pet")
             : "Pet";
@@ -1957,7 +1957,7 @@ class SearchService {
             params: {
               kPetClusterParamId: clusterId,
               kFileID: files.first.uploadedFileID,
-              kPetSpecies: summary?.$3 ?? -1,
+              kPetSpecies: summary?.$2 ?? -1,
               kPetHasCustomName: customName != null && customName.isNotEmpty,
             },
             onResultTap: (ctx) {
@@ -1967,7 +1967,7 @@ class SearchService {
                   clusterId: clusterId,
                   clusterLabel: clusterLabel,
                   files: files,
-                  species: summary?.$3 ?? -1,
+                  species: summary?.$2 ?? -1,
                 ),
               );
             },

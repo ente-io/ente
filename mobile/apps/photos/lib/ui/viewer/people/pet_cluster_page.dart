@@ -88,8 +88,8 @@ class _PetClusterPageState extends State<PetClusterPage> {
         final result = _files
             .where(
               (file) =>
-                  file.creationTime! >= creationStartTime &&
-                  file.creationTime! <= creationEndTime,
+                  (file.creationTime ?? 0) >= creationStartTime &&
+                  (file.creationTime ?? 0) <= creationEndTime,
             )
             .toList();
         return Future.value(

@@ -1,9 +1,10 @@
 import "dart:math" show sqrt;
-import "dart:typed_data" show Float32List, Uint8List;
+import "dart:typed_data" show Float32List;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
@@ -89,50 +90,39 @@ class PetClusterFeedbackService {
   }
 
   /// Merge two pet clusters into one. Recomputes the target cluster's
-  /// centroid as a weighted average of the two clusters' centroids.
+  /// summary from the full membership after reassignment.
   Future<void> mergePetClusters(
     String sourceId,
     String targetId,
   ) async {
-    // Fetch summaries to recompute centroid
-    final summaries = await _db.getAllPetClusterSummary();
-    final sourceSummary = summaries[sourceId];
-    final targetSummary = summaries[targetId];
-
     await _db.reassignAllPetFacesInCluster(sourceId, targetId);
     await _db.deletePetClusterSummary(sourceId);
 
-    // Recompute target centroid as weighted average
-    if (sourceSummary != null && targetSummary != null) {
-      final srcCentroid = Float32List.view(sourceSummary.$1.buffer);
-      final tgtCentroid = Float32List.view(targetSummary.$1.buffer);
-      final srcCount = sourceSummary.$2;
-      final tgtCount = targetSummary.$2;
-      final totalCount = srcCount + tgtCount;
-
-      if (srcCentroid.length == tgtCentroid.length && totalCount > 0) {
-        final merged = Float32List(tgtCentroid.length);
-        for (int i = 0; i < merged.length; i++) {
-          merged[i] = (tgtCentroid[i] * tgtCount + srcCentroid[i] * srcCount) /
-              totalCount;
-        }
-        // L2-normalize so downstream dot-product comparisons remain valid.
-        double norm = 0;
-        for (int i = 0; i < merged.length; i++) {
-          norm += merged[i] * merged[i];
-        }
-        norm = sqrt(norm);
-        if (norm > 0) {
-          for (int i = 0; i < merged.length; i++) {
-            merged[i] /= norm;
-          }
-        }
-        final species = targetSummary.$3;
-        await _db.petClusterSummaryUpdate({
-          targetId: (merged.buffer.asUint8List(), totalCount, species),
-        });
+    // Delete source centroid from vector DB
+    final sourceSummary = await _db.getAllPetClusterSummary();
+    final sourceSpecies = sourceSummary[sourceId]?.$2;
+    if (sourceSpecies != null) {
+      final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+        species: sourceSpecies,
+        offline: isOfflineMode,
+      );
+      final sqlDb = await _db.asyncDB;
+      final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+        [sourceId],
+        db: sqlDb,
+      );
+      final vectorId = idMap[sourceId];
+      if (vectorId != null) {
+        await centroidVdb.deleteCentroids([vectorId]);
+        await centroidVdb.deleteClusterCentroidMapping(
+          sourceId,
+          db: sqlDb,
+        );
       }
     }
+
+    // Recompute the target cluster's summary from its full membership.
+    await _recomputeClusterSummaries([targetId]);
 
     _logger.info("Merged pet cluster $sourceId into $targetId");
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
@@ -141,11 +131,12 @@ class PetClusterFeedbackService {
   /// Recompute cluster summaries for the given cluster IDs.
   ///
   /// Queries all faces currently assigned to each cluster, fetches their
-  /// embeddings, and writes an L2-normalized mean centroid + count. Clusters
-  /// that are now empty get their summary deleted.
+  /// embeddings, and writes an L2-normalized mean centroid to the vector DB
+  /// and count/species to SQLite. Empty clusters get their summary deleted.
   Future<void> _recomputeClusterSummaries(List<String> clusterIds) async {
     try {
-      final summaries = <String, (Uint8List, int, int)>{};
+      final sqlSummaries = <String, (int, int)>{};
+      final centroidsBySpecies = <int, Map<String, Float32List>>{};
       final emptyIds = <String>[];
 
       for (final clusterId in clusterIds.toSet()) {
@@ -172,42 +163,74 @@ class PetClusterFeedbackService {
         final embs = await vdb.getEmbeddings(vectorIds);
         if (embs.isEmpty) continue;
 
-        // Mean centroid, L2-normalized.
-        final dim = embs.first.length;
-        final centroid = Float32List(dim);
-        for (final emb in embs) {
-          for (int i = 0; i < dim; i++) {
-            centroid[i] += emb[i];
-          }
-        }
-        final n = embs.length.toDouble();
-        double norm = 0;
-        for (int i = 0; i < dim; i++) {
-          centroid[i] /= n;
-          norm += centroid[i] * centroid[i];
-        }
-        norm = sqrt(norm);
-        if (norm > 0) {
-          for (int i = 0; i < dim; i++) {
-            centroid[i] /= norm;
-          }
-        }
-
-        summaries[clusterId] = (
-          centroid.buffer.asUint8List(),
-          faceIds.length,
-          species,
-        );
+        final centroid = _meanCentroid(embs);
+        sqlSummaries[clusterId] = (faceIds.length, species);
+        centroidsBySpecies
+            .putIfAbsent(species, () => {})
+            .putIfAbsent(clusterId, () => centroid);
       }
 
       for (final id in emptyIds) {
         await _db.deletePetClusterSummary(id);
       }
-      if (summaries.isNotEmpty) {
-        await _db.petClusterSummaryUpdate(summaries);
+      if (sqlSummaries.isNotEmpty) {
+        await _db.petClusterSummaryUpdate(sqlSummaries);
+      }
+
+      // Write centroids to vector DB, grouped by species.
+      final sqlDb = await _db.asyncDB;
+      for (final entry in centroidsBySpecies.entries) {
+        final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+          species: entry.key,
+          offline: isOfflineMode,
+        );
+        final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+          entry.value.keys,
+          db: sqlDb,
+          createIfMissing: true,
+        );
+        final vectorIds = <int>[];
+        final centroids = <Float32List>[];
+        for (final ce in entry.value.entries) {
+          final vectorId = idMap[ce.key];
+          if (vectorId != null) {
+            vectorIds.add(vectorId);
+            centroids.add(ce.value);
+          }
+        }
+        if (vectorIds.isNotEmpty) {
+          await centroidVdb.bulkInsertCentroids(
+            vectorIds: vectorIds,
+            centroids: centroids,
+          );
+        }
       }
     } catch (e, s) {
       _logger.warning("Failed to recompute cluster summaries", e, s);
     }
+  }
+
+  /// Compute L2-normalized mean centroid from a list of Float32 embeddings.
+  static Float32List _meanCentroid(List<Float32List> embs) {
+    final dim = embs.first.length;
+    final centroid = Float32List(dim);
+    for (final emb in embs) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] += emb[i];
+      }
+    }
+    final n = embs.length.toDouble();
+    double norm = 0;
+    for (int i = 0; i < dim; i++) {
+      centroid[i] /= n;
+      norm += centroid[i] * centroid[i];
+    }
+    norm = sqrt(norm);
+    if (norm > 0) {
+      for (int i = 0; i < dim; i++) {
+        centroid[i] /= norm;
+      }
+    }
+    return centroid;
   }
 }

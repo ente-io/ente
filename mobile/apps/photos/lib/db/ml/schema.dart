@@ -212,7 +212,6 @@ const createPetFacesTable = '''CREATE TABLE IF NOT EXISTS $petFacesTable (
 ''';
 
 const deletePetFacesTable = 'DELETE FROM $petFacesTable';
-const dropPetFacesTable = 'DROP TABLE IF EXISTS $petFacesTable';
 
 // ── Pet Bodies Table ──
 
@@ -236,7 +235,6 @@ const createPetBodiesTable = '''CREATE TABLE IF NOT EXISTS $petBodiesTable (
 ''';
 
 const deletePetBodiesTable = 'DELETE FROM $petBodiesTable';
-const dropPetBodiesTable = 'DROP TABLE IF EXISTS $petBodiesTable';
 
 // ── Vector ID Mapping Tables ──
 
@@ -279,8 +277,6 @@ CREATE TABLE IF NOT EXISTS $petFaceClustersTable (
 );
 ''';
 
-const dropPetFaceClustersTable = 'DROP TABLE IF EXISTS $petFaceClustersTable';
-
 const petFcClusterIDIndex =
     'CREATE INDEX IF NOT EXISTS idx_pet_fc_cluster ON $petFaceClustersTable ($clusterIDColumn)';
 
@@ -291,14 +287,23 @@ const petClusterSummaryTable = 'pet_cluster_summary';
 const createPetClusterSummaryTable = '''
 CREATE TABLE IF NOT EXISTS $petClusterSummaryTable (
   $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
-  $avgColumn BLOB NOT NULL,
   $countColumn INTEGER NOT NULL DEFAULT 0,
   $speciesColumn INTEGER NOT NULL DEFAULT -1
 );
 ''';
 
-const dropPetClusterSummaryTable =
-    'DROP TABLE IF EXISTS $petClusterSummaryTable';
+// ── Pet Cluster Centroid Vector ID Mapping Table ──
+
+const petClusterCentroidVectorIdMappingTable =
+    'pet_cluster_centroid_vector_id_map';
+const petClusterCentroidVectorIdColumn = 'pet_cluster_vector_id';
+
+const createPetClusterCentroidVectorIdMappingTable = '''
+CREATE TABLE IF NOT EXISTS $petClusterCentroidVectorIdMappingTable (
+  $petClusterCentroidVectorIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $clusterIDColumn TEXT NOT NULL UNIQUE
+);
+''';
 
 // ── Pet Names Table ──
 

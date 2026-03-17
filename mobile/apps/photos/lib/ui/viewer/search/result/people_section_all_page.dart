@@ -383,7 +383,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     }
     return faces.where((face) {
       final personId = face.params[kPersonParamID] as String?;
-      if (personId == null || personId.isEmpty) {
+      final petClusterId = face.params[kPetClusterParamId] as String?;
+      if ((personId == null || personId.isEmpty) && petClusterId == null) {
         return false;
       }
       return face.name().toLowerCase().contains(query);

@@ -1,11 +1,13 @@
 import "dart:math" show min, sqrt;
-import "dart:typed_data" show Float32List, Float64List, Uint8List;
+import "dart:typed_data" show Float32List, Float64List;
 
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/db_pet_model_mappers.dart";
+import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/src/rust/api/ml_indexing_api.dart";
 import "package:uuid/uuid.dart";
 
@@ -164,20 +166,37 @@ class PetClusteringService {
         species: species,
       );
     } else {
-      // Incremental mode — pass existing centroids
-      final faceCentroids = existingSummaries.entries
-          .map(
-            (e) => RustPetClusterSummary(
-              clusterId: e.key,
-              centroid: _uint8ListToFloat64(e.value.$1),
-              count: e.value.$2,
-            ),
-          )
-          .toList();
+      // Incremental mode — read centroids from vector DB
+      final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+        species: species,
+        offline: isOfflineMode,
+      );
+      final sqlDb = await mlDataDB.asyncDB;
+      final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+        existingSummaries.keys,
+        db: sqlDb,
+      );
 
-      // Body centroids require a separate DB table + Rust struct changes.
-      // The Rust incremental path handles missing body centroids gracefully
-      // by skipping body rescue — face centroids alone drive assignment.
+      final faceCentroids = <RustPetClusterSummary>[];
+      if (idMap.isNotEmpty) {
+        final vectorIds = <int>[];
+        final clusterIds = <String>[];
+        for (final entry in idMap.entries) {
+          clusterIds.add(entry.key);
+          vectorIds.add(entry.value);
+        }
+        final centroids = await centroidVdb.getCentroids(vectorIds);
+        for (int i = 0; i < clusterIds.length && i < centroids.length; i++) {
+          faceCentroids.add(
+            RustPetClusterSummary(
+              clusterId: clusterIds[i],
+              centroid: _float32ToFloat64(centroids[i]),
+              count: existingSummaries[clusterIds[i]]?.$1 ?? 0,
+            ),
+          );
+        }
+      }
+
       result = await runPetClusteringIncrementalRust(
         newInputs: clusterInputs,
         existingFaceCentroids: faceCentroids,
@@ -226,7 +245,8 @@ class PetClusteringService {
     }
 
     final dbClusterToFaces = await mlDataDB.getPetClusterToFaceIds(species);
-    final clusterSummaries = <String, (Uint8List, int, int)>{};
+    final clusterSummaries = <String, (int, int)>{};
+    final clusterCentroids = <String, Float32List>{};
     for (final entry in dbClusterToFaces.entries) {
       final embs = <Float64List>[];
       for (final faceId in entry.value) {
@@ -235,17 +255,12 @@ class PetClusteringService {
       }
       if (embs.isEmpty) continue;
       final centroid = _meanCentroid(embs);
-      clusterSummaries[entry.key] = (
-        _doublesToUint8List(centroid),
-        entry.value.length,
-        species,
-      );
+      clusterCentroids[entry.key] = _doublesToFloat32(centroid);
+      clusterSummaries[entry.key] = (entry.value.length, species);
     }
 
     // Delete existing summaries for clusters that no longer have any face
-    // assignments in the DB. Query the DB directly rather than relying on
-    // faceToCluster, which only covers the current Rust result and may
-    // miss clusters with retained assignments from unclustered faces.
+    // assignments in the DB.
     final activeClusterIds = await mlDataDB.getActivePetClusterIds(species);
     final staleIds = existingSummaries.keys
         .where((id) => !activeClusterIds.contains(id))
@@ -258,20 +273,40 @@ class PetClusteringService {
       await mlDataDB.petClusterSummaryUpdate(clusterSummaries);
     }
 
+    // Write centroids to vector DB
+    if (clusterCentroids.isNotEmpty) {
+      final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+        species: species,
+        offline: isOfflineMode,
+      );
+      final sqlDb = await mlDataDB.asyncDB;
+      final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+        clusterCentroids.keys,
+        db: sqlDb,
+        createIfMissing: true,
+      );
+      final vectorIds = <int>[];
+      final centroids = <Float32List>[];
+      for (final entry in clusterCentroids.entries) {
+        final vectorId = idMap[entry.key];
+        if (vectorId != null) {
+          vectorIds.add(vectorId);
+          centroids.add(entry.value);
+        }
+      }
+      if (vectorIds.isNotEmpty) {
+        await centroidVdb.bulkInsertCentroids(
+          vectorIds: vectorIds,
+          centroids: centroids,
+        );
+      }
+    }
+
     _logger.info(
       "$speciesName clustering done: ${faceToCluster.length} assigned, "
       "${result.nUnclustered} unclustered, "
       "${result.summaries.length} clusters",
     );
-  }
-
-  static Float64List _uint8ListToFloat64(Uint8List bytes) {
-    final f32 = Float32List.view(bytes.buffer);
-    final f64 = Float64List(f32.length);
-    for (int i = 0; i < f32.length; i++) {
-      f64[i] = f32[i];
-    }
-    return f64;
   }
 
   static Float64List _float32ToFloat64(Float32List f32) {
@@ -282,12 +317,12 @@ class PetClusteringService {
     return f64;
   }
 
-  static Uint8List _doublesToUint8List(List<double> values) {
+  static Float32List _doublesToFloat32(List<double> values) {
     final floats = Float32List(values.length);
     for (int i = 0; i < values.length; i++) {
       floats[i] = values[i];
     }
-    return floats.buffer.asUint8List();
+    return floats;
   }
 
   /// Compute the L2-normalized mean centroid of a list of embeddings.
@@ -440,17 +475,16 @@ extension PetClusteringDB on MLDataDB {
     }
   }
 
-  /// Update pet cluster summaries (centroid + count + species).
+  /// Update pet cluster summaries (count + species) in SQLite.
   Future<void> petClusterSummaryUpdate(
-    Map<String, (Uint8List, int, int)> summaries,
+    Map<String, (int count, int species)> summaries,
   ) async {
     if (summaries.isEmpty) return;
     final db = await asyncDB;
     const String sql = '''
-      INSERT INTO $petClusterSummaryTable ($clusterIDColumn, $avgColumn, $countColumn, $speciesColumn)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO $petClusterSummaryTable ($clusterIDColumn, $countColumn, $speciesColumn)
+      VALUES (?, ?, ?)
       ON CONFLICT($clusterIDColumn) DO UPDATE SET
-        $avgColumn = excluded.$avgColumn,
         $countColumn = excluded.$countColumn,
         $speciesColumn = excluded.$speciesColumn
     ''';
@@ -458,15 +492,13 @@ extension PetClusteringDB on MLDataDB {
     final entries = summaries.entries.toList();
     for (int i = 0; i < entries.length; i += batchSize) {
       final batch = entries.sublist(i, min(i + batchSize, entries.length));
-      final params = batch
-          .map((e) => [e.key, e.value.$1, e.value.$2, e.value.$3])
-          .toList();
+      final params = batch.map((e) => [e.key, e.value.$1, e.value.$2]).toList();
       await db.executeBatch(sql, params);
     }
   }
 
   /// Get all existing pet cluster summaries, optionally filtered by species.
-  Future<Map<String, (Uint8List, int, int)>> getAllPetClusterSummary({
+  Future<Map<String, (int count, int species)>> getAllPetClusterSummary({
     int? species,
   }) async {
     final db = await asyncDB;
@@ -476,10 +508,9 @@ extension PetClusteringDB on MLDataDB {
       'SELECT * FROM $petClusterSummaryTable$where',
       params,
     );
-    final result = <String, (Uint8List, int, int)>{};
+    final result = <String, (int, int)>{};
     for (final r in rows) {
       result[r[clusterIDColumn] as String] = (
-        r[avgColumn] as Uint8List,
         r[countColumn] as int,
         r[speciesColumn] as int,
       );

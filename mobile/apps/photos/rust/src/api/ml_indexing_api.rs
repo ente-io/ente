@@ -782,20 +782,19 @@ pub fn run_face_clustering_incremental_rust(
         })
         .collect();
 
-    let mut centroids: HashMap<String, Vec<f32>> = HashMap::new();
-    let mut counts: HashMap<String, usize> = HashMap::new();
-    for s in existing_centroids {
-        let id = s.cluster_id;
-        let count = s.count as usize;
-        let centroid: Vec<f32> = s.centroid.into_iter().map(|v| v as f32).collect();
-        centroids.insert(id.clone(), centroid);
-        counts.insert(id, count);
-    }
+    let centroids: HashMap<String, Vec<f32>> = existing_centroids
+        .into_iter()
+        .map(|s| {
+            (
+                s.cluster_id,
+                s.centroid.into_iter().map(|v| v as f32).collect(),
+            )
+        })
+        .collect();
 
     match face_cluster::run_face_clustering_incremental(
         &cluster_inputs,
         &centroids,
-        &counts,
         threshold as f32,
     ) {
         Some(result) => Ok(to_face_cluster_result(result)),
