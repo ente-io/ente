@@ -752,15 +752,47 @@ Future<MLResult> analyzeImageRust(Map args) async {
         e,
         s,
       );
-      final fallback =
-          await _createJpegDecodeFallbackFile(imagePath: imagePath);
+      final _DecodeFallbackFile? fallback;
+      try {
+        fallback = await _createJpegDecodeFallbackFile(imagePath: imagePath);
+      } catch (fallbackError, fallbackStack) {
+        _logger.severe(
+          "JPEG fallback conversion threw for fileID $enteFileID (format: $fileFormat)",
+          fallbackError,
+          fallbackStack,
+        );
+        if (_shouldStoreEmptyResultForRustDecodeFailure(
+          primaryError: e,
+          fallbackError: fallbackError,
+        )) {
+          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
+            enteFileID: enteFileID,
+            fileFormat: fileFormat,
+            primaryError: e,
+            fallbackError: fallbackError,
+          );
+        }
+        rethrow;
+      }
       if (fallback == null) {
         _logger.severe(
           "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
           e,
           s,
         );
-        rethrow;
+        if (_shouldStoreEmptyResultForRustDecodeFailure(
+          primaryError: e,
+          fallbackReturnedEmpty: true,
+        )) {
+          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
+            enteFileID: enteFileID,
+            fileFormat: fileFormat,
+            primaryError: e,
+          );
+        }
+        throw Exception(
+          "RustMLDecodeFallbackFailed: JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
+        );
       }
 
       try {
@@ -774,6 +806,17 @@ Future<MLResult> analyzeImageRust(Map args) async {
           retryError,
           retryStack,
         );
+        if (_shouldStoreEmptyResultForRustDecodeFailure(
+          primaryError: e,
+          fallbackError: retryError,
+        )) {
+          throw _asInvalidImageFormatExceptionForRustDecodeFailure(
+            enteFileID: enteFileID,
+            fileFormat: fileFormat,
+            primaryError: e,
+            fallbackError: retryError,
+          );
+        }
         rethrow;
       } finally {
         await _cleanupDecodeFallback(fallback);
@@ -882,6 +925,107 @@ Future<MLResult> analyzeImageRust(Map args) async {
 bool _isRustDecodeIssue(Object error) {
   final message = error.toString().toLowerCase();
   return message.contains("decode error");
+}
+
+bool _shouldStoreEmptyResultForRustDecodeFailure({
+  required Object primaryError,
+  Object? fallbackError,
+  bool fallbackReturnedEmpty = false,
+}) {
+  if (fallbackReturnedEmpty) {
+    // Empty output from FlutterImageCompress is ambiguous on Android and can
+    // happen after internal OOM retries. Treat it as transient so valid
+    // images are retried instead of being permanently marked invalid.
+    return false;
+  }
+
+  if (fallbackError == null) {
+    return false;
+  }
+
+  if (_isInfrastructureFallbackFailure(fallbackError)) {
+    return false;
+  }
+
+  if (_isFileSpecificDecodeFailure(fallbackError)) {
+    return true;
+  }
+  return false;
+}
+
+bool _isFileSpecificDecodeFailure(Object error) {
+  final message = _normalizedErrorMessage(error);
+  if (_isInfrastructureFallbackFailure(error)) {
+    return false;
+  }
+
+  const fileIssueMarkers = <String>[
+    "failed to decode",
+    "failed to guess image format",
+    "format error",
+    "required tag",
+    "unsupported image format",
+    "unsupported tiff pixel format",
+    "invalid image",
+    "invalid data",
+    "not an image",
+    "cannot decode",
+    "could not decode",
+    "corrupt",
+    "corrupted",
+    "buffer length does not match dimensions",
+  ];
+  return fileIssueMarkers.any(message.contains);
+}
+
+bool _isInfrastructureFallbackFailure(Object error) {
+  final message = _normalizedErrorMessage(error);
+
+  const infrastructureMarkers = <String>[
+    "failed to open image file",
+    "no such file or directory",
+    "permission denied",
+    "operation not permitted",
+    "read-only file system",
+    "file system",
+    "filesystem",
+    "space left on device",
+    "channel-error",
+    "missingplugin",
+    "unable to establish connection on channel",
+    "platformexception(channel-error",
+    "out of memory",
+    "outofmemory",
+    "timed out",
+    "timeout",
+  ];
+  return infrastructureMarkers.any(message.contains);
+}
+
+String _normalizedErrorMessage(Object error) {
+  if (error is PlatformException) {
+    return <String>[
+      error.code,
+      error.message ?? "",
+      "${error.details ?? ""}",
+      error.toString(),
+    ].join(" ").toLowerCase();
+  }
+  return error.toString().toLowerCase();
+}
+
+Exception _asInvalidImageFormatExceptionForRustDecodeFailure({
+  required int enteFileID,
+  required String fileFormat,
+  required Object primaryError,
+  Object? fallbackError,
+}) {
+  final details = <String>[
+    "InvalidImageFormatException: Rust decode failed for fileID $enteFileID (format: $fileFormat)",
+    "primary_error: $primaryError",
+    if (fallbackError != null) "fallback_error: $fallbackError",
+  ];
+  return Exception(details.join("; "));
 }
 
 class _DecodeFallbackFile {
