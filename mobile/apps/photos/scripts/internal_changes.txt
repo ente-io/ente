@@ -1,3 +1,4 @@
+- Ashil, Setal (i): Native family management screens
 - Ashil: Fix album sorting state not persisting 
 - Amrithesh: (I) QR code detection
 - Ashil: Hero animation for feed
