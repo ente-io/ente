@@ -138,14 +138,10 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
             duration: const Duration(milliseconds: 180),
             height: 58,
             decoration: BoxDecoration(
-              color: colorScheme.fill,
+              color: colorScheme.fillFaint,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: hasError
-                    ? colorScheme.redBase
-                    : _emailFocusNode.hasFocus
-                        ? colorScheme.greenBase
-                        : colorScheme.strokeSolid,
+                color: hasError ? colorScheme.redBase : colorScheme.strokeMuted,
               ),
             ),
             child: TextField(
@@ -165,9 +161,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
               onSubmitted: (_) => _addEmail(),
               decoration: InputDecoration(
                 hintText: l10n.emailAddress,
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.contentLighter,
-                ),
+                hintStyle: textTheme.bodyFaint,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
@@ -191,9 +185,9 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
             width: 58,
             height: 58,
             decoration: BoxDecoration(
-              color: colorScheme.fill,
+              color: colorScheme.fillFaint,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colorScheme.strokeSolid),
+              border: Border.all(color: colorScheme.strokeMuted),
             ),
             child: Center(
               child: _isCheckingEmail
@@ -571,6 +565,11 @@ class _EmailChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final rowTextStyle = textTheme.body.copyWith(
+      fontSize: 15,
+      height: 18.75 / 15,
+    );
+    final rowIconColor = textTheme.bodyFaint.color;
 
     return Container(
       width: double.infinity,
@@ -584,7 +583,7 @@ class _EmailChip extends StatelessWidget {
           Expanded(
             child: Text(
               email,
-              style: textTheme.body,
+              style: rowTextStyle,
             ),
           ),
           GestureDetector(
@@ -593,7 +592,7 @@ class _EmailChip extends StatelessWidget {
             child: Icon(
               Icons.close,
               size: 18,
-              color: colorScheme.contentLighter,
+              color: rowIconColor,
             ),
           ),
         ],
