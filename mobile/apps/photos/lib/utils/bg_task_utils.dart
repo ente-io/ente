@@ -5,14 +5,15 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
-import "package:photos/main.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/services/background_run_helper.dart";
+import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/background_run_helper.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
+import "package:workmanager_apple/workmanager_apple.dart";
 
 const _kIOSBackgroundRefreshCadence = Duration(minutes: 15);
 const _kIOSBackgroundProcessingContinuationDelay = Duration(seconds: 60);
@@ -27,30 +28,66 @@ void callbackDispatcher() {
     final shouldRescheduleProcessingTask =
         Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
     final timeout = BgTaskUtils.backgroundBudgetForTask(taskName);
+    bool didHandleExpiration = false;
+    await WorkmanagerApple.setTaskExpirationHandler((expiredTaskName) async {
+      if (expiredTaskName != taskName || didHandleExpiration) {
+        return;
+      }
+
+      didHandleExpiration = true;
+      BgTaskUtils.$
+          .warning("Task expired via iOS expirationHandler: $taskName");
+      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+      if (shouldRescheduleProcessingTask) {
+        await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
+          source: "callbackDispatcher:$taskName:expired",
+        );
+      }
+    });
+    if (shouldRescheduleProcessingTask) {
+      await BgTaskUtils.handleIOSBackgroundProcessingTaskStart(
+        source: "callbackDispatcher:$taskName",
+      );
+    }
     try {
       BgTaskUtils.$.info('Task started $tlog');
-      final result = await runBackgroundTask(taskName, tlog).timeout(
-        timeout,
-        onTimeout: () async {
-          BgTaskUtils.$.warning("Task timed out: $taskName");
-          await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-          // iOS should report real timeout/error outcomes to BGTaskScheduler.
-          // Android keeps success here to avoid retry storms from transient failures.
-          return Platform.isIOS ? false : true;
-        },
-      );
+      final result = Platform.isIOS
+          ? await runBackgroundTask(taskName, tlog)
+          : await runBackgroundTask(taskName, tlog).timeout(
+              timeout,
+              onTimeout: () async {
+                BgTaskUtils.$.warning("Task timed out: $taskName");
+                if (!didHandleExpiration) {
+                  await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+                }
+                if (shouldRescheduleProcessingTask && !didHandleExpiration) {
+                  await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
+                    source: "callbackDispatcher:$taskName:timeout",
+                  );
+                }
+                return true;
+              },
+            );
+      if (shouldRescheduleProcessingTask && !didHandleExpiration) {
+        await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
+          source: "callbackDispatcher:$taskName:success",
+        );
+      }
       BgTaskUtils.$.info('Task run completed ($result) $tlog');
       return result;
     } catch (e) {
       BgTaskUtils.$.warning('Task error: $e');
-      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-      return Platform.isIOS ? false : true;
-    } finally {
-      if (shouldRescheduleProcessingTask) {
+      if (!didHandleExpiration) {
+        await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+      }
+      if (shouldRescheduleProcessingTask && !didHandleExpiration) {
         await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
-          source: "callbackDispatcher:$taskName",
+          source: "callbackDispatcher:$taskName:error",
         );
       }
+      return Platform.isIOS ? false : true;
+    } finally {
+      await WorkmanagerApple.clearTaskExpirationHandler();
     }
   });
 }
@@ -242,6 +279,37 @@ class BgTaskUtils {
       iOSBackgroundProcessingTask,
     );
     await _clearIOSBackgroundProcessingSchedulingState();
+  }
+
+  static Future<void> handleIOSBackgroundProcessingTaskStart({
+    required String source,
+  }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final isUploadHandoffEnabled =
+        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    if (!isUploadHandoffEnabled) {
+      await _clearIOSBackgroundProcessingSchedulingState();
+      return;
+    }
+
+    final nextSchedule = nextIOSBackgroundProcessingSchedule(
+      isUploadHandoffEnabled: isUploadHandoffEnabled,
+      hasActiveUploads: FileUploader.instance.hasActiveUploads,
+      isBackupEligible: await isIOSBackupEligible(),
+    );
+    if (nextSchedule != null) {
+      await scheduleIOSBackgroundProcessingTask(
+        source: "$source:start",
+        initialDelay: nextSchedule.delay,
+        reason: nextSchedule.reason,
+      );
+    } else {
+      await _clearIOSBackgroundProcessingSchedulingState();
+    }
   }
 
   static Future<void> handleIOSBackgroundProcessingTaskCompletion({

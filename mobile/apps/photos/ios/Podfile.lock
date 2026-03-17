@@ -114,6 +114,8 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
+  - grace_window_ios (1.0.0):
+    - Flutter
   - home_widget (0.0.1):
     - Flutter
   - in_app_purchase_storekit (0.0.1):
@@ -289,6 +291,7 @@ DEPENDENCIES:
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - grace_window_ios (from `.symlinks/plugins/grace_window_ios/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
@@ -404,6 +407,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_timezone/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  grace_window_ios:
+    :path: ".symlinks/plugins/grace_window_ios/ios"
   home_widget:
     :path: ".symlinks/plugins/home_widget/ios"
   in_app_purchase_storekit:
@@ -519,6 +524,7 @@ SPEC CHECKSUMS:
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
+  grace_window_ios: 3043cd470da5fe034e1b432deb2dec986bc7154d
   home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
   in_app_purchase_storekit: d1a48cb0f8b29dbf5f85f782f5dd79b21b90a5e6
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
