@@ -16,6 +16,7 @@ import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
+import "package:photos/db/pet_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -1885,8 +1886,16 @@ class SearchService {
       // Get cluster summaries for species info
       final clusterSummaries = await mlDataDB.getAllPetClusterSummary();
 
-      // Get pet names
-      final petNames = await mlDataDB.getAllPetNames();
+      // Get pet names via cluster → pet mapping + PetDB
+      final clusterToPetId = await mlDataDB.getClusterToPetId();
+      final petEntities = await PetDB.instance.getAllAsMap();
+      final petNames = <String, String>{};
+      for (final entry in clusterToPetId.entries) {
+        final pet = petEntities[entry.value];
+        if (pet != null && pet.name.isNotEmpty) {
+          petNames[entry.key] = pet.name;
+        }
+      }
 
       // Get file ID -> EnteFile mapping. In offline mode the ML DB stores
       // local integer IDs, so we must convert via OfflineFilesDB first.
@@ -1959,6 +1968,8 @@ class SearchService {
               kFileID: files.first.uploadedFileID,
               kPetSpecies: summary?.$2 ?? -1,
               kPetHasCustomName: customName != null && customName.isNotEmpty,
+              if (clusterToPetId.containsKey(clusterId))
+                kPetId: clusterToPetId[clusterId],
             },
             onResultTap: (ctx) {
               routeToPage(

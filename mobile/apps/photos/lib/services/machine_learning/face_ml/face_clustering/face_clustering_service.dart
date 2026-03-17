@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer";
-import "dart:typed_data" show Float64List, Uint8List;
+import "dart:typed_data" show Uint8List;
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -11,7 +11,6 @@ import "package:photos/models/base/id.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/src/rust/api/ml_indexing_api.dart" as rust_ml;
 import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/isolate/super_isolate.dart";
 import "package:photos/utils/local_settings.dart";
@@ -163,107 +162,6 @@ class FaceClusteringService extends SuperIsolate {
       rethrow;
     } finally {
       isRunning = false;
-    }
-  }
-
-  /// Runs agglomerative clustering via Rust as a fallback.
-  ///
-  /// Returns null if the Rust path cannot handle the input (>5000 faces)
-  /// or if an error occurs.
-  Future<ClusteringResult?> predictAgglomerativeRust(
-    Set<FaceDbInfoForClustering> input, {
-    required Map<String, (Uint8List, int)> oldClusterSummaries,
-    double? distanceThreshold,
-  }) async {
-    final resolvedThreshold = distanceThreshold ?? defaultDistanceThreshold;
-    if (input.isEmpty) return null;
-
-    _logger.info(
-      "Running Rust agglomerative clustering on ${input.length} faces "
-      "(threshold: $resolvedThreshold)",
-    );
-
-    try {
-      // Convert FaceDbInfoForClustering → RustFaceClusterInput
-      final rustInputs = <rust_ml.RustFaceClusterInput>[];
-      for (final face in input) {
-        final values = EVector.fromBuffer(face.embeddingBytes).values;
-        rustInputs.add(
-          rust_ml.RustFaceClusterInput(
-            faceId: face.faceID,
-            embedding: Float64List.fromList(
-              values.map((v) => v.toDouble()).toList(),
-            ),
-            existingClusterId: face.clusterId ?? "",
-            rejectedClusterIds: face.rejectedClusterIds ?? [],
-          ),
-        );
-      }
-
-      late rust_ml.RustFaceClusterResult rustResult;
-
-      if (oldClusterSummaries.isEmpty) {
-        // Batch mode
-        rustResult = await rust_ml.runFaceClusteringRust(
-          inputs: rustInputs,
-          threshold: resolvedThreshold,
-        );
-      } else {
-        // Incremental mode — pass existing centroids
-        final existingCentroids = oldClusterSummaries.entries.map((e) {
-          final centroidValues = EVector.fromBuffer(e.value.$1).values;
-          return rust_ml.RustFaceClusterSummary(
-            clusterId: e.key,
-            centroid: Float64List.fromList(
-              centroidValues.map((v) => v.toDouble()).toList(),
-            ),
-            count: e.value.$2,
-          );
-        }).toList();
-
-        rustResult = await rust_ml.runFaceClusteringIncrementalRust(
-          newInputs: rustInputs,
-          existingCentroids: existingCentroids,
-          threshold: resolvedThreshold,
-        );
-      }
-
-      // Convert RustFaceClusterResult → ClusteringResult
-      final newFaceIdToCluster = <String, String>{};
-      for (final assignment in rustResult.assignments) {
-        newFaceIdToCluster[assignment.faceId] = assignment.clusterId;
-      }
-
-      final newClusterIdToFaceIds = <String, List<String>>{};
-      for (final entry in newFaceIdToCluster.entries) {
-        newClusterIdToFaceIds.putIfAbsent(entry.value, () => []).add(entry.key);
-      }
-
-      final newClusterSummaries = <String, (Uint8List, int)>{};
-      for (final summary in rustResult.summaries) {
-        final centroidBytes = EVector(
-          values: summary.centroid.map((v) => v.toDouble()).toList(),
-        ).writeToBuffer();
-        newClusterSummaries[summary.clusterId] = (
-          Uint8List.fromList(centroidBytes),
-          summary.count,
-        );
-      }
-
-      _logger.info(
-        "Rust agglomerative clustering: ${newFaceIdToCluster.length} assigned, "
-        "${rustResult.nUnclustered} unclustered, "
-        "${rustResult.summaries.length} clusters",
-      );
-
-      return ClusteringResult(
-        newFaceIdToCluster: newFaceIdToCluster,
-        newClusterIdToFaceIds: newClusterIdToFaceIds,
-        newClusterSummaries: newClusterSummaries,
-      );
-    } catch (e, s) {
-      _logger.severe("Rust agglomerative clustering failed", e, s);
-      return null;
     }
   }
 

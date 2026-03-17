@@ -305,16 +305,15 @@ CREATE TABLE IF NOT EXISTS $petClusterCentroidVectorIdMappingTable (
 );
 ''';
 
-// ── Pet Names Table ──
+// ── Pet Cluster → Pet Mapping Table ──
 
-const petNamesTable = 'pet_names';
-const petNameColumn = 'name';
+const petClusterPetTable = 'pet_cluster_pet';
+const petIdColumn = 'pet_id';
 
-const createPetNamesTable = '''
-CREATE TABLE IF NOT EXISTS $petNamesTable (
+const createPetClusterPetTable = '''
+CREATE TABLE IF NOT EXISTS $petClusterPetTable (
   $clusterIDColumn TEXT NOT NULL PRIMARY KEY,
-  $petNameColumn TEXT NOT NULL DEFAULT '',
-  $speciesColumn INTEGER NOT NULL DEFAULT -1
+  $petIdColumn TEXT NOT NULL
 );
 ''';
 

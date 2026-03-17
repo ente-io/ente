@@ -110,7 +110,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     petFcClusterIDIndex,
     createPetClusterSummaryTable,
     createPetClusterCentroidVectorIdMappingTable,
-    createPetNamesTable,
+    createPetClusterPetTable,
     createNotPetFeedbackTable,
   ];
   static const List<String> _offlineMigrationScripts = [

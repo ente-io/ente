@@ -81,7 +81,7 @@ impl ClusterConfig {
             min_cluster_size: 2,
             min_samples: 2,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.77,
+            agglomerative_threshold: 0.85,
         }
     }
 
@@ -98,7 +98,7 @@ impl ClusterConfig {
             min_cluster_size: 2,
             min_samples: 2,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.77,
+            agglomerative_threshold: 0.85,
         }
     }
 
@@ -719,7 +719,7 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
 ///   3. Build minimum spanning tree (Prim's algorithm)
 ///   4. Single-linkage hierarchy from MST
 ///   5. Extract clusters using EOM (Excess of Mass) stability
-fn hdbscan_precomputed(dist: &[f32], n: usize, min_cluster_size: usize, min_samples: usize) -> Vec<i32> {
+pub(crate) fn hdbscan_precomputed(dist: &[f32], n: usize, min_cluster_size: usize, min_samples: usize) -> Vec<i32> {
     if n < min_cluster_size {
         return vec![-1i32; n];
     }

@@ -1,3 +1,5 @@
+import "dart:convert" show jsonEncode;
+import "dart:io" show File;
 import "dart:math" show min, sqrt;
 import "dart:typed_data" show Float32List, Float64List;
 
@@ -7,6 +9,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
+import "package:photos/db/pet_db.dart";
 import "package:photos/src/rust/api/ml_indexing_api.dart";
 import "package:uuid/uuid.dart";
 
@@ -20,6 +23,103 @@ class PetClusteringService {
   static final instance = PetClusteringService._();
 
   bool _isRunning = false;
+
+  /// Export all pet face/body embeddings with cluster assignments to a JSON
+  /// file for offline threshold tuning. Call from a debug menu or test.
+  ///
+  /// Output format: `{ "species": 0, "inputs": [...], "clusters": {...} }`
+  /// where each input has petFaceId, faceEmbedding, bodyEmbedding, fileId,
+  /// and clusters maps petFaceId -> clusterId.
+  Future<String> dumpEmbeddingsJson({
+    required MLDataDB mlDataDB,
+    required String outputPath,
+    bool isOffline = false,
+  }) async {
+    final results = <Map<String, dynamic>>[];
+
+    for (final species in [0, 1]) {
+      final speciesName = species == 0 ? "dog" : "cat";
+      final faces = await mlDataDB.getPetFacesForClustering(
+        species,
+        isOffline: isOffline,
+      );
+      if (faces.isEmpty) continue;
+
+      final bodies = await mlDataDB.getPetBodiesForClustering(
+        species,
+        isOffline: isOffline,
+      );
+      final bodyByFileId = <int, PetBodyClusterInfo>{};
+      for (final body in bodies) {
+        bodyByFileId.putIfAbsent(body.fileId, () => body);
+      }
+
+      final faceVdb = PetVectorDB.forModel(
+        species: species,
+        isFace: true,
+        offline: isOffline,
+      );
+      final bodyVdb = PetVectorDB.forModel(
+        species: species,
+        isFace: false,
+        offline: isOffline,
+      );
+
+      final inputs = <Map<String, dynamic>>[];
+      for (final face in faces) {
+        if (face.faceVectorId == null) continue;
+        List<double> faceEmb;
+        try {
+          final embs = await faceVdb.getEmbeddings([face.faceVectorId!]);
+          if (embs.isEmpty) continue;
+          faceEmb = embs.first.toList();
+        } catch (_) {
+          continue;
+        }
+
+        List<double> bodyEmb = [];
+        final body = bodyByFileId[face.fileId];
+        if (body != null && body.bodyVectorId != null) {
+          try {
+            final bodyEmbs = await bodyVdb.getEmbeddings([body.bodyVectorId!]);
+            if (bodyEmbs.isNotEmpty) {
+              bodyEmb = bodyEmbs.first.toList();
+            }
+          } catch (_) {}
+        }
+
+        inputs.add({
+          "petFaceId": face.petFaceId,
+          "faceEmbedding": faceEmb,
+          "bodyEmbedding": bodyEmb,
+          "fileId": face.fileId,
+        });
+      }
+
+      // Read existing cluster assignments
+      final clusters = <String, String>{};
+      final sqlDb = await mlDataDB.asyncDB;
+      final rows = await sqlDb.getAll(
+        "SELECT pet_face_id, cluster_id FROM $petFaceClustersTable",
+      );
+      for (final row in rows) {
+        clusters[row["pet_face_id"] as String] = row["cluster_id"] as String;
+      }
+
+      results.add({
+        "species": species,
+        "speciesName": speciesName,
+        "count": inputs.length,
+        "inputs": inputs,
+        "clusters": clusters,
+      });
+    }
+
+    final json = jsonEncode(results);
+    await File(outputPath).writeAsString(json);
+    _logger.info("Exported ${results.length} species groups to $outputPath");
+    return outputPath;
+  }
 
   /// Run pet clustering on all unclustered pet faces.
   ///
@@ -97,9 +197,9 @@ class PetClusteringService {
       offline: isOffline,
     );
 
-    // Build cluster inputs
-    final List<RustPetClusterInput> clusterInputs = [];
-    final List<String> petFaceIds = [];
+    // Build cluster inputs, tracking which are unclustered
+    final List<RustPetClusterInput> allInputs = [];
+    final List<RustPetClusterInput> unclusteredInputs = [];
 
     for (final face in faces) {
       if (face.faceVectorId == null) continue;
@@ -129,43 +229,50 @@ class PetClusteringService {
         }
       }
 
-      clusterInputs.add(
-        RustPetClusterInput(
-          petFaceId: face.petFaceId,
-          faceEmbedding: faceEmb,
-          bodyEmbedding: bodyEmb,
-          species: species,
-          fileId: face.fileId,
-        ),
+      final input = RustPetClusterInput(
+        petFaceId: face.petFaceId,
+        faceEmbedding: faceEmb,
+        bodyEmbedding: bodyEmb,
+        species: species,
+        fileId: face.fileId,
       );
-      petFaceIds.add(face.petFaceId);
-    }
-
-    if (clusterInputs.length < 2) {
-      _logger.info("Not enough $speciesName faces to cluster "
-          "(${clusterInputs.length})");
-      return;
+      allInputs.add(input);
+      if (face.clusterId == null) {
+        unclusteredInputs.add(input);
+      }
     }
 
     // 5. Check for existing clusters (incremental mode)
     final existingSummaries =
         await mlDataDB.getAllPetClusterSummary(species: species);
 
-    _logger.info(
-      "Clustering ${clusterInputs.length} $speciesName faces "
-      "(${existingSummaries.length} existing clusters)",
-    );
-
     late RustPetClusterResult result;
 
     if (existingSummaries.isEmpty) {
-      // Batch mode
+      // Batch mode — send all faces
+      if (allInputs.length < 2) {
+        _logger.info("Not enough $speciesName faces to cluster "
+            "(${allInputs.length})");
+        return;
+      }
+      _logger.info(
+        "Batch clustering ${allInputs.length} $speciesName faces",
+      );
       result = await runPetClusteringRust(
-        inputs: clusterInputs,
+        inputs: allInputs,
         species: species,
       );
     } else {
-      // Incremental mode — read centroids from vector DB
+      // Incremental mode — only send unclustered faces
+      if (unclusteredInputs.isEmpty) {
+        _logger.info("No unclustered $speciesName faces, skipping");
+        return;
+      }
+      _logger.info(
+        "Incremental clustering ${unclusteredInputs.length} new "
+        "$speciesName faces (${existingSummaries.length} existing clusters)",
+      );
+
       final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
         species: species,
         offline: isOffline,
@@ -197,7 +304,7 @@ class PetClusteringService {
       }
 
       result = await runPetClusteringIncrementalRust(
-        newInputs: clusterInputs,
+        newInputs: unclusteredInputs,
         existingFaceCentroids: faceCentroids,
         existingBodyCentroids: [],
         species: species,
@@ -235,7 +342,7 @@ class PetClusteringService {
     // unclustered (nUnclustered > 0), and those retain their previous DB
     // assignments which must be reflected in the summary.
     final embeddingByFaceId = <String, Float64List>{};
-    for (final input in clusterInputs) {
+    for (final input in allInputs) {
       if (input.faceEmbedding.isNotEmpty) {
         embeddingByFaceId[input.petFaceId] = Float64List.fromList(
           input.faceEmbedding,
@@ -536,36 +643,30 @@ extension PetClusteringDB on MLDataDB {
     return DBPetFace.fromMap(rows.first);
   }
 
-  // ── Pet names (editable names) ──
+  // ── Cluster → Pet mapping ──
 
-  /// Get all pet names: clusterId → name.
-  Future<Map<String, String>> getAllPetNames() async {
+  /// Get all cluster-to-pet-ID mappings.
+  Future<Map<String, String>> getClusterToPetId() async {
     final db = await asyncDB;
     final rows = await db.getAll(
-      "SELECT $clusterIDColumn, $petNameColumn FROM $petNamesTable "
-      "WHERE $petNameColumn != ''",
+      "SELECT $clusterIDColumn, $petIdColumn FROM $petClusterPetTable",
     );
     final result = <String, String>{};
     for (final r in rows) {
-      result[r[clusterIDColumn] as String] = r[petNameColumn] as String;
+      result[r[clusterIDColumn] as String] = r[petIdColumn] as String;
     }
     return result;
   }
 
-  /// Set or update a pet name for a cluster.
-  Future<void> setPetName(
-    String clusterId,
-    String name,
-    int species,
-  ) async {
+  /// Map a cluster to a pet ID.
+  Future<void> setClusterPetId(String clusterId, String petId) async {
     final db = await asyncDB;
     await db.execute(
-      '''INSERT INTO $petNamesTable ($clusterIDColumn, $petNameColumn, $speciesColumn)
-         VALUES (?, ?, ?)
+      '''INSERT INTO $petClusterPetTable ($clusterIDColumn, $petIdColumn)
+         VALUES (?, ?)
          ON CONFLICT($clusterIDColumn) DO UPDATE SET
-           $petNameColumn = excluded.$petNameColumn,
-           $speciesColumn = excluded.$speciesColumn''',
-      [clusterId, name, species],
+           $petIdColumn = excluded.$petIdColumn''',
+      [clusterId, petId],
     );
   }
 
@@ -762,8 +863,16 @@ extension PetClusteringDB on MLDataDB {
     ''';
     final rows = await db.getAll(query);
 
-    // Fetch names separately
-    final names = await getAllPetNames();
+    // Resolve names via cluster → pet mapping + PetDB
+    final clusterToPetId = await getClusterToPetId();
+    final petEntities = await PetDB.instance.getAllAsMap();
+    final names = <String, String>{};
+    for (final entry in clusterToPetId.entries) {
+      final pet = petEntities[entry.value];
+      if (pet != null && pet.name.isNotEmpty) {
+        names[entry.key] = pet.name;
+      }
+    }
 
     return rows.map((r) {
       final cid = r[clusterIDColumn] as String;

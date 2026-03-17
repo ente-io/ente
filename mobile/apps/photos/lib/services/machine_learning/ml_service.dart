@@ -467,32 +467,13 @@ class MLService {
             }
           }
 
-          ClusteringResult? clusteringResult;
-          try {
-            clusteringResult =
-                await FaceClusteringService.instance.predictLinearIsolate(
-              faceInfoForClustering.toSet(),
-              fileIDToCreationTime: fileIDToCreationTime,
-              offset: offset,
-              oldClusterSummaries: oldClusterSummaries,
-            );
-          } catch (e, s) {
-            _logger.severe("Linear clustering failed for bucket $bucket", e, s);
-          }
-
-          // Fallback: Rust agglomerative clustering
-          if (clusteringResult == null &&
-              (flagService.useRustForML || isOfflineMode)) {
-            _logger.info(
-              "Falling back to Rust agglomerative clustering for bucket $bucket",
-            );
-            clusteringResult =
-                await FaceClusteringService.instance.predictAgglomerativeRust(
-              faceInfoForClustering.toSet(),
-              oldClusterSummaries: oldClusterSummaries,
-            );
-          }
-
+          final clusteringResult =
+              await FaceClusteringService.instance.predictLinearIsolate(
+            faceInfoForClustering.toSet(),
+            fileIDToCreationTime: fileIDToCreationTime,
+            offset: offset,
+            oldClusterSummaries: oldClusterSummaries,
+          );
           if (clusteringResult == null) {
             _logger.warning("faceIdToCluster is null");
             return;
@@ -523,29 +504,12 @@ class MLService {
         }
       } else {
         final clusterStartTime = DateTime.now();
-        ClusteringResult? clusteringResult;
-        try {
-          clusteringResult =
-              await FaceClusteringService.instance.predictLinearIsolate(
-            allFaceInfoForClustering.toSet(),
-            fileIDToCreationTime: fileIDToCreationTime,
-            oldClusterSummaries: oldClusterSummaries,
-          );
-        } catch (e, s) {
-          _logger.severe("Linear clustering failed", e, s);
-        }
-
-        // Fallback: Rust agglomerative clustering
-        if (clusteringResult == null &&
-            (flagService.useRustForML || isOfflineMode)) {
-          _logger.info("Falling back to Rust agglomerative clustering");
-          clusteringResult =
-              await FaceClusteringService.instance.predictAgglomerativeRust(
-            allFaceInfoForClustering.toSet(),
-            oldClusterSummaries: oldClusterSummaries,
-          );
-        }
-
+        final clusteringResult =
+            await FaceClusteringService.instance.predictLinearIsolate(
+          allFaceInfoForClustering.toSet(),
+          fileIDToCreationTime: fileIDToCreationTime,
+          oldClusterSummaries: oldClusterSummaries,
+        );
         if (clusteringResult == null) {
           _logger.warning("faceIdToCluster is null");
           return;

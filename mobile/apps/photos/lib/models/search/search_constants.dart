@@ -6,5 +6,6 @@ const kFileID = 'file_id';
 const kPetClusterParamId = 'pet_cluster_id';
 const kPetSpecies = 'pet_species';
 const kPetHasCustomName = 'pet_has_custom_name';
+const kPetId = 'pet_id';
 const kContactEmail = 'contact_email';
 const kContactCollections = 'contact_collections';
