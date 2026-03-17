@@ -39,6 +39,9 @@ jobs:
                       rust/apps/ensu/src-tauri/target
                   key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
 
+            - name: Install Rust stable
+              uses: dtolnay/rust-toolchain@stable
+
             - name: Install system dependencies
               run: |
                   sudo apt-get update
