@@ -24,7 +24,7 @@ enum FamilyMemberStatus {
     return FamilyMemberStatus.values.firstWhereOrNull(
           (status) => status.serverValue == value,
         ) ??
-        FamilyMemberStatus.accepted;
+        FamilyMemberStatus.unknown;
   }
 }
 
@@ -52,7 +52,7 @@ class UserDetails {
   );
 
   bool isPartOfFamily() {
-    return familyData?.members?.isNotEmpty ?? false;
+    return currentFamilyMember()?.isActive ?? false;
   }
 
   bool hasPaidAddon() {
@@ -75,7 +75,7 @@ class UserDetails {
 
   bool hasConfiguredFamily() {
     final currentUserMember = currentFamilyMember();
-    if (currentUserMember == null) {
+    if (currentUserMember == null || !currentUserMember.isActive) {
       return false;
     }
     if (!currentUserMember.isAdmin) {
@@ -180,6 +180,8 @@ class FamilyMember {
   bool get isActive =>
       status == FamilyMemberStatus.accepted ||
       status == FamilyMemberStatus.self;
+
+  bool get isInactive => !isActive && !isPending;
 
   factory FamilyMember.fromMap(Map<String, dynamic> map) {
     return FamilyMember(

@@ -438,7 +438,7 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
 
   Future<void> _showMemberActions(FamilyMember member) async {
     final isCurrentUser = member.email.trim() == _userDetails.email.trim();
-    if (!_isFamilyAdmin || isCurrentUser) {
+    if (!_isFamilyAdmin || isCurrentUser || member.isInactive) {
       return;
     }
 
@@ -612,11 +612,23 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
       _userDetails.familyData?.members ?? const <FamilyMember>[],
     );
     final currentEmail = _userDetails.email.trim().toLowerCase();
+    int statusPriority(FamilyMember member) {
+      if (member.isActive) {
+        return 0;
+      }
+      if (member.isPending) {
+        return 1;
+      }
+      return 2;
+    }
 
     members.sort((a, b) {
       if (a.email.trim().toLowerCase() == currentEmail) return -1;
       if (b.email.trim().toLowerCase() == currentEmail) return 1;
-      if (a.isPending != b.isPending) return a.isPending ? 1 : -1;
+      final priorityComparison = statusPriority(a).compareTo(statusPriority(b));
+      if (priorityComparison != 0) {
+        return priorityComparison;
+      }
       return a.email.compareTo(b.email);
     });
     return members;
@@ -1082,12 +1094,23 @@ class _FamilyMemberRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final isCurrentUser =
         member.email.trim().toLowerCase() == currentEmail.trim().toLowerCase();
-    final canTap = isAdminView && !isCurrentUser;
+    final isInactive = member.isInactive;
+    final canTap = isAdminView && !isCurrentUser && !isInactive;
     final backgroundColor = member.isPending
         ? colorScheme.fillMuted
-        : avatarColor ?? colorScheme.greenBase;
-    final foregroundColor =
-        member.isPending ? colorScheme.contentLight : Colors.white;
+        : isInactive
+            ? colorScheme.fillFaint
+            : avatarColor ?? colorScheme.greenBase;
+    final foregroundColor = member.isPending || isInactive
+        ? colorScheme.contentLight
+        : Colors.white;
+    final subtitle = member.isPending
+        ? l10n.pending
+        : isInactive
+            ? _statusLabel(member.status)
+            : l10n.memberStorageUsed(
+                amount: convertBytesToReadableFormat(member.usage),
+              );
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -1111,17 +1134,13 @@ class _FamilyMemberRow extends StatelessWidget {
                 children: [
                   Text(
                     member.email,
-                    style: member.isPending
+                    style: member.isPending || isInactive
                         ? textTheme.body.copyWith(color: colorScheme.textMuted)
                         : textTheme.body,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    member.isPending
-                        ? l10n.pending
-                        : l10n.memberStorageUsed(
-                            amount: convertBytesToReadableFormat(member.usage),
-                          ),
+                    subtitle,
                     style: textTheme.smallMuted,
                   ),
                 ],
@@ -1153,6 +1172,11 @@ class _FamilyMemberRow extends StatelessWidget {
       ),
     );
   }
+}
+
+String _statusLabel(FamilyMemberStatus status) {
+  final lowerCase = status.serverValue.toLowerCase();
+  return "${lowerCase[0].toUpperCase()}${lowerCase.substring(1)}";
 }
 
 class _BadgeChip extends StatelessWidget {
