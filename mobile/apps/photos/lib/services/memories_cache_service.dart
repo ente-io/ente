@@ -880,11 +880,12 @@ class MemoriesCacheService {
         context: context,
         forceCustomPageRoute: true,
       );
+      return;
     }
     await _routeToPage(
       FullScreenMemoryDataUpdater(
         initialIndex: 0,
-        memories: personMemory!.memories,
+        memories: personMemory.memories,
         child: Container(
           color: backgroundBaseDark,
           width: double.infinity,

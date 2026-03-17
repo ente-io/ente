@@ -29,6 +29,9 @@ class AppNavigationService {
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final Logger _logger = Logger("AppNavigationService");
+  // Serialize push initiation so multi-step external launches keep their
+  // intended stack order even when navigator attachment is delayed by unlock.
+  Future<void> _lastScheduledPush = Future<void>.value();
 
   NavigatorState? get navigator => navigatorKey.currentState;
 
@@ -36,23 +39,63 @@ class AppNavigationService {
   ///
   /// This waits briefly for the inner `MaterialApp` to finish rebuilding during
   /// resume/unlock so callers from widget and notification handlers do not have
-  /// to coordinate navigator readiness themselves.
+  /// to coordinate navigator readiness themselves. Push requests are scheduled
+  /// in call order so stacked routes do not race each other during resume.
   Future<T?> pushPage<T extends Object>(
     Widget page, {
     bool forceCustomPageRoute = false,
-  }) async {
-    final pageName = page.runtimeType.toString();
-    _logger.info(
-      "Inner navigator push requested: page=$pageName forceCustomPageRoute=$forceCustomPageRoute",
-    );
-    final navigator = await _waitForNavigator();
-    if (navigator == null) {
-      _logger
-          .warning("Skipping navigation because app navigator is unavailable");
-      return null;
-    }
+  }) {
+    final pushResult = Completer<T?>();
+    final scheduledPush = _lastScheduledPush
+        .catchError((Object _, StackTrace __) {})
+        .then((_) async {
+      final navigator = await _waitForNavigator();
+      if (navigator == null) {
+        _logger.warning(
+          "Skipping navigation because app navigator is unavailable",
+        );
+        if (!pushResult.isCompleted) {
+          pushResult.complete(null);
+        }
+        return;
+      }
 
-    _logger.info("Inner navigator ready; pushing page=$pageName");
+      try {
+        final routeFuture = _pushWithNavigator<T>(
+          navigator,
+          page,
+          forceCustomPageRoute: forceCustomPageRoute,
+        );
+        unawaited(
+          routeFuture.then(
+            (value) {
+              if (!pushResult.isCompleted) {
+                pushResult.complete(value);
+              }
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (!pushResult.isCompleted) {
+                pushResult.completeError(error, stackTrace);
+              }
+            },
+          ),
+        );
+      } catch (error, stackTrace) {
+        if (!pushResult.isCompleted) {
+          pushResult.completeError(error, stackTrace);
+        }
+        rethrow;
+      }
+    });
+    _lastScheduledPush = scheduledPush.catchError((Object _, StackTrace __) {});
+    return pushResult.future;
+  }
+
+  Future<T?> _pushWithNavigator<T extends Object>(
+    NavigatorState navigator,
+    Widget page, {
+    bool forceCustomPageRoute = false,
+  }) {
     if (Platform.isAndroid || forceCustomPageRoute) {
       return navigator.push(
         _buildPageRoute(page),
@@ -69,20 +112,17 @@ class AppNavigationService {
   }
 
   /// The inner navigator can be temporarily unavailable while Flutter is
-  /// restoring the app tree after resume or unlock. Poll a small number of
-  /// frames so external launch handlers can still navigate deterministically.
+  /// restoring the app tree after resume or unlock. Wait on frame boundaries
+  /// so external launch handlers can navigate after the app tree is rebuilt.
   Future<NavigatorState?> _waitForNavigator() async {
-    for (var attempt = 0; attempt < 60; attempt++) {
+    final binding = WidgetsBinding.instance;
+    for (var attempt = 0; attempt < 120; attempt++) {
       final currentNavigator = navigator;
       if (currentNavigator != null) {
-        if (attempt > 0) {
-          _logger.info(
-            "Inner navigator became available after ${attempt + 1} checks",
-          );
-        }
         return currentNavigator;
       }
-      await Future<void>.delayed(const Duration(milliseconds: 16));
+      binding.ensureVisualUpdate();
+      await binding.endOfFrame;
     }
     _logger.warning("Inner navigator did not become ready in time");
     return null;
