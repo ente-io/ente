@@ -16,6 +16,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import {
     createDocumentIcon,
     createDocumentIconConfig,
@@ -96,6 +97,7 @@ interface CreateItemDialogProps {
     onUploadFile?: (file: File, collectionID: number) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
     defaultCollectionID?: number | null;
+    initialFile?: File | null;
     editItem?: {
         id: number;
         type: LockerItemType;
@@ -112,6 +114,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onUploadFile,
     onCreateCollection,
     defaultCollectionID,
+    initialFile,
     editItem,
 }) => {
     const isEditMode = !!editItem;
@@ -168,7 +171,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             return;
         }
 
-        setSelectedOption(editItem?.type ?? null);
+        setSelectedOption(editItem?.type ?? (initialFile ? "file" : null));
         setSelectedCollectionID(
             isEditMode
                 ? editCollectionID
@@ -176,12 +179,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
-        setSelectedFile(null);
+        setSelectedFile(initialFile ?? null);
         setError(null);
     }, [
         defaultCollectionID,
         editCollectionID,
         editItem,
+        initialFile,
         isEditMode,
         normalizeSelectedCollectionID,
         open,
@@ -303,8 +307,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             slotProps={{
                 paper: {
                     sx: {
+                        ...lockerDialogPaperSx,
                         maxHeight: "min(720px, 90vh)",
-                        borderRadius: "16px",
                         width: "min(100%, 520px)",
                     },
                 },
