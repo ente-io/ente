@@ -1106,7 +1106,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!mounted) return;
     final String? payload = notificationResponse.payload;
     if (payload != null) {
-      _logger.info("Notification tap entered: payload=$payload");
       debugPrint('notification payload: $payload');
       final uri = Uri.tryParse(payload);
       if (uri != null &&
@@ -1126,9 +1125,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           if (!mounted || !canOpenRitual) {
             return;
           }
-          _logger.info(
-            "Notification tap: pushing ritual page for ritualId=$ritualId",
-          );
           // Ensure the camera is stacked on top of the ritual page so the user
           // lands on the ritual details after adding photos via a notification.
           // ignore: unawaited_futures
@@ -1137,9 +1133,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           );
         }
         if (!canOpenRitual) return;
-        _logger.info(
-          "Notification tap: pushing ritual camera page for ritualId=$ritualId albumId=$albumId",
-        );
         // ignore: unawaited_futures
         AppNavigationService.instance.pushPage(
           RitualCameraPage(
@@ -1154,7 +1147,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
         final target = FeedNavigationTarget.fromUri(uri);
-        _logger.info("Notification tap: pushing feed screen target=$target");
         // ignore: unawaited_futures
         AppNavigationService.instance.pushPage(
           FeedScreen(
@@ -1164,21 +1156,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {
-        _logger.info("On this day notification received");
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory();
       } else if (payload.toLowerCase().contains("birthday")) {
-        _logger.info("Birthday notification received");
         final personID = payload.substring("birthday_".length);
         // ignore: unawaited_futures
         memoriesCacheService.goToPersonMemory(personID);
       } else {
-        _logger.info("Album notification received");
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
-          _logger.info(
-            "Notification tap: pushing collection page for collectionId=$collectionID",
-          );
           final collection = CollectionsService.instance
               .getCollectionByID(int.parse(collectionID))!;
           final thumbnail =

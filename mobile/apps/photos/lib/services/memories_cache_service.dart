@@ -765,9 +765,6 @@ class MemoriesCacheService {
     int generatedFileID, {
     BuildContext? context,
   }) async {
-    _logger.info(
-      "Memory routing entered for generatedFileID=$generatedFileID contextProvided=${context != null}",
-    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     int memoryIdx = 0;
@@ -791,9 +788,6 @@ class MemoriesCacheService {
       );
       return;
     }
-    _logger.info(
-      "Memory routing resolved: generatedFileID=$generatedFileID memoryIdx=$memoryIdx fileIdx=$fileIdx",
-    );
     await _routeToPage(
       AllMemoriesPage(
         allMemories: _cachedMemories!.map((e) => e.memories).toList(),
@@ -808,9 +802,6 @@ class MemoriesCacheService {
   }
 
   Future<void> goToOnThisDayMemory({BuildContext? context}) async {
-    _logger.info(
-      "On-this-day routing entered: contextProvided=${context != null}",
-    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     int memoryIdx = 0;
@@ -829,7 +820,6 @@ class MemoriesCacheService {
       );
       return;
     }
-    _logger.info("On-this-day routing resolved: memoryIdx=$memoryIdx");
     await _routeToPage(
       AllMemoriesPage(
         allMemories: allMemories.map((e) => e.memories).toList(),
@@ -847,19 +837,10 @@ class MemoriesCacheService {
     String personID, {
     BuildContext? context,
   }) async {
-    _logger.info(
-      "Person memory routing entered: personID=$personID contextProvided=${context != null}",
-    );
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     final personMemories = <PeopleMemory>[];
     for (final memory in allMemories) {
-      if (memory is PeopleMemory) {
-        _logger.info("Found person memory");
-        _logger.info("Person memory ID: ${memory.id}");
-        _logger.info("Person memory personID: ${memory.personID}");
-        _logger.info("Person memory isBirthday: ${memory.isBirthday}");
-      }
       if (memory is PeopleMemory &&
           (memory.isBirthday ?? false) &&
           memory.personID == personID) {
@@ -899,9 +880,7 @@ class MemoriesCacheService {
         context: context,
         forceCustomPageRoute: true,
       );
-      _logger.info("Person memory routing fell back to PeoplePage");
     }
-    _logger.info("Routing to the birthday memory");
     await _routeToPage(
       FullScreenMemoryDataUpdater(
         initialIndex: 0,
@@ -923,9 +902,6 @@ class MemoriesCacheService {
     BuildContext? context,
     bool forceCustomPageRoute = false,
   }) async {
-    _logger.info(
-      "Routing page=${page.runtimeType} via ${context != null ? "context" : "inner_app_navigator"} forceCustomPageRoute=$forceCustomPageRoute",
-    );
     if (context != null) {
       await routeToPage(
         context,

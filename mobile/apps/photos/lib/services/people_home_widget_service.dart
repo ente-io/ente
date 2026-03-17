@@ -156,9 +156,6 @@ class PeopleHomeWidgetService {
     int fileId,
     String personId,
   ) async {
-    _logger.info(
-      "People widget launch entered: fileId=$fileId personId=$personId",
-    );
     final file = await FilesDB.instance.getFile(fileId);
     if (file == null) {
       _logger.warning("Cannot launch widget: file with ID $fileId not found");
@@ -172,7 +169,6 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    _logger.info("People widget: pushing people page for personId=$personId");
     AppNavigationService.instance
         .pushPage(
           PeoplePage(
@@ -188,9 +184,6 @@ class PeopleHomeWidgetService {
       sortOnTime: false,
     );
 
-    _logger.info(
-      "People widget: pushing detail page for personId=$personId fileId=$fileId",
-    );
     AppNavigationService.instance
         .pushPage(
           DetailPage(

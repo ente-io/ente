@@ -96,19 +96,12 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   Future<void> _checkForWidgetLaunch() async {
-    _logger.info("Initializing widget launch handling");
     await HomeWidgetService.instance.setAppGroup();
     await hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
-      (uri) {
-        _logger.info("Initial widget launch URI received: $uri");
-        return HomeWidgetService.instance.onLaunchFromWidget(uri);
-      },
+      (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri),
     );
     _widgetClickedSubscription = hw.HomeWidget.widgetClicked.listen(
-      (uri) {
-        _logger.info("Widget click stream URI received: $uri");
-        unawaited(HomeWidgetService.instance.onLaunchFromWidget(uri));
-      },
+      (uri) => unawaited(HomeWidgetService.instance.onLaunchFromWidget(uri)),
     );
   }
 

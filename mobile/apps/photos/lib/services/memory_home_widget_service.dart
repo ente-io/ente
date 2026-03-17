@@ -148,7 +148,6 @@ class MemoryHomeWidgetService {
   }
 
   Future<void> onLaunchFromWidget(int generatedId) async {
-    _logger.info("Memory widget launch entered: generatedId=$generatedId");
     memoriesCacheService.goToMemoryFromGeneratedFileID(generatedId).ignore();
     await _refreshMemoriesWidget();
   }

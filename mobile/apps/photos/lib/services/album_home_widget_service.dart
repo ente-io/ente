@@ -164,9 +164,6 @@ class AlbumHomeWidgetService {
     int fileId,
     int collectionId,
   ) async {
-    _logger.info(
-      "Album widget launch entered: fileId=$fileId collectionId=$collectionId",
-    );
     final collection =
         CollectionsService.instance.getCollectionByID(collectionId);
     if (collection == null) {
@@ -178,9 +175,6 @@ class AlbumHomeWidgetService {
 
     // First navigate to the collection page
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    _logger.info(
-      "Album widget: pushing collection page for collectionId=$collectionId",
-    );
     AppNavigationService.instance
         .pushPage(
           CollectionPage(
@@ -198,9 +192,6 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    _logger.info(
-      "Album widget: pushing detail page for collectionId=$collectionId fileId=$fileId",
-    );
     AppNavigationService.instance
         .pushPage(
           DetailPage(
