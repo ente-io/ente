@@ -356,22 +356,14 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
             },
           ),
           const SizedBox(height: 12),
-          ButtonWidgetV2(
-            buttonType: ButtonTypeV2.tertiaryCritical,
-            labelText: l10n.closeFamilyPlan,
-            onTap: () async {
-              unawaited(_confirmCloseFamily());
-            },
-          ),
         ],
-        if (_remainingSlots == 0)
-          ButtonWidgetV2(
-            buttonType: ButtonTypeV2.tertiaryCritical,
-            labelText: l10n.closeFamilyPlan,
-            onTap: () async {
-              unawaited(_confirmCloseFamily());
-            },
-          ),
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.tertiaryCritical,
+          labelText: l10n.closeFamilyPlan,
+          onTap: () async {
+            unawaited(_confirmCloseFamily());
+          },
+        ),
         const SizedBox(height: 16),
       ],
     );
