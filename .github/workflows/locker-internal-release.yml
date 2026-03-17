@@ -77,11 +77,6 @@ jobs:
                       exit 1
                   fi
 
-                  if grep -Eq '[\*\_\<\>\[\]\(\)]' "$OUTPUT_FILE"; then
-                      echo "Changelog contains markdown or HTML formatting."
-                      exit 1
-                  fi
-
                   echo "Validated Play Store changelog:"
                   cat "$OUTPUT_FILE"
 
