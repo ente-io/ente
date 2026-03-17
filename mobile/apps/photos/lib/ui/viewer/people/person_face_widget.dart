@@ -147,20 +147,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     _disposed = true;
     _upgradeGeneration += 1;
     _cancelVisibleTaskTouchTimer();
-    if (_faceCropFileId != null) {
-      if (widget.useFullFile) {
-        checkStopTryingToGenerateFaceThumbnails(
-          _faceCropFileId!,
-          useFullFile: true,
-        );
-      }
-      if (_fallbackEverUsed || _shouldUseProgressiveStrategy) {
-        checkStopTryingToGenerateFaceThumbnails(
-          _faceCropFileId!,
-          useFullFile: false,
-        );
-      }
-    }
     if (_requestedThumbnailPreviewFile != null) {
       removePendingGetThumbnailRequestIfAny(_requestedThumbnailPreviewFile!);
     }
@@ -481,13 +467,47 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     return currentFaceID == null || currentFaceID == faceSource.face.faceID;
   }
 
+  Future<bool> _canReuseResolvedFaceSource(
+    PersonFaceSource faceSource,
+    String personOrClusterId, {
+    bool clearSharedCache = false,
+  }) async {
+    if (!_canUseResolvedFaceSource(faceSource, personOrClusterId)) {
+      return false;
+    }
+    if (isOfflineMode) {
+      return true;
+    }
+
+    final fileId = faceSource.file.uploadedFileID ?? faceSource.resolvedFileId;
+
+    final hiddenFileIDs = await SearchService.instance.getHiddenFiles().then(
+          (files) =>
+              files.map((file) => file.uploadedFileID).whereType<int>().toSet(),
+        );
+    if (!hiddenFileIDs.contains(fileId)) {
+      return true;
+    }
+
+    _logger.info(
+      'Skipping cached face source for hidden file ID $fileId for person: ${widget.personId} or cluster: ${widget.clusterID}',
+    );
+    if (identical(_resolvedFaceSource, faceSource)) {
+      _resolvedFaceSource = null;
+    }
+    if (clearSharedCache) {
+      removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
+    }
+    return false;
+  }
+
   Future<PersonFaceSource?> _resolveFaceSource({
     bool notifyOnError = true,
   }) async {
     final personOrClusterId = widget.personId ?? widget.clusterID!;
 
     if (widget.initialFaceSource != null &&
-        _canUseResolvedFaceSource(
+        await _canReuseResolvedFaceSource(
           widget.initialFaceSource!,
           personOrClusterId,
         )) {
@@ -500,19 +520,29 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     }
 
     if (_resolvedFaceSource != null) {
-      return _resolvedFaceSource;
+      if (await _canReuseResolvedFaceSource(
+        _resolvedFaceSource!,
+        personOrClusterId,
+      )) {
+        return _resolvedFaceSource;
+      }
     }
 
     final cachedFaceSource =
         checkCachedFaceSourceForPersonOrClusterID(personOrClusterId);
-    if (cachedFaceSource != null &&
-        _canUseResolvedFaceSource(cachedFaceSource, personOrClusterId)) {
-      _applyResolvedFaceSource(cachedFaceSource);
-      await cacheFaceIdForPersonOrClusterIfNeeded(
+    if (cachedFaceSource != null) {
+      if (await _canReuseResolvedFaceSource(
+        cachedFaceSource,
         personOrClusterId,
-        cachedFaceSource.face.faceID,
-      );
-      return cachedFaceSource;
+        clearSharedCache: true,
+      )) {
+        _applyResolvedFaceSource(cachedFaceSource);
+        await cacheFaceIdForPersonOrClusterIfNeeded(
+          personOrClusterId,
+          cachedFaceSource.face.faceID,
+        );
+        return cachedFaceSource;
+      }
     }
 
     try {

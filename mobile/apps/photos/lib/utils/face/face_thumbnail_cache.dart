@@ -80,6 +80,10 @@ PersonFaceSource? checkCachedFaceSourceForPersonOrClusterID(
   return _personOrClusterIdToFaceSourceCache.get(personOrClusterID);
 }
 
+void removeCachedFaceSourceForPersonOrClusterID(String personOrClusterID) {
+  _personOrClusterIdToFaceSourceCache.remove(personOrClusterID);
+}
+
 void cacheFaceSourceForPersonOrClusterID(
   String personOrClusterID,
   PersonFaceSource faceSource,
