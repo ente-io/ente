@@ -89,8 +89,9 @@ class FamilyService {
     return refreshUserDetails();
   }
 
-  Future<void> leaveFamily() async {
+  Future<UserDetails> leaveFamily() async {
     await UserService.instance.leaveFamilyPlan();
+    return refreshUserDetails();
   }
 
   Future<void> closeFamily(UserDetails userDetails) async {

@@ -277,10 +277,38 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     }
   }
 
+  Future<void> _onLeaveFamily(UserDetails userDetails) async {
+    _userDetails = userDetails;
+    _currentSubscription = userDetails.subscription;
+    _hasActiveSubscription = _currentSubscription!.isValid();
+    _hideCurrentPlanSelection =
+        _currentSubscription?.attributes?.isCancelled ?? false;
+    showYearlyPlan = _currentSubscription!.isYearlyPlan();
+    _isActiveStripeSubscriber =
+        _currentSubscription!.paymentProvider == stripe &&
+            _currentSubscription!.isValid();
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _filterStorePlansForUi();
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to refresh billing plans after leaving family",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   Widget _getBody() {
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        return ChildSubscriptionWidget(
+          userDetails: _userDetails,
+          onLeaveFamily: _onLeaveFamily,
+        );
       } else {
         return _buildPlans();
       }

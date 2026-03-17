@@ -87,6 +87,30 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     });
   }
 
+  Future<void> _onLeaveFamily(UserDetails userDetails) async {
+    _userDetails = userDetails;
+    _currentSubscription = userDetails.subscription;
+    _showYearlyPlan = _currentSubscription!.isYearlyPlan();
+    _hideCurrentPlanSelection =
+        (_currentSubscription?.attributes?.isCancelled ?? false) &&
+            userDetails.hasPaidAddon();
+    _hasActiveSubscription = _currentSubscription!.isValid();
+    _isStripeSubscriber = _currentSubscription!.paymentProvider == stripe;
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _filterStripeForUI();
+    } catch (error, stackTrace) {
+      logger.warning(
+        "Failed to refresh billing plans after leaving family",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   // _filterPlansForUI is used for initializing initState & plan toggle states
   Future<void> _filterStripeForUI() async {
     final billingPlans = await _billingService.getBillingPlans();
@@ -197,7 +221,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        return ChildSubscriptionWidget(
+          userDetails: _userDetails,
+          onLeaveFamily: _onLeaveFamily,
+        );
       } else {
         return _buildPlans();
       }
