@@ -95,12 +95,14 @@ class PetClusterFeedbackService {
     String sourceId,
     String targetId,
   ) async {
+    // Read source species before deleting the summary
+    final sourceSummary = await _db.getAllPetClusterSummary();
+    final sourceSpecies = sourceSummary[sourceId]?.$2;
+
     await _db.reassignAllPetFacesInCluster(sourceId, targetId);
     await _db.deletePetClusterSummary(sourceId);
 
     // Delete source centroid from vector DB
-    final sourceSummary = await _db.getAllPetClusterSummary();
-    final sourceSpecies = sourceSummary[sourceId]?.$2;
     if (sourceSpecies != null) {
       final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
         species: sourceSpecies,

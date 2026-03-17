@@ -169,7 +169,7 @@ class PetClusteringService {
       // Incremental mode — read centroids from vector DB
       final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
         species: species,
-        offline: isOfflineMode,
+        offline: isOffline,
       );
       final sqlDb = await mlDataDB.asyncDB;
       final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
@@ -277,7 +277,7 @@ class PetClusteringService {
     if (clusterCentroids.isNotEmpty) {
       final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
         species: species,
-        offline: isOfflineMode,
+        offline: isOffline,
       );
       final sqlDb = await mlDataDB.asyncDB;
       final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
