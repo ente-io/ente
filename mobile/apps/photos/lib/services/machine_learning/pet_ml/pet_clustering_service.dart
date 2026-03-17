@@ -7,7 +7,6 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
-import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/src/rust/api/ml_indexing_api.dart";
 import "package:uuid/uuid.dart";
 
