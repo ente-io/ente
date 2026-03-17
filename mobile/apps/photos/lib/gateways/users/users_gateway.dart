@@ -256,7 +256,7 @@ class UsersGateway {
 
   /// Update a family member's storage limit.
   ///
-  /// Endpoint: PUT /family/modify-storage
+  /// Endpoint: POST /family/modify-storage
   Future<void> updateFamilyMemberStorage({
     required String id,
     int? storageLimit,
