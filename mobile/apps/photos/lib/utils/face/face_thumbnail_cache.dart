@@ -22,6 +22,7 @@ import "package:photos/utils/thumbnail_util.dart";
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
+const _kFaceGenerationTaskTimeout = Duration(minutes: 5);
 final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(100);
 final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(100);
 final LRUMap<int, ({int width, int height})>
@@ -33,12 +34,12 @@ final LRUMap<String, PersonFaceSource> _personOrClusterIdToFaceSourceCache =
 
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
-  taskTimeout: const Duration(minutes: 1),
+  taskTimeout: _kFaceGenerationTaskTimeout,
   maxQueueSize: 100,
 );
 TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
-  taskTimeout: const Duration(minutes: 1),
+  taskTimeout: _kFaceGenerationTaskTimeout,
   maxQueueSize: 100,
 );
 
@@ -351,6 +352,18 @@ void checkStopTryingToGenerateFaceThumbnails(
     _queueFullFileFaceGenerations.removeTask(taskId);
   } else {
     _queueThumbnailFaceGenerations.removeTask(taskId);
+  }
+}
+
+bool touchPendingFaceThumbnailGeneration(
+  int fileID, {
+  bool useFullFile = true,
+}) {
+  final taskId = [fileID, useFullFile ? "-full" : "-thumbnail"].join();
+  if (useFullFile) {
+    return _queueFullFileFaceGenerations.touchTask(taskId);
+  } else {
+    return _queueThumbnailFaceGenerations.touchTask(taskId);
   }
 }
 

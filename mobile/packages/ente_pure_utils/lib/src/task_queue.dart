@@ -16,9 +16,11 @@ class _QueueItem<T> {
         counter = 1,
         completer = Completer<void>();
 
-  void updateTimestamp() {
+  void updateTimestamp({bool incrementCounter = true}) {
     lastUpdated = DateTime.now().millisecondsSinceEpoch;
-    counter++;
+    if (incrementCounter) {
+      counter++;
+    }
   }
 
   bool isTimedOut(Duration timeout) {
@@ -115,6 +117,21 @@ class TaskQueue<T> {
 
       return queueItem.future;
     }
+  }
+
+  /// Refresh a pending task so it stays near the front of the queue.
+  ///
+  /// Returns true only when the task is still pending. Running or missing
+  /// tasks cannot be reprioritized here.
+  bool touchTask(T id) {
+    final item = _taskMap[id];
+    if (item == null) {
+      return false;
+    }
+    _priorityQueue.remove(item);
+    item.updateTimestamp(incrementCounter: false);
+    _priorityQueue.add(item);
+    return true;
   }
 
   /// Enforce the maximum queue size by discarding older tasks

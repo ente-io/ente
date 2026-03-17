@@ -23,12 +23,14 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/face/face_thumbnail_cache.dart';
 import 'package:photos/utils/face/face_thumbnail_quality.dart';
 import 'package:photos/utils/thumbnail_util.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 final _logger = Logger('PersonFaceWidget');
 const _kMinUnnamedClusterSizeForProgressiveUpgrade = 5;
 const _kProgressiveUpgradeUpscaleThreshold = 1.35;
 const _kProgressiveUpgradeMinImprovementRatio = 1.2;
 const _kProgressiveUpgradeIdleWaitBudget = Duration(seconds: 2);
+const _kVisibleTaskTouchInterval = Duration(seconds: 20);
 
 class _PersonFaceLoadResult {
   final Uint8List? faceCropBytes;
@@ -117,6 +119,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   bool _disposed = false;
   int _upgradeGeneration = 0;
   EnteFile? _requestedThumbnailPreviewFile;
+  bool _isVisible = false;
+  Timer? _visibleTaskTouchTimer;
 
   static final LRUMap<String, int> _clusterToFileCountCache = LRUMap(1000);
 
@@ -142,6 +146,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   void dispose() {
     _disposed = true;
     _upgradeGeneration += 1;
+    _cancelVisibleTaskTouchTimer();
     if (_faceCropFileId != null) {
       if (widget.useFullFile) {
         checkStopTryingToGenerateFaceThumbnails(
@@ -166,51 +171,57 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return FutureBuilder<_PersonFaceLoadResult?>(
-      future: _faceLoadFuture,
-      builder: (context, snapshot) {
-        final loadResult = snapshot.data;
-        if (loadResult?.faceCropBytes != null) {
-          return _buildFaceImage(
-            _buildImageFromBytes(loadResult!.faceCropBytes!),
-          );
-        }
-        if (loadResult?.thumbnailBytes != null &&
-            loadResult?.faceSource != null) {
-          final previewDimensions = _previewImageDimensionsForSource(
-            loadResult!.faceSource!,
-          );
-          if (previewDimensions != null) {
+    return VisibilityDetector(
+      key: ValueKey(
+        'person_face_visibility_${_visibilityKeySuffix()}_${identityHashCode(this)}',
+      ),
+      onVisibilityChanged: _handleVisibilityChanged,
+      child: FutureBuilder<_PersonFaceLoadResult?>(
+        future: _faceLoadFuture,
+        builder: (context, snapshot) {
+          final loadResult = snapshot.data;
+          if (loadResult?.faceCropBytes != null) {
             return _buildFaceImage(
-              _DirectThumbnailFacePreview(
-                thumbnailBytes: loadResult.thumbnailBytes!,
-                faceBox: loadResult.faceSource!.face.detection.box,
-                imageDimensions: previewDimensions,
-              ),
+              _buildImageFromBytes(loadResult!.faceCropBytes!),
             );
           }
-        }
-        if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.connectionState == ConnectionState.active) {
-          return EnteLoadingWidget(
-            color: getEnteColorScheme(context).fillMuted,
+          if (loadResult?.thumbnailBytes != null &&
+              loadResult?.faceSource != null) {
+            final previewDimensions = _previewImageDimensionsForSource(
+              loadResult!.faceSource!,
+            );
+            if (previewDimensions != null) {
+              return _buildFaceImage(
+                _DirectThumbnailFacePreview(
+                  thumbnailBytes: loadResult.thumbnailBytes!,
+                  faceBox: loadResult.faceSource!.face.detection.box,
+                  imageDimensions: previewDimensions,
+                ),
+              );
+            }
+          }
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.connectionState == ConnectionState.active) {
+            return EnteLoadingWidget(
+              color: getEnteColorScheme(context).fillMuted,
+            );
+          }
+          if (snapshot.hasError) {
+            _logger.severe(
+              'Error getting cover face for person',
+              snapshot.error,
+              snapshot.stackTrace,
+            );
+          } else {
+            _logger.severe(
+              'No cover face found for person or cluster.',
+            );
+          }
+          return _EmptyPersonThumbnail(
+            initial: isPerson ? (loadResult?.personName ?? _personName) : null,
           );
-        }
-        if (snapshot.hasError) {
-          _logger.severe(
-            'Error getting cover face for person',
-            snapshot.error,
-            snapshot.stackTrace,
-          );
-        } else {
-          _logger.severe(
-            'No cover face found for person or cluster.',
-          );
-        }
-        return _EmptyPersonThumbnail(
-          initial: isPerson ? (loadResult?.personName ?? _personName) : null,
-        );
-      },
+        },
+      ),
     );
   }
 
@@ -412,6 +423,51 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       widget.personId ?? widget.clusterID!,
       faceSource,
     );
+    _touchVisibleFaceTasks();
+  }
+
+  void _handleVisibilityChanged(VisibilityInfo info) {
+    final nowVisible = info.visibleFraction >= 0.01;
+    if (nowVisible == _isVisible) {
+      return;
+    }
+    _isVisible = nowVisible;
+    if (_isVisible) {
+      _touchVisibleFaceTasks();
+      _visibleTaskTouchTimer = Timer.periodic(
+        _kVisibleTaskTouchInterval,
+        (_) => _touchVisibleFaceTasks(),
+      );
+    } else {
+      _cancelVisibleTaskTouchTimer();
+    }
+  }
+
+  void _touchVisibleFaceTasks() {
+    if (!_isVisible) {
+      return;
+    }
+    final fileId = _faceCropFileId;
+    if (fileId == null) {
+      return;
+    }
+    touchPendingFaceThumbnailGeneration(fileId, useFullFile: false);
+    if (widget.useFullFile) {
+      touchPendingFaceThumbnailGeneration(fileId, useFullFile: true);
+    }
+  }
+
+  void _cancelVisibleTaskTouchTimer() {
+    _visibleTaskTouchTimer?.cancel();
+    _visibleTaskTouchTimer = null;
+  }
+
+  String _visibilityKeySuffix() {
+    final widgetKey = widget.key;
+    if (widgetKey is ValueKey) {
+      return widgetKey.value.toString();
+    }
+    return widget.personId ?? widget.clusterID ?? widgetKey.toString();
   }
 
   bool _canUseResolvedFaceSource(

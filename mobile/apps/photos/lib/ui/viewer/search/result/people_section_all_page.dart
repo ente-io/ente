@@ -32,6 +32,7 @@ import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/ui/viewer/people/pinned_person_badge.dart";
+import "package:photos/ui/viewer/people/visible_face_source_prefetch.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/utils/local_settings.dart";
@@ -687,6 +688,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           }
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
+          final visibleFacePrefetchCount = crossAxisCount * 6;
+          final visibleFaceLeadingBuffer = crossAxisCount;
 
           final itemSize = (screenWidth -
                   ((horizontalEdgePadding * 2) +
@@ -719,18 +722,24 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     childCount: searchResults.length,
                     (context, index) {
                       final result = searchResults[index];
-                      return !widget.namedOnly
-                          ? SelectablePersonSearchExample(
-                              searchResult: result,
-                              size: itemSize,
-                              selectedPeople: widget.selectedPeople!,
-                              isDefaultFace: defaultFaces.contains(result),
-                            )
-                          : PersonSearchExample(
-                              searchResult: result,
-                              size: itemSize,
-                              selectedPeople: widget.selectedPeople!,
-                            );
+                      return VisibleFaceSourcePrefetch(
+                        results: searchResults,
+                        index: index,
+                        prefetchCount: visibleFacePrefetchCount,
+                        leadingBuffer: visibleFaceLeadingBuffer,
+                        child: !widget.namedOnly
+                            ? SelectablePersonSearchExample(
+                                searchResult: result,
+                                size: itemSize,
+                                selectedPeople: widget.selectedPeople!,
+                                isDefaultFace: defaultFaces.contains(result),
+                              )
+                            : PersonSearchExample(
+                                searchResult: result,
+                                size: itemSize,
+                                selectedPeople: widget.selectedPeople!,
+                              ),
+                      );
                     },
                   ),
                 ),
@@ -795,18 +804,24 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     delegate: SliverChildBuilderDelegate(
                       childCount: filteredNormalFaces.length,
                       (context, index) {
-                        return !widget.namedOnly
-                            ? SelectablePersonSearchExample(
-                                searchResult: filteredNormalFaces[index],
-                                size: itemSize,
-                                selectedPeople: widget.selectedPeople!,
-                                isDefaultFace: true,
-                              )
-                            : PersonSearchExample(
-                                searchResult: filteredNormalFaces[index],
-                                size: itemSize,
-                                selectedPeople: widget.selectedPeople!,
-                              );
+                        return VisibleFaceSourcePrefetch(
+                          results: filteredNormalFaces,
+                          index: index,
+                          prefetchCount: visibleFacePrefetchCount,
+                          leadingBuffer: visibleFaceLeadingBuffer,
+                          child: !widget.namedOnly
+                              ? SelectablePersonSearchExample(
+                                  searchResult: filteredNormalFaces[index],
+                                  size: itemSize,
+                                  selectedPeople: widget.selectedPeople!,
+                                  isDefaultFace: true,
+                                )
+                              : PersonSearchExample(
+                                  searchResult: filteredNormalFaces[index],
+                                  size: itemSize,
+                                  selectedPeople: widget.selectedPeople!,
+                                ),
+                        );
                       },
                     ),
                   ),
@@ -837,18 +852,24 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       delegate: SliverChildBuilderDelegate(
                         childCount: filteredExtraFaces.length,
                         (context, index) {
-                          return !widget.namedOnly
-                              ? SelectablePersonSearchExample(
-                                  searchResult: filteredExtraFaces[index],
-                                  size: itemSize,
-                                  selectedPeople: widget.selectedPeople!,
-                                  isDefaultFace: false,
-                                )
-                              : PersonSearchExample(
-                                  searchResult: filteredExtraFaces[index],
-                                  size: itemSize,
-                                  selectedPeople: widget.selectedPeople!,
-                                );
+                          return VisibleFaceSourcePrefetch(
+                            results: filteredExtraFaces,
+                            index: index,
+                            prefetchCount: visibleFacePrefetchCount,
+                            leadingBuffer: visibleFaceLeadingBuffer,
+                            child: !widget.namedOnly
+                                ? SelectablePersonSearchExample(
+                                    searchResult: filteredExtraFaces[index],
+                                    size: itemSize,
+                                    selectedPeople: widget.selectedPeople!,
+                                    isDefaultFace: false,
+                                  )
+                                : PersonSearchExample(
+                                    searchResult: filteredExtraFaces[index],
+                                    size: itemSize,
+                                    selectedPeople: widget.selectedPeople!,
+                                  ),
+                          );
                         },
                       ),
                     ),

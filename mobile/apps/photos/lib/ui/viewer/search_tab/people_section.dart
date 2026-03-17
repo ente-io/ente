@@ -23,6 +23,7 @@ import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/ui/viewer/people/person_face_widget.dart';
+import "package:photos/ui/viewer/people/visible_face_source_prefetch.dart";
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
@@ -172,6 +173,8 @@ class SearchExampleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const visibleFacePrefetchCount = 12;
+    const visibleFaceLeadingBuffer = 2;
     return SizedBox(
       height: 128,
       child: ListView.separated(
@@ -180,9 +183,15 @@ class SearchExampleRow extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: examples.length,
         itemBuilder: (context, index) {
-          return PersonSearchExample(
-            searchResult: examples[index],
-            selectedPeople: null,
+          return VisibleFaceSourcePrefetch(
+            results: examples,
+            index: index,
+            prefetchCount: visibleFacePrefetchCount,
+            leadingBuffer: visibleFaceLeadingBuffer,
+            child: PersonSearchExample(
+              searchResult: examples[index],
+              selectedPeople: null,
+            ),
           );
         },
         separatorBuilder: (context, index) => const SizedBox(width: 3),

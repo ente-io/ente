@@ -73,6 +73,7 @@ class SearchService {
   Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
   Future<List<EnteFile>>? _cachedFilesForGenericGallery;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
+  final Set<String> _faceSourcePrefetchInFlight = {};
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -202,23 +203,68 @@ class SearchService {
   Future<void> _enrichInitialFaceSources(
     List<GenericSearchResult> results,
   ) async {
-    final resultsToPrefetch = results.take(_initialFaceSourcePrefetchCount);
-    await Future.wait(
-      resultsToPrefetch.map((result) async {
-        try {
-          final source = await _tryBuildInitialPersonFaceSource(result);
-          if (source != null) {
-            result.params[kPersonFaceSource] = source;
-          }
-        } catch (e, s) {
-          _logger.fine(
-            "Failed to prefetch initial face source for ${result.params[kPersonParamID]}",
-            e,
-            s,
-          );
-        }
-      }),
+    await prefetchFaceSourcesInWindow(
+      results,
+      startIndex: 0,
+      count: _initialFaceSourcePrefetchCount,
     );
+  }
+
+  Future<void> prefetchFaceSourcesInWindow(
+    List<GenericSearchResult> results, {
+    required int startIndex,
+    int count = _initialFaceSourcePrefetchCount,
+    int leadingBuffer = 0,
+  }) async {
+    if (results.isEmpty || count <= 0) {
+      return;
+    }
+    final safeStart = max(0, startIndex - leadingBuffer);
+    final safeEnd = min(results.length, safeStart + count);
+    if (safeStart >= safeEnd) {
+      return;
+    }
+    await Future.wait(
+      results.sublist(safeStart, safeEnd).map(_prefetchFaceSourceIfNeeded),
+    );
+  }
+
+  Future<void> _prefetchFaceSourceIfNeeded(
+    GenericSearchResult result,
+  ) async {
+    if (result.params[kPersonFaceSource] != null) {
+      return;
+    }
+    final prefetchKey = _faceSourcePrefetchKey(result);
+    if (prefetchKey == null || !_faceSourcePrefetchInFlight.add(prefetchKey)) {
+      return;
+    }
+    try {
+      final source = await _tryBuildInitialPersonFaceSource(result);
+      if (source != null) {
+        result.params[kPersonFaceSource] = source;
+      }
+    } catch (e, s) {
+      _logger.fine(
+        "Failed to prefetch initial face source for ${result.params[kPersonParamID] ?? result.params[kClusterParamId]}",
+        e,
+        s,
+      );
+    } finally {
+      _faceSourcePrefetchInFlight.remove(prefetchKey);
+    }
+  }
+
+  String? _faceSourcePrefetchKey(GenericSearchResult result) {
+    final personID = result.params[kPersonParamID] as String?;
+    if (personID != null && personID.isNotEmpty) {
+      return "person:$personID";
+    }
+    final clusterID = result.params[kClusterParamId] as String?;
+    if (clusterID != null && clusterID.isNotEmpty) {
+      return "cluster:$clusterID";
+    }
+    return null;
   }
 
   Future<PersonFaceSource?> _tryBuildInitialPersonFaceSource(
