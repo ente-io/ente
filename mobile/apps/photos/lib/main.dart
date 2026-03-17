@@ -67,6 +67,7 @@ const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 28);
+const kBGProcessingTaskTimeout = Duration(seconds: 60);
 const kBGPushTimeout = Duration(seconds: 28);
 const kAndroidBackgroundTaskTimeout = Duration(hours: 1);
 const kFGTaskDeathTimeout = Duration(seconds: 5);
@@ -144,8 +145,16 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
 
 Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
   final trigger = Platform.isIOS
-      ? BackgroundTrigger.bgAppRefresh
+      ? (taskId == BgTaskUtils.iOSBackgroundProcessingTask
+          ? BackgroundTrigger.bgProcessing
+          : BackgroundTrigger.bgAppRefresh)
       : BackgroundTrigger.workmanager;
+  final budget = switch (trigger) {
+    BackgroundTrigger.bgProcessing => kBGProcessingTaskTimeout,
+    BackgroundTrigger.bgAppRefresh => kBGTaskTimeout,
+    BackgroundTrigger.workmanager => kAndroidBackgroundTaskTimeout,
+    BackgroundTrigger.remotePush => kBGPushTimeout,
+  };
   bool result = true;
   await runWithLogs(
     () async {
@@ -153,9 +162,7 @@ Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
         result = await _runBackgroundPass(
           trigger: trigger,
           taskId: taskId,
-          budget: Platform.isIOS
-              ? kBGTaskTimeout
-              : kAndroidBackgroundTaskTimeout,
+          budget: budget,
         );
       } catch (e, s) {
         result = false;
@@ -514,7 +521,7 @@ String _backgroundLogPrefix(BackgroundTrigger trigger) {
   return switch (trigger) {
     BackgroundTrigger.remotePush => "[fbg]",
     BackgroundTrigger.bgAppRefresh => "[bg-refresh]",
-    BackgroundTrigger.workmanager => "[bg]",
+    BackgroundTrigger.bgProcessing || BackgroundTrigger.workmanager => "[bg]",
   };
 }
 

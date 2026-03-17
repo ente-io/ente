@@ -1,17 +1,22 @@
 import "dart:io";
 
+import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/main.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
 
 const _kIOSBackgroundRefreshCadence = Duration(minutes: 15);
-const _kIOSBackgroundProcessingCadence = Duration(hours: 1);
+const _kIOSBackgroundProcessingContinuationDelay = Duration(seconds: 60);
+const _kIOSBackgroundProcessingMaintenanceCadence = Duration(days: 1);
+const _kDebugIOSBackgroundProcessingMaintenanceCadence = Duration(minutes: 15);
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -22,8 +27,12 @@ void callbackDispatcher() {
         Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
     try {
       BgTaskUtils.$.info('Task started $tlog');
+      final timeout = Platform.isIOS &&
+              taskName == BgTaskUtils.iOSBackgroundProcessingTask
+          ? kBGProcessingTaskTimeout
+          : (Platform.isIOS ? kBGTaskTimeout : kAndroidBackgroundTaskTimeout);
       final result = await runBackgroundTask(taskName, tlog).timeout(
-        Platform.isIOS ? kBGTaskTimeout : kAndroidBackgroundTaskTimeout,
+        timeout,
         onTimeout: () async {
           BgTaskUtils.$.warning("Task timed out: $taskName");
           await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
@@ -38,7 +47,7 @@ void callbackDispatcher() {
       return true;
     } finally {
       if (shouldRescheduleProcessingTask) {
-        await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
+        await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
           source: "callbackDispatcher:$taskName",
         );
       }
@@ -53,6 +62,12 @@ class BgTaskUtils {
   static const iOSBackgroundProcessingTask =
       "io.ente.frame.iOSBackgroundProcessing";
   static const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
+  static const iOSBackgroundProcessingReasonContinuation = "continuation";
+  static const iOSBackgroundProcessingReasonMaintenance = "maintenance";
+  static const _keyIOSBackgroundProcessingReason =
+      "ios_bg_upload_processing_reason";
+  static const _keyIOSBackgroundProcessingScheduledAt =
+      "ios_bg_upload_processing_scheduled_at";
 
   static Future<void> releaseResourcesForKill(
     String taskId,
@@ -141,26 +156,143 @@ class BgTaskUtils {
       backoffPolicy: workmanager.BackoffPolicy.linear,
       backoffPolicyDelay: _kIOSBackgroundRefreshCadence,
     );
-    await scheduleIOSBackgroundProcessingTask(source: source);
+
+    final prefs = await SharedPreferences.getInstance();
+    if (!FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs)) {
+      await scheduleIOSBackgroundProcessingTask(
+        source: "$source:default",
+      );
+    }
   }
 
   static Future<void> scheduleIOSBackgroundProcessingTask({
+    required String source,
+    Duration? initialDelay,
+    String? reason,
+  }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
+    final delay = initialDelay ?? _maintenanceDelay();
+    final prefs = await SharedPreferences.getInstance();
+    final isUploadHandoffEnabled =
+        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    if (!isUploadHandoffEnabled && reason != null) {
+      $.info(
+        "Skipping iOS background processing schedule from $source "
+        "because upload handoff flag is disabled",
+      );
+      return;
+    }
+    await prefs.setInt(
+      _keyIOSBackgroundProcessingScheduledAt,
+      DateTime.now().microsecondsSinceEpoch,
+    );
+    if (reason == null) {
+      await prefs.remove(_keyIOSBackgroundProcessingReason);
+    } else {
+      await prefs.setString(_keyIOSBackgroundProcessingReason, reason);
+    }
+
+    $.info(
+      "Scheduling iOS background processing task from $source "
+      "(delay=$delay, reason=${reason ?? "none"})",
+    );
+
+    await workmanager.Workmanager().registerProcessingTask(
+      iOSBackgroundProcessingTask,
+      iOSBackgroundProcessingTask,
+      initialDelay: delay,
+      constraints: workmanager.Constraints(
+        networkType: workmanager.NetworkType.connected,
+        requiresCharging: false,
+      ),
+    );
+  }
+
+  static Future<void> cancelIOSBackgroundProcessingTask({
     required String source,
   }) async {
     if (!Platform.isIOS) {
       return;
     }
 
-    $.info("Scheduling iOS background processing task from $source");
-
-    await workmanager.Workmanager().registerProcessingTask(
+    $.info("Cancelling iOS background processing task from $source");
+    await workmanager.Workmanager().cancelByUniqueName(
       iOSBackgroundProcessingTask,
-      iOSBackgroundProcessingTask,
-      initialDelay: _kIOSBackgroundProcessingCadence,
-      constraints: workmanager.Constraints(
-        networkType: workmanager.NetworkType.connected,
-        requiresCharging: false,
-      ),
     );
+    await _clearIOSBackgroundProcessingSchedulingState();
+  }
+
+  static Future<void> handleIOSBackgroundProcessingTaskCompletion({
+    required String source,
+  }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final isUploadHandoffEnabled =
+        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    if (!isUploadHandoffEnabled) {
+      await scheduleIOSBackgroundProcessingTask(
+        source: "$source:default",
+      );
+      return;
+    }
+    await prefs.reload();
+    final reason = prefs.getString(_keyIOSBackgroundProcessingReason);
+    await _clearIOSBackgroundProcessingSchedulingState();
+
+    if (FileUploader.instance.hasActiveUploads) {
+      await scheduleIOSBackgroundProcessingTask(
+        source: "$source:continuation",
+        initialDelay: _kIOSBackgroundProcessingContinuationDelay,
+        reason: iOSBackgroundProcessingReasonContinuation,
+      );
+      return;
+    }
+
+    if (await _isBackupEligibleForIOSProcessing()) {
+      await scheduleIOSBackgroundProcessingTask(
+        source: "$source:${reason ?? iOSBackgroundProcessingReasonMaintenance}",
+        initialDelay: _maintenanceDelay(),
+        reason: iOSBackgroundProcessingReasonMaintenance,
+      );
+    }
+  }
+
+  static Duration continuationDelay() =>
+      _kIOSBackgroundProcessingContinuationDelay;
+
+  static Duration maintenanceDelay() => _maintenanceDelay();
+
+  static Future<void> _clearIOSBackgroundProcessingSchedulingState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyIOSBackgroundProcessingReason);
+    await prefs.remove(_keyIOSBackgroundProcessingScheduledAt);
+  }
+
+  static Future<bool> _isBackupEligibleForIOSProcessing() async {
+    if (!Platform.isIOS || !Configuration.instance.hasConfiguredAccount()) {
+      return false;
+    }
+
+    final photoPermission = await Permission.photos.status;
+    final hasPhotoAccess = photoPermission == PermissionStatus.granted ||
+        photoPermission == PermissionStatus.limited;
+    if (!hasPhotoAccess) {
+      return false;
+    }
+
+    return backupPreferenceService.hasSelectedAnyBackupFolder;
+  }
+
+  static Duration _maintenanceDelay() {
+    if (kDebugMode) {
+      return _kDebugIOSBackgroundProcessingMaintenanceCadence;
+    }
+    return _kIOSBackgroundProcessingMaintenanceCadence;
   }
 }

@@ -80,6 +80,8 @@ class FileUploader {
   /// Returns true if any file uploads are currently in progress
   bool get isUploading => _uploadCounter > 0;
 
+  bool get hasActiveUploads => isUploading || _queue.isNotEmpty;
+
   // Maintains the count of files in the current upload session.
   // Upload session is the period between the first entry into the _queue and last entry out of the _queue
   int _totalCountInUploadSession = 0;
@@ -1614,6 +1616,36 @@ class FileUploader {
     Future.delayed(kBlockedUploadsPollFrequency, () async {
       await _pollBackgroundUploadStatus();
     });
+  }
+
+  Future<void> reconcileAfterBackground() async {
+    bool changed = false;
+    final backupEntries = _allBackups.entries.toList(growable: false);
+    for (final entry in backupEntries) {
+      final backup = entry.value;
+      final generatedID = backup.file.generatedID;
+      if (generatedID == null) {
+        continue;
+      }
+
+      final dbFile = await FilesDB.instance.getFile(generatedID);
+      if (dbFile?.uploadedFileID == null) {
+        continue;
+      }
+
+      _queue.remove(entry.key);
+      if (backup.status != BackupItemStatus.uploaded) {
+        _allBackups[entry.key] = backup.copyWith(
+          status: BackupItemStatus.uploaded,
+          file: dbFile,
+        );
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    }
   }
 }
 

@@ -1,5 +1,8 @@
+import "dart:async";
+
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
+import "package:photos/services/upload_background_coordinator.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class AppLifecycleService {
@@ -28,7 +31,11 @@ class AppLifecycleService {
 
   void onAppInForeground(String reason) {
     _logger.info("App in foreground via $reason");
+    final wasForeground = isForeground;
     isForeground = true;
+    if (!wasForeground) {
+      unawaited(UploadBackgroundCoordinator.instance.onAppForeground());
+    }
   }
 
   void onAppInBackground(String reason) {
@@ -38,6 +45,7 @@ class AppLifecycleService {
         keyLastAppOpenTime,
         DateTime.now().microsecondsSinceEpoch,
       );
+      unawaited(UploadBackgroundCoordinator.instance.onAppBackground());
     } else {
       _logger.info("App already in background, skipping open time update");
     }

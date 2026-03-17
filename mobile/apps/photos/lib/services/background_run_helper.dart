@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum BackgroundTrigger {
   workmanager,
   bgAppRefresh,
+  bgProcessing,
   remotePush,
 }
 
@@ -24,19 +25,19 @@ class BackgroundRunAttempt {
     required SharedPreferences prefs,
     required String leaseToken,
   }) : this._(
-         prefs: prefs,
-         leaseToken: leaseToken,
-         skipReason: null,
-       );
+          prefs: prefs,
+          leaseToken: leaseToken,
+          skipReason: null,
+        );
 
   const BackgroundRunAttempt.skip({
     required SharedPreferences prefs,
     required BackgroundSkipReason skipReason,
   }) : this._(
-         prefs: prefs,
-         leaseToken: null,
-         skipReason: skipReason,
-       );
+          prefs: prefs,
+          leaseToken: null,
+          skipReason: skipReason,
+        );
 
   final SharedPreferences prefs;
   final String? leaseToken;
@@ -59,9 +60,9 @@ class BackgroundRunHelper {
     required Logger logger,
     required Future<bool> Function() isRunningInForeground,
     required Future<bool> Function() isAnotherBackgroundRunAlive,
-  }) : _logger = logger,
-       _isRunningInForeground = isRunningInForeground,
-       _isAnotherBackgroundRunAlive = isAnotherBackgroundRunAlive;
+  })  : _logger = logger,
+        _isRunningInForeground = isRunningInForeground,
+        _isAnotherBackgroundRunAlive = isAnotherBackgroundRunAlive;
 
   Future<BackgroundRunAttempt> prepareRun({
     required BackgroundTrigger trigger,
@@ -135,8 +136,7 @@ class BackgroundRunHelper {
     final existingToken = prefs.getString(keyActiveBackgroundRunToken);
     final existingStart = prefs.getInt(keyActiveBackgroundRunStartedAt) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
-    final leaseIsFresh =
-        existingStart >
+    final leaseIsFresh = existingStart >
         now - budget.inMicroseconds - activeLeaseGrace.inMicroseconds;
 
     if (existingToken != null) {

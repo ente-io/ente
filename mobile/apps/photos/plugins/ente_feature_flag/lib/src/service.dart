@@ -104,6 +104,25 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
+  bool get enableIOSUploadBackgroundHandoff =>
+      isIOSUploadBackgroundHandoffEnabledForPrefs(_prefs);
+
+  static bool isIOSUploadBackgroundHandoffEnabledForPrefs(
+    SharedPreferences prefs,
+  ) {
+    final isDisabled = prefs.getBool("ls.internal_user_disabled") ?? false;
+    try {
+      final remoteFlags = prefs.getString("remote_flags");
+      final isInternalUser = remoteFlags == null
+          ? kDebugMode
+          : (RemoteFlags.fromMap(jsonDecode(remoteFlags)).internalUser ||
+                kDebugMode);
+      return isInternalUser && !isDisabled;
+    } catch (_) {
+      return kDebugMode && !isDisabled;
+    }
+  }
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
