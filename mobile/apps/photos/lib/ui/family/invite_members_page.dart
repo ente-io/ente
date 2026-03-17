@@ -284,7 +284,6 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         if (!mounted) {
           return;
         }
-        setState(() => _errorMessage = l10n.thisUserIsNotOnEnte);
         await _showInviteToEnteSheet(email);
         return;
       }
