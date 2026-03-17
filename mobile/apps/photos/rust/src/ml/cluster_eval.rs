@@ -831,7 +831,7 @@ mod tests {
             }
 
             // Update step: recompute centroids as normalized mean
-            for ki in 0..k {
+            for (ki, centroid_slot) in centroids.iter_mut().enumerate().take(k) {
                 let mut new_centroid = vec![0.0f32; dim];
                 let mut count = 0usize;
                 for (i, emb) in embs.iter().enumerate() {
@@ -844,7 +844,7 @@ mod tests {
                 }
                 if count > 0 {
                     normalize(&mut new_centroid);
-                    centroids[ki] = new_centroid;
+                    *centroid_slot = new_centroid;
                 }
             }
         }
@@ -2214,7 +2214,8 @@ mod tests {
         let dist = build_dist_matrix(&data.embeddings);
         let ts = thresholds(0.10, 1.00, 0.05);
 
-        let linkages: Vec<(&str, Box<dyn Fn(&[f32], usize, f32) -> Vec<i32>>)> = vec![
+        type LinkageFn = Box<dyn Fn(&[f32], usize, f32) -> Vec<i32>>;
+        let linkages: Vec<(&str, LinkageFn)> = vec![
             (
                 "Average",
                 Box::new(|d: &[f32], n: usize, t: f32| agglomerative_precomputed(d, n, t)),
@@ -2505,12 +2506,11 @@ mod tests {
             .iter()
             .map(|inp| {
                 if let Some(cid) = result.face_to_cluster.get(&inp.pet_face_id) {
-                    let num = *cluster_to_num.entry(cid.clone()).or_insert_with(|| {
+                    *cluster_to_num.entry(cid.clone()).or_insert_with(|| {
                         let n = next;
                         next += 1;
                         n
-                    });
-                    num
+                    })
                 } else {
                     -1
                 }
@@ -2681,9 +2681,9 @@ mod tests {
         let mut cluster_majority: HashMap<i32, i32> = HashMap::new();
         for &pc in &pred_clusters {
             let mut true_counts: HashMap<i32, usize> = HashMap::new();
-            for i in 0..n {
-                if pred_labels[i] == pc {
-                    *true_counts.entry(data.true_labels[i]).or_default() += 1;
+            for (pred, true_label) in pred_labels.iter().zip(data.true_labels.iter()) {
+                if *pred == pc {
+                    *true_counts.entry(*true_label).or_default() += 1;
                 }
             }
             let (&maj_label, _) = true_counts.iter()
@@ -3141,17 +3141,16 @@ mod tests {
 
     /// Count how many points are assigned to a cluster whose majority matches their true label.
     fn count_majority_correct(true_labels: &[i32], pred_labels: &[i32]) -> usize {
-        let n = true_labels.len();
         // For each predicted cluster, find its majority true label
         let mut cluster_members: HashMap<i32, Vec<usize>> = HashMap::new();
-        for i in 0..n {
-            if pred_labels[i] >= 0 {
-                cluster_members.entry(pred_labels[i]).or_default().push(i);
+        for (i, &pred) in pred_labels.iter().enumerate() {
+            if pred >= 0 {
+                cluster_members.entry(pred).or_default().push(i);
             }
         }
 
         let mut correct = 0usize;
-        for (_, members) in &cluster_members {
+        for members in cluster_members.values() {
             let mut counts: HashMap<i32, usize> = HashMap::new();
             for &i in members {
                 *counts.entry(true_labels[i]).or_default() += 1;

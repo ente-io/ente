@@ -15,7 +15,7 @@ mod tests {
     use crate::ml::cluster::{agglomerative_precomputed, dot};
     use crate::ml::onnx;
     use crate::ml::pet::cluster::{
-        hdbscan_precomputed, run_pet_clustering, ClusterConfig, PetClusterInput,
+        run_pet_clustering, ClusterConfig, PetClusterInput,
     };
     use crate::ml::runtime::ExecutionProviderPolicy;
     use std::collections::HashMap;
@@ -435,12 +435,11 @@ mod tests {
                     .iter()
                     .map(|inp| {
                         if let Some(cid) = result.face_to_cluster.get(&inp.pet_face_id) {
-                            let label = *id_map.entry(cid.clone()).or_insert_with(|| {
+                            *id_map.entry(cid.clone()).or_insert_with(|| {
                                 let l = next;
                                 next += 1;
                                 l
-                            });
-                            label
+                            })
                         } else {
                             -1
                         }

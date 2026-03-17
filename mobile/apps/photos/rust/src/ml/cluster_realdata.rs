@@ -382,12 +382,11 @@ mod tests {
             .iter()
             .map(|inp| {
                 if let Some(cid) = clusters.get(&inp.pet_face_id) {
-                    let label = *id_map.entry(cid.clone()).or_insert_with(|| {
+                    *id_map.entry(cid.clone()).or_insert_with(|| {
                         let l = next;
                         next += 1;
                         l
-                    });
-                    label
+                    })
                 } else {
                     -1
                 }
@@ -406,12 +405,11 @@ mod tests {
             .iter()
             .map(|inp| {
                 if let Some(cid) = result.face_to_cluster.get(&inp.pet_face_id) {
-                    let label = *id_map.entry(cid.clone()).or_insert_with(|| {
+                    *id_map.entry(cid.clone()).or_insert_with(|| {
                         let l = next;
                         next += 1;
                         l
-                    });
-                    label
+                    })
                 } else {
                     -1
                 }
