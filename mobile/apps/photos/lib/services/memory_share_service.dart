@@ -368,7 +368,6 @@ class MemoryShareService {
     try {
       final file = EnteFile();
       file.uploadedFileID = _toInt(remoteFile['id']);
-      file.collectionID = _toInt(remoteFile['collectionID']);
       file.ownerID = _toInt(remoteFile['ownerID']);
       // /public-memory/files returns per-share re-encrypted key material at the
       // top level. Fall back to nested fields for compatibility.
@@ -444,9 +443,6 @@ class MemoryShareService {
       }
 
       file.localID = null;
-      if ((file.collectionID ?? 0) <= 0) {
-        return null;
-      }
       return file;
     } catch (e, s) {
       _logger.warning("Failed to parse public memory file", e, s);
