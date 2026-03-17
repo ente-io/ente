@@ -101,7 +101,28 @@ const hasPaidLockerAccess = (json: {
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
 
-const Page: React.FC = () => {
+const isLockerAppPath = (path: string) => {
+    const pathname = path.split("?")[0] ?? path;
+    return (
+        pathname === "/" ||
+        pathname === "/collections" ||
+        pathname === "/trash" ||
+        pathname === "/collection"
+    );
+};
+
+const getCollectionIDFromPath = (path: string) => {
+    const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
+    const id = searchParams.get("id");
+    if (id === null) {
+        return null;
+    }
+
+    const parsedID = Number.parseInt(id, 10);
+    return Number.isFinite(parsedID) ? parsedID : null;
+};
+
+export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
@@ -121,13 +142,6 @@ const Page: React.FC = () => {
     // View mode state
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
     const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
-    const [isTrashView, setIsTrashView] = useState(false);
-    const [isCollectionsView, setIsCollectionsView] = useState(false);
-
-    // Collection filter state
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
@@ -149,6 +163,20 @@ const Page: React.FC = () => {
     );
     const [isDragActive, setIsDragActive] = useState(false);
     const dragDepthRef = useRef(0);
+    const lockerRouteStackRef = useRef<string[]>([]);
+    const lockerRouteIndexRef = useRef(-1);
+    const isNavigatingBackRef = useRef(false);
+    const isProgrammaticLockerNavigationRef = useRef(false);
+    const routeCollectionID =
+        router.pathname === "/collection"
+            ? getCollectionIDFromPath(router.asPath)
+            : null;
+    const selectedCollectionID =
+        routeCollectionID !== null && Number.isFinite(routeCollectionID)
+            ? routeCollectionID
+            : null;
+    const isTrashView = router.pathname === "/trash";
+    const isCollectionsView = router.pathname === "/collections";
 
     const loadUserDetails = useCallback(async () => {
         try {
@@ -204,10 +232,18 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
+        if (router.pathname !== "/locker") {
+            return;
+        }
+
+        void router.replace("/", undefined, { shallow: true });
+    }, [router]);
+
+    useEffect(() => {
         const load = async () => {
             const mk = await masterKeyFromSession();
             if (!mk) {
-                stashRedirect("/locker");
+                stashRedirect(router.asPath || "/");
                 void router.push("/login");
                 return;
             }
@@ -239,26 +275,122 @@ const Page: React.FC = () => {
         void load();
     }, [loadUserDetails, router, logout, showMiniDialog]);
 
-    const handleSelectCollection = useCallback((id: number | null) => {
-        setSelectedCollectionID(id);
-        setIsTrashView(false);
-        setIsCollectionsView(false);
+    useEffect(() => {
+        if (!router.isReady || !isLockerAppPath(router.asPath)) {
+            return;
+        }
+
+        const routeStack = lockerRouteStackRef.current;
+        const currentIndex = lockerRouteIndexRef.current;
+        const currentPath = router.asPath;
+
+        if (isNavigatingBackRef.current) {
+            isNavigatingBackRef.current = false;
+            const previousIndex = routeStack.lastIndexOf(currentPath);
+            if (previousIndex >= 0) {
+                lockerRouteIndexRef.current = previousIndex;
+            } else {
+                routeStack.push(currentPath);
+                lockerRouteIndexRef.current = routeStack.length - 1;
+            }
+            return;
+        }
+
+        if (routeStack.length === 0) {
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = 0;
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (currentIndex >= 0 && routeStack[currentIndex] === currentPath) {
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (isProgrammaticLockerNavigationRef.current) {
+            isProgrammaticLockerNavigationRef.current = false;
+            routeStack.splice(currentIndex + 1);
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = routeStack.length - 1;
+            return;
+        }
+
+        const existingIndex = routeStack.lastIndexOf(currentPath);
+        if (existingIndex >= 0) {
+            lockerRouteIndexRef.current = existingIndex;
+            return;
+        }
+
+        routeStack.splice(currentIndex + 1);
+        routeStack.push(currentPath);
+        lockerRouteIndexRef.current = routeStack.length - 1;
+    }, [router.asPath, router.isReady]);
+
+    useEffect(() => {
+        if (
+            router.pathname === "/collection" &&
+            router.isReady &&
+            routeCollectionID === null
+        ) {
+            void router.replace("/", undefined, { shallow: true });
+        }
+    }, [routeCollectionID, router]);
+
+    const navigateHome = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/", undefined, { shallow: true });
+    }, [router]);
+
+    const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
-    }, []);
+
+        const currentIndex = lockerRouteIndexRef.current;
+        if (currentIndex > 0) {
+            lockerRouteIndexRef.current = currentIndex - 1;
+            isNavigatingBackRef.current = true;
+            router.back();
+            return;
+        }
+
+        if (router.asPath !== "/") {
+            lockerRouteStackRef.current = [router.asPath, "/"];
+            lockerRouteIndexRef.current = 1;
+            isNavigatingBackRef.current = true;
+            isProgrammaticLockerNavigationRef.current = true;
+            void router.push("/", undefined, { shallow: true });
+            return;
+        }
+    }, [router]);
+
+    const handleSelectCollection = useCallback(
+        (id: number | null) => {
+            if (id === null) {
+                navigateHome();
+            } else {
+                isProgrammaticLockerNavigationRef.current = true;
+                void router.push(
+                    { pathname: "/collection", query: { id: String(id) } },
+                    undefined,
+                    { shallow: true },
+                );
+            }
+            setSidebarOpen(false);
+        },
+        [navigateHome, router],
+    );
 
     const handleSelectCollections = useCallback(() => {
-        setIsCollectionsView(true);
-        setIsTrashView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/collections", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const handleSelectTrash = useCallback(() => {
-        setIsTrashView(true);
-        setIsCollectionsView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/trash", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const isHomeView =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
@@ -432,8 +564,8 @@ const Page: React.FC = () => {
 
     const handleEmptyTrash = useCallback(() => {
         showMiniDialog({
-            title: t("empty_trash"),
-            message: t("confirm_empty_trash"),
+            title: t("empty_trash_title"),
+            message: t("empty_trash_message"),
             continue: {
                 text: t("empty_trash"),
                 color: "critical",
@@ -574,14 +706,14 @@ const Page: React.FC = () => {
                     color: "critical",
                     action: async () => {
                         await deleteCollectionAPI(collectionID);
-                        setSelectedCollectionID(null);
+                        navigateHome();
                         await refreshData();
                         setToast(t("collectionDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [collections, showMiniDialog, refreshData],
+        [collections, navigateHome, refreshData, showMiniDialog],
     );
 
     const handleOpenShareCollection = useCallback(
@@ -616,8 +748,14 @@ const Page: React.FC = () => {
             : (collections.find(
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
+    const isCollectionRoutePending =
+        router.pathname === "/collection" &&
+        (router.asPath.split("?")[0] ?? router.asPath) === "/collection" &&
+        !router.isReady;
+    const isViewLoading =
+        !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
-    if (!hasFetched || !isLockerI18nReady) {
+    if (isViewLoading) {
         return <LoadingIndicator />;
     }
     if (initialLoadError && collections.length === 0) {
@@ -707,6 +845,7 @@ const Page: React.FC = () => {
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
                     searchTerm={searchTerm}
+                    onNavigateBack={handleNavigateBack}
                 />
             </Box>
             <LockerSidebar
@@ -845,4 +984,4 @@ const Page: React.FC = () => {
     );
 };
 
-export default Page;
+export default LockerPage;
