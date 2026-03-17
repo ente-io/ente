@@ -93,11 +93,11 @@ interface CreateItemDialogProps {
     onSave: (
         type: LockerItemType,
         data: Record<string, unknown>,
-        collectionID: number,
+        collectionIDs: number[],
     ) => Promise<void>;
     onUploadProgress?: (
         file: File,
-        collectionID: number,
+        collectionIDs: number[],
         onProgress: (progress: LockerUploadProgress) => void,
     ) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
@@ -135,9 +135,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const [selectedOption, setSelectedOption] = useState<CreateOption | null>(
         editItem?.type ?? null,
     );
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(editItem?.collectionID ?? defaultCollectionID ?? null);
+    const [selectedCollectionIDs, setSelectedCollectionIDs] = useState<
+        number[]
+    >(editItem?.collectionID ? [editItem.collectionID] : []);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -161,15 +161,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     displayCollectionsRef.current = displayCollections;
 
     // Keep this stable so collection refreshes do not look like dialog resets.
-    const normalizeSelectedCollectionID = useCallback(
-        (collectionID: number | null | undefined) =>
-            collectionID !== null &&
-            collectionID !== undefined &&
-            displayCollectionsRef.current.some(
-                (collection) => collection.id === collectionID,
-            )
-                ? collectionID
-                : null,
+    const normalizeSelectedCollectionIDs = useCallback(
+        (collectionIDs: number[]) =>
+            collectionIDs.filter((collectionID) =>
+                displayCollectionsRef.current.some(
+                    (collection) => collection.id === collectionID,
+                ),
+            ),
         [],
     );
 
@@ -179,10 +177,17 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         }
 
         setSelectedOption(editItem?.type ?? (initialFile ? "file" : null));
-        setSelectedCollectionID(
+        setSelectedCollectionIDs(
             isEditMode
                 ? editCollectionID
-                : normalizeSelectedCollectionID(defaultCollectionID),
+                    ? [editCollectionID]
+                    : []
+                : normalizeSelectedCollectionIDs(
+                      defaultCollectionID !== null &&
+                          defaultCollectionID !== undefined
+                          ? [defaultCollectionID]
+                          : [],
+                  ),
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
@@ -195,7 +200,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         editItem,
         initialFile,
         isEditMode,
-        normalizeSelectedCollectionID,
+        normalizeSelectedCollectionIDs,
         open,
     ]);
 
@@ -203,16 +208,23 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         if (
             !open ||
             isEditMode ||
-            selectedCollectionID === null ||
-            displayCollections.some(
-                (collection) => collection.id === selectedCollectionID,
+            selectedCollectionIDs.every((selectedCollectionID) =>
+                displayCollections.some(
+                    (collection) => collection.id === selectedCollectionID,
+                ),
             )
         ) {
             return;
         }
 
-        setSelectedCollectionID(null);
-    }, [displayCollections, isEditMode, open, selectedCollectionID]);
+        setSelectedCollectionIDs((current) =>
+            current.filter((selectedCollectionID) =>
+                displayCollections.some(
+                    (collection) => collection.id === selectedCollectionID,
+                ),
+            ),
+        );
+    }, [displayCollections, isEditMode, open, selectedCollectionIDs]);
 
     const handleClose = useCallback(() => {
         if (saving || uploading) {
@@ -250,7 +262,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     );
 
     const handleSave = useCallback(async () => {
-        if (!selectedType || selectedCollectionID === null) {
+        if (!selectedType || selectedCollectionIDs.length === 0) {
             return;
         }
 
@@ -269,7 +281,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     .filter(([, value]) => value.trim())
                     .map(([key, value]) => [key, value.trim()]),
             );
-            await onSave(selectedType, cleanData, selectedCollectionID);
+            await onSave(selectedType, cleanData, selectedCollectionIDs);
             handleClose();
         } catch (error) {
             log.error("Failed to save Locker item", error);
@@ -277,12 +289,12 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setSaving(false);
         }
-    }, [formData, handleClose, onSave, selectedCollectionID, selectedType]);
+    }, [formData, handleClose, onSave, selectedCollectionIDs, selectedType]);
 
     const handleUpload = useCallback(async () => {
         if (
             !selectedFile ||
-            selectedCollectionID === null ||
+            selectedCollectionIDs.length === 0 ||
             !onUploadProgress
         ) {
             return;
@@ -294,7 +306,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         try {
             await onUploadProgress(
                 selectedFile,
-                selectedCollectionID,
+                selectedCollectionIDs,
                 setUploadProgress,
             );
             handleClose();
@@ -304,17 +316,17 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setUploading(false);
         }
-    }, [handleClose, onUploadProgress, selectedCollectionID, selectedFile]);
+    }, [handleClose, onUploadProgress, selectedCollectionIDs, selectedFile]);
 
     const canSave =
         selectedType !== null &&
-        selectedCollectionID !== null &&
+        selectedCollectionIDs.length > 0 &&
         getRequiredFields(selectedType).every((field) =>
             formData[field]?.trim(),
         );
 
     const canUpload =
-        isFileMode && selectedCollectionID !== null && selectedFile !== null;
+        isFileMode && selectedCollectionIDs.length > 0 && selectedFile !== null;
 
     return (
         <Dialog
@@ -510,8 +522,16 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         {!isEditMode && (
                             <CollectionSelector
                                 collections={displayCollections}
-                                selectedID={selectedCollectionID}
-                                onSelect={setSelectedCollectionID}
+                                selectedIDs={selectedCollectionIDs}
+                                onToggle={(collectionID) =>
+                                    setSelectedCollectionIDs((current) =>
+                                        current.includes(collectionID)
+                                            ? current.filter(
+                                                  (id) => id !== collectionID,
+                                              )
+                                            : [...current, collectionID],
+                                    )
+                                }
                                 onCreateCollection={onCreateCollection}
                             />
                         )}
@@ -561,12 +581,22 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             }
                         />
 
-                        <CollectionSelector
-                            collections={displayCollections}
-                            selectedID={selectedCollectionID}
-                            onSelect={setSelectedCollectionID}
-                            onCreateCollection={onCreateCollection}
-                        />
+                        {!isEditMode && (
+                            <CollectionSelector
+                                collections={displayCollections}
+                                selectedIDs={selectedCollectionIDs}
+                                onToggle={(collectionID) =>
+                                    setSelectedCollectionIDs((current) =>
+                                        current.includes(collectionID)
+                                            ? current.filter(
+                                                  (id) => id !== collectionID,
+                                              )
+                                            : [...current, collectionID],
+                                    )
+                                }
+                                onCreateCollection={onCreateCollection}
+                            />
+                        )}
 
                         {error && (
                             <Typography
@@ -871,10 +901,10 @@ const typeDisplayName = (type: LockerItemType): string => {
 
 const CollectionSelector: React.FC<{
     collections: LockerCollection[];
-    selectedID: number | null;
-    onSelect: (id: number) => void;
+    selectedIDs: number[];
+    onToggle: (id: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
-}> = ({ collections, selectedID, onSelect, onCreateCollection }) => {
+}> = ({ collections, selectedIDs, onToggle, onCreateCollection }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
     const [creating, setCreating] = useState(false);
@@ -890,7 +920,7 @@ const CollectionSelector: React.FC<{
         setCreateError(null);
         try {
             const newCollectionID = await onCreateCollection(name);
-            onSelect(newCollectionID);
+            onToggle(newCollectionID);
             setCreateName("");
             setCreateOpen(false);
         } catch (error) {
@@ -902,7 +932,7 @@ const CollectionSelector: React.FC<{
         } finally {
             setCreating(false);
         }
-    }, [createName, onCreateCollection, onSelect]);
+    }, [createName, onCreateCollection, onToggle]);
 
     return (
         <Box>
@@ -956,20 +986,19 @@ const CollectionSelector: React.FC<{
                     {collections.map((collection) => (
                         <ButtonBase
                             key={collection.id}
-                            onClick={() => onSelect(collection.id)}
+                            onClick={() => onToggle(collection.id)}
                             sx={(theme) => ({
                                 borderRadius: "999px",
                                 px: 1.5,
                                 py: 0.875,
-                                backgroundColor:
-                                    selectedID === collection.id
-                                        ? theme.vars.palette.primary.main
-                                        : theme.vars.palette.fill.faint,
-                                color:
-                                    selectedID === collection.id
-                                        ? theme.vars.palette.primary
-                                              .contrastText
-                                        : theme.vars.palette.text.base,
+                                backgroundColor: selectedIDs.includes(
+                                    collection.id,
+                                )
+                                    ? theme.vars.palette.primary.main
+                                    : theme.vars.palette.fill.faint,
+                                color: selectedIDs.includes(collection.id)
+                                    ? theme.vars.palette.primary.contrastText
+                                    : theme.vars.palette.text.base,
                             })}
                         >
                             <Typography variant="small">

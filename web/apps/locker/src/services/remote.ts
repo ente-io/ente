@@ -1238,11 +1238,15 @@ export const deleteLockerFileShareLink = async (
  * @param masterKey The user's master key.
  */
 export const createInfoItem = async (
-    collectionID: number,
+    collectionIDs: number[],
     infoType: LockerItemType,
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
+    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
+    if (collectionID === undefined) {
+        throw new Error("No collection selected");
+    }
     const collectionRecord = encryptedCollections.get(collectionID);
     if (!collectionRecord)
         throw new Error(`Collection ${collectionID} not in cache`);
@@ -1306,6 +1310,16 @@ export const createInfoItem = async (
         }),
     });
     ensureOk(res);
+
+    const created = (await res.json()) as { id: number };
+    if (additionalCollectionIDs.length > 0) {
+        await addFileToCollections(
+            created.id,
+            fileKey,
+            additionalCollectionIDs,
+            masterKey,
+        );
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1474,6 +1488,45 @@ export const emptyTrash = async (lastUpdatedAt: number): Promise<void> => {
         body: JSON.stringify({ lastUpdatedAt }),
     });
     ensureOk(res);
+};
+
+const addFileToCollections = async (
+    fileID: number,
+    fileKey: string,
+    targetCollectionIDs: number[],
+    masterKey: string,
+): Promise<void> => {
+    for (const targetCollectionID of targetCollectionIDs) {
+        const collectionRecord = encryptedCollections.get(targetCollectionID);
+        if (!collectionRecord) {
+            throw new Error(`Collection ${targetCollectionID} not in cache`);
+        }
+
+        const collectionKey = await decryptCollectionKey(
+            collectionRecord,
+            masterKey,
+        );
+        const encryptedFileKey = await encryptBox(fileKey, collectionKey);
+
+        const res = await fetch(await apiURL("/collections/add-files"), {
+            method: "POST",
+            headers: {
+                ...(await authenticatedRequestHeaders()),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                collectionID: targetCollectionID,
+                files: [
+                    {
+                        id: fileID,
+                        encryptedKey: encryptedFileKey.encryptedData,
+                        keyDecryptionNonce: encryptedFileKey.nonce,
+                    },
+                ],
+            }),
+        });
+        ensureOk(res);
+    }
 };
 
 /**
@@ -2045,10 +2098,14 @@ const createAggregateUploadProgressReporter = (
  */
 export const uploadLockerFile = async (
     file: File,
-    collectionID: number,
+    collectionIDs: number[],
     masterKey: string,
     onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
+    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
+    if (collectionID === undefined) {
+        throw new Error("No collection selected");
+    }
     onProgress?.({ phase: "preparing" });
 
     const plaintextChunkCount = Math.max(
@@ -2277,5 +2334,13 @@ export const uploadLockerFile = async (
     });
     ensureOk(res);
     const created = (await res.json()) as { id: number };
+    if (additionalCollectionIDs.length > 0) {
+        await addFileToCollections(
+            created.id,
+            fileKey,
+            additionalCollectionIDs,
+            masterKey,
+        );
+    }
     return created.id;
 };

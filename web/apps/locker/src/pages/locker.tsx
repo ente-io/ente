@@ -402,10 +402,10 @@ export const LockerPage: React.FC = () => {
         async (
             type: LockerItemType,
             data: Record<string, unknown>,
-            collectionID: number,
+            collectionIDs: number[],
         ) => {
             if (!masterKey) throw new Error("No master key");
-            await createInfoItem(collectionID, type, data, masterKey);
+            await createInfoItem(collectionIDs, type, data, masterKey);
             await refreshData();
             setToast(t("recordSavedSuccessfully"));
         },
@@ -415,11 +415,11 @@ export const LockerPage: React.FC = () => {
     const handleUploadFileWithProgress = useCallback(
         async (
             file: File,
-            collectionID: number,
+            collectionIDs: number[],
             onProgress: (progress: LockerUploadProgress) => void,
         ) => {
             if (!masterKey) throw new Error("No master key");
-            await uploadLockerFile(file, collectionID, masterKey, onProgress);
+            await uploadLockerFile(file, collectionIDs, masterKey, onProgress);
             await refreshData();
             setToast(t("uploadComplete"));
         },
