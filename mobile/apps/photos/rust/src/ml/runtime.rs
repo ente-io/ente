@@ -136,25 +136,18 @@ impl ModelSlot {
         Self::set_config_locked(&mut state, path, policy);
     }
 
-    fn sync_indexing_residency(
-        &self,
-        path: &str,
-        policy: &ExecutionProviderPolicy,
-        error_msg: &str,
-    ) -> MlResult<()> {
+    fn sync_indexing_residency(&self, path: &str, policy: &ExecutionProviderPolicy) {
         let mut state = self.lock_state();
         if path.trim().is_empty() {
             state.path.clear();
             state.fell_back_to_cpu = false;
             state.pin_count = 0;
             state.session = None;
-            return Ok(());
+            return;
         }
 
         Self::set_config_locked(&mut state, path, policy);
         state.pin_count = 1;
-        Self::ensure_loaded_locked(&mut state, error_msg)?;
-        Ok(())
     }
 
     fn release_indexing_residency(&self) {
@@ -325,51 +318,24 @@ impl MlRuntime {
         let shared_policy = &config.provider_policy;
         let pet_policy = pet_policy();
 
-        self.face_detection.sync_indexing_residency(
-            &config.model_paths.face_detection,
-            shared_policy,
-            "missing model path: faceDetectionModelPath is required when runFaces is true",
-        )?;
-        self.face_embedding.sync_indexing_residency(
-            &config.model_paths.face_embedding,
-            shared_policy,
-            "missing model path: faceEmbeddingModelPath is required when runFaces is true",
-        )?;
-        self.clip_image.sync_indexing_residency(
-            &config.model_paths.clip_image,
-            shared_policy,
-            "missing model path: clipImageModelPath is required when runClip is true",
-        )?;
-        self.pet_face_detection.sync_indexing_residency(
-            &config.model_paths.pet_face_detection,
-            &pet_policy,
-            "missing model path: petFaceDetectionModelPath is required when runPets is true",
-        )?;
-        self.pet_face_embedding_dog.sync_indexing_residency(
-            &config.model_paths.pet_face_embedding_dog,
-            &pet_policy,
-            "missing model path: petFaceEmbeddingDogModelPath is required",
-        )?;
-        self.pet_face_embedding_cat.sync_indexing_residency(
-            &config.model_paths.pet_face_embedding_cat,
-            &pet_policy,
-            "missing model path: petFaceEmbeddingCatModelPath is required",
-        )?;
-        self.pet_body_detection.sync_indexing_residency(
-            &config.model_paths.pet_body_detection,
-            &pet_policy,
-            "missing model path: petBodyDetectionModelPath is required when runPets is true",
-        )?;
-        self.pet_body_embedding_dog.sync_indexing_residency(
-            &config.model_paths.pet_body_embedding_dog,
-            &pet_policy,
-            "missing model path: petBodyEmbeddingDogModelPath is required",
-        )?;
-        self.pet_body_embedding_cat.sync_indexing_residency(
-            &config.model_paths.pet_body_embedding_cat,
-            &pet_policy,
-            "missing model path: petBodyEmbeddingCatModelPath is required",
-        )?;
+        self.face_detection
+            .sync_indexing_residency(&config.model_paths.face_detection, shared_policy);
+        self.face_embedding
+            .sync_indexing_residency(&config.model_paths.face_embedding, shared_policy);
+        self.clip_image
+            .sync_indexing_residency(&config.model_paths.clip_image, shared_policy);
+        self.pet_face_detection
+            .sync_indexing_residency(&config.model_paths.pet_face_detection, &pet_policy);
+        self.pet_face_embedding_dog
+            .sync_indexing_residency(&config.model_paths.pet_face_embedding_dog, &pet_policy);
+        self.pet_face_embedding_cat
+            .sync_indexing_residency(&config.model_paths.pet_face_embedding_cat, &pet_policy);
+        self.pet_body_detection
+            .sync_indexing_residency(&config.model_paths.pet_body_detection, &pet_policy);
+        self.pet_body_embedding_dog
+            .sync_indexing_residency(&config.model_paths.pet_body_embedding_dog, &pet_policy);
+        self.pet_body_embedding_cat
+            .sync_indexing_residency(&config.model_paths.pet_body_embedding_cat, &pet_policy);
 
         Ok(())
     }
@@ -640,6 +606,35 @@ mod tests {
     }
 
     #[test]
+    fn prepare_indexing_models_pins_without_loading_sessions() {
+        let runtime = MlRuntime::new();
+
+        runtime
+            .prepare_indexing_models(&MlRuntimeConfig {
+                model_paths: ModelPaths {
+                    face_detection: "face.onnx".to_string(),
+                    face_embedding: "embed.onnx".to_string(),
+                    clip_image: "clip.onnx".to_string(),
+                    ..empty_paths()
+                },
+                provider_policy: test_policy(),
+            })
+            .unwrap();
+
+        let face_detection = runtime.face_detection.lock_state();
+        assert_eq!(face_detection.pin_count, 1);
+        assert!(face_detection.session.is_none());
+
+        let face_embedding = runtime.face_embedding.lock_state();
+        assert_eq!(face_embedding.pin_count, 1);
+        assert!(face_embedding.session.is_none());
+
+        let clip_image = runtime.clip_image.lock_state();
+        assert_eq!(clip_image.pin_count, 1);
+        assert!(clip_image.session.is_none());
+    }
+
+    #[test]
     fn sync_indexing_residency_clears_disabled_slots() {
         let slot = ModelSlot::new();
 
@@ -650,8 +645,7 @@ mod tests {
             state.fell_back_to_cpu = true;
         }
 
-        slot.sync_indexing_residency("", &test_policy(), "unused")
-            .unwrap();
+        slot.sync_indexing_residency("", &test_policy());
 
         let state = slot.lock_state();
         assert!(state.path.is_empty());
