@@ -452,7 +452,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       return;
     }
     touchPendingFaceThumbnailGeneration(fileId, useFullFile: false);
-    if (widget.useFullFile) {
+    // Keep first-paint work ahead of progressive upgrades. Only reprioritize
+    // full-file generation when the tile still has no fallback thumbnail.
+    if (widget.useFullFile && !_fallbackEverUsed) {
       touchPendingFaceThumbnailGeneration(fileId, useFullFile: true);
     }
   }
