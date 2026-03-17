@@ -268,6 +268,12 @@ When you join a family plan, your individual plan (including any referral bonuse
 
 (Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
 
+### Are duplicate photos deduplicated across family members? {#family-plan-deduplication}
+
+No. Family plans are a way to share storage, but each family member has their own separate account. Ente cannot deduplicate files across different accounts.
+
+If you and a family member both upload the same photo (for example, from Google Takeout), it will be counted separately in each account's storage usage. Unlike [deduplication within a single account](#deduplication), which avoids counting the same file twice, deduplication does not apply across different accounts in a family plan.
+
 ## Student Discounts
 
 ### Does Ente offer discounts to students? {#student-discount}
@@ -583,6 +589,11 @@ Yes! Switching between monthly and yearly billing works the same as upgrading or
 
 The same prorating calculation applies as described above.
 
+### If I subscribed to a plan with a reference code and a discount, and then need to upgrade/downgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
+
+The referral bonus remains, and the discount stays valid for 12 months even on
+an upgraded/downgraded plan. The amount is prorated.
+
 ### How can I update my payment method? {#update-payment}
 
 You can view and manage your payment method via Settings > click on the Storage (subscription) card at the top > Manage payment method.
@@ -608,3 +619,31 @@ After cancellation, you'll have access to your data for 30 days, after which it 
 ### How can I earn free storage? {#earn-free-storage}
 
 Use our [referral program](/photos/features/account/referral-program/). When friends sign up using your referral code and subscribe to a paid plan, both you and your friend earn additional free storage.
+
+## Inactive Account Email
+
+### Why did I receive this email? {#inactive-account-email-received}
+
+We recently sent an email to accounts that have not shown activity for 12
+months as part of our inactive-account policy.
+
+### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
+
+The email includes the email address associated with the inactive account.
+
+If you are using Ente regularly, check the registered email address shown inside
+the app to confirm which account you are currently using.
+
+Open `Settings > Account`. The registered email address will appear in a green
+box.
+
+### What should I do if I received this email? {#inactive-account-action}
+
+Simply sign in to the account mentioned in the email before the date specified.
+This will mark the account as active.
+
+### I think this email was sent by mistake {#inactive-account-mistake}
+
+Contact support at [support@ente.io](mailto:support@ente.io) and share a
+screenshot of the `Settings > Account` page showing the registered email address
+(green box), so we can verify the account.

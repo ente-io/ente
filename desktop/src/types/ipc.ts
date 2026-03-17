@@ -41,6 +41,18 @@ export interface NativeDeviceLockCapability {
     reason?: NativeDeviceLockUnavailableReason;
 }
 
+/**
+ * Persisted desktop app-lock configuration.
+ *
+ * This excludes the passphrase hash material, which continues to live in the
+ * renderer KV DB.
+ */
+export interface PersistedAppLockConfig {
+    enabled: boolean;
+    lockType: "pin" | "password" | "device" | "none";
+    autoLockTimeMs: number;
+}
+
 export interface FolderWatch {
     collectionMapping: CollectionMapping;
     folderPath: string;

@@ -70,6 +70,7 @@ import type {
     FolderWatch,
     NativeDeviceLockCapability,
     PendingUploads,
+    PersistedAppLockConfig,
     UtilityProcessType,
     ZipItem,
 } from "./types/ipc";
@@ -119,6 +120,19 @@ const masterKeyFromSafeStorage = () =>
 
 const saveMasterKeyInSafeStorage = (masterKey: string) =>
     ipcRenderer.invoke("saveMasterKeyInSafeStorage", masterKey);
+
+const isSafeStorageAvailable = (): Promise<boolean> =>
+    ipcRenderer.invoke("isSafeStorageAvailable");
+
+const appLockConfigFromSafeStorage = (): Promise<
+    PersistedAppLockConfig | undefined
+> => ipcRenderer.invoke("appLockConfigFromSafeStorage");
+
+const saveAppLockConfigInSafeStorage = (config: PersistedAppLockConfig) =>
+    ipcRenderer.invoke("saveAppLockConfigInSafeStorage", config);
+
+const clearAppLockConfigFromSafeStorage = () =>
+    ipcRenderer.invoke("clearAppLockConfigFromSafeStorage");
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -387,6 +401,10 @@ contextBridge.exposeInMainWorld("electron", {
     logout,
     masterKeyFromSafeStorage,
     saveMasterKeyInSafeStorage,
+    isSafeStorageAvailable,
+    appLockConfigFromSafeStorage,
+    saveAppLockConfigInSafeStorage,
+    clearAppLockConfigFromSafeStorage,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,

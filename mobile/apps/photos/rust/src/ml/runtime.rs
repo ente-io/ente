@@ -1,12 +1,34 @@
-use std::sync::Mutex;
+use std::sync::RwLock;
 
-use once_cell::sync::Lazy;
+use once_cell::sync::{Lazy, OnceCell};
 use ort::Session;
 
 use crate::ml::{
     error::{MlError, MlResult},
     onnx,
 };
+
+/// Log to Android logcat or stderr.
+fn rt_log(msg: &str) {
+    #[cfg(target_os = "android")]
+    {
+        unsafe extern "C" {
+            unsafe fn __android_log_write(
+                prio: std::ffi::c_int,
+                tag: *const std::ffi::c_char,
+                text: *const std::ffi::c_char,
+            ) -> std::ffi::c_int;
+        }
+        use std::ffi::CString;
+        let tag = CString::new("ml_rt").unwrap();
+        let cmsg = CString::new(msg).unwrap_or_else(|_| CString::new("(invalid)").unwrap());
+        unsafe { __android_log_write(4, tag.as_ptr(), cmsg.as_ptr()); }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        eprintln!("[ml][rt] {msg}");
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ExecutionProviderPolicy {
@@ -33,6 +55,52 @@ pub struct ModelPaths {
     pub face_embedding: String,
     pub clip_image: String,
     pub clip_text: String,
+    pub pet_face_detection: String,
+    pub pet_face_embedding_dog: String,
+    pub pet_face_embedding_cat: String,
+    pub pet_body_detection: String,
+    pub pet_body_embedding_dog: String,
+    pub pet_body_embedding_cat: String,
+}
+
+impl ModelPaths {
+    /// Check whether the existing runtime can serve a request with `requested` paths.
+    /// An empty path in `requested` means "not needed" and is always compatible.
+    fn can_serve(&self, requested: &ModelPaths) -> bool {
+        fn ok(existing: &str, requested: &str) -> bool {
+            requested.is_empty() || existing == requested
+        }
+        ok(&self.face_detection, &requested.face_detection)
+            && ok(&self.face_embedding, &requested.face_embedding)
+            && ok(&self.clip_image, &requested.clip_image)
+            && ok(&self.clip_text, &requested.clip_text)
+            && ok(&self.pet_face_detection, &requested.pet_face_detection)
+            && ok(&self.pet_face_embedding_dog, &requested.pet_face_embedding_dog)
+            && ok(&self.pet_face_embedding_cat, &requested.pet_face_embedding_cat)
+            && ok(&self.pet_body_detection, &requested.pet_body_detection)
+            && ok(&self.pet_body_embedding_dog, &requested.pet_body_embedding_dog)
+            && ok(&self.pet_body_embedding_cat, &requested.pet_body_embedding_cat)
+    }
+
+    /// Merge two configs: keep existing non-empty paths, override with non-empty
+    /// paths from `other`.
+    fn merge(&self, other: &ModelPaths) -> ModelPaths {
+        fn pick(existing: &str, new: &str) -> String {
+            if new.is_empty() { existing.to_string() } else { new.to_string() }
+        }
+        ModelPaths {
+            face_detection: pick(&self.face_detection, &other.face_detection),
+            face_embedding: pick(&self.face_embedding, &other.face_embedding),
+            clip_image: pick(&self.clip_image, &other.clip_image),
+            clip_text: pick(&self.clip_text, &other.clip_text),
+            pet_face_detection: pick(&self.pet_face_detection, &other.pet_face_detection),
+            pet_face_embedding_dog: pick(&self.pet_face_embedding_dog, &other.pet_face_embedding_dog),
+            pet_face_embedding_cat: pick(&self.pet_face_embedding_cat, &other.pet_face_embedding_cat),
+            pet_body_detection: pick(&self.pet_body_detection, &other.pet_body_detection),
+            pet_body_embedding_dog: pick(&self.pet_body_embedding_dog, &other.pet_body_embedding_dog),
+            pet_body_embedding_cat: pick(&self.pet_body_embedding_cat, &other.pet_body_embedding_cat),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,95 +109,166 @@ pub struct MlRuntimeConfig {
     pub provider_policy: ExecutionProviderPolicy,
 }
 
+/// A lazily-initialized ONNX session that is thread-safe for concurrent reads.
+///
+/// `OnceLock` ensures the session is loaded exactly once (on first use) and
+/// then shared via `&Session` for concurrent inference — `ort::Session::run()`
+/// takes `&self` and is `Send + Sync`.
 #[derive(Debug)]
-struct ModelSession {
+struct LazySession {
     path: String,
-    // Per-model policy cache key. After CPU-only recovery we restore this key
-    // to the requested policy so failing EP combinations are not retried on
-    // every subsequent call.
-    policy_key: ExecutionProviderPolicy,
-    session: Session,
+    policy: ExecutionProviderPolicy,
+    session: OnceCell<Session>,
+}
+
+impl LazySession {
+    fn new(path: String, policy: ExecutionProviderPolicy) -> Self {
+        Self {
+            path,
+            policy,
+            session: OnceCell::new(),
+        }
+    }
+
+    fn get(&self, error_msg: &str) -> MlResult<&Session> {
+        if self.path.trim().is_empty() {
+            return Err(MlError::InvalidRequest(error_msg.to_string()));
+        }
+        self.session
+            .get_or_try_init(|| {
+                let model_name = self.path.rsplit('/').next().unwrap_or(&self.path);
+                rt_log(&format!("loading {model_name}"));
+                let t = std::time::Instant::now();
+                let s = onnx::build_session(&self.path, &self.policy)?;
+                rt_log(&format!("loaded {model_name} in {:?}", t.elapsed()));
+                Ok(s)
+            })
+    }
 }
 
 #[derive(Debug)]
 pub struct MlRuntime {
-    face_detection: Option<ModelSession>,
-    face_embedding: Option<ModelSession>,
-    clip_image: Option<ModelSession>,
-    clip_text: Option<ModelSession>,
+    face_detection: LazySession,
+    face_embedding: LazySession,
+    clip_image: LazySession,
+    clip_text: LazySession,
+    pet_face_detection: LazySession,
+    pet_face_embedding_dog: LazySession,
+    pet_face_embedding_cat: LazySession,
+    pet_body_detection: LazySession,
+    pet_body_embedding_dog: LazySession,
+    pet_body_embedding_cat: LazySession,
 }
 
 #[derive(Debug)]
 struct RuntimeState {
+    config: MlRuntimeConfig,
     runtime: MlRuntime,
+    /// Set after a hardware EP failure triggers a successful CPU-only fallback.
+    /// While true, `ensure_runtime` treats a CPU-only runtime as compatible
+    /// with requests that prefer hardware acceleration (when
+    /// `allow_cpu_fallback` is set), avoiding repeated rebuild/retry cycles
+    /// on devices where NNAPI/CoreML is broken.
+    fell_back_to_cpu: bool,
 }
 
-static GLOBAL_RUNTIME: Lazy<Mutex<Option<RuntimeState>>> = Lazy::new(|| Mutex::new(None));
+static GLOBAL_RUNTIME: Lazy<RwLock<Option<RuntimeState>>> = Lazy::new(|| RwLock::new(None));
+
+fn create_runtime(config: &MlRuntimeConfig) -> MlRuntime {
+    let p = &config.provider_policy;
+    // Pet models use CPU-only to avoid NNAPI/CoreML driver issues with
+    // FP16 models on some devices.
+    // TODO: Make pet EP policy configurable so hardware acceleration can be
+    // re-enabled once driver issues are resolved.
+    let pet_policy = ExecutionProviderPolicy {
+        prefer_coreml: false,
+        prefer_nnapi: false,
+        prefer_xnnpack: false,
+        allow_cpu_fallback: true,
+    };
+    MlRuntime {
+        face_detection: LazySession::new(config.model_paths.face_detection.clone(), p.clone()),
+        face_embedding: LazySession::new(config.model_paths.face_embedding.clone(), p.clone()),
+        clip_image: LazySession::new(config.model_paths.clip_image.clone(), p.clone()),
+        clip_text: LazySession::new(config.model_paths.clip_text.clone(), p.clone()),
+        pet_face_detection: LazySession::new(config.model_paths.pet_face_detection.clone(), pet_policy.clone()),
+        pet_face_embedding_dog: LazySession::new(config.model_paths.pet_face_embedding_dog.clone(), pet_policy.clone()),
+        pet_face_embedding_cat: LazySession::new(config.model_paths.pet_face_embedding_cat.clone(), pet_policy.clone()),
+        pet_body_detection: LazySession::new(config.model_paths.pet_body_detection.clone(), pet_policy.clone()),
+        pet_body_embedding_dog: LazySession::new(config.model_paths.pet_body_embedding_dog.clone(), pet_policy.clone()),
+        pet_body_embedding_cat: LazySession::new(config.model_paths.pet_body_embedding_cat.clone(), pet_policy),
+    }
+}
 
 impl MlRuntime {
-    fn new() -> Self {
-        Self {
-            face_detection: None,
-            face_embedding: None,
-            clip_image: None,
-            clip_text: None,
-        }
+    pub fn face_detection_session(&self) -> MlResult<&Session> {
+        self.face_detection.get(
+            "missing model path: faceDetectionModelPath is required when runFaces is true",
+        )
     }
 
-    pub fn face_detection_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_detection
-            .as_mut()
-            .ok_or_else(|| {
-                MlError::InvalidRequest(
-                    "missing model path: faceDetectionModelPath is required when runFaces is true"
-                        .to_string(),
-                )
-            })
-            .map(|model| &mut model.session)
+    pub fn face_embedding_session(&self) -> MlResult<&Session> {
+        self.face_embedding.get(
+            "missing model path: faceEmbeddingModelPath is required when runFaces is true",
+        )
     }
 
-    pub fn face_embedding_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.face_embedding
-            .as_mut()
-            .ok_or_else(|| {
-                MlError::InvalidRequest(
-                    "missing model path: faceEmbeddingModelPath is required when runFaces is true"
-                        .to_string(),
-                )
-            })
-            .map(|model| &mut model.session)
+    pub fn clip_image_session(&self) -> MlResult<&Session> {
+        self.clip_image.get(
+            "missing model path: clipImageModelPath is required when runClip is true",
+        )
     }
 
-    pub fn clip_image_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_image
-            .as_mut()
-            .ok_or_else(|| {
-                MlError::InvalidRequest(
-                    "missing model path: clipImageModelPath is required when runClip is true"
-                        .to_string(),
-                )
-            })
-            .map(|model| &mut model.session)
+    pub fn clip_text_session(&self) -> MlResult<&Session> {
+        self.clip_text.get(
+            "missing model path: clipTextModelPath is required when running clip text",
+        )
     }
 
-    pub fn clip_text_session_mut(&mut self) -> MlResult<&mut Session> {
-        self.clip_text
-            .as_mut()
-            .ok_or_else(|| {
-                MlError::InvalidRequest(
-                    "missing model path: clipTextModelPath is required when running clip text"
-                        .to_string(),
-                )
-            })
-            .map(|model| &mut model.session)
+    pub fn pet_face_detection_session(&self) -> MlResult<&Session> {
+        self.pet_face_detection.get(
+            "missing model path: petFaceDetectionModelPath is required when runPets is true",
+        )
+    }
+
+    pub fn pet_face_embedding_dog_session(&self) -> MlResult<&Session> {
+        self.pet_face_embedding_dog
+            .get("missing model path: petFaceEmbeddingDogModelPath is required")
+    }
+
+    pub fn pet_face_embedding_cat_session(&self) -> MlResult<&Session> {
+        self.pet_face_embedding_cat
+            .get("missing model path: petFaceEmbeddingCatModelPath is required")
+    }
+
+    pub fn pet_body_detection_session(&self) -> MlResult<&Session> {
+        self.pet_body_detection.get(
+            "missing model path: petBodyDetectionModelPath is required when runPets is true",
+        )
+    }
+
+    pub fn pet_body_embedding_dog_session(&self) -> MlResult<&Session> {
+        self.pet_body_embedding_dog
+            .get("missing model path: petBodyEmbeddingDogModelPath is required")
+    }
+
+    pub fn pet_body_embedding_cat_session(&self) -> MlResult<&Session> {
+        self.pet_body_embedding_cat
+            .get("missing model path: petBodyEmbeddingCatModelPath is required")
     }
 }
 
-fn lock_runtime() -> std::sync::MutexGuard<'static, Option<RuntimeState>> {
-    match GLOBAL_RUNTIME.lock() {
+fn read_runtime() -> std::sync::RwLockReadGuard<'static, Option<RuntimeState>> {
+    match GLOBAL_RUNTIME.read() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner(),
+    }
+}
+
+fn write_runtime() -> std::sync::RwLockWriteGuard<'static, Option<RuntimeState>> {
+    match GLOBAL_RUNTIME.write() {
         Ok(guard) => guard,
         Err(poisoned) => {
-            // Recover from a previous panic by clearing runtime state.
             let mut guard = poisoned.into_inner();
             *guard = None;
             guard
@@ -137,33 +276,99 @@ fn lock_runtime() -> std::sync::MutexGuard<'static, Option<RuntimeState>> {
     }
 }
 
-pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
-    let mut guard = lock_runtime();
-    let state = guard.get_or_insert_with(|| RuntimeState {
-        runtime: MlRuntime::new(),
-    });
+/// A CPU-only runtime satisfies a hardware-preferring request when the
+/// runtime was installed via EP fallback and the caller allows CPU fallback.
+fn policy_compatible(existing: &RuntimeState, requested: &ExecutionProviderPolicy) -> bool {
+    existing.config.provider_policy == *requested
+        || (existing.fell_back_to_cpu && requested.allow_cpu_fallback)
+}
 
-    // Runtime config is additive:
-    // - Empty model path keeps current session as-is.
-    // - Non-empty model path loads/replaces only that model session.
-    // Provider policy is per-model (not global): each loaded/reloaded model
-    // caches the policy from the request that configured it.
-    apply_runtime_config(&mut state.runtime, config)?;
+pub fn ensure_runtime(config: &MlRuntimeConfig) -> MlResult<()> {
+    ensure_runtime_inner(config, false)
+}
+
+/// When `mark_as_fallback` is true the installed runtime is atomically
+/// tagged with `fell_back_to_cpu = true` inside the same write lock,
+/// preventing a concurrent caller from observing an un-tagged CPU runtime
+/// and replacing it with a hardware EP runtime before the flag is set.
+fn ensure_runtime_inner(config: &MlRuntimeConfig, mark_as_fallback: bool) -> MlResult<()> {
+    // Fast path: check under read lock whether the current runtime can serve.
+    // Skip the fast path when marking a fallback — we need the write lock to
+    // set `fell_back_to_cpu` atomically.
+    if !mark_as_fallback {
+        let guard = read_runtime();
+        if let Some(existing) = guard.as_ref()
+            && policy_compatible(existing, &config.provider_policy)
+            && existing.config.model_paths.can_serve(&config.model_paths)
+        {
+            return Ok(()); // existing runtime handles this request
+        }
+    }
+
+    // Slow path: acquire write lock, re-check (another thread may have
+    // already merged), compute the merged config, build, and install.
+    let mut guard = write_runtime();
+    let (merged, preserve_fallback) = match guard.as_ref() {
+        Some(existing) => {
+            // Re-check: a concurrent caller may have updated since the
+            // read-lock check above.
+            if policy_compatible(existing, &config.provider_policy)
+                && existing.config.model_paths.can_serve(&config.model_paths)
+            {
+                // Runtime already compatible — just ensure the fallback
+                // flag is set when requested.
+                if mark_as_fallback
+                    && let Some(state) = guard.as_mut()
+                {
+                    state.fell_back_to_cpu = true;
+                }
+                return Ok(());
+            }
+            // If we previously fell back to CPU, keep the CPU-only policy
+            // for the merged config instead of re-trying the broken EP.
+            let effective_policy =
+                if existing.fell_back_to_cpu && config.provider_policy.allow_cpu_fallback {
+                    existing.config.provider_policy.clone()
+                } else {
+                    config.provider_policy.clone()
+                };
+            (
+                MlRuntimeConfig {
+                    model_paths: existing.config.model_paths.merge(&config.model_paths),
+                    provider_policy: effective_policy,
+                },
+                existing.fell_back_to_cpu,
+            )
+        }
+        None => (config.clone(), false),
+    };
+
+    let runtime = create_runtime(&merged);
+    *guard = Some(RuntimeState {
+        config: merged,
+        runtime,
+        fell_back_to_cpu: preserve_fallback || mark_as_fallback,
+    });
     Ok(())
 }
 
-pub fn with_runtime_mut<F, R>(config: &MlRuntimeConfig, mut func: F) -> MlResult<R>
+/// Run a function with a shared (read) reference to the runtime.
+///
+/// Multiple callers can hold the read lock concurrently, so CLIP text
+/// queries no longer block on image indexing and vice versa. The write
+/// lock is only acquired during `ensure_runtime` to swap the config.
+pub fn with_runtime<F, R>(config: &MlRuntimeConfig, func: F) -> MlResult<R>
 where
-    F: FnMut(&mut MlRuntime) -> MlResult<R>,
+    F: Fn(&MlRuntime) -> MlResult<R>,
 {
     ensure_runtime(config)?;
 
     let first_result = {
-        let mut guard = lock_runtime();
+        let guard = read_runtime();
         let state = guard
-            .as_mut()
+            .as_ref()
             .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-        func(&mut state.runtime)
+        func(&state.runtime)
     };
 
     match first_result {
@@ -174,28 +379,19 @@ where
             }
 
             let fallback_config = cpu_only_runtime_config(config);
-            eprintln!(
-                "[ml][runtime] execution provider failed, retrying with CPU-only runtime: {first_error}"
-            );
-            ensure_runtime(&fallback_config)?;
-            let retry_result = {
-                let mut guard = lock_runtime();
+            rt_log(&format!("execution provider failed, retrying with CPU-only runtime: {first_error}"));
+            // Install the CPU-only runtime and atomically mark it as a
+            // fallback so concurrent callers see `fell_back_to_cpu = true`
+            // immediately and don't rebuild a hardware EP runtime.
+            ensure_runtime_inner(&fallback_config, true)?;
+
+            {
+                let guard = read_runtime();
                 let state = guard
-                    .as_mut()
+                    .as_ref()
                     .ok_or_else(|| MlError::Runtime("runtime is not initialized".to_string()))?;
-                func(&mut state.runtime)
-            };
-
-            if retry_result.is_ok() {
-                let mut guard = lock_runtime();
-                if let Some(state) = guard.as_mut() {
-                    // Keep recovered sessions hot under the originally requested
-                    // policy key to avoid repeated EP retries per call.
-                    restore_requested_policy_keys(&mut state.runtime, config);
-                }
+                func(&state.runtime)
             }
-
-            retry_result
         }
     }
 }
@@ -232,98 +428,7 @@ fn is_execution_provider_failure(error: &MlError) -> bool {
 }
 
 pub fn release_runtime() -> MlResult<()> {
-    let mut guard = lock_runtime();
+    let mut guard = write_runtime();
     *guard = None;
     Ok(())
-}
-
-fn apply_runtime_config(runtime: &mut MlRuntime, config: &MlRuntimeConfig) -> MlResult<()> {
-    apply_model_update(
-        &mut runtime.face_detection,
-        &config.model_paths.face_detection,
-        &config.provider_policy,
-    )?;
-    apply_model_update(
-        &mut runtime.face_embedding,
-        &config.model_paths.face_embedding,
-        &config.provider_policy,
-    )?;
-    apply_model_update(
-        &mut runtime.clip_image,
-        &config.model_paths.clip_image,
-        &config.provider_policy,
-    )?;
-    apply_model_update(
-        &mut runtime.clip_text,
-        &config.model_paths.clip_text,
-        &config.provider_policy,
-    )?;
-    Ok(())
-}
-
-fn apply_model_update(
-    model: &mut Option<ModelSession>,
-    model_path: &str,
-    provider_policy: &ExecutionProviderPolicy,
-) -> MlResult<()> {
-    if model_path.trim().is_empty() {
-        return Ok(());
-    }
-
-    let should_reload = match model.as_ref() {
-        Some(existing) => existing.path != model_path || existing.policy_key != *provider_policy,
-        None => true,
-    };
-    if !should_reload {
-        return Ok(());
-    }
-
-    let session = onnx::build_session(model_path, provider_policy)?;
-    *model = Some(ModelSession {
-        path: model_path.to_string(),
-        policy_key: provider_policy.clone(),
-        session,
-    });
-    Ok(())
-}
-
-fn restore_requested_policy_keys(runtime: &mut MlRuntime, config: &MlRuntimeConfig) {
-    restore_model_policy_key(
-        &mut runtime.face_detection,
-        &config.model_paths.face_detection,
-        &config.provider_policy,
-    );
-    restore_model_policy_key(
-        &mut runtime.face_embedding,
-        &config.model_paths.face_embedding,
-        &config.provider_policy,
-    );
-    restore_model_policy_key(
-        &mut runtime.clip_image,
-        &config.model_paths.clip_image,
-        &config.provider_policy,
-    );
-    restore_model_policy_key(
-        &mut runtime.clip_text,
-        &config.model_paths.clip_text,
-        &config.provider_policy,
-    );
-}
-
-fn restore_model_policy_key(
-    model: &mut Option<ModelSession>,
-    model_path: &str,
-    requested_policy: &ExecutionProviderPolicy,
-) {
-    if model_path.trim().is_empty() {
-        return;
-    }
-
-    let Some(model) = model.as_mut() else {
-        return;
-    };
-
-    if model.path == model_path {
-        model.policy_key = requested_policy.clone();
-    }
 }

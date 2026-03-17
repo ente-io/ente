@@ -121,7 +121,6 @@
   "importAegisGuide": "Utilice la opción \"Exportar la bóveda\" en ajustes de Aegis.\n\nSi tu bóveda está cifrada, necesitaras introducir la contraseña de la bóveda para descifrarla.",
   "import2FasGuide": "Usa la opción \"Configuración→Copia de seguridad→Exportar\" en 2FAS\n\nSi tu copia de seguridad está cifrada, necesitará introducir la contraseña para descifrarla",
   "importLastpassGuide": "Utiliza la opción \"Transferir cuentas\" en la configuración del autenticador de Lastpass y pulse \"Exportar cuentas al archivo\". Importe el archivo JSON descargado.",
-  "importProtonAuthGuide": "Utilice la opción \"Exportar\" en la configuración del Autenticador de Proton para exportar sus códigos.",
   "exportCodes": "Exportar códigos",
   "importLabel": "Importar",
   "importInstruction": "Por favor, seleccione un archivo que contenga una lista de sus códigos en el siguiente formato",
