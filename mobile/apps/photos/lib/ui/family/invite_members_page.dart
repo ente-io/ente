@@ -104,14 +104,10 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                       ),
                     ),
                   ],
-                  if (_emails.isNotEmpty) const SizedBox(height: 16),
-                  for (final email in _emails) ...[
-                    _EmailChip(
-                      email: email,
-                      onRemove: () => _removeEmail(email),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
+                  _InviteEmailList(
+                    emails: _emails,
+                    onRemove: _removeEmail,
+                  ),
                 ],
               ),
             ),
@@ -426,6 +422,139 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InviteEmailList extends StatefulWidget {
+  const _InviteEmailList({
+    required this.emails,
+    required this.onRemove,
+  });
+
+  final List<String> emails;
+  final ValueChanged<String> onRemove;
+
+  @override
+  State<_InviteEmailList> createState() => _InviteEmailListState();
+}
+
+class _InviteEmailListState extends State<_InviteEmailList> {
+  static const _animationDuration = Duration(milliseconds: 200);
+
+  final _listKey = GlobalKey<AnimatedListState>();
+  late List<String> _displayedEmails = List<String>.from(widget.emails);
+
+  @override
+  void didUpdateWidget(covariant _InviteEmailList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncEmails();
+  }
+
+  void _syncEmails() {
+    final nextEmails = List<String>.from(widget.emails);
+    final nextEmailSet = nextEmails.toSet();
+
+    if (_listKey.currentState == null) {
+      setState(() {
+        _displayedEmails = nextEmails;
+      });
+      return;
+    }
+
+    for (var i = _displayedEmails.length - 1; i >= 0; i--) {
+      final email = _displayedEmails[i];
+      if (nextEmailSet.contains(email)) {
+        continue;
+      }
+
+      final removedEmail = _displayedEmails.removeAt(i);
+      _listKey.currentState!.removeItem(
+        i,
+        (context, animation) => _buildAnimatedEmailItem(
+          removedEmail,
+          animation,
+        ),
+        duration: _animationDuration,
+      );
+    }
+
+    for (var i = 0; i < nextEmails.length; i++) {
+      final nextEmail = nextEmails[i];
+      if (i < _displayedEmails.length && _displayedEmails[i] == nextEmail) {
+        continue;
+      }
+
+      final existingIndex = _displayedEmails.indexOf(nextEmail);
+      if (existingIndex != -1) {
+        setState(() {
+          _displayedEmails = nextEmails;
+        });
+        return;
+      }
+
+      _displayedEmails.insert(i, nextEmail);
+      _listKey.currentState!.insertItem(i, duration: _animationDuration);
+    }
+
+    setState(() {});
+  }
+
+  Widget _buildAnimatedEmailItem(String email, Animation<double> animation) {
+    final curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
+    return FadeTransition(
+      opacity: curvedAnimation,
+      child: SizeTransition(
+        sizeFactor: curvedAnimation,
+        axisAlignment: -1,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -0.04),
+            end: Offset.zero,
+          ).animate(curvedAnimation),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _EmailChip(
+              email: email,
+              onRemove: () => widget.onRemove(email),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: _animationDuration,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: _displayedEmails.isEmpty
+          ? const SizedBox(
+              height: 0,
+              width: double.infinity,
+            )
+          : Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: AnimatedList(
+                key: _listKey,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                initialItemCount: _displayedEmails.length,
+                itemBuilder: (context, index, animation) {
+                  return _buildAnimatedEmailItem(
+                    _displayedEmails[index],
+                    animation,
+                  );
+                },
+              ),
+            ),
     );
   }
 }
