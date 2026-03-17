@@ -155,7 +155,7 @@ pub struct RunClipTextResult {
 }
 
 pub fn init_ml_runtime(config: RustMlRuntimeConfig) -> Result<(), String> {
-    runtime::ensure_runtime(&to_runtime_config(&config)).map_err(|e| e.to_string())
+    runtime::prepare_runtime(&to_runtime_config(&config)).map_err(|e| e.to_string())
 }
 
 pub fn release_ml_runtime() -> Result<(), String> {
@@ -242,8 +242,18 @@ fn analyze_image_rust_inner(req: AnalyzeImageRequest) -> MlResult<AnalyzeImageRe
             }
 
             (
-                Some(pet_face_results.into_iter().map(to_api_pet_face_result).collect()),
-                Some(body_results.into_iter().map(to_api_pet_body_result).collect()),
+                Some(
+                    pet_face_results
+                        .into_iter()
+                        .map(to_api_pet_face_result)
+                        .collect(),
+                ),
+                Some(
+                    body_results
+                        .into_iter()
+                        .map(to_api_pet_body_result)
+                        .collect(),
+                ),
             )
         } else {
             (None, None)
@@ -437,12 +447,21 @@ fn to_api_pet_face_result(result: crate::ml::types::PetFaceResult) -> RustPetFac
                 .collect(),
         },
         alignment: RustPetAlignmentResult {
-            center: result.alignment.center.into_iter().map(|v| v as f64).collect(),
+            center: result
+                .alignment
+                .center
+                .into_iter()
+                .map(|v| v as f64)
+                .collect(),
             angle: result.alignment.angle as f64,
             crop_size: result.alignment.crop_size as f64,
         },
         species: result.species,
-        face_embedding: result.face_embedding.into_iter().map(|v| v as f64).collect(),
+        face_embedding: result
+            .face_embedding
+            .into_iter()
+            .map(|v| v as f64)
+            .collect(),
         pet_face_id: result.pet_face_id,
     }
 }
@@ -458,6 +477,10 @@ fn to_api_pet_body_result(result: crate::ml::types::PetBodyResult) -> RustPetBod
         score: result.detection.score as f64,
         coco_class: result.detection.coco_class,
         pet_body_id: result.pet_body_id,
-        body_embedding: result.body_embedding.into_iter().map(|v| v as f64).collect(),
+        body_embedding: result
+            .body_embedding
+            .into_iter()
+            .map(|v| v as f64)
+            .collect(),
     }
 }

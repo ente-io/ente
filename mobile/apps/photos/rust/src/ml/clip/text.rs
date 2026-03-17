@@ -2,13 +2,13 @@ use crate::ml::{
     clip::tokenizer,
     error::{MlError, MlResult},
     onnx,
-    runtime::MlRuntime,
+    runtime::MlRuntimeView,
     types::ClipResult,
 };
 
 const CLIP_TEXT_TOKEN_COUNT: usize = 77;
 
-pub fn run_clip_text(runtime: &MlRuntime, token_ids: &[i32]) -> MlResult<ClipResult> {
+pub fn run_clip_text(runtime: &MlRuntimeView<'_>, token_ids: &[i32]) -> MlResult<ClipResult> {
     if token_ids.len() != CLIP_TEXT_TOKEN_COUNT {
         return Err(MlError::InvalidRequest(format!(
             "clip text expects exactly {CLIP_TEXT_TOKEN_COUNT} tokens, got {}",
@@ -18,7 +18,7 @@ pub fn run_clip_text(runtime: &MlRuntime, token_ids: &[i32]) -> MlResult<ClipRes
 
     let clip_text = runtime.clip_text_session()?;
     let (shape, output) = onnx::run_i32_f32(
-        clip_text,
+        &clip_text,
         token_ids.to_vec(),
         [1, CLIP_TEXT_TOKEN_COUNT as i64],
     )?;
@@ -45,7 +45,7 @@ pub fn run_clip_text(runtime: &MlRuntime, token_ids: &[i32]) -> MlResult<ClipRes
 }
 
 pub fn run_clip_text_query(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     query: &str,
     vocab_path: &str,
 ) -> MlResult<ClipResult> {

@@ -1,7 +1,7 @@
 use crate::ml::{
     error::{MlError, MlResult},
     onnx,
-    runtime::MlRuntime,
+    runtime::MlRuntimeView,
     types::FaceResult,
 };
 
@@ -10,7 +10,7 @@ const FACE_INPUT_HEIGHT: i64 = 112;
 const FACE_INPUT_CHANNELS: i64 = 3;
 
 pub fn run_face_embedding(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [FaceResult],
 ) -> MlResult<()> {
@@ -40,7 +40,7 @@ pub fn run_face_embedding(
 
     let face_embedding = runtime.face_embedding_session()?;
     let (shape, output) = onnx::run_f32(
-        face_embedding,
+        &face_embedding,
         input,
         [
             aligned_faces.len() as i64,

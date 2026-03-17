@@ -313,12 +313,12 @@ Future<void> _ensureRustLoaded() async {
 }
 
 Future<void> _ensureRustDisposed() async {
-  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
-  if (loaded) {
-    await _releaseRustRuntime();
-    EntePhotosRust.dispose();
-    _isolateCache.remove(_rustLibLoadedCacheKey);
-  }
+  // Intentionally a no-op.
+  //
+  // Rust ML residency is owned by the feature isolate using it, not by the
+  // generic cache-clear path. This avoids disposing the bridge before
+  // MLIndexingIsolate has a chance to release its selective indexing-model
+  // residency during onDispose().
 }
 
 Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
@@ -384,7 +384,7 @@ Future<void> _releaseRustRuntime() async {
   try {
     await rust_ml.releaseMlRuntime();
   } catch (_) {
-    // no-op: runtime release is best-effort before process-wide bridge dispose.
+    // no-op: indexing-model release is best-effort.
   }
   _isolateCache.remove(_rustMlRuntimeConfigCacheKey);
 }

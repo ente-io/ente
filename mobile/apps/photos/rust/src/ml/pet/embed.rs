@@ -1,7 +1,7 @@
 use crate::ml::{
     error::{MlError, MlResult},
     onnx,
-    runtime::MlRuntime,
+    runtime::MlRuntimeView,
     types::{DecodedImage, PetBodyResult, PetFaceResult},
 };
 
@@ -25,7 +25,7 @@ const BODY_EMBED_CHANNELS: i64 = 3;
 /// Faces are grouped by species and batched per model to avoid running the
 /// wrong embedding model on any detection.
 pub fn run_pet_face_embedding(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     aligned_faces: &[Vec<f32>],
     face_results: &mut [PetFaceResult],
 ) -> MlResult<()> {
@@ -40,7 +40,8 @@ pub fn run_pet_face_embedding(
         )));
     }
 
-    let per_face_len = (FACE_EMBED_INPUT_SIZE * FACE_EMBED_INPUT_SIZE * FACE_EMBED_CHANNELS) as usize;
+    let per_face_len =
+        (FACE_EMBED_INPUT_SIZE * FACE_EMBED_INPUT_SIZE * FACE_EMBED_CHANNELS) as usize;
 
     // Group indices by species (class_id from detection).
     let mut dog_indices = Vec::new();
@@ -79,7 +80,7 @@ pub fn run_pet_face_embedding(
         };
 
         let (shape, output) = onnx::run_f32(
-            session,
+            &session,
             input,
             [
                 indices.len() as i64,
@@ -129,7 +130,7 @@ pub fn run_pet_face_embedding(
 ///
 /// This mirrors `pet_pipeline/embedding.py` `Embedder.embed_body()`.
 pub fn run_pet_body_embedding(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
     body_results: &mut [PetBodyResult],
 ) -> MlResult<()> {
@@ -147,8 +148,9 @@ pub fn run_pet_body_embedding(
     let mut cat_indices = Vec::new();
     let mut preprocessed: Vec<Option<Vec<f32>>> = Vec::with_capacity(body_results.len());
     for (i, body_result) in body_results.iter().enumerate() {
-        let crop = extract_crop(decoded, &body_result.detection.box_xyxy)
-            .and_then(|(crop_data, crop_w, crop_h)| preprocess_pet_embedding(&crop_data, crop_w, crop_h));
+        let crop = extract_crop(decoded, &body_result.detection.box_xyxy).and_then(
+            |(crop_data, crop_w, crop_h)| preprocess_pet_embedding(&crop_data, crop_w, crop_h),
+        );
         match crop {
             Ok(input) => {
                 preprocessed.push(Some(input));
@@ -182,7 +184,7 @@ pub fn run_pet_body_embedding(
         };
 
         let (shape, output) = onnx::run_f32(
-            session,
+            &session,
             input,
             [
                 indices.len() as i64,

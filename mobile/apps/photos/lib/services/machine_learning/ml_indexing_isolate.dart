@@ -47,6 +47,7 @@ class MLIndexingIsolate extends SuperIsolate {
 
   @override
   Future<void> onDispose() async {
+    await releaseRustRuntime();
     await _releaseModels();
   }
 
