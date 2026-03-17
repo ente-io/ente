@@ -21,6 +21,6 @@
         "ente-build-config": "*",
         "vite-plugin-wasm": "^3.2.4",
         "vitest": "^3.2.4",
-        "wasm-pack": "^0.13.1"
+        "wasm-pack": "^0.14.0"
     }
 }

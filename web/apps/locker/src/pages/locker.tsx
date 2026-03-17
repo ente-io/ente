@@ -1,12 +1,14 @@
 import AddIcon from "@mui/icons-material/Add";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
 import { LockerCollectionShareDrawer } from "components/LockerCollectionShareDrawer";
-import { LockerNavbar } from "components/LockerNavbar";
+import { LockerNavbar, LockerUnstableToast } from "components/LockerNavbar";
 import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
+import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -16,17 +18,16 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { masterKeyFromSession } from "ente-base/session";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Trans } from "react-i18next";
 import {
     isEnteProductionEndpoint,
     LOCKER_FILE_LIMIT_FREE,
     LOCKER_FILE_LIMIT_PAID,
 } from "services/locker-limits";
-import type { LockerFileShareLinkSummary } from "services/remote";
 import {
     createCollection as createCollectionAPI,
     createInfoItem,
@@ -34,7 +35,6 @@ import {
     emptyTrash as emptyTrashAPI,
     fetchCollectionSharees,
     fetchLockerData,
-    fetchLockerFileShareLinks,
     fetchLockerTrash,
     permanentlyDeleteFromTrash,
     renameCollection as renameCollectionAPI,
@@ -77,6 +77,10 @@ interface LockerUserDetailsResponse {
     };
 }
 
+type DragDataTransferItem = DataTransferItem & {
+    webkitGetAsEntry?: () => FileSystemEntry | null;
+};
+
 const hasPaidLockerAccess = (json: {
     subscription?: { productID?: string; expiryTime?: number };
     familyData?: { members?: unknown[] };
@@ -97,7 +101,28 @@ const hasPaidLockerAccess = (json: {
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
 
-const Page: React.FC = () => {
+const isLockerAppPath = (path: string) => {
+    const pathname = path.split("?")[0] ?? path;
+    return (
+        pathname === "/" ||
+        pathname === "/collections" ||
+        pathname === "/trash" ||
+        pathname === "/collection"
+    );
+};
+
+const getCollectionIDFromPath = (path: string) => {
+    const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
+    const id = searchParams.get("id");
+    if (id === null) {
+        return null;
+    }
+
+    const parsedID = Number.parseInt(id, 10);
+    return Number.isFinite(parsedID) ? parsedID : null;
+};
+
+export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
@@ -116,16 +141,14 @@ const Page: React.FC = () => {
 
     // View mode state
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
-    const [isTrashView, setIsTrashView] = useState(false);
-    const [isCollectionsView, setIsCollectionsView] = useState(false);
-
-    // Collection filter state
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(null);
+    const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [prefilledUploadFile, setPrefilledUploadFile] = useState<File | null>(
+        null,
+    );
     const [editItem, setEditItem] = useState<{
         id: number;
         type: LockerItemType;
@@ -138,9 +161,22 @@ const Page: React.FC = () => {
     const [shareCollectionID, setShareCollectionID] = useState<number | null>(
         null,
     );
-    const [fileShareLinksByFileID, setFileShareLinksByFileID] = useState(
-        new Map<number, LockerFileShareLinkSummary>(),
-    );
+    const [isDragActive, setIsDragActive] = useState(false);
+    const dragDepthRef = useRef(0);
+    const lockerRouteStackRef = useRef<string[]>([]);
+    const lockerRouteIndexRef = useRef(-1);
+    const isNavigatingBackRef = useRef(false);
+    const isProgrammaticLockerNavigationRef = useRef(false);
+    const routeCollectionID =
+        router.pathname === "/collection"
+            ? getCollectionIDFromPath(router.asPath)
+            : null;
+    const selectedCollectionID =
+        routeCollectionID !== null && Number.isFinite(routeCollectionID)
+            ? routeCollectionID
+            : null;
+    const isTrashView = router.pathname === "/trash";
+    const isCollectionsView = router.pathname === "/collections";
 
     const loadUserDetails = useCallback(async () => {
         try {
@@ -177,14 +213,14 @@ const Page: React.FC = () => {
             if (!key) return;
             try {
                 void loadUserDetails();
-                const [data, trash, fileLinks] = await Promise.all([
-                    fetchLockerData(key),
-                    fetchLockerTrash(key),
-                    fetchLockerFileShareLinks(),
-                ]);
+                // fetchLockerTrash depends on the encrypted caches populated by
+                // fetchLockerData; running both in parallel can race and drop
+                // trash key metadata needed for restore.
+                const data = await fetchLockerData(key);
+                const trash = await fetchLockerTrash(key);
                 setCollections(data);
-                setTrashItems(trash);
-                setFileShareLinksByFileID(fileLinks);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to refresh locker data", e);
@@ -196,10 +232,18 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
+        if (router.pathname !== "/locker") {
+            return;
+        }
+
+        void router.replace("/", undefined, { shallow: true });
+    }, [router]);
+
+    useEffect(() => {
         const load = async () => {
             const mk = await masterKeyFromSession();
             if (!mk) {
-                stashRedirect("/locker");
+                stashRedirect(router.asPath || "/");
                 void router.push("/login");
                 return;
             }
@@ -208,14 +252,13 @@ const Page: React.FC = () => {
             void loadUserDetails();
 
             try {
-                const [data, trash, fileLinks] = await Promise.all([
-                    fetchLockerData(mk),
-                    fetchLockerTrash(mk),
-                    fetchLockerFileShareLinks(),
-                ]);
+                // See note in refreshData: fetchLockerTrash must run after
+                // fetchLockerData has populated encrypted caches.
+                const data = await fetchLockerData(mk);
+                const trash = await fetchLockerTrash(mk);
                 setCollections(data);
-                setTrashItems(trash);
-                setFileShareLinksByFileID(fileLinks);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to fetch locker data", e);
@@ -232,26 +275,122 @@ const Page: React.FC = () => {
         void load();
     }, [loadUserDetails, router, logout, showMiniDialog]);
 
-    const handleSelectCollection = useCallback((id: number | null) => {
-        setSelectedCollectionID(id);
-        setIsTrashView(false);
-        setIsCollectionsView(false);
+    useEffect(() => {
+        if (!router.isReady || !isLockerAppPath(router.asPath)) {
+            return;
+        }
+
+        const routeStack = lockerRouteStackRef.current;
+        const currentIndex = lockerRouteIndexRef.current;
+        const currentPath = router.asPath;
+
+        if (isNavigatingBackRef.current) {
+            isNavigatingBackRef.current = false;
+            const previousIndex = routeStack.lastIndexOf(currentPath);
+            if (previousIndex >= 0) {
+                lockerRouteIndexRef.current = previousIndex;
+            } else {
+                routeStack.push(currentPath);
+                lockerRouteIndexRef.current = routeStack.length - 1;
+            }
+            return;
+        }
+
+        if (routeStack.length === 0) {
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = 0;
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (currentIndex >= 0 && routeStack[currentIndex] === currentPath) {
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (isProgrammaticLockerNavigationRef.current) {
+            isProgrammaticLockerNavigationRef.current = false;
+            routeStack.splice(currentIndex + 1);
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = routeStack.length - 1;
+            return;
+        }
+
+        const existingIndex = routeStack.lastIndexOf(currentPath);
+        if (existingIndex >= 0) {
+            lockerRouteIndexRef.current = existingIndex;
+            return;
+        }
+
+        routeStack.splice(currentIndex + 1);
+        routeStack.push(currentPath);
+        lockerRouteIndexRef.current = routeStack.length - 1;
+    }, [router.asPath, router.isReady]);
+
+    useEffect(() => {
+        if (
+            router.pathname === "/collection" &&
+            router.isReady &&
+            routeCollectionID === null
+        ) {
+            void router.replace("/", undefined, { shallow: true });
+        }
+    }, [routeCollectionID, router]);
+
+    const navigateHome = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/", undefined, { shallow: true });
+    }, [router]);
+
+    const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
-    }, []);
+
+        const currentIndex = lockerRouteIndexRef.current;
+        if (currentIndex > 0) {
+            lockerRouteIndexRef.current = currentIndex - 1;
+            isNavigatingBackRef.current = true;
+            router.back();
+            return;
+        }
+
+        if (router.asPath !== "/") {
+            lockerRouteStackRef.current = [router.asPath, "/"];
+            lockerRouteIndexRef.current = 1;
+            isNavigatingBackRef.current = true;
+            isProgrammaticLockerNavigationRef.current = true;
+            void router.push("/", undefined, { shallow: true });
+            return;
+        }
+    }, [router]);
+
+    const handleSelectCollection = useCallback(
+        (id: number | null) => {
+            if (id === null) {
+                navigateHome();
+            } else {
+                isProgrammaticLockerNavigationRef.current = true;
+                void router.push(
+                    { pathname: "/collection", query: { id: String(id) } },
+                    undefined,
+                    { shallow: true },
+                );
+            }
+            setSidebarOpen(false);
+        },
+        [navigateHome, router],
+    );
 
     const handleSelectCollections = useCallback(() => {
-        setIsCollectionsView(true);
-        setIsTrashView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/collections", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const handleSelectTrash = useCallback(() => {
-        setIsTrashView(true);
-        setIsCollectionsView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/trash", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const isHomeView =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
@@ -297,9 +436,20 @@ const Page: React.FC = () => {
         (item: LockerItem) => {
             showMiniDialog({
                 title: t("delete"),
-                message: t("deleteFileConfirmation", {
-                    fileName: getItemTitle(item),
-                }),
+                message: (
+                    <Trans
+                        i18nKey="deleteFileConfirmation"
+                        values={{ fileName: getItemTitle(item) }}
+                        components={{
+                            strong: (
+                                <Box
+                                    component="span"
+                                    sx={{ fontWeight: 700, color: "text.base" }}
+                                />
+                            ),
+                        }}
+                    />
+                ),
                 continue: {
                     text: t("delete"),
                     color: "critical",
@@ -401,7 +551,11 @@ const Page: React.FC = () => {
     const handleRestoreItem = useCallback(
         async (item: LockerItem, collectionID: number) => {
             if (!masterKey) return;
-            await restoreFromTrash([item.id], collectionID, masterKey);
+            await restoreFromTrash(
+                [{ id: item.id, collectionID: item.collectionID }],
+                collectionID,
+                masterKey,
+            );
             await refreshData();
             setToast(t("filesRestoredSuccessfully", { count: 1 }));
         },
@@ -410,19 +564,19 @@ const Page: React.FC = () => {
 
     const handleEmptyTrash = useCallback(() => {
         showMiniDialog({
-            title: t("empty_trash"),
-            message: t("confirm_empty_trash"),
+            title: t("empty_trash_title"),
+            message: t("empty_trash_message"),
             continue: {
                 text: t("empty_trash"),
                 color: "critical",
                 action: async () => {
-                    await emptyTrashAPI();
+                    await emptyTrashAPI(trashLastUpdatedAt);
                     await refreshData();
                     setToast(t("trashClearedSuccessfully"));
                 },
             },
         });
-    }, [showMiniDialog, refreshData]);
+    }, [showMiniDialog, refreshData, trashLastUpdatedAt]);
 
     // Collection management
 
@@ -435,6 +589,98 @@ const Page: React.FC = () => {
             return id;
         },
         [masterKey, refreshData],
+    );
+
+    const handleCreateDialogClose = useCallback(() => {
+        setCreateDialogOpen(false);
+        setPrefilledUploadFile(null);
+    }, []);
+
+    const openUploadDialogForFile = useCallback((file: File) => {
+        setPrefilledUploadFile(file);
+        setCreateDialogOpen(true);
+    }, []);
+
+    const openCreateDialog = useCallback(() => {
+        setPrefilledUploadFile(null);
+        setCreateDialogOpen(true);
+    }, []);
+
+    const handleDragEnter = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current += 1;
+            setIsDragActive(true);
+        },
+        [],
+    );
+
+    const handleDragOver = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = "copy";
+        },
+        [],
+    );
+
+    const handleDragLeave = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+            if (dragDepthRef.current === 0) {
+                setIsDragActive(false);
+            }
+        },
+        [],
+    );
+
+    const handleDrop = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = 0;
+            setIsDragActive(false);
+
+            const droppedFiles = Array.from(event.dataTransfer.files);
+            const droppedItems = Array.from(
+                event.dataTransfer.items,
+            ) as DragDataTransferItem[];
+            const [droppedItem] = droppedItems;
+
+            if (droppedFiles.length !== 1) {
+                return;
+            }
+
+            if (
+                droppedItems.length > 0 &&
+                (droppedItems.length !== 1 ||
+                    droppedItem === undefined ||
+                    droppedItem.kind !== "file" ||
+                    droppedItem.webkitGetAsEntry()?.isDirectory)
+            ) {
+                return;
+            }
+
+            const [file] = droppedFiles;
+            if (!file) {
+                return;
+            }
+
+            openUploadDialogForFile(file);
+        },
+        [openUploadDialogForFile],
     );
 
     const handleRenameCollection = useCallback(
@@ -460,14 +706,14 @@ const Page: React.FC = () => {
                     color: "critical",
                     action: async () => {
                         await deleteCollectionAPI(collectionID);
-                        setSelectedCollectionID(null);
+                        navigateHome();
                         await refreshData();
                         setToast(t("collectionDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [collections, showMiniDialog, refreshData],
+        [collections, navigateHome, refreshData, showMiniDialog],
     );
 
     const handleOpenShareCollection = useCallback(
@@ -502,8 +748,14 @@ const Page: React.FC = () => {
             : (collections.find(
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
+    const isCollectionRoutePending =
+        router.pathname === "/collection" &&
+        (router.asPath.split("?")[0] ?? router.asPath) === "/collection" &&
+        !router.isReady;
+    const isViewLoading =
+        !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
-    if (!hasFetched || !isLockerI18nReady) {
+    if (isViewLoading) {
         return <LoadingIndicator />;
     }
     if (initialLoadError && collections.length === 0) {
@@ -512,7 +764,10 @@ const Page: React.FC = () => {
                 <LockerNavbar
                     onOpenSidebar={() => setSidebarOpen(true)}
                     showMenuButton
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
                 />
+                <LockerUnstableToast />
                 <Box
                     sx={{
                         flex: 1,
@@ -548,11 +803,20 @@ const Page: React.FC = () => {
     }
 
     return (
-        <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+        <Stack
+            sx={{ height: "100dvh", overflow: "hidden", position: "relative" }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
             />
+            <LockerUnstableToast />
             <Box
                 sx={{
                     flex: 1,
@@ -569,7 +833,6 @@ const Page: React.FC = () => {
                     isTrashView={isTrashView}
                     isCollectionsView={isCollectionsView}
                     selectedCollectionID={selectedCollectionID}
-                    fileShareLinksByFileID={fileShareLinksByFileID}
                     onSelectCollection={handleSelectCollection}
                     onEditItem={handleEditItem}
                     onDeleteItem={handleDeleteItem}
@@ -581,6 +844,8 @@ const Page: React.FC = () => {
                     onDeleteCollection={handleDeleteCollection}
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
+                    searchTerm={searchTerm}
+                    onNavigateBack={handleNavigateBack}
                 />
             </Box>
             <LockerSidebar
@@ -610,7 +875,7 @@ const Page: React.FC = () => {
                 <Fab
                     color="primary"
                     aria-label={t("saveToLocker")}
-                    onClick={() => setCreateDialogOpen(true)}
+                    onClick={openCreateDialog}
                     sx={{
                         position: "fixed",
                         right: "max(24px, env(safe-area-inset-right))",
@@ -618,6 +883,7 @@ const Page: React.FC = () => {
                         width: 72,
                         height: 72,
                         minHeight: 72,
+                        color: "#FFFFFF",
                         background:
                             "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
                         boxShadow: "0 16px 40px rgba(0, 66, 173, 0.32)",
@@ -636,12 +902,13 @@ const Page: React.FC = () => {
             {/* Create dialog */}
             <CreateItemDialog
                 open={createDialogOpen}
-                onClose={() => setCreateDialogOpen(false)}
+                onClose={handleCreateDialogClose}
                 collections={collections}
                 onSave={handleCreateItem}
                 onUploadFile={handleUploadFile}
                 onCreateCollection={handleCreateCollection}
                 defaultCollectionID={selectedCollectionID}
+                initialFile={prefilledUploadFile}
             />
 
             {/* Edit dialog */}
@@ -662,8 +929,59 @@ const Page: React.FC = () => {
                 autoHideDuration={3000}
                 onClose={() => setToast(null)}
             />
+            {isDragActive && (
+                <Box
+                    sx={(theme) => ({
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 1600,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        pointerEvents: "none",
+                        backgroundColor: "rgba(8, 9, 10, 0.58)",
+                        backdropFilter: "blur(8px)",
+                        ...theme.applyStyles("light", {
+                            backgroundColor: "rgba(241, 245, 249, 0.78)",
+                        }),
+                    })}
+                >
+                    <Box
+                        sx={(theme) => ({
+                            width: "min(520px, calc(100vw - 48px))",
+                            px: 4,
+                            py: 5,
+                            borderRadius: "24px",
+                            border: "2px dashed rgba(127, 179, 255, 0.48)",
+                            background:
+                                "linear-gradient(180deg, rgba(16, 113, 255, 0.16) 0%, rgba(16, 113, 255, 0.08) 100%)",
+                            boxShadow: "0 20px 48px rgba(0, 0, 0, 0.26)",
+                            textAlign: "center",
+                            ...theme.applyStyles("light", {
+                                background:
+                                    "linear-gradient(180deg, rgba(16, 113, 255, 0.10) 0%, rgba(16, 113, 255, 0.06) 100%)",
+                                boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
+                            }),
+                        })}
+                    >
+                        <CloudUploadOutlinedIcon
+                            sx={{
+                                fontSize: 44,
+                                color: "primary.main",
+                                mb: 1.5,
+                            }}
+                        />
+                        <Typography variant="h4" sx={{ mb: 0.75 }}>
+                            {t("saveDocumentTitle")}
+                        </Typography>
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            {t("clickHereToUpload")}
+                        </Typography>
+                    </Box>
+                </Box>
+            )}
         </Stack>
     );
 };
 
-export default Page;
+export default LockerPage;

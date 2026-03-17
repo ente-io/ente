@@ -614,6 +614,14 @@
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
+  "uploadSubscriptionExpiredErrorTitle": "Tu suscripción ha caducado",
+  "@uploadSubscriptionExpiredErrorTitle": {
+    "description": "Title shown when uploads fail because the Photos subscription is expired"
+  },
+  "uploadSubscriptionExpiredErrorBody": "Tu suscripción de Ente Photos ha caducado. Renueva tu suscripción para seguir subiendo archivos.",
+  "@uploadSubscriptionExpiredErrorBody": {
+    "description": "Body shown when uploads fail because the Photos subscription is expired"
+  },
   "uploadFileCountLimitErrorTitle": "Limite de archivos alcanzado",
   "@uploadFileCountLimitErrorTitle": {
     "description": "Title shown when uploads fail because the locker already has the maximum file count"
@@ -1023,5 +1031,7 @@
   "usageFamily": "Familia",
   "searchSettings": "Ajustes de búsqueda",
   "suggestions": "Sugerencias",
-  "noResultsFound": "No se han encontrado resultados"
+  "noResultsFound": "No se han encontrado resultados",
+  "viewActiveSessions": "Ver sesiones activas",
+  "authToViewYourActiveSessions": "Por favor, autentícate para ver tus sesiones activas"
 }

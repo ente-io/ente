@@ -16,10 +16,6 @@ import {
     type Session,
 } from "ente-accounts-rs/services/sessions";
 import { RowButton, RowButtonGroup } from "ente-base/components/RowButton";
-import {
-    TitledNestedSidebarDrawer,
-    type NestedSidebarDrawerVisibilityProps,
-} from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { isHTTP401Error } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
@@ -27,9 +23,13 @@ import log from "ente-base/log";
 import { savedAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
+import {
+    LockerTitledNestedSidebarDrawer,
+    type LockerNestedSidebarDrawerVisibilityProps,
+} from "./LockerSidebarShell";
 
 export const LockerSessionsDrawer: React.FC<
-    NestedSidebarDrawerVisibilityProps
+    LockerNestedSidebarDrawerVisibilityProps
 > = ({ open, onClose, onRootClose }) => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -39,10 +39,11 @@ export const LockerSessionsDrawer: React.FC<
     };
 
     return (
-        <TitledNestedSidebarDrawer
+        <LockerTitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
             title={t("active_sessions")}
+            hideRootCloseButton
             actionButton={
                 <IconButton
                     onClick={() => setRefreshTrigger((value) => value + 1)}
@@ -54,7 +55,7 @@ export const LockerSessionsDrawer: React.FC<
             }
         >
             <SessionsContents refreshTrigger={refreshTrigger} />
-        </TitledNestedSidebarDrawer>
+        </LockerTitledNestedSidebarDrawer>
     );
 };
 

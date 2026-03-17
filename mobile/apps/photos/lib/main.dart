@@ -78,10 +78,11 @@ final _backgroundRunHelper = BackgroundRunHelper(
   isRunningInForeground: _isRunningInForeground,
   isAnotherBackgroundRunAlive: _isAnotherBackgroundRunAlive,
 );
+bool _isRustInitialized = false;
+Future<void>? _rustInitFuture;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isIOS) {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -169,6 +170,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await _scheduleHeartBeat(prefs, true);
+  await _ensureRustInitialized(via: 'workmanager:$taskId');
 
   _logger.fine("Configuration init $tlog");
   await Configuration.instance.init();
@@ -241,6 +243,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
+    await _ensureRustInitialized(
+      via: isBackground ? 'background:$via' : 'foreground:$via',
+    );
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
@@ -342,6 +347,27 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
+  }
+}
+
+Future<void> _ensureRustInitialized({required String via}) async {
+  if (_isRustInitialized) {
+    return;
+  }
+  final inFlightInit = _rustInitFuture;
+  if (inFlightInit != null) {
+    await inFlightInit;
+    return;
+  }
+
+  _logger.info("Initializing Rust bridge via $via");
+  final initFuture = EntePhotosRust.init();
+  _rustInitFuture = initFuture;
+  try {
+    await initFuture;
+    _isRustInitialized = true;
+  } finally {
+    _rustInitFuture = null;
   }
 }
 

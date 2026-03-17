@@ -121,7 +121,6 @@
   "importAegisGuide": "Употребити \"Export the vault\" из Aegis-а.\n\nАко је сеф шифрован, мораћете унети лозинку сефа да би га дешифровали.",
   "import2FasGuide": "Употребити \"Settings->Backup -Export\" из 2FAS-а.\n\nАко је ваша копија шифрирана, мораћете да унесете лозинку за дешифрирање копије",
   "importLastpassGuide": "Употребити \"Transfer accounts\" из Lastpass Authenticator и стисните \"Export accounts to file\". Унесите преузет JSON.",
-  "importProtonAuthGuide": "Користите опцију „Извоз“ у подешавањима Proton Authenticator да бисте извезли своје кодове.",
   "exportCodes": "Извоз кôдова",
   "importLabel": "Увоз",
   "importInstruction": "Изаберите датотеку која садржи списак ваших кôдова у следећем формату",

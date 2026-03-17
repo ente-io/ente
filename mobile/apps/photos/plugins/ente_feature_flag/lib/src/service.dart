@@ -99,6 +99,8 @@ class FlagService {
 
   bool get useRustForFaceThumbnails => internalUser;
 
+  bool get petEnabled => internalUser;
+
   bool get qrFeatureEnabled => internalUser;
 
   bool get enableIOSUploadBackgroundHandoff => internalUser;
@@ -121,6 +123,7 @@ class FlagService {
     SharedPreferences prefs,
   ) =>
       isInternalUserForPrefs(prefs);
+  bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {

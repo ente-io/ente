@@ -1,12 +1,13 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import {
@@ -18,7 +19,8 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    InputAdornment,
+    Menu,
+    MenuItem,
     Snackbar,
     Stack,
     TextField,
@@ -31,7 +33,6 @@ import {
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import { isHTTPErrorWithStatus } from "ente-base/http";
-import { formattedDate } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
@@ -39,7 +40,6 @@ import {
     deleteLockerFileShareLink,
     downloadLockerFile,
     getOrCreateLockerFileShareLink,
-    type LockerFileShareLinkSummary,
 } from "services/remote";
 import type { LockerCollection, LockerItem } from "types";
 import {
@@ -54,6 +54,18 @@ import {
 import { ItemCard } from "./ItemCard";
 import { ItemDetailView } from "./ItemDetailView";
 import { LockerFileLinkDialog } from "./LockerFileLinkDialog";
+import { lockerDialogPaperSx } from "./lockerDialogStyles";
+
+const uniqueCollectionsByID = (collections: LockerCollection[]) => {
+    const seen = new Set<number>();
+    return collections.filter((collection) => {
+        if (seen.has(collection.id)) {
+            return false;
+        }
+        seen.add(collection.id);
+        return true;
+    });
+};
 
 interface ItemListProps {
     collections: LockerCollection[];
@@ -62,7 +74,6 @@ interface ItemListProps {
     isTrashView: boolean;
     isCollectionsView: boolean;
     selectedCollectionID: number | null;
-    fileShareLinksByFileID: Map<number, LockerFileShareLinkSummary>;
     onSelectCollection: (id: number | null) => void;
     onEditItem?: (item: LockerItem) => void;
     onDeleteItem?: (item: LockerItem) => void;
@@ -74,7 +85,11 @@ interface ItemListProps {
     onDeleteCollection?: (collectionID: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
     onShareCollection?: (collection: LockerCollection) => void;
+    searchTerm: string;
+    onNavigateBack?: () => void;
 }
+
+const contentMaxWidth = 560;
 
 export const ItemList: React.FC<ItemListProps> = ({
     collections,
@@ -83,7 +98,6 @@ export const ItemList: React.FC<ItemListProps> = ({
     isTrashView,
     isCollectionsView,
     selectedCollectionID,
-    fileShareLinksByFileID,
     onSelectCollection,
     onEditItem,
     onDeleteItem,
@@ -95,9 +109,10 @@ export const ItemList: React.FC<ItemListProps> = ({
     onDeleteCollection,
     onCreateCollection,
     onShareCollection,
+    searchTerm,
+    onNavigateBack,
 }) => {
     const currentUserID = ensureLocalUser().id;
-    const [searchTerm, setSearchTerm] = useState("");
     const [selectedItem, setSelectedItem] = useState<LockerItem | null>(null);
     const [restoreItem, setRestoreItem] = useState<LockerItem | null>(null);
     const [restoreCollectionID, setRestoreCollectionID] = useState<
@@ -116,6 +131,8 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [homeSelectedCollectionIDs, setHomeSelectedCollectionIDs] = useState<
         number[]
     >([]);
+    const [collectionFilterAnchorEl, setCollectionFilterAnchorEl] =
+        useState<HTMLElement | null>(null);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedItemIDs, setSelectedItemIDs] = useState<number[]>([]);
     const [bulkDownloading, setBulkDownloading] = useState(false);
@@ -132,16 +149,9 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [isCreatingFileLink, setIsCreatingFileLink] = useState(false);
     const [isDeletingFileLink, setIsDeletingFileLink] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-    const [knownFileShareLinksByID, setKnownFileShareLinksByID] = useState(
-        fileShareLinksByFileID,
-    );
-
-    React.useEffect(() => {
-        setKnownFileShareLinksByID(fileShareLinksByFileID);
-    }, [fileShareLinksByFileID]);
 
     const displayCollections = useMemo(
-        () => visibleLockerCollections(collections),
+        () => uniqueCollectionsByID(visibleLockerCollections(collections)),
         [collections],
     );
     const allItems = useMemo(() => {
@@ -177,17 +187,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                   ) ?? null),
         [collections, selectedCollectionID],
     );
-    const collectionNameByID = useMemo(
-        () =>
-            new Map(
-                collections.map((collection) => [
-                    collection.id,
-                    collection.name,
-                ]),
-            ),
-        [collections],
-    );
-
     const trimmedSearch = searchTerm.trim();
     const searchQuery = trimmedSearch.toLowerCase();
     const searchActive = searchQuery.length > 0;
@@ -257,6 +256,42 @@ export const ItemList: React.FC<ItemListProps> = ({
             ),
         );
     }, [homeSelectedCollectionIDs, isHomeView, sortedItems]);
+    const orderedHomeCollections = useMemo(() => {
+        if (!isHomeView || homeSelectedCollectionIDs.length === 0) {
+            return displayCollections;
+        }
+
+        const selectedCollectionIDSet = new Set(homeSelectedCollectionIDs);
+        const availableCollectionIDs = new Set<number>();
+        for (const item of homeFilteredItems) {
+            for (const collectionID of item.collectionIDs) {
+                availableCollectionIDs.add(collectionID);
+            }
+        }
+        for (const collectionID of homeSelectedCollectionIDs) {
+            availableCollectionIDs.add(collectionID);
+        }
+
+        const selectedCollections = displayCollections.filter((collection) =>
+            selectedCollectionIDSet.has(collection.id),
+        );
+        const remainingCollections = displayCollections.filter(
+            (collection) =>
+                availableCollectionIDs.has(collection.id) &&
+                !selectedCollectionIDSet.has(collection.id),
+        );
+
+        return [...selectedCollections, ...remainingCollections];
+    }, [
+        displayCollections,
+        homeFilteredItems,
+        homeSelectedCollectionIDs,
+        isHomeView,
+    ]);
+    const dropdownHomeCollections = useMemo(
+        () => displayCollections,
+        [displayCollections],
+    );
     const visibleItems = useMemo(() => {
         if (isCollectionsView) {
             return [];
@@ -361,42 +396,6 @@ export const ItemList: React.FC<ItemListProps> = ({
             onShareCollection(selectedCollection);
         }
     }, [onShareCollection, selectedCollection]);
-    const itemTypeLabel = useCallback((item: LockerItem) => {
-        switch (item.type) {
-            case "note":
-                return t("personalNote");
-            case "accountCredential":
-                return t("secret");
-            case "physicalRecord":
-                return t("thing");
-            case "emergencyContact":
-                return t("emergencyContact");
-            case "file":
-                return t("document");
-        }
-    }, []);
-    const getItemSecondaryText = useCallback(
-        (item: LockerItem) => {
-            const parts = [itemTypeLabel(item)];
-            if (selectedCollectionID === null) {
-                const collectionName = collectionNameByID.get(
-                    item.collectionID,
-                );
-                if (collectionName) {
-                    parts.push(collectionName);
-                }
-            }
-            if (item.updatedAt ?? item.createdAt) {
-                parts.push(
-                    formattedDate(
-                        new Date((item.updatedAt ?? item.createdAt!) / 1000),
-                    ),
-                );
-            }
-            return parts.join(" • ");
-        },
-        [collectionNameByID, itemTypeLabel, selectedCollectionID],
-    );
     const toggleHomeCollection = useCallback((collectionID: number) => {
         setHomeSelectedCollectionIDs((current) =>
             current.includes(collectionID)
@@ -406,6 +405,15 @@ export const ItemList: React.FC<ItemListProps> = ({
     }, []);
     const clearHomeCollectionSelection = useCallback(() => {
         setHomeSelectedCollectionIDs([]);
+    }, []);
+    const openCollectionFilterMenu = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            setCollectionFilterAnchorEl(event.currentTarget);
+        },
+        [],
+    );
+    const closeCollectionFilterMenu = useCallback(() => {
+        setCollectionFilterAnchorEl(null);
     }, []);
     const startSelectionModeForItem = useCallback((item: LockerItem) => {
         setSelectionMode(true);
@@ -457,17 +465,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                     masterKey,
                 );
                 setActiveFileLink(link);
-                setKnownFileShareLinksByID((current) => {
-                    const next = new Map(current);
-                    next.set(item.id, {
-                        linkID: link.linkID,
-                        fileID: item.id,
-                        validTill: link.validTill,
-                        enableDownload: link.enableDownload ?? true,
-                        passwordEnabled: link.passwordEnabled ?? false,
-                    });
-                    return next;
-                });
             } catch (error) {
                 log.error(
                     `Failed to create share link for file ${item.id}`,
@@ -537,11 +534,6 @@ export const ItemList: React.FC<ItemListProps> = ({
                 activeFileLinkItem.id,
                 activeFileLink?.linkID,
             );
-            setKnownFileShareLinksByID((current) => {
-                const next = new Map(current);
-                next.delete(activeFileLinkItem.id);
-                return next;
-            });
             setFeedbackMessage(t("shareLinkDeletedSuccessfully"));
             setActiveFileLinkItem(null);
             setActiveFileLink(null);
@@ -658,73 +650,29 @@ export const ItemList: React.FC<ItemListProps> = ({
             sx={{ flex: 1, minHeight: 0, overflow: "hidden", height: "100%" }}
         >
             <Box
-                sx={{
+                sx={(theme) => ({
                     flex: 1,
                     minHeight: 0,
                     overflowY: "auto",
                     overscrollBehavior: "contain",
                     WebkitOverflowScrolling: "touch",
-                }}
+                    backgroundColor: "#08090A",
+                    ...theme.applyStyles("light", {
+                        backgroundColor: "#F3F4F6",
+                    }),
+                })}
             >
                 <Box
-                    sx={{
-                        background:
-                            "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)",
-                        px: { xs: 2, sm: 3 },
-                        pb: 1.75,
-                        pt: 0.25,
-                    }}
-                >
-                    <Box sx={{ maxWidth: 760 }}>
-                        <TextField
-                            size="small"
-                            placeholder={t("searchHint")}
-                            value={searchTerm}
-                            onChange={(event) =>
-                                setSearchTerm(event.target.value)
-                            }
-                            variant="outlined"
-                            fullWidth
-                            slotProps={{
-                                input: {
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon
-                                                sx={{
-                                                    fontSize: 20,
-                                                    color: "text.faint",
-                                                }}
-                                            />
-                                        </InputAdornment>
-                                    ),
-                                },
-                            }}
-                            sx={{
-                                "& .MuiOutlinedInput-root": {
-                                    borderRadius: "24px",
-                                    backgroundColor: "background.paper",
-                                    "& fieldset": {
-                                        borderColor: "transparent",
-                                    },
-                                    "&:hover fieldset": {
-                                        borderColor: "transparent",
-                                    },
-                                    "&.Mui-focused fieldset": {
-                                        borderColor: "primary.main",
-                                    },
-                                },
-                            }}
-                        />
-                    </Box>
-                </Box>
-
-                <Box
-                    sx={{
+                    sx={(theme) => ({
                         px: { xs: 2, sm: 3 },
                         pb: isTrashView
                             ? 3
                             : "calc(env(safe-area-inset-bottom) + 120px)",
-                    }}
+                        backgroundColor: "#08090A",
+                        ...theme.applyStyles("light", {
+                            backgroundColor: "#F3F4F6",
+                        }),
+                    })}
                 >
                     {isHomeView && (
                         <>
@@ -739,48 +687,54 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 <Stack
                                     direction="row"
                                     sx={{
-                                        maxWidth: 760,
+                                        width: "100%",
+                                        maxWidth: contentMaxWidth,
+                                        mx: "auto",
                                         alignItems: "center",
-                                        gap: 1,
+                                        gap: 0.75,
                                         mt: -0.25,
                                         mb: 1.75,
+                                        minWidth: 0,
                                     }}
                                 >
-                                    <CollectionChipFilters
-                                        collections={displayCollections}
-                                        selectedCollectionIDs={
-                                            homeSelectedCollectionIDs
+                                    <CollectionFilterChip
+                                        selected={
+                                            homeSelectedCollectionIDs.length > 0
                                         }
-                                        onToggleCollection={
-                                            toggleHomeCollection
-                                        }
+                                        onClick={openCollectionFilterMenu}
                                     />
-                                    {homeSelectedCollectionIDs.length > 0 && (
-                                        <Tooltip title={t("clearSelection")}>
-                                            <IconButton
-                                                size="small"
-                                                onClick={
-                                                    clearHomeCollectionSelection
-                                                }
-                                                sx={{
-                                                    width: 32,
-                                                    height: 32,
-                                                    color: "text.muted",
-                                                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                                                    backgroundColor:
-                                                        "rgba(255, 255, 255, 0.035)",
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "rgba(255, 255, 255, 0.065)",
-                                                    },
-                                                }}
-                                            >
-                                                <ClearRoundedIcon
-                                                    sx={{ fontSize: 18 }}
-                                                />
-                                            </IconButton>
-                                        </Tooltip>
-                                    )}
+                                    <Box
+                                        key={orderedHomeCollections
+                                            .map((collection) => collection.id)
+                                            .join("-")}
+                                        sx={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            "@keyframes chipBarRefresh": {
+                                                "0%": {
+                                                    opacity: 0.7,
+                                                    transform:
+                                                        "translateY(2px)",
+                                                },
+                                                "100%": {
+                                                    opacity: 1,
+                                                    transform: "translateY(0)",
+                                                },
+                                            },
+                                            animation:
+                                                "chipBarRefresh 220ms ease-out",
+                                        }}
+                                    >
+                                        <CollectionChipFilters
+                                            collections={orderedHomeCollections}
+                                            selectedCollectionIDs={
+                                                homeSelectedCollectionIDs
+                                            }
+                                            onToggleCollection={
+                                                toggleHomeCollection
+                                            }
+                                        />
+                                    </Box>
                                 </Stack>
                             )}
 
@@ -795,11 +749,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -835,6 +787,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerCollectionsCount", {
                                     count: displayCollections.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     onCreateCollection ? (
                                         <Tooltip
@@ -878,16 +831,22 @@ export const ItemList: React.FC<ItemListProps> = ({
                             />
 
                             {displayCollections.length > 0 ? (
-                                <CollectionGrid
-                                    collections={displayCollections}
-                                    onSelectCollection={onSelectCollection}
-                                    onShareCollection={onShareCollection}
-                                    onRequestRenameCollection={(collection) => {
-                                        setRenameCollectionID(collection.id);
-                                        setRenameValue(collection.name);
-                                    }}
-                                    onDeleteCollection={onDeleteCollection}
-                                />
+                                <Box sx={{ mt: 1.25 }}>
+                                    <CollectionGrid
+                                        collections={displayCollections}
+                                        onSelectCollection={onSelectCollection}
+                                        onShareCollection={onShareCollection}
+                                        onRequestRenameCollection={(
+                                            collection,
+                                        ) => {
+                                            setRenameCollectionID(
+                                                collection.id,
+                                            );
+                                            setRenameValue(collection.name);
+                                        }}
+                                        onDeleteCollection={onDeleteCollection}
+                                    />
+                                </Box>
                             ) : (
                                 <EmptyState
                                     title={t("noCollections")}
@@ -945,11 +904,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={openFileLinkDialog}
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -980,6 +937,7 @@ export const ItemList: React.FC<ItemListProps> = ({
                                 countLabel={t("lockerItemsCount", {
                                     count: sortedItems.length,
                                 })}
+                                onBack={onNavigateBack}
                                 action={
                                     <Stack
                                         direction="row"
@@ -1064,13 +1022,11 @@ export const ItemList: React.FC<ItemListProps> = ({
                                     setRestoreItem(item);
                                     setRestoreCollectionID(null);
                                 }}
-                                getSecondaryText={getItemSecondaryText}
                                 onSelectItem={setSelectedItem}
                                 currentUserID={currentUserID}
                                 onShareLink={
                                     isTrashView ? undefined : openFileLinkDialog
                                 }
-                                fileShareLinksByFileID={knownFileShareLinksByID}
                                 selectionMode={selectionMode}
                                 selectedItemIDSet={selectedItemIDSet}
                                 onToggleItemSelection={toggleItemSelection}
@@ -1111,7 +1067,9 @@ export const ItemList: React.FC<ItemListProps> = ({
                     canDownload={
                         !!masterKey && selectedDownloadableItems.length > 0
                     }
-                    canDelete={!!onDeleteItems && selectedOwnedItems.length > 0}
+                    canDelete={
+                        !!onDeleteItems && selectedVisibleItems.length > 0
+                    }
                     onToggleSelectAll={toggleSelectAllVisibleItems}
                     onDownload={downloadSelectedFiles}
                     onDelete={deleteSelectedFiles}
@@ -1145,6 +1103,13 @@ export const ItemList: React.FC<ItemListProps> = ({
                           }
                         : undefined
                 }
+                onDeleteDisabledHint={
+                    !isTrashView &&
+                    selectedItem &&
+                    (selectedItem.ownerID ?? currentUserID) !== currentUserID
+                        ? t("actionNotSupportedForSharedFiles", { count: 1 })
+                        : undefined
+                }
                 isTrashView={isTrashView}
                 onShareLink={
                     !isTrashView &&
@@ -1171,6 +1136,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             />
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={restoreItem !== null}
                 onClose={() => setRestoreItem(null)}
                 fullWidth
@@ -1178,7 +1144,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("restoreToCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 1, py: 1 }}>
+                    <Stack sx={{ gap: 1, pt: 0.25, pb: 1 }}>
                         {displayCollections.length > 0 ? (
                             displayCollections.map((collection) => (
                                 <Chip
@@ -1220,6 +1186,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             </Dialog>
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={renameCollectionID !== null}
                 onClose={() => setRenameCollectionID(null)}
                 fullWidth
@@ -1227,7 +1194,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("renameCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 2, py: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
                             value={renameValue}
                             onChange={(event) =>
@@ -1254,6 +1221,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             </Dialog>
 
             <Dialog
+                slotProps={{ paper: { sx: lockerDialogPaperSx } }}
                 open={createCollectionOpen}
                 onClose={() => {
                     if (!creatingCollection) {
@@ -1265,7 +1233,7 @@ export const ItemList: React.FC<ItemListProps> = ({
             >
                 <DialogTitle>{t("createNewCollection")}</DialogTitle>
                 <DialogContent>
-                    <Stack sx={{ gap: 2, py: 1 }}>
+                    <Stack sx={{ gap: 2, pt: 0.25, pb: 1 }}>
                         <TextField
                             value={createCollectionName}
                             onChange={(event) => {
@@ -1316,6 +1284,154 @@ export const ItemList: React.FC<ItemListProps> = ({
                 </DialogContent>
             </Dialog>
 
+            <Menu
+                anchorEl={collectionFilterAnchorEl}
+                open={!!collectionFilterAnchorEl}
+                onClose={closeCollectionFilterMenu}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            mt: 1,
+                            width: "fit-content",
+                            minWidth: 0,
+                            maxWidth: "calc(100vw - 32px)",
+                            borderRadius: "18px",
+                            overflow: "hidden",
+                        },
+                    },
+                }}
+            >
+                <Box sx={{ px: 1, pt: 0, pb: 0, width: "fit-content" }}>
+                    {dropdownHomeCollections.map((collection) => {
+                        const isSelected = homeSelectedCollectionIDs.includes(
+                            collection.id,
+                        );
+
+                        return (
+                            <MenuItem
+                                key={collection.id}
+                                onClick={() =>
+                                    toggleHomeCollection(collection.id)
+                                }
+                                sx={(theme) => ({
+                                    gap: 1.25,
+                                    px: 1,
+                                    py: 1,
+                                    my: "6px",
+                                    borderRadius: "14px",
+                                    alignItems: "center",
+                                    width: "auto",
+                                    color: isSelected
+                                        ? "primary.main"
+                                        : "text.base",
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.10)"
+                                        : "transparent",
+                                    "&:hover": {
+                                        backgroundColor: isSelected
+                                            ? "rgba(16, 113, 255, 0.14)"
+                                            : theme.vars.palette.fill.faint,
+                                    },
+                                })}
+                            >
+                                <CheckCircleRoundedIcon
+                                    sx={{
+                                        fontSize: 20,
+                                        color: isSelected
+                                            ? "primary.main"
+                                            : "text.faint",
+                                        opacity: isSelected ? 1 : 0.22,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                                <Box sx={{ minWidth: 0, flex: 1 }}>
+                                    <Typography
+                                        variant="body"
+                                        sx={{
+                                            fontWeight: isSelected ? 700 : 500,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 0.75,
+                                            minWidth: 0,
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            {collection.name}
+                                        </Box>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                color: "text.muted",
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            {"·"}
+                                        </Box>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                color: "text.muted",
+                                                fontWeight: 500,
+                                                flexShrink: 0,
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {new Intl.NumberFormat().format(
+                                                collection.items.length,
+                                            )}
+                                        </Box>
+                                    </Typography>
+                                </Box>
+                            </MenuItem>
+                        );
+                    })}
+                    {homeSelectedCollectionIDs.length > 0 && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                pt: "12px",
+                                pb: 0,
+                            }}
+                        >
+                            <Button
+                                color="secondary"
+                                onClick={() => {
+                                    clearHomeCollectionSelection();
+                                    closeCollectionFilterMenu();
+                                }}
+                                sx={{
+                                    minWidth: "auto",
+                                    px: 1,
+                                    py: 0.5,
+                                    backgroundColor: "transparent",
+                                    color: "text.muted",
+                                    fontSize: "0.8125rem",
+                                    fontWeight: 500,
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "3px",
+                                    "&:hover": {
+                                        backgroundColor: "transparent",
+                                        color: "text.secondary",
+                                    },
+                                }}
+                            >
+                                {t("clearSelection")}
+                            </Button>
+                        </Box>
+                    )}
+                </Box>
+            </Menu>
+
             <Snackbar
                 open={feedbackMessage !== null}
                 message={feedbackMessage}
@@ -1330,26 +1446,56 @@ const SectionHeader: React.FC<{
     title: string;
     countLabel: string;
     action?: React.ReactNode;
-}> = ({ title, countLabel, action }) => (
+    onBack?: () => void;
+}> = ({ title, countLabel, action, onBack }) => (
     <Stack
         direction="row"
         sx={{
             alignItems: "center",
             justifyContent: "space-between",
             gap: 2,
-            maxWidth: 760,
+            maxWidth: contentMaxWidth,
+            mx: "auto",
             mt: 3,
-            mb: 1.5,
+            mb: 2.25,
         }}
     >
-        <Box>
-            <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                {title}
-            </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {countLabel}
-            </Typography>
-        </Box>
+        <Stack
+            direction="row"
+            sx={{ minWidth: 0, gap: 1.5, alignItems: "center" }}
+        >
+            {onBack && (
+                <IconButton
+                    aria-label="Back"
+                    onClick={onBack}
+                    sx={{
+                        alignSelf: "center",
+                        width: 44,
+                        height: 44,
+                        flexShrink: 0,
+                        color: "text.secondary",
+                        border: "1px solid rgba(255, 255, 255, 0.10)",
+                        backgroundColor: "rgba(255, 255, 255, 0.03)",
+                        "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        },
+                    }}
+                >
+                    <ArrowBackRoundedIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+            )}
+            <Box sx={{ minWidth: 0 }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", minWidth: 0 }}
+                >
+                    {title}
+                </Typography>
+                <Typography variant="small" sx={{ color: "text.muted", mt: 1 }}>
+                    {countLabel}
+                </Typography>
+            </Box>
+        </Stack>
         {action}
     </Stack>
 );
@@ -1362,11 +1508,9 @@ const ItemsSection: React.FC<{
     onDeleteItem?: (item: LockerItem) => void;
     onPermanentlyDelete?: (items: LockerItem[]) => void;
     onRequestRestore: (item: LockerItem) => void;
-    getSecondaryText: (item: LockerItem) => string;
     onSelectItem: (item: LockerItem) => void;
     currentUserID: number;
     onShareLink?: (item: LockerItem) => void;
-    fileShareLinksByFileID: Map<number, LockerFileShareLinkSummary>;
     selectionMode?: boolean;
     selectedItemIDSet?: Set<number>;
     onToggleItemSelection?: (item: LockerItem) => void;
@@ -1380,11 +1524,9 @@ const ItemsSection: React.FC<{
     onDeleteItem,
     onPermanentlyDelete,
     onRequestRestore,
-    getSecondaryText,
     onSelectItem,
     currentUserID,
     onShareLink,
-    fileShareLinksByFileID,
     selectionMode,
     selectedItemIDSet,
     onToggleItemSelection,
@@ -1392,50 +1534,64 @@ const ItemsSection: React.FC<{
     emptyState,
 }) =>
     items.length > 0 ? (
-        <Stack sx={{ maxWidth: 760, gap: 0, mt: 1 }}>
-            {items.map((item) => (
-                <ItemCard
-                    key={item.id}
-                    item={item}
-                    masterKey={masterKey}
-                    isTrashView={isTrashView}
-                    secondaryText={getSecondaryText(item)}
-                    onClick={() => onSelectItem(item)}
-                    onEdit={
-                        onEditItem &&
-                        (item.ownerID ?? currentUserID) === currentUserID
-                            ? onEditItem
-                            : undefined
-                    }
-                    onDelete={
-                        onDeleteItem &&
-                        (item.ownerID ?? currentUserID) === currentUserID
-                            ? onDeleteItem
-                            : undefined
-                    }
-                    onPermanentlyDelete={onPermanentlyDelete}
-                    onRestore={
-                        isTrashView
-                            ? (trashItem) => onRequestRestore(trashItem)
-                            : undefined
-                    }
-                    onShareLink={
-                        onShareLink &&
-                        canShareLockerFileLink(item, currentUserID)
-                            ? onShareLink
-                            : undefined
-                    }
-                    fileShareLink={fileShareLinksByFileID.get(item.id)}
-                    selectionMode={selectionMode}
-                    selectable
-                    selected={selectedItemIDSet?.has(item.id)}
-                    onToggleSelection={onToggleItemSelection}
-                    onLongPressSelect={onStartSelection}
-                />
-            ))}
+        <Stack
+            sx={{ maxWidth: contentMaxWidth, mx: "auto", gap: 1.1, mt: 1.25 }}
+        >
+            {items.map((item) => {
+                const isOwnedByCurrentUser =
+                    (item.ownerID ?? currentUserID) === currentUserID;
+                return (
+                    <ItemCard
+                        key={item.id}
+                        item={item}
+                        masterKey={masterKey}
+                        isTrashView={isTrashView}
+                        isIncomingShared={
+                            (item.ownerID ?? currentUserID) !== currentUserID
+                        }
+                        onClick={() => onSelectItem(item)}
+                        onEdit={
+                            onEditItem && isOwnedByCurrentUser
+                                ? onEditItem
+                                : undefined
+                        }
+                        onDelete={
+                            onDeleteItem && isOwnedByCurrentUser
+                                ? onDeleteItem
+                                : undefined
+                        }
+                        deleteDisabledHint={
+                            onDeleteItem &&
+                            !isTrashView &&
+                            !isOwnedByCurrentUser
+                                ? t("actionNotSupportedForSharedFiles", {
+                                      count: 1,
+                                  })
+                                : undefined
+                        }
+                        onPermanentlyDelete={onPermanentlyDelete}
+                        onRestore={
+                            isTrashView
+                                ? (trashItem) => onRequestRestore(trashItem)
+                                : undefined
+                        }
+                        onShareLink={
+                            onShareLink &&
+                            canShareLockerFileLink(item, currentUserID)
+                                ? onShareLink
+                                : undefined
+                        }
+                        selectionMode={selectionMode}
+                        selectable
+                        selected={selectedItemIDSet?.has(item.id)}
+                        onToggleSelection={onToggleItemSelection}
+                        onLongPressSelect={onStartSelection}
+                    />
+                );
+            })}
         </Stack>
     ) : (
-        <Box sx={{ maxWidth: 760 }}>{emptyState}</Box>
+        <Box sx={{ maxWidth: contentMaxWidth, mx: "auto" }}>{emptyState}</Box>
     );
 
 const SelectionActionBar: React.FC<{
@@ -1627,11 +1783,13 @@ const CollectionGrid: React.FC<{
     const currentUserID = ensureLocalUser().id;
 
     return (
-        <Stack
+        <Box
             sx={{
                 width: "100%",
-                maxWidth: { xs: "100%", sm: "440px" },
-                gap: 1.25,
+                maxWidth: contentMaxWidth,
+                mx: "auto",
+                display: "grid",
+                gap: 2,
             }}
         >
             {collections.map((collection) => (
@@ -1659,7 +1817,7 @@ const CollectionGrid: React.FC<{
                     }
                 />
             ))}
-        </Stack>
+        </Box>
     );
 };
 
@@ -1668,46 +1826,130 @@ const CollectionChipFilters: React.FC<{
     selectedCollectionIDs: number[];
     onToggleCollection: (collectionID: number) => void;
 }> = ({ collections, selectedCollectionIDs, onToggleCollection }) => (
-    <Stack
-        direction="row"
-        sx={{ maxWidth: 760, flexWrap: "wrap", gap: 1, mt: 0.5 }}
+    <Box
+        sx={{
+            position: "relative",
+            width: "100%",
+            maxWidth: contentMaxWidth,
+            mx: "auto",
+            mt: 0.5,
+        }}
     >
-        {collections.map((collection) => {
-            const isSelected = selectedCollectionIDs.includes(collection.id);
+        <Stack
+            direction="row"
+            sx={{
+                flexWrap: "nowrap",
+                overflowX: "auto",
+                overflowY: "hidden",
+                justifyContent: "flex-start",
+                gap: 0,
+                pb: 0.5,
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": { display: "none" },
+            }}
+        >
+            {collections.map((collection) => {
+                const isSelected = selectedCollectionIDs.includes(
+                    collection.id,
+                );
 
-            return (
-                <Chip
-                    key={collection.id}
-                    clickable
-                    label={collection.name}
-                    onClick={() => onToggleCollection(collection.id)}
-                    sx={(theme) => ({
-                        height: 36,
-                        borderRadius: "999px",
-                        fontWeight: 600,
-                        color: isSelected
-                            ? "#FFFFFF"
-                            : theme.vars.palette.text.base,
-                        background: isSelected
-                            ? "linear-gradient(135deg, #1071FF 0%, #0056CC 100%)"
-                            : "rgba(18, 36, 63, 0.72)",
-                        border: isSelected
-                            ? "1px solid rgba(160, 199, 255, 0.18)"
-                            : "1px solid rgba(159, 193, 255, 0.12)",
-                        boxShadow: isSelected
-                            ? "0 8px 18px rgba(0, 66, 173, 0.22)"
-                            : "none",
-                        "& .MuiChip-label": { px: 1.5 },
-                        "&:hover": {
-                            background: isSelected
-                                ? "linear-gradient(135deg, #1A7AFF 0%, #004DB8 100%)"
-                                : "rgba(25, 47, 81, 0.82)",
-                        },
-                    })}
-                />
-            );
-        })}
-    </Stack>
+                return (
+                    <Box key={collection.id} sx={{ pr: 1, flexShrink: 0 }}>
+                        <Chip
+                            clickable
+                            label={collection.name}
+                            onClick={() => onToggleCollection(collection.id)}
+                            sx={(theme) => ({
+                                height: 36,
+                                flexShrink: 0,
+                                borderRadius: "999px",
+                                fontWeight: isSelected ? 700 : 600,
+                                color: isSelected
+                                    ? theme.vars.palette.primary.main
+                                    : theme.vars.palette.text.base,
+                                backgroundColor: isSelected
+                                    ? "rgba(16, 113, 255, 0.10)"
+                                    : theme.vars.palette.fill.faint,
+                                border: "1px solid transparent",
+                                boxShadow: isSelected
+                                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
+                                    : "none",
+                                transition:
+                                    "background-color 180ms ease, color 180ms ease, box-shadow 180ms ease",
+                                "& .MuiChip-label": { px: 1.5 },
+                                "&:hover": {
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.14)"
+                                        : theme.vars.palette.fill.faintHover,
+                                },
+                                ...theme.applyStyles("light", {
+                                    backgroundColor: isSelected
+                                        ? "rgba(16, 113, 255, 0.10)"
+                                        : "#FFFFFF",
+                                    border: isSelected
+                                        ? "1px solid rgba(16, 113, 255, 0.24)"
+                                        : "1px solid rgba(17, 24, 39, 0.06)",
+                                    "&:hover": {
+                                        backgroundColor: isSelected
+                                            ? "rgba(16, 113, 255, 0.14)"
+                                            : "#F8FAFC",
+                                    },
+                                }),
+                            })}
+                        />
+                    </Box>
+                );
+            })}
+        </Stack>
+    </Box>
+);
+
+const CollectionFilterChip: React.FC<{
+    selected: boolean;
+    onClick: (event: React.MouseEvent<HTMLElement>) => void;
+}> = ({ selected, onClick }) => (
+    <Tooltip title={t("seeAllCollections")}>
+        <Chip
+            clickable
+            icon={<FilterListRoundedIcon sx={{ fontSize: 18 }} />}
+            onClick={onClick}
+            sx={(theme) => ({
+                height: 36,
+                flexShrink: 0,
+                borderRadius: "999px",
+                fontWeight: selected ? 700 : 600,
+                color: selected ? "primary.main" : theme.vars.palette.text.base,
+                backgroundColor: selected
+                    ? "rgba(16, 113, 255, 0.10)"
+                    : theme.vars.palette.fill.faint,
+                border: "1px solid transparent",
+                boxShadow: selected
+                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
+                    : "none",
+                "& .MuiChip-icon": { color: "inherit", m: 0 },
+                "& .MuiChip-label": { display: "none" },
+                px: 1.125,
+                "&:hover": {
+                    backgroundColor: selected
+                        ? "rgba(16, 113, 255, 0.14)"
+                        : theme.vars.palette.fill.faintHover,
+                },
+                ...theme.applyStyles("light", {
+                    backgroundColor: selected
+                        ? "rgba(16, 113, 255, 0.10)"
+                        : "#FFFFFF",
+                    border: selected
+                        ? "1px solid rgba(16, 113, 255, 0.24)"
+                        : "1px solid rgba(17, 24, 39, 0.06)",
+                    "&:hover": {
+                        backgroundColor: selected
+                            ? "rgba(16, 113, 255, 0.14)"
+                            : "#F8FAFC",
+                    },
+                }),
+            })}
+        />
+    </Tooltip>
 );
 
 const EmptyState: React.FC<{ title: string; subtitle: string }> = ({
@@ -1733,34 +1975,50 @@ const CollectionCard: React.FC<{
 }> = ({ collection, onClick, onShare, onRename, onDelete }) => {
     return (
         <ButtonBase
+            component="div"
             onClick={onClick}
-            sx={{
+            sx={(theme) => ({
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
+                gap: 1.25,
+                px: 1.5,
+                py: 1.25,
                 minHeight: 84,
-                borderRadius: "16px",
-                background:
+                borderRadius: "18px",
+                backgroundColor:
                     collection.items.length > 0
-                        ? "linear-gradient(180deg, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.055) 100%)"
-                        : "linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.022) 100%)",
+                        ? theme.vars.palette.fill.faint
+                        : "rgba(255, 255, 255, 0.03)",
                 border: 1,
                 borderStyle: "solid",
                 borderColor:
                     collection.items.length > 0
-                        ? "rgba(255, 255, 255, 0.10)"
+                        ? "rgba(255, 255, 255, 0.08)"
                         : "rgba(255, 255, 255, 0.08)",
                 transition: "background-color 0.15s, border-color 0.15s",
                 "&:hover": {
-                    background:
-                        "linear-gradient(180deg, rgba(255, 255, 255, 0.090) 0%, rgba(255, 255, 255, 0.065) 100%)",
+                    backgroundColor:
+                        collection.items.length > 0
+                            ? theme.vars.palette.fill.faintHover
+                            : "rgba(255, 255, 255, 0.05)",
                     borderColor: "rgba(255, 255, 255, 0.13)",
                 },
-            }}
+                ...theme.applyStyles("light", {
+                    backgroundColor:
+                        collection.items.length > 0 ? "#FFFFFF" : "#F8FAFC",
+                    borderColor:
+                        collection.items.length > 0
+                            ? "rgba(17, 24, 39, 0.08)"
+                            : "rgba(17, 24, 39, 0.06)",
+                    "&:hover": {
+                        backgroundColor:
+                            collection.items.length > 0 ? "#FFFFFF" : "#F1F5F9",
+                        borderColor: "rgba(17, 24, 39, 0.12)",
+                    },
+                }),
+            })}
         >
             <Stack
                 direction="row"
@@ -1768,29 +2026,40 @@ const CollectionCard: React.FC<{
             >
                 <Box
                     sx={{
+                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        backgroundColor: isImportantCollection(collection)
-                            ? "rgba(16, 113, 255, 0.16)"
-                            : "rgba(18, 36, 63, 0.96)",
-                        border: isImportantCollection(collection)
-                            ? "none"
-                            : "1px solid rgba(159, 193, 255, 0.12)",
+                        width: 52,
+                        height: 52,
                         flexShrink: 0,
-                        position: "relative",
                     }}
                 >
-                    {isImportantCollection(collection) ? (
-                        <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
-                    ) : (
-                        <FolderOutlinedIcon
-                            sx={{ fontSize: 18, color: "#D6E5FF" }}
-                        />
-                    )}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            m: "6px",
+                            borderRadius: "12px",
+                            backgroundColor: isImportantCollection(collection)
+                                ? "rgba(16, 113, 255, 0.16)"
+                                : "rgba(18, 36, 63, 0.96)",
+                            border: isImportantCollection(collection)
+                                ? "none"
+                                : "1px solid rgba(159, 193, 255, 0.12)",
+                        }}
+                    >
+                        {isImportantCollection(collection) ? (
+                            <StarIcon sx={{ fontSize: 20, color: "#1071FF" }} />
+                        ) : (
+                            <FolderOutlinedIcon
+                                sx={{ fontSize: 20, color: "#D6E5FF" }}
+                            />
+                        )}
+                    </Box>
                     {collection.isShared && <SharedCollectionBadge />}
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -1798,8 +2067,8 @@ const CollectionCard: React.FC<{
                         variant="body"
                         sx={{
                             minWidth: 0,
-                            fontWeight: "medium",
-                            lineHeight: 1.3,
+                            fontWeight: "regular",
+                            lineHeight: 1.45,
                         }}
                         noWrap
                     >
@@ -1817,7 +2086,7 @@ const CollectionCard: React.FC<{
             </Stack>
             {(onShare || onRename || onDelete) && (
                 <Box
-                    sx={{ flexShrink: 0 }}
+                    sx={{ flexShrink: 0, ml: 0.25 }}
                     onClick={(event) => event.stopPropagation()}
                 >
                     <CollectionContextMenu
