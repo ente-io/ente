@@ -135,12 +135,16 @@ class BillingService {
 
   Future<void> launchFamilyPortal(
     BuildContext context,
-    UserDetails userDetails,
-  ) async {
+    UserDetails userDetails, {
+    bool popOnFreeAdvertViewPlans = false,
+  }) async {
     try {
       await routeToPage(
         context,
-        FamilyPlanPage(initialUserDetails: userDetails),
+        FamilyPlanPage(
+          initialUserDetails: userDetails,
+          popOnFreeAdvertViewPlans: popOnFreeAdvertViewPlans,
+        ),
       );
     } catch (e) {
       await showGenericErrorDialog(context: context, error: e);

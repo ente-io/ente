@@ -261,7 +261,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             ),
             onTap: () async {
               // ignore: unawaited_futures
-              _billingService.launchFamilyPortal(context, _userDetails);
+              _billingService.launchFamilyPortal(
+                context,
+                _userDetails,
+                popOnFreeAdvertViewPlans: true,
+              );
             },
           ),
         ),

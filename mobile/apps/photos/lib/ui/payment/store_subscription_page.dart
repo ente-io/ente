@@ -375,7 +375,11 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             ),
             onTap: () async {
               unawaited(
-                _billingService.launchFamilyPortal(context, _userDetails),
+                _billingService.launchFamilyPortal(
+                  context,
+                  _userDetails,
+                  popOnFreeAdvertViewPlans: true,
+                ),
               );
             },
           ),

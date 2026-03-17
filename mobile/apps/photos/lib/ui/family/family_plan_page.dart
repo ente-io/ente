@@ -24,10 +24,12 @@ import 'package:photos/utils/dialog_util.dart';
 class FamilyPlanPage extends StatefulWidget {
   const FamilyPlanPage({
     required this.initialUserDetails,
+    this.popOnFreeAdvertViewPlans = false,
     super.key,
   });
 
   final UserDetails initialUserDetails;
+  final bool popOnFreeAdvertViewPlans;
 
   @override
   State<FamilyPlanPage> createState() => _FamilyPlanPageState();
@@ -130,7 +132,11 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
           : l10n.plansStartAt(price: _startingPrice!),
       buttonLabel: l10n.viewPlans,
       onButtonTap: () async {
-        unawaited(routeToPage(context, getSubscriptionPage()));
+        if (widget.popOnFreeAdvertViewPlans && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+          return;
+        }
+        await routeToPage(context, getSubscriptionPage());
       },
     );
   }
