@@ -6,7 +6,9 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
+import "package:photos/db/pet_db.dart";
 import "package:photos/events/pets_changed_event.dart";
+import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:uuid/uuid.dart";
@@ -89,44 +91,35 @@ class PetClusterFeedbackService {
     Bus.instance.fire(PetsChangedEvent(source: "movePetFaces"));
   }
 
-  /// Merge two pet clusters into one. Recomputes the target cluster's
-  /// summary from the full membership after reassignment.
+  /// Merge two pet clusters by mapping them to the same [PetEntity].
+  ///
+  /// Both clusters keep their faces and summaries intact — only the
+  /// `pet_cluster_pet` mapping is updated so both point to the same pet.
+  /// This is reversible: removing the mapping "unmerges" the cluster.
   Future<void> mergePetClusters(
     String sourceId,
     String targetId,
   ) async {
-    // Read source species before deleting the summary
-    final sourceSummary = await _db.getAllPetClusterSummary();
-    final sourceSpecies = sourceSummary[sourceId]?.$2;
-
-    await _db.reassignAllPetFacesInCluster(sourceId, targetId);
-    await _db.deletePetClusterSummary(sourceId);
-
-    // Delete source centroid from vector DB
-    if (sourceSpecies != null) {
-      final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
-        species: sourceSpecies,
-        offline: isOfflineMode,
+    // Find or create the PetEntity for the target cluster.
+    final mappings = await _db.getClusterToPetId();
+    String petId;
+    if (mappings.containsKey(targetId)) {
+      petId = mappings[targetId]!;
+    } else {
+      // Target has no pet yet — create one using its cluster summary species.
+      final summaries = await _db.getAllPetClusterSummary();
+      final species = summaries[targetId]?.$2 ?? -1;
+      petId = const Uuid().v4();
+      await PetDB.instance.upsert(
+        PetEntity(id: petId, name: "", species: species),
       );
-      final sqlDb = await _db.asyncDB;
-      final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
-        [sourceId],
-        db: sqlDb,
-      );
-      final vectorId = idMap[sourceId];
-      if (vectorId != null) {
-        await centroidVdb.deleteCentroids([vectorId]);
-        await centroidVdb.deleteClusterCentroidMapping(
-          sourceId,
-          db: sqlDb,
-        );
-      }
+      await _db.setClusterPetId(targetId, petId);
     }
 
-    // Recompute the target cluster's summary from its full membership.
-    await _recomputeClusterSummaries([targetId]);
+    // Map the source cluster to the same pet.
+    await _db.setClusterPetId(sourceId, petId);
 
-    _logger.info("Merged pet cluster $sourceId into $targetId");
+    _logger.info("Merged pet cluster $sourceId into $targetId (pet $petId)");
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
   }
 
