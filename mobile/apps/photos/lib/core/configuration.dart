@@ -211,9 +211,6 @@ class Configuration {
       }
     }
 
-    // Reset feed cutoff so it is recreated for the next login session.
-    await localSettings.clearSharedPhotoFeedCutoffTime();
-
     // Clear preferences and secure storage
     await _preferences.clear();
     await _secureStorage.deleteAll();
@@ -250,7 +247,9 @@ class Configuration {
     // Clear all service caches
     await SimilarImagesService.instance.clearCache();
     await IgnoredFilesService.instance.reset();
-    unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+    if (!autoLogout) {
+      unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+    }
 
     // Clear additional caches (safe to call even if not initialized)
     try {
