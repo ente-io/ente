@@ -1,8 +1,7 @@
 //! Pet clustering engine — 3-phase fused clustering.
 //!
-//! Translates the Python `ClusterEngine` from `pet_pipeline.py` into Rust.
 //! Phases:
-//! - Phase 1: Face-based density clustering (HDBSCAN-style via mutual reachability)
+//! - Phase 1: Face-based agglomerative clustering (average linkage)
 //! - Phase 2: Body rescue — assign unclustered images to existing clusters
 //! - Phase 2b: Body-only clustering for remaining unclustered images
 //! - Phase 3: Cross-cluster merge — merge clusters similar in body space
@@ -366,10 +365,9 @@ pub fn run_pet_clustering_incremental(
     result
 }
 
-// ── Phase 1: Face-based density clustering ──────────────────────────────
+// ── Phase 1: Face-based agglomerative clustering ────────────────────────
 
-/// HDBSCAN-style clustering on face embeddings using mutual reachability
-/// distance and single-linkage hierarchy extraction.
+/// Agglomerative clustering (average linkage) on face embeddings.
 fn phase1_face_cluster(
     inputs: &[PetClusterInput],
     has_face: &[bool],
