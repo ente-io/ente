@@ -123,7 +123,12 @@ const openExternalUrl = async (url: string) => {
 
 type AnchorProps = React.ComponentPropsWithoutRef<"a"> & { node?: unknown };
 
-const ExternalLink = ({ node: _node, href, children, ...rest }: AnchorProps) => (
+const ExternalLink = ({
+    node: _node,
+    href,
+    children,
+    ...rest
+}: AnchorProps) => (
     <a
         {...rest}
         href={href}

@@ -1057,7 +1057,7 @@ const Page: React.FC = () => {
                 }
             }
         };
-        run();
+        void run();
 
         return () => {
             cancelled = true;
@@ -1271,7 +1271,7 @@ const Page: React.FC = () => {
                 setContextLength(clampedContextLength);
                 setMaxTokens(parsed.maxTokens ?? "");
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 log.error("Failed to read model settings", error);
             });
         return () => {
@@ -1816,7 +1816,7 @@ const Page: React.FC = () => {
                     setBranchSelections(selections);
                 }
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 log.error("Failed to load branch selections", error);
                 if (!cancelled) {
                     setBranchSelections({});
@@ -1916,7 +1916,7 @@ const Page: React.FC = () => {
         for (const message of displayMessages) {
             for (const attachment of message.attachments ?? []) {
                 if (attachment.kind === "image") {
-                    loadAttachmentPreview(attachment, message.sessionUuid);
+                    void loadAttachmentPreview(attachment, message.sessionUuid);
                 }
             }
         }
@@ -2854,7 +2854,7 @@ const Page: React.FC = () => {
                         parentMessageUuid,
                     );
 
-                    updateBranchSelectionState(
+                    void updateBranchSelectionState(
                         parentMessageUuid,
                         assistantMessage.messageUuid,
                     );
@@ -2869,7 +2869,7 @@ const Page: React.FC = () => {
                 } catch (error) {
                     log.error("Failed to finalize stopped generation", error);
                     if (last?.previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             last.parentMessageUuid,
                             last.previousSelection,
                         );
@@ -2880,7 +2880,7 @@ const Page: React.FC = () => {
             })();
         } else {
             if (last?.previousSelection) {
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     last.parentMessageUuid,
                     last.previousSelection,
                 );
@@ -2966,7 +2966,7 @@ const Page: React.FC = () => {
                 previousSelection,
             };
 
-            updateBranchSelectionState(
+            void updateBranchSelectionState(
                 parentMessageUuid,
                 STREAMING_SELECTION_KEY,
                 false,
@@ -3027,7 +3027,7 @@ const Page: React.FC = () => {
                     stopRequestedRef.current = false;
                     provider.cancelGeneration(-1);
                     if (previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             parentMessageUuid,
                             previousSelection,
                         );
@@ -3105,7 +3105,7 @@ const Page: React.FC = () => {
                         });
                     }
                     if (previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             parentMessageUuid,
                             previousSelection,
                         );
@@ -3132,7 +3132,7 @@ const Page: React.FC = () => {
                     parentMessageUuid,
                 );
 
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     parentMessageUuid,
                     assistantMessage.messageUuid,
                 );
@@ -3152,7 +3152,7 @@ const Page: React.FC = () => {
                 const message = formatErrorMessage(error);
                 showMiniDialog({ title: "Model error", message });
                 if (previousSelection) {
-                    updateBranchSelectionState(
+                    void updateBranchSelectionState(
                         parentMessageUuid,
                         previousSelection,
                     );
@@ -3257,7 +3257,7 @@ const Page: React.FC = () => {
                 (switcher.currentIndex - 1 + switcher.total) % switcher.total;
             const target = switcher.targets[nextIndex];
             if (!target) return;
-            updateBranchSelectionState(switcher.selectionKey, target);
+            void updateBranchSelectionState(switcher.selectionKey, target);
         },
         [updateBranchSelectionState],
     );
@@ -3268,7 +3268,7 @@ const Page: React.FC = () => {
             const nextIndex = (switcher.currentIndex + 1) % switcher.total;
             const target = switcher.targets[nextIndex];
             if (!target) return;
-            updateBranchSelectionState(switcher.selectionKey, target);
+            void updateBranchSelectionState(switcher.selectionKey, target);
         },
         [updateBranchSelectionState],
     );
@@ -3975,7 +3975,7 @@ const Page: React.FC = () => {
                     attachments,
                 );
 
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     selectionKey,
                     newUserMessage.messageUuid,
                 );
@@ -4012,7 +4012,10 @@ const Page: React.FC = () => {
                 attachments,
             );
 
-            updateBranchSelectionState(selectionKey, userMessage.messageUuid);
+            void updateBranchSelectionState(
+                selectionKey,
+                userMessage.messageUuid,
+            );
             appendMessageToState(userMessage);
             updateSessionAfterMessage(userMessage);
             setPendingDocuments([]);

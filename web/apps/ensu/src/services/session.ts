@@ -1,11 +1,11 @@
 import log from "ente-base/log";
-import { ensureCryptoInit, enteWasm } from "./wasm";
 import {
     isTauriAppRuntime,
     secureStorageDelete,
     secureStorageGet,
     secureStorageSet,
 } from "./secure-storage";
+import { ensureCryptoInit, enteWasm } from "./wasm";
 
 /**
  * Session storage key used to store the encrypted master key.

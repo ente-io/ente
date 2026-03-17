@@ -1,5 +1,5 @@
-import log from "ente-base/log";
 import { getKV, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from "idb";
 import { base64ToBytes } from "services/base64";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
@@ -74,10 +74,7 @@ interface ChatDbSchema {
 
 type ChatStoreName = keyof ChatDbSchema;
 
-type PersistedAttachmentBytes = {
-    id: string;
-    data: string;
-};
+type PersistedAttachmentBytes = { id: string; data: string };
 
 type PersistedChatStore = {
     sessions: StoredSession[];
@@ -92,18 +89,9 @@ type ChatStoreState = {
 };
 
 interface IndexedChatDBSchema extends DBSchema {
-    sessions: {
-        key: string;
-        value: StoredSession;
-    };
-    messages: {
-        key: string;
-        value: StoredMessage;
-    };
-    attachmentBytes: {
-        key: string;
-        value: StoredAttachmentBytes;
-    };
+    sessions: { key: string; value: StoredSession };
+    messages: { key: string; value: StoredMessage };
+    attachmentBytes: { key: string; value: StoredAttachmentBytes };
 }
 
 interface ChatObjectStore<K extends ChatStoreName> {
@@ -124,8 +112,11 @@ interface ChatDbLike {
         key: string,
     ) => Promise<ChatDbSchema[K] | undefined>;
     getAll: <K extends ChatStoreName>(name: K) => Promise<ChatDbSchema[K][]>;
-    put: <K extends ChatStoreName>(name: K, value: ChatDbSchema[K]) => Promise<void>;
-    delete: <K extends ChatStoreName>(name: K, key: string) => Promise<void>;
+    put: <K extends ChatStoreName>(
+        name: K,
+        value: ChatDbSchema[K],
+    ) => Promise<void>;
+    delete: (name: ChatStoreName, key: string) => Promise<void>;
     transaction: (names: ChatStoreName[], mode: "readwrite") => ChatTransaction;
     close: () => void;
 }
@@ -326,10 +317,12 @@ const loadChatStoreState = (): ChatStoreState => {
                     message.deletedAt ??
                     (message.isDeleted ? message.createdAt : null),
             })),
-            attachmentBytes: (parsed.attachmentBytes ?? []).map((attachment) => ({
-                id: attachment.id,
-                data: base64ToBytes(attachment.data),
-            })),
+            attachmentBytes: (parsed.attachmentBytes ?? []).map(
+                (attachment) => ({
+                    id: attachment.id,
+                    data: base64ToBytes(attachment.data),
+                }),
+            ),
         };
     } catch (error) {
         log.error("Failed to parse chat store", error);
@@ -349,7 +342,7 @@ const cloneStoreEntry = <K extends ChatStoreName>(
         } as ChatDbSchema[K];
     }
 
-    const cloned = { ...value } as ChatDbSchema[K];
+    const cloned = { ...value };
     if (name === "messages") {
         const message = cloned as StoredMessage;
         message.attachments = message.attachments?.map((attachment) => ({
@@ -384,10 +377,14 @@ const normalizeStoreEntry = <K extends ChatStoreName>(
     value: ChatDbSchema[K],
 ): ChatDbSchema[K] => {
     if (name === "sessions") {
-        return normalizeStoredSession(value as StoredSession) as ChatDbSchema[K];
+        return normalizeStoredSession(
+            value as StoredSession,
+        ) as ChatDbSchema[K];
     }
     if (name === "messages") {
-        return normalizeStoredMessage(value as StoredMessage) as ChatDbSchema[K];
+        return normalizeStoredMessage(
+            value as StoredMessage,
+        ) as ChatDbSchema[K];
     }
     return value;
 };
@@ -417,22 +414,31 @@ const createIndexedDbChatDb = (
     transaction: (names, mode) => {
         const tx = db.transaction(names, mode);
         return {
-            objectStore: <K extends ChatStoreName>(name: K): ChatObjectStore<K> => ({
+            objectStore: <K extends ChatStoreName>(
+                name: K,
+            ): ChatObjectStore<K> => ({
                 get: async (key) => {
-                    const entry = (await tx.objectStore(name).get(
-                        key,
-                    )) as ChatDbSchema[K] | undefined;
+                    const entry = (await tx.objectStore(name).get(key)) as
+                        | ChatDbSchema[K]
+                        | undefined;
                     if (!entry) return undefined;
-                    return cloneStoreEntry(name, normalizeStoreEntry(name, entry));
+                    return cloneStoreEntry(
+                        name,
+                        normalizeStoreEntry(name, entry),
+                    );
                 },
                 getAll: async () => {
-                    const entries = (await tx.objectStore(name).getAll()) as ChatDbSchema[K][];
+                    const entries = (await tx
+                        .objectStore(name)
+                        .getAll()) as ChatDbSchema[K][];
                     return entries.map((entry) =>
                         cloneStoreEntry(name, normalizeStoreEntry(name, entry)),
                     );
                 },
                 put: async (value: ChatDbSchema[K]) => {
-                    await tx.objectStore(name).put(cloneStoreEntry(name, value));
+                    await tx
+                        .objectStore(name)
+                        .put(cloneStoreEntry(name, value));
                 },
                 delete: async (key: string) => {
                     await tx.objectStore(name).delete(key);
@@ -669,10 +675,9 @@ const migrateLegacyLocalChatStoreToIndexedDb = async () => {
     }
 
     for (const attachment of legacy.attachmentBytes) {
-        await tx.objectStore("attachmentBytes").put({
-            id: attachment.id,
-            data: new Uint8Array(attachment.data),
-        });
+        await tx
+            .objectStore("attachmentBytes")
+            .put({ id: attachment.id, data: new Uint8Array(attachment.data) });
     }
 
     await tx.done;
@@ -712,18 +717,24 @@ const migrateLegacyIndexedDbChatStore = async () => {
         );
 
         for (const session of sessions) {
-            await tx.objectStore("sessions").put(normalizeStoredSession(session));
+            await tx
+                .objectStore("sessions")
+                .put(normalizeStoredSession(session));
         }
 
         for (const message of messages) {
-            await tx.objectStore("messages").put(normalizeStoredMessage(message));
+            await tx
+                .objectStore("messages")
+                .put(normalizeStoredMessage(message));
         }
 
         for (const attachment of attachmentBytes) {
-            await tx.objectStore("attachmentBytes").put({
-                id: attachment.id,
-                data: new Uint8Array(attachment.data),
-            });
+            await tx
+                .objectStore("attachmentBytes")
+                .put({
+                    id: attachment.id,
+                    data: new Uint8Array(attachment.data),
+                });
         }
 
         await tx.done;
@@ -854,7 +865,7 @@ export const initializeChatStorePersistence = async (chatKey: string) => {
         }
 
         await migrateLegacyIndexedDbChatStore();
-    })().catch((error) => {
+    })().catch((error: unknown) => {
         if (_chatPersistenceInitPromise === initPromise) {
             _chatPersistenceInitPromise = undefined;
             _chatPersistenceInitKey = undefined;

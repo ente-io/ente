@@ -1,12 +1,12 @@
 import { HTTPError } from "ente-base/http";
-import { ensureCryptoInit, enteWasm } from "../wasm";
-import { ChatKeyNotFoundError, createChatKey, getChatKey } from "./gateway";
 import {
     isTauriAppRuntime,
     secureStorageDelete,
     secureStorageGet,
     secureStorageSet,
 } from "../secure-storage";
+import { ensureCryptoInit, enteWasm } from "../wasm";
+import { ChatKeyNotFoundError, createChatKey, getChatKey } from "./gateway";
 
 const CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey";
 const LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey.local";
@@ -14,10 +14,7 @@ const CHAT_KEY_FILE_NAME = "chat-keys.json";
 const REMOTE_CHAT_KEY_SECURE_STORAGE_KEY = "remoteChatKey";
 const LOCAL_CHAT_KEY_SECURE_STORAGE_KEY = "localChatKey";
 
-type PersistedChatKeys = {
-    remoteChatKey?: string;
-    localChatKey?: string;
-};
+type PersistedChatKeys = { remoteChatKey?: string; localChatKey?: string };
 
 let _persistedChatKeys: PersistedChatKeys = {};
 let _chatKeyStoreInitPromise: Promise<void> | undefined;
@@ -83,7 +80,9 @@ const persistNativeChatKeys = async () => {
             ),
         );
     } else {
-        operations.push(secureStorageDelete(REMOTE_CHAT_KEY_SECURE_STORAGE_KEY));
+        operations.push(
+            secureStorageDelete(REMOTE_CHAT_KEY_SECURE_STORAGE_KEY),
+        );
     }
 
     if (_persistedChatKeys.localChatKey) {
@@ -112,12 +111,12 @@ export const initChatKeyStore = async () => {
     _chatKeyStoreInitPromise ??= (async () => {
         const [secureRemoteChatKey, secureLocalChatKey, nativeKeys] =
             await Promise.all([
-                secureStorageGet(
-                    REMOTE_CHAT_KEY_SECURE_STORAGE_KEY,
-                ).catch(() => undefined),
-                secureStorageGet(
-                    LOCAL_CHAT_KEY_SECURE_STORAGE_KEY,
-                ).catch(() => undefined),
+                secureStorageGet(REMOTE_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                    () => undefined,
+                ),
+                secureStorageGet(LOCAL_CHAT_KEY_SECURE_STORAGE_KEY).catch(
+                    () => undefined,
+                ),
                 readNativeChatKeys(),
             ]);
         const remoteChatKey =
@@ -154,7 +153,7 @@ export const initChatKeyStore = async () => {
         } catch {
             // ignore missing legacy file
         }
-    })().catch((error) => {
+    })().catch((error: unknown) => {
         _chatKeyStoreInitPromise = undefined;
         throw error;
     });
