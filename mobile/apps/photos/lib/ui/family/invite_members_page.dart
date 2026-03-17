@@ -53,10 +53,14 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
 
   bool get _canAddMore => _inviteSlotsLeft > 0;
 
+  bool get _showsInviteLimitHint =>
+      !_canAddMore && _emailFocusNode.hasFocus && _errorMessage == null;
+
   @override
   void initState() {
     super.initState();
     _remainingSlots = widget.remainingSlots;
+    _emailFocusNode.addListener(_handleFocusChange);
     _existingEmails = {
       for (final member in widget.userDetails.familyData?.members ?? [])
         member.email.trim().toLowerCase(),
@@ -74,8 +78,6 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
-    final inviteLimitMessage = _inviteLimitMessage(l10n);
-    final inviteLimitTextStyle = textTheme.bodyMuted.copyWith(height: 1.5);
 
     return FamilyPageScaffold(
       title: l10n.inviteMembers,
@@ -87,42 +89,18 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 150),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    layoutBuilder: (currentChild, previousChildren) {
-                      return Stack(
-                        alignment: AlignmentDirectional.topStart,
-                        children: [
-                          ...previousChildren,
-                          if (currentChild != null) currentChild,
-                        ],
-                      );
-                    },
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      );
-                    },
-                    child: Text(
-                      inviteLimitMessage,
-                      key: ValueKey(inviteLimitMessage),
-                      style: inviteLimitTextStyle,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   _buildInputRow(context),
-                  if (_errorMessage != null) ...[
+                  if (_fieldMessage(l10n) case final message?) ...[
                     const SizedBox(height: 6),
                     Padding(
                       padding: const EdgeInsets.only(left: 4),
                       child: Text(
-                        _errorMessage!,
-                        style: textTheme.small.copyWith(
-                          color: getEnteColorScheme(context).redBase,
-                        ),
+                        message,
+                        style: _errorMessage != null
+                            ? textTheme.small.copyWith(
+                                color: getEnteColorScheme(context).redBase,
+                              )
+                            : textTheme.smallMuted,
                       ),
                     ),
                   ],
@@ -180,7 +158,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               autofocus: _canAddMore,
-              enabled: !_isCheckingEmail && _canAddMore,
+              enabled: !_isCheckingEmail,
               onChanged: (_) {
                 if (_errorMessage != null) {
                   setState(() {
@@ -212,7 +190,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         const SizedBox(width: 8),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: (_isCheckingEmail || !_canAddMore) ? null : _addEmail,
+          onTap: _isCheckingEmail ? null : _addEmail,
           child: Container(
             width: 58,
             height: 58,
@@ -233,9 +211,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
                   : Icon(
                       Icons.add,
                       size: 24,
-                      color: _canAddMore
-                          ? colorScheme.content
-                          : colorScheme.contentLighter,
+                      color: colorScheme.content,
                     ),
             ),
           ),
@@ -248,11 +224,21 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
     return l10n.sendCountInvites(count: _emails.length);
   }
 
-  String _inviteLimitMessage(AppLocalizations l10n) {
-    if (_inviteSlotsLeft == 0) {
+  String? _fieldMessage(AppLocalizations l10n) {
+    if (_errorMessage != null) {
+      return _errorMessage;
+    }
+    if (_showsInviteLimitHint) {
       return l10n.inviteLimitReached;
     }
-    return l10n.inviteSlotsLeft(count: _inviteSlotsLeft);
+    return null;
+  }
+
+  void _handleFocusChange() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   int _remainingSlotsFor(UserDetails details) {
@@ -268,12 +254,16 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   }
 
   Future<void> _addEmail() async {
-    if (_isCheckingEmail || !_canAddMore) {
+    if (_isCheckingEmail) {
       return;
     }
 
     final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim().toLowerCase();
+    if (!_canAddMore) {
+      setState(() => _errorMessage = l10n.inviteLimitReached);
+      return;
+    }
     if (email.isEmpty) {
       setState(() => _errorMessage = l10n.enterAnEmailAddress);
       return;
@@ -327,6 +317,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   void _removeEmail(String email) {
     setState(() {
       _emails.remove(email);
+      _errorMessage = null;
     });
   }
 
