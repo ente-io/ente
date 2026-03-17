@@ -13,6 +13,8 @@ import {
 
 const STORAGE_KEY = "ensu.chat.store.v1";
 const NATIVE_MIGRATION_KEY = "ensu.chat.nativeMigration.v1";
+const CHAT_DB_NAME = "ensu-chat";
+const LEGACY_WEB_CHAT_DB_NAME = "ensu.chat.db";
 
 export type AttachmentKind = "image" | "document";
 
@@ -443,7 +445,7 @@ const createIndexedDbChatDb = (
 });
 
 const openChatDb = async () => {
-    const db = await openDB<IndexedChatDBSchema>("ensu-chat", 1, {
+    const db = await openDB<IndexedChatDBSchema>(CHAT_DB_NAME, 1, {
         upgrade(db) {
             if (!db.objectStoreNames.contains("sessions")) {
                 db.createObjectStore("sessions", { keyPath: "sessionUuid" });
@@ -589,6 +591,41 @@ const deserializeAttachments = async (
 const hasLegacyChatStore = () =>
     typeof localStorage !== "undefined" && !!localStorage.getItem(STORAGE_KEY);
 
+const hasIndexedDbDatabase = async (name: string) => {
+    if (typeof indexedDB === "undefined") return false;
+
+    if ("databases" in indexedDB && typeof indexedDB.databases === "function") {
+        const databases = await indexedDB.databases();
+        return databases.some((database) => database.name === name);
+    }
+
+    return new Promise<boolean>((resolve, reject) => {
+        let created = false;
+        const request = indexedDB.open(name);
+
+        request.onupgradeneeded = () => {
+            created = true;
+        };
+
+        request.onsuccess = () => {
+            const db = request.result;
+            db.close();
+
+            if (!created) {
+                resolve(true);
+                return;
+            }
+
+            const deleteRequest = indexedDB.deleteDatabase(name);
+            deleteRequest.onsuccess = () => resolve(false);
+            deleteRequest.onerror = () => reject(deleteRequest.error);
+            deleteRequest.onblocked = () => resolve(false);
+        };
+
+        request.onerror = () => reject(request.error);
+    });
+};
+
 const isNativeMigrationDone = () =>
     typeof localStorage !== "undefined" &&
     localStorage.getItem(NATIVE_MIGRATION_KEY) === "1";
@@ -641,6 +678,72 @@ const migrateLegacyLocalChatStoreToIndexedDb = async () => {
     await tx.done;
     localStorage.removeItem(STORAGE_KEY);
     log.info("Finished migrating legacy local chat store to IndexedDB");
+};
+
+const migrateLegacyIndexedDbChatStore = async () => {
+    if (typeof indexedDB === "undefined") return;
+    if (!(await hasIndexedDbDatabase(LEGACY_WEB_CHAT_DB_NAME))) return;
+
+    log.info("Migrating legacy IndexedDB chat store", {
+        from: LEGACY_WEB_CHAT_DB_NAME,
+        to: CHAT_DB_NAME,
+    });
+
+    const [legacyDb, db] = await Promise.all([
+        openDB<IndexedChatDBSchema>(LEGACY_WEB_CHAT_DB_NAME),
+        chatDb(),
+    ]);
+
+    let migratedAnyEntries = false;
+    try {
+        const [sessions, messages, attachmentBytes] = await Promise.all([
+            legacyDb.getAll("sessions"),
+            legacyDb.getAll("messages"),
+            legacyDb.getAll("attachmentBytes"),
+        ]);
+        migratedAnyEntries =
+            sessions.length > 0 ||
+            messages.length > 0 ||
+            attachmentBytes.length > 0;
+
+        const tx = db.transaction(
+            ["sessions", "messages", "attachmentBytes"],
+            "readwrite",
+        );
+
+        for (const session of sessions) {
+            await tx.objectStore("sessions").put(normalizeStoredSession(session));
+        }
+
+        for (const message of messages) {
+            await tx.objectStore("messages").put(normalizeStoredMessage(message));
+        }
+
+        for (const attachment of attachmentBytes) {
+            await tx.objectStore("attachmentBytes").put({
+                id: attachment.id,
+                data: new Uint8Array(attachment.data),
+            });
+        }
+
+        await tx.done;
+    } finally {
+        legacyDb.close();
+    }
+
+    await deleteDB(LEGACY_WEB_CHAT_DB_NAME, {
+        blocked() {
+            log.warn(
+                "Waiting for an existing client to close the legacy chat DB",
+            );
+        },
+    });
+
+    log.info(
+        migratedAnyEntries
+            ? "Finished migrating legacy IndexedDB chat store"
+            : "Removed empty legacy IndexedDB chat store",
+    );
 };
 
 const migrateLegacyChatStoreToNative = async (chatKey: string) => {
@@ -745,8 +848,12 @@ export const initializeChatStorePersistence = async (chatKey: string) => {
             return;
         }
 
-        if (!hasLegacyChatStore()) return;
-        await migrateLegacyLocalChatStoreToIndexedDb();
+        if (hasLegacyChatStore()) {
+            await migrateLegacyLocalChatStoreToIndexedDb();
+            return;
+        }
+
+        await migrateLegacyIndexedDbChatStore();
     })().catch((error) => {
         if (_chatPersistenceInitPromise === initPromise) {
             _chatPersistenceInitPromise = undefined;
