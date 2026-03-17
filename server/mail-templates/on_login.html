@@ -102,9 +102,23 @@
     <p>Hi,</p>
       <p>
       We detected a new login to your Ente account at {{ .Date }} UTC.
-      <br>
-      <br>
-      If this is not you, please reset your password. For any assistance or questions, please reply to this email.      
+      </p>
+      <table>
+        <tr>
+          <td><strong>App</strong></td>
+          <td>{{ .App }}</td>
+        </tr>
+        <tr>
+          <td><strong>Device</strong></td>
+          <td>{{ .Device }}</td>
+        </tr>
+        <tr>
+          <td><strong>IP address</strong></td>
+          <td>{{ .IP }}</td>
+        </tr>
+      </table>
+      <p>
+      If this is not you, please reset your password. For any assistance or questions, please reply to this email.
       </p>
     </div>
     <br />
