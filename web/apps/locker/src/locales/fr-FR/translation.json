@@ -89,6 +89,7 @@
     "hidePassword": "Masquer le mot de passe",
     "lastUpdated": "Derniere mise a jour",
     "uploadComplete": "Element televerse avec succes",
+    "uploadMultipleComplete": "{{count, number}} elements televerses avec succes",
     "createCollectionSuccess": "Collection creee avec succes",
     "home": "Accueil",
     "security": "Securite",

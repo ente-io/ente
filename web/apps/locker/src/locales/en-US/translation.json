@@ -100,6 +100,7 @@
     "lastUpdated": "Last updated",
     "createCollectionSuccess": "Collection created successfully",
     "uploadComplete": "Item uploaded successfully",
+    "uploadMultipleComplete": "{{count, number}} items uploaded successfully",
     "restore": "Restore",
     "copyPassword": "Copy password",
     "searchEverywhereEmpty": "Try searching for something else.",

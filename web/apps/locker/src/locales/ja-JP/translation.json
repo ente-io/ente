@@ -92,6 +92,7 @@
     "hidePassword": "パスワードを非表示",
     "lastUpdated": "最終更新",
     "uploadComplete": "アイテムが正常にアップロードされました",
+    "uploadMultipleComplete": "{{count, number}}件のアイテムを正常にアップロードしました",
     "createCollectionSuccess": "コレクションが正常に作成されました",
     "home": "ホーム",
     "security": "セキュリティ",
