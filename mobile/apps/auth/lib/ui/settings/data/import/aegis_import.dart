@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:base32/base32.dart';
 import 'package:convert/convert.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -56,13 +57,16 @@ Future<void> showAegisImportInstruction(BuildContext context) async {
 
 Future<void> _pickAegisJsonFile(BuildContext context) async {
   final l10n = context.l10n;
-  FilePickerResult? result = await FilePicker.platform
-      .pickFiles(dialogTitle: l10n.importSelectJsonFile);
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    dialogTitle: l10n.importSelectJsonFile,
+  );
   if (result == null) {
     return;
   }
-  final ProgressDialog progressDialog =
-      createProgressDialog(context, l10n.pleaseWait);
+  final ProgressDialog progressDialog = createProgressDialog(
+    context,
+    l10n.pleaseWait,
+  );
   await progressDialog.show();
   try {
     String path = result.files.single.path!;
@@ -114,8 +118,9 @@ Future<int?> _processAegisExportFile(
       final content = decryptAegisVault(decodedJson, password: password!);
       aegisDB = jsonDecode(content);
     } catch (e, s) {
-      Logger("AegisImport")
-          .warning("exception while decrypting aegis vault", e, s);
+      Logger(
+        "AegisImport",
+      ).warning("exception while decrypting aegis vault", e, s);
       await dialog.hide();
       if (password != null) {
         await showErrorDialog(
@@ -163,9 +168,20 @@ Future<int?> _processAegisExportFile(
     // Build the OTP URL
     String otpUrl;
 
-    if (kind.toLowerCase() == 'totp' || kind.toLowerCase() == 'steam') {
-      otpUrl =
-          'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+    if (kind.toLowerCase() == 'totp' ||
+        kind.toLowerCase() == 'steam' ||
+        kind.toLowerCase() == 'yandex') {
+      final String host = kind.toLowerCase() == 'yandex' ? 'yaotp' : kind;
+      final StringBuffer otpUrlBuffer = StringBuffer(
+        'otpauth://$host/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer',
+      );
+      final String? pin = item['info']['pin'];
+      if (kind.toLowerCase() == 'yandex' && pin != null && pin.isNotEmpty) {
+        otpUrlBuffer.write(
+          '&pin=${base32.encode(Uint8List.fromList(utf8.encode(pin))).replaceAll('=', '').toUpperCase()}',
+        );
+      }
+      otpUrl = otpUrlBuffer.toString();
     } else if (kind.toLowerCase() == 'hotp') {
       otpUrl =
           'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
@@ -174,7 +190,9 @@ Future<int?> _processAegisExportFile(
     }
 
     Code code = Code.fromOTPAuthUrl(otpUrl);
-    code = code.copyWith(display: CodeDisplay(pinned: isFavorite, tags: tags));
+    code = code.copyWith(
+      display: CodeDisplay(pinned: isFavorite, tags: tags),
+    );
     parsedCodes.add(code);
   }
 
@@ -199,22 +217,15 @@ String decryptAegisVault(dynamic data, {required String password}) {
     final int p = slot["p"];
     const int derivedKeyLength = 32;
     final script = Scrypt()
-      ..init(
-        ScryptParameters(
-          iterations,
-          r,
-          p,
-          derivedKeyLength,
-          salt,
-        ),
-      );
+      ..init(ScryptParameters(iterations, r, p, derivedKeyLength, salt));
 
     final key = script.process(Uint8List.fromList(utf8.encode(password)));
 
     final params = slot["key_params"];
     final nonce = Uint8List.fromList(hex.decode(params["nonce"]));
-    final encryptedKeyWithTag =
-        Uint8List.fromList(hex.decode(slot["key"]) + hex.decode(params["tag"]));
+    final encryptedKeyWithTag = Uint8List.fromList(
+      hex.decode(slot["key"]) + hex.decode(params["tag"]),
+    );
 
     final cipher = GCMBlockCipher(AESEngine())
       ..init(

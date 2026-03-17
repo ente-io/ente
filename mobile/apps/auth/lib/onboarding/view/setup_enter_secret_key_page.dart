@@ -45,6 +45,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late TextEditingController _pinController;
   late TextEditingController _notesController;
   late TextEditingController _digitsController;
   late TextEditingController _periodController;
@@ -70,6 +71,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     );
     _secretController = TextEditingController(
       text: widget.code?.secret,
+    );
+    _pinController = TextEditingController(
+      text: widget.code?.pin,
     );
     _notesController = TextEditingController(
       text: widget.code?.display.note,
@@ -108,6 +112,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       _limitTextLength(_accountController, _otherTextLimit);
       _limitTextLength(_secretController, _otherTextLimit);
     }
+    _limitTextLength(_pinController, 16);
 
     isCustomIcon = widget.code?.display.isCustomIcon ?? false;
     if (isCustomIcon) {
@@ -144,6 +149,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _issuerController.dispose();
     _accountController.dispose();
     _notesController.dispose();
+    _pinController.dispose();
     _digitsController.dispose();
     _periodController.dispose();
     super.dispose();
@@ -263,6 +269,24 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       ),
                     ],
                   ),
+                  Row(
+                    children: [
+                      FieldLabel(l10n.pinText),
+                      Expanded(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          maxLength: 16,
+                          decoration: const InputDecoration(
+                            counterText: '',
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                          style: getEnteTextTheme(context).small,
+                          controller: _pinController,
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -365,12 +389,33 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
                         final period =
                             int.tryParse(_periodController.text.trim());
+                        final pin = _pinController.text
+                            .trim()
+                            .replaceAll(' ', '')
+                            .replaceAll('-', '');
                         if (period != null && (period < 10 || period > 60)) {
                           String message =
                               "Period must be between 10 and 60 seconds";
                           _showIncorrectDetailsDialog(
                             context,
                             message: message,
+                          );
+                          return;
+                        }
+
+                        if (pin.isNotEmpty &&
+                            !RegExp(r'^\d{4,16}$').hasMatch(pin)) {
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: "PIN must be 4 to 16 digits",
+                          );
+                          return;
+                        }
+
+                        if (widget.code?.pin != null && pin.isEmpty) {
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: "PIN cannot be empty",
                           );
                           return;
                         }
@@ -420,7 +465,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   Future<void> _saveCode() async {
     try {
       final account = _accountController.text.trim();
-      final issuer = _issuerController.text.trim();
+      final String enteredPin =
+          _pinController.text.trim().replaceAll(' ', '').replaceAll('-', '');
+      final String? pin = enteredPin.isEmpty ? widget.code?.pin : enteredPin;
+      final issuer = _issuerController.text.trim().isEmpty && pin != null
+          ? Code.yandexDefaultIssuer
+          : _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
       final notes = _notesController.text.trim();
       final digits = int.tryParse(_digitsController.text.trim());
@@ -468,11 +518,13 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               isStreamCode ? Code.steamDigits : digits!,
               algorithm: _algorithm,
               period: period!,
+              pin: pin,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
+              pin: pin,
               display: display,
               algorithm: _algorithm,
               digits: digits!,

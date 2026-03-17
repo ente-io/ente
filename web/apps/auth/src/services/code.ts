@@ -3,6 +3,7 @@ import { nullToUndefined } from "ente-utils/transform";
 import { HOTP, TOTP } from "otpauth";
 import { z } from "zod";
 import { Steam } from "./steam";
+import { normalizeYandexSecret, parseYandexPin, Yandex } from "./yandex";
 /**
  * A parsed representation of an *OTP code URI.
  *
@@ -39,6 +40,8 @@ export interface Code {
      * which case we should start from 0.
      */
     counter?: number;
+    /** Optional Yandex PIN for YAOTP variants. */
+    pin?: string;
     /**
      * The secret that is used to drive the OTP generator.
      *
@@ -101,6 +104,9 @@ const CodeDisplay = z.object({
  * - (Steam)
  *   otpauth://steam/Steam:SteamAccount?algorithm=SHA1&digits=5&issuer=Steam&period=30&secret=AAABBBCCCDDDEEEFFF
  *
+ * - (Yandex)
+ *   otpauth://yaotp/Yandex:user@example.org?secret=ALPHANUM&pin=GUZDGOI&issuer=Yandex
+ *
  * See also `auth/test/models/code_test.dart`.
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
@@ -120,17 +126,20 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
 
     const [type, path] = parsePathname(url);
+    const isYandex = isYandexCode(url);
+    const pin = parsePin(url, isYandex);
 
     return {
         id,
         type,
         account: parseAccount(path),
-        issuer: parseIssuer(url, path),
-        length: parseLength(url, type),
-        period: parsePeriod(url),
-        algorithm: parseAlgorithm(url),
+        issuer: parseIssuer(url, path, isYandex),
+        length: parseLength(url, type, isYandex),
+        period: parsePeriod(url, isYandex),
+        algorithm: parseAlgorithm(url, isYandex),
         counter: parseCounter(url),
-        secret: parseSecret(url),
+        pin,
+        secret: parseSecret(url, isYandex),
         codeDisplay: parseCodeDisplay(url),
         uriString,
     };
@@ -168,6 +177,9 @@ const parsePathname = (url: URL): [type: Code["type"], path: string] => {
             return ["hotp", url.pathname.toLowerCase()];
         case "steam":
             return ["steam", url.pathname.toLowerCase()];
+        case "yaotp":
+        case "yandex":
+            return ["totp", url.pathname.toLowerCase()];
         default:
             break;
     }
@@ -176,6 +188,8 @@ const parsePathname = (url: URL): [type: Code["type"], path: string] => {
     if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
     if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
     if (p.startsWith("//steam")) return ["steam", url.pathname.slice(7)];
+    if (p.startsWith("//yaotp")) return ["totp", url.pathname.slice(7)];
+    if (p.startsWith("//yandex")) return ["totp", url.pathname.slice(8)];
 
     throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
@@ -188,7 +202,7 @@ const parseAccount = (path: string): string | undefined => {
     return p;
 };
 
-const parseIssuer = (url: URL, path: string): string => {
+const parseIssuer = (url: URL, path: string, isYandex: boolean): string => {
     // If there is a "issuer" search param, use that.
     let issuer = url.searchParams.get("issuer");
     if (issuer) {
@@ -205,6 +219,7 @@ const parseIssuer = (url: URL, path: string): string => {
     if (p.startsWith("/")) p = p.slice(1);
 
     if (p.includes(":")) p = p.split(":")[0]!;
+    else if (isYandex) return "Yandex";
     else if (p.includes("-")) p = p.split("-")[0]!;
 
     return p;
@@ -217,15 +232,23 @@ const parseIssuer = (url: URL, path: string): string => {
  * this for generating numeric codes. Now we also support steam, which instead
  * shows non-numeric codes, and also with a different default length of 5.
  */
-const parseLength = (url: URL, type: Code["type"]): number => {
+const parseLength = (
+    url: URL,
+    type: Code["type"],
+    isYandex: boolean,
+): number => {
+    if (isYandex) return Yandex.digits;
     const defaultLength = type == "steam" ? 5 : 6;
     return parseInt(url.searchParams.get("digits") ?? "", 10) || defaultLength;
 };
 
-const parsePeriod = (url: URL): number =>
-    parseInt(url.searchParams.get("period") ?? "", 10) || 30;
+const parsePeriod = (url: URL, isYandex: boolean): number =>
+    isYandex
+        ? Yandex.period
+        : parseInt(url.searchParams.get("period") ?? "", 10) || 30;
 
-const parseAlgorithm = (url: URL): Code["algorithm"] => {
+const parseAlgorithm = (url: URL, isYandex: boolean): Code["algorithm"] => {
+    if (isYandex) return "sha256";
     switch (url.searchParams.get("algorithm")?.toLowerCase()) {
         case "sha256":
             return "sha256";
@@ -241,8 +264,28 @@ const parseCounter = (url: URL): number | undefined => {
     return c ? parseInt(c, 10) : undefined;
 };
 
-const parseSecret = (url: URL): string =>
-    url.searchParams.get("secret")!.replaceAll(" ", "").toUpperCase();
+const parsePin = (url: URL, isYandex: boolean): string | undefined => {
+    const pin = url.searchParams.get("pin");
+    if (pin) {
+        return parseYandexPin(pin);
+    }
+    if (isYandex) {
+        throw new Error("Missing Yandex PIN");
+    }
+    return undefined;
+};
+
+const parseSecret = (url: URL, isYandex: boolean): string => {
+    const secret = url.searchParams
+        .get("secret")!
+        .replaceAll(" ", "")
+        .toUpperCase();
+    return isYandex ? normalizeYandexSecret(secret) : secret;
+};
+
+const isYandexCode = (url: URL) =>
+    ["yaotp", "yandex"].includes(url.host.toLowerCase()) ||
+    url.searchParams.has("pin");
 
 /**
  * Parse a JSON string containing Ente specific metadata attached to the code.
@@ -279,16 +322,27 @@ export const generateOTPs = (
     const timestamp = Date.now() + timeOffset;
     switch (code.type) {
         case "totp": {
-            const totp = new TOTP({
-                secret: code.secret,
-                algorithm: code.algorithm,
-                period: code.period,
-                digits: code.length,
-            });
-            otp = totp.generate({ timestamp });
-            nextOTP = totp.generate({
-                timestamp: timestamp + code.period * 1000,
-            });
+            if (code.pin) {
+                const yandex = new Yandex({
+                    secret: code.secret,
+                    pin: code.pin,
+                });
+                otp = yandex.generate({ timestamp });
+                nextOTP = yandex.generate({
+                    timestamp: timestamp + code.period * 1000,
+                });
+            } else {
+                const totp = new TOTP({
+                    secret: code.secret,
+                    algorithm: code.algorithm,
+                    period: code.period,
+                    digits: code.length,
+                });
+                otp = totp.generate({ timestamp });
+                nextOTP = totp.generate({
+                    timestamp: timestamp + code.period * 1000,
+                });
+            }
             break;
         }
 

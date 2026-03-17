@@ -51,7 +51,7 @@ void main() {
     final secondDataToStore = restoredCode.toOTPAuthUrlFormat();
     expect(dataToStore, secondDataToStore);
   });
-//
+  //
 
   test("parseWithFunnyAccountName", () {
     final code = Code.fromOTPAuthUrl(
@@ -72,5 +72,80 @@ void main() {
     final updateCode = Code.fromOTPAuthUrl(updatedRawCode);
     expect(updateCode.account, '伍迪', reason: 'updated accountMismatch');
     expect(updateCode.issuer, '鸭子', reason: 'updated issuerMismatch');
+  });
+
+  test("parseYandexOtpAuthUrl", () {
+    final code = Code.fromOTPAuthUrl(
+      'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3IAAAAAAHTSG4HRZPI&issuer=Yandex&pin=G42TQNQ',
+    );
+    expect(code.type, Type.totp);
+    expect(code.issuer, 'Yandex');
+    expect(code.account, 'alice');
+    expect(code.pin, '7586');
+    expect(code.secret, 'LA2V6KMCGYMWWVEW64RNP3JA3I');
+    expect(code.algorithm, Algorithm.sha256);
+    expect(code.digits, Code.yandexDigits);
+    expect(code.period, Code.defaultPeriod);
+  });
+
+  test("copyWithPreservesYandexPin", () {
+    final code = Code.fromOTPAuthUrl(
+      'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3IAAAAAAHTSG4HRZPI&issuer=Yandex&pin=G42TQNQ',
+    );
+    final updatedCode = code.copyWith(account: 'bob');
+    expect(updatedCode.pin, '7586');
+    expect(updatedCode.rawData, contains('otpauth://yaotp/'));
+    expect(updatedCode.rawData, contains('pin=G42TQNQ'));
+  });
+
+  test("copyWithNormalizesYandexSecret", () {
+    final code = Code.fromOTPAuthUrl(
+      'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3I&issuer=Yandex&pin=7586',
+    );
+    final updatedCode = code.copyWith(
+      secret: 'la2v6kmc-gymwwvew64rnp3ja3iaaaaaahtsg4hrzpi',
+    );
+
+    expect(updatedCode.secret, 'LA2V6KMCGYMWWVEW64RNP3JA3I');
+    expect(
+      updatedCode.rawData,
+      contains('secret=LA2V6KMCGYMWWVEW64RNP3JA3I'),
+    );
+  });
+
+  test("fromAccountAndSecretNormalizesYandexSecret", () {
+    final code = Code.fromAccountAndSecret(
+      Type.totp,
+      'alice',
+      'Yandex',
+      'la2v6kmc-gymwwvew64rnp3ja3iaaaaaahtsg4hrzpi',
+      CodeDisplay(),
+      Code.defaultDigits,
+      pin: '7586',
+    );
+
+    expect(code.secret, 'LA2V6KMCGYMWWVEW64RNP3JA3I');
+    expect(code.rawData, contains('secret=LA2V6KMCGYMWWVEW64RNP3JA3I'));
+  });
+
+  test("rejectsPinLessYandexOtpAuthUrl", () {
+    expect(
+      () => Code.fromOTPAuthUrl(
+        'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3I&issuer=Yandex',
+      ),
+      throwsUnsupportedError,
+    );
+  });
+
+  test("yandexEqualityIgnoresRawEncodingDifferences", () {
+    final aegisEncoded = Code.fromOTPAuthUrl(
+      'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3IAAAAAAHTSG4HRZPI&issuer=Yandex&pin=G42TQNQ',
+    );
+    final canonical = Code.fromOTPAuthUrl(
+      'otpauth://yaotp/Yandex:alice?secret=LA2V6KMCGYMWWVEW64RNP3JA3I&issuer=Yandex&pin=7586',
+    );
+
+    expect(aegisEncoded, canonical);
+    expect(aegisEncoded.hashCode, canonical.hashCode);
   });
 }
