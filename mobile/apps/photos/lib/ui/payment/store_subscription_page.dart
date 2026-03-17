@@ -376,8 +376,20 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             showOnlyLoadingState: true,
             surfaceExecutionStates: true,
             onTap: () async {
-              final userDetails =
-                  await _userService.getUserDetailsV2(memoryCount: false);
+              late final UserDetails userDetails;
+              try {
+                userDetails =
+                    await _userService.getUserDetailsV2(memoryCount: false);
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+                await showGenericErrorDialog(context: context, error: error);
+                return;
+              }
+              if (!context.mounted) {
+                return;
+              }
               await _billingService.launchFamilyPortal(
                 context,
                 userDetails,
