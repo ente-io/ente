@@ -23,6 +23,9 @@ import 'package:photos/utils/face/face_thumbnail_quality.dart';
 
 final _logger = Logger('PersonFaceWidget');
 const _kMinUnnamedClusterSizeForProgressiveUpgrade = 5;
+const _kProgressiveUpgradeUpscaleThreshold = 1.35;
+const _kProgressiveUpgradeMinImprovementRatio = 1.2;
+const _kProgressiveUpgradeIdleWaitBudget = Duration(seconds: 2);
 
 class PersonFaceWidget extends StatefulWidget {
   final String? personId;
@@ -102,7 +105,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           useFullFile: true,
         );
       }
-      if (_fallbackEverUsed || _shouldUseProgressiveStrategy) {
+      if (_fallbackEverUsed) {
         checkStopTryingToGenerateFaceThumbnails(
           _faceCropFileId!,
           useFullFile: false,
@@ -337,6 +340,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       thumbnailHeight: thumbnailDimensions.height,
       fullWidth: sourceFile.width,
       fullHeight: sourceFile.height,
+      upscaleThreshold: _kProgressiveUpgradeUpscaleThreshold,
+      minImprovementRatio: _kProgressiveUpgradeMinImprovementRatio,
     );
     if (!decision.shouldUpgrade) {
       _logger.fine(
@@ -354,11 +359,17 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       'person=${widget.personId} cluster=${widget.clusterID} '
       'thumbUpscale=${decision.thumbnailUpscaleFactor.toStringAsFixed(2)}',
     );
-    await waitForThumbnailFaceGenerationIdle(
+    final didReachThumbnailIdle = await waitForThumbnailFaceGenerationIdle(
       shouldStopWaiting: () => _shouldAbortUpgrade(generation),
+      maxWait: _kProgressiveUpgradeIdleWaitBudget,
     );
     if (_shouldAbortUpgrade(generation)) {
       return;
+    }
+    if (!didReachThumbnailIdle) {
+      _logger.fine(
+        'person_face_thumbnail_upgrade_wait_idle_timeout person=${widget.personId} cluster=${widget.clusterID}',
+      );
     }
 
     _logger.info(
@@ -421,6 +432,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           checkInMemoryCachedCropForPersonOrClusterID(personOrClusterId);
       if (tryInMemoryCachedCrop != null) {
         return tryInMemoryCachedCrop;
+      }
+      if (!useFullFile) {
+        final tryInMemoryCachedThumbnailCrop =
+            checkInMemoryCachedThumbnailCropForPersonOrClusterID(
+          personOrClusterId,
+        );
+        if (tryInMemoryCachedThumbnailCrop != null) {
+          return tryInMemoryCachedThumbnailCrop;
+        }
       }
       String? fixedFaceID;
       PersonEntity? personEntity;
@@ -496,9 +516,13 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           }
         }
       } else {
-        final hiddenFileIDs = await SearchService.instance
-            .getHiddenFiles()
-            .then((onValue) => onValue.map((e) => e.uploadedFileID));
+        final hiddenFileIDs =
+            await SearchService.instance.getHiddenFiles().then(
+                  (files) => files
+                      .map((file) => file.uploadedFileID)
+                      .whereType<int>()
+                      .toSet(),
+                );
         if (fixedFaceID != null) {
           final fileID = getFileIdFromFaceId<int>(fixedFaceID);
           final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
@@ -587,6 +611,10 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         await checkRemoveCachedFaceIDForPersonOrClusterId(personOrClusterId);
         return null;
       }
+      await cacheFaceIdForPersonOrClusterIfNeeded(
+        personOrClusterId,
+        face.faceID,
+      );
 
       final cropMap = await getCachedFaceCrops(
         selectedFileForFaceCrop,

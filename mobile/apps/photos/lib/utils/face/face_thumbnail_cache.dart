@@ -49,6 +49,15 @@ Uint8List? checkInMemoryCachedCropForPersonOrClusterID(
   return cachedCover;
 }
 
+Uint8List? checkInMemoryCachedThumbnailCropForPersonOrClusterID(
+  String personOrClusterID,
+) {
+  final String? faceID =
+      _personOrClusterIdToCachedFaceID.get(personOrClusterID);
+  if (faceID == null) return null;
+  return _faceCropThumbnailCache.get(faceID);
+}
+
 ({int width, int height})? getCachedThumbnailSourceDimensionsForFileId(
   int fileId,
 ) {
@@ -85,6 +94,16 @@ Future<void> putFaceIdCachedForPersonOrCluster(
     faceID,
   );
   _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
+}
+
+Future<void> cacheFaceIdForPersonOrClusterIfNeeded(
+  String personOrClusterID,
+  String faceID,
+) async {
+  if (_personOrClusterIdToCachedFaceID.get(personOrClusterID) == faceID) {
+    return;
+  }
+  await putFaceIdCachedForPersonOrCluster(personOrClusterID, faceID);
 }
 
 Future<void> _putCachedCropForFaceID(
@@ -312,16 +331,21 @@ bool areThumbnailFaceGenerationQueuesIdle() {
       _queueThumbnailFaceGenerations.runningTasksCount == 0;
 }
 
-Future<void> waitForThumbnailFaceGenerationIdle({
+Future<bool> waitForThumbnailFaceGenerationIdle({
   Duration pollInterval = const Duration(milliseconds: 120),
+  Duration? maxWait,
   bool Function()? shouldStopWaiting,
 }) async {
+  final startedAt = DateTime.now();
   while (true) {
     if (shouldStopWaiting?.call() ?? false) {
-      return;
+      return false;
     }
     if (areThumbnailFaceGenerationQueuesIdle()) {
-      return;
+      return true;
+    }
+    if (maxWait != null && DateTime.now().difference(startedAt) >= maxWait) {
+      return false;
     }
     await Future.delayed(pollInterval);
   }
