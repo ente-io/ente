@@ -45,10 +45,7 @@ class FlagService {
   bool get disableCFWorker => flags.disableCFWorker;
 
   /// Returns true if the user is an internal user, respecting the debug toggle.
-  bool get internalUser {
-    final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
-    return (flags.internalUser || kDebugMode) && !isDisabled;
-  }
+  bool get internalUser => isInternalUserForPrefs(_prefs);
 
   bool get cloudflareUploadWorker => internalUser;
 
@@ -104,24 +101,26 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
-  bool get enableIOSUploadBackgroundHandoff =>
-      isIOSUploadBackgroundHandoffEnabledForPrefs(_prefs);
+  bool get enableIOSUploadBackgroundHandoff => internalUser;
 
-  static bool isIOSUploadBackgroundHandoffEnabledForPrefs(
-    SharedPreferences prefs,
-  ) {
+  static bool isInternalUserForPrefs(SharedPreferences prefs) {
     final isDisabled = prefs.getBool("ls.internal_user_disabled") ?? false;
     try {
       final remoteFlags = prefs.getString("remote_flags");
       final isInternalUser = remoteFlags == null
           ? kDebugMode
           : (RemoteFlags.fromMap(jsonDecode(remoteFlags)).internalUser ||
-                kDebugMode);
+              kDebugMode);
       return isInternalUser && !isDisabled;
     } catch (_) {
       return kDebugMode && !isDisabled;
     }
   }
+
+  static bool isIOSUploadBackgroundHandoffEnabledForPrefs(
+    SharedPreferences prefs,
+  ) =>
+      isInternalUserForPrefs(prefs);
 
   Future<void> tryRefreshFlags() async {
     try {

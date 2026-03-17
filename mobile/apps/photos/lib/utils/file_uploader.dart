@@ -228,6 +228,26 @@ class FileUploader {
     return _totalCountInUploadSession;
   }
 
+  @visibleForTesting
+  void resetForTesting() {
+    _queue.clear();
+    _allBackups.clear();
+    _totalCountInUploadSession = 0;
+    _uploadCounter = 0;
+    _videoUploadCounter = 0;
+  }
+
+  @visibleForTesting
+  void addPendingUploadForTesting(
+    FileUploadItem queueItem,
+    BackupItem backupItem,
+  ) {
+    final localID = queueItem.file.localID!;
+    _queue[localID] = queueItem;
+    _allBackups[localID] = backupItem;
+    _totalCountInUploadSession++;
+  }
+
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
@@ -1618,8 +1638,12 @@ class FileUploader {
     });
   }
 
-  Future<void> reconcileAfterBackground() async {
+  Future<void> reconcileAfterBackground({
+    Future<EnteFile?> Function(int generatedID)? lookupFile,
+  }) async {
     bool changed = false;
+    bool queueChanged = false;
+    final resolveFile = lookupFile ?? FilesDB.instance.getFile;
     final backupEntries = _allBackups.entries.toList(growable: false);
     for (final entry in backupEntries) {
       final backup = entry.value;
@@ -1628,12 +1652,18 @@ class FileUploader {
         continue;
       }
 
-      final dbFile = await FilesDB.instance.getFile(generatedID);
+      final dbFile = await resolveFile(generatedID);
       if (dbFile?.uploadedFileID == null) {
         continue;
       }
 
-      _queue.remove(entry.key);
+      final queueItem = _queue.remove(entry.key);
+      if (queueItem != null) {
+        queueChanged = true;
+        if (!queueItem.completer.isCompleted) {
+          queueItem.completer.complete(dbFile!);
+        }
+      }
       if (backup.status != BackupItemStatus.uploaded) {
         _allBackups[entry.key] = backup.copyWith(
           status: BackupItemStatus.uploaded,
@@ -1645,6 +1675,9 @@ class FileUploader {
 
     if (changed) {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    }
+    if (queueChanged) {
+      _pollQueue();
     }
   }
 }

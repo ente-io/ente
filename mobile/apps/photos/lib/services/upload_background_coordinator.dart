@@ -3,8 +3,6 @@ import "dart:io";
 
 import "package:grace_window_ios/grace_window_ios.dart";
 import "package:logging/logging.dart";
-import "package:permission_handler/permission_handler.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/utils/bg_task_utils.dart";
@@ -54,7 +52,7 @@ class UploadBackgroundCoordinator {
       return;
     }
 
-    if (await _isBackupEligible()) {
+    if (await BgTaskUtils.isIOSBackupEligible()) {
       await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
         source: "appBackground:maintenance",
         initialDelay: BgTaskUtils.maintenanceDelay(),
@@ -97,20 +95,5 @@ class UploadBackgroundCoordinator {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyIOSUploadGraceActive);
     await GraceWindowIos.endGraceWindow();
-  }
-
-  Future<bool> _isBackupEligible() async {
-    if (!Configuration.instance.hasConfiguredAccount()) {
-      return false;
-    }
-
-    final status = await Permission.photos.status;
-    final hasPhotoAccess = status == PermissionStatus.granted ||
-        status == PermissionStatus.limited;
-    if (!hasPhotoAccess) {
-      return false;
-    }
-
-    return backupPreferenceService.hasSelectedAnyBackupFolder;
   }
 }

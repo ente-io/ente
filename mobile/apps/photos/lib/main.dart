@@ -144,17 +144,8 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
 }
 
 Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
-  final trigger = Platform.isIOS
-      ? (taskId == BgTaskUtils.iOSBackgroundProcessingTask
-          ? BackgroundTrigger.bgProcessing
-          : BackgroundTrigger.bgAppRefresh)
-      : BackgroundTrigger.workmanager;
-  final budget = switch (trigger) {
-    BackgroundTrigger.bgProcessing => kBGProcessingTaskTimeout,
-    BackgroundTrigger.bgAppRefresh => kBGTaskTimeout,
-    BackgroundTrigger.workmanager => kAndroidBackgroundTaskTimeout,
-    BackgroundTrigger.remotePush => kBGPushTimeout,
-  };
+  final trigger = BgTaskUtils.backgroundTriggerForTask(taskId);
+  final budget = BgTaskUtils.backgroundBudgetForTask(taskId);
   bool result = true;
   await runWithLogs(
     () async {
@@ -506,17 +497,6 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
-Future<void> _releaseBackgroundResources(
-  String taskId,
-  SharedPreferences prefs,
-) async {
-  await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-    ProcessType.background.toString(),
-    DateTime.now().microsecondsSinceEpoch,
-  );
-  await prefs.remove(kLastBGTaskHeartBeatTime);
-}
-
 String _backgroundLogPrefix(BackgroundTrigger trigger) {
   return switch (trigger) {
     BackgroundTrigger.remotePush => "[fbg]",
@@ -550,7 +530,7 @@ Future<bool> _runBackgroundPass({
   } catch (e, s) {
     success = false;
     _logger.severe("Background run failed for $taskId", e, s);
-    await _releaseBackgroundResources(taskId, attempt.prefs);
+    await BgTaskUtils.releaseResourcesForKill(taskId, attempt.prefs);
   } finally {
     await _backgroundRunHelper.finishRun(attempt);
   }
