@@ -1794,6 +1794,11 @@ interface MultipartCompletedPart {
     eTag: string;
 }
 
+export type LockerUploadProgress =
+    | { phase: "preparing" }
+    | { phase: "uploading"; loaded: number; total: number }
+    | { phase: "finalizing" };
+
 /**
  * Request a presigned upload URL from the server.
  *
@@ -1853,14 +1858,31 @@ const putFileToS3 = async (
     url: string,
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<void> => {
-    const res = await fetch(url, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/octet-stream",
-            "Content-MD5": contentMd5,
-        },
-        body: data,
+    const res = await new Promise<{
+        ok: boolean;
+        status: number;
+        statusText: string;
+    }>((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("PUT", url);
+        request.setRequestHeader("Content-Type", "application/octet-stream");
+        request.setRequestHeader("Content-MD5", contentMd5);
+        request.upload.onprogress = (event) => {
+            onProgress?.({
+                loaded: event.loaded,
+                total: event.lengthComputable ? event.total : data.length,
+            });
+        };
+        request.onload = () =>
+            resolve({
+                ok: request.status >= 200 && request.status < 300,
+                status: request.status,
+                statusText: request.statusText,
+            });
+        request.onerror = () => reject(new Error("S3 upload failed"));
+        request.send(data);
     });
     if (!res.ok) {
         throw new Error(`S3 upload failed: ${res.status} ${res.statusText}`);
@@ -1870,13 +1892,14 @@ const putFileToS3 = async (
 const uploadSingleObject = async (
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<string> => {
     const maxAttempts = 3;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const uploadURL = await fetchUploadURL(data.length, contentMd5);
-            await putFileToS3(uploadURL.url, data, contentMd5);
+            await putFileToS3(uploadURL.url, data, contentMd5, onProgress);
             return uploadURL.objectKey;
         } catch (error) {
             if (attempt === maxAttempts) {
@@ -1892,19 +1915,56 @@ const putFilePartToS3 = async (
     url: string,
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<string> => {
-    const res = await retryEnsuringHTTPOk(() =>
-        fetch(url, {
-            method: "PUT",
-            headers: { ...publicRequestHeaders(), "Content-MD5": contentMd5 },
-            body: data,
-        }),
-    );
-    const eTag = res.headers.get("etag");
-    if (!eTag) {
-        throw new Error("Missing ETag from multipart upload response");
+    const maxAttempts = 3;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const eTag = await new Promise<string | null>((resolve, reject) => {
+                const request = new XMLHttpRequest();
+                request.open("PUT", url);
+                for (const [headerName, headerValue] of Object.entries({
+                    ...publicRequestHeaders(),
+                    "Content-MD5": contentMd5,
+                })) {
+                    request.setRequestHeader(headerName, headerValue);
+                }
+                request.upload.onprogress = (event) => {
+                    onProgress?.({
+                        loaded: event.loaded,
+                        total: event.lengthComputable
+                            ? event.total
+                            : data.length,
+                    });
+                };
+                request.onload = () => {
+                    if (request.status < 200 || request.status >= 300) {
+                        reject(
+                            new Error(
+                                `S3 multipart upload failed: ${request.status} ${request.statusText}`,
+                            ),
+                        );
+                        return;
+                    }
+                    resolve(request.getResponseHeader("etag"));
+                };
+                request.onerror = () =>
+                    reject(new Error("S3 multipart upload failed"));
+                request.send(data);
+            });
+            if (!eTag) {
+                throw new Error("Missing ETag from multipart upload response");
+            }
+            return eTag;
+        } catch (error) {
+            if (attempt === maxAttempts) {
+                throw error;
+            }
+        }
     }
-    return eTag;
+
+    throw new Error("Unreachable multipart upload retry state");
 };
 
 const completeMultipartUpload = async (
@@ -1940,6 +2000,31 @@ const mergeUint8Arrays = (chunks: Uint8Array[]): Uint8Array => {
     return merged;
 };
 
+const createAggregateUploadProgressReporter = (
+    total: number,
+    onProgress?: (progress: LockerUploadProgress) => void,
+) => {
+    let uploadedBytes = 0;
+
+    return {
+        reportPartProgress: (loaded: number) => {
+            onProgress?.({
+                phase: "uploading",
+                loaded: Math.min(total, uploadedBytes + loaded),
+                total,
+            });
+        },
+        completePart: (partLength: number) => {
+            uploadedBytes += partLength;
+            onProgress?.({
+                phase: "uploading",
+                loaded: Math.min(total, uploadedBytes),
+                total,
+            });
+        },
+    };
+};
+
 /**
  * Upload a file to Locker with E2E encryption.
  *
@@ -1962,7 +2047,10 @@ export const uploadLockerFile = async (
     file: File,
     collectionID: number,
     masterKey: string,
+    onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
+    onProgress?.({ phase: "preparing" });
+
     const plaintextChunkCount = Math.max(
         1,
         Math.ceil(file.size / STREAM_ENCRYPTION_CHUNK_SIZE),
@@ -2025,6 +2113,10 @@ export const uploadLockerFile = async (
                 partMd5s,
             });
             const completedParts: MultipartCompletedPart[] = [];
+            const progressReporter = createAggregateUploadProgressReporter(
+                encryptedFileSize,
+                onProgress,
+            );
 
             for (const [index, partData] of parts.entries()) {
                 const partUploadURL = multipartUpload.partURLs[index];
@@ -2036,8 +2128,10 @@ export const uploadLockerFile = async (
                     partUploadURL,
                     partData,
                     partMd5,
+                    ({ loaded }) => progressReporter.reportPartProgress(loaded),
                 );
                 completedParts.push({ partNumber: index + 1, eTag });
+                progressReporter.completePart(partData.length);
                 parts[index] = new Uint8Array(0);
             }
 
@@ -2077,11 +2171,24 @@ export const uploadLockerFile = async (
             encryptedFileObjectKey = await uploadSingleObject(
                 encryptedFileBytes,
                 encryptedFileMd5,
+                ({ loaded, total }) =>
+                    onProgress?.({
+                        phase: "uploading",
+                        loaded,
+                        total: total ?? encryptedFileBytes.length,
+                    }),
             );
         }
     } finally {
         streamEncryptor.free();
     }
+
+    onProgress?.({
+        phase: "uploading",
+        loaded: encryptedFileSize,
+        total: encryptedFileSize,
+    });
+    onProgress?.({ phase: "finalizing" });
 
     // 3. Encrypt the black placeholder thumbnail with the file key
     const encryptedThumb = await encryptFileStreamWithKey(

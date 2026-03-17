@@ -36,6 +36,7 @@ import React, {
     useState,
 } from "react";
 import { formatLockerMutationError } from "services/locker-errors";
+import type { LockerUploadProgress } from "services/remote";
 import type { LockerCollection, LockerItemType } from "types";
 import { isCollectionOwner, visibleLockerCollections } from "types";
 
@@ -94,7 +95,11 @@ interface CreateItemDialogProps {
         data: Record<string, unknown>,
         collectionID: number,
     ) => Promise<void>;
-    onUploadFile?: (file: File, collectionID: number) => Promise<void>;
+    onUploadProgress?: (
+        file: File,
+        collectionID: number,
+        onProgress: (progress: LockerUploadProgress) => void,
+    ) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
     defaultCollectionID?: number | null;
     initialFile?: File | null;
@@ -111,7 +116,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onClose,
     collections,
     onSave,
-    onUploadFile,
+    onUploadProgress,
     onCreateCollection,
     defaultCollectionID,
     initialFile,
@@ -141,6 +146,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     );
     const [showPassword, setShowPassword] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] =
+        useState<LockerUploadProgress | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
@@ -181,6 +188,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setShowPassword(false);
         setSelectedFile(initialFile ?? null);
         setError(null);
+        setUploadProgress(null);
     }, [
         defaultCollectionID,
         editCollectionID,
@@ -214,6 +222,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setError(null);
         setShowPassword(false);
         setSelectedFile(null);
+        setUploadProgress(null);
         onClose();
     }, [onClose, saving, uploading]);
 
@@ -271,14 +280,23 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     }, [formData, handleClose, onSave, selectedCollectionID, selectedType]);
 
     const handleUpload = useCallback(async () => {
-        if (!selectedFile || selectedCollectionID === null || !onUploadFile) {
+        if (
+            !selectedFile ||
+            selectedCollectionID === null ||
+            !onUploadProgress
+        ) {
             return;
         }
 
         setUploading(true);
         setError(null);
+        setUploadProgress({ phase: "preparing" });
         try {
-            await onUploadFile(selectedFile, selectedCollectionID);
+            await onUploadProgress(
+                selectedFile,
+                selectedCollectionID,
+                setUploadProgress,
+            );
             handleClose();
         } catch (error) {
             log.error("Failed to upload Locker file", error);
@@ -286,7 +304,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setUploading(false);
         }
-    }, [handleClose, onUploadFile, selectedCollectionID, selectedFile]);
+    }, [handleClose, onUploadProgress, selectedCollectionID, selectedFile]);
 
     const canSave =
         selectedType !== null &&
@@ -397,67 +415,96 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             </ButtonBase>
                         ) : (
                             <Stack
-                                direction="row"
                                 sx={{
-                                    alignItems: "center",
-                                    gap: 1.5,
-                                    p: 2,
                                     borderRadius: "12px",
                                     backgroundColor: (theme) =>
                                         theme.vars.palette.fill.faint,
+                                    overflow: "hidden",
                                 }}
                             >
-                                <Box
+                                <Stack
+                                    direction="row"
                                     sx={{
-                                        display: "flex",
                                         alignItems: "center",
-                                        justifyContent: "center",
-                                        width: 48,
-                                        height: 48,
-                                        borderRadius: "12px",
-                                        backgroundColor: lockerItemIconConfig(
-                                            "file",
-                                            selectedFile.name,
-                                        ).backgroundColor,
-                                        flexShrink: 0,
+                                        gap: 1.5,
+                                        p: 2,
                                     }}
                                 >
-                                    {lockerItemIcon("file", {
-                                        fileName: selectedFile.name,
-                                        size: 24,
-                                        strokeWidth: 1.9,
-                                    })}
-                                </Box>
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                    <Typography variant="body" noWrap>
-                                        {selectedFile.name}
-                                    </Typography>
-                                    <Typography
-                                        variant="small"
-                                        sx={{ color: "text.faint" }}
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: 48,
+                                            height: 48,
+                                            borderRadius: "12px",
+                                            backgroundColor:
+                                                lockerItemIconConfig(
+                                                    "file",
+                                                    selectedFile.name,
+                                                ).backgroundColor,
+                                            flexShrink: 0,
+                                        }}
                                     >
-                                        {formatFileSize(selectedFile.size)}
-                                    </Typography>
-                                </Box>
-                                <FocusVisibleButton
-                                    size="small"
-                                    color="secondary"
-                                    onClick={() => {
-                                        setSelectedFile(null);
-                                        if (fileInputRef.current) {
-                                            fileInputRef.current.value = "";
+                                        {lockerItemIcon("file", {
+                                            fileName: selectedFile.name,
+                                            size: 24,
+                                            strokeWidth: 1.9,
+                                        })}
+                                    </Box>
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Typography variant="body" noWrap>
+                                            {selectedFile.name}
+                                        </Typography>
+                                        <Typography
+                                            variant="small"
+                                            sx={{ color: "text.faint" }}
+                                        >
+                                            {formatFileSize(selectedFile.size)}
+                                        </Typography>
+                                    </Box>
+                                    {!uploading && (
+                                        <FocusVisibleButton
+                                            size="small"
+                                            color="secondary"
+                                            onClick={() => {
+                                                setSelectedFile(null);
+                                                if (fileInputRef.current) {
+                                                    fileInputRef.current.value =
+                                                        "";
+                                                }
+                                            }}
+                                        >
+                                            {t("change")}
+                                        </FocusVisibleButton>
+                                    )}
+                                </Stack>
+                                {uploading && (
+                                    <LinearProgress
+                                        variant={
+                                            uploadProgress?.phase ===
+                                            "uploading"
+                                                ? "determinate"
+                                                : "indeterminate"
                                         }
-                                    }}
-                                >
-                                    {t("change")}
-                                </FocusVisibleButton>
+                                        value={
+                                            uploadProgress?.phase ===
+                                            "uploading"
+                                                ? Math.min(
+                                                      100,
+                                                      (uploadProgress.loaded /
+                                                          Math.max(
+                                                              uploadProgress.total,
+                                                              1,
+                                                          )) *
+                                                          100,
+                                                  )
+                                                : undefined
+                                        }
+                                        sx={{ height: 4, borderRadius: 0 }}
+                                    />
+                                )}
                             </Stack>
-                        )}
-
-                        {uploading && (
-                            <Box sx={{ width: "100%" }}>
-                                <LinearProgress />
-                            </Box>
                         )}
 
                         {!isEditMode && (

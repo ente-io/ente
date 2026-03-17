@@ -44,6 +44,7 @@ import {
     unshareCollection as unshareCollectionAPI,
     updateInfoItem,
     uploadLockerFile,
+    type LockerUploadProgress,
 } from "services/remote";
 import type { LockerCollection, LockerItem, LockerItemType } from "types";
 import { getItemTitle } from "types";
@@ -411,10 +412,14 @@ export const LockerPage: React.FC = () => {
         [masterKey, refreshData],
     );
 
-    const handleUploadFile = useCallback(
-        async (file: File, collectionID: number) => {
+    const handleUploadFileWithProgress = useCallback(
+        async (
+            file: File,
+            collectionID: number,
+            onProgress: (progress: LockerUploadProgress) => void,
+        ) => {
             if (!masterKey) throw new Error("No master key");
-            await uploadLockerFile(file, collectionID, masterKey);
+            await uploadLockerFile(file, collectionID, masterKey, onProgress);
             await refreshData();
             setToast(t("uploadComplete"));
         },
@@ -905,7 +910,7 @@ export const LockerPage: React.FC = () => {
                 onClose={handleCreateDialogClose}
                 collections={collections}
                 onSave={handleCreateItem}
-                onUploadFile={handleUploadFile}
+                onUploadProgress={handleUploadFileWithProgress}
                 onCreateCollection={handleCreateCollection}
                 defaultCollectionID={selectedCollectionID}
                 initialFile={prefilledUploadFile}
