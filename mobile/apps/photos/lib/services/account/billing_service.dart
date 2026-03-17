@@ -137,6 +137,7 @@ class BillingService {
     BuildContext context,
     UserDetails userDetails, {
     bool popOnFreeAdvertViewPlans = false,
+    bool refreshOnOpen = true,
   }) async {
     try {
       await routeToPage(
@@ -144,6 +145,7 @@ class BillingService {
         FamilyPlanPage(
           initialUserDetails: userDetails,
           popOnFreeAdvertViewPlans: popOnFreeAdvertViewPlans,
+          refreshOnOpen: refreshOnOpen,
         ),
       );
     } catch (e) {

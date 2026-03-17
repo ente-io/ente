@@ -482,10 +482,15 @@ class _SettingsBody extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
+          surfaceExecutionStates: true,
           onTap: () async {
             final userDetails =
                 await UserService.instance.getUserDetailsV2(memoryCount: false);
-            await billingService.launchFamilyPortal(context, userDetails);
+            await billingService.launchFamilyPortal(
+              context,
+              userDetails,
+              refreshOnOpen: false,
+            );
           },
         ),
         MenuItemWidgetNew(

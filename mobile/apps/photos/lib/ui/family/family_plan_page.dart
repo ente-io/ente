@@ -25,11 +25,13 @@ class FamilyPlanPage extends StatefulWidget {
   const FamilyPlanPage({
     required this.initialUserDetails,
     this.popOnFreeAdvertViewPlans = false,
+    this.refreshOnOpen = true,
     super.key,
   });
 
   final UserDetails initialUserDetails;
   final bool popOnFreeAdvertViewPlans;
+  final bool refreshOnOpen;
 
   @override
   State<FamilyPlanPage> createState() => _FamilyPlanPageState();
@@ -80,7 +82,9 @@ class _FamilyPlanPageState extends State<FamilyPlanPage> {
       });
       return;
     }
-    unawaited(_refreshUserDetails());
+    if (widget.refreshOnOpen) {
+      unawaited(_refreshUserDetails());
+    }
     if (_isFreeUser) {
       unawaited(_loadStartingPrice());
     }

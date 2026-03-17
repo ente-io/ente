@@ -373,13 +373,16 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
+            showOnlyLoadingState: true,
+            surfaceExecutionStates: true,
             onTap: () async {
-              unawaited(
-                _billingService.launchFamilyPortal(
-                  context,
-                  _userDetails,
-                  popOnFreeAdvertViewPlans: true,
-                ),
+              final userDetails =
+                  await _userService.getUserDetailsV2(memoryCount: false);
+              await _billingService.launchFamilyPortal(
+                context,
+                userDetails,
+                popOnFreeAdvertViewPlans: true,
+                refreshOnOpen: false,
               );
             },
           ),

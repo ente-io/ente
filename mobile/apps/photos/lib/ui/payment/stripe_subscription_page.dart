@@ -259,12 +259,16 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
+            showOnlyLoadingState: true,
+            surfaceExecutionStates: true,
             onTap: () async {
-              // ignore: unawaited_futures
-              _billingService.launchFamilyPortal(
+              final userDetails =
+                  await _userService.getUserDetailsV2(memoryCount: false);
+              await _billingService.launchFamilyPortal(
                 context,
-                _userDetails,
+                userDetails,
                 popOnFreeAdvertViewPlans: true,
+                refreshOnOpen: false,
               );
             },
           ),
