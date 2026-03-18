@@ -28,12 +28,11 @@ Run `./build.sh --help` or `./run.sh --help` for full options.
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
 - UniFFI Swift bindings are generated locally and gitignored:
   - `ensu/Generated/core*`, `ensu/Generated/db*`, `ensu/Generated/sync*`
-  - `../Packages/Rust/Sources/InferenceRS/inference_rs_uniffi*`
+  - `../Packages/Rust/Sources/InferenceRS/`
   - `../Packages/Rust/InferenceRSFFI.xcframework`
 
 The Xcode build script (`scripts/build-rust.sh`) builds Rust static libs, but it does
-not regenerate the Swift bindings. If bindings are missing, build the corresponding
-`rust/uniffi/core` or `rust/uniffi/ensu/*` crate and run `uniffi-bindgen generate` to output into the paths above.
+regenerate the `core`, `db`, and `sync` Swift bindings into `ensu/Generated/` as part of the build.
 `../Packages/Rust/tool/generate_bindings.sh` and `../Packages/Rust/tool/build_xcframework.sh`
 handle the InferenceRS bindings and xcframework.
 
@@ -123,5 +122,3 @@ ENTE_API_ENDPOINT="https://your-endpoint.example" \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   -derivedDataPath build
 ```
-
-
