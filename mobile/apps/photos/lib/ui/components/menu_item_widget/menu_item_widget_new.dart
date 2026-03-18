@@ -16,7 +16,6 @@ class MenuItemWidgetNew extends StatefulWidget {
   final int titleMaxLines;
   final int subTextMaxLines;
   final TextStyle? subTextStyle;
-  final double verticalPaddingWithSubText;
   final double titleToSubTextSpacing;
 
   /// Color for the title text
@@ -69,7 +68,6 @@ class MenuItemWidgetNew extends StatefulWidget {
     this.titleMaxLines = 2,
     this.subTextMaxLines = 1,
     this.subTextStyle,
-    this.verticalPaddingWithSubText = 9.0,
     this.titleToSubTextSpacing = 0.0,
     this.titleColor,
     this.leadingIcon,
@@ -158,14 +156,12 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
     final bool hasSubText =
         widget.subText != null && widget.subText!.isNotEmpty;
-    final verticalPadding =
-        hasSubText ? widget.verticalPaddingWithSubText : 16.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
       clipBehavior: Clip.none,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(circularRadius),
         color: effectiveMenuItemColor,
