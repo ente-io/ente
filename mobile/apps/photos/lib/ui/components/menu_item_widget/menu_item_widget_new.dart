@@ -14,7 +14,6 @@ class MenuItemWidgetNew extends StatefulWidget {
   final String title;
   final String? subText;
   final TextStyle? subTextStyle;
-  final double verticalPaddingWithSubText;
   final double titleToSubTextSpacing;
 
   /// Color for the title text
@@ -65,7 +64,6 @@ class MenuItemWidgetNew extends StatefulWidget {
     required this.title,
     this.subText,
     this.subTextStyle,
-    this.verticalPaddingWithSubText = 9.0,
     this.titleToSubTextSpacing = 0.0,
     this.titleColor,
     this.leadingIcon,
@@ -154,8 +152,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
     final bool hasSubText =
         widget.subText != null && widget.subText!.isNotEmpty;
-    final verticalPadding =
-        hasSubText ? widget.verticalPaddingWithSubText : 16.0;
+    final verticalPadding = hasSubText ? 12.0 : 16.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),

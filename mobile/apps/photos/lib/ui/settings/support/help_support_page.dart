@@ -193,7 +193,6 @@ class HelpSupportPage extends StatelessWidget {
       title: title,
       subText: subText,
       subTextStyle: textTheme.miniMuted,
-      verticalPaddingWithSubText: 12,
       titleToSubTextSpacing: 2,
       leadingIconWidget: _buildIconWidget(context, icon),
       trailingIcon: Icons.chevron_right_outlined,
