@@ -597,6 +597,28 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           PersonService.instance.getPerson(widget.personId!);
     }
 
+    Future<bool> isFaceStillAssignedToCurrentSubject(
+      PersonFaceSource faceSource, {
+      String? currentAvatarFaceId,
+    }) async {
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      if (!isPerson) {
+        final currentClusterId =
+            await mlDataDB.getClusterIDForFaceID(faceSource.face.faceID);
+        return currentClusterId == widget.clusterID;
+      }
+
+      if (currentAvatarFaceId != null) {
+        return faceSource.face.faceID == currentAvatarFaceId;
+      }
+
+      final personIdsByFace = await mlDataDB.getFaceIdToPersonIdForFaces([
+        faceSource.face.faceID,
+      ]);
+      return personIdsByFace[faceSource.face.faceID] == widget.personId;
+    }
+
     Future<bool> canReuseResolvedFaceSource(
       PersonFaceSource faceSource, {
       bool clearSharedCache = false,
@@ -609,7 +631,22 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         return false;
       }
       if (!isPerson || isOfflineMode) {
-        return true;
+        final isStillAssigned =
+            await isFaceStillAssignedToCurrentSubject(faceSource);
+        if (isStillAssigned) {
+          return true;
+        }
+        _logger.fine(
+          'Ignoring stale prefetched face source for ${widget.clusterID ?? widget.personId}: '
+          'face=${faceSource.face.faceID}',
+        );
+        if (identical(_resolvedFaceSource, faceSource)) {
+          _resolvedFaceSource = null;
+        }
+        if (clearSharedCache) {
+          removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
+        }
+        return false;
       }
 
       final personEntity = await getCurrentPersonEntity();
@@ -622,12 +659,11 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       _personName = personEntity.data.name;
 
       final currentAvatarFaceId = personEntity.data.avatarFaceID;
-      final seededAvatarFaceId = widget.initialAvatarFaceId;
-      final shouldRejectFaceSource = currentAvatarFaceId != null
-          ? faceSource.face.faceID != currentAvatarFaceId
-          : seededAvatarFaceId != null &&
-              faceSource.face.faceID == seededAvatarFaceId;
-      if (!shouldRejectFaceSource) {
+      final isStillAssigned = await isFaceStillAssignedToCurrentSubject(
+        faceSource,
+        currentAvatarFaceId: currentAvatarFaceId,
+      );
+      if (isStillAssigned) {
         return true;
       }
 
