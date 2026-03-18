@@ -119,6 +119,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   bool _disposed = false;
   int _upgradeGeneration = 0;
   EnteFile? _requestedThumbnailPreviewFile;
+  final Map<int, int> _fullGenerationTaskClaims = <int, int>{};
+  final Map<int, int> _thumbnailGenerationTaskClaims = <int, int>{};
   bool _isVisible = false;
   Timer? _visibleTaskTouchTimer;
 
@@ -147,6 +149,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     _disposed = true;
     _upgradeGeneration += 1;
     _cancelVisibleTaskTouchTimer();
+    _releasePendingFaceGenerationClaims();
     if (_requestedThumbnailPreviewFile != null) {
       removePendingGetThumbnailRequestIfAny(_requestedThumbnailPreviewFile!);
     }
@@ -316,6 +319,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       return null;
     }
 
+    final cachedFullCrop = await _loadCachedFullFaceCropIfAvailable(faceSource);
+    if (cachedFullCrop != null) {
+      _showingFallback = false;
+      return _PersonFaceLoadResult.faceCrop(
+        faceCropBytes: cachedFullCrop,
+        personName: _personName,
+      );
+    }
+
     if (_previewImageDimensionsForSource(faceSource) != null) {
       final thumbnailBytes = await _loadThumbnailPreviewBytes(faceSource.file);
       if (thumbnailBytes != null) {
@@ -399,6 +411,21 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     }
   }
 
+  Future<Uint8List?> _loadCachedFullFaceCropIfAvailable(
+    PersonFaceSource faceSource,
+  ) async {
+    final personOrClusterId = widget.personId ?? widget.clusterID!;
+    final cachedFullCrop =
+        checkInMemoryCachedCropForPersonOrClusterID(personOrClusterId);
+    if (cachedFullCrop != null) {
+      return cachedFullCrop;
+    }
+    return getPersistedFullFaceCropIfAvailable(
+      faceSource.face.faceID,
+      personOrClusterID: personOrClusterId,
+    );
+  }
+
   void _applyResolvedFaceSource(PersonFaceSource faceSource) {
     _resolvedFaceSource = faceSource;
     fileForFaceCrop = faceSource.file;
@@ -448,6 +475,33 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   void _cancelVisibleTaskTouchTimer() {
     _visibleTaskTouchTimer?.cancel();
     _visibleTaskTouchTimer = null;
+  }
+
+  void _recordPendingFaceGenerationClaim(
+    int fileId, {
+    required bool useFullFile,
+  }) {
+    final claims = useFullFile
+        ? _fullGenerationTaskClaims
+        : _thumbnailGenerationTaskClaims;
+    claims.update(fileId, (count) => count + 1, ifAbsent: () => 1);
+  }
+
+  void _releasePendingFaceGenerationClaims() {
+    void releaseClaims(Map<int, int> claims, {required bool useFullFile}) {
+      for (final entry in claims.entries) {
+        for (var i = 0; i < entry.value; i++) {
+          checkStopTryingToGenerateFaceThumbnails(
+            entry.key,
+            useFullFile: useFullFile,
+          );
+        }
+      }
+      claims.clear();
+    }
+
+    releaseClaims(_fullGenerationTaskClaims, useFullFile: true);
+    releaseClaims(_thumbnailGenerationTaskClaims, useFullFile: false);
   }
 
   String _visibilityKeySuffix() {
@@ -973,11 +1027,22 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         return null;
       }
 
+      var didRecordGenerationClaim = false;
       final cropMap = await getCachedFaceCrops(
         faceSource.file,
         [faceSource.face],
         useFullFile: useFullFile,
         personOrClusterID: personOrClusterId,
+        onGenerationTaskQueued: () {
+          if (didRecordGenerationClaim) {
+            return;
+          }
+          didRecordGenerationClaim = true;
+          _recordPendingFaceGenerationClaim(
+            faceSource.resolvedFileId,
+            useFullFile: useFullFile,
+          );
+        },
         useTempCache: false,
       );
       _applyResolvedFaceSource(faceSource);

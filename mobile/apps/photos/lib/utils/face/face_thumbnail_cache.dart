@@ -169,6 +169,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
   int fetchAttempt = 1,
   bool useFullFile = true,
   String? personOrClusterID,
+  VoidCallback? onGenerationTaskQueued,
   required bool useTempCache,
 }) async {
   try {
@@ -234,6 +235,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     final result = await _getFaceCropsUsingHeapPriorityQueue(
       enteFile,
       facesWithoutCrops,
+      onGenerationTaskQueued: onGenerationTaskQueued,
       useFullFile: useFullFile,
     );
     if (result == null) {
@@ -285,6 +287,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           faces,
           fetchAttempt: fetchAttempt + 1,
           useFullFile: useFullFile,
+          onGenerationTaskQueued: onGenerationTaskQueued,
           useTempCache: useTempCache,
         );
       }
@@ -401,9 +404,45 @@ Future<bool> hasPersistedFullFaceCrop(String faceID) async {
   return faceCropCacheFile.exists();
 }
 
+Future<Uint8List?> getPersistedFullFaceCropIfAvailable(
+  String faceID, {
+  String? personOrClusterID,
+}) async {
+  final cachedFace = _checkInMemoryCachedCropForFaceID(faceID);
+  if (cachedFace != null) {
+    return cachedFace;
+  }
+
+  final faceCropCacheFile = cachedFaceCropPath(faceID, false);
+  if (!(await faceCropCacheFile.exists())) {
+    return null;
+  }
+
+  try {
+    final data = await faceCropCacheFile.readAsBytes();
+    if (data.isEmpty) {
+      _logger.warning(
+        "Persisted face crop for faceID $faceID is empty, deleting file ${faceCropCacheFile.path}",
+      );
+      await faceCropCacheFile.delete();
+      return null;
+    }
+    await _putCachedCropForFaceID(faceID, data, personOrClusterID);
+    return data;
+  } catch (e, s) {
+    _logger.warning(
+      "Error reading persisted face crop for faceID $faceID from file ${faceCropCacheFile.path}",
+      e,
+      s,
+    );
+    return null;
+  }
+}
+
 Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap, {
+  VoidCallback? onGenerationTaskQueued,
   bool useFullFile = true,
 }) async {
   final completer = Completer<Map<String, Uint8List>?>();
@@ -418,6 +457,7 @@ Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
     taskId = await _faceCropTaskId(file, useFullFile: false);
   }
 
+  onGenerationTaskQueued?.call();
   await relevantTaskQueue.addTask(taskId, () async {
     final faceCrops = await _getFaceCrops(
       file,
