@@ -10,9 +10,7 @@ import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class UploadBackgroundCoordinator {
-  UploadBackgroundCoordinator._privateConstructor() {
-    _ensureGraceWindowListener();
-  }
+  UploadBackgroundCoordinator._privateConstructor();
 
   static final UploadBackgroundCoordinator instance =
       UploadBackgroundCoordinator._privateConstructor();
@@ -20,20 +18,6 @@ class UploadBackgroundCoordinator {
   static const _keyIOSUploadGraceActive = "ios_bg_upload_grace_active";
 
   final _logger = Logger("UploadBackgroundCoordinator");
-  // ignore: cancel_subscriptions
-  StreamSubscription<void>? _graceWindowExpiredSubscription;
-
-  void _ensureGraceWindowListener() {
-    if (_graceWindowExpiredSubscription != null) {
-      return;
-    }
-    _graceWindowExpiredSubscription =
-        GraceWindowIos.onGraceWindowExpired.listen(
-      (_) {
-        unawaited(onGraceWindowExpired());
-      },
-    );
-  }
 
   Future<void> onAppBackground() async {
     if (!Platform.isIOS || !flagService.enableIOSUploadBackgroundHandoff) {
@@ -49,6 +33,7 @@ class UploadBackgroundCoordinator {
       _logger.info("Starting iOS upload grace window");
       await GraceWindowIos.beginGraceWindow("ente-upload-grace-window");
       await prefs.setBool(_keyIOSUploadGraceActive, true);
+      unawaited(_waitForGraceWindowExpiration());
       return;
     }
 
@@ -66,34 +51,61 @@ class UploadBackgroundCoordinator {
       return;
     }
 
+    final cutoffMicros = DateTime.now().microsecondsSinceEpoch;
+
     _logger.info("Finishing iOS upload grace window and reconciling uploads");
     await GraceWindowIos.endGraceWindow();
+    final didExpireGraceWindow = await GraceWindowIos.consumeExpiredState();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyIOSUploadGraceActive);
+    if (didExpireGraceWindow) {
+      _logger.info(
+        "Grace window expiration was observed natively before foreground recovery",
+      );
+      await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
+        ProcessType.foreground.toString(),
+        cutoffMicros,
+      );
+    }
     await BgTaskUtils.cancelIOSBackgroundProcessingTask(
       source: "appForeground",
     );
     await FileUploader.instance.reconcileAfterBackground();
   }
 
-  Future<void> onGraceWindowExpired() async {
-    if (!Platform.isIOS || !flagService.enableIOSUploadBackgroundHandoff) {
+  /// Best-effort same-process expiration detection via a pending MethodChannel
+  /// call. Swift holds the result and completes it when the native expiration
+  /// handler fires. If this path misses (e.g. process suspended before
+  /// delivery), [onAppForeground] catches it via [consumeExpiredState].
+  Future<void> _waitForGraceWindowExpiration() async {
+    final expired = await GraceWindowIos.awaitExpiration();
+    if (!expired) {
       return;
     }
 
-    _logger.info("iOS upload grace window expired");
+    final cutoffMicros = DateTime.now().microsecondsSinceEpoch;
+
+    _logger.info("iOS upload grace window expired (via pending call)");
+
+    // Consume the durable marker *before* releasing locks so that
+    // onAppForeground (which can run between any two awaits here) won't
+    // see the marker and do a second lock release against freshly
+    // reacquired locks.
+    await GraceWindowIos.consumeExpiredState();
+
+    // Schedule continuation now that we know expiration actually happened.
     await BgTaskUtils.scheduleIOSBackgroundProcessingTask(
       source: "graceWindowExpired",
       initialDelay: BgTaskUtils.continuationDelay(),
       reason: BgTaskUtils.iOSBackgroundProcessingReasonContinuation,
     );
-    final now = DateTime.now().microsecondsSinceEpoch;
+
     await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
       ProcessType.foreground.toString(),
-      now,
+      cutoffMicros,
     );
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyIOSUploadGraceActive);
-    await GraceWindowIos.endGraceWindow();
   }
 }
