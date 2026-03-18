@@ -13,18 +13,16 @@ enum FamilyMemberStatus {
   declined("DECLINED"),
   revoked("REVOKED"),
   removed("REMOVED"),
-  left("LEFT"),
-  unknown("UNKNOWN");
+  left("LEFT");
 
   const FamilyMemberStatus(this.serverValue);
 
   final String serverValue;
 
   static FamilyMemberStatus fromServerValue(String? value) {
-    return FamilyMemberStatus.values.firstWhereOrNull(
-          (status) => status.serverValue == value,
-        ) ??
-        FamilyMemberStatus.accepted;
+    return FamilyMemberStatus.values.firstWhere(
+      (status) => status.serverValue == value,
+    );
   }
 }
 
