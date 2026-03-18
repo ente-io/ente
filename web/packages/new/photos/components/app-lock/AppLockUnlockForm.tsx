@@ -44,6 +44,8 @@ interface AppLockFormHeaderProps {
     marginBottom: number;
 }
 
+type UnlockInputError = string | null | undefined;
+
 const ENTE_GREEN = "#08C225";
 const ENTE_GREEN_HOVER = "#07A820";
 const appLockModalContentSx = { width: 408 - 32, maxWidth: "100%" } as const;
@@ -143,7 +145,11 @@ const inputFieldSx = (
         borderRadius: `${String(options?.borderRadius ?? 12)}px !important`,
         "&::before": { borderBottom: "1px solid #E0E0E0" },
         "&::after": { borderBottom: `2px solid ${ENTE_GREEN}` },
+        "&.Mui-error::before": { borderBottomColor: theme.palette.error.main },
         "&.Mui-error::after": { borderBottomColor: theme.palette.error.main },
+        "&.Mui-error:hover:not(.Mui-disabled)::before": {
+            borderBottomColor: theme.palette.error.main,
+        },
         "&:hover:not(.Mui-disabled)::before": {
             borderBottom: "1px solid #BDBDBD",
         },
@@ -198,7 +204,7 @@ const deviceLockErrorText = (result: DeviceLockUnlockResult) => {
 
 const handleUnlockResult = (
     result: UnlockResult,
-    setError: (error: string | undefined) => void,
+    setError: (error: UnlockInputError) => void,
     setLoading: (loading: boolean) => void,
     logout: () => void,
 ) => {
@@ -213,7 +219,7 @@ const handleUnlockResult = (
             setLoading(false);
             break;
         case "failed":
-            setError(t("app_lock_incorrect"));
+            setError(null);
             setLoading(false);
             break;
     }
@@ -269,7 +275,7 @@ const PinUnlockContent = ({
     logout,
 }: UnlockContentProps) => {
     const [pin, setPin] = useState(["", "", "", ""]);
-    const [error, setError] = useState<string>();
+    const [error, setError] = useState<UnlockInputError>();
     const [loading, setLoading] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const isSubmittingRef = useRef(false);
@@ -348,7 +354,7 @@ const PinUnlockContent = ({
     }, [fullPin, handleSubmit, loading]);
 
     useEffect(() => {
-        if (!error || loading || cooldown.text) return;
+        if (error === undefined || loading || cooldown.text) return;
 
         const rafID = requestAnimationFrame(() => {
             focusPinInput(0);
@@ -402,7 +408,7 @@ const PinUnlockContent = ({
                                 variant="standard"
                                 hiddenLabel
                                 autoFocus={i === 0}
-                                error={!!error}
+                                error={error !== undefined}
                                 inputRef={(el: HTMLInputElement | null) => {
                                     inputRefs.current[i] = el;
                                 }}
@@ -449,7 +455,7 @@ const PinUnlockContent = ({
             </AppLockCard>
 
             <ErrorMessage
-                error={error}
+                error={error ?? undefined}
                 attemptCount={appLock.invalidAttemptCount}
             />
         </Stack>
@@ -465,7 +471,7 @@ const PasswordUnlockContent = ({
 }: UnlockContentProps) => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState<string>();
+    const [error, setError] = useState<UnlockInputError>();
     const [loading, setLoading] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
@@ -492,7 +498,7 @@ const PasswordUnlockContent = ({
     );
 
     useEffect(() => {
-        if (!error || loading || cooldown.text) return;
+        if (error === undefined || loading || cooldown.text) return;
 
         const rafID = requestAnimationFrame(() => {
             inputRef.current?.focus();
@@ -539,7 +545,7 @@ const PasswordUnlockContent = ({
                         hiddenLabel
                         variant="standard"
                         autoFocus
-                        error={!!error}
+                        error={error !== undefined}
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => {
@@ -588,7 +594,7 @@ const PasswordUnlockContent = ({
             </AppLockCard>
 
             <ErrorMessage
-                error={error}
+                error={error ?? undefined}
                 attemptCount={appLock.invalidAttemptCount}
             />
         </Stack>
