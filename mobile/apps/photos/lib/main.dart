@@ -167,7 +167,9 @@ Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
   return result;
 }
 
-Future<void> ensureServiceLocatorBootstrap() async {
+Future<void> ensureServiceLocatorBootstrap({
+  SharedPreferences? prefs,
+}) async {
   if (ServiceLocator.instance.isInitialized) {
     return;
   }
@@ -181,13 +183,13 @@ Future<void> ensureServiceLocatorBootstrap() async {
   _bootstrapCompleter = completer;
   try {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final sharedPreferences = prefs ?? await SharedPreferences.getInstance();
     _logger.fine("Configuration bootstrap init");
     await Configuration.instance.init();
     _logger.fine("Configuration bootstrap done");
     await NetworkClient.instance.init(packageInfo);
     ServiceLocator.instance.init(
-      prefs,
+      sharedPreferences,
       NetworkClient.instance.enteDio,
       NetworkClient.instance.getDio(),
       packageInfo,
@@ -206,7 +208,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   await _scheduleHeartBeat(prefs, true);
   await _ensureRustInitialized(via: 'workmanager:$taskId');
 
-  await ensureServiceLocatorBootstrap();
+  await ensureServiceLocatorBootstrap(prefs: prefs);
 
   AppLifecycleService.instance.init(prefs);
   AppLifecycleService.instance.onAppInBackground(
