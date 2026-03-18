@@ -65,56 +65,6 @@ class HelpSupportPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MenuSectionTitle(title: l10n.browseHelpPages),
-                      _buildHelpTopicItem(
-                        context,
-                        title: l10n.searchAndDiscovery,
-                        subText: l10n.searchAndDiscoveryDesc,
-                        icon: HugeIcons.strokeRoundedSearch01,
-                        faqUrl: _searchAndDiscoveryFaqUrl,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildHelpTopicItem(
-                        context,
-                        title: l10n.backupAndSync,
-                        subText: l10n.backupAndSyncDesc,
-                        icon: HugeIcons.strokeRoundedCloudUpload,
-                        faqUrl: _backupAndSyncFaqUrl,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildHelpTopicItem(
-                        context,
-                        title: l10n.sharingAndCollaboration,
-                        subText: l10n.sharingAndCollaborationDesc,
-                        icon: HugeIcons.strokeRoundedShare01,
-                        faqUrl: _sharingAndCollaborationFaqUrl,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildHelpTopicItem(
-                        context,
-                        title: l10n.storageAndPlans,
-                        subText: l10n.storageAndPlansDesc,
-                        icon: HugeIcons.strokeRoundedHardDrive,
-                        faqUrl: _storageAndPlansFaqUrl,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildHelpTopicItem(
-                        context,
-                        title: l10n.troubleshooting,
-                        subText: l10n.troubleshootingDesc,
-                        icon: HugeIcons.strokeRoundedWrench01,
-                        faqUrl: _troubleshootingFaqUrl,
-                      ),
-                      _SupportLink(
-                        label: l10n.viewAllHelpTopics,
-                        onTap: () async {
-                          await _openHelpPage(
-                            context,
-                            title: l10n.helpAndSupport,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
                       MenuSectionTitle(title: l10n.getInTouch),
                       MenuItemWidgetNew(
                         title: l10n.reportAnIssue,
@@ -169,6 +119,56 @@ class HelpSupportPage extends StatelessWidget {
                         label: l10n.exportLogs,
                         onTap: () async {
                           await _exportLogs(context);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      MenuSectionTitle(title: l10n.browseHelpPages),
+                      _buildHelpTopicItem(
+                        context,
+                        title: l10n.searchAndDiscovery,
+                        subText: l10n.searchAndDiscoveryDesc,
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        faqUrl: _searchAndDiscoveryFaqUrl,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHelpTopicItem(
+                        context,
+                        title: l10n.backupAndSync,
+                        subText: l10n.backupAndSyncDesc,
+                        icon: HugeIcons.strokeRoundedCloudUpload,
+                        faqUrl: _backupAndSyncFaqUrl,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHelpTopicItem(
+                        context,
+                        title: l10n.sharingAndCollaboration,
+                        subText: l10n.sharingAndCollaborationDesc,
+                        icon: HugeIcons.strokeRoundedShare01,
+                        faqUrl: _sharingAndCollaborationFaqUrl,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHelpTopicItem(
+                        context,
+                        title: l10n.storageAndPlans,
+                        subText: l10n.storageAndPlansDesc,
+                        icon: HugeIcons.strokeRoundedHardDrive,
+                        faqUrl: _storageAndPlansFaqUrl,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHelpTopicItem(
+                        context,
+                        title: l10n.troubleshooting,
+                        subText: l10n.troubleshootingDesc,
+                        icon: HugeIcons.strokeRoundedWrench01,
+                        faqUrl: _troubleshootingFaqUrl,
+                      ),
+                      _SupportLink(
+                        label: l10n.viewAllHelpTopics,
+                        onTap: () async {
+                          await _openHelpPage(
+                            context,
+                            title: l10n.helpAndSupport,
+                          );
                         },
                       ),
                       const SizedBox(height: 24),
