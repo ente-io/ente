@@ -1005,8 +1005,24 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
 
     if (sourceFile.width <= 0 || sourceFile.height <= 0) {
       _logger.fine(
-        'person_face_thumbnail_upgrade_skipped reason=missing_full_dimensions file=${sourceFile.uploadedFileID}',
+        'person_face_thumbnail_upgrade_fallback reason=missing_full_dimensions file=${sourceFile.uploadedFileID}',
       );
+      final fullCrop = await _getFaceCrop(
+        useFullFile: true,
+        notifyOnError: false,
+      );
+      if (fullCrop == null || _shouldAbortUpgrade(generation) || !mounted) {
+        return;
+      }
+      setState(() {
+        _showingFallback = false;
+        _faceLoadFuture = Future.value(
+          _PersonFaceLoadResult.faceCrop(
+            faceCropBytes: fullCrop,
+            personName: _personName,
+          ),
+        );
+      });
       return;
     }
 

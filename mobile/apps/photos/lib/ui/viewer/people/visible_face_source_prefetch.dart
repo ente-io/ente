@@ -33,8 +33,17 @@ class _VisibleFaceSourcePrefetchState extends State<VisibleFaceSourcePrefetch> {
   @override
   void didUpdateWidget(covariant VisibleFaceSourcePrefetch oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final oldTargetKey = _visibilityTargetKeyFor(
+      results: oldWidget.results,
+      index: oldWidget.index,
+    );
+    final newTargetKey = _visibilityTargetKeyFor(
+      results: widget.results,
+      index: widget.index,
+    );
     if (oldWidget.index != widget.index ||
-        !identical(oldWidget.results, widget.results)) {
+        !identical(oldWidget.results, widget.results) ||
+        oldTargetKey != newTargetKey) {
       _hasPrefetchedForCurrentItem = false;
     }
   }
@@ -70,12 +79,22 @@ class _VisibleFaceSourcePrefetchState extends State<VisibleFaceSourcePrefetch> {
   }
 
   String _visibilityTargetKey() {
-    if (widget.index < 0 || widget.index >= widget.results.length) {
-      return widget.index.toString();
+    return _visibilityTargetKeyFor(
+      results: widget.results,
+      index: widget.index,
+    );
+  }
+
+  String _visibilityTargetKeyFor({
+    required List<GenericSearchResult> results,
+    required int index,
+  }) {
+    if (index < 0 || index >= results.length) {
+      return index.toString();
     }
-    final result = widget.results[widget.index];
+    final result = results[index];
     final personID = result.params[kPersonParamID] as String?;
     final clusterID = result.params[kClusterParamId] as String?;
-    return personID ?? clusterID ?? widget.index.toString();
+    return personID ?? clusterID ?? index.toString();
   }
 }

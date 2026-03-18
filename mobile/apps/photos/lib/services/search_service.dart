@@ -271,21 +271,28 @@ class SearchService {
     GenericSearchResult result,
   ) async {
     final personID = result.params[kPersonParamID] as String?;
+    final clusterID = result.params[kClusterParamId] as String?;
     final avatarFaceID = result.params[kPersonAvatarFaceID] as String?;
     final previewFile = result.previewThumbnail();
     final previewFileID = previewFile?.uploadedFileID;
-    if (personID == null ||
-        avatarFaceID == null ||
-        avatarFaceID.isEmpty ||
-        previewFile == null ||
-        previewFileID == null) {
+    if (previewFile == null || previewFileID == null) {
+      return null;
+    }
+
+    final hasPersonSeed = personID != null &&
+        personID.isNotEmpty &&
+        avatarFaceID != null &&
+        avatarFaceID.isNotEmpty;
+    final hasClusterSeed = clusterID != null && clusterID.isNotEmpty;
+    if (!hasPersonSeed && !hasClusterSeed) {
       return null;
     }
 
     final face = await mlDataDB.getCoverFaceForPerson(
       recentFileID: previewFileID,
-      personID: personID,
-      avatarFaceId: avatarFaceID,
+      personID: hasPersonSeed ? personID : null,
+      avatarFaceId: hasPersonSeed ? avatarFaceID : null,
+      clusterID: hasClusterSeed ? clusterID : null,
     );
     if (face == null) {
       return null;
