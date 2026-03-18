@@ -964,8 +964,7 @@ String formatExpectedMlSkipReasonForLogs(Object error) {
   if (normalized.contains("filesizetoolargeformobileindexing")) {
     return "file is too large for mobile indexing";
   }
-  final compact = _stripExceptionPrefixes(error.toString()).trim();
-  final firstLine = compact.split('\n').first.trim();
+  final firstLine = error.toString().split('\n').first.trim();
   return firstLine.isEmpty ? "unknown ML skip reason" : firstLine;
 }
 
@@ -1063,15 +1062,6 @@ String _normalizedErrorMessage(Object error) {
     ].join(" ").toLowerCase();
   }
   return error.toString().toLowerCase();
-}
-
-String _stripExceptionPrefixes(String message) {
-  var stripped = message.trimLeft();
-  const prefix = "Exception: ";
-  while (stripped.startsWith(prefix)) {
-    stripped = stripped.substring(prefix.length);
-  }
-  return stripped;
 }
 
 Exception _asInvalidImageFormatExceptionForRustDecodeFailure({
