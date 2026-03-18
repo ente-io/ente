@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
 iOS background grace window plugin for Ente Photos.
                        DESC
   s.homepage         = 'https://github.com/ente-io/ente'
-  s.license          = { :type => 'MIT' }
+  s.license          = { :type => 'AGPL-3.0' }
   s.author           = { 'Ente' => 'contact@ente.io' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
