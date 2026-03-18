@@ -1,0 +1,10 @@
+docs/
+
+.dockerignore
+.gitignore
+.prettierignore
+.prettierrc
+Dockerfile
+CLAUDE.md
+crowdin.yml
+README.md
