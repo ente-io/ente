@@ -612,7 +612,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       String? fixedFaceID = widget.initialAvatarFaceId;
       final mlDataDB =
           isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-      if (isPerson && !isOfflineMode && fixedFaceID == null) {
+      if (isPerson && !isOfflineMode) {
         final personEntity =
             await PersonService.instance.getPerson(widget.personId!);
         if (personEntity == null) {
@@ -622,7 +622,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           return null;
         }
         _personName = personEntity.data.name;
-        fixedFaceID = personEntity.data.avatarFaceID;
+        final currentAvatarFaceId = personEntity.data.avatarFaceID;
+        if (widget.initialAvatarFaceId != null &&
+            widget.initialAvatarFaceId != currentAvatarFaceId) {
+          _logger.fine(
+            'Ignoring stale seeded avatar face ID for person ${widget.personId}: '
+            '${widget.initialAvatarFaceId} -> $currentAvatarFaceId',
+          );
+        }
+        fixedFaceID = currentAvatarFaceId;
       }
       fixedFaceID ??= await checkUsedFaceIDForPersonOrClusterId(
         personOrClusterId,
