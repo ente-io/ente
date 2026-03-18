@@ -78,9 +78,12 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          AppLocalizations.of(context).loginToEnte,
-          style: textTheme.largeBold,
+        title: DeveloperSettingsTapArea(
+          behavior: HitTestBehavior.translucent,
+          child: Text(
+            AppLocalizations.of(context).loginToEnte,
+            style: textTheme.largeBold,
+          ),
         ),
         centerTitle: true,
       ),

@@ -98,9 +98,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          AppLocalizations.of(context).createAccountTitle,
-          style: textTheme.largeBold,
+        title: DeveloperSettingsTapArea(
+          behavior: HitTestBehavior.translucent,
+          child: Text(
+            AppLocalizations.of(context).createAccountTitle,
+            style: textTheme.largeBold,
+          ),
         ),
         centerTitle: true,
       ),
