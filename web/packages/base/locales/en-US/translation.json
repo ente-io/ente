@@ -851,7 +851,7 @@
     "app_lock_incorrect": "Incorrect PIN or app lock password",
     "app_lock_enter_pin_to_unlock": "Enter your app lock pin to unlock.",
     "app_lock_pin_digit_label": "PIN digit {{index}}",
-    "app_lock_please_try_again_in": "Please try again in",
+    "app_lock_please_try_again_in": "Too many attempts, Please try again in",
     "app_lock_set_pin": "Set PIN",
     "device_lock": "Device lock",
     "device_lock_not_supported": "Device lock is not supported on this device",
