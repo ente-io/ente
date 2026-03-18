@@ -104,6 +104,9 @@ class MLIndexingIsolate extends SuperIsolate {
       }
       result = MLResult.fromJsonString(resultJsonString);
     } catch (e, s) {
+      if (isExpectedMlSkipError(e)) {
+        rethrow;
+      }
       _logger.severe(
         "Could not analyze image with ID ${instruction.fileKey} \n",
         e,

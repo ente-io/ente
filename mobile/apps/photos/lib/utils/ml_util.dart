@@ -747,14 +747,9 @@ Future<MLResult> analyzeImageRust(Map args) async {
         rethrow;
       }
 
-      _logger.warning(
-        "Rust decode failed for fileID $enteFileID (format: $fileFormat), retrying with JPEG fallback",
-        e,
-        s,
-      );
       if (_shouldSkipJpegDecodeFallback(fileFormat)) {
         _logger.warning(
-          "Skipping JPEG fallback for fileID $enteFileID (format: $fileFormat) because flutter_image_compress is known to crash on unsupported RAW input",
+          "Rust decode failed for fileID $enteFileID (format: $fileFormat); skipping JPEG fallback for known-unsupported RAW input",
         );
         throw _asInvalidImageFormatExceptionForRustDecodeFailure(
           enteFileID: enteFileID,
@@ -762,19 +757,20 @@ Future<MLResult> analyzeImageRust(Map args) async {
           primaryError: e,
         );
       }
+      _logger.warning(
+        "Rust decode failed for fileID $enteFileID (format: $fileFormat), retrying with JPEG fallback",
+      );
       final _DecodeFallbackFile? fallback;
       try {
         fallback = await _createJpegDecodeFallbackFile(imagePath: imagePath);
       } catch (fallbackError, fallbackStack) {
-        _logger.severe(
-          "JPEG fallback conversion threw for fileID $enteFileID (format: $fileFormat)",
-          fallbackError,
-          fallbackStack,
-        );
         if (_shouldStoreEmptyResultForRustDecodeFailure(
           primaryError: e,
           fallbackError: fallbackError,
         )) {
+          _logger.warning(
+            "JPEG fallback conversion failed for fileID $enteFileID (format: $fileFormat); storing empty result instead",
+          );
           throw _asInvalidImageFormatExceptionForRustDecodeFailure(
             enteFileID: enteFileID,
             fileFormat: fileFormat,
@@ -782,6 +778,11 @@ Future<MLResult> analyzeImageRust(Map args) async {
             fallbackError: fallbackError,
           );
         }
+        _logger.severe(
+          "JPEG fallback conversion threw for fileID $enteFileID (format: $fileFormat)",
+          fallbackError,
+          fallbackStack,
+        );
         rethrow;
       }
       if (fallback == null) {
@@ -811,15 +812,13 @@ Future<MLResult> analyzeImageRust(Map args) async {
           "Rust decode fallback succeeded for fileID $enteFileID (original format: $fileFormat)",
         );
       } catch (retryError, retryStack) {
-        _logger.severe(
-          "Rust decode fallback retry failed for fileID $enteFileID (original format: $fileFormat)",
-          retryError,
-          retryStack,
-        );
         if (_shouldStoreEmptyResultForRustDecodeFailure(
           primaryError: e,
           fallbackError: retryError,
         )) {
+          _logger.warning(
+            "Rust decode fallback retry failed for fileID $enteFileID (format: $fileFormat); storing empty result instead",
+          );
           throw _asInvalidImageFormatExceptionForRustDecodeFailure(
             enteFileID: enteFileID,
             fileFormat: fileFormat,
@@ -827,6 +826,11 @@ Future<MLResult> analyzeImageRust(Map args) async {
             fallbackError: retryError,
           );
         }
+        _logger.severe(
+          "Rust decode fallback retry failed for fileID $enteFileID (original format: $fileFormat)",
+          retryError,
+          retryStack,
+        );
         rethrow;
       } finally {
         await _cleanupDecodeFallback(fallback);
@@ -927,9 +931,42 @@ Future<MLResult> analyzeImageRust(Map args) async {
 
     return result;
   } catch (e, s) {
+    if (isExpectedMlSkipError(e)) {
+      rethrow;
+    }
     _logger.severe("Could not analyze image with Rust pipeline", e, s);
     rethrow;
   }
+}
+
+bool isExpectedMlSkipError(Object error) {
+  final message = _normalizedErrorMessage(error);
+  const acceptedIssueMarkers = <String>[
+    "thumbnailretrievalexception",
+    "invalidimageformatexception",
+    "unhandledexiforientation",
+    "filesizetoolargeformobileindexing",
+  ];
+  return acceptedIssueMarkers.any(message.contains);
+}
+
+String formatExpectedMlSkipReasonForLogs(Object error) {
+  final normalized = _normalizedErrorMessage(error);
+  if (normalized.contains("invalidimageformatexception")) {
+    return "image decode failed";
+  }
+  if (normalized.contains("thumbnailretrievalexception")) {
+    return "thumbnail retrieval failed";
+  }
+  if (normalized.contains("unhandledexiforientation")) {
+    return "unsupported EXIF orientation";
+  }
+  if (normalized.contains("filesizetoolargeformobileindexing")) {
+    return "file is too large for mobile indexing";
+  }
+  final compact = _stripExceptionPrefixes(error.toString()).trim();
+  final firstLine = compact.split('\n').first.trim();
+  return firstLine.isEmpty ? "unknown ML skip reason" : firstLine;
 }
 
 bool _isRustDecodeIssue(Object error) {
@@ -1026,6 +1063,15 @@ String _normalizedErrorMessage(Object error) {
     ].join(" ").toLowerCase();
   }
   return error.toString().toLowerCase();
+}
+
+String _stripExceptionPrefixes(String message) {
+  var stripped = message.trimLeft();
+  const prefix = "Exception: ";
+  while (stripped.startsWith(prefix)) {
+    stripped = stripped.substring(prefix.length);
+  }
+  return stripped;
 }
 
 Exception _asInvalidImageFormatExceptionForRustDecodeFailure({
