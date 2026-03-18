@@ -46,6 +46,7 @@ import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ServiceLocator {
+  bool _isInitialized = false;
   late final SharedPreferences prefs;
   late final Dio enteDio;
   late final Dio nonEnteDio;
@@ -55,6 +56,8 @@ class ServiceLocator {
   ServiceLocator._privateConstructor();
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
+
+  bool get isInitialized => _isInitialized;
 
   init(
     SharedPreferences prefs,
@@ -66,6 +69,7 @@ class ServiceLocator {
     this.enteDio = enteDio;
     this.nonEnteDio = nonEnteDio;
     this.packageInfo = packageInfo;
+    _isInitialized = true;
   }
 }
 

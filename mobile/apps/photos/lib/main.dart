@@ -80,6 +80,7 @@ final _backgroundRunHelper = BackgroundRunHelper(
 );
 bool _isRustInitialized = false;
 Future<void>? _rustInitFuture;
+Completer<void>? _bootstrapCompleter;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -166,15 +167,46 @@ Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
   return result;
 }
 
+Future<void> ensureServiceLocatorBootstrap() async {
+  if (ServiceLocator.instance.isInitialized) {
+    return;
+  }
+  final inFlightBootstrap = _bootstrapCompleter;
+  if (inFlightBootstrap != null) {
+    await inFlightBootstrap.future;
+    return;
+  }
+
+  final completer = Completer<void>();
+  _bootstrapCompleter = completer;
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    _logger.fine("Configuration bootstrap init");
+    await Configuration.instance.init();
+    _logger.fine("Configuration bootstrap done");
+    await NetworkClient.instance.init(packageInfo);
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
+    completer.complete();
+  } catch (e, s) {
+    completer.completeError(e, s);
+    rethrow;
+  } finally {
+    _bootstrapCompleter = null;
+  }
+}
+
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await _scheduleHeartBeat(prefs, true);
   await _ensureRustInitialized(via: 'workmanager:$taskId');
 
-  _logger.fine("Configuration init $tlog");
-  await Configuration.instance.init();
-  _logger.fine("Configuration done $tlog");
+  await ensureServiceLocatorBootstrap();
 
   AppLifecycleService.instance.init(prefs);
   AppLifecycleService.instance.onAppInBackground(
@@ -183,14 +215,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
   await Computer.shared().turnOn(workersCount: 4);
   CryptoUtil.init();
-
-  await NetworkClient.instance.init(packageInfo);
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
 
   _logger.fine("CollectionsService init $tlog");
   await CollectionsService.instance.init(prefs);
@@ -553,6 +577,12 @@ Future<bool> _runBackgroundPass({
 
   try {
     await _runMinimally(taskId, TimeLogger());
+    if (trigger == BackgroundTrigger.bgProcessing &&
+        taskId == BgTaskUtils.iOSBackgroundProcessingTask) {
+      await BgTaskUtils.handleIOSBackgroundProcessingTaskStart(
+        source: "_runBackgroundPass:$taskId",
+      );
+    }
   } catch (e, s) {
     success = false;
     _logger.severe("Background run failed for $taskId", e, s);

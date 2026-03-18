@@ -1,11 +1,9 @@
 import "dart:io";
 
-import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
@@ -44,11 +42,6 @@ void callbackDispatcher() {
         );
       }
     });
-    if (shouldRescheduleProcessingTask) {
-      await BgTaskUtils.handleIOSBackgroundProcessingTaskStart(
-        source: "callbackDispatcher:$taskName",
-      );
-    }
     try {
       BgTaskUtils.$.info('Task started $tlog');
       final result = Platform.isIOS
@@ -212,8 +205,7 @@ class BgTaskUtils {
       backoffPolicy: workmanager.BackoffPolicy.linear,
       backoffPolicyDelay: _kIOSBackgroundRefreshCadence,
     );
-    final prefs = await SharedPreferences.getInstance();
-    if (!FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs)) {
+    if (!flagService.enableIOSUploadBackgroundHandoff) {
       await workmanager.Workmanager().cancelByUniqueName(
         iOSBackgroundProcessingTask,
       );
@@ -232,8 +224,7 @@ class BgTaskUtils {
 
     final delay = initialDelay ?? _maintenanceDelay();
     final prefs = await SharedPreferences.getInstance();
-    final isUploadHandoffEnabled =
-        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
     if (!isUploadHandoffEnabled && reason != null) {
       $.info(
         "Skipping iOS background processing schedule from $source "
@@ -288,9 +279,7 @@ class BgTaskUtils {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    final isUploadHandoffEnabled =
-        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
     if (!isUploadHandoffEnabled) {
       await _clearIOSBackgroundProcessingSchedulingState();
       return;
@@ -319,9 +308,9 @@ class BgTaskUtils {
       return;
     }
 
+    await ensureServiceLocatorBootstrap();
     final prefs = await SharedPreferences.getInstance();
-    final isUploadHandoffEnabled =
-        FlagService.isIOSUploadBackgroundHandoffEnabledForPrefs(prefs);
+    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
     if (!isUploadHandoffEnabled) {
       await _clearIOSBackgroundProcessingSchedulingState();
       return;
