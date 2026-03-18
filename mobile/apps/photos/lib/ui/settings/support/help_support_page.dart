@@ -8,7 +8,6 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/settings/support/ask_question_page.dart";
 import "package:photos/ui/settings/support/report_issue_page.dart";
 import "package:photos/utils/email_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
@@ -92,10 +91,9 @@ class HelpSupportPage extends StatelessWidget {
                         trailingIcon: Icons.chevron_right_outlined,
                         trailingIconIsMuted: true,
                         onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AskQuestionPage(),
-                            ),
+                          await openEmailComposer(
+                            context,
+                            to: supportEmail,
                           );
                         },
                       ),
