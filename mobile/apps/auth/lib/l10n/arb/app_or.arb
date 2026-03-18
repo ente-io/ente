@@ -1,1 +1,11 @@
-{}
+{
+  "account": "ଆକାଉଣ୍ଟ",
+  "unlock": "ଖୋଲନ୍ତୁ",
+  "recoveryKey": "ରିକଭରି ଚାବି",
+  "counterAppBarTitle": "କାଉଣ୍ଟର",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "ଆପଣଙ୍କ ୨ ଫାକଟର କୋଡ୍ ବ୍ଯାକଅପ କରନ୍ତୁ",
+  "featureBackupCodes": "ଏଣ୍ଡରୁ ଏଣ୍ଡ ଏନକ୍ରିପ୍ଟ ହୋଇଛି\nବ୍ୟାକଅପ୍ ଏବଂ ସିଙ୍କ୍"
+}

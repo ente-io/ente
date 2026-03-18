@@ -117,12 +117,10 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               ),
                               trailingWidget: ToggleSwitchWidget(
                                 value: () =>
-                                    localSettings
-                                        .isBGDebugNotificationsEnabled,
+                                    localSettings.isBGDebugNotificationsEnabled,
                                 onChanged: () async {
-                                  final newValue =
-                                      !localSettings
-                                          .isBGDebugNotificationsEnabled;
+                                  final newValue = !localSettings
+                                      .isBGDebugNotificationsEnabled;
                                   await localSettings
                                       .setBGDebugNotificationsEnabled(
                                     newValue,

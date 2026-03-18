@@ -102,9 +102,13 @@ class FlagService {
 
   bool get useRustForFaceThumbnails => internalUser;
 
+  bool get petEnabled => internalUser;
+
   bool get qrFeatureEnabled => internalUser;
 
   bool get enableBgLocalUploadPriority => internalUser;
+
+  bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {

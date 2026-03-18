@@ -13,6 +13,21 @@ class AddOnPage extends StatelessWidget {
 
   const AddOnPage(this.bonusData, {super.key});
 
+  String _sectionNameForBonusType(String bonusType) {
+    switch (bonusType) {
+      case "ADD_ON_BF_2023":
+        return "Black Friday 2023";
+      case "ADD_ON_BF_2024":
+        return "Black Friday 2024";
+      case "ADD_ON_SUPPORT":
+        return "Support";
+      case "ADD_ON_NON_PROFIT":
+        return "Non-profit";
+      default:
+        return bonusType.replaceAll("_", " ");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,9 +59,7 @@ class AddOnPage extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: AddOnViewSection(
-                      sectionName: bonus.type == 'ADD_ON_BF_2023'
-                          ? "Black friday 2023"
-                          : bonus.type.replaceAll('_', ' '),
+                      sectionName: _sectionNameForBonusType(bonus.type),
                       bonus: bonus,
                     ),
                   );

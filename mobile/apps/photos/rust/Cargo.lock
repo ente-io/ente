@@ -763,6 +763,7 @@ dependencies = [
  "ente_media_inspector",
  "fast_image_resize",
  "flutter_rust_bridge",
+ "half",
  "html-escape",
  "image",
  "imageproc",
@@ -2081,6 +2082,7 @@ version = "2.0.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86d83095ae3c1258738d70ae7a06195c94d966a8e546f0d3609dc90885fb61f5"
 dependencies = [
+ "half",
  "js-sys",
  "libloading",
  "ndarray 0.15.6",

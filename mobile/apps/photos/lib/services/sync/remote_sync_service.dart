@@ -39,6 +39,7 @@ import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/network_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
@@ -124,12 +125,15 @@ class RemoteSyncService {
     );
 
     try {
+      final canPrepareUploadsInBackground =
+          !isProcessBg || await canUseHighBandwidth();
+
       // use flag to decide if we should start marking files for upload before
       // remote-sync is done. This is done to avoid adding existing files to
       // the same or different collection when user had already uploaded them
       // before.
       final bool hasSyncedBefore = _prefs.containsKey(_isFirstRemoteSyncDone);
-      if (hasSyncedBefore) {
+      if (hasSyncedBefore && canPrepareUploadsInBackground) {
         await syncDeviceCollectionFilesForUpload();
       }
       await _pullDiff();
@@ -145,13 +149,19 @@ class RemoteSyncService {
 
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
-        await syncDeviceCollectionFilesForUpload();
+        if (canPrepareUploadsInBackground) {
+          await syncDeviceCollectionFilesForUpload();
+        }
       }
 
       if (
           // We don't need syncFDStatus here if in background
           !isProcessBg) {
         fileDataService.syncFDStatus().ignore();
+      }
+
+      if (!canPrepareUploadsInBackground) {
+        throw WiFiUnavailableError();
       }
 
       final filesToBeUploaded = await _getFilesToBeUploaded();
@@ -416,6 +426,12 @@ class RemoteSyncService {
       }
 
       if (localIDsToSync.isEmpty) {
+        if (flagService.syncRecoveryDiagnostics) {
+          _logger.info(
+            "[${deviceCollection.name}] upload-prep empty: "
+            "pathID=${deviceCollection.id} mappedFromPath=0",
+          );
+        }
         continue;
       }
       final collectionID = await _getCollectionID(deviceCollection);
@@ -474,6 +490,25 @@ class RemoteSyncService {
             "mismatch in num of filesToSync ${localIDsToSync.length} to "
             "fileSynced ${fileFoundForLocalIDs.length}",
           );
+        }
+        if (flagService.syncRecoveryDiagnostics) {
+          final int mappedCount = localIDsToSync.length;
+          final int postFilterCount = localIDsToSync.length;
+          final int missingFileRows =
+              postFilterCount - fileFoundForLocalIDs.length;
+          if (missingFileRows > 0) {
+            final sample =
+                localIDsToSync.difference(fileFoundForLocalIDs).take(3);
+            _logger.warning(
+              "[${deviceCollection.name}] upload-prep missing rows: "
+              "pathID=${deviceCollection.id} "
+              "mappedFromPath=$mappedCount "
+              "postFilter=$postFilterCount "
+              "missingFileRows=$missingFileRows "
+              "collectionID=$collectionID "
+              "sample=${sample.toList()}",
+            );
+          }
         }
       }
     }

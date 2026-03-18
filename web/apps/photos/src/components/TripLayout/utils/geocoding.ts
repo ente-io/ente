@@ -1,4 +1,4 @@
-interface GeocodingResponse {
+interface StadiaMapsGeocodingResponse {
     features?: {
         properties?: {
             locality?: string;
@@ -7,8 +7,16 @@ interface GeocodingResponse {
             region?: string;
             name?: string;
             country?: string;
+            [key: string]: unknown;
         };
+        [key: string]: unknown;
     }[];
+    [key: string]: unknown;
+}
+
+export interface LocationInfo {
+    place: string;
+    country: string;
 }
 
 // Icon cache to avoid recreating identical icons
@@ -45,11 +53,11 @@ export const throttle = <T extends (...args: unknown[]) => void>(
 export const getLocationName = async (
     lat: number,
     lng: number,
-): Promise<{ place: string; country: string }> => {
+): Promise<LocationInfo> => {
     try {
-        // Round coordinates to 1 decimal place for geocoding
-        const roundedLat = Math.round(lat * 10) / 10;
-        const roundedLng = Math.round(lng * 10) / 10;
+        // Round coordinates to 2 decimal place for better geocoding
+        const roundedLat = Math.round(lat * 100) / 100;
+        const roundedLng = Math.round(lng * 100) / 100;
 
         const response = await fetch(
             `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${roundedLat}&point.lon=${roundedLng}`,
@@ -59,11 +67,11 @@ export const getLocationName = async (
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = (await response.json()) as GeocodingResponse;
+        const data = (await response.json()) as StadiaMapsGeocodingResponse;
 
         // Extract location name from the response
         const feature = data.features?.[0];
-        let result: { place: string; country: string };
+        let result: LocationInfo;
 
         if (feature?.properties) {
             const props = feature.properties;
@@ -78,7 +86,7 @@ export const getLocationName = async (
             // Get country info
             const country = props.country || "Unknown";
 
-            result = { place: locationName, country: country };
+            result = { place: locationName, country };
         } else {
             // Fallback if no location found
             result = { place: "Unknown", country: "Unknown" };
