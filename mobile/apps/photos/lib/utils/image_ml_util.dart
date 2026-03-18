@@ -7,6 +7,7 @@ import "dart:ui";
 import "package:exif_reader/exif_reader.dart";
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
+import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -134,6 +135,27 @@ Future<DecodedImage> decodeImageFromPath(
     image: includeDartUiImage ? image : null,
     rawRgbaBytes: rawRgbaBytes,
   );
+}
+
+Future<Uint8List?> createSafeJpegDecodeFallbackBytes({
+  required String imagePath,
+}) async {
+  final imageData = await File(imagePath).readAsBytes();
+  return createSafeJpegDecodeFallbackBytesFromData(imageData);
+}
+
+Uint8List? createSafeJpegDecodeFallbackBytesFromData(Uint8List imageData) {
+  try {
+    final decoded = img.decodeImage(imageData);
+    if (decoded == null) {
+      return null;
+    }
+    final jpeg = img.encodeJpg(decoded, quality: 95);
+    return Uint8List.fromList(jpeg);
+  } catch (e, s) {
+    _logger.warning("Safe JPEG conversion failed", e, s);
+    return null;
+  }
 }
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.

@@ -3,7 +3,6 @@ import "dart:math" as math show sqrt, min, max;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
-import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -747,16 +746,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
         rethrow;
       }
 
-      if (_shouldSkipJpegDecodeFallback(fileFormat)) {
-        _logger.warning(
-          "Rust decode failed for fileID $enteFileID (format: $fileFormat); skipping JPEG fallback for known-unsupported RAW input",
-        );
-        throw _asInvalidImageFormatExceptionForRustDecodeFailure(
-          enteFileID: enteFileID,
-          fileFormat: fileFormat,
-          primaryError: e,
-        );
-      }
       _logger.warning(
         "Rust decode failed for fileID $enteFileID (format: $fileFormat), retrying with JPEG fallback",
       );
@@ -973,10 +962,6 @@ bool _isRustDecodeIssue(Object error) {
   return message.contains("decode error");
 }
 
-bool _shouldSkipJpegDecodeFallback(String fileFormat) {
-  return isRawImageExtension(fileFormat);
-}
-
 bool _shouldStoreEmptyResultForRustDecodeFailure({
   required Object primaryError,
   Object? fallbackError,
@@ -1091,17 +1076,8 @@ class _DecodeFallbackFile {
 Future<_DecodeFallbackFile?> _createJpegDecodeFallbackFile({
   required String imagePath,
 }) async {
-  final format = getExtension(imagePath);
-  if (_shouldSkipJpegDecodeFallback(format)) {
-    throw Exception(
-      "InvalidImageFormatException: JPEG decode fallback skipped for unsupported RAW image format $format",
-    );
-  }
-  final convertedData = await FlutterImageCompress.compressWithFile(
-    imagePath,
-    format: CompressFormat.jpeg,
-    minWidth: 20000,
-    minHeight: 20000,
+  final convertedData = await createSafeJpegDecodeFallbackBytes(
+    imagePath: imagePath,
   );
   if (convertedData == null || convertedData.isEmpty) {
     return null;
