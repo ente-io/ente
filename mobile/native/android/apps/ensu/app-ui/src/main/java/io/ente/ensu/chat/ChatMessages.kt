@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -48,8 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -59,11 +58,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
-import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
-import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -134,9 +132,18 @@ internal fun MessageList(
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
     var lastUserMessageId by remember { mutableStateOf<String?>(null) }
+    var previousScrollIndex by remember { mutableStateOf(listState.firstVisibleItemIndex) }
+    var previousScrollOffset by remember { mutableStateOf(listState.firstVisibleItemScrollOffset) }
     val isAtBottom by remember {
         derivedStateOf {
             !listState.canScrollForward
+        }
+    }
+    val bottomItemIndex by remember(messages.size, isGenerating) {
+        derivedStateOf {
+            messages.size +
+                (if (isGenerating) 1 else 0) +
+                (if (messages.isNotEmpty()) 1 else 0)
         }
     }
 
@@ -161,21 +168,35 @@ internal fun MessageList(
 
     LaunchedEffect(messages.size) {
         if (shouldJumpToBottomOnLoad && messages.isNotEmpty()) {
-            if (listState.firstVisibleItemIndex != messages.size) {
-                listState.scrollToItem(messages.size)
+            if (listState.firstVisibleItemIndex != bottomItemIndex) {
+                listState.scrollToItem(bottomItemIndex)
             }
             shouldJumpToBottomOnLoad = false
         }
     }
 
-    LaunchedEffect(listState.isScrollInProgress, isAtBottom, isAutoScrolling) {
-        if (listState.isScrollInProgress && !isAtBottom && !isAutoScrolling) {
-            autoScrollEnabled = false
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            Triple(
+                listState.firstVisibleItemIndex,
+                listState.firstVisibleItemScrollOffset,
+                listState.isScrollInProgress
+            )
+        }.collect { (index, offset, isScrolling) ->
+            if (isScrolling && !isAutoScrolling && !isAtBottom) {
+                val movedTowardTop = index < previousScrollIndex ||
+                    (index == previousScrollIndex && offset < previousScrollOffset)
+                if (movedTowardTop) {
+                    autoScrollEnabled = false
+                }
+            }
+            previousScrollIndex = index
+            previousScrollOffset = offset
         }
     }
 
-    LaunchedEffect(isAtBottom, isGenerating) {
-        if (isGenerating && isAtBottom) {
+    LaunchedEffect(isAtBottom) {
+        if (isAtBottom) {
             autoScrollEnabled = true
         }
     }
@@ -191,7 +212,8 @@ internal fun MessageList(
 
     LaunchedEffect(messages.size, streamingResponse, streamingParentId, isGenerating, autoScrollEnabled) {
         if (!autoScrollEnabled) return@LaunchedEffect
-        val targetIndex = messages.size
+        if (listState.isScrollInProgress && !isAutoScrolling) return@LaunchedEffect
+        val targetIndex = bottomItemIndex
         if (targetIndex >= 0) {
             isAutoScrolling = true
             try {
@@ -273,8 +295,7 @@ internal fun MessageList(
                             branchSelections = branchSelections,
                             onRetry = { onRetryMessage(message) },
                             onBranchChange = onBranchChange,
-                            showsMetadata = true,
-                            showOutroRive = false
+                            showsMetadata = true
                         )
                     }
                 }
@@ -296,6 +317,12 @@ internal fun MessageList(
                     text = streamingResponse,
                     isGenerating = true
                 )
+            }
+        }
+
+        if (messages.isNotEmpty()) {
+            item(key = "ai-safety-footer") {
+                AiSafetyFooter()
             }
         }
 
@@ -336,6 +363,19 @@ private fun EmptyState(
 }
 
 @Composable
+private fun AiSafetyFooter() {
+    Text(
+        text = "Ensu can make mistakes. Please double-check key details.",
+        style = EnsuTypography.small.copy(fontSize = 12.sp),
+        color = EnsuColor.textMuted(),
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = EnsuSpacing.sm.dp)
+    )
+}
+
+@Composable
 private fun DownloadOnboarding(
     modifier: Modifier,
     isDownloading: Boolean,
@@ -361,6 +401,8 @@ private fun DownloadOnboarding(
             )
             Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
             if (isDownloading) {
+                val showProgress = downloadPercent != null ||
+                    downloadStatus?.contains("Loading", ignoreCase = true) == true
                 val statusText = when {
                     downloadStatus?.contains("Loading", ignoreCase = true) == true -> downloadStatus
                     modelDownloadSizeBytes != null && downloadPercent != null && downloadPercent >= 0 -> {
@@ -376,27 +418,44 @@ private fun DownloadOnboarding(
                     color = EnsuColor.textMuted(),
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                val clamped = downloadPercent?.coerceIn(0, 100)
-                if (clamped != null) {
-                    LinearProgressIndicator(
-                        progress = { clamped / 100f },
-                        color = downloadAccent,
-                        trackColor = EnsuColor.border(),
-                        modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .height(6.dp)
-                    )
-                } else {
-                    LinearProgressIndicator(
-                        color = downloadAccent,
-                        trackColor = EnsuColor.border(),
-                        modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .height(6.dp)
-                    )
+                if (showProgress) {
+                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                    val clamped = downloadPercent?.coerceIn(0, 100)
+                    if (clamped != null) {
+                        LinearProgressIndicator(
+                            progress = { clamped / 100f },
+                            color = downloadAccent,
+                            trackColor = EnsuColor.border(),
+                            modifier = Modifier
+                                .fillMaxWidth(0.6f)
+                                .height(6.dp)
+                        )
+                    } else {
+                        LinearProgressIndicator(
+                            color = downloadAccent,
+                            trackColor = EnsuColor.border(),
+                            modifier = Modifier
+                                .fillMaxWidth(0.6f)
+                                .height(6.dp)
+                        )
+                    }
                 }
             } else {
+                if (!downloadStatus.isNullOrBlank()) {
+                    Text(
+                        text = downloadStatus,
+                        style = EnsuTypography.body,
+                        color = if (downloadStatus.contains("not enough storage", ignoreCase = true) ||
+                            downloadStatus.contains("failed", ignoreCase = true)
+                        ) {
+                            EnsuColor.error
+                        } else {
+                            EnsuColor.textMuted()
+                        },
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                }
                 Button(
                     onClick = {
                         haptic.perform(HapticFeedbackType.TextHandleMove)
@@ -529,8 +588,7 @@ private fun AssistantMessageBubble(
     branchSelections: Map<String, Int>,
     onRetry: () -> Unit,
     onBranchChange: (String, Int) -> Unit,
-    showsMetadata: Boolean,
-    showOutroRive: Boolean
+    showsMetadata: Boolean
 ) {
     val clipboard = LocalClipboardManager.current
     val haptic = rememberEnsuHaptics()
@@ -555,7 +613,10 @@ private fun AssistantMessageBubble(
                     }
                     .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
             ) {
-                MarkdownView(markdown = message.text, enableSelection = false)
+                MarkdownView(
+                    markdown = stripHiddenMessageParts(message.text),
+                    enableSelection = false
+                )
 
                 if (message.isInterrupted) {
                     Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
@@ -574,7 +635,7 @@ private fun AssistantMessageBubble(
                 actions = listOf(
                     MessageAction("Copy", HugeIcons.Copy01Icon) {
                         haptic.perform(HapticFeedbackType.TextHandleMove)
-                        clipboard.setText(AnnotatedString(message.text))
+                        clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
                     },
                     MessageAction("Retry", HugeIcons.RepeatIcon) {
                         haptic.perform(HapticFeedbackType.TextHandleMove)
@@ -582,26 +643,6 @@ private fun AssistantMessageBubble(
                     }
                 )
             )
-        }
-
-        if (showOutroRive) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = EnsuSpacing.sm.dp)
-                    .width(115.dp)
-                    .height(52.5.dp),
-                contentAlignment = Alignment.TopStart
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .offset(y = (-4).dp),
-                    alignment = RiveAlignment.TOP_LEFT,
-                    outroTrigger = true,
-                    outroInputName = "outro",
-                    clipContent = false
-                )
-            }
         }
 
         AnimatedVisibility(
@@ -702,7 +743,8 @@ private fun StreamingMessageBubble(
 ) {
     var renderedText by remember { mutableStateOf(text) }
     var showCursor by remember { mutableStateOf(true) }
-    val shouldBlink = isGenerating && renderedText.isNotBlank()
+    val hasText = renderedText.isNotBlank()
+    val shouldBlink = isGenerating && hasText
 
     LaunchedEffect(shouldBlink) {
         if (!shouldBlink) {
@@ -726,20 +768,51 @@ private fun StreamingMessageBubble(
         }
         // Throttle markdown re-rendering while streaming to reduce dropped frames.
         delay(33)
-        renderedText = text
+        renderedText = stripHiddenMessageParts(text)
     }
 
-    if (isGenerating && renderedText.isNotBlank()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = EnsuSpacing.sm.dp)
-                .padding(vertical = EnsuSpacing.md.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
+    if (!isGenerating) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = EnsuSpacing.sm.dp)
+            .padding(vertical = if (hasText) EnsuSpacing.md.dp else 0.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(if (hasText) EnsuSpacing.sm.dp else 0.dp)
+    ) {
+        if (hasText) {
             MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
+
+        generatingDotsIndicator()
     }
+}
+
+@Composable
+private fun generatingDotsIndicator() {
+    var dotCount by remember { mutableStateOf(1) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(420)
+            dotCount = if (dotCount == 3) 1 else dotCount + 1
+        }
+    }
+
+    Text(
+        text = ".".repeat(dotCount),
+        style = EnsuTypography.message,
+        color = EnsuColor.textMuted(),
+        modifier = Modifier.widthIn(min = 24.dp)
+    )
+}
+
+private fun stripHiddenMessageParts(text: String): String {
+    return text
+        .replace(Regex("<think>[\\s\\S]*?</think>"), "")
+        .replace(Regex("<todo_list>[\\s\\S]*?</todo_list>"), "")
+        .trim()
 }
 
 @Composable

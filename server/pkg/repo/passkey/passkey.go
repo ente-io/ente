@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	ente_time "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -153,7 +154,7 @@ func (r *Repository) CreateBeginRegistrationData(user *ente.User) (options *prot
 	// in the Credential Manager UI during passkey registration. Without this, Android falls back to
 	// the legacy FIDO2 API which only offers Google Password Manager.
 	// This feature is currently enabled only for internal users (@ente.io email addresses).
-	if strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
+	if strings.HasSuffix(emailUtil.NormalizeEmail(user.Email), "@ente.io") {
 		authSelection := protocol.AuthenticatorSelection{
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
 			RequireResidentKey: protocol.ResidentKeyRequired(),

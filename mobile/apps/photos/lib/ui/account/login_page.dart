@@ -12,10 +12,12 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/account/login_pwd_verification_page.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
+import "package:photos/ui/settings/developer_settings_tap_area.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -61,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
@@ -75,9 +78,12 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          AppLocalizations.of(context).logInLabel,
-          style: textTheme.largeBold,
+        title: DeveloperSettingsTapArea(
+          behavior: HitTestBehavior.translucent,
+          child: Text(
+            AppLocalizations.of(context).loginToEnte,
+            style: textTheme.largeBold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -92,6 +98,8 @@ class _LoginPageState extends State<LoginPage> {
           onTap: _emailIsValid ? _onLoginPressed : null,
         ),
       ),
+      bottomNavigationBar:
+          isKeyboardOpen ? null : _getSignUpPrompt(colorScheme, textTheme),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -120,6 +128,38 @@ class _LoginPageState extends State<LoginPage> {
               messageType: _showValidationMessage && !_emailIsValid
                   ? TextInputMessageType.alert
                   : TextInputMessageType.guide,
+            ),
+            const SizedBox(height: 24),
+            const Expanded(
+              child: DeveloperSettingsTapArea(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getSignUpPrompt(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have an account?",
+              style: textTheme.bodyMuted,
+            ),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.link,
+              labelText: AppLocalizations.of(context).signUp,
+              buttonSize: ButtonSizeV2.small,
+              shouldSurfaceExecutionStates: false,
+              onTap: _goToSignUpPage,
             ),
           ],
         ),
@@ -183,5 +223,14 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
     FocusScope.of(context).unfocus();
+  }
+
+  Future<void> _goToSignUpPage() async {
+    FocusScope.of(context).unfocus();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const EmailEntryPage(),
+      ),
+    );
   }
 }

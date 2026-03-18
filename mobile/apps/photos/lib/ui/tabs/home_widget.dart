@@ -68,6 +68,7 @@ import "package:photos/ui/home/home_bottom_nav_bar.dart";
 import "package:photos/ui/home/home_gallery_widget.dart";
 import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
+import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
@@ -232,6 +233,13 @@ class _HomeWidgetState extends State<HomeWidget> {
             if (mounted) {
               setState(() {});
               syncWidget();
+              if (!NotificationService.instance.hasGrantedPermissions() &&
+                  isOfflineMode &&
+                  !Configuration.instance.hasConfiguredAccount()) {
+                Future.delayed(const Duration(seconds: 2), () {
+                  NotificationService.instance.requestPermissions().ignore();
+                });
+              }
             }
           },
         );
@@ -714,6 +722,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     bool isSettingsOpen = false;
     final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
+    final isOnOnlineGrantPermissionScreen =
+        Configuration.instance.hasConfiguredAccount() &&
+            !isOfflineMode &&
+            _shouldShowPermissionWidget();
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
@@ -812,42 +824,44 @@ class _HomeWidgetState extends State<HomeWidget> {
 
           ///To fix the status bar not adapting it's color when switching
           ///screens the have different appbar colours.
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(0),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: isOnSearchTabNotifier,
-              builder: (context, isOnSearchTab, _) {
-                return AnimatedBuilder(
-                  animation: IndexOfStackNotifier(),
-                  builder: (context, _) {
-                    final colorScheme = getEnteColorScheme(context);
-                    final resultsBackground = EnteTheme.isDark(context)
-                        ? const Color.fromRGBO(22, 22, 22, 1)
-                        : colorScheme.backgroundElevated2;
-                    final isSearchResults =
-                        isOnSearchTab && IndexOfStackNotifier().index == 1;
-                    final isOnLandingPage =
-                        !Configuration.instance.hasConfiguredAccount() &&
-                            !isOfflineMode &&
-                            !widget.startWithoutAccount;
-                    final isOnOnlineGrantPermissionScreen =
-                        Configuration.instance.hasConfiguredAccount() &&
-                            !isOfflineMode &&
-                            _shouldShowPermissionWidget();
-                    return AppBar(
-                      backgroundColor: isOnLandingPage
-                          ? colorScheme.greenBase
-                          : isSearchResults
-                              ? resultsBackground
-                              : isOnOnlineGrantPermissionScreen
-                                  ? colorScheme.backgroundColour
-                                  : colorScheme.backgroundBase,
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+          appBar: isOnOnlineGrantPermissionScreen
+              ? null
+              : PreferredSize(
+                  preferredSize: const Size.fromHeight(0),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isOnSearchTabNotifier,
+                    builder: (context, isOnSearchTab, _) {
+                      return AnimatedBuilder(
+                        animation: IndexOfStackNotifier(),
+                        builder: (context, _) {
+                          final colorScheme = getEnteColorScheme(context);
+                          final resultsBackground = EnteTheme.isDark(context)
+                              ? const Color.fromRGBO(22, 22, 22, 1)
+                              : colorScheme.backgroundElevated2;
+                          final isSearchResults = isOnSearchTab &&
+                              IndexOfStackNotifier().index == 1;
+                          final isOnLandingPage =
+                              !Configuration.instance.hasConfiguredAccount() &&
+                                  !isOfflineMode &&
+                                  !widget.startWithoutAccount;
+                          final isOnOnlineGrantPermissionScreen =
+                              Configuration.instance.hasConfiguredAccount() &&
+                                  !isOfflineMode &&
+                                  _shouldShowPermissionWidget();
+                          return AppBar(
+                            backgroundColor: isOnLandingPage
+                                ? colorScheme.greenBase
+                                : isSearchResults
+                                    ? resultsBackground
+                                    : isOnOnlineGrantPermissionScreen
+                                        ? colorScheme.backgroundColour
+                                        : colorScheme.backgroundBase,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -928,7 +942,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ? const NeverScrollableScrollPhysics()
                       : const BouncingScrollPhysics(),
                   children: [
-                    child!,
+                    _showShowBackupHook
+                        ? const StartBackupHookWidget(
+                            headerWidget: HeaderWidget(),
+                          )
+                        : child!,
                     UserCollectionsTab(selectedAlbums: _selectedAlbums),
                     _sharedCollectionTab,
                     _searchTab,
@@ -1239,7 +1257,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     _collectionsSyncTriggered = true;
-    CollectionsService.instance.sync().whenComplete(() {
+    CollectionsService.instance.sync().then((_) {
       if (mounted) {
         setState(() {});
       }

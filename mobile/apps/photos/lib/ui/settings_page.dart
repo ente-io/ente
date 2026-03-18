@@ -6,12 +6,14 @@ import "package:log_viewer/log_viewer.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/emergency/emergency_page.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/email_entry_page.dart";
 import "package:photos/ui/account/login_page.dart";
 import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
@@ -19,7 +21,6 @@ import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
-import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/about/about_us_page.dart";
 import "package:photos/ui/settings/account/account_settings_page.dart";
@@ -96,7 +97,10 @@ class _SettingsBody extends StatelessWidget {
                     onGetStarted: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const LandingPageWidget(),
+                          builder: (_) => const EmailEntryPage(
+                            showReferralSourceField: false,
+                            referralSource: "Offline",
+                          ),
                         ),
                       );
                     },
@@ -479,10 +483,27 @@ class _SettingsBody extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
+          surfaceExecutionStates: true,
           onTap: () async {
-            final userDetails =
-                await UserService.instance.getUserDetailsV2(memoryCount: false);
-            await billingService.launchFamilyPortal(context, userDetails);
+            late final UserDetails userDetails;
+            try {
+              userDetails = await UserService.instance
+                  .getUserDetailsV2(memoryCount: false);
+            } catch (error) {
+              if (!context.mounted) {
+                return;
+              }
+              await showGenericErrorDialog(context: context, error: error);
+              return;
+            }
+            if (!context.mounted) {
+              return;
+            }
+            await billingService.launchFamilyPortal(
+              context,
+              userDetails,
+              refreshOnOpen: false,
+            );
           },
         ),
         MenuItemWidgetNew(

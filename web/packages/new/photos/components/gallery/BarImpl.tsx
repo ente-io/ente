@@ -12,6 +12,10 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
+    PeopleSortOptions,
+    type PeopleSortBy,
+} from "ente-new/photos/components/PeopleSortOptions";
+import {
     BarItemTile,
     ItemCard,
     TileTextOverlay,
@@ -39,8 +43,8 @@ import React, {
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     FixedSizeList,
-    type ListChildComponentProps,
     areEqual,
+    type ListChildComponentProps,
 } from "react-window";
 import { isMLSupported } from "../../services/ml";
 import type { GalleryBarMode } from "./reducer";
@@ -76,6 +80,11 @@ export interface GalleryBarImplProps {
      */
     onShowAllAlbums: () => void;
     /**
+     * Called when the user selects the option to show a modal with all the
+     * people.
+     */
+    onShowAllPeople: () => void;
+    /**
      * The scheme that should be used for sorting the collections in the bar.
      */
     collectionsSortBy: CollectionsSortBy;
@@ -83,6 +92,14 @@ export interface GalleryBarImplProps {
      * Called when the user changes the sorting scheme.
      */
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
+    /**
+     * The scheme that should be used for sorting the people.
+     */
+    peopleSortBy: PeopleSortBy;
+    /**
+     * Called when the user changes the people sorting scheme.
+     */
+    onChangePeopleSortBy: (by: PeopleSortBy) => void;
     /**
      * The list of people that should be shown in the bar.
      */
@@ -104,8 +121,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     activeCollectionID,
     onSelectCollectionID,
     onShowAllAlbums,
+    onShowAllPeople,
     collectionsSortBy,
     onChangeCollectionsSortBy,
+    peopleSortBy,
+    onChangePeopleSortBy,
     people,
     activePerson,
     onSelectPerson,
@@ -222,31 +242,46 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             direction="row"
             sx={{ alignItems: "center", gap: 1, minHeight: "64px" }}
         >
-            {mode != "people" && (
-                <>
-                    <CollectionsSortOptions
-                        activeSortBy={collectionsSortBy}
-                        onChangeSortBy={onChangeCollectionsSortBy}
-                        transparentTriggerButtonBackground
-                    />
-                    <IconButton onClick={onShowAllAlbums}>
-                        <ExpandMoreIcon />
-                    </IconButton>
-                </>
+            {mode != "people" ? (
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                    transparentTriggerButtonBackground
+                />
+            ) : (
+                <PeopleSortOptions
+                    activeSortBy={peopleSortBy}
+                    onChangeSortBy={onChangePeopleSortBy}
+                    transparentTriggerButtonBackground
+                />
             )}
+            <IconButton
+                onClick={mode == "people" ? onShowAllPeople : onShowAllAlbums}
+            >
+                <ExpandMoreIcon />
+            </IconButton>
         </Stack>
     );
 
-    const controls2 = !isSmallWidth && mode != "people" && (
+    const controls2 = !isSmallWidth && (
         <Stack
             direction="row"
             sx={{ alignItems: "center", gap: 1, height: "64px" }}
         >
-            <CollectionsSortOptions
-                activeSortBy={collectionsSortBy}
-                onChangeSortBy={onChangeCollectionsSortBy}
-            />
-            <FilledIconButton onClick={onShowAllAlbums}>
+            {mode != "people" ? (
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                />
+            ) : (
+                <PeopleSortOptions
+                    activeSortBy={peopleSortBy}
+                    onChangeSortBy={onChangePeopleSortBy}
+                />
+            )}
+            <FilledIconButton
+                onClick={mode == "people" ? onShowAllPeople : onShowAllAlbums}
+            >
                 <ExpandMoreIcon />
             </FilledIconButton>
         </Stack>

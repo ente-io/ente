@@ -2,10 +2,12 @@ use llama_cpp_2::context::LlamaContext;
 use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;
 use llama_cpp_2::llama_batch::LlamaBatch;
-use llama_cpp_2::model::{AddBos, LlamaChatMessage, LlamaChatTemplate, LlamaModel, Special};
+use llama_cpp_2::TokenToStringError;
+use llama_cpp_2::model::{AddBos, LlamaChatMessage, LlamaChatTemplate, LlamaModel};
 use llama_cpp_2::mtmd::{
     MtmdBitmap, MtmdContext, MtmdContextParams, MtmdInputText, mtmd_default_marker,
 };
+use llama_cpp_2::openai::OpenAIChatTemplateParams;
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
 use llama_cpp_sys_2::{
@@ -45,6 +47,7 @@ static MTMD_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
 static MTMD_LOG_HOOK: OnceLock<()> = OnceLock::new();
 
 const CANCEL_MESSAGE: &str = "Generation cancelled";
+const DEFAULT_GENERATION_MAX_TOKENS: i32 = 8_192;
 
 fn backend() -> Result<&'static LlamaBackend, String> {
     match BACKEND.get_or_init(|| LlamaBackend::init().map_err(|err| err.to_string())) {
@@ -130,20 +133,63 @@ fn format_error(context: &str, err: impl std::fmt::Display) -> String {
     format!("{context}: {err}")
 }
 
+fn token_piece_bytes(model: &LlamaModel, token: LlamaToken) -> Result<Vec<u8>, TokenToStringError> {
+    match model.token_to_piece_bytes(token, 8, true, None) {
+        Err(TokenToStringError::InsufficientBufferSpace(required)) => model.token_to_piece_bytes(
+            token,
+            (-required).try_into().expect("error buffer size is positive"),
+            true,
+            None,
+        ),
+        result => result,
+    }
+}
+
+fn token_piece_string(model: &LlamaModel, token: LlamaToken) -> Option<String> {
+    String::from_utf8(token_piece_bytes(model, token).ok()?).ok()
+}
+
 fn build_chat_prompt(
     model: &LlamaModel,
     messages: Vec<ChatMessage>,
     template_override: Option<String>,
     add_assistant: bool,
 ) -> Result<String, String> {
-    let template = match template_override {
-        Some(template) => LlamaChatTemplate::new(&template)
-            .map_err(|err| format_error("Invalid chat template", err))?,
+    let template_text = match template_override {
+        Some(template) => template,
         None => model
             .chat_template(None)
-            .or_else(|_| LlamaChatTemplate::new("chatml"))
-            .map_err(|err| format_error("Failed to load chat template", err))?,
+            .ok()
+            .and_then(|template| template.to_string().ok())
+            .unwrap_or_else(|| "chatml".to_string()),
     };
+    let template = LlamaChatTemplate::new(&template_text)
+        .map_err(|err| format_error("Invalid chat template", err))?;
+
+    if template_text.contains("enable_thinking") {
+        let messages_json =
+            serde_json::to_string(&messages).map_err(|err| format_error("Invalid chat messages", err))?;
+        let params = OpenAIChatTemplateParams {
+            messages_json: &messages_json,
+            tools_json: None,
+            tool_choice: None,
+            json_schema: None,
+            grammar: None,
+            reasoning_format: None,
+            chat_template_kwargs: Some(r#"{"enable_thinking":false}"#),
+            add_generation_prompt: add_assistant,
+            use_jinja: true,
+            parallel_tool_calls: false,
+            enable_thinking: false,
+            add_bos: false,
+            add_eos: false,
+            parse_tool_calls: false,
+        };
+        let result = model
+            .apply_chat_template_oaicompat(&template, &params)
+            .map_err(|err| format_error("Failed to apply chat template", err))?;
+        return Ok(result.prompt);
+    }
 
     let chat_messages = messages
         .into_iter()
@@ -159,7 +205,7 @@ fn build_chat_prompt(
 }
 
 fn should_add_bos(model: &LlamaModel, prompt: &str) -> AddBos {
-    if let Ok(bos) = model.token_to_str(model.token_bos(), Special::Tokenize)
+    if let Some(bos) = token_piece_string(model, model.token_bos())
         && !bos.is_empty()
         && prompt.starts_with(&bos)
     {
@@ -334,10 +380,8 @@ fn run_generation_loop(
             break;
         }
 
-        let bytes = ctx
-            .model
-            .token_to_bytes(token, Special::Tokenize)
-            .map_err(|err| format_error("Detokenize failed", err))?;
+        let bytes =
+            token_piece_bytes(&ctx.model, token).map_err(|err| format_error("Detokenize failed", err))?;
         let step = decoder.push_bytes(&bytes);
 
         if let Some(text) = step.text {
@@ -660,10 +704,14 @@ pub fn tokenize(
 
 pub fn detokenize(model: &ModelHandle, tokens: Vec<i32>) -> Result<String, String> {
     let tokens = tokens.into_iter().map(LlamaToken::new).collect::<Vec<_>>();
-    model
-        .model()
-        .tokens_to_str(&tokens, Special::Tokenize)
-        .map_err(|err| format_error("Detokenize failed", err))
+    let mut bytes = Vec::with_capacity(tokens.len() * 4);
+    for token in tokens {
+        bytes.extend_from_slice(
+            &token_piece_bytes(model.model(), token)
+                .map_err(|err| format_error("Detokenize failed", err))?,
+        );
+    }
+    String::from_utf8(bytes).map_err(|err| format_error("Detokenize failed", err))
 }
 
 pub fn get_model_info(model: &ModelHandle) -> Result<ModelInfo, String> {
@@ -671,14 +719,8 @@ pub fn get_model_info(model: &ModelHandle) -> Result<ModelInfo, String> {
     let bos_token = model_ref.token_bos();
     let eos_token = model_ref.token_eos();
 
-    let bos_token_str = model_ref
-        .token_to_str(bos_token, Special::Tokenize)
-        .ok()
-        .filter(|value| !value.is_empty());
-    let eos_token_str = model_ref
-        .token_to_str(eos_token, Special::Tokenize)
-        .ok()
-        .filter(|value| !value.is_empty());
+    let bos_token_str = token_piece_string(model_ref, bos_token).filter(|value| !value.is_empty());
+    let eos_token_str = token_piece_string(model_ref, eos_token).filter(|value| !value.is_empty());
 
     let chat_template = model_ref
         .chat_template(None)
@@ -757,7 +799,7 @@ pub fn generate_chat_stream(
         token_id: None,
     });
 
-    let max_tokens = max_tokens.unwrap_or(128);
+    let max_tokens = max_tokens.unwrap_or(DEFAULT_GENERATION_MAX_TOKENS);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = stop_sequences.unwrap_or_default();
 
@@ -1046,7 +1088,7 @@ pub fn generate_stream(
         token_id: None,
     });
 
-    let max_tokens = request.max_tokens.unwrap_or(128);
+    let max_tokens = request.max_tokens.unwrap_or(DEFAULT_GENERATION_MAX_TOKENS);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = request.stop_sequences.clone().unwrap_or_default();
 

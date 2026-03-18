@@ -1,4 +1,4 @@
-import 'dart:typed_data' show Uint8List, Float32List;
+import 'dart:typed_data' show Float32List, Uint8List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
@@ -204,8 +204,42 @@ Future<dynamic> isolateFunction(
 
     /// MLComputer
     case IsolateOperation.runClipText:
-      final textEmbedding = await ClipTextEncoder.predict(args);
-      return List<double>.from(textEmbedding, growable: false);
+      final useRustMl = args["useRustMl"] as bool? ?? false;
+      if (!useRustMl) {
+        final textEmbedding = await ClipTextEncoder.predict(args);
+        return List<double>.from(textEmbedding, growable: false);
+      }
+
+      await _ensureRustLoaded();
+      final text = args["text"] as String;
+      final clipTextModelPath = args["clipTextModelPath"] as String?;
+      if (clipTextModelPath == null || clipTextModelPath.trim().isEmpty) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextModelPath",
+        );
+      }
+
+      final clipTextVocabPath = args["clipTextVocabPath"] as String?;
+      if (clipTextVocabPath == null || clipTextVocabPath.trim().isEmpty) {
+        throw Exception(
+          "RustMLMissingModelPath: Missing required model path: clipTextVocabPath",
+        );
+      }
+
+      final result = await rust_ml.runClipTextRust(
+        req: rust_ml.RunClipTextRequest(
+          text: text,
+          modelPath: clipTextModelPath,
+          vocabPath: clipTextVocabPath,
+          providerPolicy: rust_ml.RustExecutionProviderPolicy(
+            preferCoreml: args["preferCoreml"] as bool? ?? true,
+            preferNnapi: args["preferNnapi"] as bool? ?? true,
+            preferXnnpack: args["preferXnnpack"] as bool? ?? false,
+            allowCpuFallback: args["allowCpuFallback"] as bool? ?? true,
+          ),
+        ),
+      );
+      return List<double>.from(result.embedding, growable: false);
 
     /// MLComputer
     case IsolateOperation.computeBulkSimilarities:
@@ -279,12 +313,14 @@ Future<void> _ensureRustLoaded() async {
 }
 
 Future<void> _ensureRustDisposed() async {
-  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
-  if (loaded) {
-    await _releaseRustRuntime();
-    EntePhotosRust.dispose();
-    _isolateCache.remove(_rustLibLoadedCacheKey);
-  }
+  // Intentionally a no-op.
+  //
+  // Rust ML residency is owned by the feature isolate that prepared it.
+  // The generic cache-clear path runs in multiple rust-using isolates, so
+  // letting it call process-global ML teardown would allow unrelated isolates
+  // to release indexing sessions they do not own. MLIndexingIsolate tracks
+  // whether it prepared the runtime and releases it explicitly during its own
+  // cleanup, even if the app mode or flags have changed since preparation.
 }
 
 Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
@@ -292,6 +328,17 @@ Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
     faceDetection: (args["faceDetectionModelPath"] as String?) ?? "",
     faceEmbedding: (args["faceEmbeddingModelPath"] as String?) ?? "",
     clipImage: (args["clipImageModelPath"] as String?) ?? "",
+    clipText: (args["clipTextModelPath"] as String?) ?? "",
+    petFaceDetection: (args["petFaceDetectionModelPath"] as String?) ?? "",
+    petFaceEmbeddingDog:
+        (args["petFaceEmbeddingDogModelPath"] as String?) ?? "",
+    petFaceEmbeddingCat:
+        (args["petFaceEmbeddingCatModelPath"] as String?) ?? "",
+    petBodyDetection: (args["petBodyDetectionModelPath"] as String?) ?? "",
+    petBodyEmbeddingDog:
+        (args["petBodyEmbeddingDogModelPath"] as String?) ?? "",
+    petBodyEmbeddingCat:
+        (args["petBodyEmbeddingCatModelPath"] as String?) ?? "",
   );
   final providerPolicy = rust_ml.RustExecutionProviderPolicy(
     preferCoreml: args["preferCoreml"] as bool? ?? true,
@@ -339,7 +386,7 @@ Future<void> _releaseRustRuntime() async {
   try {
     await rust_ml.releaseMlRuntime();
   } catch (_) {
-    // no-op: runtime release is best-effort before process-wide bridge dispose.
+    // no-op: indexing-model release is best-effort.
   }
   _isolateCache.remove(_rustMlRuntimeConfigCacheKey);
 }
@@ -352,6 +399,13 @@ String _runtimeConfigCacheKey(
     modelPaths.faceDetection,
     modelPaths.faceEmbedding,
     modelPaths.clipImage,
+    modelPaths.clipText,
+    modelPaths.petFaceDetection,
+    modelPaths.petFaceEmbeddingDog,
+    modelPaths.petFaceEmbeddingCat,
+    modelPaths.petBodyDetection,
+    modelPaths.petBodyEmbeddingDog,
+    modelPaths.petBodyEmbeddingCat,
     providerPolicy.preferCoreml,
     providerPolicy.preferNnapi,
     providerPolicy.preferXnnpack,

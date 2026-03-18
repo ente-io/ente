@@ -21,10 +21,10 @@ struct ModelSettingsView: View {
 
     private let suggestedModels: [SuggestedModel] = [
         SuggestedModel(
-            name: "Qwen3-VL 2B Instruct (Q4_K_M)",
+            name: "Qwen 3.5 2B (Q8_0)",
             details: "Multimodal • requires mmproj",
-            url: "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3-VL-2B-Instruct-Q4_K_M.gguf",
-            mmproj: "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-qwen3-vl-2b.gguf"
+            url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+            mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
         ),
         SuggestedModel(
             name: "LFM 2.5 1.2B Instruct (Q4_0)",

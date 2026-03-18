@@ -511,7 +511,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         GradientButton(
           text: context.l10n.contactSupport,
           onTap: () async {
-            await openSupportPage(message, null);
+            await sendEmail(
+              context,
+              to: "support@ente.io",
+              body: message,
+            );
           },
         ),
       ],

@@ -9,6 +9,26 @@
 - Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
 - Python 3 (used to patch llama.cpp mtmd sources)
 
+## Quick scripts
+
+From `mobile/native/android/apps/ensu`:
+
+```bash
+./build.sh                 # builds Rust + debug APK
+./build.sh apk             # builds Rust + release APK
+./build.sh aab             # builds Rust + release AAB (app bundle)
+./run.sh                   # builds + installs + launches on connected adb device
+```
+
+Helpful flags:
+
+- `--skip-rust` to skip Rust/jni rebuild
+- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
+- `--device <serial>` for `run.sh`
+- legacy aliases still supported: `release`/`release-apk` and `bundle`/`release-aab`
+
+Run `./build.sh --help` or `./run.sh --help` for full options.
+
 ## Building
 
 ### 1. Build Rust Libraries
@@ -47,6 +67,17 @@ Output: `app-ui/build/outputs/apk/debug/app-ui-debug.apk`
 Output: `app-ui/build/outputs/apk/release/app-ui-release.apk`
 
 Note: Release builds use a debug keystore located at `debug.keystore`. For production releases, configure your own signing keys in `app-ui/build.gradle.kts`.
+
+## Certificate Fingerprints
+
+- **SHA1**: 55:32:94:80:28:F7:C7:43:9F:41:07:58:4B:13:F1:56:38:00:75:0C
+- **SHA256**: 66:99:CF:8C:42:AF:42:7B:55:2C:96:20:54:E5:D6:95:89:FA:49:09:96:55:3A:53:04:5E:B3:9C:C3:4F:2E:66
+
+To verify these fingerprints, use the following command:
+
+```bash
+apksigner verify --print-certs <path_to_apk>
+```
 
 ## Installation
 

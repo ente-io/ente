@@ -4,17 +4,35 @@
 
 All commands below assume you run them from `darwin/Apps/ensu`.
 
+## Quick scripts
+
+```bash
+./build.sh                 # Debug build for iOS simulator (prefers booted iPhone)
+./build.sh device          # Debug build for connected iOS device
+./build.sh archive         # Release archive (.xcarchive)
+./build.sh ipa             # Release IPA export (uses ExportOptions-AppStore.plist)
+./run.sh                   # Build + install + launch on iOS simulator (prefers booted iPhone)
+```
+
+Helpful flags:
+
+- `--destination-id <id>` to force a specific simulator/device
+- `--endpoint <url>` to set `ENTE_API_ENDPOINT`
+- `--archive-path`, `--export-path`, `--export-options-plist` for release flows
+- `--skip-build` for `run.sh`
+
+Run `./build.sh --help` or `./run.sh --help` for full options.
+
 ## Generated bindings & dependencies
 
 - SwiftMath is fetched via SwiftPM (`https://github.com/mgriebling/SwiftMath.git`).
 - UniFFI Swift bindings are generated locally and gitignored:
   - `ensu/Generated/core*`, `ensu/Generated/db*`, `ensu/Generated/sync*`
-  - `../Packages/Rust/Sources/InferenceRS/inference_rs_uniffi*`
+  - `../Packages/Rust/Sources/InferenceRS/`
   - `../Packages/Rust/InferenceRSFFI.xcframework`
 
 The Xcode build script (`scripts/build-rust.sh`) builds Rust static libs, but it does
-not regenerate the Swift bindings. If bindings are missing, build the corresponding
-`rust/uniffi/core` or `rust/uniffi/ensu/*` crate and run `uniffi-bindgen generate` to output into the paths above.
+regenerate the `core`, `db`, and `sync` Swift bindings into `ensu/Generated/` as part of the build.
 `../Packages/Rust/tool/generate_bindings.sh` and `../Packages/Rust/tool/build_xcframework.sh`
 handle the InferenceRS bindings and xcframework.
 
@@ -87,6 +105,8 @@ xcrun devicectl device install app \
 ### Release (IPA)
 Install the exported IPA via Apple Configurator or TestFlight after `xcodebuild -exportArchive`.
 
+Note: App Store IPA export requires valid distribution signing certificate/profile on this machine.
+
 ## Custom API Endpoint
 
 Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the app defaults to `https://api.ente.io`.
@@ -102,5 +122,3 @@ ENTE_API_ENDPOINT="https://your-endpoint.example" \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
   -derivedDataPath build
 ```
-
-

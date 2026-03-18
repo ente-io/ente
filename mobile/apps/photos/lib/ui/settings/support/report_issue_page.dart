@@ -1,7 +1,6 @@
-import "dart:io";
-
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
@@ -67,6 +66,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -124,22 +124,19 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        l10n.deviceInfoNote,
-                        style: textTheme.miniMuted,
-                      ),
-                      const SizedBox(height: 24),
-                      ButtonWidgetV2(
-                        buttonType: ButtonTypeV2.primary,
-                        labelText: l10n.send,
-                        isDisabled: _isSending,
-                        shouldSurfaceExecutionStates: false,
-                        onTap: _onSend,
-                      ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: l10n.continueInMailApp,
+                isDisabled: _isSending,
+                shouldSurfaceExecutionStates: false,
+                onTap: _onSend,
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -167,8 +164,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       _isSending = true;
     });
 
-    final bugsEmail =
-        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
+    const recipientEmail = supportEmail;
     String? logsZipFilePath;
     String? logsLabel;
 
@@ -187,22 +183,27 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       final didOpenComposer = _attachLogs
           ? await sendLogsWithSubjectAndBody(
               context,
-              toEmail: bugsEmail,
+              toEmail: recipientEmail,
               subject: subject,
               body: body,
               zipFilePath: logsZipFilePath,
             )
           : await sendComposedEmail(
               context,
-              to: bugsEmail,
+              to: recipientEmail,
               subject: subject,
               body: body,
             );
 
+      if (didOpenComposer && mounted) {
+        Navigator.of(context).pop();
+        return;
+      }
+
       if (!didOpenComposer && mounted) {
         await showNoMailAppSheet(
           context,
-          toEmail: bugsEmail,
+          toEmail: recipientEmail,
           subject: subject,
           message: description,
           deviceInfo: deviceInfo,

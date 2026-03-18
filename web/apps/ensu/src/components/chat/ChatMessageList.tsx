@@ -106,6 +106,23 @@ const AttachmentCard = memo(({ attachment, onClick }: AttachmentCardProps) => {
     );
 });
 
+const AiSafetyFooter = memo(() => {
+    return (
+        <Typography
+            variant="small"
+            sx={{
+                color: "text.muted",
+                textAlign: "center",
+                width: "100%",
+                fontSize: "12px",
+                lineHeight: "16px",
+            }}
+        >
+            Ensu can make mistakes. Please double-check key details.
+        </Typography>
+    );
+});
+
 interface MessageRowProps {
     message: ChatMessage;
     branchSwitchers: Record<string, BranchSwitcher>;
@@ -178,7 +195,7 @@ const MessageRow = memo(
             const fallbackText = imageCount ? "Attached images" : "";
             const displayText = isSelf
                 ? parsedDocuments.text || fallbackText
-                : message.text || fallbackText;
+                : stripHiddenParts(message.text) || fallbackText;
             const copyText = isSelf
                 ? displayText
                 : stripHiddenParts(message.text);
@@ -696,6 +713,7 @@ export const ChatMessageList = memo(
                                 {renderMessage(index, message)}
                             </React.Fragment>
                         ))}
+                        <AiSafetyFooter />
                     </Stack>
                 )}
             </Box>

@@ -34,7 +34,16 @@
       "slug": "addy_io"
     },
     {
+      "title": "adnymics",
+      "hex": "189cd9"
+    },
+    {
       "title": "Adobe"
+    },
+    {
+      "title": "Affiliprint",
+      "slug": "affiliprint",
+      "hex": "0000ff"
     },
     {
       "title": "Airtable"
@@ -175,6 +184,11 @@
       "slug": "band"
     },
     {
+      "title": "Basebuilder",
+      "slug": "basebuilder",
+      "hex": "ff6900"
+    },
+    {
       "title": "Battle.net",
       "slug": "battlenet",
       "altNames": [
@@ -271,6 +285,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Biznet",
+      "altNames": [
+        "BiznetGio"
+      ]
+    },
+    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -324,6 +344,9 @@
     },
     {
       "title": "btcturk"
+    },
+    {
+      "title": "Buenbit"
     },
     {
       "title": "Bugzilla"
@@ -436,6 +459,13 @@
       "title": "ClouDNS"
     },
     {
+      "title": "Cocos Capital",
+      "slug": "cocos_capital",
+      "altNames": [
+        "cocos crypto"
+      ]
+    },
+    {
       "title": "Co-Wheels",
       "slug": "cowheels"
     },
@@ -506,6 +536,9 @@
       "slug": "crowdsec"
     },
     {
+      "title": "Crowdstrike"
+    },
+    {
       "title": "Cryptee",
       "slug": "cryptee"
     },
@@ -544,6 +577,11 @@
         "c wallet",
         "cwallet.com"
       ]
+    },
+    {
+      "title": "Daisycon",
+      "slug": "daisycon",
+      "hex": "9cd137"
     },
     {
       "title": "DCS",
@@ -752,6 +790,9 @@
     },
     {
       "title": "Finary"
+    },
+    {
+      "title": "Fiwind"
     },
     {
       "title": "Firefox",
@@ -1026,6 +1067,16 @@
       "title": "Kite"
     },
     {
+      "title": "Kiwix",
+      "slug": "kiwix",
+      "altNames": [
+        "kiwix.org",
+        "get.kiwix.org",
+        "pro.kiwix.org",
+        "hub.kiwix.org"
+      ]
+    },
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
@@ -1108,6 +1159,11 @@
         "Lincoln Financial Group",
         "LFG"
       ]
+    },
+    {
+      "title": "Linehub",
+      "slug": "linehub",
+      "hex": "000000"
     },
     {
       "title": "LinkedIn",
@@ -1340,7 +1396,8 @@
       ]
     },
     {
-      "title": "nexo"
+      "title": "NEXO",
+      "slug": "nexo"
     },
     {
       "title": "Nextcloud",
@@ -1464,6 +1521,11 @@
       ]
     },
     {
+      "title": "ParcelDealz",
+      "slug": "parceldealz",
+      "hex": "a930af"
+    },
+    {
       "title": "Parqet",
       "slug": "parqet"
     },
@@ -1522,6 +1584,10 @@
     {
       "title": "Pionex",
       "slug": "pionex"
+    },
+    {
+      "title": "Plus Crypto",
+      "slug": "plus_crypto"
     },
     {
       "title": "Plutus",
@@ -1695,6 +1761,9 @@
       "altNames": [
         "restream.io"
       ]
+    },
+    {
+      "title": "Ripio"
     },
     {
       "title": "RippleMatch"
@@ -2183,6 +2252,9 @@
       "title": "WHMCS"
     },
     {
+       "title": "Wick"
+    },
+    {     
       "title": "Windscribe"
     },
     {

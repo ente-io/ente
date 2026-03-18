@@ -66,6 +66,7 @@ impl From<AuthError> for Error {
                 Error::AuthenticationFailed("Incorrect recovery key".to_string())
             }
             AuthError::InvalidKeyAttributes => Error::Crypto(err.to_string()),
+            AuthError::InsufficientMemory => Error::Crypto(err.to_string()),
             AuthError::MissingField(field) => Error::Crypto(format!("Missing field: {field}")),
             AuthError::Crypto(source) => source.into(),
             AuthError::Decode(msg) => Error::Crypto(msg),

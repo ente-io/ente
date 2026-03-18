@@ -9,14 +9,23 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/account/login_page.dart";
 import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
+import "package:photos/ui/settings/developer_settings_tap_area.dart";
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({super.key});
+  const EmailEntryPage({
+    super.key,
+    this.showReferralSourceField = true,
+    this.referralSource,
+  });
+
+  final bool showReferralSourceField;
+  final String? referralSource;
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -50,6 +59,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   void initState() {
     super.initState();
+    _referralSource = widget.referralSource?.trim() ?? '';
     final storedEmail = _config.getEmail();
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _email = storedEmail;
@@ -73,6 +83,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
@@ -87,9 +98,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          AppLocalizations.of(context).createAccount,
-          style: textTheme.largeBold,
+        title: DeveloperSettingsTapArea(
+          behavior: HitTestBehavior.translucent,
+          child: Text(
+            AppLocalizations.of(context).createAccountTitle,
+            style: textTheme.largeBold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -99,7 +113,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: ButtonWidgetV2(
           key: const ValueKey("createAccountButton"),
           buttonType: ButtonTypeV2.primary,
-          labelText: AppLocalizations.of(context).createAccount,
+          labelText: AppLocalizations.of(context).createAccountTitle,
           isDisabled: !_isFormValid(),
           onTap: _isFormValid()
               ? () async {
@@ -117,6 +131,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               : null,
         ),
       ),
+      bottomNavigationBar:
+          isKeyboardOpen ? null : _getLoginPrompt(colorScheme, textTheme),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -154,105 +170,158 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     }
 
     return AutofillGroup(
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).email,
-            hintText: AppLocalizations.of(context).email,
-            textEditingController: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            autoCorrect: false,
-            isRequired: true,
-            onChange: _onEmailChanged,
-            message: _showEmailValidation && !_emailIsValid
-                ? AppLocalizations.of(context).invalidEmailAddress
-                : null,
-            messageType: _showEmailValidation && !_emailIsValid
-                ? TextInputMessageType.alert
-                : TextInputMessageType.guide,
-          ),
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).password,
-            hintText: AppLocalizations.of(context).password,
-            textEditingController: _passwordController1,
-            isPasswordInput: true,
-            isRequired: true,
-            autoCorrect: false,
-            autofillHints: const [AutofillHints.newPassword],
-            message: passwordMessage,
-            messageType: passwordMessageType,
-            onChange: (password) {
-              if (password != _password) {
-                _passwordStrengthTimer?.cancel();
-                setState(() {
-                  _password = password;
-                  _passwordStrength = estimatePasswordStrength(password);
-                  _passwordIsValid =
-                      _passwordStrength >= kMildPasswordStrengthThreshold;
-                  _passwordsMatch = _password == _cnfPassword;
-                  _showPasswordStrength = false;
-                });
-                _passwordStrengthTimer = Timer(
-                  const Duration(seconds: 1),
-                  () {
-                    if (mounted) {
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  TextInputWidgetV2(
+                    label: AppLocalizations.of(context).email,
+                    hintText: AppLocalizations.of(context).email,
+                    textEditingController: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autoCorrect: false,
+                    isRequired: true,
+                    onChange: _onEmailChanged,
+                    message: _showEmailValidation && !_emailIsValid
+                        ? AppLocalizations.of(context).invalidEmailAddress
+                        : null,
+                    messageType: _showEmailValidation && !_emailIsValid
+                        ? TextInputMessageType.alert
+                        : TextInputMessageType.guide,
+                  ),
+                  const SizedBox(height: 24),
+                  TextInputWidgetV2(
+                    label: AppLocalizations.of(context).password,
+                    hintText: AppLocalizations.of(context).password,
+                    textEditingController: _passwordController1,
+                    isPasswordInput: true,
+                    isRequired: true,
+                    autoCorrect: false,
+                    autofillHints: const [AutofillHints.newPassword],
+                    message: passwordMessage,
+                    messageType: passwordMessageType,
+                    onChange: (password) {
+                      if (password != _password) {
+                        _passwordStrengthTimer?.cancel();
+                        setState(() {
+                          _password = password;
+                          _passwordStrength =
+                              estimatePasswordStrength(password);
+                          _passwordIsValid = _passwordStrength >=
+                              kMildPasswordStrengthThreshold;
+                          _passwordsMatch = _password == _cnfPassword;
+                          _showPasswordStrength = false;
+                        });
+                        _passwordStrengthTimer = Timer(
+                          const Duration(seconds: 1),
+                          () {
+                            if (mounted) {
+                              setState(() {
+                                _showPasswordStrength = true;
+                              });
+                            }
+                          },
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  TextInputWidgetV2(
+                    label: AppLocalizations.of(context).confirmPassword,
+                    hintText: AppLocalizations.of(context).confirmPassword,
+                    textEditingController: _passwordController2,
+                    isPasswordInput: true,
+                    isRequired: true,
+                    autoCorrect: false,
+                    autofillHints: const [],
+                    finishAutofillContextOnEditingComplete: true,
+                    message: confirmPasswordMessage,
+                    messageType: confirmPasswordMessageType,
+                    onChange: (cnfPassword) {
+                      _confirmPasswordTimer?.cancel();
                       setState(() {
-                        _showPasswordStrength = true;
+                        _cnfPassword = cnfPassword;
+                        _showConfirmPasswordValidation = false;
+                        if (_password != null && _password!.isNotEmpty) {
+                          _passwordsMatch = _password == _cnfPassword;
+                        }
                       });
-                    }
-                  },
-                );
-              }
-            },
+                      _confirmPasswordTimer = Timer(
+                        const Duration(seconds: 1),
+                        () {
+                          if (mounted) {
+                            setState(() {
+                              _showConfirmPasswordValidation = true;
+                            });
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  if (widget.showReferralSourceField) ...[
+                    const SizedBox(height: 24),
+                    TextInputWidgetV2(
+                      label: AppLocalizations.of(context).hearUsWhereTitle,
+                      autoCorrect: false,
+                      onChange: (value) {
+                        _referralSource = value.trim();
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _getTOSAgreement(colorScheme, textTheme),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).confirmPassword,
-            hintText: AppLocalizations.of(context).confirmPassword,
-            textEditingController: _passwordController2,
-            isPasswordInput: true,
-            isRequired: true,
-            autoCorrect: false,
-            autofillHints: const [],
-            finishAutofillContextOnEditingComplete: true,
-            message: confirmPasswordMessage,
-            messageType: confirmPasswordMessageType,
-            onChange: (cnfPassword) {
-              _confirmPasswordTimer?.cancel();
-              setState(() {
-                _cnfPassword = cnfPassword;
-                _showConfirmPasswordValidation = false;
-                if (_password != null && _password!.isNotEmpty) {
-                  _passwordsMatch = _password == _cnfPassword;
-                }
-              });
-              _confirmPasswordTimer = Timer(
-                const Duration(seconds: 1),
-                () {
-                  if (mounted) {
-                    setState(() {
-                      _showConfirmPasswordValidation = true;
-                    });
-                  }
-                },
-              );
-            },
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: DeveloperSettingsTapArea(),
+                  ),
+                  SizedBox(height: 80),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          TextInputWidgetV2(
-            label: AppLocalizations.of(context).hearUsWhereTitle,
-            autoCorrect: false,
-            onChange: (value) {
-              _referralSource = value.trim();
-            },
-          ),
-          const SizedBox(height: 16),
-          _getTOSAgreement(colorScheme, textTheme),
-          const SizedBox(height: 80),
         ],
+      ),
+    );
+  }
+
+  Widget _getLoginPrompt(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              AppLocalizations.of(context).alreadyHaveAnAccount,
+              style: textTheme.bodyMuted,
+            ),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.link,
+              labelText: AppLocalizations.of(context).logInLabel,
+              buttonSize: ButtonSizeV2.small,
+              shouldSurfaceExecutionStates: false,
+              onTap: _goToLoginPage,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -365,5 +434,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _passwordsMatch &&
         _hasAgreedToTOS &&
         _passwordIsValid;
+  }
+
+  Future<void> _goToLoginPage() async {
+    FocusScope.of(context).unfocus();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const LoginPage(),
+      ),
+    );
   }
 }

@@ -173,7 +173,7 @@ final class InferenceRsProvider {
         messages: [InferenceMessage],
         imageFiles: [URL],
         temperature: Float,
-        maxTokens: Int,
+        maxTokens: Int?,
         onToken: @escaping (String) -> Void
     ) async throws -> InferenceGenerationSummary {
         _ = (target, messages, imageFiles, temperature, maxTokens, onToken)
@@ -186,6 +186,11 @@ final class InferenceRsProvider {
     }
 
     func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
+        _ = target
+        return nil
+    }
+
+    func loadedContextLength(target: InferenceModelTarget) -> Int? {
         _ = target
         return nil
     }
@@ -383,6 +388,11 @@ private struct OnlineStorePreparation {
 
 @MainActor
 final class ChatViewModel: ObservableObject {
+    private struct ModelReadyKey: Equatable {
+        let id: String
+        let requestedContextLength: Int?
+    }
+
     private static let defaultTemperature: Float = 0.5
     private static let systemPromptBody = "Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
     private static let systemPromptDateFormatter: DateFormatter = {
@@ -390,6 +400,7 @@ final class ChatViewModel: ObservableObject {
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         return formatter
     }()
+    private static let defaultGenerationMaxTokens = 8_192
     private static let overflowSafetyTokens = 128
     private static let imageTokenEstimate = 768
     private nonisolated static let sessionTitleMaxLength = 40
@@ -476,6 +487,9 @@ final class ChatViewModel: ObservableObject {
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
+    private var sharedModelReadyTask: Task<Void, Error>?
+    private var sharedModelReadyTaskId: UUID?
+    private var sharedModelReadyKey: ModelReadyKey?
     private var stopRequested = false
     private var activeGenerationId: UUID?
     private var activeGenerationSessionId: UUID?
@@ -483,6 +497,7 @@ final class ChatViewModel: ObservableObject {
     private var pendingSyncShowErrors = false
     private var pendingSyncShowSuccess = false
     private var modelDownloadLoggedStart = false
+    private let downloadProgressTracker = DownloadProgressTracker()
     private var pendingOverflow: PendingOverflow?
     private var overflowBypassMessageId: UUID?
 
@@ -1049,13 +1064,36 @@ final class ChatViewModel: ObservableObject {
     }
 
     func sendDraft() {
+        guard !isGenerating && !isDownloading && !isAttachmentDownloadBlocked else { return }
+
         let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = draftAttachments
         guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
-        let sessionId = currentSessionId ?? createSessionForDraft()
-
         Task { @MainActor in
+            let target = self.modelSettings.currentTarget()
+            self.hasRequestedModelDownload = true
+
+            do {
+                try await self.ensureModelReadyShared(target: target)
+                self.isModelDownloaded = true
+            } catch {
+                if self.isCancellation(error) {
+                    return
+                }
+                self.isModelDownloaded = false
+                self.isDownloading = false
+                self.downloadToast = DownloadToastState(
+                    phase: .errorDownload,
+                    percent: -1,
+                    status: self.userFacingModelReadyError(error, wasDownloaded: false),
+                    offerRetryDownload: true
+                )
+                self.logger.error("Model readiness check failed before send", error)
+                return
+            }
+
+            let sessionId = self.currentSessionId ?? self.createSessionForDraft()
             let missing = await self.missingAttachments(for: sessionId)
             if !missing.isEmpty {
                 self.queueMissingAttachments(for: sessionId, missing: missing)
@@ -1154,6 +1192,7 @@ final class ChatViewModel: ObservableObject {
         let target = modelSettings.currentTarget()
         isModelDownloaded = provider.isModelDownloaded(target: target)
         if isModelDownloaded {
+            clearDownloadProgressMemory()
             modelDownloadSizeBytes = nil
             return
         }
@@ -1162,8 +1201,73 @@ final class ChatViewModel: ObservableObject {
             guard let self else { return }
             let size = await provider.estimatedDownloadSize(target: target)
             await MainActor.run {
-                self.modelDownloadSizeBytes = size
+                self.modelDownloadSizeBytes = size ?? self.modelDownloadSizeBytes
             }
+        }
+    }
+
+    private func clearSharedModelReadyTask() {
+        sharedModelReadyTask = nil
+        sharedModelReadyTaskId = nil
+        sharedModelReadyKey = nil
+    }
+
+    private func modelReadyKey(for target: InferenceModelTarget) -> ModelReadyKey {
+        ModelReadyKey(id: target.id, requestedContextLength: target.contextLength)
+    }
+
+    private func ensureModelReadyShared(target: InferenceModelTarget) async throws {
+        let modelKey = modelReadyKey(for: target)
+        if let existingTask = sharedModelReadyTask, sharedModelReadyKey == modelKey {
+            try await existingTask.value
+            return
+        }
+
+        if let existingTask = sharedModelReadyTask, sharedModelReadyKey != modelKey {
+            existingTask.cancel()
+            provider.cancelDownload()
+            clearSharedModelReadyTask()
+        }
+
+        let taskId = UUID()
+        let task = Task {
+            var retryCount = 0
+            while true {
+                do {
+                    try await provider.ensureModelReady(target: target) { progress in
+                        Task { @MainActor in
+                            self.handleProgress(progress)
+                        }
+                    }
+                    return
+                } catch {
+                    if self.isCancellation(error) {
+                        throw error
+                    }
+                    if !self.shouldRetryModelDownload(error, retryCount: retryCount) {
+                        throw error
+                    }
+                    retryCount += 1
+                    try await Task.sleep(nanoseconds: self.retryDelayNanoseconds(for: retryCount))
+                }
+            }
+        }
+
+        sharedModelReadyTask = task
+        sharedModelReadyTaskId = taskId
+        sharedModelReadyKey = modelKey
+
+        do {
+            try await task.value
+        } catch {
+            if sharedModelReadyTaskId == taskId {
+                clearSharedModelReadyTask()
+            }
+            throw error
+        }
+
+        if sharedModelReadyTaskId == taskId {
+            clearSharedModelReadyTask()
         }
     }
 
@@ -1182,17 +1286,14 @@ final class ChatViewModel: ObservableObject {
         }
 
         isDownloading = true
+        seedDownloadProgressMemory()
         modelDownloadLoggedStart = true
         logger.info("Model download started", details: "model=\(target.id)")
 
         modelDownloadTask?.cancel()
         modelDownloadTask = Task {
             do {
-                try await provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if isCancellation(error) {
                     return
@@ -1207,10 +1308,11 @@ final class ChatViewModel: ObservableObject {
                     self.downloadToast = DownloadToastState(
                         phase: .errorDownload,
                         percent: -1,
-                        status: error.localizedDescription,
+                        status: self.userFacingModelReadyError(error, wasDownloaded: false),
                         offerRetryDownload: true
                     )
                     self.isDownloading = false
+                    self.isModelDownloaded = false
                 }
             }
         }
@@ -1229,11 +1331,7 @@ final class ChatViewModel: ObservableObject {
         modelDownloadTask = Task { [weak self] in
             guard let self else { return }
             do {
-                try await self.provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if self.isCancellation(error) {
                     return
@@ -1242,10 +1340,11 @@ final class ChatViewModel: ObservableObject {
                     self.downloadToast = DownloadToastState(
                         phase: .errorLoad,
                         percent: -1,
-                        status: error.localizedDescription,
+                        status: self.userFacingModelReadyError(error, wasDownloaded: true),
                         offerRetryDownload: true
                     )
                     self.isDownloading = false
+                    self.isModelDownloaded = false
                 }
             }
         }
@@ -1255,12 +1354,15 @@ final class ChatViewModel: ObservableObject {
         resetGenerationState(stopRequested: true)
         modelDownloadTask?.cancel()
         modelDownloadTask = nil
+        sharedModelReadyTask?.cancel()
+        clearSharedModelReadyTask()
         provider.cancelDownload()
         if modelDownloadLoggedStart {
             logger.info("Model download cancelled")
             modelDownloadLoggedStart = false
         }
         hasRequestedModelDownload = false
+        clearDownloadProgressMemory()
         refreshModelDownloadInfo()
     }
 
@@ -1331,28 +1433,6 @@ final class ChatViewModel: ObservableObject {
 
         let target = modelSettings.currentTarget()
         let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
-        let historySelection = buildHistorySelection(
-            sessionId: userNode.sessionId,
-            promptText: prompt.text,
-            promptImageCount: prompt.imageFiles.count,
-            currentMessageId: userNode.id,
-            target: target
-        )
-
-        if historySelection.wasTrimmed && overflowBypassMessageId != userNode.id {
-            pendingOverflow = PendingOverflow(sessionId: userNode.sessionId, messageId: userNode.id)
-            overflowAlert = OverflowAlertState(
-                inputTokens: historySelection.inputTokens,
-                inputBudget: historySelection.inputBudget,
-                contextLength: target.contextLength ?? 4096,
-                maxOutput: target.maxTokens ?? 1024
-            )
-            return
-        }
-
-        overflowBypassMessageId = nil
-        pendingOverflow = nil
-        overflowAlert = nil
 
         let generationId = UUID()
         activeGenerationId = generationId
@@ -1363,18 +1443,17 @@ final class ChatViewModel: ObservableObject {
         streamingResponse = ""
         streamingParentId = userNode.id
         downloadToast = nil
+        seedDownloadProgressMemory()
         rebuildMessages(for: userNode.sessionId)
 
         generationTask = Task {
             do {
-                try await provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        guard self.activeGenerationId == generationId else { return }
-                        self.handleProgress(progress)
-                    }
-                }
+                try await self.ensureModelReadyShared(target: target)
             } catch {
                 if isCancellation(error) {
+                    self.sharedModelReadyTask?.cancel()
+                    self.provider.cancelDownload()
+                    self.clearSharedModelReadyTask()
                     if self.activeGenerationId == generationId {
                         isGenerating = false
                         isDownloading = false
@@ -1389,14 +1468,53 @@ final class ChatViewModel: ObservableObject {
                 if self.activeGenerationId == generationId {
                     isGenerating = false
                     isDownloading = false
+                    isModelDownloaded = false
                     streamingParentId = nil
-                    downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: error.localizedDescription, offerRetryDownload: true)
+                    downloadToast = DownloadToastState(
+                        phase: .errorDownload,
+                        percent: -1,
+                        status: self.userFacingModelReadyError(error, wasDownloaded: self.provider.isModelDownloaded(target: target)),
+                        offerRetryDownload: true
+                    )
                     activeGenerationId = nil
                     activeGenerationSessionId = nil
                 }
                 syncNow(showErrors: false)
                 return
             }
+
+            let generationLimits = resolveGenerationLimits(target: target)
+            let historySelection = buildHistorySelection(
+                sessionId: userNode.sessionId,
+                promptText: prompt.text,
+                promptImageCount: prompt.imageFiles.count,
+                currentMessageId: userNode.id,
+                limits: generationLimits
+            )
+
+            if historySelection.wasTrimmed && overflowBypassMessageId != userNode.id {
+                overflowBypassMessageId = nil
+                pendingOverflow = PendingOverflow(sessionId: userNode.sessionId, messageId: userNode.id)
+                activeGenerationId = nil
+                activeGenerationSessionId = nil
+                isGenerating = false
+                isDownloading = false
+                streamingResponse = ""
+                streamingParentId = nil
+                overflowAlert = OverflowAlertState(
+                    inputTokens: historySelection.inputTokens,
+                    inputBudget: historySelection.inputBudget,
+                    contextLength: generationLimits.contextLength,
+                    maxOutput: generationLimits.maxOutput
+                )
+                rebuildMessages(for: userNode.sessionId)
+                syncNow(showErrors: false)
+                return
+            }
+
+            overflowBypassMessageId = nil
+            pendingOverflow = nil
+            overflowAlert = nil
 
             let history = historySelection.messages
             let systemMessage = InferenceMessage(text: Self.systemPrompt(), role: .system, hasAttachments: false)
@@ -1441,7 +1559,7 @@ final class ChatViewModel: ObservableObject {
                     messages: messages,
                     imageFiles: prompt.imageFiles,
                     temperature: resolveTemperature(),
-                    maxTokens: target.maxTokens ?? 1024,
+                    maxTokens: generationLimits.maxOutput,
                     onToken: { token in
                         let tokenEstimate = max(1, token.count / 4)
                         var snapshot = ""
@@ -1576,19 +1694,24 @@ final class ChatViewModel: ObservableObject {
             }
             downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: progress.status, offerRetryDownload: true)
             isDownloading = false
+            isModelDownloaded = false
             return
         }
 
-        let isLoading = progress.status.localizedCaseInsensitiveContains("Loading")
-        let isReady = progress.status.localizedCaseInsensitiveContains("Ready")
+        let resolvedProgress = downloadProgressTracker.resolve(progress)
 
-        if isLoading {
-            downloadToast = DownloadToastState(phase: .loading, percent: progress.percent, status: progress.status, offerRetryDownload: false)
+        if resolvedProgress.isLoading {
+            downloadToast = DownloadToastState(
+                phase: .loading,
+                percent: resolvedProgress.percent ?? progress.percent,
+                status: resolvedProgress.status,
+                offerRetryDownload: false
+            )
             isDownloading = true
             return
         }
 
-        if isReady {
+        if resolvedProgress.isReady {
             if modelDownloadLoggedStart {
                 logger.info("Model download complete", details: progress.status)
                 modelDownloadLoggedStart = false
@@ -1597,6 +1720,7 @@ final class ChatViewModel: ObservableObject {
             isDownloading = false
             isModelDownloaded = true
             modelDownloadSizeBytes = nil
+            clearDownloadProgressMemory()
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_500_000_000)
                 if self.downloadToast?.phase == .complete {
@@ -1606,8 +1730,14 @@ final class ChatViewModel: ObservableObject {
             return
         }
 
-        downloadToast = DownloadToastState(phase: .downloading, percent: progress.percent, status: progress.status, offerRetryDownload: false)
-        isDownloading = progress.percent >= 0 && progress.percent < 100
+        downloadToast = DownloadToastState(
+            phase: .downloading,
+            percent: resolvedProgress.percent ?? 0,
+            status: resolvedProgress.status,
+            offerRetryDownload: false
+        )
+        let visiblePercent = resolvedProgress.percent ?? progress.percent
+        isDownloading = visiblePercent >= 0 && visiblePercent < 100
     }
 
     private func buildSyncAuth() -> SyncAuth? {
@@ -2267,6 +2397,64 @@ final class ChatViewModel: ObservableObject {
         return error.localizedDescription.localizedCaseInsensitiveContains("cancel")
     }
 
+    private func seedDownloadProgressMemory() {
+        downloadProgressTracker.seed(from: downloadToast)
+    }
+
+    private func clearDownloadProgressMemory() {
+        downloadProgressTracker.clear()
+    }
+
+    private func shouldRetryModelDownload(_ error: Error, retryCount: Int) -> Bool {
+        if retryCount >= 5 { return false }
+        if isCancellation(error) { return false }
+        if isOutOfStorageError(error) { return false }
+
+        let message = error.localizedDescription.lowercased()
+        if message.contains("not gguf") { return false }
+        if message.contains("http 401") || message.contains("http 403") || message.contains("http 404") {
+            return false
+        }
+        return true
+    }
+
+    private func retryDelayNanoseconds(for retryCount: Int) -> UInt64 {
+        let shift = max(0, retryCount - 1)
+        let multiplier = UInt64(1 << shift)
+        let delayMs = min(12_000, 1_500 * Int(multiplier))
+        return UInt64(delayMs) * 1_000_000
+    }
+
+    private func userFacingModelReadyError(_ error: Error, wasDownloaded: Bool) -> String {
+        if isOutOfStorageError(error) {
+            return "Not enough storage space to download the model. Please free up space and try again."
+        }
+        return wasDownloaded ? "Model load failed" : "Download failed. Please try again."
+    }
+
+    private func isOutOfStorageError(_ error: Error) -> Bool {
+        func containsStorageMessage(_ message: String) -> Bool {
+            let normalized = message.lowercased()
+            return normalized.contains("no space left on device") ||
+                normalized.contains("not enough space") ||
+                normalized.contains("out of space") ||
+                normalized.contains("disk is full") ||
+                normalized.contains("enospc")
+        }
+
+        var current: NSError? = error as NSError
+        while let nsError = current {
+            if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileWriteOutOfSpaceError {
+                return true
+            }
+            if containsStorageMessage(nsError.localizedDescription) {
+                return true
+            }
+            current = nsError.userInfo[NSUnderlyingErrorKey] as? NSError
+        }
+        return containsStorageMessage(error.localizedDescription)
+    }
+
     private nonisolated func attachmentsDirectory() throws -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -2308,6 +2496,11 @@ final class ChatViewModel: ObservableObject {
         let wasTrimmed: Bool
     }
 
+    private struct GenerationLimits {
+        let contextLength: Int
+        let maxOutput: Int
+    }
+
     private struct PendingOverflow {
         let sessionId: UUID
         let messageId: UUID
@@ -2343,15 +2536,13 @@ final class ChatViewModel: ObservableObject {
         promptText: String,
         promptImageCount: Int,
         currentMessageId: UUID,
-        target: InferenceModelTarget
+        limits: GenerationLimits
     ) -> HistorySelection {
         let childrenMap = childrenByParent(sessionId: sessionId)
         let path = buildSelectedPath(for: sessionId, childrenMap: childrenMap)
         let historyMessages = path.prefix { $0.id != currentMessageId }
 
-        let contextSize: Int = target.contextLength ?? 4096
-        let maxTokens: Int = target.maxTokens ?? 1024
-        let inputBudget = max(0, contextSize - maxTokens - Self.overflowSafetyTokens)
+        let inputBudget = max(0, limits.contextLength - limits.maxOutput - Self.overflowSafetyTokens)
         let systemTokens = estimateTokens(Self.systemPrompt())
         let promptTokens = estimatePromptTokens(promptText: promptText, imageCount: promptImageCount)
         let historyTokens = historyMessages.reduce(0) { total, node in
@@ -2377,6 +2568,18 @@ final class ChatViewModel: ObservableObject {
         }
 
         return HistorySelection(messages: selected.reversed(), inputTokens: inputTokens, inputBudget: inputBudget, wasTrimmed: inputTokens > inputBudget)
+    }
+
+    private func resolveGenerationLimits(target: InferenceModelTarget) -> GenerationLimits {
+        let contextLength = provider.loadedContextLength(target: target) ?? target.contextLength ?? 12000
+        let maxOutput = resolveMaxOutputTokens(configuredMaxTokens: target.maxTokens, contextLength: contextLength)
+        return GenerationLimits(contextLength: contextLength, maxOutput: maxOutput)
+    }
+
+    private func resolveMaxOutputTokens(configuredMaxTokens: Int?, contextLength: Int) -> Int {
+        let maxAllowed = max(1, contextLength - Self.overflowSafetyTokens)
+        let implicitMax = min(Self.defaultGenerationMaxTokens, max(1, contextLength / 2))
+        return min(maxAllowed, configuredMaxTokens ?? implicitMax)
     }
 
     private func historyText(_ node: MessageNode) -> String {
@@ -2440,6 +2643,77 @@ final class ChatViewModel: ObservableObject {
     private struct PromptResult {
         let text: String
         let imageFiles: [URL]
+    }
+}
+
+private struct ResolvedDownloadProgress {
+    let percent: Int?
+    let status: String
+    let isLoading: Bool
+    let isReady: Bool
+}
+
+private final class DownloadProgressTracker {
+    private var lastVisiblePercent: Int?
+    private var lastVisibleStatus: String?
+
+    func seed(from toast: DownloadToastState?) {
+        if let toast, toast.percent >= 0 {
+            lastVisiblePercent = toast.percent
+            lastVisibleStatus = toast.status
+        } else {
+            lastVisiblePercent = 0
+            lastVisibleStatus = "Starting download..."
+        }
+    }
+
+    func clear() {
+        lastVisiblePercent = nil
+        lastVisibleStatus = nil
+    }
+
+    func resolve(_ progress: InferenceDownloadProgress) -> ResolvedDownloadProgress {
+        let isLoading = progress.status.localizedCaseInsensitiveContains("Loading")
+        let isReady = progress.status.localizedCaseInsensitiveContains("Ready")
+        let rawPercent = progress.percent >= 0 ? progress.percent : nil
+        let previousPercent = lastVisiblePercent
+        let previousStatus = lastVisibleStatus
+
+        let resolvedPercent: Int? = {
+            if isReady { return 100 }
+            if let rawPercent {
+                if let previousPercent {
+                    return max(rawPercent, previousPercent)
+                }
+                return rawPercent
+            }
+            return previousPercent
+        }()
+        let regressed = {
+            guard let rawPercent, let previousPercent else { return false }
+            return rawPercent < previousPercent
+        }()
+        let resolvedStatus: String = {
+            if isReady || isLoading {
+                return progress.status
+            }
+            if regressed {
+                return previousStatus ?? progress.status
+            }
+            return progress.status
+        }()
+
+        if !isReady {
+            lastVisiblePercent = resolvedPercent
+            lastVisibleStatus = resolvedStatus
+        }
+
+        return ResolvedDownloadProgress(
+            percent: resolvedPercent,
+            status: resolvedStatus,
+            isLoading: isLoading,
+            isReady: isReady
+        )
     }
 }
 #else

@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/favorites_service_init_complete_event.dart";
@@ -27,7 +28,7 @@ import "package:photos/ui/collections/device/device_folders_vertical_grid_view.d
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/offline/empty/on_ente.dart";
+import "package:photos/ui/offline/empty/on_ente_empty_state.dart";
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
@@ -53,6 +54,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       _favoritesServiceInitCompleteEvent;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEvent;
 
   String _loadReason = "init";
   final _scrollController = ScrollController();
@@ -105,19 +107,30 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       _loadReason = event.reason;
       if (mounted) setState(() {});
     });
+    _appModeChangedEvent = Bus.instance.on<AppModeChangedEvent>().listen((_) {
+      _loadReason = "AppModeChangedEvent";
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
+    final bool offlineUiMode =
+        isOfflineMode && !Configuration.instance.hasConfiguredAccount();
     return FutureBuilder<List<Collection>>(
-      future: isOfflineMode
+      future: offlineUiMode
           ? Future.value(<Collection>[])
           : CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getCollectionsGalleryWidget(snapshot.data!);
+          return _getCollectionsGalleryWidget(
+            snapshot.data!,
+            offlineUiMode: offlineUiMode,
+          );
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -127,7 +140,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _getCollectionsGalleryWidget(List<Collection> collections) {
+  Widget _getCollectionsGalleryWidget(
+    List<Collection> collections, {
+    required bool offlineUiMode,
+  }) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
               color: Theme.of(context)
@@ -206,7 +222,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: isOfflineMode
+                onTap: offlineUiMode
                     ? null
                     : () {
                         unawaited(
@@ -223,7 +239,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         );
                       },
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: isOfflineMode
+                trailingWidget: offlineUiMode
                     ? null
                     : Row(
                         mainAxisSize: MainAxisSize.min,
@@ -258,9 +274,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            isOfflineMode
-                ? SliverToBoxAdapter(
-                    child: EmptyOnEnteSection(collections: collections),
+            offlineUiMode
+                ? const SliverToBoxAdapter(
+                    child: EmptyOnEnteSection(),
                   )
                 : Configuration.instance.hasConfiguredAccount()
                     ? CollectionsFlexiGridViewWidget(
@@ -272,7 +288,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         enableSelectionMode: true,
                       )
                     : const SliverToBoxAdapter(child: EmptyState()),
-            if (!isOfflineMode) ...[
+            if (!offlineUiMode) ...[
               SliverToBoxAdapter(
                 child: Divider(
                   color: colorScheme.strokeFaint,
@@ -322,6 +338,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _debouncer.cancelDebounceTimer();
     _albumSortOrderChangeEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
+    _appModeChangedEvent.cancel();
     super.dispose();
   }
 

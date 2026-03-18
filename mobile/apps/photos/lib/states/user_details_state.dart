@@ -79,8 +79,7 @@ class InheritedUserDetails extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedUserDetails oldWidget) {
-    return (userDetails?.usage != oldWidget.userDetails?.usage) ||
-        (userDetails?.fileCount != oldWidget.userDetails?.fileCount) ||
+    return (userDetails != oldWidget.userDetails) ||
         (isCached != oldWidget.isCached);
   }
 }

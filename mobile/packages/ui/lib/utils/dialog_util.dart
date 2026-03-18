@@ -39,7 +39,11 @@ Future<ButtonResult?> showErrorDialog(
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
-          await openSupportPage(body, null);
+          await sendEmail(
+            context,
+            to: "support@ente.io",
+            body: body,
+          );
         },
       ),
       const ButtonWidget(

@@ -87,6 +87,30 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     });
   }
 
+  Future<void> _onLeaveFamily(UserDetails userDetails) async {
+    _userDetails = userDetails;
+    _currentSubscription = userDetails.subscription;
+    _showYearlyPlan = _currentSubscription!.isYearlyPlan();
+    _hideCurrentPlanSelection =
+        (_currentSubscription?.attributes?.isCancelled ?? false) &&
+            userDetails.hasPaidAddon();
+    _hasActiveSubscription = _currentSubscription!.isValid();
+    _isStripeSubscriber = _currentSubscription!.paymentProvider == stripe;
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _filterStripeForUI();
+    } catch (error, stackTrace) {
+      logger.warning(
+        "Failed to refresh billing plans after leaving family",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   // _filterPlansForUI is used for initializing initState & plan toggle states
   Future<void> _filterStripeForUI() async {
     final billingPlans = await _billingService.getBillingPlans();
@@ -150,7 +174,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             ? null
             : Text(
                 widget.isOnboarding
-                    ? AppLocalizations.of(context).selectYourPlan
+                    ? AppLocalizations.of(context).chooseYourPlan
                     : AppLocalizations.of(context).subscription,
                 style: textTheme.largeBold,
               ),
@@ -197,7 +221,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        return ChildSubscriptionWidget(
+          userDetails: _userDetails,
+          onLeaveFamily: _onLeaveFamily,
+        );
       } else {
         return _buildPlans();
       }
@@ -259,9 +286,29 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
+            showOnlyLoadingState: true,
+            surfaceExecutionStates: true,
             onTap: () async {
-              // ignore: unawaited_futures
-              _billingService.launchFamilyPortal(context, _userDetails);
+              late final UserDetails userDetails;
+              try {
+                userDetails =
+                    await _userService.getUserDetailsV2(memoryCount: false);
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+                await showGenericErrorDialog(context: context, error: error);
+                return;
+              }
+              if (!context.mounted) {
+                return;
+              }
+              await _billingService.launchFamilyPortal(
+                context,
+                userDetails,
+                popOnFreeAdvertViewPlans: true,
+                refreshOnOpen: false,
+              );
             },
           ),
         ),

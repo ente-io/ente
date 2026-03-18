@@ -121,7 +121,6 @@
   "importAegisGuide": "Použite možnosť \"Exportovať trezor\" v nastaveniach služby Aegis.\n\nAk je váš trezor zašifrovaný, na dešifrovanie budete musieť zadať heslo trezoru.",
   "import2FasGuide": "Použite možnosť \"Nastavenia->Záloha -Export\" v službe 2FAS.\n\nAk je vaša záloha zašifrovaná, na dešifrovanie budete musieť zadať heslo",
   "importLastpassGuide": "Použite možnosť \"Preniesť účty\" v nastaveniach služby Lastpass Authenticator a stlačte \"Exportovať účty do súboru\". Importujte stiahnutý JSON súbor.",
-  "importProtonAuthGuide": "Použite možnosť Exportovať v nastaveniach Proton Autentifikátora pre exportovanie vašich kódov.",
   "exportCodes": "Exportovať kódy",
   "importLabel": "Importovať",
   "importInstruction": "Vyberte súbor, ktorý obsahuje zoznam vašich kódov v nasledujúcom formáte",

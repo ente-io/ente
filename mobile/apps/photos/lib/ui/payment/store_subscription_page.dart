@@ -187,7 +187,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             ? null
             : Text(
                 widget.isOnboarding
-                    ? AppLocalizations.of(context).selectYourPlan
+                    ? AppLocalizations.of(context).chooseYourPlan
                     : "${AppLocalizations.of(context).subscription}${kDebugMode ? ' Store' : ''}",
                 style: textTheme.largeBold,
               ),
@@ -277,10 +277,38 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     }
   }
 
+  Future<void> _onLeaveFamily(UserDetails userDetails) async {
+    _userDetails = userDetails;
+    _currentSubscription = userDetails.subscription;
+    _hasActiveSubscription = _currentSubscription!.isValid();
+    _hideCurrentPlanSelection =
+        _currentSubscription?.attributes?.isCancelled ?? false;
+    showYearlyPlan = _currentSubscription!.isYearlyPlan();
+    _isActiveStripeSubscriber =
+        _currentSubscription!.paymentProvider == stripe &&
+            _currentSubscription!.isValid();
+    if (mounted) {
+      setState(() {});
+    }
+
+    try {
+      await _filterStorePlansForUi();
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to refresh billing plans after leaving family",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   Widget _getBody() {
     if (_hasLoadedData) {
       if (_userDetails.isPartOfFamily() && !_userDetails.isFamilyAdmin()) {
-        return ChildSubscriptionWidget(userDetails: _userDetails);
+        return ChildSubscriptionWidget(
+          userDetails: _userDetails,
+          onLeaveFamily: _onLeaveFamily,
+        );
       } else {
         return _buildPlans();
       }
@@ -339,7 +367,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
             child: MenuItemWidgetNew(
-              title: "Manage payment method",
+              title: AppLocalizations.of(context).managePaymentMethod,
               menuItemColor: colorScheme.fillFaint,
               pressedColor: colorScheme.fillFaintPressed,
               trailingWidget: Icon(
@@ -373,9 +401,28 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               Icons.chevron_right_outlined,
               color: colorScheme.strokeBase,
             ),
+            showOnlyLoadingState: true,
+            surfaceExecutionStates: true,
             onTap: () async {
-              unawaited(
-                _billingService.launchFamilyPortal(context, _userDetails),
+              late final UserDetails userDetails;
+              try {
+                userDetails =
+                    await _userService.getUserDetailsV2(memoryCount: false);
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+                await showGenericErrorDialog(context: context, error: error);
+                return;
+              }
+              if (!context.mounted) {
+                return;
+              }
+              await _billingService.launchFamilyPortal(
+                context,
+                userDetails,
+                popOnFreeAdvertViewPlans: true,
+                refreshOnOpen: false,
               );
             },
           ),

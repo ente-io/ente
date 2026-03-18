@@ -168,6 +168,7 @@ func main() {
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
+	emergencyContactRepository := &emergencyRepo.Repository{DB: db}
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
@@ -417,6 +418,7 @@ func main() {
 	inactiveUserOrchestrator := user.NewInactiveUserOrchestrator(
 		userRepo,
 		notificationHistoryRepo,
+		emergencyContactRepository,
 		lockController,
 		discordController,
 		userController,
@@ -547,6 +549,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
+	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
 	privateAPI.PUT("/files/share-url", fileHandler.UpdateFileURL)
 	privateAPI.DELETE("/files/share-url/:fileID", fileHandler.DisableUrl)
 	privateAPI.GET("/files/share-urls/", fileHandler.GetUrls)
@@ -606,7 +609,7 @@ func main() {
 	privateAPI.GET("/comments-reactions/updated-at", socialHandler.LatestUpdates)
 
 	emergencyCtrl := &emergency.Controller{
-		Repo:              &emergencyRepo.Repository{DB: db},
+		Repo:              emergencyContactRepository,
 		UserRepo:          userRepo,
 		UserCtrl:          userController,
 		PasskeyController: passkeyCtrl,
@@ -858,6 +861,7 @@ func main() {
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
 	adminAPI.POST("/mail/unsubscribe", adminHandler.UnsubscribeMail)
+	adminAPI.GET("/listmonk/missing-subscribers/count", adminHandler.GetListmonkMissingSubscribersCount)
 	adminAPI.GET("/users", adminHandler.GetUsers)
 	adminAPI.GET("/user", adminHandler.GetUser)
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
@@ -888,7 +892,7 @@ func main() {
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
-	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo}
+	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
 
 	privateAPI.POST("/authenticator/key", authenticatorHandler.CreateKey)
@@ -1089,7 +1093,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	healthCheckHandler *api.HealthCheckHandler,
 	castDb castRepo.Repository,
 	inactiveUserOrchestrator *user.InactiveUserOrchestrator) {
-	const deletedTokenRetentionDays = 397 // 13 months using a fixed-day approximation
+	const deletedTokenRetentionDays = 427 // 13-month deletion window (395 days) + 32-day safety buffer
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
 		log.Info("Skipping cron jobs")

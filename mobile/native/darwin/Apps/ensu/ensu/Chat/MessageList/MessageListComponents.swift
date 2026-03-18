@@ -166,7 +166,6 @@ struct AssistantMessageBubbleView: View {
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
     let showsMetadata: Bool
-    let showOutroRive: Bool
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -195,19 +194,6 @@ struct AssistantMessageBubbleView: View {
                     }
                 }
                 #endif
-
-                if showOutroRive {
-                    EnsuBrandIllustration(
-                        width: 115,
-                        height: 52.5,
-                        outroTrigger: true,
-                        outroInputName: "outro",
-                        clipsContent: false
-                    )
-                    .padding(.horizontal, EnsuSpacing.sm)
-                    .offset(y: -4)
-                    .frame(width: 115, height: 52.5, alignment: .topLeading)
-                }
 
                 if showsMetadata {
                     HStack(spacing: EnsuSpacing.sm) {
@@ -239,12 +225,9 @@ private enum StreamingCursor {
 struct StreamingBubbleView: View {
     let text: String
     let isGenerating: Bool
-    let isOutroPhase: Bool
 
     @State private var storageId = UUID().uuidString
     @State private var renderedText = ""
-    private let riveWidth: CGFloat = 115
-    private let riveHeight: CGFloat = 52.5
 
     var body: some View {
         let hasText = isGenerating && !renderedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -266,15 +249,15 @@ struct StreamingBubbleView: View {
                     }
                 }
 
-                EnsuBrandIllustration(
-                    width: riveWidth,
-                    height: riveHeight,
-                    outroTrigger: isOutroPhase,
-                    outroInputName: "outro",
-                    clipsContent: false
-                )
-                .offset(y: -4)
-                .frame(width: riveWidth, height: riveHeight, alignment: .topLeading)
+                TimelineView(.periodic(from: .now, by: 0.42)) { context in
+                    let step = Int(context.date.timeIntervalSinceReferenceDate / 0.42)
+                    let count = (step % 3) + 1
+                    Text(String(repeating: ".", count: count))
+                        .font(EnsuTypography.message)
+                        .monospaced()
+                        .foregroundStyle(EnsuColor.textMuted)
+                        .frame(minWidth: 24, alignment: .leading)
+                }
             }
             .padding(.vertical, bubbleVerticalPadding)
             .padding(.horizontal, EnsuSpacing.sm)
@@ -369,10 +352,6 @@ struct AssistantMessageRenderer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.lg) {
-            if let think = parsedMessage.thinkContent {
-                ThinkSectionView(content: think, isStreaming: isStreaming, storageId: storageId)
-            }
-
             ForEach(parsedMessage.todoBlocks) { block in
                 TodoListCardView(title: block.title, status: block.status, items: block.items)
             }
@@ -397,20 +376,16 @@ struct ParsedMessage {
         let items: [String]
     }
 
-    let thinkContent: String?
     let todoBlocks: [TodoBlock]
     let markdown: String
     let markdownBlocks: [MarkdownBlock]
 
     init(text: String) {
         var remaining = text
-        var think: String?
         var todos: [TodoBlock] = []
 
-        if let thinkRange = ParsedMessage.extractTag(using: ChatMessageTagRegex.think, from: remaining) {
-            think = thinkRange.content.trimmingCharacters(in: .whitespacesAndNewlines)
-            remaining = thinkRange.cleaned
-        }
+        let thinkMatches = ParsedMessage.extractTags(using: ChatMessageTagRegex.think, from: remaining)
+        remaining = thinkMatches.cleaned
 
         let todoMatches = ParsedMessage.extractTags(using: ChatMessageTagRegex.todoList, from: remaining)
         remaining = todoMatches.cleaned
@@ -422,19 +397,9 @@ struct ParsedMessage {
             }
         }
 
-        self.thinkContent = think
         self.todoBlocks = todos
         self.markdown = remaining
         self.markdownBlocks = MarkdownParser.parse(remaining)
-    }
-
-    private static func extractTag(using regex: NSRegularExpression?, from text: String) -> (content: String, cleaned: String)? {
-        guard let regex else { return nil }
-        guard let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) else { return nil }
-        guard let range = Range(match.range(at: 1), in: text) else { return nil }
-        let content = String(text[range])
-        let cleaned = regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "")
-        return (content, cleaned)
     }
 
     private static func extractTags(using regex: NSRegularExpression?, from text: String) -> (contents: [String], cleaned: String) {
@@ -455,64 +420,6 @@ struct ParsedMessage {
         let title: String
         let status: String?
         let items: [String]
-    }
-}
-
-struct ThinkSectionView: View {
-    let content: String
-    let isStreaming: Bool
-    let storageId: String
-
-    @SceneStorage private var isExpanded: Bool
-
-    init(content: String, isStreaming: Bool, storageId: String) {
-        self.content = content
-        self.isStreaming = isStreaming
-        self.storageId = storageId
-        _isExpanded = SceneStorage(wrappedValue: false, "thinkExpanded_\(storageId)")
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.16)) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("THINK")
-                        .font(EnsuTypography.mini)
-                        .tracking(0.5)
-                        .foregroundStyle(EnsuColor.textMuted)
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                        .foregroundStyle(EnsuColor.textMuted)
-                }
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded {
-                Text(content)
-                    .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textPrimary)
-                    .lineSpacing(EnsuLineHeight.spacing(fontSize: 12.5, lineHeight: 1.45))
-                    .textSelection(.enabled)
-            } else if isStreaming {
-                Text("…" + content)
-                    .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .lineLimit(4)
-            }
-        }
-        .padding(EnsuSpacing.cardPadding)
-        .background(EnsuColor.fillFaint)
-        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
-        .onChange(of: isStreaming) { newValue in
-            if !newValue {
-                isExpanded = false
-            }
-        }
     }
 }
 

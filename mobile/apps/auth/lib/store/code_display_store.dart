@@ -140,7 +140,7 @@ class CodeDisplayStore {
         // traverse through all the codes and edit this tag's value
         final relevantCodes = await _getCodesByTag(tag);
 
-        final tasks = <Future>[];
+        final tasks = <Future<AddResult>>[];
 
         for (final code in relevantCodes) {
           final tags = code.display.tags;
@@ -150,11 +150,17 @@ class CodeDisplayStore {
               code.copyWith(
                 display: code.display.copyWith(tags: tags),
               ),
+              shouldSync: false,
             ),
           );
         }
 
-        await Future.wait(tasks);
+        final results = await Future.wait(tasks);
+        if (results.any((r) => r != AddResult.duplicate) &&
+            AuthenticatorService.instance.getAccountMode() ==
+                AccountMode.online) {
+          AuthenticatorService.instance.onlineSync().ignore();
+        }
       },
     );
   }
@@ -183,7 +189,7 @@ class CodeDisplayStore {
     // traverse through all the codes and edit this tag's value
     final relevantCodes = await _getCodesByTag(previousTag);
 
-    final tasks = <Future>[];
+    final tasks = <Future<AddResult>>[];
 
     for (final code in relevantCodes) {
       final tags = code.display.tags;
@@ -194,10 +200,15 @@ class CodeDisplayStore {
           code.copyWith(
             display: code.display.copyWith(tags: tags),
           ),
+          shouldSync: false,
         ),
       );
     }
 
-    await Future.wait(tasks);
+    final results = await Future.wait(tasks);
+    if (results.any((r) => r != AddResult.duplicate) &&
+        AuthenticatorService.instance.getAccountMode() == AccountMode.online) {
+      AuthenticatorService.instance.onlineSync().ignore();
+    }
   }
 }
