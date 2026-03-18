@@ -775,21 +775,24 @@ Future<MLResult> analyzeImageRust(Map args) async {
         rethrow;
       }
       if (fallback == null) {
-        _logger.severe(
-          "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
-          e,
-          s,
-        );
         if (_shouldStoreEmptyResultForRustDecodeFailure(
           primaryError: e,
           fallbackReturnedEmpty: true,
         )) {
+          _logger.warning(
+            "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat); storing empty result instead",
+          );
           throw _asInvalidImageFormatExceptionForRustDecodeFailure(
             enteFileID: enteFileID,
             fileFormat: fileFormat,
             primaryError: e,
           );
         }
+        _logger.severe(
+          "JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
+          e,
+          s,
+        );
         throw Exception(
           "RustMLDecodeFallbackFailed: JPEG fallback conversion returned null/empty bytes for fileID $enteFileID (format: $fileFormat)",
         );
@@ -968,10 +971,7 @@ bool _shouldStoreEmptyResultForRustDecodeFailure({
   bool fallbackReturnedEmpty = false,
 }) {
   if (fallbackReturnedEmpty) {
-    // Empty output from FlutterImageCompress is ambiguous on Android and can
-    // happen after internal OOM retries. Treat it as transient so valid
-    // images are retried instead of being permanently marked invalid.
-    return false;
+    return _isFileSpecificDecodeFailure(primaryError);
   }
 
   if (fallbackError == null) {

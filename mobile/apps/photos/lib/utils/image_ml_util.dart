@@ -152,8 +152,13 @@ Uint8List? createSafeJpegDecodeFallbackBytesFromData(Uint8List imageData) {
     }
     final jpeg = img.encodeJpg(decoded, quality: 95);
     return Uint8List.fromList(jpeg);
-  } catch (e, s) {
-    _logger.warning("Safe JPEG conversion failed", e, s);
+  } catch (e) {
+    final firstLine = e.toString().split('\n').first.trim();
+    _logger.warning(
+      firstLine.isEmpty
+          ? "Safe JPEG conversion failed"
+          : "Safe JPEG conversion failed: $firstLine",
+    );
     return null;
   }
 }
