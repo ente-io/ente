@@ -98,7 +98,7 @@ class MLService {
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
-    // Listen on ComputeController in both foreground and background.
+    // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!hasGrantedMLConsent) {
         if (!isProcessBg && event.shouldRun) {
