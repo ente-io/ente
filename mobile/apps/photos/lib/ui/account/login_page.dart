@@ -17,6 +17,7 @@ import "package:photos/ui/account/login_pwd_verification_page.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
+import "package:photos/ui/settings/developer_settings_tap_area.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -124,6 +125,10 @@ class _LoginPageState extends State<LoginPage> {
               messageType: _showValidationMessage && !_emailIsValid
                   ? TextInputMessageType.alert
                   : TextInputMessageType.guide,
+            ),
+            const SizedBox(height: 24),
+            const Expanded(
+              child: DeveloperSettingsTapArea(),
             ),
           ],
         ),
