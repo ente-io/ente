@@ -2140,7 +2140,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       const batchSize = 5000;
       int offset = 0;
       int processedCount = 0;
-      int weirdCount = 0;
+      int emptyCount = 0;
+      int malformedCount = 0;
       int whileCount = 0;
       const String migrationKey = "clip_vector_db_migration_in_progress";
       final stopwatch = Stopwatch()..start();
@@ -2171,18 +2172,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           for (final result in results) {
             final embedding =
                 Float32List.view((result[embeddingColumn] as Uint8List).buffer);
-            if (embedding.length == 512) {
+            if (embedding.length == ClipVectorDB.embeddingDimensions) {
               fileIDs.add(result[fileIDColumn] as int);
               embeddings.add(Float32List.view(result[embeddingColumn].buffer));
+            } else if (embedding.isEmpty) {
+              emptyCount++;
             } else {
-              weirdCount++;
+              malformedCount++;
               _logger.warning(
-                "Weird clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping",
+                "Malformed clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping ClipVectorDB migration for this row",
               );
             }
           }
           _logger.info(
-            "Got ${fileIDs.length} valid embeddings, $weirdCount weird embeddings",
+            "Got ${fileIDs.length} valid clip embeddings, skipped $emptyCount empty and $malformedCount malformed embeddings so far",
           );
 
           await _clipVectorDB.bulkInsertEmbeddings(
@@ -2204,20 +2207,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           await Future.delayed(const Duration(milliseconds: 100));
         }
         _logger.info(
-          "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
+          "migrated all vectorizable clip embeddings from $totalCount SQLite rows to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms; skipped $emptyCount empty and $malformedCount malformed embeddings",
         );
         await _clipVectorDB.setMigrationDone();
         _logger.info("ClipVectorDB migration done");
         try {
-          final latestClipCount = await getClipIndexedFileCount();
+          final latestClipCount = await getClipVectorizableFileCount();
           final vectorStats = await _clipVectorDB.getIndexStats();
           if (vectorStats.size != latestClipCount) {
             _logger.warning(
-              "ClipVectorDB size mismatch: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+              "ClipVectorDB size mismatch: vectorDb=${vectorStats.size}, clipTableVectorizable=$latestClipCount",
             );
           } else {
             _logger.info(
-              "ClipVectorDB size match: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+              "ClipVectorDB size match: vectorDb=${vectorStats.size}, clipTableVectorizable=$latestClipCount",
             );
           }
         } catch (e, s) {
@@ -2279,6 +2282,35 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       );
     }
     unawaited(_scheduleClipVectorDbRecovery());
+  }
+
+  bool _isVectorizableClipEmbedding(ClipEmbedding embedding) {
+    return embedding.embedding.length == ClipVectorDB.embeddingDimensions;
+  }
+
+  List<ClipEmbedding> _vectorizableClipEmbeddings(
+    Iterable<ClipEmbedding> embeddings,
+  ) {
+    final vectorizable = <ClipEmbedding>[];
+    final skippedNonEmpty = <(int, int)>[];
+
+    for (final embedding in embeddings) {
+      if (_isVectorizableClipEmbedding(embedding)) {
+        vectorizable.add(embedding);
+        continue;
+      }
+      if (embedding.embedding.isNotEmpty) {
+        skippedNonEmpty.add((embedding.fileID, embedding.embedding.length));
+      }
+    }
+
+    for (final (fileID, length) in skippedNonEmpty) {
+      _logger.warning(
+        "Skipping ClipVectorDB write for fileID $fileID because embedding length $length does not match expected ${ClipVectorDB.embeddingDimensions}",
+      );
+    }
+
+    return vectorizable;
   }
 
   Future<void> _scheduleClipVectorDbRecovery() async {
@@ -2353,6 +2385,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final String query =
         'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable WHERE $mlVersionColumn >= $minimumMlVersion';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.first['count'] as int;
+  }
+
+  Future<int> getClipVectorizableFileCount({
+    int minimumMlVersion = clipMlVersion,
+  }) async {
+    final db = await asyncDB;
+    const String query =
+        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable '
+        'WHERE $mlVersionColumn >= ? AND LENGTH($embeddingColumn) = ?';
+    final List<Map<String, dynamic>> maps = await db.getAll(query, [
+      minimumMlVersion,
+      ClipVectorDB.embeddingBytesLength,
+    ]);
     return maps.first['count'] as int;
   }
 
@@ -2493,19 +2539,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> putClip(List<ClipEmbedding> embeddings) async {
     if (embeddings.isEmpty) return;
     final db = await asyncDB;
+    final vectorizableEmbeddings = _vectorizableClipEmbeddings(embeddings);
     if (embeddings.length == 1) {
       await db.execute(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
         _getRowFromEmbedding(embeddings.first),
       );
       if (flagService.enableVectorDb &&
+          vectorizableEmbeddings.isNotEmpty &&
           await _clipVectorDB.checkIfMigrationDone()) {
         await _withClipVectorWriteRecovery(
           operation: "putClip(single)",
           writeOperation: () async {
             await _clipVectorDB.insertEmbedding(
-              fileID: embeddings.first.fileID,
-              embedding: embeddings.first.embedding,
+              fileID: vectorizableEmbeddings.first.fileID,
+              embedding: vectorizableEmbeddings.first.embedding,
             );
           },
         );
@@ -2517,13 +2565,14 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         inputs,
       );
       if (flagService.enableVectorDb &&
+          vectorizableEmbeddings.isNotEmpty &&
           await _clipVectorDB.checkIfMigrationDone()) {
         await _withClipVectorWriteRecovery(
           operation: "putClip(bulk)",
           writeOperation: () async {
             await _clipVectorDB.bulkInsertEmbeddings(
-              fileIDs: embeddings.map((e) => e.fileID).toList(),
-              embeddings: embeddings
+              fileIDs: vectorizableEmbeddings.map((e) => e.fileID).toList(),
+              embeddings: vectorizableEmbeddings
                   .map((e) => Float32List.fromList(e.embedding))
                   .toList(),
             );

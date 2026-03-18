@@ -1,8 +1,8 @@
 use crate::ml::{
     error::{MlError, MlResult},
     onnx, preprocess,
-    runtime::MlRuntime,
-    types::{DecodedImage, PetFaceDetection, PetBodyDetection},
+    runtime::MlRuntimeView,
+    types::{DecodedImage, PetBodyDetection, PetFaceDetection},
 };
 
 const INPUT_WIDTH: f32 = 640.0;
@@ -32,7 +32,7 @@ const COCO_DOG: u8 = 16;
 ///
 /// This mirrors `pet_pipeline/detection.py` `FaceDetector.detect()`.
 pub fn run_pet_face_detection(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetFaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
@@ -40,7 +40,7 @@ pub fn run_pet_face_detection(
 
     let pet_face_detection = runtime.pet_face_detection_session()?;
     let (output_shape, output_data) = onnx::run_f32(
-        pet_face_detection,
+        &pet_face_detection,
         input,
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
@@ -54,10 +54,13 @@ pub fn run_pet_face_detection(
         // Flat output: total_elements, must infer row_len.
         // Prefer 13 (2-class model) as the expected format, then fall back.
         let total = output_data.len();
-        let inferred = if total % 13 == 0 { 13 }
-        else if total % 12 == 0 { 12 }
-        else if total % 11 == 0 { 11 }
-        else {
+        let inferred = if total % 13 == 0 {
+            13
+        } else if total % 12 == 0 {
+            12
+        } else if total % 11 == 0 {
+            11
+        } else {
             return Err(MlError::Postprocess(format!(
                 "unexpected pet face detector output size: {} (shape: {:?})",
                 total, output_shape
@@ -81,7 +84,8 @@ pub fn run_pet_face_detection(
     if row_len < 11 || output_data.len() < row_len {
         return Err(MlError::Postprocess(format!(
             "pet face detector row_len={} too small or output too short (len={})",
-            row_len, output_data.len()
+            row_len,
+            output_data.len()
         )));
     }
 
@@ -152,7 +156,7 @@ pub fn run_pet_face_detection(
 ///
 /// This mirrors `pet_pipeline/detection.py` `BodyDetector.detect()`.
 pub fn run_pet_body_detection(
-    runtime: &MlRuntime,
+    runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetBodyDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
@@ -160,7 +164,7 @@ pub fn run_pet_body_detection(
 
     let body_detection = runtime.pet_body_detection_session()?;
     let (_output_shape, output_data) = onnx::run_f32(
-        body_detection,
+        &body_detection,
         input,
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;
@@ -277,10 +281,12 @@ fn correct_for_maintained_aspect_ratio_3kp(
         return;
     }
 
-    let transform_x =
-        |x: f32| -> f32 { ((x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32).clamp(0.0, 1.0) };
-    let transform_y =
-        |y: f32| -> f32 { ((y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32).clamp(0.0, 1.0) };
+    let transform_x = |x: f32| -> f32 {
+        ((x * INPUT_WIDTH - pad_left as f32) / scaled_width as f32).clamp(0.0, 1.0)
+    };
+    let transform_y = |y: f32| -> f32 {
+        ((y * INPUT_HEIGHT - pad_top as f32) / scaled_height as f32).clamp(0.0, 1.0)
+    };
 
     for point in keypoints.iter_mut() {
         point[0] = transform_x(point[0]);
@@ -358,7 +364,8 @@ fn naive_nms_pet_body(
             // Only suppress within the same COCO class so a dog and cat
             // occupying the same region are both retained.
             if detections[i].coco_class == detections[j].coco_class
-                && calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy) >= iou_threshold
+                && calculate_iou_4(&detections[i].box_xyxy, &detections[j].box_xyxy)
+                    >= iou_threshold
             {
                 suppressed[j] = true;
             }

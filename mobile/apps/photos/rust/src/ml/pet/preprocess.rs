@@ -41,8 +41,9 @@ pub fn preprocess_pet_embedding(
     let target_w = PET_EMBED_INPUT_SIZE as u32;
     let target_h = PET_EMBED_INPUT_SIZE as u32;
 
-    let src_image = FirImage::from_vec_u8(crop_width, crop_height, rgb_crop.to_vec(), PixelType::U8x3)
-        .map_err(|e| MlError::Preprocess(format!("failed to create FIR source image: {e}")))?;
+    let src_image =
+        FirImage::from_vec_u8(crop_width, crop_height, rgb_crop.to_vec(), PixelType::U8x3)
+            .map_err(|e| MlError::Preprocess(format!("failed to create FIR source image: {e}")))?;
 
     let mut resized_image = FirImage::new(target_w, target_h, PixelType::U8x3);
     let mut resizer = Resizer::new();
@@ -82,27 +83,30 @@ pub fn preprocess_pet_embedding(
 ///
 /// The bounding box is in relative coordinates [0, 1].
 /// Returns the crop as RGB bytes and its dimensions.
-pub fn extract_crop(
-    decoded: &DecodedImage,
-    box_xyxy: &[f32; 4],
-) -> MlResult<(Vec<u8>, u32, u32)> {
+pub fn extract_crop(decoded: &DecodedImage, box_xyxy: &[f32; 4]) -> MlResult<(Vec<u8>, u32, u32)> {
     let img_w = decoded.dimensions.width;
     let img_h = decoded.dimensions.height;
 
     let max_x = if img_w > 0 { img_w - 1 } else { 0 };
     let max_y = if img_h > 0 { img_h - 1 } else { 0 };
-    let x1 = (box_xyxy[0] * img_w as f32).round().clamp(0.0, max_x as f32) as u32;
-    let y1 = (box_xyxy[1] * img_h as f32).round().clamp(0.0, max_y as f32) as u32;
-    let x2 = (box_xyxy[2] * img_w as f32).round().clamp(0.0, img_w as f32) as u32;
-    let y2 = (box_xyxy[3] * img_h as f32).round().clamp(0.0, img_h as f32) as u32;
+    let x1 = (box_xyxy[0] * img_w as f32)
+        .round()
+        .clamp(0.0, max_x as f32) as u32;
+    let y1 = (box_xyxy[1] * img_h as f32)
+        .round()
+        .clamp(0.0, max_y as f32) as u32;
+    let x2 = (box_xyxy[2] * img_w as f32)
+        .round()
+        .clamp(0.0, img_w as f32) as u32;
+    let y2 = (box_xyxy[3] * img_h as f32)
+        .round()
+        .clamp(0.0, img_h as f32) as u32;
 
     let crop_w = x2.saturating_sub(x1);
     let crop_h = y2.saturating_sub(y1);
 
     if crop_w == 0 || crop_h == 0 {
-        return Err(MlError::Preprocess(
-            "crop region has zero area".to_string(),
-        ));
+        return Err(MlError::Preprocess("crop region has zero area".to_string()));
     }
 
     let mut crop = Vec::with_capacity((crop_w as usize) * (crop_h as usize) * 3);
@@ -114,7 +118,10 @@ pub fn extract_crop(
         if row_end > decoded.rgb.len() || row_start > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
                 "crop row {} out of bounds: start={}, end={}, buffer_len={}",
-                row, row_start, row_end, decoded.rgb.len()
+                row,
+                row_start,
+                row_end,
+                decoded.rgb.len()
             )));
         }
         crop.extend_from_slice(&decoded.rgb[row_start..row_end]);
