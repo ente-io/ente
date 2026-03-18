@@ -752,6 +752,16 @@ Future<MLResult> analyzeImageRust(Map args) async {
         e,
         s,
       );
+      if (_shouldSkipJpegDecodeFallback(fileFormat)) {
+        _logger.warning(
+          "Skipping JPEG fallback for fileID $enteFileID (format: $fileFormat) because flutter_image_compress is known to crash on unsupported RAW input",
+        );
+        throw _asInvalidImageFormatExceptionForRustDecodeFailure(
+          enteFileID: enteFileID,
+          fileFormat: fileFormat,
+          primaryError: e,
+        );
+      }
       final _DecodeFallbackFile? fallback;
       try {
         fallback = await _createJpegDecodeFallbackFile(imagePath: imagePath);
@@ -927,6 +937,10 @@ bool _isRustDecodeIssue(Object error) {
   return message.contains("decode error");
 }
 
+bool _shouldSkipJpegDecodeFallback(String fileFormat) {
+  return isRawImageExtension(fileFormat);
+}
+
 bool _shouldStoreEmptyResultForRustDecodeFailure({
   required Object primaryError,
   Object? fallbackError,
@@ -1041,6 +1055,12 @@ class _DecodeFallbackFile {
 Future<_DecodeFallbackFile?> _createJpegDecodeFallbackFile({
   required String imagePath,
 }) async {
+  final format = getExtension(imagePath);
+  if (_shouldSkipJpegDecodeFallback(format)) {
+    throw Exception(
+      "InvalidImageFormatException: JPEG decode fallback skipped for unsupported RAW image format $format",
+    );
+  }
   final convertedData = await FlutterImageCompress.compressWithFile(
     imagePath,
     format: CompressFormat.jpeg,
