@@ -39,6 +39,7 @@ class ComputeController {
   bool _hasCompletedInitialHealthChecks = false;
   bool _temporaryInteractionOverride = false;
   bool _debugInteractionOverride = false;
+  Future<void>? _initFuture;
 
   /// If true, user interaction is ignored and compute tasks can run regardless of user activity.
   bool get interactionOverride =>
@@ -63,12 +64,16 @@ class ComputeController {
 
   ComputeController(this._localSettings) {
     _logger.info('ComputeController constructor');
-    init();
+    unawaited(init());
     _logger.info('init done ');
   }
 
   // Directly assign the values + Attach listener for compute controller
-  Future<void> init() async {
+  Future<void> init() {
+    return _initFuture ??= _initInternal();
+  }
+
+  Future<void> _initInternal() async {
     if (!isProcessBg) {
       // Initialize interaction tracking before any await to avoid first-tap races.
       _startInteractionTimer(kDefaultInteractionTimeout);

@@ -3,7 +3,7 @@ import "dart:io" show Platform;
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List;
 
-import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/foundation.dart" show kDebugMode, visibleForTesting;
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -12,6 +12,7 @@ import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/main.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -177,6 +178,10 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (!hasGrantedMLConsent) {
+      _logger.info("runAllML called without ML consent, skipping");
+      return;
+    }
     if (_isRunningML) {
       _logger.info("runAllML called while already running, skipping");
       return;
@@ -662,16 +667,10 @@ class MLService {
           e,
           s,
         );
-        await mlDataDB.bulkInsertFaces(
-          [Face.empty(instruction.fileKey, error: true)],
+        await storeAcceptedIssuePlaceholders(
+          instruction: instruction,
+          mlDataDB: mlDataDB,
         );
-        if (instruction.isOffline) {
-          await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
-        } else {
-          await SemanticSearchService.instance.storeEmptyClipImageResult(
-            instruction.file,
-          );
-        }
         return true;
       }
       _logger.severe(
@@ -681,6 +680,30 @@ class MLService {
       );
       return false;
     }
+  }
+
+  @visibleForTesting
+  Future<void> storeAcceptedIssuePlaceholders({
+    required FileMLInstruction instruction,
+    required MLDataDB mlDataDB,
+    Future<void> Function(EnteFile file)? storeEmptyClipImageResult,
+  }) async {
+    if (instruction.shouldRunFaces) {
+      await mlDataDB.bulkInsertFaces(
+        [Face.empty(instruction.fileKey, error: true)],
+      );
+    }
+    if (!instruction.shouldRunClip) {
+      return;
+    }
+    if (instruction.isOffline) {
+      await mlDataDB.putClip([ClipEmbedding.empty(instruction.fileKey)]);
+      return;
+    }
+    await (storeEmptyClipImageResult ??
+        SemanticSearchService.instance.storeEmptyClipImageResult)(
+      instruction.file,
+    );
   }
 
   bool _canRunMLFunction({required String function}) {
