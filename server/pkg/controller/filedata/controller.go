@@ -129,7 +129,7 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 	dbInsertErr := c.Repo.InsertOrUpdate(context.Background(), row)
 	if dbInsertErr != nil {
 		logger.WithError(dbInsertErr).Error("insert or update failed")
-		return uploadErr
+		return dbInsertErr
 	}
 	//}()
 	return nil
