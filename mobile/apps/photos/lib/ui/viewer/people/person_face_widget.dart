@@ -403,7 +403,16 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
 
     _requestedThumbnailPreviewFile = file;
     try {
-      return await getThumbnail(file);
+      try {
+        return await getThumbnail(file);
+      } catch (e, s) {
+        _logger.warning(
+          'Failed to load preview thumbnail for progressive face fallback for file ${file.uploadedFileID ?? file.localID}',
+          e,
+          s,
+        );
+        return null;
+      }
     } finally {
       if (_requestedThumbnailPreviewFile == file) {
         _requestedThumbnailPreviewFile = null;
