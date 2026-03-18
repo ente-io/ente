@@ -139,10 +139,7 @@ impl ModelSlot {
     fn sync_indexing_residency(&self, path: &str, policy: &ExecutionProviderPolicy) {
         let mut state = self.lock_state();
         if path.trim().is_empty() {
-            state.path.clear();
-            state.fell_back_to_cpu = false;
-            state.pin_count = 0;
-            state.session = None;
+            Self::reset_slot_locked(&mut state);
             return;
         }
 
@@ -150,13 +147,13 @@ impl ModelSlot {
         state.pin_count = 1;
     }
 
-    fn release_indexing_residency(&self) {
+    fn release_residency(&self) {
         let mut state = self.lock_state();
         if state.pin_count > 0 {
             state.pin_count -= 1;
         }
         if state.pin_count == 0 {
-            state.session = None;
+            Self::clear_transient_runtime_state_locked(&mut state);
         }
     }
 
@@ -206,6 +203,17 @@ impl ModelSlot {
         state.requested_policy = policy.clone();
         state.fell_back_to_cpu = false;
         state.session = None;
+    }
+
+    fn clear_transient_runtime_state_locked(state: &mut ModelSlotState) {
+        state.fell_back_to_cpu = false;
+        state.session = None;
+    }
+
+    fn reset_slot_locked(state: &mut ModelSlotState) {
+        state.path.clear();
+        state.pin_count = 0;
+        Self::clear_transient_runtime_state_locked(state);
     }
 
     fn ensure_loaded_locked(state: &mut ModelSlotState, error_msg: &str) -> MlResult<()> {
@@ -341,15 +349,15 @@ impl MlRuntime {
     }
 
     fn release_indexing_models(&self) {
-        self.face_detection.release_indexing_residency();
-        self.face_embedding.release_indexing_residency();
-        self.clip_image.release_indexing_residency();
-        self.pet_face_detection.release_indexing_residency();
-        self.pet_face_embedding_dog.release_indexing_residency();
-        self.pet_face_embedding_cat.release_indexing_residency();
-        self.pet_body_detection.release_indexing_residency();
-        self.pet_body_embedding_dog.release_indexing_residency();
-        self.pet_body_embedding_cat.release_indexing_residency();
+        self.face_detection.release_residency();
+        self.face_embedding.release_residency();
+        self.clip_image.release_residency();
+        self.pet_face_detection.release_residency();
+        self.pet_face_embedding_dog.release_residency();
+        self.pet_face_embedding_cat.release_residency();
+        self.pet_body_detection.release_residency();
+        self.pet_body_embedding_dog.release_residency();
+        self.pet_body_embedding_cat.release_residency();
     }
 
     fn force_cpu_only_for_requested_models(&self, config: &MlRuntimeConfig) {
@@ -588,11 +596,13 @@ mod tests {
             let mut clip_text = runtime.clip_text.lock_state();
             clip_text.path = "clip_text.onnx".to_string();
             clip_text.pin_count = 0;
+            clip_text.fell_back_to_cpu = true;
         }
         {
             let mut face_detection = runtime.face_detection.lock_state();
             face_detection.path = "face.onnx".to_string();
             face_detection.pin_count = 1;
+            face_detection.fell_back_to_cpu = true;
         }
 
         runtime.release_indexing_models();
@@ -600,9 +610,11 @@ mod tests {
         let clip_text = runtime.clip_text.lock_state();
         assert_eq!(clip_text.path, "clip_text.onnx");
         assert_eq!(clip_text.pin_count, 0);
+        assert!(clip_text.fell_back_to_cpu);
 
         let face_detection = runtime.face_detection.lock_state();
         assert_eq!(face_detection.pin_count, 0);
+        assert!(!face_detection.fell_back_to_cpu);
     }
 
     #[test]
@@ -649,6 +661,26 @@ mod tests {
 
         let state = slot.lock_state();
         assert!(state.path.is_empty());
+        assert_eq!(state.pin_count, 0);
+        assert!(!state.fell_back_to_cpu);
+        assert!(state.session.is_none());
+    }
+
+    #[test]
+    fn release_residency_resets_transient_cpu_fallback_for_any_slot() {
+        let slot = ModelSlot::new();
+
+        {
+            let mut state = slot.lock_state();
+            state.path = "clip_text.onnx".to_string();
+            state.requested_policy = test_policy();
+            state.pin_count = 1;
+            state.fell_back_to_cpu = true;
+        }
+
+        slot.release_residency();
+
+        let state = slot.lock_state();
         assert_eq!(state.pin_count, 0);
         assert!(!state.fell_back_to_cpu);
         assert!(state.session.is_none());
