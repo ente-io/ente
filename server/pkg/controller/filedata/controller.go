@@ -37,6 +37,8 @@ type _fetchConfig struct {
 var _defaultFetchConfig = _fetchConfig{RetryCount: 3, InitialTimeout: 10 * gTime.Second, MaxTimeout: 30 * gTime.Second}
 var globalFileFetchSemaphore = make(chan struct{}, 400)
 
+const bulkFileDataFetchTimeout = 45 * gTime.Second
+
 type bulkS3MetaFetchResult struct {
 	s3MetaObject fileData.S3FileMetadata
 	dbEntry      fileData.Row
@@ -180,7 +182,11 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	doRows, err := c.Repo.GetFilesData(ctx, req.Type, req.FileIDs)
+	reqCtx, cancel := context.WithTimeout(ctx.Request.Context(), bulkFileDataFetchTimeout)
+	defer cancel()
+	reqID := requestid.Get(ctx)
+
+	doRows, err := c.Repo.GetFilesData(reqCtx, req.Type, req.FileIDs)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -196,7 +202,7 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 	}
 	pendingIndexFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
 	// Fetch missing doRows in parallel
-	s3MetaFetchResults, err := c.getS3FileMetadataParallel(ctx, activeRows)
+	s3MetaFetchResults, err := c.getS3FileMetadataParallel(reqCtx, reqID, activeRows)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -233,25 +239,33 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 	}, nil
 }
 
-func (c *Controller) getS3FileMetadataParallel(ctx *gin.Context, dbRows []fileData.Row) ([]bulkS3MetaFetchResult, error) {
+func (c *Controller) getS3FileMetadataParallel(ctx context.Context, reqID string, dbRows []fileData.Row) ([]bulkS3MetaFetchResult, error) {
 	var wg sync.WaitGroup
 	embeddingObjects := make([]bulkS3MetaFetchResult, len(dbRows))
 	for i := range dbRows {
 		dbRow := dbRows[i]
+		select {
+		case globalFileFetchSemaphore <- struct{}{}:
+		case <-ctx.Done():
+			embeddingObjects[i] = bulkS3MetaFetchResult{
+				err:     ctx.Err(),
+				dbEntry: dbRow,
+			}
+			continue
+		}
 		wg.Add(1)
-		globalFileFetchSemaphore <- struct{}{} // Acquire from global semaphore
 		go func(i int, row fileData.Row) {
 			defer wg.Done()
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 
 			ctxLogger := log.WithFields(log.Fields{
 				"objectKey":     row.S3FileMetadataObjectKey(),
-				"req_id":        requestid.Get(ctx),
+				"req_id":        reqID,
 				"latest_bucket": row.LatestBucket,
 				"file_id":       row.FileID,
 			})
 
-			s3FileMetadata, err := c.fetchS3FileMetadata(context.Background(), row, ctxLogger)
+			s3FileMetadata, err := c.fetchS3FileMetadata(ctx, row, ctxLogger)
 			if err != nil {
 				ctxLogger.
 					Error("error fetching  object: "+row.S3FileMetadataObjectKey(), err)
