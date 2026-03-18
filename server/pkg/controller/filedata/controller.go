@@ -217,6 +217,15 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 		}
 	}
 
+	if len(errFileIds) > 10 {
+		return nil, stacktrace.Propagate(
+			ente.NewInternalError(
+				fmt.Sprintf("bulk file data fetch failed for %d fileIDs", len(errFileIds)),
+			),
+			"",
+		)
+	}
+
 	return &fileData.GetFilesDataResponse{
 		Data:                fetchedEmbeddings,
 		PendingIndexFileIDs: pendingIndexFileIds,
