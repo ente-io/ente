@@ -228,26 +228,6 @@ class FileUploader {
     return _totalCountInUploadSession;
   }
 
-  @visibleForTesting
-  void resetForTesting() {
-    _queue.clear();
-    _allBackups.clear();
-    _totalCountInUploadSession = 0;
-    _uploadCounter = 0;
-    _videoUploadCounter = 0;
-  }
-
-  @visibleForTesting
-  void addPendingUploadForTesting(
-    FileUploadItem queueItem,
-    BackupItem backupItem,
-  ) {
-    final localID = queueItem.file.localID!;
-    _queue[localID] = queueItem;
-    _allBackups[localID] = backupItem;
-    _totalCountInUploadSession++;
-  }
-
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
