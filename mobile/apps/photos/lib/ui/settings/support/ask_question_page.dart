@@ -87,7 +87,7 @@ class _AskQuestionPageState extends State<AskQuestionPage> {
                       const SizedBox(height: 24),
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.primary,
-                        labelText: l10n.send,
+                        labelText: l10n.continueInMailApp,
                         isDisabled: _isSending,
                         shouldSurfaceExecutionStates: false,
                         onTap: _onSend,

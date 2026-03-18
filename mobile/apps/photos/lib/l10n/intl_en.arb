@@ -123,6 +123,7 @@
   "generatingEncryptionKeys": "Generating encryption keys...",
   "pleaseWait": "Please wait...",
   "continueLabel": "Continue",
+  "continueInMailApp": "Continue in mail app",
   "insecureDevice": "Insecure device",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
   "howItWorks": "How it works",

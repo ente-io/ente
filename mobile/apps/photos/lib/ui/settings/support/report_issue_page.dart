@@ -131,7 +131,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 16),
               ButtonWidgetV2(
                 buttonType: ButtonTypeV2.primary,
-                labelText: l10n.send,
+                labelText: l10n.continueInMailApp,
                 isDisabled: _isSending,
                 shouldSurfaceExecutionStates: false,
                 onTap: _onSend,
