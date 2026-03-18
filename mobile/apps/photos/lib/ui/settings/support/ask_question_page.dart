@@ -131,6 +131,11 @@ class _AskQuestionPageState extends State<AskQuestionPage> {
         subject: emailSubject,
         body: description,
       );
+      if (didOpenComposer && mounted) {
+        Navigator.of(context).pop();
+        return;
+      }
+
       if (!didOpenComposer && mounted) {
         await showNoMailAppSheet(
           context,

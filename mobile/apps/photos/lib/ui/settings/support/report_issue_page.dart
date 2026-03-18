@@ -195,6 +195,11 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               body: body,
             );
 
+      if (didOpenComposer && mounted) {
+        Navigator.of(context).pop();
+        return;
+      }
+
       if (!didOpenComposer && mounted) {
         await showNoMailAppSheet(
           context,
