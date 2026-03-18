@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 iOS background grace window plugin for Ente Photos.
                        DESC
-  s.homepage         = 'https://github.com/prateekmedia/ente'
+  s.homepage         = 'https://github.com/ente-io/ente'
   s.license          = { :type => 'MIT' }
   s.author           = { 'Ente' => 'contact@ente.io' }
   s.source           = { :path => '.' }
