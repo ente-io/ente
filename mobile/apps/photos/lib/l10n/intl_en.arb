@@ -879,7 +879,6 @@
   "anyAdditionalInformation": "Any additional information",
   "attachLogs": "Attach logs",
   "attachLogsHelper": "Helps us diagnose the issue faster",
-  "deviceInfoNote": "Device details such as OS version, app version, and device model will be included automatically.",
   "pleaseEnterASubject": "Please enter a subject",
   "pleaseEnterADescription": "Please enter a description",
   "noEmailAppFound": "No email app found",
