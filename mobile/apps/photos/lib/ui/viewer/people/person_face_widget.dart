@@ -13,6 +13,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/ml/face/box.dart';
 import 'package:photos/models/ml/face/face.dart';
+import 'package:photos/models/ml/face/person.dart';
 import 'package:photos/models/ml/face/person_face_source.dart';
 import 'package:photos/service_locator.dart' show flagService, isOfflineMode;
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
@@ -496,6 +497,24 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     claims.update(fileId, (count) => count + 1, ifAbsent: () => 1);
   }
 
+  void _clearPendingFaceGenerationClaim(
+    int fileId, {
+    required bool useFullFile,
+  }) {
+    final claims = useFullFile
+        ? _fullGenerationTaskClaims
+        : _thumbnailGenerationTaskClaims;
+    final currentCount = claims[fileId];
+    if (currentCount == null) {
+      return;
+    }
+    if (currentCount <= 1) {
+      claims.remove(fileId);
+    } else {
+      claims[fileId] = currentCount - 1;
+    }
+  }
+
   void _releasePendingFaceGenerationClaims() {
     void releaseClaims(Map<int, int> claims, {required bool useFullFile}) {
       for (final entry in claims.entries) {
@@ -568,11 +587,68 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     bool notifyOnError = true,
   }) async {
     final personOrClusterId = widget.personId ?? widget.clusterID!;
+    Future<PersonEntity?>? currentPersonEntityFuture;
+
+    Future<PersonEntity?> getCurrentPersonEntity() {
+      if (!isPerson || isOfflineMode) {
+        return Future.value(null);
+      }
+      return currentPersonEntityFuture ??=
+          PersonService.instance.getPerson(widget.personId!);
+    }
+
+    Future<bool> canReuseResolvedFaceSource(
+      PersonFaceSource faceSource, {
+      bool clearSharedCache = false,
+    }) async {
+      if (!await _canReuseResolvedFaceSource(
+        faceSource,
+        personOrClusterId,
+        clearSharedCache: clearSharedCache,
+      )) {
+        return false;
+      }
+      if (!isPerson || isOfflineMode) {
+        return true;
+      }
+
+      final personEntity = await getCurrentPersonEntity();
+      if (personEntity == null) {
+        _logger.severe(
+          'Person with ID ${widget.personId} not found, cannot validate face source.',
+        );
+        return false;
+      }
+      _personName = personEntity.data.name;
+
+      final currentAvatarFaceId = personEntity.data.avatarFaceID;
+      final seededAvatarFaceId = widget.initialAvatarFaceId;
+      final shouldRejectFaceSource = currentAvatarFaceId != null
+          ? faceSource.face.faceID != currentAvatarFaceId
+          : seededAvatarFaceId != null &&
+              faceSource.face.faceID == seededAvatarFaceId;
+      if (!shouldRejectFaceSource) {
+        return true;
+      }
+
+      _logger.fine(
+        'Ignoring stale prefetched face source for person ${widget.personId}: '
+        'seeded=${widget.initialAvatarFaceId} '
+        'current=$currentAvatarFaceId '
+        'face=${faceSource.face.faceID}',
+      );
+      if (identical(_resolvedFaceSource, faceSource)) {
+        _resolvedFaceSource = null;
+      }
+      if (clearSharedCache) {
+        removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
+      }
+      return false;
+    }
 
     if (widget.initialFaceSource != null &&
-        await _canReuseResolvedFaceSource(
+        await canReuseResolvedFaceSource(
           widget.initialFaceSource!,
-          personOrClusterId,
         )) {
       _applyResolvedFaceSource(widget.initialFaceSource!);
       await cacheFaceIdForPersonOrClusterIfNeeded(
@@ -583,9 +659,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     }
 
     if (_resolvedFaceSource != null) {
-      if (await _canReuseResolvedFaceSource(
+      if (await canReuseResolvedFaceSource(
         _resolvedFaceSource!,
-        personOrClusterId,
       )) {
         return _resolvedFaceSource;
       }
@@ -594,9 +669,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     final cachedFaceSource =
         checkCachedFaceSourceForPersonOrClusterID(personOrClusterId);
     if (cachedFaceSource != null) {
-      if (await _canReuseResolvedFaceSource(
+      if (await canReuseResolvedFaceSource(
         cachedFaceSource,
-        personOrClusterId,
         clearSharedCache: true,
       )) {
         _applyResolvedFaceSource(cachedFaceSource);
@@ -613,8 +687,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       final mlDataDB =
           isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
       if (isPerson && !isOfflineMode) {
-        final personEntity =
-            await PersonService.instance.getPerson(widget.personId!);
+        final personEntity = await getCurrentPersonEntity();
         if (personEntity == null) {
           _logger.severe(
             'Person with ID ${widget.personId} not found, cannot get cover face.',
@@ -1045,31 +1118,40 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       }
 
       var didRecordGenerationClaim = false;
-      final cropMap = await getCachedFaceCrops(
-        faceSource.file,
-        [faceSource.face],
-        useFullFile: useFullFile,
-        personOrClusterID: personOrClusterId,
-        onGenerationTaskQueued: () {
-          if (didRecordGenerationClaim) {
-            return;
-          }
-          didRecordGenerationClaim = true;
-          _recordPendingFaceGenerationClaim(
+      try {
+        final cropMap = await getCachedFaceCrops(
+          faceSource.file,
+          [faceSource.face],
+          useFullFile: useFullFile,
+          personOrClusterID: personOrClusterId,
+          onGenerationTaskQueued: () {
+            if (didRecordGenerationClaim) {
+              return;
+            }
+            didRecordGenerationClaim = true;
+            _recordPendingFaceGenerationClaim(
+              faceSource.resolvedFileId,
+              useFullFile: useFullFile,
+            );
+          },
+          useTempCache: false,
+        );
+        _applyResolvedFaceSource(faceSource);
+        final result = cropMap?[faceSource.face.faceID];
+        if (result == null) {
+          _logger.severe(
+            'Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${faceSource.resolvedFileId}',
+          );
+        }
+        return result;
+      } finally {
+        if (didRecordGenerationClaim) {
+          _clearPendingFaceGenerationClaim(
             faceSource.resolvedFileId,
             useFullFile: useFullFile,
           );
-        },
-        useTempCache: false,
-      );
-      _applyResolvedFaceSource(faceSource);
-      final result = cropMap?[faceSource.face.faceID];
-      if (result == null) {
-        _logger.severe(
-          'Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${faceSource.resolvedFileId}',
-        );
+        }
       }
-      return result;
     } catch (e, s) {
       _logger.severe(
         'Error getting cover face for person: ${widget.personId} or cluster ${widget.clusterID}',
