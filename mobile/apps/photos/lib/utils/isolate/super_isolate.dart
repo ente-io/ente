@@ -137,7 +137,6 @@ abstract class SuperIsolate {
         final logs = receivedMessage['logs'] as List<String>;
         IsolateLogger.handLogStringsToMainLogger(logs);
         final data = receivedMessage['data'];
-
         if (data is Map && data.containsKey('error')) {
           // Handle the error
           final errorMessage = data['error'];

@@ -222,8 +222,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await _homeWidgetSync(true);
 
     if (flagService.enableMLInBackground && hasGrantedMLConsent) {
-      await MLService.instance.init();
-      await PersonService.init(entityService, MLDataDB.instance, prefs);
       await controller.init();
       final canRunML = controller.requestCompute(ml: true);
       if (!canRunML) {
@@ -231,6 +229,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
           "[BG TASK] skipping ML, compute requirements not satisfied",
         );
       } else {
+        await MLService.instance.init();
+        await PersonService.init(entityService, MLDataDB.instance, prefs);
         await MLService.instance.runAllML(force: true);
       }
     }
