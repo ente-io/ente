@@ -252,7 +252,7 @@ dependency_overrides:
     git:
       url: https://github.com/prateekmedia/flutter_workmanager.git
       path: workmanager_apple
-      ref: main
+      ref: 34671326213e654635a2c3303d781e7890caa350
   media_kit: # update media_kit* if there is any update
     git:
       url: https://github.com/media-kit/media-kit
