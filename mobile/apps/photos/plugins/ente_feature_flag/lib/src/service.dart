@@ -104,6 +104,8 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
+  bool get enableBgLocalUploadPriority => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();

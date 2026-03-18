@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -17,6 +18,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/extensions/logger_extension.dart';
 import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/extensions/file_props.dart';
@@ -46,6 +48,7 @@ class RemoteSyncService {
   final Configuration _config = Configuration.instance;
   final CollectionsService _collectionsService = CollectionsService.instance;
   final DiffFetcher _diffFetcher = DiffFetcher();
+  final PhotoManagerPlugin _photoManagerPlugin = PhotoManagerPlugin();
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
@@ -651,7 +654,14 @@ class RemoteSyncService {
     }
     final List<Future> futures = [];
 
-    for (final file in filesToBeUploaded) {
+    var uploadQueue = filesToBeUploaded;
+    if (Platform.isIOS &&
+        isProcessBg &&
+        flagService.enableBgLocalUploadPriority) {
+      uploadQueue = await _buildBgUploadQueue(filesToBeUploaded);
+    }
+
+    for (final file in uploadQueue) {
       if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         break;
@@ -1005,6 +1015,79 @@ class RemoteSyncService {
       // 2. creationTime descending
       return second.creationTime!.compareTo(first.creationTime!);
     });
+  }
+
+  /// Builds an upload queue for iOS background sync. For each upload slot,
+  /// checks up to [kMaximumPermissibleUploadsInThrottledMode] candidates to
+  /// find one that's locally available (not iCloud-only). If a local file is
+  /// found, it's picked; otherwise the next file in line is used.
+  /// Files already checked and found to be iCloud-only are tracked to avoid
+  /// re-checking.
+  Future<List<EnteFile>> _buildBgUploadQueue(List<EnteFile> files) async {
+    const maxChecksPerSlot = kMaximumPermissibleUploadsInThrottledMode;
+    const slots = kMaximumPermissibleUploadsInThrottledMode;
+    final Set<int> picked = {};
+    final Set<int> knownICloud = {};
+    final List<EnteFile> queue = [];
+
+    for (int slot = 0; slot < slots && picked.length < files.length; slot++) {
+      int checks = 0;
+      int? fallback;
+      bool found = false;
+
+      for (int i = 0; i < files.length; i++) {
+        if (picked.contains(i)) continue;
+
+        fallback ??= i;
+
+        if (knownICloud.contains(i)) continue;
+
+        if (checks >= maxChecksPerSlot) break;
+        checks++;
+
+        if (await _isOriginLocallyAvailable(files[i])) {
+          queue.add(files[i]);
+          picked.add(i);
+          found = true;
+          break;
+        } else {
+          knownICloud.add(i);
+        }
+      }
+
+      if (!found && fallback != null) {
+        queue.add(files[fallback]);
+        picked.add(fallback);
+      }
+    }
+
+    _logger.internalInfo(
+      "Built bg upload queue: ${queue.length} files, "
+      "${knownICloud.length} iCloud-only skipped",
+    );
+    return queue;
+  }
+
+  Future<bool> _isOriginLocallyAvailable(EnteFile file) async {
+    try {
+      if (file.localID == null) {
+        return false;
+      }
+      return await _photoManagerPlugin.isLocallyAvailable(
+        file.localID!,
+        isOrigin: true,
+        subtype: file.fileType == FileType.livePhoto
+            ? (file.fileSubType ?? 0)
+            : 0,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to determine local availability for ${file.tag}",
+        e,
+        s,
+      );
+      return false;
+    }
   }
 
   bool _shouldShowSharedPhotosAndAlbumsNotification(int collectionID) {
