@@ -116,7 +116,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   PersonFaceSource? _resolvedFaceSource;
   String? _personName;
   bool _showingFallback = false;
-  bool _fallbackEverUsed = false;
   bool _disposed = false;
   int _upgradeGeneration = 0;
   EnteFile? _requestedThumbnailPreviewFile;
@@ -268,7 +267,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       if (thumbnailCrop == null) {
         return null;
       }
-      _fallbackEverUsed = true;
       _showingFallback = false;
       return _PersonFaceLoadResult.faceCrop(
         faceCropBytes: thumbnailCrop,
@@ -301,7 +299,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     final fallbackCrop = await _getFaceCrop(useFullFile: false);
     if (fallbackCrop != null) {
       _showingFallback = true;
-      _fallbackEverUsed = true;
       return _PersonFaceLoadResult.faceCrop(
         faceCropBytes: fallbackCrop,
         personName: _personName,
@@ -333,7 +330,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       final thumbnailBytes = await _loadThumbnailPreviewBytes(faceSource.file);
       if (thumbnailBytes != null) {
         _showingFallback = true;
-        _fallbackEverUsed = true;
         final generation = ++_upgradeGeneration;
         unawaited(_attemptFullQualityUpgrade(generation));
         return _PersonFaceLoadResult.thumbnailPreview(
@@ -350,7 +346,6 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     );
     if (thumbnailCrop != null) {
       _showingFallback = true;
-      _fallbackEverUsed = true;
       final generation = ++_upgradeGeneration;
       unawaited(_attemptFullQualityUpgrade(generation));
       return _PersonFaceLoadResult.faceCrop(
@@ -475,9 +470,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       return;
     }
     touchPendingFaceThumbnailGeneration(fileId, useFullFile: false);
-    // Keep first-paint work ahead of progressive upgrades. Only reprioritize
-    // full-file generation when the tile still has no fallback thumbnail.
-    if (widget.useFullFile && !_fallbackEverUsed) {
+    // Keep visible full-quality upgrades from aging out of the bounded queue.
+    // Thumbnail work is still refreshed first so first-paint requests stay hot.
+    if (widget.useFullFile) {
       touchPendingFaceThumbnailGeneration(fileId, useFullFile: true);
     }
   }
