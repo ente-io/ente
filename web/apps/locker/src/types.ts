@@ -127,6 +127,12 @@ export interface LockerCollection {
     isShared: boolean;
 }
 
+export interface LockerUploadCandidate {
+    file: File;
+    relativePath?: string;
+    suggestedCollectionNames: string[];
+}
+
 const IMPORTANT_COLLECTION_TYPE = "favorites";
 const UNCATEGORIZED_COLLECTION_TYPE = "uncategorized";
 

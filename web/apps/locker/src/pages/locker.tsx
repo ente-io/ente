@@ -46,7 +46,12 @@ import {
     uploadLockerFile,
     type LockerUploadProgress,
 } from "services/remote";
-import type { LockerCollection, LockerItem, LockerItemType } from "types";
+import type {
+    LockerCollection,
+    LockerItem,
+    LockerItemType,
+    LockerUploadCandidate,
+} from "types";
 import { getItemTitle } from "types";
 
 /** Subset of /users/details/v2 we need for the sidebar. */
@@ -122,17 +127,44 @@ const readDirectoryEntries = (entry: FileSystemDirectoryEntry) =>
         readBatch();
     });
 
-const filesFromEntry = async (entry: FileSystemEntry): Promise<File[]> => {
+const collectionNamesFromRelativePath = (relativePath?: string) => [
+    ...new Set((relativePath?.split("/").slice(0, -1) ?? []).filter(Boolean)),
+];
+
+const uploadCandidateFromFile = (
+    file: File,
+    relativePath?: string,
+): LockerUploadCandidate => ({
+    file,
+    relativePath,
+    suggestedCollectionNames: collectionNamesFromRelativePath(relativePath),
+});
+
+const uploadCandidatesFromEntry = async (
+    entry: FileSystemEntry,
+    parentPath = "",
+): Promise<LockerUploadCandidate[]> => {
     if (entry.isFile) {
-        return [await fileFromEntry(entry as FileSystemFileEntry)];
+        const file = await fileFromEntry(entry as FileSystemFileEntry);
+        const relativePath = parentPath
+            ? `${parentPath}/${file.name}`
+            : file.name;
+        return [uploadCandidateFromFile(file, relativePath)];
     }
 
     if (entry.isDirectory) {
+        const directoryPath = parentPath
+            ? `${parentPath}/${entry.name}`
+            : entry.name;
         const entries = await readDirectoryEntries(
             entry as FileSystemDirectoryEntry,
         );
-        const files = await Promise.all(entries.map(filesFromEntry));
-        return files.flat();
+        const items = await Promise.all(
+            entries.map((childEntry) =>
+                uploadCandidatesFromEntry(childEntry, directoryPath),
+            ),
+        );
+        return items.flat();
     }
 
     return [];
@@ -203,9 +235,9 @@ export const LockerPage: React.FC = () => {
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
-    const [prefilledUploadFiles, setPrefilledUploadFiles] = useState<File[]>(
-        [],
-    );
+    const [prefilledUploadItems, setPrefilledUploadItems] = useState<
+        LockerUploadCandidate[]
+    >([]);
     const [editItem, setEditItem] = useState<{
         id: number;
         type: LockerItemType;
@@ -666,18 +698,53 @@ export const LockerPage: React.FC = () => {
         [masterKey, refreshData],
     );
 
+    const ensureCollectionsExist = useCallback(
+        async (names: string[]) => {
+            if (!masterKey) throw new Error("No master key");
+
+            const normalizedNameToID = new Map(
+                collections.map((collection) => [
+                    collection.name.trim().toLocaleLowerCase(),
+                    collection.id,
+                ]),
+            );
+            let createdCollection = false;
+
+            for (const name of names) {
+                const normalizedName = name.trim().toLocaleLowerCase();
+                if (!normalizedName || normalizedNameToID.has(normalizedName)) {
+                    continue;
+                }
+
+                const id = await createCollectionAPI(name, masterKey);
+                normalizedNameToID.set(normalizedName, id);
+                createdCollection = true;
+            }
+
+            if (createdCollection) {
+                await refreshData();
+            }
+
+            return normalizedNameToID;
+        },
+        [collections, masterKey, refreshData],
+    );
+
     const handleCreateDialogClose = useCallback(() => {
         setCreateDialogOpen(false);
-        setPrefilledUploadFiles([]);
+        setPrefilledUploadItems([]);
     }, []);
 
-    const openUploadDialogForFiles = useCallback((files: File[]) => {
-        setPrefilledUploadFiles(files);
-        setCreateDialogOpen(true);
-    }, []);
+    const openUploadDialogForItems = useCallback(
+        (items: LockerUploadCandidate[]) => {
+            setPrefilledUploadItems(items);
+            setCreateDialogOpen(true);
+        },
+        [],
+    );
 
     const openCreateDialog = useCallback(() => {
-        setPrefilledUploadFiles([]);
+        setPrefilledUploadItems([]);
         setCreateDialogOpen(true);
     }, []);
 
@@ -731,7 +798,7 @@ export const LockerPage: React.FC = () => {
             const droppedItems = Array.from(
                 event.dataTransfer.items,
             ) as DragDataTransferItem[];
-            const entryFiles = (
+            const entryItems = (
                 await Promise.all(
                     droppedItems
                         .filter((item) => item.kind === "file")
@@ -739,34 +806,49 @@ export const LockerPage: React.FC = () => {
                             const entry = item.webkitGetAsEntry();
                             if (!entry) {
                                 const file = item.getAsFile();
-                                return file ? [file] : [];
+                                return file
+                                    ? [
+                                          uploadCandidateFromFile(
+                                              file,
+                                              file.webkitRelativePath ||
+                                                  file.name,
+                                          ),
+                                      ]
+                                    : [];
                             }
-                            return filesFromEntry(entry);
+                            return uploadCandidatesFromEntry(entry);
                         }),
                 )
             ).flat();
 
-            const droppedFiles =
-                entryFiles.length > 0
-                    ? entryFiles
-                    : Array.from(event.dataTransfer.files);
-            const uniqueFiles = droppedFiles.filter(
-                (file, index, files) =>
-                    files.findIndex(
+            const droppedItemsList =
+                entryItems.length > 0
+                    ? entryItems
+                    : Array.from(event.dataTransfer.files).map((file) =>
+                          uploadCandidateFromFile(
+                              file,
+                              file.webkitRelativePath || file.name,
+                          ),
+                      );
+            const uniqueItems = droppedItemsList.filter(
+                (item, index, items) =>
+                    items.findIndex(
                         (candidate) =>
-                            candidate.name === file.name &&
-                            candidate.size === file.size &&
-                            candidate.lastModified === file.lastModified,
+                            (candidate.relativePath ?? candidate.file.name) ===
+                                (item.relativePath ?? item.file.name) &&
+                            candidate.file.size === item.file.size &&
+                            candidate.file.lastModified ===
+                                item.file.lastModified,
                     ) === index,
             );
 
-            if (uniqueFiles.length === 0) {
+            if (uniqueItems.length === 0) {
                 return;
             }
 
-            openUploadDialogForFiles(uniqueFiles);
+            openUploadDialogForItems(uniqueItems);
         },
-        [openUploadDialogForFiles],
+        [openUploadDialogForItems],
     );
 
     const handleRenameCollection = useCallback(
@@ -995,8 +1077,9 @@ export const LockerPage: React.FC = () => {
                 onUploadItemComplete={handleUploadItemComplete}
                 onUploadsFinished={handleUploadsFinished}
                 onCreateCollection={handleCreateCollection}
+                onEnsureCollections={ensureCollectionsExist}
                 defaultCollectionID={selectedCollectionID}
-                initialFiles={prefilledUploadFiles}
+                initialItems={prefilledUploadItems}
             />
 
             {/* Edit dialog */}

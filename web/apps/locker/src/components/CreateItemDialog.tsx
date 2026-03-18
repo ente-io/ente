@@ -1,8 +1,5 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
-import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -13,11 +10,19 @@ import {
     DialogTitle,
     IconButton,
     InputAdornment,
-    LinearProgress,
     Stack,
     TextField,
     Typography,
 } from "@mui/material";
+import { FileUploadSection } from "components/createItemDialog/FileUploadSection";
+import {
+    addCollectionName,
+    collectionNamesByUploadItem,
+    dedupeCollectionNames,
+    normalizeCollectionName,
+    toggleCollectionName,
+    uploadQueueItemKey,
+} from "components/createItemDialog/fileUploadHelpers";
 import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import {
     createDocumentIcon,
@@ -39,7 +44,11 @@ import React, {
 } from "react";
 import { formatLockerMutationError } from "services/locker-errors";
 import type { LockerUploadProgress } from "services/remote";
-import type { LockerCollection, LockerItemType } from "types";
+import type {
+    LockerCollection,
+    LockerItemType,
+    LockerUploadCandidate,
+} from "types";
 import { isCollectionOwner, visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
@@ -106,8 +115,11 @@ interface CreateItemDialogProps {
     onUploadItemComplete?: () => void;
     onUploadsFinished?: (uploadedCount: number) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
+    onEnsureCollections?: (
+        names: string[],
+    ) => Promise<Map<string, number> | Record<string, number>>;
     defaultCollectionID?: number | null;
-    initialFiles?: File[];
+    initialItems?: LockerUploadCandidate[];
     editItem?: {
         id: number;
         type: LockerItemType;
@@ -115,6 +127,24 @@ interface CreateItemDialogProps {
         collectionID: number;
     } | null;
 }
+
+interface UploadState {
+    completedFileKeys: Set<string>;
+    failedFileKeys: Set<string>;
+    uploadingFileKeys: Set<string>;
+    uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
+    uploadCapByFileKey: Record<string, number>;
+    finalizingStartedAtByFileKey: Record<string, number>;
+}
+
+const emptyUploadState = (): UploadState => ({
+    completedFileKeys: new Set(),
+    failedFileKeys: new Set(),
+    uploadingFileKeys: new Set(),
+    uploadProgressByFileKey: {},
+    uploadCapByFileKey: {},
+    finalizingStartedAtByFileKey: {},
+});
 
 export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     open,
@@ -125,8 +155,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     onUploadItemComplete,
     onUploadsFinished,
     onCreateCollection,
+    onEnsureCollections,
     defaultCollectionID,
-    initialFiles,
+    initialItems,
     editItem,
 }) => {
     const isEditMode = !!editItem;
@@ -152,7 +183,13 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         editItem ? (editItem.data as Record<string, string>) : {},
     );
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [selectedUploadItems, setSelectedUploadItems] = useState<
+        LockerUploadCandidate[]
+    >([]);
+    const [
+        selectedCollectionNamesByFileKey,
+        setSelectedCollectionNamesByFileKey,
+    ] = useState<Record<string, string[]>>({});
     const [completedFileKeys, setCompletedFileKeys] = useState<Set<string>>(
         () => new Set(),
     );
@@ -194,14 +231,30 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         [],
     );
 
+    const resetUploadState = useCallback(() => {
+        const nextState = emptyUploadState();
+        setCompletedFileKeys(nextState.completedFileKeys);
+        setFailedFileKeys(nextState.failedFileKeys);
+        setUploadingFileKeys(nextState.uploadingFileKeys);
+        setUploadProgressByFileKey(nextState.uploadProgressByFileKey);
+        setUploadCapByFileKey(nextState.uploadCapByFileKey);
+        setFinalizingStartedAtByFileKey(nextState.finalizingStartedAtByFileKey);
+    }, []);
+
     useEffect(() => {
         if (!open) {
             return;
         }
 
         setSelectedOption(
-            editItem?.type ?? (initialFiles?.length ? "file" : null),
+            editItem?.type ?? (initialItems?.length ? "file" : null),
         );
+        const defaultCollectionName =
+            defaultCollectionID !== null && defaultCollectionID !== undefined
+                ? displayCollectionsRef.current.find(
+                      (collection) => collection.id === defaultCollectionID,
+                  )?.name
+                : undefined;
         setSelectedCollectionIDs(
             isEditMode
                 ? editCollectionID
@@ -216,22 +269,24 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
-        setSelectedFiles(initialFiles ?? []);
-        setCompletedFileKeys(new Set());
-        setFailedFileKeys(new Set());
-        setUploadingFileKeys(new Set());
+        setSelectedUploadItems(initialItems ?? []);
+        setSelectedCollectionNamesByFileKey(
+            collectionNamesByUploadItem(
+                initialItems ?? [],
+                defaultCollectionName,
+            ),
+        );
+        resetUploadState();
         setError(null);
-        setUploadProgressByFileKey({});
-        setUploadCapByFileKey({});
-        setFinalizingStartedAtByFileKey({});
     }, [
         defaultCollectionID,
         editCollectionID,
         editItem,
-        initialFiles,
+        initialItems,
         isEditMode,
         normalizeSelectedCollectionIDs,
         open,
+        resetUploadState,
     ]);
 
     useEffect(() => {
@@ -275,28 +330,23 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
         setError(null);
         setShowPassword(false);
-        setSelectedFiles([]);
-        setCompletedFileKeys(new Set());
-        setFailedFileKeys(new Set());
-        setUploadingFileKeys(new Set());
-        setUploadProgressByFileKey({});
-        setUploadCapByFileKey({});
-        setFinalizingStartedAtByFileKey({});
+        setSelectedUploadItems([]);
+        setSelectedCollectionNamesByFileKey({});
+        resetUploadState();
         onClose();
-    }, [onClose, saving, uploading]);
+    }, [onClose, resetUploadState, saving, uploading]);
 
-    const handleSelectOption = useCallback((option: CreateOption) => {
-        setSelectedOption(option);
-        setFormData({});
-        setSelectedFiles([]);
-        setCompletedFileKeys(new Set());
-        setFailedFileKeys(new Set());
-        setUploadingFileKeys(new Set());
-        setUploadProgressByFileKey({});
-        setUploadCapByFileKey({});
-        setFinalizingStartedAtByFileKey({});
-        setError(null);
-    }, []);
+    const handleSelectOption = useCallback(
+        (option: CreateOption) => {
+            setSelectedOption(option);
+            setFormData({});
+            setSelectedUploadItems([]);
+            setSelectedCollectionNamesByFileKey({});
+            resetUploadState();
+            setError(null);
+        },
+        [resetUploadState],
+    );
 
     const handleFieldChange = useCallback((field: string, value: string) => {
         setFormData((previous) => ({ ...previous, [field]: value }));
@@ -307,17 +357,26 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         (event: React.ChangeEvent<HTMLInputElement>) => {
             const files = Array.from(event.target.files ?? []);
             if (files.length > 0) {
-                setSelectedFiles(files);
-                setCompletedFileKeys(new Set());
-                setFailedFileKeys(new Set());
-                setUploadingFileKeys(new Set());
-                setUploadProgressByFileKey({});
-                setUploadCapByFileKey({});
-                setFinalizingStartedAtByFileKey({});
+                const defaultCollectionName =
+                    selectedCollectionIDs.length > 0
+                        ? displayCollectionsRef.current.find((collection) =>
+                              selectedCollectionIDs.includes(collection.id),
+                          )?.name
+                        : undefined;
+                const items = files.map((file) => ({
+                    file,
+                    relativePath: file.webkitRelativePath || file.name,
+                    suggestedCollectionNames: [],
+                }));
+                setSelectedUploadItems(items);
+                setSelectedCollectionNamesByFileKey(
+                    collectionNamesByUploadItem(items, defaultCollectionName),
+                );
+                resetUploadState();
                 setError(null);
             }
         },
-        [],
+        [resetUploadState, selectedCollectionIDs],
     );
 
     const handleSave = useCallback(async () => {
@@ -351,34 +410,69 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     }, [formData, handleClose, onSave, selectedCollectionIDs, selectedType]);
 
     const handleUpload = useCallback(async () => {
-        if (
-            selectedFiles.length === 0 ||
-            selectedCollectionIDs.length === 0 ||
-            !onUploadProgress
-        ) {
+        if (selectedUploadItems.length === 0 || !onUploadProgress) {
             return;
         }
 
         setUploading(true);
         setError(null);
-        setCompletedFileKeys(new Set());
-        setFailedFileKeys(new Set());
-        setUploadingFileKeys(new Set());
-        setUploadProgressByFileKey({});
-        setUploadCapByFileKey({});
-        setFinalizingStartedAtByFileKey({});
+        resetUploadState();
         let uploadedCount = 0;
         try {
+            const existingNormalizedNameToID = new Map(
+                displayCollections.map((collection) => [
+                    normalizeCollectionName(collection.name),
+                    collection.id,
+                ]),
+            );
+            const normalizedNameToIDResult = await onEnsureCollections?.(
+                dedupeCollectionNames(
+                    Object.values(selectedCollectionNamesByFileKey).flat(),
+                ),
+            );
+            const normalizedNameToID = new Map(existingNormalizedNameToID);
+            if (normalizedNameToIDResult instanceof Map) {
+                for (const [name, id] of normalizedNameToIDResult.entries()) {
+                    normalizedNameToID.set(normalizeCollectionName(name), id);
+                }
+            } else {
+                for (const [name, id] of Object.entries(
+                    normalizedNameToIDResult ?? {},
+                )) {
+                    normalizedNameToID.set(normalizeCollectionName(name), id);
+                }
+            }
+            const uploadTargets = selectedUploadItems.map((item) => {
+                const fileKey = uploadQueueItemKey(item);
+                const collectionIDs = dedupeCollectionNames(
+                    selectedCollectionNamesByFileKey[fileKey] ?? [],
+                )
+                    .map((name) =>
+                        normalizedNameToID.get(normalizeCollectionName(name)),
+                    )
+                    .filter((id): id is number => typeof id === "number");
+                return { item, fileKey, collectionIDs };
+            });
+
+            if (
+                uploadTargets.some(
+                    ({ collectionIDs }) => collectionIDs.length === 0,
+                )
+            ) {
+                setError(t("required_field"));
+                return;
+            }
+
             let nextIndex = 0;
             const worker = async () => {
                 while (true) {
-                    const file = selectedFiles[nextIndex];
+                    const target = uploadTargets[nextIndex];
                     nextIndex += 1;
-                    if (!file) {
+                    if (!target) {
                         return;
                     }
 
-                    const fileKey = uploadQueueItemKey(file);
+                    const { item, fileKey, collectionIDs } = target;
                     setUploadingFileKeys((current) =>
                         new Set(current).add(fileKey),
                     );
@@ -393,8 +487,8 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
                     try {
                         await onUploadProgress(
-                            file,
-                            selectedCollectionIDs,
+                            item.file,
+                            collectionIDs,
                             (progress) => {
                                 if (progress.phase === "finalizing") {
                                     setFinalizingStartedAtByFileKey(
@@ -447,7 +541,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 Array.from({
                     length: Math.min(
                         MAX_PARALLEL_UPLOADS,
-                        selectedFiles.length,
+                        selectedUploadItems.length,
                     ),
                 }).map(() => worker()),
             );
@@ -455,7 +549,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             if (uploadedCount > 0) {
                 await onUploadsFinished?.(uploadedCount);
             }
-            if (uploadedCount === selectedFiles.length) {
+            if (uploadedCount === selectedUploadItems.length) {
                 handleClose();
             }
         } catch (error) {
@@ -466,11 +560,14 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         }
     }, [
         handleClose,
+        displayCollections,
+        onEnsureCollections,
         onUploadProgress,
         onUploadItemComplete,
         onUploadsFinished,
-        selectedCollectionIDs,
-        selectedFiles,
+        resetUploadState,
+        selectedCollectionNamesByFileKey,
+        selectedUploadItems,
     ]);
 
     const canSave =
@@ -482,9 +579,14 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
     const canUpload =
         isFileMode &&
-        selectedCollectionIDs.length > 0 &&
-        selectedFiles.length > 0 &&
-        completedFileKeys.size + failedFileKeys.size !== selectedFiles.length;
+        selectedUploadItems.length > 0 &&
+        selectedUploadItems.every(
+            (item) =>
+                (selectedCollectionNamesByFileKey[uploadQueueItemKey(item)]
+                    ?.length ?? 0) > 0,
+        ) &&
+        completedFileKeys.size + failedFileKeys.size !==
+            selectedUploadItems.length;
 
     return (
         <Dialog
@@ -513,7 +615,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 {isEditMode
                     ? t("editItem")
                     : isFileMode
-                      ? t("saveDocumentTitle")
+                      ? selectedUploadItems.length > 1
+                          ? t("saveDocumentsTitle")
+                          : t("saveDocumentTitle")
                       : selectedType
                         ? typeDisplayName(selectedType)
                         : t("saveToLocker")}
@@ -545,259 +649,72 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )}
 
                 {isFileMode && (
-                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            hidden
-                            onChange={handleFileSelect}
-                        />
-
-                        {selectedFiles.length === 0 ? (
-                            <ButtonBase
-                                onClick={() => fileInputRef.current?.click()}
-                                sx={(theme) => ({
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: 1.5,
-                                    p: 4,
-                                    borderRadius: "16px",
-                                    border: `2px dashed ${theme.vars.palette.divider}`,
-                                    backgroundColor:
-                                        theme.vars.palette.fill.faint,
-                                    transition: "background-color 0.15s",
-                                    "&:hover": {
-                                        backgroundColor:
-                                            theme.vars.palette.fill.faintHover,
-                                    },
-                                })}
-                            >
-                                <CloudUploadOutlinedIcon
-                                    sx={{ fontSize: 40, color: "text.faint" }}
-                                />
-                                <Typography
-                                    variant="body"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    {t("clickHereToUpload")}
-                                </Typography>
-                            </ButtonBase>
-                        ) : (
-                            <Stack sx={{ gap: 1.25 }}>
-                                {selectedFiles.map((file) => {
-                                    const fileKey = uploadQueueItemKey(file);
-                                    const isDone =
-                                        completedFileKeys.has(fileKey);
-                                    const isFailed =
-                                        failedFileKeys.has(fileKey);
-                                    const isUploading =
-                                        uploadingFileKeys.has(fileKey);
-                                    const isQueued =
-                                        !isDone &&
-                                        !isFailed &&
-                                        !isUploading &&
-                                        uploading;
-                                    const uploadProgress =
-                                        uploadProgressByFileKey[fileKey];
-                                    const uploadCap =
-                                        uploadCapByFileKey[fileKey] ?? 95;
-                                    const finalizingStartedAt =
-                                        finalizingStartedAtByFileKey[fileKey];
-                                    return (
-                                        <Stack
-                                            key={fileKey}
-                                            sx={{
-                                                borderRadius: "12px",
-                                                backgroundColor: (theme) =>
-                                                    theme.vars.palette.fill
-                                                        .faint,
-                                                overflow: "hidden",
-                                            }}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                sx={{
-                                                    alignItems: "center",
-                                                    gap: 1.5,
-                                                    p: 2,
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent:
-                                                            "center",
-                                                        width: 48,
-                                                        height: 48,
-                                                        borderRadius: "12px",
-                                                        backgroundColor:
-                                                            lockerItemIconConfig(
-                                                                "file",
-                                                                file.name,
-                                                            ).backgroundColor,
-                                                        flexShrink: 0,
-                                                    }}
-                                                >
-                                                    {lockerItemIcon("file", {
-                                                        fileName: file.name,
-                                                        size: 24,
-                                                        strokeWidth: 1.9,
-                                                    })}
-                                                </Box>
-                                                <Box
-                                                    sx={{
-                                                        flex: 1,
-                                                        minWidth: 0,
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="body"
-                                                        noWrap
-                                                    >
-                                                        {file.name}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="small"
-                                                        sx={{
-                                                            color: "text.faint",
-                                                        }}
-                                                    >
-                                                        {formatFileSize(
-                                                            file.size,
-                                                        )}
-                                                    </Typography>
-                                                </Box>
-                                                {isDone && (
-                                                    <Box
-                                                        sx={(theme) => ({
-                                                            width: 24,
-                                                            height: 24,
-                                                            borderRadius: "50%",
-                                                            display: "flex",
-                                                            alignItems:
-                                                                "center",
-                                                            justifyContent:
-                                                                "center",
-                                                            backgroundColor:
-                                                                theme.vars
-                                                                    .palette
-                                                                    .primary
-                                                                    .main,
-                                                            color: theme.vars
-                                                                .palette.primary
-                                                                .contrastText,
-                                                            flexShrink: 0,
-                                                        })}
-                                                    >
-                                                        <CheckRoundedIcon
-                                                            sx={{
-                                                                fontSize: 16,
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                )}
-                                                {isFailed && (
-                                                    <ErrorOutlineRoundedIcon
-                                                        sx={{
-                                                            color: "critical.main",
-                                                            fontSize: 20,
-                                                            flexShrink: 0,
-                                                        }}
-                                                    />
-                                                )}
-                                                {isQueued && (
-                                                    <ScheduleRoundedIcon
-                                                        sx={{
-                                                            color: "text.muted",
-                                                            fontSize: 20,
-                                                            flexShrink: 0,
-                                                        }}
-                                                    />
-                                                )}
-                                            </Stack>
-                                            <Box sx={{ height: 4 }}>
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={
-                                                        isUploading
-                                                            ? uploadProgressValue(
-                                                                  uploadProgress,
-                                                                  uploadCap,
-                                                                  finalizingStartedAt,
-                                                                  progressTick,
-                                                              )
-                                                            : isDone
-                                                              ? 100
-                                                              : 0
-                                                    }
-                                                    sx={{
-                                                        height: 4,
-                                                        borderRadius: 0,
-                                                        opacity:
-                                                            isUploading ||
-                                                            isDone
-                                                                ? 1
-                                                                : 0,
-                                                    }}
-                                                />
-                                            </Box>
-                                        </Stack>
-                                    );
-                                })}
-                            </Stack>
-                        )}
-
-                        {!isEditMode && (
-                            <CollectionSelector
-                                collections={displayCollections}
-                                selectedIDs={selectedCollectionIDs}
-                                onToggle={(collectionID) =>
-                                    setSelectedCollectionIDs((current) =>
-                                        current.includes(collectionID)
-                                            ? current.filter(
-                                                  (id) => id !== collectionID,
-                                              )
-                                            : [...current, collectionID],
-                                    )
-                                }
-                                onCreateCollection={onCreateCollection}
-                            />
-                        )}
-
-                        {error && (
-                            <Typography
-                                variant="small"
-                                sx={{ color: "critical.main" }}
-                            >
-                                {error}
-                            </Typography>
-                        )}
-
-                        <Stack direction="row" sx={{ gap: 1, pt: 1 }}>
-                            <FocusVisibleButton
-                                fullWidth
-                                color="secondary"
-                                onClick={handleClose}
-                                disabled={uploading}
-                                sx={{ borderRadius: "16px", py: 1.25 }}
-                            >
-                                {t("cancel")}
-                            </FocusVisibleButton>
-                            <LoadingButton
-                                fullWidth
-                                color="accent"
-                                loading={uploading}
-                                disabled={!canUpload}
-                                sx={{ borderRadius: "16px", py: 1.25 }}
-                                onClick={() => void handleUpload()}
-                            >
-                                {t("upload")}
-                            </LoadingButton>
-                        </Stack>
-                    </Stack>
+                    <FileUploadSection
+                        fileInputRef={fileInputRef}
+                        selectedUploadItems={selectedUploadItems}
+                        collections={displayCollections}
+                        selectedCollectionNamesByFileKey={
+                            selectedCollectionNamesByFileKey
+                        }
+                        completedFileKeys={completedFileKeys}
+                        failedFileKeys={failedFileKeys}
+                        uploadingFileKeys={uploadingFileKeys}
+                        uploadProgressByFileKey={uploadProgressByFileKey}
+                        uploadCapByFileKey={uploadCapByFileKey}
+                        finalizingStartedAtByFileKey={
+                            finalizingStartedAtByFileKey
+                        }
+                        progressTick={progressTick}
+                        uploading={uploading}
+                        error={error}
+                        canUpload={canUpload}
+                        onFileSelect={handleFileSelect}
+                        onToggleCollectionName={(fileKey, name) =>
+                            setSelectedCollectionNamesByFileKey((current) => ({
+                                ...current,
+                                [fileKey]: toggleCollectionName(
+                                    current[fileKey] ?? [],
+                                    name,
+                                ),
+                            }))
+                        }
+                        onAddCollectionName={(fileKey, name) =>
+                            setSelectedCollectionNamesByFileKey((current) => ({
+                                ...current,
+                                [fileKey]: addCollectionName(
+                                    current[fileKey] ?? [],
+                                    name,
+                                ),
+                            }))
+                        }
+                        onSetCollectionNamesForAllItems={(names) =>
+                            setSelectedCollectionNamesByFileKey(
+                                Object.fromEntries(
+                                    selectedUploadItems.map((item) => [
+                                        uploadQueueItemKey(item),
+                                        names,
+                                    ]),
+                                ),
+                            )
+                        }
+                        onRemoveItem={(fileKey) => {
+                            setSelectedUploadItems((current) =>
+                                current.filter(
+                                    (item) =>
+                                        uploadQueueItemKey(item) !== fileKey,
+                                ),
+                            );
+                            setSelectedCollectionNamesByFileKey((current) =>
+                                Object.fromEntries(
+                                    Object.entries(current).filter(
+                                        ([key]) => key !== fileKey,
+                                    ),
+                                ),
+                            );
+                        }}
+                        onClose={handleClose}
+                        onUpload={handleUpload}
+                    />
                 )}
 
                 {selectedType && (
@@ -1130,40 +1047,6 @@ const typeDisplayName = (type: LockerItemType): string => {
     }
 };
 
-const uploadQueueItemKey = (file: File) =>
-    `${file.name}:${file.size}:${file.lastModified}`;
-
-const uploadProgressValue = (
-    progress: LockerUploadProgress | null | undefined,
-    uploadCap: number,
-    finalizingStartedAt?: number,
-    now = Date.now(),
-) => {
-    if (!progress) {
-        return 0;
-    }
-
-    if (progress.phase === "uploading") {
-        return Math.min(
-            uploadCap,
-            (progress.loaded / Math.max(progress.total, 1)) * uploadCap,
-        );
-    }
-
-    if (progress.phase === "finalizing") {
-        const start = finalizingStartedAt ?? now;
-        const elapsed = Math.max(0, now - start);
-        const finalTarget = 99;
-        const easedFraction = 1 - Math.exp(-elapsed / 2200);
-        return Math.min(
-            finalTarget,
-            uploadCap + (finalTarget - uploadCap) * easedFraction,
-        );
-    }
-
-    return 0;
-};
-
 const CollectionSelector: React.FC<{
     collections: LockerCollection[];
     selectedIDs: number[];
@@ -1338,17 +1221,4 @@ const CollectionSelector: React.FC<{
             )}
         </Box>
     );
-};
-
-const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) {
-        return `${bytes} B`;
-    }
-    if (bytes < 1024 * 1024) {
-        return `${(bytes / 1024).toFixed(1)} KB`;
-    }
-    if (bytes < 1024 * 1024 * 1024) {
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 };
