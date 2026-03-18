@@ -6,6 +6,7 @@ import "package:log_viewer/log_viewer.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/emergency/emergency_page.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -482,10 +483,27 @@ class _SettingsBody extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
+          surfaceExecutionStates: true,
           onTap: () async {
-            final userDetails =
-                await UserService.instance.getUserDetailsV2(memoryCount: false);
-            await billingService.launchFamilyPortal(context, userDetails);
+            late final UserDetails userDetails;
+            try {
+              userDetails = await UserService.instance
+                  .getUserDetailsV2(memoryCount: false);
+            } catch (error) {
+              if (!context.mounted) {
+                return;
+              }
+              await showGenericErrorDialog(context: context, error: error);
+              return;
+            }
+            if (!context.mounted) {
+              return;
+            }
+            await billingService.launchFamilyPortal(
+              context,
+              userDetails,
+              refreshOnOpen: false,
+            );
           },
         ),
         MenuItemWidgetNew(
