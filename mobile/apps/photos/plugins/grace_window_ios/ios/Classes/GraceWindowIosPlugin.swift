@@ -1,12 +1,14 @@
 import Flutter
 import UIKit
 
-public final class GraceWindowIosPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
+public final class GraceWindowIosPlugin: NSObject, FlutterPlugin {
   private static let methodChannelName = "io.ente.photos.grace_window_ios/methods"
-  private static let eventChannelName = "io.ente.photos.grace_window_ios/events"
+  private static let expiredStateDefaultsKey = "io.ente.photos.grace_window_ios.expired"
 
-  private var eventSink: FlutterEventSink?
   private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
+  private var pendingExpirationResult: FlutterResult?
+  private var bufferedExpiration: Bool?
+  private var didExpire = false
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = GraceWindowIosPlugin()
@@ -14,13 +16,7 @@ public final class GraceWindowIosPlugin: NSObject, FlutterPlugin, FlutterStreamH
       name: methodChannelName,
       binaryMessenger: registrar.messenger()
     )
-    let eventChannel = FlutterEventChannel(
-      name: eventChannelName,
-      binaryMessenger: registrar.messenger()
-    )
-
     registrar.addMethodCallDelegate(instance, channel: methodChannel)
-    eventChannel.setStreamHandler(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -33,34 +29,62 @@ public final class GraceWindowIosPlugin: NSObject, FlutterPlugin, FlutterStreamH
     case "endGraceWindow":
       endGraceWindow()
       result(nil)
+    case "awaitExpiration":
+      if let buffered = bufferedExpiration {
+        bufferedExpiration = nil
+        result(buffered)
+      } else {
+        pendingExpirationResult = result
+      }
+    case "consumeExpiredGraceWindowState":
+      result(consumeExpiredGraceWindowState())
     default:
       result(FlutterMethodNotImplemented)
     }
   }
 
-  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-    eventSink = events
-    return nil
-  }
-
-  public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    eventSink = nil
-    return nil
-  }
-
   private func beginGraceWindow(name: String) {
     endGraceWindow()
+    didExpire = false
+    bufferedExpiration = nil
+    UserDefaults.standard.set(false, forKey: Self.expiredStateDefaultsKey)
     backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
-      self?.eventSink?(true)
-      self?.endGraceWindow()
+      UserDefaults.standard.set(true, forKey: Self.expiredStateDefaultsKey)
+      self?.didExpire = true
+      self?.resolveAwait(expired: true)
+      self?.terminateBackgroundTask()
     }
   }
 
+  private func resolveAwait(expired: Bool) {
+    if let pending = pendingExpirationResult {
+      pending(expired)
+      pendingExpirationResult = nil
+    } else {
+      bufferedExpiration = expired
+    }
+  }
+
+  private func consumeExpiredGraceWindowState() -> Bool {
+    let defaults = UserDefaults.standard
+    let didExpire = defaults.bool(forKey: Self.expiredStateDefaultsKey)
+    defaults.set(false, forKey: Self.expiredStateDefaultsKey)
+    return didExpire
+  }
+
+  /// Called from Dart when the grace window is no longer needed.
+  /// Only resolves the pending await with false if no expiration occurred.
   private func endGraceWindow() {
+    if !didExpire {
+      resolveAwait(expired: false)
+    }
+    terminateBackgroundTask()
+  }
+
+  private func terminateBackgroundTask() {
     guard backgroundTaskID != .invalid else {
       return
     }
-
     UIApplication.shared.endBackgroundTask(backgroundTaskID)
     backgroundTaskID = .invalid
   }

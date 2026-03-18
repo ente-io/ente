@@ -66,9 +66,9 @@ const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
-const kBGTaskTimeout = Duration(seconds: 28);
-const kBGProcessingTaskTimeout = Duration(seconds: 60);
-const kBGPushTimeout = Duration(seconds: 28);
+const kBGAppRefreshBudget = Duration(seconds: 28);
+const kBGProcessingBudget = Duration(seconds: 60);
+const kBGPushBudget = Duration(seconds: 28);
 const kAndroidBackgroundTaskTimeout = Duration(hours: 1);
 const kFGTaskDeathTimeout = Duration(seconds: 5);
 bool isProcessBg = true;
@@ -147,7 +147,7 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
 
 Future<bool> runBackgroundTask(String taskId, TimeLogger _) async {
   final trigger = BgTaskUtils.backgroundTriggerForTask(taskId);
-  final budget = BgTaskUtils.backgroundBudgetForTask(taskId);
+  final budget = BgTaskUtils.backgroundRunBudgetForTask(taskId);
   bool result = true;
   await runWithLogs(
     () async {
@@ -506,7 +506,7 @@ Future<bool> _isAnotherBackgroundRunAlive() async {
   return _hasRecentHeartbeat(
     prefs,
     kLastBGTaskHeartBeatTime,
-    (Platform.isIOS ? kBGTaskTimeout : kAndroidBackgroundTaskTimeout) +
+    (Platform.isIOS ? kBGAppRefreshBudget : kAndroidBackgroundTaskTimeout) +
         BackgroundRunHelper.activeLeaseGrace,
   );
 }
@@ -532,7 +532,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     () => _runBackgroundPass(
       trigger: BackgroundTrigger.remotePush,
       taskId: "remote_push_sync",
-      budget: kBGPushTimeout,
+      budget: kBGPushBudget,
       pushPayload: message.data.map((key, value) => MapEntry(key, "$value")),
     ),
     prefix: _backgroundLogPrefix(BackgroundTrigger.remotePush),

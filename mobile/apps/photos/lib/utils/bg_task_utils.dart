@@ -4,6 +4,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
@@ -25,7 +26,6 @@ void callbackDispatcher() {
     final prefs = await SharedPreferences.getInstance();
     final shouldRescheduleProcessingTask =
         Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
-    final timeout = BgTaskUtils.backgroundBudgetForTask(taskName);
     bool didHandleExpiration = false;
     await WorkmanagerApple.setTaskExpirationHandler((expiredTaskName) async {
       if (expiredTaskName != taskName || didHandleExpiration) {
@@ -47,7 +47,7 @@ void callbackDispatcher() {
       final result = Platform.isIOS
           ? await runBackgroundTask(taskName, tlog)
           : await runBackgroundTask(taskName, tlog).timeout(
-              timeout,
+              BgTaskUtils.backgroundRunBudgetForTask(taskName),
               onTimeout: () async {
                 BgTaskUtils.$.warning("Task timed out: $taskName");
                 if (!didHandleExpiration) {
@@ -109,12 +109,12 @@ class BgTaskUtils {
         : BackgroundTrigger.bgAppRefresh;
   }
 
-  static Duration backgroundBudgetForTask(String taskId) {
+  static Duration backgroundRunBudgetForTask(String taskId) {
     return switch (backgroundTriggerForTask(taskId)) {
-      BackgroundTrigger.bgProcessing => kBGProcessingTaskTimeout,
-      BackgroundTrigger.bgAppRefresh => kBGTaskTimeout,
+      BackgroundTrigger.bgProcessing => kBGProcessingBudget,
+      BackgroundTrigger.bgAppRefresh => kBGAppRefreshBudget,
       BackgroundTrigger.workmanager => kAndroidBackgroundTaskTimeout,
-      BackgroundTrigger.remotePush => kBGPushTimeout,
+      BackgroundTrigger.remotePush => kBGPushBudget,
     };
   }
 

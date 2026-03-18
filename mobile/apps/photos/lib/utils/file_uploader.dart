@@ -1634,6 +1634,80 @@ class FileUploader {
 
       final dbFile = await resolveFile(generatedID);
       if (dbFile?.uploadedFileID == null) {
+        final queueItem = _queue[entry.key];
+        if (queueItem == null) {
+          continue;
+        }
+
+        final localID = backup.file.localID!;
+        bool shouldReconcile = false;
+
+        if (queueItem.status == UploadStatus.inBackground) {
+          final isStillLockedInBackground = await _uploadLocks.isLocked(
+            localID,
+            ProcessType.background.toString(),
+          );
+          shouldReconcile = !isStillLockedInBackground;
+        } else if (queueItem.status == UploadStatus.inProgress) {
+          // Only reconcile inProgress items whose foreground lock was already
+          // released by the grace window expiration handler. If the lock is
+          // still held, the upload is alive. If the foreground lock is gone
+          // but a background lock exists, a BG run has taken over — also skip.
+          final isStillLockedInForeground = await _uploadLocks.isLocked(
+            localID,
+            ProcessType.foreground.toString(),
+          );
+          if (!isStillLockedInForeground) {
+            final isTakenOverByBackground = await _uploadLocks.isLocked(
+              localID,
+              ProcessType.background.toString(),
+            );
+            shouldReconcile = !isTakenOverByBackground;
+          }
+        }
+
+        if (!shouldReconcile) {
+          continue;
+        }
+
+        _logger.info(
+          "Foreground reconciliation detected incomplete upload "
+          "(status=${queueItem.status}) ${backup.file.tag}",
+        );
+
+        if (queueItem.status == UploadStatus.inProgress) {
+          // The upload worker (_encryptAndUploadFileToCollection) is still
+          // unwinding. Leave the queue entry so the worker's success/error
+          // path can clean up without a null-assert crash. The worker's
+          // finally block calls _pollQueue when it exits.
+          _allBackups[entry.key] = backup.copyWith(
+            status: BackupItemStatus.retry,
+            error: SilentlyCancelUploadsError(),
+          );
+          changed = true;
+          continue;
+        }
+
+        // For inBackground items the worker is only awaiting the completer,
+        // so removing the queue entry and completing with error is safe.
+        await _uploadLocks.releaseLock(
+          localID,
+          ProcessType.foreground.toString(),
+        );
+        final removedQueueItem = _queue.remove(entry.key);
+        if (removedQueueItem != null) {
+          queueChanged = true;
+          if (!removedQueueItem.completer.isCompleted) {
+            removedQueueItem.completer.completeError(
+              SilentlyCancelUploadsError(),
+            );
+          }
+        }
+        _allBackups[entry.key] = backup.copyWith(
+          status: BackupItemStatus.retry,
+          error: SilentlyCancelUploadsError(),
+        );
+        changed = true;
         continue;
       }
 

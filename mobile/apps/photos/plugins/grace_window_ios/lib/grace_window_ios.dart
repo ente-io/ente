@@ -1,4 +1,3 @@
-import "dart:async";
 import "dart:io";
 
 import "package:flutter/services.dart";
@@ -9,11 +8,6 @@ class GraceWindowIos {
   static const MethodChannel _methodChannel = MethodChannel(
     "io.ente.photos.grace_window_ios/methods",
   );
-  static const EventChannel _eventChannel = EventChannel(
-    "io.ente.photos.grace_window_ios/events",
-  );
-
-  static Stream<void>? _expirationStream;
 
   static Future<void> beginGraceWindow(String name) async {
     if (!Platform.isIOS) {
@@ -31,13 +25,26 @@ class GraceWindowIos {
     await _methodChannel.invokeMethod("endGraceWindow");
   }
 
-  static Stream<void> get onGraceWindowExpired {
+  /// Waits for the native expiration handler to fire.
+  /// Returns true if the grace window expired, false if it was ended normally.
+  /// Best-effort same-process delivery via a solicited MethodChannel reply.
+  /// The durable fallback is [consumeExpiredState] (backed by UserDefaults).
+  static Future<bool> awaitExpiration() async {
     if (!Platform.isIOS) {
-      return const Stream<void>.empty();
+      return false;
     }
 
-    return _expirationStream ??= _eventChannel.receiveBroadcastStream().map(
-          (_) {},
-        );
+    return await _methodChannel.invokeMethod<bool>("awaitExpiration") ?? false;
+  }
+
+  static Future<bool> consumeExpiredState() async {
+    if (!Platform.isIOS) {
+      return false;
+    }
+
+    return await _methodChannel.invokeMethod<bool>(
+          "consumeExpiredGraceWindowState",
+        ) ??
+        false;
   }
 }
