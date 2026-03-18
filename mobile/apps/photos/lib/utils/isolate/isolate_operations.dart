@@ -315,10 +315,12 @@ Future<void> _ensureRustLoaded() async {
 Future<void> _ensureRustDisposed() async {
   // Intentionally a no-op.
   //
-  // Rust ML residency is owned by the feature isolate using it, not by the
-  // generic cache-clear path. This avoids disposing the bridge before
-  // MLIndexingIsolate has a chance to release its selective indexing-model
-  // residency during onDispose().
+  // Rust ML residency is owned by the feature isolate that prepared it.
+  // The generic cache-clear path runs in multiple rust-using isolates, so
+  // letting it call process-global ML teardown would allow unrelated isolates
+  // to release indexing sessions they do not own. MLIndexingIsolate tracks
+  // whether it prepared the runtime and releases it explicitly during its own
+  // cleanup, even if the app mode or flags have changed since preparation.
 }
 
 Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {

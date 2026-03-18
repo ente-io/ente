@@ -142,7 +142,8 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> releaseRustRuntime() async {
-    if (!_shouldUseRustMl) {
+    final cachedRustRuntimeArgs = _cachedRustRuntimeArgs;
+    if (cachedRustRuntimeArgs == null) {
       return;
     }
     if (!isIsolateSpawned) {
@@ -150,12 +151,16 @@ class MLIndexingIsolate extends SuperIsolate {
       return;
     }
     return _rustRuntimeLock.synchronized(() async {
-      _cachedRustRuntimeArgs = null;
+      if (_cachedRustRuntimeArgs == null) {
+        return;
+      }
       if (!isIsolateSpawned) {
+        _cachedRustRuntimeArgs = null;
         return;
       }
       try {
         await runInIsolate(IsolateOperation.releaseRustMlRuntime, {});
+        _cachedRustRuntimeArgs = null;
       } catch (e, s) {
         _logger.warning("Could not release rust runtime in isolate", e, s);
       }
