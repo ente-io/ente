@@ -148,7 +148,6 @@ abstract class SuperIsolate {
         } else {
           completer.complete(data);
         }
-        _activeTasks--;
       });
 
       return completer.future;

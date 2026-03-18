@@ -180,10 +180,6 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
-    if (!hasGrantedMLConsent) {
-      _logger.info("runAllML called without ML consent, skipping");
-      return;
-    }
     if (_isRunningML) {
       _logger.info("runAllML called while already running, skipping");
       return;

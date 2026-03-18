@@ -157,11 +157,6 @@ Future<void> runBackgroundTask(
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   try {
-    // Background worker can run in a process/isolate where Rust has been
-    // disposed or not initialized; always initialize before ML usage.
-    await EntePhotosRust.init();
-    _logger.info("Rust bridge initialized in background via: workmanager");
-
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await _scheduleHeartBeat(prefs, true);
