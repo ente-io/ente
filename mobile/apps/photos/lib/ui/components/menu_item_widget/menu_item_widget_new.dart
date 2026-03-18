@@ -152,13 +152,12 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     final effectiveMenuItemColor = menuItemColor ?? defaultMenuItemColor;
     final bool hasSubText =
         widget.subText != null && widget.subText!.isNotEmpty;
-    final verticalPadding = hasSubText ? 12.0 : 16.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
       clipBehavior: Clip.none,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(circularRadius),
         color: effectiveMenuItemColor,
