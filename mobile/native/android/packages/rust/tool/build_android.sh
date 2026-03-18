@@ -122,11 +122,8 @@ ensure_uniffi_bindgen
 # Remove stale generated bindings to avoid duplicate symbol conflicts.
 rm -f "$CORE_KOTLIN_OUT_DIR/io/ente/ensu/crypto/core.kt"
 rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/inference_rs/inference.kt"
-rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/inference_rs/inference_rs_uniffi.kt"
 rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/ensu_db/db.kt"
-rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/llmchat_db/llmchat_db_uniffi.kt"
 rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/ensu_sync/sync.kt"
-rm -f "$RUST_KOTLIN_OUT_DIR/io/ente/labs/llmchat_sync/llmchat_sync_uniffi.kt"
 
 generate_kotlin_bindings "$CORE_UNIFFI_RUST_DIR" "core" "$CORE_KOTLIN_OUT_DIR"
 generate_kotlin_bindings "$INFERENCE_UNIFFI_RUST_DIR" "inference" "$RUST_KOTLIN_OUT_DIR"

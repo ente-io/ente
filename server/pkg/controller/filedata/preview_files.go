@@ -20,7 +20,7 @@ func (c *Controller) GetPreviewUrl(ctx *gin.Context, actorUser int64, request fi
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if len(data) == 0 || data[0].IsDeleted {
-		return nil, stacktrace.Propagate(ente.ErrNotFound, "")
+		return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
 	}
 	enteUrl, err := c.signedUrlGet(data[0].LatestBucket, data[0].GetS3FileObjectKey())
 	if err != nil {
