@@ -1529,6 +1529,75 @@ const addFileToCollections = async (
     }
 };
 
+const decryptFileKeyForCollection = async (
+    fileID: number,
+    collectionID: number,
+    masterKey: string,
+): Promise<string> => {
+    const fileRecord = getEncryptedFileRecord(fileID, collectionID);
+    if (!fileRecord) {
+        throw new Error(
+            `File ${fileID} not in cache for collection ${collectionID}`,
+        );
+    }
+
+    const collectionRecord = encryptedCollections.get(collectionID);
+    if (!collectionRecord) {
+        throw new Error(`Collection ${collectionID} not in cache`);
+    }
+
+    const collectionKey = await decryptCollectionKey(
+        collectionRecord,
+        masterKey,
+    );
+    return await decryptBox(
+        {
+            encryptedData: fileRecord.encryptedKey,
+            nonce: fileRecord.keyDecryptionNonce,
+        },
+        collectionKey,
+    );
+};
+
+const removeFilesFromCollection = async (
+    collectionID: number,
+    fileIDs: number[],
+): Promise<void> => {
+    if (fileIDs.length === 0) {
+        return;
+    }
+
+    const res = await fetch(await apiURL("/collections/v3/remove-files"), {
+        method: "POST",
+        headers: {
+            ...(await authenticatedRequestHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ collectionID, fileIDs }),
+    });
+    ensureOk(res);
+};
+
+const moveFilesBetweenCollections = async (
+    fromCollectionID: number,
+    toCollectionID: number,
+    files: { id: number; encryptedKey: string; keyDecryptionNonce: string }[],
+): Promise<void> => {
+    if (files.length === 0) {
+        return;
+    }
+
+    const res = await fetch(await apiURL("/collections/move-files"), {
+        method: "POST",
+        headers: {
+            ...(await authenticatedRequestHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fromCollectionID, toCollectionID, files }),
+    });
+    ensureOk(res);
+};
+
 /**
  * Restore files from trash to a collection.
  *
@@ -1723,11 +1792,95 @@ export const renameCollection = async (
  * @param collectionID The collection to delete.
  */
 export const deleteCollection = async (collectionID: number): Promise<void> => {
-    const res = await fetch(await apiURL(`/collections/v3/${collectionID}`), {
-        method: "DELETE",
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL(
+            `/collections/v3/${collectionID}?keepFiles=True&collectionID=${collectionID}`,
+        ),
+        { method: "DELETE", headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
+};
+
+export const deleteCollectionKeepingFiles = async (
+    collection: LockerCollection,
+    masterKey: string,
+): Promise<void> => {
+    const collectionID = collection.id;
+    const currentUserID = ensureLocalUser().id;
+    const uncategorizedCollection = [...encryptedCollections.values()].find(
+        (candidate) => candidate.type === "uncategorized",
+    );
+    if (!uncategorizedCollection) {
+        throw new Error("Uncategorized collection not found in cache");
+    }
+
+    const fileIDsToRemove: number[] = [];
+    const filesToMoveByTargetCollectionID = new Map<
+        number,
+        { id: number; encryptedKey: string; keyDecryptionNonce: string }[]
+    >();
+
+    for (const item of collection.items) {
+        const isCurrentUserOwned =
+            (item.ownerID ?? currentUserID) === currentUserID;
+        if (!isCurrentUserOwned) {
+            fileIDsToRemove.push(item.id);
+            continue;
+        }
+
+        const otherOwnedCollectionIDs = item.collectionIDs.filter(
+            (itemCollectionID) => {
+                if (itemCollectionID === collectionID) {
+                    return false;
+                }
+
+                const targetCollection =
+                    encryptedCollections.get(itemCollectionID);
+                return (
+                    !!targetCollection &&
+                    targetCollection.ownerID === currentUserID &&
+                    targetCollection.type !== "uncategorized"
+                );
+            },
+        );
+
+        const targetCollectionID =
+            otherOwnedCollectionIDs[0] ?? uncategorizedCollection.id;
+        const fileKey = await decryptFileKeyForCollection(
+            item.id,
+            collectionID,
+            masterKey,
+        );
+        const targetCollectionRecord =
+            encryptedCollections.get(targetCollectionID);
+        if (!targetCollectionRecord) {
+            throw new Error(`Collection ${targetCollectionID} not in cache`);
+        }
+        const targetCollectionKey = await decryptCollectionKey(
+            targetCollectionRecord,
+            masterKey,
+        );
+        const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
+        const filesToMove =
+            filesToMoveByTargetCollectionID.get(targetCollectionID) ?? [];
+        filesToMove.push({
+            id: item.id,
+            encryptedKey: encryptedFileKey.encryptedData,
+            keyDecryptionNonce: encryptedFileKey.nonce,
+        });
+        filesToMoveByTargetCollectionID.set(targetCollectionID, filesToMove);
+    }
+
+    for (const [targetCollectionID, files] of filesToMoveByTargetCollectionID) {
+        await moveFilesBetweenCollections(
+            collectionID,
+            targetCollectionID,
+            files,
+        );
+    }
+
+    await removeFilesFromCollection(collectionID, fileIDsToRemove);
+    await deleteCollection(collectionID);
 };
 
 /**

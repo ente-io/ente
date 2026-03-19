@@ -32,6 +32,7 @@ import {
     createCollection as createCollectionAPI,
     createInfoItem,
     deleteCollection as deleteCollectionAPI,
+    deleteCollectionKeepingFiles,
     emptyTrash as emptyTrashAPI,
     fetchCollectionSharees,
     fetchLockerData,
@@ -863,9 +864,13 @@ export const LockerPage: React.FC = () => {
 
     const handleDeleteCollection = useCallback(
         (collectionID: number) => {
-            const collectionName =
-                collections.find((collection) => collection.id === collectionID)
-                    ?.name ?? "";
+            const collection = collections.find(
+                (candidate) => candidate.id === collectionID,
+            );
+            const collectionName = collection?.name ?? "";
+            const shouldNavigateHome =
+                router.pathname === "/collection" &&
+                selectedCollectionID === collectionID;
             showMiniDialog({
                 title: t("deleteCollection"),
                 message: t("deleteCollectionConfirmation", { collectionName }),
@@ -873,15 +878,40 @@ export const LockerPage: React.FC = () => {
                     text: t("delete"),
                     color: "critical",
                     action: async () => {
-                        await deleteCollectionAPI(collectionID);
-                        navigateHome();
+                        if (!collection) {
+                            throw new Error("Collection not found");
+                        }
+
+                        if (collection.items.length > 0) {
+                            if (!masterKey) {
+                                throw new Error("Missing master key");
+                            }
+
+                            await deleteCollectionKeepingFiles(
+                                collection,
+                                masterKey,
+                            );
+                        } else {
+                            await deleteCollectionAPI(collectionID);
+                        }
+                        if (shouldNavigateHome) {
+                            navigateHome();
+                        }
                         await refreshData();
                         setToast(t("collectionDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [collections, navigateHome, refreshData, showMiniDialog],
+        [
+            collections,
+            masterKey,
+            navigateHome,
+            refreshData,
+            router.pathname,
+            selectedCollectionID,
+            showMiniDialog,
+        ],
     );
 
     const handleOpenShareCollection = useCallback(
