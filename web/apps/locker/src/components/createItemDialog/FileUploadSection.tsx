@@ -139,8 +139,11 @@ export function FileUploadSection({
                     <CloudUploadOutlinedIcon
                         sx={{ fontSize: 40, color: "text.faint" }}
                     />
-                    <Typography variant="body" sx={{ color: "text.muted" }}>
-                        {t("clickHereToUpload")}
+                    <Typography variant="body" sx={{ fontWeight: 600 }}>
+                        {t("saveDocumentsTitle")}
+                    </Typography>
+                    <Typography variant="small" sx={{ color: "text.muted" }}>
+                        {t("dropToSaveToLocker")}
                     </Typography>
                 </ButtonBase>
             ) : (
@@ -302,6 +305,8 @@ const UploadItemCard: React.FC<{
             borderRadius: "12px",
             backgroundColor: (theme) => theme.vars.palette.fill.faint,
             overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
         }}
     >
         <Stack
@@ -339,15 +344,15 @@ const UploadItemCard: React.FC<{
             </Box>
             {isDone && (
                 <Box
-                    sx={(theme) => ({
+                    sx={() => ({
                         width: 24,
                         height: 24,
                         borderRadius: "50%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        backgroundColor: theme.vars.palette.primary.main,
-                        color: theme.vars.palette.primary.contrastText,
+                        backgroundColor: "#1071FF",
+                        color: "#FFFFFF",
                         flexShrink: 0,
                     })}
                 >
@@ -389,30 +394,8 @@ const UploadItemCard: React.FC<{
                 </IconButton>
             )}
         </Stack>
-        <Box sx={{ height: 4 }}>
-            <LinearProgress
-                variant="determinate"
-                value={
-                    isUploading
-                        ? uploadProgressValue(
-                              uploadProgress,
-                              uploadCap,
-                              finalizingStartedAt,
-                              progressTick,
-                          )
-                        : isDone
-                          ? 100
-                          : 0
-                }
-                sx={{
-                    height: 4,
-                    borderRadius: 0,
-                    opacity: isUploading || isDone ? 1 : 0,
-                }}
-            />
-        </Box>
         {showCollectionSelector && (
-            <Box sx={{ px: 2, pt: 1.5, pb: 2 }}>
+            <Box sx={{ px: 2, pt: 1.5, pb: 2, flexShrink: 0 }}>
                 <CollectionNameSelector
                     collections={collections}
                     availableNames={availableCollectionNames}
@@ -424,6 +407,30 @@ const UploadItemCard: React.FC<{
                 />
             </Box>
         )}
+        <Box sx={{ mt: "auto", height: 4, flexShrink: 0 }}>
+            <LinearProgress
+                variant={isQueued ? "indeterminate" : "determinate"}
+                value={
+                    isQueued
+                        ? undefined
+                        : isUploading
+                          ? uploadProgressValue(
+                                uploadProgress,
+                                uploadCap,
+                                finalizingStartedAt,
+                                progressTick,
+                            )
+                          : isDone
+                            ? 100
+                            : 0
+                }
+                sx={{
+                    height: 4,
+                    borderRadius: 0,
+                    opacity: isQueued || isUploading || isDone ? 1 : 0,
+                }}
+            />
+        </Box>
     </Stack>
 );
 
@@ -462,41 +469,13 @@ const CollectionNameSelector: React.FC<{
             ...availableNames,
             ...selectedNames,
         ]);
-        const selectedNameSet = new Set(
-            selectedNames.map((name) => normalizeCollectionName(name)),
-        );
         const suggestedNameSet = new Set(
             suggestedNames.map((name) => normalizeCollectionName(name)),
         );
-        const sortedSelectedSuggestedNames = allNames
-            .filter((name) => {
-                const normalizedName = normalizeCollectionName(name);
-                return (
-                    selectedNameSet.has(normalizedName) &&
-                    suggestedNameSet.has(normalizedName)
-                );
-            })
-            .sort((a, b) =>
-                a.localeCompare(b, undefined, { sensitivity: "base" }),
-            );
-        const sortedSelectedNames = allNames
-            .filter((name) => {
-                const normalizedName = normalizeCollectionName(name);
-                return (
-                    selectedNameSet.has(normalizedName) &&
-                    !suggestedNameSet.has(normalizedName)
-                );
-            })
-            .sort((a, b) =>
-                a.localeCompare(b, undefined, { sensitivity: "base" }),
-            );
         const sortedSuggestedNames = allNames
             .filter((name) => {
                 const normalizedName = normalizeCollectionName(name);
-                return (
-                    suggestedNameSet.has(normalizedName) &&
-                    !selectedNameSet.has(normalizedName)
-                );
+                return suggestedNameSet.has(normalizedName);
             })
             .sort((a, b) =>
                 a.localeCompare(b, undefined, { sensitivity: "base" }),
@@ -504,20 +483,12 @@ const CollectionNameSelector: React.FC<{
         const sortedRemainingNames = allNames
             .filter((name) => {
                 const normalizedName = normalizeCollectionName(name);
-                return (
-                    !selectedNameSet.has(normalizedName) &&
-                    !suggestedNameSet.has(normalizedName)
-                );
+                return !suggestedNameSet.has(normalizedName);
             })
             .sort((a, b) =>
                 a.localeCompare(b, undefined, { sensitivity: "base" }),
             );
-        return [
-            ...sortedSelectedSuggestedNames,
-            ...sortedSelectedNames,
-            ...sortedSuggestedNames,
-            ...sortedRemainingNames,
-        ];
+        return [...sortedSuggestedNames, ...sortedRemainingNames];
     }, [availableNames, collections, selectedNames, suggestedNames]);
 
     const handleAddCollectionName = useCallback(() => {
