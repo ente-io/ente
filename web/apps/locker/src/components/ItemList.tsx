@@ -56,6 +56,7 @@ import {
     getItemTitle,
     hasDownloadableObject,
     isImportantCollection,
+    sortLockerCollections,
     visibleLockerCollections,
 } from "types";
 import { ItemCard } from "./ItemCard";
@@ -158,8 +159,13 @@ export const ItemList: React.FC<ItemListProps> = ({
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     const displayCollections = useMemo(
-        () => uniqueCollectionsByID(visibleLockerCollections(collections)),
-        [collections],
+        () =>
+            uniqueCollectionsByID(
+                isCollectionsView
+                    ? sortLockerCollections(collections)
+                    : visibleLockerCollections(collections),
+            ),
+        [collections, isCollectionsView],
     );
     const allItems = useMemo(() => {
         const itemsByID = new Map<number, LockerItem>();
