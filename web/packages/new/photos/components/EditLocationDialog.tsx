@@ -292,11 +292,8 @@ const EditableMap: React.FC<EditableMapProps> = ({
             searchAbortRef.current = null;
         }
         setIsSearching(false);
+        setSearchResults([]);
         setShowResults(false);
-
-        if (query.trim().length < 3) {
-            setSearchResults([]);
-        }
     };
 
     const handleSearchSubmit = async (
