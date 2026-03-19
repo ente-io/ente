@@ -148,6 +148,7 @@ const main = () => {
             allowExternalLinks(webContents);
             handleBackOnStripeCheckout(mainWindow);
             allowAllCORSOrigins(webContents);
+            allowOpenStreetMapTileReferer(webContents);
 
             // Start loading the renderer.
             void mainWindow.loadURL(rendererURL);
@@ -674,6 +675,25 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
                 }
 
             callback({ responseHeaders: headers });
+        },
+    );
+
+/**
+ * OSM's standard tile servers require browser-based clients to send a valid
+ * HTTP Referer. Our desktop renderer is served from the custom "ente://app"
+ * origin, so Chromium does not send the kind of referrer OSM expects for these
+ * tile requests.
+ *
+ * Inject a stable https referer for OSM tiles at the Electron session layer so
+ * the desktop app identifies itself consistently without changing the renderer
+ * code in each Leaflet map usage.
+ */
+const allowOpenStreetMapTileReferer = (webContents: WebContents) =>
+    webContents.session.webRequest.onBeforeSendHeaders(
+        { urls: ["https://tile.openstreetmap.org/*"] },
+        ({ requestHeaders }, callback) => {
+            requestHeaders.Referer = "https://ente.io/";
+            callback({ requestHeaders });
         },
     );
 
