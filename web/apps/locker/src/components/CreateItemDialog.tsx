@@ -472,9 +472,49 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             return;
         }
 
+        const pendingUploadItems = selectedUploadItems.filter(
+            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        );
+        if (pendingUploadItems.length === 0) {
+            return;
+        }
+
         setUploading(true);
         setError(null);
-        resetUploadState();
+        const pendingUploadFileKeys = new Set(
+            pendingUploadItems.map((item) => uploadQueueItemKey(item)),
+        );
+        setFailedFileKeys((current) => {
+            const next = new Set(current);
+            pendingUploadFileKeys.forEach((fileKey) => next.delete(fileKey));
+            return next;
+        });
+        setUploadingFileKeys((current) => {
+            const next = new Set(current);
+            pendingUploadFileKeys.forEach((fileKey) => next.delete(fileKey));
+            return next;
+        });
+        setUploadProgressByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
+        setUploadCapByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
+        setFinalizingStartedAtByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
         let uploadedCount = 0;
         try {
             const existingNormalizedNameToID = new Map(
@@ -500,7 +540,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     normalizedNameToID.set(normalizeCollectionName(name), id);
                 }
             }
-            const uploadTargets = selectedUploadItems.map((item) => {
+            const uploadTargets = pendingUploadItems.map((item) => {
                 const fileKey = uploadQueueItemKey(item);
                 const collectionIDs = dedupeCollectionNames(
                     selectedCollectionNamesByFileKey[fileKey] ?? [],
@@ -607,7 +647,10 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             if (uploadedCount > 0) {
                 await onUploadsFinished?.(uploadedCount);
             }
-            if (uploadedCount === selectedUploadItems.length) {
+            if (
+                completedFileKeys.size + uploadedCount ===
+                selectedUploadItems.length
+            ) {
                 handleClose();
             }
         } catch (error) {
@@ -623,7 +666,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         onUploadProgress,
         onUploadItemComplete,
         onUploadsFinished,
-        resetUploadState,
+        completedFileKeys,
         selectedCollectionNamesByFileKey,
         selectedUploadItems,
     ]);
@@ -643,8 +686,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 (selectedCollectionNamesByFileKey[uploadQueueItemKey(item)]
                     ?.length ?? 0) > 0,
         ) &&
-        completedFileKeys.size + failedFileKeys.size !==
-            selectedUploadItems.length;
+        selectedUploadItems.some(
+            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        );
 
     return (
         <Dialog
