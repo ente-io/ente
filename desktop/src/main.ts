@@ -699,9 +699,8 @@ const allowOpenStreetMapRequestIdentification = (webContents: WebContents) =>
                 requestHeaders["User-Agent"] ?? requestHeaders["user-agent"];
             delete requestHeaders["User-Agent"];
             delete requestHeaders["user-agent"];
-            requestHeaders["User-Agent"] = openStreetMapUserAgent(
-                existingUserAgent,
-            );
+            requestHeaders["User-Agent"] =
+                openStreetMapUserAgent(existingUserAgent);
             delete requestHeaders.Referer;
             delete requestHeaders.referer;
             callback({ requestHeaders });
