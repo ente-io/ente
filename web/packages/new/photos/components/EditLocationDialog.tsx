@@ -272,7 +272,6 @@ const EditableMap: React.FC<EditableMapProps> = ({
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const searchRequestIdRef = useRef(0);
     const searchAbortRef = useRef<AbortController | null>(null);
 
@@ -286,55 +285,77 @@ const EditableMap: React.FC<EditableMapProps> = ({
         setManualLon(null);
     }, [open, selectedLocation]);
 
-    // Search using Nominatim API
-    const handleSearch = (query: string) => {
+    const handleSearchChange = (query: string) => {
         setSearchQuery(query);
-
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
         if (searchAbortRef.current) {
             searchAbortRef.current.abort();
             searchAbortRef.current = null;
         }
+        setIsSearching(false);
+        setShowResults(false);
 
         if (query.trim().length < 3) {
             setSearchResults([]);
-            setShowResults(false);
-            setIsSearching(false);
+        }
+    };
+
+    const handleSearchSubmit = async (
+        e?: React.FormEvent<HTMLFormElement> | React.MouseEvent,
+    ) => {
+        e?.preventDefault();
+
+        const query = searchInputRef.current?.value.trim() ?? searchQuery.trim();
+        if (query.length < 3 || isSearching) {
+            if (query.length < 3) {
+                setSearchResults([]);
+                setShowResults(false);
+            }
             return;
         }
 
-        searchTimeoutRef.current = setTimeout(async () => {
-            const requestId = searchRequestIdRef.current + 1;
-            searchRequestIdRef.current = requestId;
-            const abortController = new AbortController();
-            searchAbortRef.current = abortController;
-            setIsSearching(true);
-            try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-                    {
-                        headers: { "Accept-Language": "en" },
-                        signal: abortController.signal,
-                    },
-                );
-                const data = (await response.json()) as NominatimResult[];
-                if (searchRequestIdRef.current !== requestId) return;
-                setSearchResults(data);
-                setShowResults(data.length > 0);
-            } catch (error) {
-                if (abortController.signal.aborted) return;
-                if (searchRequestIdRef.current !== requestId) return;
-                console.error("Search failed:", error);
-                setSearchResults([]);
-                setShowResults(false);
-            } finally {
-                if (searchRequestIdRef.current === requestId) {
-                    setIsSearching(false);
-                }
+        setSearchQuery(query);
+
+        if (searchAbortRef.current) {
+            searchAbortRef.current.abort();
+        }
+
+        const requestId = searchRequestIdRef.current + 1;
+        searchRequestIdRef.current = requestId;
+        const abortController = new AbortController();
+        searchAbortRef.current = abortController;
+        setIsSearching(true);
+
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 750));
+            if (
+                searchRequestIdRef.current !== requestId ||
+                abortController.signal.aborted
+            ) {
+                return;
             }
-        }, 300);
+
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+                {
+                    headers: { "Accept-Language": "en" },
+                    signal: abortController.signal,
+                },
+            );
+            const data = (await response.json()) as NominatimResult[];
+            if (searchRequestIdRef.current !== requestId) return;
+            setSearchResults(data);
+            setShowResults(data.length > 0);
+        } catch (error) {
+            if (abortController.signal.aborted) return;
+            if (searchRequestIdRef.current !== requestId) return;
+            console.error("Search failed:", error);
+            setSearchResults([]);
+            setShowResults(false);
+        } finally {
+            if (searchRequestIdRef.current === requestId) {
+                setIsSearching(false);
+            }
+        }
     };
 
     const handleSelectResult = (result: NominatimResult) => {
@@ -406,9 +427,6 @@ const EditableMap: React.FC<EditableMapProps> = ({
 
     useEffect(() => {
         return () => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
             if (searchAbortRef.current) {
                 searchAbortRef.current.abort();
             }
@@ -541,27 +559,82 @@ const EditableMap: React.FC<EditableMapProps> = ({
             <MapContainer ref={mapContainerRef} />
             <SearchContainer>
                 <ClickAwayListener onClickAway={() => setShowResults(false)}>
-                    <Box sx={{ position: "relative", width: "100%" }}>
+                    <Box
+                        component="form"
+                        onSubmit={handleSearchSubmit}
+                        sx={{ position: "relative", width: "100%" }}
+                    >
                         <SearchInputWrapper>
-                            <SearchIcon
-                                sx={{ color: "text.muted", fontSize: 20 }}
-                            />
                             <InputBase
                                 placeholder={t("search_location")}
                                 value={searchQuery}
-                                onChange={(e) => handleSearch(e.target.value)}
+                                onChange={(e) =>
+                                    handleSearchChange(e.target.value)
+                                }
                                 onFocus={() =>
                                     searchResults.length > 0 &&
                                     setShowResults(true)
                                 }
                                 inputRef={searchInputRef}
-                                sx={{ ml: 1 }}
-                                inputProps={{ style: { padding: 0 } }}
+                                sx={{ flex: 1 }}
+                                inputProps={{
+                                    style: {
+                                        padding: 0,
+                                        paddingLeft: 8,
+                                    },
+                                }}
                             />
-                            <CircularProgress
-                                size={16}
-                                sx={{ ml: 1, opacity: isSearching ? 1 : 0 }}
-                            />
+                            <IconButton
+                                type="submit"
+                                size="small"
+                                disabled={
+                                    isSearching || searchQuery.trim().length < 3
+                                }
+                                aria-label={t("search_location")}
+                                sx={(theme) => ({
+                                    ml: 1,
+                                    p: 0,
+                                    width: 32,
+                                    height: 32,
+                                    backgroundColor:
+                                        theme.vars.palette.fill.faint,
+                                    color: theme.vars.palette.text.base,
+                                    transition:
+                                        "background-color 0.2s ease, transform 0.2s ease",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            theme.vars.palette.fill.faintHover,
+                                    },
+                                    "&:active": {
+                                        backgroundColor:
+                                            theme.vars.palette.fill.faintHover,
+                                        transform: "scale(0.96)",
+                                    },
+                                    "&.Mui-disabled": {
+                                        backgroundColor:
+                                            theme.vars.palette.background.elevatedPaper,
+                                        color: theme.vars.palette.text.faint,
+                                    },
+                                })}
+                            >
+                                {isSearching ? (
+                                    <CircularProgress
+                                        size={18}
+                                        thickness={5}
+                                        sx={{
+                                            display: "block",
+                                            color: "inherit",
+                                        }}
+                                    />
+                                ) : (
+                                    <SearchIcon
+                                        sx={{
+                                            color: "inherit",
+                                            fontSize: 20,
+                                        }}
+                                    />
+                                )}
+                            </IconButton>
                         </SearchInputWrapper>
                         {showResults && (
                             <SearchResultsList>
@@ -682,15 +755,17 @@ const CoordinateInput = styled(InputBase)(({ theme }) => ({
 }));
 
 const GoToLocationButton = styled(IconButton)(({ theme }) => ({
-    backgroundColor: theme.vars.palette.text.base,
-    color: theme.vars.palette.background.default,
+    backgroundColor: theme.vars.palette.background.paper,
+    color: theme.vars.palette.text.base,
     width: 36,
     height: 36,
     boxShadow: theme.shadows[4],
-    "&:hover": { backgroundColor: theme.vars.palette.text.muted },
+    "&:hover": {
+        backgroundColor: theme.vars.palette.background.elevatedPaper,
+    },
     "&.Mui-disabled": {
-        backgroundColor: theme.vars.palette.text.faint,
-        color: theme.vars.palette.background.default,
+        backgroundColor: theme.vars.palette.background.elevatedPaper,
+        color: theme.vars.palette.text.faint,
     },
 }));
 
@@ -728,9 +803,9 @@ const SearchContainer = styled("div")(({ theme }) => ({
 const SearchInputWrapper = styled("div")(({ theme }) => ({
     display: "inline-flex",
     alignItems: "center",
+    width: "min(100%, 360px)",
     backgroundColor: theme.vars.palette.background.paper,
     padding: theme.spacing(1),
-    paddingLeft: theme.spacing(1.5),
     borderRadius: "9999px",
     boxShadow: theme.shadows[4],
 }));

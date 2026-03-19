@@ -148,7 +148,7 @@ const main = () => {
             allowExternalLinks(webContents);
             handleBackOnStripeCheckout(mainWindow);
             allowAllCORSOrigins(webContents);
-            allowOpenStreetMapTileReferer(webContents);
+            allowOpenStreetMapRequestIdentification(webContents);
 
             // Start loading the renderer.
             void mainWindow.loadURL(rendererURL);
@@ -679,23 +679,39 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
     );
 
 /**
- * OSM's standard tile servers require browser-based clients to send a valid
- * HTTP Referer. Our desktop renderer is served from the custom "ente://app"
- * origin, so Chromium does not send the kind of referrer OSM expects for these
- * tile requests.
+ * OSM services expect requests to identify the originating app. Our desktop
+ * renderer is served from the custom "ente://app" origin, so requests from the
+ * Electron session do not naturally carry an app-specific browser identity.
  *
- * Inject a stable https referer for OSM tiles at the Electron session layer so
- * the desktop app identifies itself consistently without changing the renderer
- * code in each Leaflet map usage.
+ * Prefix OSM requests with a truthful desktop app User-Agent token instead of
+ * forging a web Referer. This applies to both map tiles and Nominatim lookups.
  */
-const allowOpenStreetMapTileReferer = (webContents: WebContents) =>
+const allowOpenStreetMapRequestIdentification = (webContents: WebContents) =>
     webContents.session.webRequest.onBeforeSendHeaders(
-        { urls: ["https://tile.openstreetmap.org/*"] },
+        {
+            urls: [
+                "https://tile.openstreetmap.org/*",
+                "https://nominatim.openstreetmap.org/*",
+            ],
+        },
         ({ requestHeaders }, callback) => {
-            requestHeaders.Referer = "https://ente.io/";
+            requestHeaders["User-Agent"] = openStreetMapUserAgent(
+                requestHeaders["User-Agent"],
+            );
+            delete requestHeaders.Referer;
+            delete requestHeaders.referer;
             callback({ requestHeaders });
         },
     );
+
+const openStreetMapUserAgent = (existingUserAgent: string | undefined) => {
+    const appName = app.getName().trim() || "app";
+    const version = isDev ? "dev" : app.getVersion();
+    const appIdentifier = `${appName}-desktop/${version}`;
+    return existingUserAgent
+        ? `${appIdentifier} ${existingUserAgent}`
+        : appIdentifier;
+};
 
 /**
  * Add an icon for our app in the system tray.
