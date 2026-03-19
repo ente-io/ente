@@ -1,4 +1,5 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
@@ -19,7 +20,13 @@ import {
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import type { LockerUploadProgress } from "services/remote";
 import type { LockerCollection, LockerUploadCandidate } from "types";
 
@@ -38,6 +45,7 @@ interface FileUploadSectionProps {
     fileInputRef: React.RefObject<HTMLInputElement | null>;
     selectedUploadItems: LockerUploadCandidate[];
     collections: LockerCollection[];
+    availableCollectionNames: string[];
     selectedCollectionNamesByFileKey: Record<string, string[]>;
     completedFileKeys: Set<string>;
     failedFileKeys: Set<string>;
@@ -52,6 +60,7 @@ interface FileUploadSectionProps {
     onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onToggleCollectionName: (fileKey: string, name: string) => void;
     onAddCollectionName: (fileKey: string, name: string) => void;
+    onAddAvailableCollectionName: (name: string) => void;
     onSetCollectionNamesForAllItems: (names: string[]) => void;
     onRemoveItem: (fileKey: string) => void;
     onClose: () => void;
@@ -62,6 +71,7 @@ export function FileUploadSection({
     fileInputRef,
     selectedUploadItems,
     collections,
+    availableCollectionNames,
     selectedCollectionNamesByFileKey,
     completedFileKeys,
     failedFileKeys,
@@ -76,6 +86,7 @@ export function FileUploadSection({
     onFileSelect,
     onToggleCollectionName,
     onAddCollectionName,
+    onAddAvailableCollectionName,
     onSetCollectionNamesForAllItems,
     onRemoveItem,
     onClose,
@@ -147,6 +158,9 @@ export function FileUploadSection({
                                 key={fileKey}
                                 item={item}
                                 collections={collections}
+                                availableCollectionNames={
+                                    availableCollectionNames
+                                }
                                 selectedCollectionNames={
                                     selectedCollectionNamesByFileKey[fileKey] ??
                                     []
@@ -193,6 +207,7 @@ export function FileUploadSection({
                 selectedUploadItems.length > 0 && (
                     <CollectionNameSelector
                         collections={collections}
+                        availableNames={availableCollectionNames}
                         selectedNames={sharedSelectedCollectionNames}
                         suggestedNames={sharedSuggestedCollectionNames}
                         onToggleName={(name) =>
@@ -203,14 +218,15 @@ export function FileUploadSection({
                                 ),
                             )
                         }
-                        onAddCollectionName={(name) =>
+                        onAddCollectionName={(name) => {
+                            onAddAvailableCollectionName(name);
                             onSetCollectionNamesForAllItems(
                                 addCollectionName(
                                     sharedSelectedCollectionNames,
                                     name,
                                 ),
-                            )
-                        }
+                            );
+                        }}
                         disabled={uploading}
                     />
                 )}
@@ -249,6 +265,7 @@ export function FileUploadSection({
 const UploadItemCard: React.FC<{
     item: LockerUploadCandidate;
     collections: LockerCollection[];
+    availableCollectionNames: string[];
     selectedCollectionNames: string[];
     suggestedCollectionNames: string[];
     showCollectionSelector: boolean;
@@ -268,6 +285,7 @@ const UploadItemCard: React.FC<{
 }> = ({
     item,
     collections,
+    availableCollectionNames,
     selectedCollectionNames,
     suggestedCollectionNames,
     showCollectionSelector,
@@ -403,6 +421,7 @@ const UploadItemCard: React.FC<{
             <Box sx={{ px: 2, pt: 1.5, pb: 2 }}>
                 <CollectionNameSelector
                     collections={collections}
+                    availableNames={availableCollectionNames}
                     selectedNames={selectedCollectionNames}
                     suggestedNames={suggestedCollectionNames}
                     onToggleName={onToggleCollectionName}
@@ -416,6 +435,7 @@ const UploadItemCard: React.FC<{
 
 const CollectionNameSelector: React.FC<{
     collections: LockerCollection[];
+    availableNames: string[];
     selectedNames: string[];
     suggestedNames: string[];
     onToggleName: (name: string) => void;
@@ -423,6 +443,7 @@ const CollectionNameSelector: React.FC<{
     disabled?: boolean;
 }> = ({
     collections,
+    availableNames,
     selectedNames,
     suggestedNames,
     onToggleName,
@@ -431,6 +452,8 @@ const CollectionNameSelector: React.FC<{
 }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const [showScrollHint, setShowScrollHint] = useState(false);
     const selectedNameMap = useMemo(
         () =>
             new Map(
@@ -441,15 +464,56 @@ const CollectionNameSelector: React.FC<{
             ),
         [selectedNames],
     );
-    const displayNames = useMemo(
-        () =>
-            dedupeCollectionNames([
-                ...collections.map((collection) => collection.name),
-                ...suggestedNames,
-                ...selectedNames,
-            ]),
-        [collections, selectedNames, suggestedNames],
-    );
+    const displayNames = useMemo(() => {
+        const sortedSuggestedNames = [
+            ...dedupeCollectionNames(suggestedNames),
+        ].sort((a, b) =>
+            a.localeCompare(b, undefined, { sensitivity: "base" }),
+        );
+        const sortedRemainingNames = dedupeCollectionNames([
+            ...collections.map((collection) => collection.name),
+            ...availableNames,
+            ...selectedNames,
+        ])
+            .filter(
+                (name) =>
+                    !sortedSuggestedNames.some(
+                        (suggestedName) =>
+                            normalizeCollectionName(suggestedName) ===
+                            normalizeCollectionName(name),
+                    ),
+            )
+            .sort((a, b) =>
+                a.localeCompare(b, undefined, { sensitivity: "base" }),
+            );
+        return [...sortedSuggestedNames, ...sortedRemainingNames];
+    }, [availableNames, collections, selectedNames, suggestedNames]);
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const updateScrollHint = () => {
+            const remainingScroll =
+                container.scrollWidth -
+                container.clientWidth -
+                container.scrollLeft;
+            setShowScrollHint(remainingScroll > 8);
+        };
+
+        updateScrollHint();
+        container.addEventListener("scroll", updateScrollHint, {
+            passive: true,
+        });
+        window.addEventListener("resize", updateScrollHint);
+
+        return () => {
+            container.removeEventListener("scroll", updateScrollHint);
+            window.removeEventListener("resize", updateScrollHint);
+        };
+    }, [displayNames.length, createOpen]);
 
     const handleAddCollectionName = useCallback(() => {
         const trimmedName = createName.trim();
@@ -486,9 +550,41 @@ const CollectionNameSelector: React.FC<{
                     {t("collections")}
                 </Typography>
             </Stack>
-
-            {displayNames.length > 0 ? (
-                <Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
+            <Box sx={{ position: "relative" }}>
+                <Stack
+                    ref={scrollContainerRef}
+                    direction="row"
+                    sx={{
+                        gap: 1,
+                        flexWrap: "nowrap",
+                        overflowX: "auto",
+                        overflowY: "hidden",
+                        pr: 6,
+                        pb: 0.5,
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": { display: "none" },
+                    }}
+                >
+                    <ButtonBase
+                        onClick={() => setCreateOpen((open) => !open)}
+                        disabled={disabled}
+                        sx={(theme) => ({
+                            borderRadius: "999px",
+                            px: 1.5,
+                            py: 0.875,
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                            border: `1px dotted ${theme.vars.palette.stroke.muted}`,
+                            color: theme.vars.palette.text.muted,
+                            backgroundColor: createOpen
+                                ? theme.vars.palette.fill.faint
+                                : "transparent",
+                        })}
+                    >
+                        <Typography variant="small">
+                            + {t("collection")}
+                        </Typography>
+                    </ButtonBase>
                     {displayNames.map((name) => {
                         const isSelected = selectedNameMap.has(
                             normalizeCollectionName(name),
@@ -502,12 +598,13 @@ const CollectionNameSelector: React.FC<{
                                     borderRadius: "999px",
                                     px: 1.5,
                                     py: 0.875,
+                                    whiteSpace: "nowrap",
+                                    flexShrink: 0,
                                     backgroundColor: isSelected
-                                        ? theme.vars.palette.primary.main
+                                        ? "#1071FF"
                                         : theme.vars.palette.fill.faint,
                                     color: isSelected
-                                        ? theme.vars.palette.primary
-                                              .contrastText
+                                        ? "#FFFFFF"
                                         : theme.vars.palette.text.base,
                                 })}
                             >
@@ -515,30 +612,42 @@ const CollectionNameSelector: React.FC<{
                             </ButtonBase>
                         );
                     })}
-                    <ButtonBase
-                        onClick={() => setCreateOpen((open) => !open)}
-                        disabled={disabled}
+                </Stack>
+                {showScrollHint && (
+                    <Box
                         sx={(theme) => ({
-                            borderRadius: "999px",
-                            px: 1.5,
-                            py: 0.875,
-                            border: `1px dotted ${theme.vars.palette.stroke.muted}`,
-                            color: theme.vars.palette.text.muted,
-                            backgroundColor: createOpen
-                                ? theme.vars.palette.fill.faint
-                                : "transparent",
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            width: 72,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            pr: 0.5,
+                            pointerEvents: "none",
+                            background: `linear-gradient(90deg, ${theme.vars.palette.background.default}00 0%, ${theme.vars.palette.background.default}E6 52%, ${theme.vars.palette.background.default} 74%)`,
                         })}
                     >
-                        <Typography variant="small">
-                            + {t("collection")}
-                        </Typography>
-                    </ButtonBase>
-                </Stack>
-            ) : (
-                <Typography variant="body" sx={{ color: "text.muted" }}>
-                    {t("noCollectionsAvailableForSelection")}
-                </Typography>
-            )}
+                        <Box
+                            sx={(theme) => ({
+                                width: 22,
+                                height: 22,
+                                borderRadius: "999px",
+                                backgroundColor:
+                                    theme.vars.palette.background.default,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            })}
+                        >
+                            <ChevronRightRoundedIcon
+                                sx={{ color: "text.faint", fontSize: 20 }}
+                            />
+                        </Box>
+                    </Box>
+                )}
+            </Box>
 
             {createOpen && (
                 <Stack sx={{ gap: 1, mt: 1.25 }}>
@@ -563,6 +672,12 @@ const CollectionNameSelector: React.FC<{
                                 setCreateName(event.target.value)
                             }
                             onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setCreateOpen(false);
+                                    return;
+                                }
                                 if (event.key === "Enter") {
                                     event.preventDefault();
                                     handleAddCollectionName();

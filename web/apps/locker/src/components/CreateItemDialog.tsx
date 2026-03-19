@@ -190,6 +190,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         selectedCollectionNamesByFileKey,
         setSelectedCollectionNamesByFileKey,
     ] = useState<Record<string, string[]>>({});
+    const [customCollectionNames, setCustomCollectionNames] = useState<
+        string[]
+    >([]);
     const [completedFileKeys, setCompletedFileKeys] = useState<Set<string>>(
         () => new Set(),
     );
@@ -270,6 +273,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
         setSelectedUploadItems(initialItems ?? []);
+        setCustomCollectionNames([]);
         setSelectedCollectionNamesByFileKey(
             collectionNamesByUploadItem(
                 initialItems ?? [],
@@ -331,16 +335,45 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         setError(null);
         setShowPassword(false);
         setSelectedUploadItems([]);
+        setCustomCollectionNames([]);
         setSelectedCollectionNamesByFileKey({});
         resetUploadState();
         onClose();
     }, [onClose, resetUploadState, saving, uploading]);
+
+    const handleStepBackToOptions = useCallback(() => {
+        if (isEditMode || saving || uploading) {
+            return;
+        }
+
+        setSelectedOption(null);
+        setFormData({});
+        setShowPassword(false);
+        setError(null);
+    }, [isEditMode, saving, uploading]);
+
+    const handleDialogClose = useCallback(
+        (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+            if (
+                reason === "escapeKeyDown" &&
+                selectedType !== null &&
+                !isEditMode
+            ) {
+                handleStepBackToOptions();
+                return;
+            }
+
+            handleClose();
+        },
+        [handleClose, handleStepBackToOptions, isEditMode, selectedType],
+    );
 
     const handleSelectOption = useCallback(
         (option: CreateOption) => {
             setSelectedOption(option);
             setFormData({});
             setSelectedUploadItems([]);
+            setCustomCollectionNames([]);
             setSelectedCollectionNamesByFileKey({});
             resetUploadState();
             setError(null);
@@ -369,6 +402,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     suggestedCollectionNames: [],
                 }));
                 setSelectedUploadItems(items);
+                setCustomCollectionNames([]);
                 setSelectedCollectionNamesByFileKey(
                     collectionNamesByUploadItem(items, defaultCollectionName),
                 );
@@ -591,7 +625,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={handleDialogClose}
             fullWidth
             maxWidth="sm"
             slotProps={{
@@ -653,6 +687,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                         fileInputRef={fileInputRef}
                         selectedUploadItems={selectedUploadItems}
                         collections={displayCollections}
+                        availableCollectionNames={customCollectionNames}
                         selectedCollectionNamesByFileKey={
                             selectedCollectionNamesByFileKey
                         }
@@ -678,14 +713,22 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 ),
                             }))
                         }
-                        onAddCollectionName={(fileKey, name) =>
+                        onAddCollectionName={(fileKey, name) => {
+                            setCustomCollectionNames((current) =>
+                                addCollectionName(current, name),
+                            );
                             setSelectedCollectionNamesByFileKey((current) => ({
                                 ...current,
                                 [fileKey]: addCollectionName(
                                     current[fileKey] ?? [],
                                     name,
                                 ),
-                            }))
+                            }));
+                        }}
+                        onAddAvailableCollectionName={(name) =>
+                            setCustomCollectionNames((current) =>
+                                addCollectionName(current, name),
+                            )
                         }
                         onSetCollectionNamesForAllItems={(names) =>
                             setSelectedCollectionNamesByFileKey(
@@ -1185,6 +1228,13 @@ const CollectionSelector: React.FC<{
                                 setCreateError(null);
                             }}
                             onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setCreateOpen(false);
+                                    setCreateError(null);
+                                    return;
+                                }
                                 if (event.key === "Enter") {
                                     event.preventDefault();
                                     void handleCreateCollection();
