@@ -1791,11 +1791,16 @@ export const renameCollection = async (
  *
  * @param collectionID The collection to delete.
  */
-export const deleteCollection = async (collectionID: number): Promise<void> => {
+export const deleteCollection = async (
+    collectionID: number,
+    opts?: { keepFiles?: boolean },
+): Promise<void> => {
+    const keepFiles = opts?.keepFiles ?? false;
     const res = await fetch(
-        await apiURL(
-            `/collections/v3/${collectionID}?keepFiles=True&collectionID=${collectionID}`,
-        ),
+        await apiURL(`/collections/v3/${collectionID}`, {
+            collectionID,
+            keepFiles,
+        }),
         { method: "DELETE", headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
@@ -1880,7 +1885,7 @@ export const deleteCollectionKeepingFiles = async (
     }
 
     await removeFilesFromCollection(collectionID, fileIDsToRemove);
-    await deleteCollection(collectionID);
+    await deleteCollection(collectionID, { keepFiles: true });
 };
 
 /**
