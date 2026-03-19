@@ -544,6 +544,12 @@ export const LockerPage: React.FC = () => {
 
     const handleDeleteItem = useCallback(
         (item: LockerItem) => {
+            const collectionIDs =
+                selectedCollectionID === null
+                    ? item.collectionIDs.length > 0
+                        ? item.collectionIDs
+                        : [item.collectionID]
+                    : [item.collectionID];
             showMiniDialog({
                 title: t("delete"),
                 message: (
@@ -564,14 +570,16 @@ export const LockerPage: React.FC = () => {
                     text: t("delete"),
                     color: "critical",
                     action: async () => {
-                        await trashFiles([item.id], item.collectionID);
+                        for (const collectionID of collectionIDs) {
+                            await trashFiles([item.id], collectionID);
+                        }
                         await refreshData();
                         setToast(t("fileDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [showMiniDialog, refreshData],
+        [refreshData, selectedCollectionID, showMiniDialog],
     );
     const handleDeleteItems = useCallback(
         (items: LockerItem[]) => {
@@ -590,14 +598,18 @@ export const LockerPage: React.FC = () => {
                     action: async () => {
                         const fileIDsByCollection = new Map<number, number[]>();
                         for (const item of items) {
-                            const existing =
-                                fileIDsByCollection.get(item.collectionID) ??
-                                [];
-                            existing.push(item.id);
-                            fileIDsByCollection.set(
-                                item.collectionID,
-                                existing,
-                            );
+                            const collectionIDs =
+                                selectedCollectionID === null
+                                    ? item.collectionIDs.length > 0
+                                        ? item.collectionIDs
+                                        : [item.collectionID]
+                                    : [item.collectionID];
+                            for (const collectionID of collectionIDs) {
+                                const existing =
+                                    fileIDsByCollection.get(collectionID) ?? [];
+                                existing.push(item.id);
+                                fileIDsByCollection.set(collectionID, existing);
+                            }
                         }
 
                         for (const [
@@ -617,7 +629,7 @@ export const LockerPage: React.FC = () => {
                 },
             });
         },
-        [showMiniDialog, refreshData],
+        [refreshData, selectedCollectionID, showMiniDialog],
     );
 
     const handleEditItem = useCallback((item: LockerItem) => {
