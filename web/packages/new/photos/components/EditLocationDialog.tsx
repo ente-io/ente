@@ -301,7 +301,8 @@ const EditableMap: React.FC<EditableMapProps> = ({
     ) => {
         e?.preventDefault();
 
-        const query = searchInputRef.current?.value.trim() ?? searchQuery.trim();
+        const query =
+            searchInputRef.current?.value.trim() ?? searchQuery.trim();
         if (query.length < 3 || isSearching) {
             if (query.length < 3) {
                 setSearchResults([]);
@@ -575,10 +576,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
                                 inputRef={searchInputRef}
                                 sx={{ flex: 1 }}
                                 inputProps={{
-                                    style: {
-                                        padding: 0,
-                                        paddingLeft: 8,
-                                    },
+                                    style: { padding: 0, paddingLeft: 8 },
                                 }}
                             />
                             <IconButton
@@ -609,7 +607,8 @@ const EditableMap: React.FC<EditableMapProps> = ({
                                     },
                                     "&.Mui-disabled": {
                                         backgroundColor:
-                                            theme.vars.palette.background.elevatedPaper,
+                                            theme.vars.palette.background
+                                                .elevatedPaper,
                                         color: theme.vars.palette.text.faint,
                                     },
                                 })}
@@ -625,10 +624,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
                                     />
                                 ) : (
                                     <SearchIcon
-                                        sx={{
-                                            color: "inherit",
-                                            fontSize: 20,
-                                        }}
+                                        sx={{ color: "inherit", fontSize: 20 }}
                                     />
                                 )}
                             </IconButton>
@@ -757,9 +753,7 @@ const GoToLocationButton = styled(IconButton)(({ theme }) => ({
     width: 36,
     height: 36,
     boxShadow: theme.shadows[4],
-    "&:hover": {
-        backgroundColor: theme.vars.palette.background.elevatedPaper,
-    },
+    "&:hover": { backgroundColor: theme.vars.palette.background.elevatedPaper },
     "&.Mui-disabled": {
         backgroundColor: theme.vars.palette.background.elevatedPaper,
         color: theme.vars.palette.text.faint,
