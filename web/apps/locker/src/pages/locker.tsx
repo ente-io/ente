@@ -9,6 +9,7 @@ import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -53,7 +54,7 @@ import type {
     LockerItemType,
     LockerUploadCandidate,
 } from "types";
-import { getItemTitle } from "types";
+import { getItemTitle, isCollectionOwner } from "types";
 
 /** Subset of /users/details/v2 we need for the sidebar. */
 interface UserDetails {
@@ -214,6 +215,7 @@ const getCollectionIDFromPath = (path: string) => {
 
 export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
+    const currentUserID = ensureLocalUser().id;
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
 
@@ -704,10 +706,14 @@ export const LockerPage: React.FC = () => {
             if (!masterKey) throw new Error("No master key");
 
             const normalizedNameToID = new Map(
-                collections.map((collection) => [
-                    collection.name.trim().toLocaleLowerCase(),
-                    collection.id,
-                ]),
+                collections
+                    .filter((collection) =>
+                        isCollectionOwner(collection, currentUserID),
+                    )
+                    .map((collection) => [
+                        collection.name.trim().toLocaleLowerCase(),
+                        collection.id,
+                    ]),
             );
             let createdCollection = false;
 
@@ -728,7 +734,7 @@ export const LockerPage: React.FC = () => {
 
             return normalizedNameToID;
         },
-        [collections, masterKey, refreshData],
+        [collections, currentUserID, masterKey, refreshData],
     );
 
     const handleCreateDialogClose = useCallback(() => {

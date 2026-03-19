@@ -107,6 +107,7 @@ export function FileUploadSection({
             ),
         [selectedUploadItems],
     );
+    const directoryInputProps = { directory: "", webkitdirectory: "" };
 
     return (
         <Stack sx={{ gap: 2.5, pt: 0.5 }}>
@@ -115,6 +116,7 @@ export function FileUploadSection({
                 type="file"
                 multiple
                 hidden
+                {...directoryInputProps}
                 onChange={onFileSelect}
             />
 
