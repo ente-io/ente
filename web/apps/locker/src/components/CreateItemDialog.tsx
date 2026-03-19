@@ -14,7 +14,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { FileUploadSection } from "components/createItemDialog/FileUploadSection";
+import { CollectionChipRow } from "components/createItemDialog/CollectionChipRow";
 import {
     addCollectionName,
     collectionNamesByUploadItem,
@@ -23,6 +23,7 @@ import {
     toggleCollectionName,
     uploadQueueItemKey,
 } from "components/createItemDialog/fileUploadHelpers";
+import { FileUploadSection } from "components/createItemDialog/FileUploadSection";
 import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import {
     createDocumentIcon,
@@ -314,6 +315,29 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
             ),
         );
     }, [displayCollections, isEditMode, open, selectedCollectionIDs]);
+
+    useEffect(() => {
+        if (
+            !open ||
+            isEditMode ||
+            selectedCollectionIDs.length > 0 ||
+            defaultCollectionID === null ||
+            defaultCollectionID === undefined ||
+            !displayCollections.some(
+                (collection) => collection.id === defaultCollectionID,
+            )
+        ) {
+            return;
+        }
+
+        setSelectedCollectionIDs([defaultCollectionID]);
+    }, [
+        defaultCollectionID,
+        displayCollections,
+        isEditMode,
+        open,
+        selectedCollectionIDs.length,
+    ]);
 
     useEffect(() => {
         if (!uploading) {
@@ -814,7 +838,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 disabled={!canSave}
                                 onClick={() => void handleSave()}
                             >
-                                {isEditMode ? t("saveRecord") : t("create")}
+                                {t("saveRecord")}
                             </LoadingButton>
                         </Stack>
                     </Stack>
@@ -1100,6 +1124,19 @@ const CollectionSelector: React.FC<{
     const [createName, setCreateName] = useState("");
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
+    const orderedCollections = useMemo(() => {
+        const selectedIDSet = new Set(selectedIDs);
+        const sortedCollections = [...collections].sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+        );
+        const selectedCollections = sortedCollections.filter((collection) =>
+            selectedIDSet.has(collection.id),
+        );
+        const remainingCollections = sortedCollections.filter(
+            (collection) => !selectedIDSet.has(collection.id),
+        );
+        return [...selectedCollections, ...remainingCollections];
+    }, [collections, selectedIDs]);
 
     const handleCreateCollection = useCallback(async () => {
         const name = createName.trim();
@@ -1127,82 +1164,23 @@ const CollectionSelector: React.FC<{
 
     return (
         <Box>
-            <Stack
-                direction="row"
-                sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 1,
-                    mb: 1.5,
-                }}
-            >
-                <Typography
-                    variant="small"
-                    sx={{
-                        color: "text.faint",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        display: "block",
-                    }}
-                >
-                    {t("collections")}
-                </Typography>
-            </Stack>
-
-            {collections.length > 0 || onCreateCollection ? (
-                <Stack direction="row" sx={{ gap: 1.5, flexWrap: "wrap" }}>
-                    {onCreateCollection && (
-                        <ButtonBase
-                            onClick={() => {
-                                setCreateOpen((open) => !open);
-                                setCreateError(null);
-                            }}
-                            sx={(theme) => ({
-                                borderRadius: "999px",
-                                px: 1.5,
-                                py: 0.875,
-                                border: `1px dotted ${theme.vars.palette.stroke.muted}`,
-                                color: theme.vars.palette.text.muted,
-                                backgroundColor: createOpen
-                                    ? theme.vars.palette.fill.faint
-                                    : "transparent",
-                            })}
-                        >
-                            <Typography variant="small">
-                                + {t("collection")}
-                            </Typography>
-                        </ButtonBase>
-                    )}
-                    {collections.map((collection) => (
-                        <ButtonBase
-                            key={collection.id}
-                            onClick={() => onToggle(collection.id)}
-                            sx={(theme) => ({
-                                borderRadius: "999px",
-                                px: 1.5,
-                                py: 0.875,
-                                backgroundColor: selectedIDs.includes(
-                                    collection.id,
-                                )
-                                    ? theme.vars.palette.primary.main
-                                    : theme.vars.palette.fill.faint,
-                                color: selectedIDs.includes(collection.id)
-                                    ? theme.vars.palette.primary.contrastText
-                                    : theme.vars.palette.text.base,
-                            })}
-                        >
-                            <Typography variant="small">
-                                {collection.name}
-                            </Typography>
-                        </ButtonBase>
-                    ))}
-                </Stack>
-            ) : (
-                <Typography variant="body" sx={{ color: "text.muted" }}>
-                    {t("noCollectionsAvailableForSelection")}
-                </Typography>
-            )}
+            <CollectionChipRow
+                items={orderedCollections.map((collection) => ({
+                    key: String(collection.id),
+                    label: collection.name,
+                    selected: selectedIDs.includes(collection.id),
+                    onClick: () => onToggle(collection.id),
+                }))}
+                createOpen={createOpen}
+                onCreateClick={
+                    onCreateCollection
+                        ? () => {
+                              setCreateOpen((open) => !open);
+                              setCreateError(null);
+                          }
+                        : undefined
+                }
+            />
 
             {createOpen && onCreateCollection && (
                 <Stack sx={{ gap: 1, mt: 1.5 }}>

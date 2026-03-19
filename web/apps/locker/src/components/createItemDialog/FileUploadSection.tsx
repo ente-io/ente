@@ -1,5 +1,4 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
@@ -13,6 +12,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { CollectionChipRow } from "components/createItemDialog/CollectionChipRow";
 import {
     lockerItemIcon,
     lockerItemIconConfig,
@@ -20,13 +20,7 @@ import {
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { LockerUploadProgress } from "services/remote";
 import type { LockerCollection, LockerUploadCandidate } from "types";
 
@@ -255,7 +249,7 @@ export function FileUploadSection({
                     sx={{ borderRadius: "16px", py: 1.25 }}
                     onClick={() => void onUpload()}
                 >
-                    {t("upload")}
+                    {t("saveRecord")}
                 </LoadingButton>
             </Stack>
         </Stack>
@@ -452,8 +446,6 @@ const CollectionNameSelector: React.FC<{
 }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
-    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-    const [showScrollHint, setShowScrollHint] = useState(false);
     const selectedNameMap = useMemo(
         () =>
             new Map(
@@ -465,55 +457,68 @@ const CollectionNameSelector: React.FC<{
         [selectedNames],
     );
     const displayNames = useMemo(() => {
-        const sortedSuggestedNames = [
-            ...dedupeCollectionNames(suggestedNames),
-        ].sort((a, b) =>
-            a.localeCompare(b, undefined, { sensitivity: "base" }),
-        );
-        const sortedRemainingNames = dedupeCollectionNames([
+        const allNames = dedupeCollectionNames([
             ...collections.map((collection) => collection.name),
             ...availableNames,
             ...selectedNames,
-        ])
-            .filter(
-                (name) =>
-                    !sortedSuggestedNames.some(
-                        (suggestedName) =>
-                            normalizeCollectionName(suggestedName) ===
-                            normalizeCollectionName(name),
-                    ),
-            )
+        ]);
+        const selectedNameSet = new Set(
+            selectedNames.map((name) => normalizeCollectionName(name)),
+        );
+        const suggestedNameSet = new Set(
+            suggestedNames.map((name) => normalizeCollectionName(name)),
+        );
+        const sortedSelectedSuggestedNames = allNames
+            .filter((name) => {
+                const normalizedName = normalizeCollectionName(name);
+                return (
+                    selectedNameSet.has(normalizedName) &&
+                    suggestedNameSet.has(normalizedName)
+                );
+            })
             .sort((a, b) =>
                 a.localeCompare(b, undefined, { sensitivity: "base" }),
             );
-        return [...sortedSuggestedNames, ...sortedRemainingNames];
+        const sortedSelectedNames = allNames
+            .filter((name) => {
+                const normalizedName = normalizeCollectionName(name);
+                return (
+                    selectedNameSet.has(normalizedName) &&
+                    !suggestedNameSet.has(normalizedName)
+                );
+            })
+            .sort((a, b) =>
+                a.localeCompare(b, undefined, { sensitivity: "base" }),
+            );
+        const sortedSuggestedNames = allNames
+            .filter((name) => {
+                const normalizedName = normalizeCollectionName(name);
+                return (
+                    suggestedNameSet.has(normalizedName) &&
+                    !selectedNameSet.has(normalizedName)
+                );
+            })
+            .sort((a, b) =>
+                a.localeCompare(b, undefined, { sensitivity: "base" }),
+            );
+        const sortedRemainingNames = allNames
+            .filter((name) => {
+                const normalizedName = normalizeCollectionName(name);
+                return (
+                    !selectedNameSet.has(normalizedName) &&
+                    !suggestedNameSet.has(normalizedName)
+                );
+            })
+            .sort((a, b) =>
+                a.localeCompare(b, undefined, { sensitivity: "base" }),
+            );
+        return [
+            ...sortedSelectedSuggestedNames,
+            ...sortedSelectedNames,
+            ...sortedSuggestedNames,
+            ...sortedRemainingNames,
+        ];
     }, [availableNames, collections, selectedNames, suggestedNames]);
-
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container) {
-            return;
-        }
-
-        const updateScrollHint = () => {
-            const remainingScroll =
-                container.scrollWidth -
-                container.clientWidth -
-                container.scrollLeft;
-            setShowScrollHint(remainingScroll > 8);
-        };
-
-        updateScrollHint();
-        container.addEventListener("scroll", updateScrollHint, {
-            passive: true,
-        });
-        window.addEventListener("resize", updateScrollHint);
-
-        return () => {
-            container.removeEventListener("scroll", updateScrollHint);
-            window.removeEventListener("resize", updateScrollHint);
-        };
-    }, [displayNames.length, createOpen]);
 
     const handleAddCollectionName = useCallback(() => {
         const trimmedName = createName.trim();
@@ -528,127 +533,19 @@ const CollectionNameSelector: React.FC<{
 
     return (
         <Box>
-            <Stack
-                direction="row"
-                sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 1,
-                    mb: 1.25,
-                }}
-            >
-                <Typography
-                    variant="small"
-                    sx={{
-                        color: "text.faint",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        display: "block",
-                    }}
-                >
-                    {t("collections")}
-                </Typography>
-            </Stack>
-            <Box sx={{ position: "relative" }}>
-                <Stack
-                    ref={scrollContainerRef}
-                    direction="row"
-                    sx={{
-                        gap: 1,
-                        flexWrap: "nowrap",
-                        overflowX: "auto",
-                        overflowY: "hidden",
-                        pr: 6,
-                        pb: 0.5,
-                        scrollbarWidth: "none",
-                        "&::-webkit-scrollbar": { display: "none" },
-                    }}
-                >
-                    <ButtonBase
-                        onClick={() => setCreateOpen((open) => !open)}
-                        disabled={disabled}
-                        sx={(theme) => ({
-                            borderRadius: "999px",
-                            px: 1.5,
-                            py: 0.875,
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                            border: `1px dotted ${theme.vars.palette.stroke.muted}`,
-                            color: theme.vars.palette.text.muted,
-                            backgroundColor: createOpen
-                                ? theme.vars.palette.fill.faint
-                                : "transparent",
-                        })}
-                    >
-                        <Typography variant="small">
-                            + {t("collection")}
-                        </Typography>
-                    </ButtonBase>
-                    {displayNames.map((name) => {
-                        const isSelected = selectedNameMap.has(
-                            normalizeCollectionName(name),
-                        );
-                        return (
-                            <ButtonBase
-                                key={name}
-                                onClick={() => onToggleName(name)}
-                                disabled={disabled}
-                                sx={(theme) => ({
-                                    borderRadius: "999px",
-                                    px: 1.5,
-                                    py: 0.875,
-                                    whiteSpace: "nowrap",
-                                    flexShrink: 0,
-                                    backgroundColor: isSelected
-                                        ? "#1071FF"
-                                        : theme.vars.palette.fill.faint,
-                                    color: isSelected
-                                        ? "#FFFFFF"
-                                        : theme.vars.palette.text.base,
-                                })}
-                            >
-                                <Typography variant="small">{name}</Typography>
-                            </ButtonBase>
-                        );
-                    })}
-                </Stack>
-                {showScrollHint && (
-                    <Box
-                        sx={(theme) => ({
-                            position: "absolute",
-                            top: 0,
-                            right: 0,
-                            bottom: 0,
-                            width: 72,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            pr: 0.5,
-                            pointerEvents: "none",
-                            background: `linear-gradient(90deg, ${theme.vars.palette.background.default}00 0%, ${theme.vars.palette.background.default}E6 52%, ${theme.vars.palette.background.default} 74%)`,
-                        })}
-                    >
-                        <Box
-                            sx={(theme) => ({
-                                width: 22,
-                                height: 22,
-                                borderRadius: "999px",
-                                backgroundColor:
-                                    theme.vars.palette.background.default,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            })}
-                        >
-                            <ChevronRightRoundedIcon
-                                sx={{ color: "text.faint", fontSize: 20 }}
-                            />
-                        </Box>
-                    </Box>
-                )}
-            </Box>
-
+            <CollectionChipRow
+                items={displayNames.map((name) => ({
+                    key: name,
+                    label: name,
+                    selected: selectedNameMap.has(
+                        normalizeCollectionName(name),
+                    ),
+                    onClick: () => onToggleName(name),
+                }))}
+                createOpen={createOpen}
+                disabled={disabled}
+                onCreateClick={() => setCreateOpen((open) => !open)}
+            />
             {createOpen && (
                 <Stack sx={{ gap: 1, mt: 1.25 }}>
                     <Stack

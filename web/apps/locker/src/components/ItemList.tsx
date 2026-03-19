@@ -1,6 +1,7 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
@@ -35,7 +36,13 @@ import {
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { t } from "i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     deleteLockerFileShareLink,
     downloadLockerFile,
@@ -1825,130 +1832,219 @@ const CollectionChipFilters: React.FC<{
     collections: LockerCollection[];
     selectedCollectionIDs: number[];
     onToggleCollection: (collectionID: number) => void;
-}> = ({ collections, selectedCollectionIDs, onToggleCollection }) => (
-    <Box
-        sx={{
-            position: "relative",
-            width: "100%",
-            maxWidth: contentMaxWidth,
-            mx: "auto",
-            mt: 0.5,
-        }}
-    >
-        <Stack
-            direction="row"
+}> = ({ collections, selectedCollectionIDs, onToggleCollection }) => {
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const [showLeftScrollHint, setShowLeftScrollHint] = useState(false);
+    const [showRightScrollHint, setShowRightScrollHint] = useState(false);
+
+    const scrollRight = () => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        container.scrollBy({
+            left: Math.max(container.clientWidth * 0.6, 160),
+            behavior: "smooth",
+        });
+    };
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const updateScrollHint = () => {
+            setShowLeftScrollHint(container.scrollLeft > 8);
+            const remainingScroll =
+                container.scrollWidth -
+                container.clientWidth -
+                container.scrollLeft;
+            setShowRightScrollHint(remainingScroll > 8);
+        };
+
+        updateScrollHint();
+        container.addEventListener("scroll", updateScrollHint, {
+            passive: true,
+        });
+        window.addEventListener("resize", updateScrollHint);
+
+        return () => {
+            container.removeEventListener("scroll", updateScrollHint);
+            window.removeEventListener("resize", updateScrollHint);
+        };
+    }, [collections, selectedCollectionIDs]);
+
+    return (
+        <Box
             sx={{
-                flexWrap: "nowrap",
-                overflowX: "auto",
-                overflowY: "hidden",
-                justifyContent: "flex-start",
-                gap: 0,
-                pb: 0.5,
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
+                width: "100%",
+                maxWidth: contentMaxWidth,
+                mx: "auto",
+                mt: 0.5,
             }}
         >
-            {collections.map((collection) => {
-                const isSelected = selectedCollectionIDs.includes(
-                    collection.id,
-                );
+            <Stack direction="row" sx={{ alignItems: "stretch", gap: 0 }}>
+                <Box sx={{ position: "relative", flex: 1, minWidth: 0 }}>
+                    <Stack
+                        ref={scrollContainerRef}
+                        direction="row"
+                        sx={{
+                            gap: 1,
+                            flexWrap: "nowrap",
+                            overflowX: "auto",
+                            overflowY: "hidden",
+                            justifyContent: "flex-start",
+                            pr: 2,
+                            pb: 0.5,
+                            scrollbarWidth: "none",
+                            "&::-webkit-scrollbar": { display: "none" },
+                        }}
+                    >
+                        {collections.map((collection) => {
+                            const isSelected = selectedCollectionIDs.includes(
+                                collection.id,
+                            );
 
-                return (
-                    <Box key={collection.id} sx={{ pr: 1, flexShrink: 0 }}>
-                        <Chip
-                            clickable
-                            label={collection.name}
-                            onClick={() => onToggleCollection(collection.id)}
-                            sx={(theme) => ({
-                                height: 36,
-                                flexShrink: 0,
-                                borderRadius: "999px",
-                                fontWeight: isSelected ? 700 : 600,
-                                color: isSelected
-                                    ? theme.vars.palette.primary.main
-                                    : theme.vars.palette.text.base,
-                                backgroundColor: isSelected
-                                    ? "rgba(16, 113, 255, 0.10)"
-                                    : theme.vars.palette.fill.faint,
-                                border: "1px solid transparent",
-                                boxShadow: isSelected
-                                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
-                                    : "none",
-                                transition:
-                                    "background-color 180ms ease, color 180ms ease, box-shadow 180ms ease",
-                                "& .MuiChip-label": { px: 1.5 },
-                                "&:hover": {
-                                    backgroundColor: isSelected
-                                        ? "rgba(16, 113, 255, 0.14)"
-                                        : theme.vars.palette.fill.faintHover,
-                                },
-                                ...theme.applyStyles("light", {
-                                    backgroundColor: isSelected
-                                        ? "rgba(16, 113, 255, 0.10)"
-                                        : "#FFFFFF",
-                                    border: isSelected
-                                        ? "1px solid rgba(16, 113, 255, 0.24)"
-                                        : "1px solid rgba(17, 24, 39, 0.06)",
-                                    "&:hover": {
+                            return (
+                                <ButtonBase
+                                    key={collection.id}
+                                    onClick={() =>
+                                        onToggleCollection(collection.id)
+                                    }
+                                    sx={(theme) => ({
+                                        borderRadius: "999px",
+                                        px: 1.5,
+                                        py: 0.875,
+                                        whiteSpace: "nowrap",
+                                        flexShrink: 0,
                                         backgroundColor: isSelected
-                                            ? "rgba(16, 113, 255, 0.14)"
-                                            : "#F8FAFC",
-                                    },
+                                            ? "#1071FF"
+                                            : theme.vars.palette.fill.faint,
+                                        color: isSelected
+                                            ? "#FFFFFF"
+                                            : theme.vars.palette.text.base,
+                                        ...theme.applyStyles("light", {
+                                            backgroundColor: isSelected
+                                                ? "#1071FF"
+                                                : "#FFFFFF",
+                                            border: isSelected
+                                                ? "none"
+                                                : "1px solid rgba(17, 24, 39, 0.06)",
+                                        }),
+                                    })}
+                                >
+                                    <Typography variant="small">
+                                        {collection.name}
+                                    </Typography>
+                                </ButtonBase>
+                            );
+                        })}
+                    </Stack>
+                    {showLeftScrollHint && (
+                        <Box
+                            sx={(theme) => ({
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                bottom: 0,
+                                width: 40,
+                                pointerEvents: "none",
+                                background:
+                                    "linear-gradient(90deg, #08090A 0%, rgba(8, 9, 10, 0) 100%)",
+                                ...theme.applyStyles("light", {
+                                    background:
+                                        "linear-gradient(90deg, #F3F4F6 0%, rgba(243, 244, 246, 0) 100%)",
                                 }),
                             })}
                         />
-                    </Box>
-                );
-            })}
-        </Stack>
-    </Box>
-);
+                    )}
+                    {showRightScrollHint && (
+                        <Box
+                            sx={(theme) => ({
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                                bottom: 0,
+                                width: 72,
+                                pointerEvents: "none",
+                                background:
+                                    "linear-gradient(90deg, rgba(8, 9, 10, 0) 0%, #08090A 100%)",
+                                ...theme.applyStyles("light", {
+                                    background:
+                                        "linear-gradient(90deg, rgba(243, 244, 246, 0) 0%, #F3F4F6 100%)",
+                                }),
+                            })}
+                        />
+                    )}
+                </Box>
+                <Box
+                    sx={{
+                        width: 28,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    {showRightScrollHint && (
+                        <ButtonBase
+                            onClick={scrollRight}
+                            sx={(theme) => ({
+                                width: 28,
+                                height: "100%",
+                                color: "#4A4A4A",
+                                borderRadius: "999px",
+                                ...theme.applyStyles("dark", {
+                                    color: "#FFFFFF",
+                                }),
+                            })}
+                        >
+                            <ChevronRightRoundedIcon sx={{ fontSize: 28 }} />
+                        </ButtonBase>
+                    )}
+                </Box>
+            </Stack>
+        </Box>
+    );
+};
 
 const CollectionFilterChip: React.FC<{
     selected: boolean;
     onClick: (event: React.MouseEvent<HTMLElement>) => void;
 }> = ({ selected, onClick }) => (
     <Tooltip title={t("seeAllCollections")}>
-        <Chip
-            clickable
-            icon={<FilterListRoundedIcon sx={{ fontSize: 18 }} />}
+        <ButtonBase
             onClick={onClick}
             sx={(theme) => ({
-                height: 36,
-                flexShrink: 0,
                 borderRadius: "999px",
-                fontWeight: selected ? 700 : 600,
-                color: selected ? "primary.main" : theme.vars.palette.text.base,
+                px: 1.25,
+                py: 0.875,
+                flexShrink: 0,
+                minWidth: 44,
+                color: selected ? "#FFFFFF" : theme.vars.palette.text.base,
                 backgroundColor: selected
-                    ? "rgba(16, 113, 255, 0.10)"
+                    ? "#1071FF"
                     : theme.vars.palette.fill.faint,
-                border: "1px solid transparent",
-                boxShadow: selected
-                    ? `inset 0 0 0 1px ${theme.vars.palette.primary.main}`
-                    : "none",
-                "& .MuiChip-icon": { color: "inherit", m: 0 },
-                "& .MuiChip-label": { display: "none" },
-                px: 1.125,
                 "&:hover": {
                     backgroundColor: selected
-                        ? "rgba(16, 113, 255, 0.14)"
+                        ? "#1071FF"
                         : theme.vars.palette.fill.faintHover,
                 },
                 ...theme.applyStyles("light", {
-                    backgroundColor: selected
-                        ? "rgba(16, 113, 255, 0.10)"
-                        : "#FFFFFF",
+                    backgroundColor: selected ? "#1071FF" : "#FFFFFF",
                     border: selected
-                        ? "1px solid rgba(16, 113, 255, 0.24)"
+                        ? "none"
                         : "1px solid rgba(17, 24, 39, 0.06)",
                     "&:hover": {
-                        backgroundColor: selected
-                            ? "rgba(16, 113, 255, 0.14)"
-                            : "#F8FAFC",
+                        backgroundColor: selected ? "#1071FF" : "#F8FAFC",
                     },
                 }),
             })}
-        />
+        >
+            <FilterListRoundedIcon sx={{ fontSize: 18 }} />
+        </ButtonBase>
     </Tooltip>
 );
 
