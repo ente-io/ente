@@ -1,6 +1,5 @@
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import { Box, ButtonBase, Stack, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
 import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -16,14 +15,7 @@ export const CollectionChipRow: React.FC<{
     createOpen: boolean;
     disabled?: boolean;
     onCreateClick?: () => void;
-    fadeColor?: (theme: Theme) => string;
-}> = ({
-    items,
-    createOpen,
-    disabled,
-    onCreateClick,
-    fadeColor = (theme) => theme.vars.palette.background.paper,
-}) => {
+}> = ({ items, createOpen, disabled, onCreateClick }) => {
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const [showScrollHint, setShowScrollHint] = useState(false);
 
@@ -101,6 +93,12 @@ export const CollectionChipRow: React.FC<{
                             overflowY: "hidden",
                             pr: 2,
                             pb: 0.5,
+                            maskImage: showScrollHint
+                                ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0, 0, 0, 0) 100%)"
+                                : undefined,
+                            WebkitMaskImage: showScrollHint
+                                ? "linear-gradient(90deg, #000 0%, #000 calc(100% - 64px), rgba(0, 0, 0, 0) 100%)"
+                                : undefined,
                             scrollbarWidth: "none",
                             "&::-webkit-scrollbar": { display: "none" },
                         }}
@@ -152,19 +150,6 @@ export const CollectionChipRow: React.FC<{
                             </ButtonBase>
                         ))}
                     </Stack>
-                    {showScrollHint && (
-                        <Box
-                            sx={(theme) => ({
-                                position: "absolute",
-                                top: 0,
-                                right: 0,
-                                bottom: 0,
-                                width: 64,
-                                pointerEvents: "none",
-                                background: `linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, ${fadeColor(theme)} 100%)`,
-                            })}
-                        />
-                    )}
                 </Box>
                 <Box
                     sx={{
