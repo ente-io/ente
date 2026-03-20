@@ -26,13 +26,15 @@ impl VectorDB {
             )
         })?;
 
-        let mut options = IndexOptions::default();
-        options.dimensions = dimensions;
-        options.metric = MetricKind::IP;
-        options.quantization = ScalarKind::F32;
-        options.connectivity = 0; // auto
-        options.expansion_add = 0; // auto
-        options.expansion_search = 0; // auto
+        let options = IndexOptions {
+            dimensions,
+            metric: MetricKind::IP,
+            quantization: ScalarKind::F32,
+            connectivity: 0,     // auto
+            expansion_add: 0,    // auto
+            expansion_search: 0, // auto
+            ..IndexOptions::default()
+        };
 
         let index = Index::new(&options).map_err(|e| format!("Failed to create index: {e}"))?;
         index
