@@ -72,6 +72,7 @@ Future<void>? _rustInitFuture;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  await _ensureRustInitialized(via: 'main');
   WidgetsFlutterBinding.ensureInitialized();
   FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
@@ -246,9 +247,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
-    await _ensureRustInitialized(
-      via: isBackground ? 'background:$via' : 'foreground:$via',
-    );
+    if (isBackground) {
+      await _ensureRustInitialized(via: 'background:$via');
+    }
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
