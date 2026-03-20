@@ -150,6 +150,7 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
+    await _ensurePluginInitialized();
     bool? result;
     if (Platform.isIOS) {
       result = await _notificationsPlugin
@@ -208,6 +209,7 @@ class NotificationService {
     String channelName = "ente",
     String payload = "ente://home",
   }) async {
+    await _ensurePluginInitialized();
     _logger.info(
       "Showing notification with: $title, $message, $channelID, $channelName, $payload",
     );
@@ -244,6 +246,7 @@ class NotificationService {
     bool logSchedule = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logSchedule) {
         _logger.info(
           "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
@@ -314,6 +317,7 @@ class NotificationService {
     bool logLines = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logLines) {
         _logger.info("Clearing all scheduled notifications");
       }
@@ -352,6 +356,7 @@ class NotificationService {
   }
 
   Future<int> pendingNotifications() async {
+    await _ensurePluginInitialized();
     final pending = await _notificationsPlugin.pendingNotificationRequests();
     return pending.length;
   }
