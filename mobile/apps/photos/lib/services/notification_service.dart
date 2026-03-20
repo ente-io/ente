@@ -56,6 +56,7 @@ class NotificationService {
 
   Future<void> _ensurePluginInitialized() async {
     if (_pluginInitialized) return;
+    final pluginInitStopwatch = Stopwatch()..start();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -72,6 +73,9 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse: _handleNotificationResponse,
     );
+    _logger.info(
+      "flutter_local_notifications.initialize took ${pluginInitStopwatch.elapsedMilliseconds}ms",
+    );
     _pluginInitialized = true;
   }
 
@@ -87,8 +91,12 @@ class NotificationService {
 
   Future<void> _handleLaunchDetailsIfNeeded() async {
     if (_launchDetailsHandled) return;
+    final launchDetailsStopwatch = Stopwatch()..start();
     final launchDetails =
         await _notificationsPlugin.getNotificationAppLaunchDetails();
+    _logger.info(
+      "getNotificationAppLaunchDetails took ${launchDetailsStopwatch.elapsedMilliseconds}ms",
+    );
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
@@ -99,11 +107,23 @@ class NotificationService {
 
   Future<void> initTimezones() async {
     if (timezoneInitialized) return;
+    final timezoneInitStopwatch = Stopwatch()..start();
+    final tzdbStopwatch = Stopwatch()..start();
     tzdb.initializeTimeZones();
+    _logger.info(
+      "tz.initializeTimeZones took ${tzdbStopwatch.elapsedMilliseconds}ms",
+    );
+    final localTimezoneStopwatch = Stopwatch()..start();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    _logger.info(
+      "FlutterTimezone.getLocalTimezone took ${localTimezoneStopwatch.elapsedMilliseconds}ms",
+    );
     final String resolvedTimeZone = _resolveTimeZoneName(currentTimeZone);
     tz.setLocalLocation(tz.getLocation(resolvedTimeZone));
     timezoneInitialized = true;
+    _logger.info(
+      "Notification timezone init took ${timezoneInitStopwatch.elapsedMilliseconds}ms",
+    );
   }
 
   String _resolveTimeZoneName(String timeZoneName) {
