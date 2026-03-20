@@ -212,12 +212,10 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        if (!isProcessBg) {
-          // refresh discover section
-          magicCacheService.updateCache(forced: force).ignore();
-          // refresh memories section
-          memoriesCacheService.updateCache(forced: force).ignore();
-        }
+        // Refresh discover/memories caches before indexing using the same
+        // path in foreground and background runs.
+        magicCacheService.updateCache(forced: force).ignore();
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
         await fetchAndIndexAllImages(mode: mode);
