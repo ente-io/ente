@@ -90,7 +90,6 @@ fun HomeView(
     val context = androidx.compose.ui.platform.LocalContext.current
     val navController = rememberAnimatedNavController()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val latestChatState by rememberUpdatedState(appState.chat)
     val latestStore by rememberUpdatedState(store)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: HomeRoute.Chat
@@ -186,15 +185,7 @@ fun HomeView(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                val chatState = latestChatState
-                if (
-                    chatState.hasRequestedModelDownload &&
-                    !chatState.isModelDownloaded &&
-                    !chatState.isDownloading &&
-                    !chatState.isGenerating
-                ) {
-                    latestStore.startModelDownload(userInitiated = false)
-                }
+                latestStore.refreshModelDownloadInfo()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

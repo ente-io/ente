@@ -51,6 +51,7 @@ interface LlmProvider {
 
     fun isModelDownloaded(target: LlmModelTarget): Boolean
     suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long?
+    suspend fun currentDownloadProgress(target: LlmModelTarget): DownloadProgress?
     fun loadedContextLength(target: LlmModelTarget): Int?
 
     fun stopGeneration()

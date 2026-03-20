@@ -488,6 +488,7 @@ final class ChatViewModel: ObservableObject {
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
+    private var downloadProgressMonitorTask: Task<Void, Never>?
     private var sharedModelReadyTask: Task<Void, Error>?
     private var sharedModelReadyTaskId: UUID?
     private var sharedModelReadyKey: ModelReadyKey?
@@ -1193,6 +1194,8 @@ final class ChatViewModel: ObservableObject {
         let target = modelSettings.currentTarget()
         isModelDownloaded = provider.isModelDownloaded(target: target)
         if isModelDownloaded {
+            downloadProgressMonitorTask?.cancel()
+            downloadProgressMonitorTask = nil
             clearDownloadProgressMemory()
             modelDownloadSizeBytes = nil
             return
@@ -1200,8 +1203,20 @@ final class ChatViewModel: ObservableObject {
 
         Task { [weak self] in
             guard let self else { return }
+            let progress = await provider.currentDownloadProgress(target: target)
             let size = await provider.estimatedDownloadSize(target: target)
             await MainActor.run {
+                guard self.modelReadyKey(for: self.modelSettings.currentTarget()) == self.modelReadyKey(for: target) else {
+                    return
+                }
+                if let progress {
+                    self.handleProgress(progress)
+                    self.startDownloadProgressMonitor(target: target)
+                } else if self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading {
+                    self.downloadToast = nil
+                    self.isDownloading = false
+                    self.clearDownloadProgressMemory()
+                }
                 self.modelDownloadSizeBytes = size ?? self.modelDownloadSizeBytes
             }
         }
@@ -1292,6 +1307,7 @@ final class ChatViewModel: ObservableObject {
         logger.info("Model download started", details: "model=\(target.id)")
 
         modelDownloadTask?.cancel()
+        startDownloadProgressMonitor(target: target)
         modelDownloadTask = Task {
             do {
                 try await self.ensureModelReadyShared(target: target)
@@ -1355,6 +1371,8 @@ final class ChatViewModel: ObservableObject {
         resetGenerationState(stopRequested: true)
         modelDownloadTask?.cancel()
         modelDownloadTask = nil
+        downloadProgressMonitorTask?.cancel()
+        downloadProgressMonitorTask = nil
         sharedModelReadyTask?.cancel()
         clearSharedModelReadyTask()
         provider.cancelDownload()
@@ -1739,6 +1757,44 @@ final class ChatViewModel: ObservableObject {
         )
         let visiblePercent = resolvedProgress.percent ?? progress.percent
         isDownloading = visiblePercent >= 0 && visiblePercent < 100
+    }
+
+    private func startDownloadProgressMonitor(target: InferenceModelTarget) {
+        downloadProgressMonitorTask?.cancel()
+        let targetKey = modelReadyKey(for: target)
+
+        downloadProgressMonitorTask = Task { [weak self] in
+            guard let self else { return }
+            var emptyPollCount = 0
+
+            while !Task.isCancelled {
+                guard self.modelReadyKey(for: self.modelSettings.currentTarget()) == targetKey else {
+                    return
+                }
+
+                let progress = await self.provider.currentDownloadProgress(target: target)
+                let isDownloaded = self.provider.isModelDownloaded(target: target)
+
+                if let progress {
+                    emptyPollCount = 0
+                    self.handleProgress(progress)
+                } else {
+                    emptyPollCount += 1
+                }
+
+                if isDownloaded {
+                    self.refreshModelDownloadInfo()
+                    return
+                }
+
+                if emptyPollCount >= 6 {
+                    self.refreshModelDownloadInfo()
+                    return
+                }
+
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+        }
     }
 
     private func buildSyncAuth() -> SyncAuth? {

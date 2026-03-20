@@ -6,6 +6,7 @@ struct ChatView: View {
     @Binding var isShowingAuth: Bool
 
     @EnvironmentObject private var appState: EnsuAppState
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject private var modelSettings = ModelSettingsStore.shared
 
     @StateObject private var viewState = ChatViewState()
@@ -139,6 +140,11 @@ struct ChatView: View {
             }
             .onChange(of: modelSettingsSignature) { _ in
                 viewModel.refreshModelDownloadInfo()
+            }
+            .onChange(of: scenePhase) { newValue in
+                if newValue == .active {
+                    viewModel.refreshModelDownloadInfo()
+                }
             }
         }
         .sheet(isPresented: $viewState.showSettings) {

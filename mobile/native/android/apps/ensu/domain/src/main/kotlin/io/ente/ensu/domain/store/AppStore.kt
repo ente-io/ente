@@ -29,7 +29,7 @@ class AppStore(
 
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
     private val attachmentActions = AttachmentStoreActions(_state, chatSyncRepository, messageStore)
-    private val modelSettingsActions = ModelSettingsActions(_state, llmProvider, logRepository)
+    private val modelSettingsActions = ModelSettingsActions(_state, sessionPreferences, llmProvider, logRepository)
     private val syncActions = SyncStoreActions(_state, chatSyncRepository, logRepository)
     private val chatActions = ChatStoreActions(
         state = _state,
@@ -58,6 +58,17 @@ class AppStore(
         modelSettingsActions.setScope(scope)
         chatActions.bootstrap(scope)
         modelSettingsActions.refreshModelDownloadInfo()
+    }
+
+    fun hydrateModelDownloadRequested(requested: Boolean) {
+        if (!requested) return
+        _state.value = _state.value.copy(
+            chat = _state.value.chat.copy(
+                hasRequestedModelDownload = true,
+                isDownloading = true,
+                downloadStatus = "Resuming download..."
+            )
+        )
     }
 
     fun createNewSession(): String = chatActions.createNewSession()
@@ -91,6 +102,8 @@ class AppStore(
 
     fun startModelDownload(userInitiated: Boolean = true) =
         modelSettingsActions.startModelDownload(userInitiated)
+
+    fun refreshModelDownloadInfo() = modelSettingsActions.refreshModelDownloadInfo()
 
     fun cancelDownload() {
         chatActions.cancelGenerationForDownload()

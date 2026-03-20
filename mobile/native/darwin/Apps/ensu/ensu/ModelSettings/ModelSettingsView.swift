@@ -41,10 +41,10 @@ struct ModelSettingsView: View {
             mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         ),
         ModelChoice(
-            id: "qwen-2b",
-            name: "Qwen 3.5 2B (Q8_0)",
-            url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-            mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+            id: "qwen-0.8b",
+            name: "Qwen 3.5 0.8B (Q4_K_M)",
+            url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+            mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
         ),
         ModelChoice(
             id: Self.customOptionId,

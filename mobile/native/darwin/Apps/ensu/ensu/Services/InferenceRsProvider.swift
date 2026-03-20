@@ -52,14 +52,19 @@ final class InferenceRsProvider {
         let requestedContextLength: Int?
     }
 
+    private struct DownloadTarget {
+        let label: String
+        let url: String
+        let destination: URL
+    }
+
     private let modelDir: URL
+    private let downloadManager = ModelDownloadManager.shared
     private var modelHandle: ModelHandle?
     private var contextHandle: ContextHandle?
     private var currentModelKey: LoadedModelKey?
     private var currentContextLength: Int?
     private var backendInitialized = false
-    private var downloadCancelled = false
-    private var currentDownloadTask: URLSessionTask?
     private var currentJobId: Int64?
 
     init(modelDir: URL) {
@@ -103,7 +108,7 @@ final class InferenceRsProvider {
         }
         expectedTargets.append(DownloadTarget(label: "Model", url: target.url, destination: modelPath))
 
-        if let mmprojUrl = target.mmprojUrl, let mmprojPath {
+        if let mmprojUrl = target.mmprojUrl, !mmprojUrl.isEmpty, let mmprojPath {
             let mmprojExistsAtStart = FileManager.default.fileExists(atPath: mmprojPath.path)
             if shouldRedownloadExistingFile(at: mmprojPath) || !mmprojExistsAtStart {
                 if mmprojExistsAtStart {
@@ -116,64 +121,9 @@ final class InferenceRsProvider {
         let downloads = expectedTargets.filter { !FileManager.default.fileExists(atPath: $0.destination.path) }
 
         if !downloads.isEmpty {
-            downloadCancelled = false
-            var lengths: [Int64?] = []
-            for download in expectedTargets {
-                if FileManager.default.fileExists(atPath: download.destination.path) {
-                    lengths.append(fileSize(download.destination))
-                } else {
-                    lengths.append(await fetchContentLength(for: download.url))
-                }
-            }
-
-            let totalBytes = lengths.compactMap { $0 }.reduce(0, +)
-            let hasTotal = lengths.allSatisfy { $0 != nil } && totalBytes > 0
-            var downloadedSoFar: Int64 = zip(expectedTargets, lengths).reduce(0) { partial, pair in
-                let existing = existingDownloadBytes(at: pair.0.destination)
-                let capped = min(existing, pair.1 ?? existing)
-                return partial + capped
-            }
-
-            if hasTotal, downloadedSoFar > 0 {
-                let initialPercent = min(99, max(0, Int((Double(downloadedSoFar) / Double(totalBytes)) * 100.0)))
-                onProgress(
-                    InferenceDownloadProgress(
-                        percent: initialPercent,
-                        status: "Downloading... \(downloadedSoFar.formattedFileSize) / \(totalBytes.formattedFileSize)"
-                    )
-                )
-            } else {
-                onProgress(InferenceDownloadProgress(percent: 0, status: "Starting download..."))
-            }
-
-            for download in downloads {
-                let expectedIndex = expectedTargets.firstIndex(where: { $0.destination == download.destination }) ?? 0
-                let fileTotal = lengths[expectedIndex]
-                let existingBytesForFile = existingDownloadBytes(at: download.destination)
-                // downloadedSoFar already includes any resumed bytes for this file.
-                let bytesBeforeFile = downloadedSoFar - existingBytesForFile
-                try await downloadFile(from: download.url, to: download.destination) { [self] downloaded, total in
-                    let overallDownloaded = bytesBeforeFile + downloaded
-                    let percent: Int
-                    if hasTotal {
-                        percent = Int((Double(overallDownloaded) / Double(totalBytes)) * 100.0)
-                    } else {
-                        let step = 100.0 / Double(expectedTargets.count)
-                        let filePercent = total.map { Double(downloaded) / Double($0) } ?? 0
-                        percent = Int((Double(expectedIndex) * step) + (filePercent * step))
-                    }
-
-                    let status = if hasTotal {
-                        "Downloading... \(overallDownloaded.formattedFileSize) / \(totalBytes.formattedFileSize)"
-                    } else {
-                        "Downloading \(download.label.lowercased())... \(downloaded.formattedFileSize)"
-                    }
-
-                    onProgress(InferenceDownloadProgress(percent: min(99, max(0, percent)), status: status))
-                }
-                let finishedBytes = fileTotal ?? existingDownloadBytes(at: download.destination)
-                downloadedSoFar = bytesBeforeFile + finishedBytes
-            }
+            onProgress(InferenceDownloadProgress(percent: 0, status: "Starting download..."))
+            await downloadManager.enqueueDownloads(downloads.map(downloadTarget(for:)))
+            try await waitForDownloads(expectedTargets, onProgress: onProgress)
         }
 
         onProgress(InferenceDownloadProgress(percent: 100, status: "Loading model..."))
@@ -289,8 +239,9 @@ final class InferenceRsProvider {
     }
 
     func cancelDownload() {
-        downloadCancelled = true
-        currentDownloadTask?.cancel()
+        Task {
+            await downloadManager.cancelAllDownloads()
+        }
     }
 
     func isModelDownloaded(target: InferenceModelTarget) -> Bool {
@@ -335,6 +286,10 @@ final class InferenceRsProvider {
         return sizes.reduce(0, +)
     }
 
+    func currentDownloadProgress(target: InferenceModelTarget) async -> InferenceDownloadProgress? {
+        await downloadManager.progress(for: expectedTargets(for: target).map(downloadTarget(for:)))
+    }
+
     func loadedContextLength(target: InferenceModelTarget) -> Int? {
         let modelKey = LoadedModelKey(id: target.id, requestedContextLength: target.contextLength)
         guard currentModelKey == modelKey, modelHandle != nil, contextHandle != nil else {
@@ -371,156 +326,6 @@ final class InferenceRsProvider {
             }
         }
         throw NSError(domain: "InferenceRsProvider", code: -5, userInfo: [NSLocalizedDescriptionKey: "Failed to create context"])
-    }
-
-    private func downloadFile(
-        from urlString: String,
-        to destination: URL,
-        onProgress: @escaping (Int64, Int64?) -> Void
-    ) async throws {
-        guard let url = URL(string: urlString) else {
-            throw NSError(domain: "InferenceRsProvider", code: -7, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
-        }
-
-        let tmp = destination.appendingPathExtension("tmp")
-        var existing = fileSize(tmp)
-        if existing > 0, !looksLikeGguf(file: tmp) {
-            try? FileManager.default.removeItem(at: tmp)
-            existing = 0
-        }
-
-        var shouldResume = existing > 0
-
-        while true {
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            if shouldResume {
-                request.setValue("bytes=\(existing)-", forHTTPHeaderField: "Range")
-            }
-
-            let (bytes, response) = try await URLSession.shared.bytes(for: request)
-            currentDownloadTask = bytes.task
-
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-            if shouldResume, statusCode == 200 {
-                try? FileManager.default.removeItem(at: tmp)
-                existing = 0
-                shouldResume = false
-                continue
-            }
-
-            if !(200...299).contains(statusCode) {
-                throw NSError(
-                    domain: "InferenceRsProvider",
-                    code: -9,
-                    userInfo: [NSLocalizedDescriptionKey: "Download failed (HTTP \(statusCode))"]
-                )
-            }
-
-            var totalBytes: Int64?
-            if shouldResume, statusCode == 206,
-               let contentRange = (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Range") {
-                totalBytes = parseTotalBytes(from: contentRange)
-            }
-
-            if totalBytes == nil {
-                let expected = response.expectedContentLength
-                if expected > 0 {
-                    totalBytes = shouldResume && statusCode == 206 ? expected + existing : expected
-                }
-            }
-
-            if let totalBytes, totalBytes <= existing {
-                try? FileManager.default.removeItem(at: tmp)
-                existing = 0
-                shouldResume = false
-                continue
-            }
-
-            try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
-
-            let handle: FileHandle
-            if shouldResume, statusCode == 206, FileManager.default.fileExists(atPath: tmp.path) {
-                handle = try FileHandle(forWritingTo: tmp)
-                try handle.seekToEnd()
-            } else {
-                if FileManager.default.fileExists(atPath: tmp.path) {
-                    try FileManager.default.removeItem(at: tmp)
-                }
-                FileManager.default.createFile(atPath: tmp.path, contents: nil)
-                handle = try FileHandle(forWritingTo: tmp)
-            }
-
-            var buffer = [UInt8]()
-            buffer.reserveCapacity(64 * 1024)
-            var downloaded: Int64 = existing
-            var lastProgressUpdate: Int64 = existing
-            let updateThreshold: Int64 = 512 * 1024
-
-            defer {
-                currentDownloadTask = nil
-            }
-
-            for try await byte in bytes {
-                if downloadCancelled {
-                    try? handle.close()
-                    try? FileManager.default.removeItem(at: tmp)
-                    throw CancellationError()
-                }
-
-                buffer.append(byte)
-                downloaded += 1
-
-                if buffer.count >= 64 * 1024 {
-                    handle.write(Data(buffer))
-                    buffer.removeAll(keepingCapacity: true)
-                }
-
-                if downloaded - lastProgressUpdate >= updateThreshold {
-                    lastProgressUpdate = downloaded
-                    onProgress(downloaded, totalBytes)
-                }
-            }
-
-            if !buffer.isEmpty {
-                handle.write(Data(buffer))
-            }
-            try handle.close()
-            onProgress(downloaded, totalBytes)
-
-            if let totalBytes, downloaded < totalBytes {
-                try? FileManager.default.removeItem(at: tmp)
-                throw NSError(domain: "InferenceRsProvider", code: -10, userInfo: [NSLocalizedDescriptionKey: "Download incomplete"])
-            }
-
-            if !looksLikeGguf(file: tmp) {
-                try? FileManager.default.removeItem(at: tmp)
-                throw NSError(domain: "InferenceRsProvider", code: -6, userInfo: [NSLocalizedDescriptionKey: "Downloaded file is not GGUF"])
-            }
-
-            if FileManager.default.fileExists(atPath: destination.path) {
-                try FileManager.default.removeItem(at: destination)
-            }
-            try FileManager.default.moveItem(at: tmp, to: destination)
-            return
-        }
-    }
-
-    private func parseTotalBytes(from contentRange: String) -> Int64? {
-        let parts = contentRange.split(separator: "/")
-        guard parts.count == 2 else { return nil }
-        return Int64(parts[1])
-    }
-
-    private func existingDownloadBytes(at destination: URL) -> Int64 {
-        if FileManager.default.fileExists(atPath: destination.path) {
-            return fileSize(destination)
-        }
-        let tmp = destination.appendingPathExtension("tmp")
-        if FileManager.default.fileExists(atPath: tmp.path) {
-            return fileSize(tmp)
-        }
-        return 0
     }
 
     private func fetchContentLength(for urlString: String) async -> Int64? {
@@ -574,12 +379,6 @@ final class InferenceRsProvider {
         return removedAny
     }
 
-    private struct DownloadTarget {
-        let label: String
-        let url: String
-        let destination: URL
-    }
-
     private func looksLikeGguf(file: URL) -> Bool {
         guard let handle = try? FileHandle(forReadingFrom: file) else { return false }
         let data = handle.readData(ofLength: 4)
@@ -614,6 +413,49 @@ final class InferenceRsProvider {
         let data = Data(value.utf8)
         let hashed = SHA256.hash(data: data)
         return hashed.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func expectedTargets(for target: InferenceModelTarget) -> [DownloadTarget] {
+        let modelPath = modelPathFor(target: target)
+        let mmprojPath = mmprojPathFor(target: target)
+        var targets = [DownloadTarget(label: "Model", url: target.url, destination: modelPath)]
+
+        if let mmprojUrl = target.mmprojUrl, !mmprojUrl.isEmpty, let mmprojPath {
+            targets.append(DownloadTarget(label: "Mmproj", url: mmprojUrl, destination: mmprojPath))
+        }
+
+        return targets
+    }
+
+    private func downloadTarget(for target: DownloadTarget) -> ModelDownloadTarget {
+        ModelDownloadTarget(label: target.label, url: target.url, destination: target.destination)
+    }
+
+    private func waitForDownloads(
+        _ expectedTargets: [DownloadTarget],
+        onProgress: @escaping (InferenceDownloadProgress) -> Void
+    ) async throws {
+        let managerTargets = expectedTargets.map(downloadTarget(for:))
+
+        while true {
+            try Task.checkCancellation()
+            if expectedTargets.allSatisfy({ FileManager.default.fileExists(atPath: $0.destination.path) }) {
+                return
+            }
+
+            if let progress = await downloadManager.progress(for: managerTargets) {
+                if progress.percent == -1 {
+                    throw NSError(
+                        domain: "InferenceRsProvider",
+                        code: -9,
+                        userInfo: [NSLocalizedDescriptionKey: progress.status]
+                    )
+                }
+                onProgress(progress)
+            }
+
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
     }
 }
 
@@ -672,6 +514,11 @@ final class InferenceRsProvider {
     }
 
     func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
+        _ = target
+        return nil
+    }
+
+    func currentDownloadProgress(target: InferenceModelTarget) async -> InferenceDownloadProgress? {
         _ = target
         return nil
     }
