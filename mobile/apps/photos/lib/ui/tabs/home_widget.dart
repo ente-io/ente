@@ -45,6 +45,7 @@ import "package:photos/services/album_home_widget_service.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
@@ -165,6 +166,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
+        unawaited(SemanticSearchService.instance.prepareForInteractiveSearch());
       } else {
         isOnSearchTabNotifier.value = false;
       }
