@@ -145,6 +145,39 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   }
 
   @override
+  void didUpdateWidget(covariant PersonFaceWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final seedInputsChanged = !_sameFaceSourceSeed(
+          oldWidget.initialFaceSource,
+          widget.initialFaceSource,
+        ) ||
+        !_samePreviewFileSeed(
+          oldWidget.initialPreviewFile,
+          widget.initialPreviewFile,
+        ) ||
+        oldWidget.initialAvatarFaceId != widget.initialAvatarFaceId;
+    if (!seedInputsChanged) {
+      if (_personName == oldWidget.initialPersonName &&
+          widget.initialPersonName != oldWidget.initialPersonName) {
+        _personName = widget.initialPersonName;
+      }
+      return;
+    }
+
+    _upgradeGeneration += 1;
+    _personName = widget.initialPersonName;
+    _resolvedFaceSource = null;
+    fileForFaceCrop = null;
+    _faceForFaceCrop = null;
+    _faceCropFileId = null;
+    _showingFallback = false;
+    _faceLoadFuture = _loadFace();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   void dispose() {
     _disposed = true;
     _upgradeGeneration += 1;
@@ -527,6 +560,30 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     releaseClaims(_thumbnailGenerationTaskClaims, useFullFile: false);
   }
 
+  bool _sameFaceSourceSeed(
+    PersonFaceSource? a,
+    PersonFaceSource? b,
+  ) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.face.faceID == b.face.faceID &&
+        a.resolvedFileId == b.resolvedFileId;
+  }
+
+  bool _samePreviewFileSeed(EnteFile? a, EnteFile? b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.uploadedFileID == b.uploadedFileID && a.localID == b.localID;
+  }
+
   String _visibilityKeySuffix() {
     final widgetKey = widget.key;
     if (widgetKey is ValueKey) {
@@ -583,6 +640,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   }) async {
     final personOrClusterId = widget.personId ?? widget.clusterID!;
     Future<PersonEntity?>? currentPersonEntityFuture;
+    Future<String?>? persistedFaceIdFuture;
 
     Future<PersonEntity?> getCurrentPersonEntity() {
       if (!isPerson || isOfflineMode) {
@@ -590,6 +648,23 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       }
       return currentPersonEntityFuture ??=
           PersonService.instance.getPerson(widget.personId!);
+    }
+
+    Future<String?> getPersistedFaceId() {
+      return persistedFaceIdFuture ??=
+          checkUsedFaceIDForPersonOrClusterId(personOrClusterId);
+    }
+
+    void invalidateResolvedFaceSource(
+      PersonFaceSource faceSource, {
+      required bool clearSharedCache,
+    }) {
+      if (identical(_resolvedFaceSource, faceSource)) {
+        _resolvedFaceSource = null;
+      }
+      if (clearSharedCache) {
+        removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
+      }
     }
 
     Future<bool> isFaceStillAssignedToCurrentSubject(
@@ -628,19 +703,32 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       if (!isPerson || isOfflineMode) {
         final isStillAssigned =
             await isFaceStillAssignedToCurrentSubject(faceSource);
-        if (isStillAssigned) {
+        if (!isStillAssigned) {
+          _logger.fine(
+            'Ignoring stale prefetched face source for ${widget.clusterID ?? widget.personId}: '
+            'face=${faceSource.face.faceID}',
+          );
+          invalidateResolvedFaceSource(
+            faceSource,
+            clearSharedCache: clearSharedCache,
+          );
+          return false;
+        }
+
+        final persistedFaceId = await getPersistedFaceId();
+        if (persistedFaceId == null ||
+            persistedFaceId == faceSource.face.faceID) {
           return true;
         }
+
         _logger.fine(
-          'Ignoring stale prefetched face source for ${widget.clusterID ?? widget.personId}: '
-          'face=${faceSource.face.faceID}',
+          'Ignoring preview-seeded face source for ${widget.clusterID ?? widget.personId}: '
+          'persisted=$persistedFaceId face=${faceSource.face.faceID}',
         );
-        if (identical(_resolvedFaceSource, faceSource)) {
-          _resolvedFaceSource = null;
-        }
-        if (clearSharedCache) {
-          removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
-        }
+        invalidateResolvedFaceSource(
+          faceSource,
+          clearSharedCache: clearSharedCache,
+        );
         return false;
       }
 
@@ -658,22 +746,38 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         faceSource,
         currentAvatarFaceId: currentAvatarFaceId,
       );
-      if (isStillAssigned) {
+      if (!isStillAssigned) {
+        _logger.fine(
+          'Ignoring stale prefetched face source for person ${widget.personId}: '
+          'seeded=${widget.initialAvatarFaceId} '
+          'current=$currentAvatarFaceId '
+          'face=${faceSource.face.faceID}',
+        );
+        invalidateResolvedFaceSource(
+          faceSource,
+          clearSharedCache: clearSharedCache,
+        );
+        return false;
+      }
+
+      if (currentAvatarFaceId != null) {
+        return true;
+      }
+
+      final persistedFaceId = await getPersistedFaceId();
+      if (persistedFaceId == null ||
+          persistedFaceId == faceSource.face.faceID) {
         return true;
       }
 
       _logger.fine(
-        'Ignoring stale prefetched face source for person ${widget.personId}: '
-        'seeded=${widget.initialAvatarFaceId} '
-        'current=$currentAvatarFaceId '
-        'face=${faceSource.face.faceID}',
+        'Ignoring preview-seeded face source for person ${widget.personId}: '
+        'persisted=$persistedFaceId face=${faceSource.face.faceID}',
       );
-      if (identical(_resolvedFaceSource, faceSource)) {
-        _resolvedFaceSource = null;
-      }
-      if (clearSharedCache) {
-        removeCachedFaceSourceForPersonOrClusterID(personOrClusterId);
-      }
+      invalidateResolvedFaceSource(
+        faceSource,
+        clearSharedCache: clearSharedCache,
+      );
       return false;
     }
 
