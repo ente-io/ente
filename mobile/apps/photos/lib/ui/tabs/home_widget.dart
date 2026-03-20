@@ -151,6 +151,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
+    NotificationService.instance
+        .initialize(_onDidReceiveNotificationResponse)
+        .ignore();
+
     if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
     }
@@ -295,10 +299,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
-
-    NotificationService.instance
-        .initialize(_onDidReceiveNotificationResponse)
-        .ignore();
 
     if (Platform.isAndroid &&
         !localSettings.hasConfiguredInAppLinkPermissions() &&
