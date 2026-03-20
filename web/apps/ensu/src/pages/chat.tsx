@@ -1230,9 +1230,11 @@ const Page: React.FC = () => {
                 contextLength?: string;
                 maxTokens?: string;
             };
+            const isTauri = detectTauriRuntime();
+            const canMmproj = isTauri;
             const rawContextLength = parsed.contextLength ?? "";
             const clampedContextLength =
-                !isTauriRuntime &&
+                !isTauri &&
                 rawContextLength &&
                 Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
                     ? String(DEFAULT_WEB_CONTEXT_SIZE)
@@ -1241,7 +1243,7 @@ const Page: React.FC = () => {
                 const nextSettings = {
                     useCustomModel: !!parsed.useCustomModel,
                     modelUrl: parsed.modelUrl ?? "",
-                    mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
+                    mmprojUrl: canMmproj ? (parsed.mmprojUrl ?? "") : "",
                     contextLength: clampedContextLength,
                     maxTokens: parsed.maxTokens ?? "",
                 };
@@ -1252,13 +1254,13 @@ const Page: React.FC = () => {
             }
             setUseCustomModel(!!parsed.useCustomModel);
             setModelUrl(parsed.modelUrl ?? "");
-            setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
+            setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
             setContextLength(clampedContextLength);
             setMaxTokens(parsed.maxTokens ?? "");
         } catch (error) {
             log.error("Failed to read model settings", error);
         }
-    }, [allowMmproj, isTauriRuntime]);
+    }, []);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);

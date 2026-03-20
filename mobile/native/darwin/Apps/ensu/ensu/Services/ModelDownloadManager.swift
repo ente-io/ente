@@ -29,13 +29,11 @@ final class ModelDownloadManager: NSObject {
     private let syncQueue = DispatchQueue(label: "io.ente.ensu.model-download-manager")
     private lazy var session: URLSession = {
         let configuration: URLSessionConfiguration
-        #if os(iOS)
         configuration = URLSessionConfiguration.background(withIdentifier: "io.ente.ensu.model-downloads")
+        #if os(iOS)
         configuration.sessionSendsLaunchEvents = true
-        configuration.isDiscretionary = false
-        #else
-        configuration = URLSessionConfiguration.default
         #endif
+        configuration.isDiscretionary = false
         configuration.waitsForConnectivity = true
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
@@ -175,36 +173,46 @@ final class ModelDownloadManager: NSObject {
         }
     }
 
-    private func saveRecords(_ records: [String: DownloadRecord]) {
+    private func mutateRecords(_ block: (inout [String: DownloadRecord]) -> Void) {
         syncQueue.sync {
+            var records: [String: DownloadRecord]
+            if let data = UserDefaults.standard.data(forKey: recordsKey),
+               let decoded = try? JSONDecoder().decode([String: DownloadRecord].self, from: data) {
+                records = decoded
+            } else {
+                records = [:]
+            }
+            block(&records)
             let data = try? JSONEncoder().encode(records)
             UserDefaults.standard.set(data, forKey: recordsKey)
         }
     }
 
     private func saveRecord(_ record: DownloadRecord) {
-        var records = loadRecords()
-        records[record.id] = record
-        saveRecords(records)
+        mutateRecords { records in
+            records[record.id] = record
+        }
     }
 
     private func updateRecord(id: String, mutate: (inout DownloadRecord) -> Void) {
-        var records = loadRecords()
-        guard var record = records[id] else { return }
-        mutate(&record)
-        records[id] = record
-        saveRecords(records)
+        mutateRecords { records in
+            guard var record = records[id] else { return }
+            mutate(&record)
+            records[id] = record
+        }
     }
 
     private func clearRecords(for targets: [ModelDownloadTarget]) {
-        var records = loadRecords()
         let ids = targets.map { recordId(for: $0.destination) }
-        ids.forEach { records.removeValue(forKey: $0) }
-        saveRecords(records)
+        mutateRecords { records in
+            ids.forEach { records.removeValue(forKey: $0) }
+        }
     }
 
     private func clearAllRecords() {
-        saveRecords([:])
+        mutateRecords { records in
+            records.removeAll()
+        }
     }
 
     private func markFailed(id: String, message: String) {
@@ -222,9 +230,9 @@ final class ModelDownloadManager: NSObject {
     }
 
     private func clearRecord(id: String) {
-        var records = loadRecords()
-        records.removeValue(forKey: id)
-        saveRecords(records)
+        mutateRecords { records in
+            records.removeValue(forKey: id)
+        }
     }
 }
 

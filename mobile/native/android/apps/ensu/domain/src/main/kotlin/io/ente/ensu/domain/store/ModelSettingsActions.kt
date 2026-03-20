@@ -77,7 +77,7 @@ internal class ModelSettingsActions(
                             isDownloading = !isFailure,
                             downloadPercent = progress.percent.takeIf { it >= 0 },
                             downloadStatus = progress.status,
-                            hasRequestedModelDownload = if (isFailure) false else true
+                            hasRequestedModelDownload = !isFailure
                         )
                     )
                 }

@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var query: String = ""
     @State private var showSignOutConfirm = false
     @State private var buildVersionTapCount = 0
+    @State private var lastBuildVersionTapAt: Date?
     @State private var isAdvancedUnlocked = EnsuAdvancedSettings.isUnlocked
 
     var body: some View {
@@ -276,6 +277,11 @@ struct SettingsView: View {
 
     private func handleBuildVersionTap() {
         guard !isAdvancedUnlocked else { return }
+        let now = Date()
+        if let last = lastBuildVersionTapAt, now.timeIntervalSince(last) > 2 {
+            buildVersionTapCount = 0
+        }
+        lastBuildVersionTapAt = now
         buildVersionTapCount += 1
         guard buildVersionTapCount >= 5 else { return }
         EnsuAdvancedSettings.unlock()

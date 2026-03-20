@@ -77,6 +77,7 @@ class InferenceRsProvider(
     @Volatile private var currentModelKey: LoadedModelKey? = null
     @Volatile private var currentContextLength: Int? = null
     @Volatile private var currentJobId: Long? = null
+    @Volatile private var manualDownloadCancelled = false
     private var backendInitialized = false
 
     init {
@@ -302,6 +303,7 @@ class InferenceRsProvider(
     }
 
     override fun cancelDownload() {
+        manualDownloadCancelled = true
         val ids = loadAllDownloadRecords().map { it.downloadId }.distinct()
         if (ids.isNotEmpty()) {
             downloadManager.remove(*ids.toLongArray())
@@ -366,6 +368,10 @@ class InferenceRsProvider(
         target: LlmModelTarget,
         onProgress: (DownloadProgress) -> Unit
     ) {
+        if (externalDownloadsRoot == null) {
+            awaitManualDownload(target, onProgress)
+            return
+        }
         ensureDownloadsEnqueued(target)
         var emptyPollCount = 0
         while (true) {
@@ -388,6 +394,20 @@ class InferenceRsProvider(
             }
             delay(500)
         }
+    }
+
+    private fun awaitManualDownload(
+        target: LlmModelTarget,
+        onProgress: (DownloadProgress) -> Unit
+    ) {
+        manualDownloadCancelled = false
+        val targets = ModelDownloadSupport.expectedTargets(modelDir, target)
+        ModelDownloadSupport.downloadTargets(
+            httpClient,
+            targets,
+            onProgress,
+            isCancelled = { manualDownloadCancelled }
+        )
     }
 
     private fun ensureDownloadsEnqueued(target: LlmModelTarget) {
