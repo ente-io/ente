@@ -56,7 +56,6 @@ class NotificationService {
 
   Future<void> _ensurePluginInitialized() async {
     if (_pluginInitialized) return;
-    await initTimezones();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
