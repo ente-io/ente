@@ -15,6 +15,7 @@ import "package:workmanager/workmanager.dart" as workmanager;
 import "package:workmanager_apple/workmanager_apple.dart";
 
 const _kIOSBackgroundRefreshCadence = Duration(minutes: 15);
+const _kBackgroundPeriodicInitialDelay = Duration(minutes: 10);
 const _kIOSBackgroundProcessingContinuationDelay = Duration(seconds: 60);
 const _kIOSBackgroundProcessingMaintenanceCadence = Duration(days: 1);
 const _kDebugIOSBackgroundProcessingMaintenanceCadence = Duration(minutes: 15);
@@ -152,7 +153,7 @@ class BgTaskUtils {
           androidPeriodicTask,
           frequency: const Duration(minutes: 15),
           initialDelay:
-              kDebugMode ? Duration.zero : const Duration(minutes: 10),
+              kDebugMode ? Duration.zero : _kBackgroundPeriodicInitialDelay,
           constraints: workmanager.Constraints(
             networkType: workmanager.NetworkType.connected,
             requiresCharging: false,
@@ -194,7 +195,8 @@ class BgTaskUtils {
       iOSBackgroundAppRefresh,
       iOSBackgroundAppRefresh,
       frequency: _kIOSBackgroundRefreshCadence,
-      initialDelay: _kIOSBackgroundRefreshCadence,
+      initialDelay:
+          kDebugMode ? Duration.zero : _kBackgroundPeriodicInitialDelay,
       constraints: workmanager.Constraints(
         networkType: workmanager.NetworkType.connected,
         requiresCharging: false,
