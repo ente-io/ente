@@ -106,6 +106,14 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(
+        PersonService.instance.refreshPersonCache(
+          notifyListeners: true,
+          source: 'startupForegroundWarm',
+        ),
+      );
+    });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
@@ -338,7 +346,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(entityService, MLDataDB.instance, preferences);
+    PersonService.init(entityService, MLDataDB.instance, preferences);
     await MemoryLaneService.instance.init();
     if (flagService.facesTimeline) {
       MemoryLaneService.instance
