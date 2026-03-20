@@ -1,4 +1,4 @@
-use crate::{
+use ente_media_inspector::{
     image::decode::decode_image_from_path,
     ml::face::thumbnail::{FaceBox, generate_face_thumbnails as generate_face_thumbnails_impl},
 };
