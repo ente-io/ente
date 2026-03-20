@@ -107,15 +107,34 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       ),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(
-        PersonService.instance.refreshPersonCache(
-          notifyListeners: true,
-          source: 'startupForegroundWarm',
-        ),
-      );
+      unawaited(_warmForegroundDeferredServices());
     });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmForegroundDeferredServices() async {
+  try {
+    await PersonService.instance.refreshPersonCache(
+      notifyListeners: true,
+      source: 'startupForegroundWarm',
+    );
+  } catch (e, s) {
+    _logger.warning("Deferred PersonService warm failed", e, s);
+  }
+
+  try {
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
+  } catch (e, s) {
+    _logger.warning("Deferred MemoryLaneService warm failed", e, s);
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -347,14 +366,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     PersonService.init(entityService, MLDataDB.instance, preferences);
-    await MemoryLaneService.instance.init();
-    if (flagService.facesTimeline) {
-      MemoryLaneService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Memory Lane disabled via feature flag");
-    }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
