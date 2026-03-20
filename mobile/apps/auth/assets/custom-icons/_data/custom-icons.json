@@ -285,6 +285,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Biznet",
+      "altNames": [
+        "BiznetGio"
+      ]
+    },
+    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -338,6 +344,9 @@
     },
     {
       "title": "btcturk"
+    },
+    {
+      "title": "Buenbit"
     },
     {
       "title": "Bugzilla"
@@ -448,6 +457,13 @@
     },
     {
       "title": "ClouDNS"
+    },
+    {
+      "title": "Cocos Capital",
+      "slug": "cocos_capital",
+      "altNames": [
+        "cocos crypto"
+      ]
     },
     {
       "title": "Co-Wheels",
@@ -776,6 +792,9 @@
       "title": "Finary"
     },
     {
+      "title": "Fiwind"
+    },
+    {
       "title": "Firefox",
       "slug": "mozilla"
     },
@@ -1046,6 +1065,16 @@
     },
     {
       "title": "Kite"
+    },
+    {
+      "title": "Kiwix",
+      "slug": "kiwix",
+      "altNames": [
+        "kiwix.org",
+        "get.kiwix.org",
+        "pro.kiwix.org",
+        "hub.kiwix.org"
+      ]
     },
     {
       "title": "KnownHost",
@@ -1367,7 +1396,8 @@
       ]
     },
     {
-      "title": "nexo"
+      "title": "NEXO",
+      "slug": "nexo"
     },
     {
       "title": "Nextcloud",
@@ -1556,6 +1586,10 @@
       "slug": "pionex"
     },
     {
+      "title": "Plus Crypto",
+      "slug": "plus_crypto"
+    },
+    {
       "title": "Plutus",
       "hex": "DEC685"
     },
@@ -1727,6 +1761,9 @@
       "altNames": [
         "restream.io"
       ]
+    },
+    {
+      "title": "Ripio"
     },
     {
       "title": "RippleMatch"
@@ -2215,6 +2252,9 @@
       "title": "WHMCS"
     },
     {
+       "title": "Wick"
+    },
+    {     
       "title": "Windscribe"
     },
     {

@@ -10,23 +10,25 @@ const (
 	SignUp BonusType = "SIGN_UP"
 
 	// AddOnSupport is the bonus for users added by the support team
-	AddOnSupport = "ADD_ON_SUPPORT"
+	AddOnSupport BonusType = "ADD_ON_SUPPORT"
+	// AddOnNonProfit is the bonus for users on the non-profit program
+	AddOnNonProfit BonusType = "ADD_ON_NON_PROFIT"
 	// AddOnBf is the bonus for users who have opted for the Black Friday offers
-	AddOnBf2023 = "ADD_ON_BF_2023"
-	AddOnBf2024 = "ADD_ON_BF_2024"
+	AddOnBf2023 BonusType = "ADD_ON_BF_2023"
+	AddOnBf2024 BonusType = "ADD_ON_BF_2024"
 	// In the future, we can add various types of bonuses based on different events like Anniversary,
 	// or finishing tasks like ML indexing, enabling sharing etc etc
 )
 
 // PaidAddOnTypes : These add-ons can be purchased by the users and help in the expiry of an account
 // as long as the add-on is active.
-var PaidAddOnTypes = []BonusType{AddOnSupport, AddOnBf2023, AddOnBf2024}
+var PaidAddOnTypes = []BonusType{AddOnSupport, AddOnNonProfit, AddOnBf2023, AddOnBf2024}
 
 // ExtendsExpiry returns true if the bonus type extends the expiry of the account.
 // By default, all bonuses don't extend expiry.
 func (t BonusType) ExtendsExpiry() bool {
 	switch t {
-	case AddOnSupport, AddOnBf2023, AddOnBf2024:
+	case AddOnSupport, AddOnNonProfit, AddOnBf2023, AddOnBf2024:
 		return true
 	case Referral, SignUp:
 		return false
@@ -43,6 +45,8 @@ func BonusFromType(bonusType string) BonusType {
 		return SignUp
 	case "ADD_ON_SUPPORT":
 		return AddOnSupport
+	case "ADD_ON_NON_PROFIT":
+		return AddOnNonProfit
 	case "ADD_ON_BF_2023":
 		return AddOnBf2023
 	case "ADD_ON_BF_2024":
@@ -59,7 +63,7 @@ func (t BonusType) RestrictToDoublingStorage() bool {
 	switch t {
 	case Referral, SignUp:
 		return true
-	case AddOnSupport, AddOnBf2023, AddOnBf2024:
+	case AddOnSupport, AddOnNonProfit, AddOnBf2023, AddOnBf2024:
 		return false
 	default:
 		return true

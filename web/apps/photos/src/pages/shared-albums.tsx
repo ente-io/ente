@@ -18,8 +18,8 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { ActiveDownloadStatusNotifications } from "components/ActiveDownloadStatusNotifications";
 import { FeedIcon } from "components/Collections/CollectionHeader";
-import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { PublicAlbumSingleFileViewer } from "components/PublicAlbumSingleFileViewer";
@@ -58,7 +58,7 @@ import {
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
-    useSaveGroups,
+    useSaveGroupsActions,
     type AddSaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
@@ -141,7 +141,7 @@ export default function PublicCollectionGallery() {
 
     const isRedirectingToAlbumsAppRef = useRef<boolean>(false);
 
-    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+    const { onAddSaveGroup } = useSaveGroupsActions();
     const { show: showPublicFeed, props: publicFeedVisibilityProps } =
         useModalVisibility();
 
@@ -613,10 +613,7 @@ export default function PublicCollectionGallery() {
                     onAddSaveGroup={onAddSaveGroup}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
-                <DownloadStatusNotifications
-                    {...{ saveGroups, onRemoveSaveGroup }}
-                    fullWidthOnMobile
-                />
+                <ActiveDownloadStatusNotifications fullWidthOnMobile />
             </>
         );
     }
@@ -735,10 +732,7 @@ export default function PublicCollectionGallery() {
                 onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                 {...{ dragAndDropFiles }}
             />
-            <DownloadStatusNotifications
-                {...{ saveGroups, onRemoveSaveGroup }}
-                fullWidthOnMobile
-            />
+            <ActiveDownloadStatusNotifications fullWidthOnMobile />
             {publicCollection && collectionKey.current && (
                 <PublicFeedSidebar
                     {...publicFeedVisibilityProps}

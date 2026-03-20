@@ -18,6 +18,7 @@ OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
 GENERATED_DIR="${SRCROOT}/ensu/Generated"
 
 mkdir -p "${OUT_DIR}"
+mkdir -p "${GENERATED_DIR}"
 
 # Use debug profile for Debug builds to speed iteration.
 CARGO_FLAGS="--locked"
@@ -106,6 +107,47 @@ ensure_generated_bindings() {
 ensure_generated_bindings
 write_endpoint_config
 
+if [ "$(uname -s)" = "Darwin" ]; then
+  HOST_LIB_EXT="dylib"
+elif [ "$(uname -s)" = "Linux" ]; then
+  HOST_LIB_EXT="so"
+else
+  HOST_LIB_EXT="dll"
+fi
+
+ensure_uniffi_bindgen() {
+  if command -v uniffi-bindgen >/dev/null 2>&1; then
+    version="$(uniffi-bindgen --version 2>/dev/null || true)"
+    if printf "%s" "${version}" | grep -q "0.31."; then
+      return
+    fi
+    echo "Found incompatible ${version}, installing uniffi-bindgen 0.31.x"
+  fi
+
+  cargo install --locked --version 0.31.0 uniffi --features cli --bin uniffi-bindgen
+}
+
+generate_swift_bindings() {
+  crate_name="$1"      # e.g. core
+  crate_dir="$2"       # absolute path
+  lib_stem="$3"        # e.g. core
+
+  echo "🧩 Generating Swift bindings for ${crate_name}"
+  rm -f "${GENERATED_DIR}/${crate_name}.swift" \
+        "${GENERATED_DIR}/${crate_name}FFI.h" \
+        "${GENERATED_DIR}/${crate_name}FFI.modulemap"
+
+  (cd "${crate_dir}" && cargo build ${CARGO_FLAGS})
+
+  host_lib_path="${crate_dir}/target/${PROFILE}/lib${lib_stem}.${HOST_LIB_EXT}"
+  if [ ! -f "${host_lib_path}" ]; then
+    echo "Expected host library not found: ${host_lib_path}" >&2
+    exit 1
+  fi
+
+  (cd "${crate_dir}" && uniffi-bindgen generate "${host_lib_path}" --language swift --out-dir "${GENERATED_DIR}" --crate "${crate_name}")
+}
+
 # Map Xcode platform+arch to Rust target triple.
 # Note: For iOS simulator on arm64, Rust uses aarch64-apple-ios-sim.
 rust_target_for() {
@@ -174,6 +216,11 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
 # Ensure host builds (build scripts) use the macOS SDK.
 export SDKROOT="${HOST_SDKROOT}"
+
+ensure_uniffi_bindgen
+generate_swift_bindings "core" "${REPO_ROOT}/rust/uniffi/core" "core"
+generate_swift_bindings "db" "${REPO_ROOT}/rust/uniffi/ensu/db" "db"
+generate_swift_bindings "sync" "${REPO_ROOT}/rust/uniffi/ensu/sync" "sync"
 
 build_crate_universal() {
   crate_name="$1"           # e.g. core

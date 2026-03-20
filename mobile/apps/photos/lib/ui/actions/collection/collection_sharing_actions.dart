@@ -748,9 +748,10 @@ class CollectionActions {
     }
     final Collection? targetCollection =
         collectionsService.getCollectionByID(toCollectionID);
-    // ignore non-cached collections, uncategorized and favorite
-    // collections and collections ignored by others
+    // ignore non-cached, deleted, uncategorized and favorite collections,
+    // and collections ignored by others
     if (targetCollection == null ||
+        targetCollection.isDeleted ||
         (CollectionType.uncategorized == targetCollection.type ||
             targetCollection.type == CollectionType.favorites) ||
         targetCollection.owner.id != userID) {

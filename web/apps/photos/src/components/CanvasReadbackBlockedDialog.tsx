@@ -39,7 +39,7 @@ export const CanvasReadbackBlockedDialog: React.FC<
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            {t("learn_more")}
+                            {t("learn_how")}
                         </HelpLink>
                         .
                     </Subtitle>
@@ -103,8 +103,8 @@ const IllustrationWrapper = styled(Box)(() => ({
 }));
 
 const ErrorIconContainer = styled(Box)(({ theme }) => ({
-    width: 112,
-    height: 112,
+    width: 92,
+    height: 92,
     borderRadius: 56,
     display: "flex",
     alignItems: "center",

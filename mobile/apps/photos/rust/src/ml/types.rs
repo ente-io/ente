@@ -55,3 +55,47 @@ pub fn to_face_id(file_id: i64, box_xyxy: [f32; 4]) -> String {
     let y_max = to_face_segment(box_xyxy[3]);
     format!("{file_id}_{x_min}_{y_min}_{x_max}_{y_max}")
 }
+
+// ── Pet Recognition Types ──────────────────────────────────────────────
+
+#[derive(Clone, Debug)]
+pub struct PetFaceDetection {
+    pub score: f32,
+    pub box_xyxy: [f32; 4],
+    /// 3 keypoints: [left_eye, right_eye, nose]
+    pub keypoints: [[f32; 2]; 3],
+    /// 0 = dog, 1 = cat (from class scores in detector output)
+    pub class_id: u8,
+}
+
+#[derive(Clone, Debug)]
+pub struct PetAlignmentResult {
+    pub center: [f32; 2],
+    pub angle: f32,
+    pub crop_size: f32,
+}
+
+#[derive(Clone, Debug)]
+pub struct PetFaceResult {
+    pub detection: PetFaceDetection,
+    /// 0 = dog, 1 = cat
+    pub species: u8,
+    pub face_embedding: Vec<f32>,
+    pub pet_face_id: String,
+    pub alignment: PetAlignmentResult,
+}
+
+#[derive(Clone, Debug)]
+pub struct PetBodyDetection {
+    pub score: f32,
+    pub box_xyxy: [f32; 4],
+    /// COCO class: 15 = cat, 16 = dog
+    pub coco_class: u8,
+}
+
+#[derive(Clone, Debug)]
+pub struct PetBodyResult {
+    pub detection: PetBodyDetection,
+    pub pet_body_id: String,
+    pub body_embedding: Vec<f32>,
+}

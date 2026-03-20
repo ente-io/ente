@@ -1328,5 +1328,15 @@
     "description": "Tooltip or semantics label for the pause button"
   },
   "playfulKids": "Lekfulla barn",
-  "coastalCliffs": "Klippor vid havet"
+  "coastalCliffs": "Klippor vid havet",
+  "candidLaughter": "Skratt i stunden",
+  "groupSelfies": "Allihop",
+  "birthdayJoy": "Födelsedagsglädje",
+  "weddingMoments": "Bröllopsglans",
+  "goldenHourPortraits": "Ansikten i gyllene timmen",
+  "concertNights": "Konsertkvällar",
+  "poolDays": "Pooldagar",
+  "picnicDays": "Picknickminnen",
+  "campingMoments": "Campingstunder",
+  "babySmiles": "Bebisleenden"
 }

@@ -133,6 +133,7 @@ abstract class SuperIsolate {
           logger.severe("Received isolate message with wrong taskID");
           return;
         }
+        _activeTasks--;
         final logs = receivedMessage['logs'] as List<String>;
         IsolateLogger.handLogStringsToMainLogger(logs);
         final data = receivedMessage['data'];
@@ -147,7 +148,6 @@ abstract class SuperIsolate {
           completer.complete(data);
         }
       });
-      _activeTasks--;
 
       return completer.future;
     });
@@ -197,8 +197,8 @@ abstract class SuperIsolate {
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     logger.info('Disposing isolate');
-    await clearAllCachedData();
     await onDispose();
+    await clearAllCachedData();
     _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();
