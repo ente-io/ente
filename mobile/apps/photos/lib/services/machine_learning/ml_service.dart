@@ -234,12 +234,10 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        if (!isProcessBg) {
-          // refresh discover section
-          magicCacheService.updateCache().ignore();
-          // refresh memories section (only runs if forced is true)
-          memoriesCacheService.updateCache(forced: force).ignore();
-        }
+        // Persist refreshed caches after ML so foreground can pick them up
+        // on the next resume, even when the work ran headlessly in background.
+        magicCacheService.updateCache(forced: force).ignore();
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);

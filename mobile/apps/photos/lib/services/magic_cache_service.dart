@@ -230,6 +230,10 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateKey) ?? 0;
   }
 
+  int get lastMagicCacheUpdateTimeInMicroseconds {
+    return lastMagicCacheUpdateTime * 1000;
+  }
+
   bool get enableDiscover => hasGrantedMLConsent;
 
   void queueUpdate(String reason) {
