@@ -248,9 +248,12 @@ Ente will automatically skip files that have already been uploaded, so you can d
 
 If the browser settings cannot be changed, we recommend uploading files through the desktop app.
 
-### Why do I get "system error number 13" during ML indexing on Windows? {#windows-ml-indexing-error-13}
+### Why does desktop ML show "Indexing: Error" on Windows? {#windows-ml-indexing-error-13}
 
-If you see "system error number 13" errors in your logs during ML indexing, this is usually caused by Windows roaming profiles preventing access to the ML model files in `%APPDATA%\ente\models\`.
+If the desktop app shows `Indexing: Error` in `Settings > Preferences > Machine learning`, this is usually caused by Windows roaming profiles preventing access to the ML model files in
+`%APPDATA%\ente\models\`.
+
+If you check the logs, you might also see `system error number 13` during ML indexing.
 
 **Solution:**
 
