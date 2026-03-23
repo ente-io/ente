@@ -79,6 +79,31 @@ void main() {
         isTrue,
       );
     });
+
+    test(
+        'logs info and does not throw when channel is unregistered '
+        '(MissingPluginException — headless background)', () async {
+      // Remove the mock handler so invokeMethod throws MissingPluginException,
+      // simulating headless Workmanager execution where the channel is never
+      // registered.
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+
+      final logs = <LogRecord>[];
+      final sub = Logger('IosBackupUtil').onRecord.listen(logs.add);
+
+      await expectLater(invokeExcludeFromBackup(testPath), completes);
+
+      await sub.cancel();
+      expect(
+        logs.any(
+          (r) =>
+              r.level == Level.INFO &&
+              r.message.contains('channel unavailable'),
+        ),
+        isTrue,
+      );
+    });
   });
 
   group('excludeFromBackup (platform guard)', () {

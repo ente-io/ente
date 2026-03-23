@@ -38,5 +38,10 @@ Future<void> _invokeExcludeFromBackup(String path) async {
     }
   } on PlatformException catch (e) {
     _logger.warning('Failed to exclude path from backup: $path — ${e.message}');
+  } on MissingPluginException {
+    // Channel not registered in headless background execution (Workmanager).
+    // Safe to ignore: backup exclusion is a best-effort attribute set on
+    // foreground init; background tasks do not trigger iCloud backups.
+    _logger.info('excludeFromBackup skipped: channel unavailable (background)');
   }
 }
