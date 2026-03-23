@@ -204,6 +204,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -237,9 +240,27 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
-    // await MLService.instance.init();
-    // await PersonService.init(entityService, MLDataDB.instance, prefs);
-    // await MLService.instance.runAllML(force: true);
+    if (flagService.enableMLInBackground && hasGrantedMLConsent) {
+      await controller.init();
+      final canRunML = controller.requestCompute(ml: true);
+      if (!canRunML) {
+        _logger.info(
+          "[BG TASK] skipping ML, compute requirements not satisfied",
+        );
+      } else {
+        bool mlRunStarted = false;
+        try {
+          await MLService.instance.init();
+          await PersonService.init(entityService, MLDataDB.instance, prefs);
+          mlRunStarted = true;
+          await MLService.instance.runAllML(force: false);
+        } finally {
+          if (!mlRunStarted) {
+            controller.releaseCompute(ml: true);
+          }
+        }
+      }
+    }
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 

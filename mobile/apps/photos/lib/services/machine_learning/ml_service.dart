@@ -13,6 +13,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/main.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -100,7 +101,7 @@ class MLService {
     // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!hasGrantedMLConsent) {
-        if (event.shouldRun) {
+        if (!isProcessBg && event.shouldRun) {
           VideoPreviewService.instance.queueFiles(duration: Duration.zero);
         }
         return;
@@ -118,7 +119,11 @@ class MLService {
             "MLController allowed running ML, faces indexing starting",
           );
         }
-        unawaited(runAllML());
+        // Background start is driven manually from _runMinimally to avoid
+        // duplicate runAllML invocations in the same cycle.
+        if (!isProcessBg) {
+          unawaited(runAllML());
+        }
       } else {
         _logger.info(
           "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -126,13 +131,27 @@ class MLService {
         pauseIndexingAndClustering();
       }
     });
+    _syncMlControllerStatusForBg();
 
     _isInitialized = true;
     unawaited(_maybePredownloadLocalModels());
     _logger.info('init done');
   }
 
+  void _syncMlControllerStatusForBg() {
+    if (!isProcessBg || !hasGrantedMLConsent) {
+      return;
+    }
+    _mlControllerStatus = computeController.shouldRunCompute;
+    _logger.info(
+      "Background init synced MLController status to $_mlControllerStatus",
+    );
+  }
+
   Future<void> _maybePredownloadLocalModels() async {
+    if (isProcessBg) {
+      return;
+    }
     if (!hasGrantedMLConsent) {
       return;
     }
@@ -172,6 +191,10 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
+    if (_isRunningML) {
+      _logger.info("runAllML called while already running, skipping");
+      return;
+    }
     try {
       final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
       final mlDataDB = _dbForMode(mode);
@@ -200,9 +223,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Refresh discover/memories caches before indexing using the same
+        // path in foreground and background runs.
         magicCacheService.updateCache(forced: force).ignore();
-        // refresh memories section
         memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
@@ -220,9 +243,9 @@ class MLService {
           _logger.info("App mode changed during ML run, stopping");
           return;
         }
-        // refresh discover section
+        // Persist refreshed caches after ML so foreground can pick them up
+        // on the next resume, even when the work ran headlessly in background.
         magicCacheService.updateCache().ignore();
-        // refresh memories section (only runs if forced is true)
         memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
@@ -232,7 +255,9 @@ class MLService {
       _logger.info("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      VideoPreviewService.instance.queueFiles();
+      if (!isProcessBg) {
+        VideoPreviewService.instance.queueFiles();
+      }
     }
   }
 
