@@ -314,7 +314,7 @@ class PetClusteringService {
         bodyCentroids.add(
           RustPetClusterSummary(
             clusterId: entry.key,
-            centroid: _meanCentroid(entry.value),
+            centroid: Float64List.fromList(_meanCentroid(entry.value)),
             count: existingSummaries[entry.key]?.$1 ?? 0,
           ),
         );
