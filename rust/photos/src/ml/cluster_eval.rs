@@ -9,7 +9,7 @@
 mod tests {
     use crate::ml::cluster::{agglomerative_precomputed, dot, normalize};
     use crate::ml::pet::cluster::{
-        hdbscan_precomputed, run_pet_clustering, ClusterAlgorithm, ClusterConfig, PetClusterInput,
+        ClusterAlgorithm, ClusterConfig, PetClusterInput, hdbscan_precomputed, run_pet_clustering,
     };
     use std::collections::HashMap;
 
@@ -245,13 +245,8 @@ mod tests {
         // ARI: Hubert & Arabie from pairwise counts
         let ari = {
             let num = 2.0 * (tp as f64 * tn as f64 - fp as f64 * fn_ as f64);
-            let den = (tp + fp) as f64 * (fp + tn) as f64
-                + (tp + fn_) as f64 * (fn_ + tn) as f64;
-            if den.abs() < 1e-12 {
-                0.0
-            } else {
-                num / den
-            }
+            let den = (tp + fp) as f64 * (fp + tn) as f64 + (tp + fn_) as f64 * (fn_ + tn) as f64;
+            if den.abs() < 1e-12 { 0.0 } else { num / den }
         };
 
         // NMI
@@ -367,17 +362,28 @@ mod tests {
 
         let (imin, ip5, imean, ip95, imax) = stats(&intra_dists);
         let (emin, ep5, emean, ep95, emax) = stats(&inter_dists);
-        eprintln!("  Intra-cluster dist: min={:.4} p5={:.4} mean={:.4} p95={:.4} max={:.4} (n={})",
-            imin, ip5, imean, ip95, imax, intra_dists.len());
-        eprintln!("  Inter-cluster dist: min={:.4} p5={:.4} mean={:.4} p95={:.4} max={:.4} (n={})",
-            emin, ep5, emean, ep95, emax, inter_dists.len());
+        eprintln!(
+            "  Intra-cluster dist: min={:.4} p5={:.4} mean={:.4} p95={:.4} max={:.4} (n={})",
+            imin,
+            ip5,
+            imean,
+            ip95,
+            imax,
+            intra_dists.len()
+        );
+        eprintln!(
+            "  Inter-cluster dist: min={:.4} p5={:.4} mean={:.4} p95={:.4} max={:.4} (n={})",
+            emin,
+            ep5,
+            emean,
+            ep95,
+            emax,
+            inter_dists.len()
+        );
 
         // Ideal threshold range
         if !intra_dists.is_empty() && !inter_dists.is_empty() {
-            eprintln!(
-                "  Ideal threshold range: ({:.4}, {:.4})",
-                imax, emin
-            );
+            eprintln!("  Ideal threshold range: ({:.4}, {:.4})", imax, emin);
         }
     }
 
@@ -398,23 +404,12 @@ mod tests {
     fn print_row(label: &str, m: &Metrics, mark: &str) {
         eprintln!(
             "  {:<28} | {:>4} | {:>5} | {:>7.4} | {:>7.4} | {:>7.4} | {:>7.4} | {:>7.4}{}",
-            label,
-            m.n_clusters,
-            m.n_noise,
-            m.ari,
-            m.nmi,
-            m.precision,
-            m.recall,
-            m.f1,
-            mark
+            label, m.n_clusters, m.n_noise, m.ari, m.nmi, m.precision, m.recall, m.f1, mark
         );
     }
 
     /// Run a threshold sweep and return (best_threshold, best_metrics, all_results).
-    fn sweep_agglom(
-        data: &Dataset,
-        thresholds: &[f32],
-    ) -> (f32, Metrics, Vec<(f32, Metrics)>) {
+    fn sweep_agglom(data: &Dataset, thresholds: &[f32]) -> (f32, Metrics, Vec<(f32, Metrics)>) {
         let n = data.embeddings.len();
         let dist = build_dist_matrix(&data.embeddings);
 
@@ -445,10 +440,7 @@ mod tests {
         (best_t, best_m, results)
     }
 
-    fn sweep_hdbscan(
-        data: &Dataset,
-        params: &[(usize, usize)],
-    ) -> Vec<((usize, usize), Metrics)> {
+    fn sweep_hdbscan(data: &Dataset, params: &[(usize, usize)]) -> Vec<((usize, usize), Metrics)> {
         let n = data.embeddings.len();
         let dist = build_dist_matrix(&data.embeddings);
 
@@ -656,8 +648,8 @@ mod tests {
                 let nk = sizes[ck] as f32;
                 let d_ik_sq = cdist[ci * n + ck];
                 let d_jk_sq = cdist[cj * n + ck];
-                let new_d_sq = ((ni + nk) * d_ik_sq + (nj + nk) * d_jk_sq - nk * d_ij_sq)
-                    / (ni + nj + nk);
+                let new_d_sq =
+                    ((ni + nk) * d_ik_sq + (nj + nk) * d_jk_sq - nk * d_ij_sq) / (ni + nj + nk);
                 let new_d_sq = new_d_sq.max(0.0);
                 cdist[ci * n + ck] = new_d_sq;
                 cdist[ck * n + ci] = new_d_sq;
@@ -747,12 +739,7 @@ mod tests {
 
     /// K-means on L2-normalized embeddings (cosine distance).
     /// Centroids are re-normalized after each update.
-    fn spherical_kmeans(
-        embs: &[Vec<f32>],
-        k: usize,
-        rng: &mut Rng,
-        max_iter: usize,
-    ) -> Vec<i32> {
+    fn spherical_kmeans(embs: &[Vec<f32>], k: usize, rng: &mut Rng, max_iter: usize) -> Vec<i32> {
         let n = embs.len();
         if n == 0 || k == 0 {
             return vec![-1i32; n];
@@ -854,12 +841,7 @@ mod tests {
 
     /// Run spherical k-means multiple times with different seeds and return
     /// the result with the best total within-cluster similarity.
-    fn spherical_kmeans_best(
-        embs: &[Vec<f32>],
-        k: usize,
-        seed: u64,
-        n_runs: usize,
-    ) -> Vec<i32> {
+    fn spherical_kmeans_best(embs: &[Vec<f32>], k: usize, seed: u64, n_runs: usize) -> Vec<i32> {
         let mut best_labels = vec![0i32; embs.len()];
         let mut best_score = f64::NEG_INFINITY;
 
@@ -942,10 +924,10 @@ mod tests {
                 for &(j, sim) in &adj[i] {
                     *votes.entry(labels[j]).or_default() += sim;
                 }
-                if let Some((&best_label, _)) = votes.iter().max_by(|a, b| {
-                    a.1.partial_cmp(b.1)
-                        .unwrap_or(std::cmp::Ordering::Equal)
-                }) {
+                if let Some((&best_label, _)) = votes
+                    .iter()
+                    .max_by(|a, b| a.1.partial_cmp(b.1).unwrap_or(std::cmp::Ordering::Equal))
+                {
                     labels[i] = best_label;
                 }
             }
@@ -973,12 +955,7 @@ mod tests {
     /// 2. Compute normalized Laplacian
     /// 3. Use power iteration to find top-k eigenvectors
     /// 4. Run k-means on the spectral embedding
-    fn spectral_clustering(
-        embs: &[Vec<f32>],
-        k: usize,
-        sim_threshold: f32,
-        seed: u64,
-    ) -> Vec<i32> {
+    fn spectral_clustering(embs: &[Vec<f32>], k: usize, sim_threshold: f32, seed: u64) -> Vec<i32> {
         let n = embs.len();
         if n == 0 || k == 0 {
             return vec![];
@@ -1425,15 +1402,7 @@ mod tests {
         eprintln!("  {}", "-".repeat(92));
 
         // HDBSCAN with various parameters
-        let hdb_params = [
-            (2, 1),
-            (2, 2),
-            (3, 2),
-            (3, 3),
-            (5, 2),
-            (5, 3),
-            (5, 5),
-        ];
+        let hdb_params = [(2, 1), (2, 2), (3, 2), (3, 3), (5, 2), (5, 3), (5, 5)];
         for &(mcs, ms) in &hdb_params {
             let pred = hdbscan_precomputed(&dist, n, mcs, ms);
             let m = eval(&data.true_labels, &pred);
@@ -1447,7 +1416,10 @@ mod tests {
         }
 
         eprintln!("\n  Winner: {} (F1={:.4})", best_label, best_f1);
-        assert!(best_f1 > 0.70, "At least one algorithm should achieve F1>0.70");
+        assert!(
+            best_f1 > 0.70,
+            "At least one algorithm should achieve F1>0.70"
+        );
     }
 
     /// Compare algorithms on pet-quality embeddings (higher noise).
@@ -1692,9 +1664,7 @@ mod tests {
         }
 
         eprintln!("\n  Winner: {} (F1={:.4})", best_label, best_f1);
-        eprintln!(
-            "  Note: HDBSCAN can assign noise as -1, agglomerative assigns everything."
-        );
+        eprintln!("  Note: HDBSCAN can assign noise as -1, agglomerative assigns everything.");
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -1963,37 +1933,26 @@ mod tests {
             let prod_m = eval(&data.true_labels, &prod_pred);
 
             // Best HDBSCAN
-            let hdb_params: Vec<(usize, usize)> = vec![
-                (2, 1),
-                (2, 2),
-                (3, 2),
-                (3, 3),
-                (5, 2),
-                (5, 3),
-                (5, 5),
-            ];
+            let hdb_params: Vec<(usize, usize)> =
+                vec![(2, 1), (2, 2), (3, 2), (3, 3), (5, 2), (5, 3), (5, 5)];
             let hdb_results = sweep_hdbscan(data, &hdb_params);
             let best_hdb = hdb_results
                 .iter()
                 .max_by(|a, b| a.1.f1.partial_cmp(&b.1.f1).unwrap())
                 .unwrap();
 
-            let hdb_label = format!("({},{})", best_hdb.0 .0, best_hdb.0 .1);
+            let hdb_label = format!("({},{})", best_hdb.0.0, best_hdb.0.1);
 
             eprintln!(
                 "  {:<24} | {:>9.2} | {:>7.4} | {:>9.2} | {:>7.4} | {:>8} | {:>7.4}",
-                name,
-                best_t,
-                best_m.f1,
-                prod_t,
-                prod_m.f1,
-                hdb_label,
-                best_hdb.1.f1
+                name, best_t, best_m.f1, prod_t, prod_m.f1, hdb_label, best_hdb.1.f1
             );
         }
 
         eprintln!();
-        eprintln!("  Legend: Best t = optimal agglomerative threshold, Prod t = current production");
+        eprintln!(
+            "  Legend: Best t = optimal agglomerative threshold, Prod t = current production"
+        );
         eprintln!("  Best HDB = best HDBSCAN (min_cluster_size, min_samples)");
     }
 
@@ -2375,7 +2334,16 @@ mod tests {
         print_header("GRAND SUMMARY: Best F1 per algorithm across scenarios");
         eprintln!(
             "  {:<16} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10}",
-            "Scenario", "Avg-Link", "Single", "Complete", "Ward", "HDBSCAN", "DBSCAN", "Sph-KM", "ChinWhisp", "Spectral"
+            "Scenario",
+            "Avg-Link",
+            "Single",
+            "Complete",
+            "Ward",
+            "HDBSCAN",
+            "DBSCAN",
+            "Sph-KM",
+            "ChinWhisp",
+            "Spectral"
         );
         eprintln!("  {}", "-".repeat(126));
 
@@ -2397,10 +2365,7 @@ mod tests {
             let single_best = ts
                 .iter()
                 .map(|&t| {
-                    let m = eval(
-                        &data.true_labels,
-                        &single_linkage_precomputed(&dist, n, t),
-                    );
+                    let m = eval(&data.true_labels, &single_linkage_precomputed(&dist, n, t));
                     m.f1
                 })
                 .fold(0.0f64, f64::max);
@@ -2431,10 +2396,7 @@ mod tests {
             let hdb_best = hdb_params
                 .iter()
                 .map(|&(mcs, ms)| {
-                    let m = eval(
-                        &data.true_labels,
-                        &hdbscan_precomputed(&dist, n, mcs, ms),
-                    );
+                    let m = eval(&data.true_labels, &hdbscan_precomputed(&dist, n, mcs, ms));
                     m.f1
                 })
                 .fold(0.0f64, f64::max);
@@ -2444,10 +2406,7 @@ mod tests {
             let mut dbscan_best = 0.0f64;
             for &eps in &eps_vals {
                 for &mp in &[2usize, 3, 4, 5] {
-                    let m = eval(
-                        &data.true_labels,
-                        &dbscan_precomputed(&dist, n, eps, mp),
-                    );
+                    let m = eval(&data.true_labels, &dbscan_precomputed(&dist, n, eps, mp));
                     dbscan_best = dbscan_best.max(m.f1);
                 }
             }
@@ -2485,8 +2444,16 @@ mod tests {
 
             eprintln!(
                 "  {:<16} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4} | {:>10.4}",
-                name, avg_best, single_best, complete_best, ward_best,
-                hdb_best, dbscan_best, km_f1, cw_best, spec_best
+                name,
+                avg_best,
+                single_best,
+                complete_best,
+                ward_best,
+                hdb_best,
+                dbscan_best,
+                km_f1,
+                cw_best,
+                spec_best
             );
         }
 
@@ -2497,7 +2464,10 @@ mod tests {
 
     // ── Helper: map pet clustering result to label vector ─────────────────
 
-    fn map_pet_result(inputs: &[PetClusterInput], result: &crate::ml::pet::cluster::PetClusterResult) -> Vec<i32> {
+    fn map_pet_result(
+        inputs: &[PetClusterInput],
+        result: &crate::ml::pet::cluster::PetClusterResult,
+    ) -> Vec<i32> {
         // Build cluster_id -> numeric label mapping
         let mut cluster_to_num: HashMap<String, i32> = HashMap::new();
         let mut next = 0i32;
@@ -2628,7 +2598,9 @@ mod tests {
             if labels[i] < 0 {
                 continue;
             }
-            let c = centroids.entry(labels[i]).or_insert_with(|| vec![0.0f32; dim]);
+            let c = centroids
+                .entry(labels[i])
+                .or_insert_with(|| vec![0.0f32; dim]);
             for (d, &v) in c.iter_mut().zip(emb.iter()) {
                 *d += v;
             }
@@ -2646,11 +2618,7 @@ mod tests {
     }
 
     /// Full inspection of one algorithm's result on a named dataset.
-    fn inspect_clustering(
-        data: &NamedDataset,
-        pred_labels: &[i32],
-        algo_name: &str,
-    ) {
+    fn inspect_clustering(data: &NamedDataset, pred_labels: &[i32], algo_name: &str) {
         let n = data.embeddings.len();
         let centroids = compute_centroids(&data.embeddings, pred_labels);
 
@@ -2658,10 +2626,13 @@ mod tests {
         let true_centroids = compute_centroids(&data.embeddings, &data.true_labels);
 
         // Count unique predicted clusters
-        let mut pred_clusters: Vec<i32> = pred_labels.iter().copied()
+        let mut pred_clusters: Vec<i32> = pred_labels
+            .iter()
+            .copied()
             .filter(|&l| l >= 0)
             .collect::<std::collections::HashSet<_>>()
-            .into_iter().collect();
+            .into_iter()
+            .collect();
         pred_clusters.sort();
 
         let n_noise = pred_labels.iter().filter(|&&l| l < 0).count();
@@ -2669,10 +2640,14 @@ mod tests {
             .filter(|&i| pred_labels[i] >= 0 && data.true_labels[i] >= 0)
             .count();
 
-        eprintln!("\n  ┌─────────────────────────────────────────────────────────────────────────────────┐");
+        eprintln!(
+            "\n  ┌─────────────────────────────────────────────────────────────────────────────────┐"
+        );
         eprintln!("  │ INSPECTION: {:<66}│", algo_name);
         eprintln!("  │ Dataset: {:<69}│", data.desc);
-        eprintln!("  └─────────────────────────────────────────────────────────────────────────────────┘");
+        eprintln!(
+            "  └─────────────────────────────────────────────────────────────────────────────────┘"
+        );
 
         // ── Per-cluster breakdown ──
         eprintln!("\n  --- Per-Cluster Members ---");
@@ -2686,8 +2661,7 @@ mod tests {
                     *true_counts.entry(*true_label).or_default() += 1;
                 }
             }
-            let (&maj_label, _) = true_counts.iter()
-                .max_by_key(|(_, c)| **c).unwrap();
+            let (&maj_label, _) = true_counts.iter().max_by_key(|(_, c)| **c).unwrap();
             cluster_majority.insert(pc, maj_label);
         }
 
@@ -2701,13 +2675,19 @@ mod tests {
             let majority_name = &data.group_names[majority_true as usize];
 
             // Compute purity
-            let correct_count = members.iter()
+            let correct_count = members
+                .iter()
                 .filter(|&&i| data.true_labels[i] == majority_true)
                 .count();
             let purity = correct_count as f64 / members.len() as f64;
 
-            eprintln!("\n  Cluster {} (size={}, majority={}, purity={:.1}%):",
-                pc, members.len(), majority_name, purity * 100.0);
+            eprintln!(
+                "\n  Cluster {} (size={}, majority={}, purity={:.1}%):",
+                pc,
+                members.len(),
+                majority_name,
+                purity * 100.0
+            );
 
             for &i in &members {
                 let true_group = &data.group_names[data.true_labels[i] as usize];
@@ -2728,8 +2708,10 @@ mod tests {
                     f32::NAN
                 };
 
-                eprintln!("    [{}] {:<16} true={:<8} dist_to_here={:.4}  dist_to_own={:.4}",
-                    mark, data.names[i], true_group, dist_assigned, dist_true);
+                eprintln!(
+                    "    [{}] {:<16} true={:<8} dist_to_here={:.4}  dist_to_own={:.4}",
+                    mark, data.names[i], true_group, dist_assigned, dist_true
+                );
 
                 if is_correct {
                     total_correct += 1;
@@ -2768,8 +2750,10 @@ mod tests {
                 } else {
                     "none"
                 };
-                eprintln!("    [--] {:<16} true={:<8} nearest_cluster={} ({}) dist={:.4}",
-                    data.names[i], true_group, nearest_cluster, nearest_name, nearest_dist);
+                eprintln!(
+                    "    [--] {:<16} true={:<8} nearest_cluster={} ({}) dist={:.4}",
+                    data.names[i], true_group, nearest_cluster, nearest_name, nearest_dist
+                );
             }
         }
 
@@ -2781,7 +2765,12 @@ mod tests {
         eprint!("  {:<10}", "");
         for &pc in &pred_clusters {
             let maj = cluster_majority[&pc];
-            eprint!("  C{}({})", pc, &data.group_names[maj as usize][..std::cmp::min(3, data.group_names[maj as usize].len())]);
+            eprint!(
+                "  C{}({})",
+                pc,
+                &data.group_names[maj as usize]
+                    [..std::cmp::min(3, data.group_names[maj as usize].len())]
+            );
         }
         if n_noise > 0 {
             eprint!("  Noise");
@@ -2814,34 +2803,57 @@ mod tests {
                 } else {
                     "farther from wrong cluster (linkage artifact)"
                 };
-                eprintln!("    {:<16} true={:<8} placed_in={:<8} d_here={:.4} d_own={:.4} ({})",
-                    name, true_g, assigned_g, d_assigned, d_true, reason);
+                eprintln!(
+                    "    {:<16} true={:<8} placed_in={:<8} d_here={:.4} d_own={:.4} ({})",
+                    name, true_g, assigned_g, d_assigned, d_true, reason
+                );
             }
         }
 
         // ── Unclustered error analysis (points that should be in a cluster but aren't) ──
-        let unclustered_real: Vec<usize> = unclustered.iter().copied()
+        let unclustered_real: Vec<usize> = unclustered
+            .iter()
+            .copied()
             .filter(|&i| {
                 let tl = data.true_labels[i];
                 // Is this a point from a real group (not noise)?
                 tl < data.group_names.len() as i32 - 1
-                    || !data.group_names.last().map(|s| s == "NOISE").unwrap_or(false)
+                    || !data
+                        .group_names
+                        .last()
+                        .map(|s| s == "NOISE")
+                        .unwrap_or(false)
             })
             .collect();
 
-        let has_noise_group = data.group_names.last().map(|s| s == "NOISE").unwrap_or(false);
+        let has_noise_group = data
+            .group_names
+            .last()
+            .map(|s| s == "NOISE")
+            .unwrap_or(false);
         if !unclustered_real.is_empty() && has_noise_group {
-            let real_missed: Vec<usize> = unclustered.iter().copied()
+            let real_missed: Vec<usize> = unclustered
+                .iter()
+                .copied()
                 .filter(|&i| data.true_labels[i] < (data.group_names.len() - 1) as i32)
                 .collect();
-            let noise_caught: Vec<usize> = unclustered.iter().copied()
+            let noise_caught: Vec<usize> = unclustered
+                .iter()
+                .copied()
                 .filter(|&i| data.true_labels[i] == (data.group_names.len() - 1) as i32)
                 .collect();
             if !real_missed.is_empty() {
-                eprintln!("\n  --- Real points incorrectly unclustered: {} ---", real_missed.len());
+                eprintln!(
+                    "\n  --- Real points incorrectly unclustered: {} ---",
+                    real_missed.len()
+                );
             }
             if !noise_caught.is_empty() {
-                eprintln!("  --- Noise correctly identified: {}/{} ---", noise_caught.len(), n_noise);
+                eprintln!(
+                    "  --- Noise correctly identified: {}/{} ---",
+                    noise_caught.len(),
+                    n_noise
+                );
             }
         }
 
@@ -2855,14 +2867,29 @@ mod tests {
         let m = eval(&data.true_labels, pred_labels);
 
         eprintln!("\n  --- Summary ---");
-        eprintln!("  Assigned: {}/{}  Correct: {}  Errors: {}  Unclustered: {}",
-            total_assigned, n, total_correct, errors.len(), unclustered.len());
-        eprintln!("  Cluster accuracy: {:.1}%  ({}/{} assigned to majority-correct cluster)",
-            accuracy * 100.0, total_correct, total_assigned);
-        eprintln!("  ARI={:.4}  NMI={:.4}  Pairwise-P={:.4}  Pairwise-R={:.4}  F1={:.4}",
-            m.ari, m.nmi, m.precision, m.recall, m.f1);
-        eprintln!("  Predicted {} clusters (true: {})", pred_clusters.len(),
-            data.group_names.len() - if has_noise_group { 1 } else { 0 });
+        eprintln!(
+            "  Assigned: {}/{}  Correct: {}  Errors: {}  Unclustered: {}",
+            total_assigned,
+            n,
+            total_correct,
+            errors.len(),
+            unclustered.len()
+        );
+        eprintln!(
+            "  Cluster accuracy: {:.1}%  ({}/{} assigned to majority-correct cluster)",
+            accuracy * 100.0,
+            total_correct,
+            total_assigned
+        );
+        eprintln!(
+            "  ARI={:.4}  NMI={:.4}  Pairwise-P={:.4}  Pairwise-R={:.4}  F1={:.4}",
+            m.ari, m.nmi, m.precision, m.recall, m.f1
+        );
+        eprintln!(
+            "  Predicted {} clusters (true: {})",
+            pred_clusters.len(),
+            data.group_names.len() - if has_noise_group { 1 } else { 0 }
+        );
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -2872,7 +2899,8 @@ mod tests {
     #[test]
     fn inspect_pet_face_all_algos() {
         let data = gen_named_clusters(
-            9000, 128,
+            9000,
+            128,
             &["Buddy", "Luna", "Max", "Bella", "Charlie"],
             &[12, 12, 12, 12, 12],
             0.15,
@@ -2896,19 +2924,46 @@ mod tests {
 
         // Run each candidate algorithm
         let configs: Vec<(&str, Vec<i32>)> = vec![
-            ("Agglom-Avg t=0.77 (PROD)", agglomerative_precomputed(&dist, n, 0.77)),
-            ("Agglom-Avg t=0.85", agglomerative_precomputed(&dist, n, 0.85)),
-            ("Agglom-Avg t=0.90", agglomerative_precomputed(&dist, n, 0.90)),
-            ("Agglom-Complete t=0.90", complete_linkage_precomputed(&dist, n, 0.90)),
-            ("Agglom-Single t=0.65", single_linkage_precomputed(&dist, n, 0.65)),
-            ("Agglom-Ward t=0.90", ward_linkage_precomputed(&dist, n, 0.90)),
-            ("DBSCAN eps=0.80 mp=2", dbscan_precomputed(&dist, n, 0.80, 2)),
-            ("DBSCAN eps=0.85 mp=3", dbscan_precomputed(&dist, n, 0.85, 3)),
+            (
+                "Agglom-Avg t=0.77 (PROD)",
+                agglomerative_precomputed(&dist, n, 0.77),
+            ),
+            (
+                "Agglom-Avg t=0.85",
+                agglomerative_precomputed(&dist, n, 0.85),
+            ),
+            (
+                "Agglom-Avg t=0.90",
+                agglomerative_precomputed(&dist, n, 0.90),
+            ),
+            (
+                "Agglom-Complete t=0.90",
+                complete_linkage_precomputed(&dist, n, 0.90),
+            ),
+            (
+                "Agglom-Single t=0.65",
+                single_linkage_precomputed(&dist, n, 0.65),
+            ),
+            (
+                "Agglom-Ward t=0.90",
+                ward_linkage_precomputed(&dist, n, 0.90),
+            ),
+            (
+                "DBSCAN eps=0.80 mp=2",
+                dbscan_precomputed(&dist, n, 0.80, 2),
+            ),
+            (
+                "DBSCAN eps=0.85 mp=3",
+                dbscan_precomputed(&dist, n, 0.85, 3),
+            ),
             ("Chinese Whispers t=0.25", {
                 let mut rng = Rng::new(9000);
                 chinese_whispers(&data.embeddings, 0.25, 30, &mut rng)
             }),
-            ("Sph-KMeans k=5", spherical_kmeans_best(&data.embeddings, 5, 9000, 10)),
+            (
+                "Sph-KMeans k=5",
+                spherical_kmeans_best(&data.embeddings, 5, 9000, 10),
+            ),
         ];
 
         for (name, pred) in &configs {
@@ -2919,17 +2974,25 @@ mod tests {
         eprintln!("\n  ┌─────────────────────────────────────────────────────────────────┐");
         eprintln!("  │ FINAL COMPARISON                                                │");
         eprintln!("  └─────────────────────────────────────────────────────────────────┘");
-        eprintln!("  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
-            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1");
+        eprintln!(
+            "  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
+            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1"
+        );
         eprintln!("  {}", "-".repeat(75));
 
         for (name, pred) in &configs {
             let m = eval(&data.true_labels, pred);
             let assigned: usize = pred.iter().filter(|&&l| l >= 0).count();
             let correct = count_majority_correct(&data.true_labels, pred);
-            let acc = if assigned > 0 { correct as f64 / assigned as f64 * 100.0 } else { 0.0 };
-            eprintln!("  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
-                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1);
+            let acc = if assigned > 0 {
+                correct as f64 / assigned as f64 * 100.0
+            } else {
+                0.0
+            };
+            eprintln!(
+                "  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
+                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1
+            );
         }
     }
 
@@ -2940,7 +3003,8 @@ mod tests {
     #[test]
     fn inspect_imbalanced_all_algos() {
         let data = gen_named_clusters(
-            9001, 128,
+            9001,
+            128,
             &["DogA", "DogB", "CatX", "CatY", "Hamster"],
             &[30, 30, 8, 8, 3],
             0.08,
@@ -2962,16 +3026,34 @@ mod tests {
         });
 
         let configs: Vec<(&str, Vec<i32>)> = vec![
-            ("Agglom-Avg t=0.50", agglomerative_precomputed(&dist, n, 0.50)),
-            ("Agglom-Avg t=0.55", agglomerative_precomputed(&dist, n, 0.55)),
-            ("Agglom-Complete t=0.60", complete_linkage_precomputed(&dist, n, 0.60)),
-            ("DBSCAN eps=0.50 mp=2", dbscan_precomputed(&dist, n, 0.50, 2)),
-            ("DBSCAN eps=0.55 mp=3", dbscan_precomputed(&dist, n, 0.55, 3)),
+            (
+                "Agglom-Avg t=0.50",
+                agglomerative_precomputed(&dist, n, 0.50),
+            ),
+            (
+                "Agglom-Avg t=0.55",
+                agglomerative_precomputed(&dist, n, 0.55),
+            ),
+            (
+                "Agglom-Complete t=0.60",
+                complete_linkage_precomputed(&dist, n, 0.60),
+            ),
+            (
+                "DBSCAN eps=0.50 mp=2",
+                dbscan_precomputed(&dist, n, 0.50, 2),
+            ),
+            (
+                "DBSCAN eps=0.55 mp=3",
+                dbscan_precomputed(&dist, n, 0.55, 3),
+            ),
             ("Chinese Whispers t=0.50", {
                 let mut rng = Rng::new(9001);
                 chinese_whispers(&data.embeddings, 0.50, 30, &mut rng)
             }),
-            ("Sph-KMeans k=5", spherical_kmeans_best(&data.embeddings, 5, 9001, 10)),
+            (
+                "Sph-KMeans k=5",
+                spherical_kmeans_best(&data.embeddings, 5, 9001, 10),
+            ),
         ];
 
         for (name, pred) in &configs {
@@ -2981,17 +3063,25 @@ mod tests {
         eprintln!("\n  ┌─────────────────────────────────────────────────────────────────┐");
         eprintln!("  │ FINAL COMPARISON                                                │");
         eprintln!("  └─────────────────────────────────────────────────────────────────┘");
-        eprintln!("  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
-            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1");
+        eprintln!(
+            "  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
+            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1"
+        );
         eprintln!("  {}", "-".repeat(75));
 
         for (name, pred) in &configs {
             let m = eval(&data.true_labels, pred);
             let assigned: usize = pred.iter().filter(|&&l| l >= 0).count();
             let correct = count_majority_correct(&data.true_labels, pred);
-            let acc = if assigned > 0 { correct as f64 / assigned as f64 * 100.0 } else { 0.0 };
-            eprintln!("  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
-                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1);
+            let acc = if assigned > 0 {
+                correct as f64 / assigned as f64 * 100.0
+            } else {
+                0.0
+            };
+            eprintln!(
+                "  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
+                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1
+            );
         }
     }
 
@@ -3002,7 +3092,8 @@ mod tests {
     #[test]
     fn inspect_with_noise_all_algos() {
         let data = gen_named_with_noise(
-            9002, 128,
+            9002,
+            128,
             &["Buddy", "Luna", "Max"],
             &[15, 15, 15],
             0.08,
@@ -3026,16 +3117,34 @@ mod tests {
         });
 
         let configs: Vec<(&str, Vec<i32>)> = vec![
-            ("Agglom-Avg t=0.50", agglomerative_precomputed(&dist, n, 0.50)),
-            ("Agglom-Avg t=0.55", agglomerative_precomputed(&dist, n, 0.55)),
-            ("DBSCAN eps=0.45 mp=3", dbscan_precomputed(&dist, n, 0.45, 3)),
-            ("DBSCAN eps=0.50 mp=3", dbscan_precomputed(&dist, n, 0.50, 3)),
-            ("DBSCAN eps=0.50 mp=4", dbscan_precomputed(&dist, n, 0.50, 4)),
+            (
+                "Agglom-Avg t=0.50",
+                agglomerative_precomputed(&dist, n, 0.50),
+            ),
+            (
+                "Agglom-Avg t=0.55",
+                agglomerative_precomputed(&dist, n, 0.55),
+            ),
+            (
+                "DBSCAN eps=0.45 mp=3",
+                dbscan_precomputed(&dist, n, 0.45, 3),
+            ),
+            (
+                "DBSCAN eps=0.50 mp=3",
+                dbscan_precomputed(&dist, n, 0.50, 3),
+            ),
+            (
+                "DBSCAN eps=0.50 mp=4",
+                dbscan_precomputed(&dist, n, 0.50, 4),
+            ),
             ("Chinese Whispers t=0.50", {
                 let mut rng = Rng::new(9002);
                 chinese_whispers(&data.embeddings, 0.50, 30, &mut rng)
             }),
-            ("Sph-KMeans k=3", spherical_kmeans_best(&data.embeddings, 3, 9002, 10)),
+            (
+                "Sph-KMeans k=3",
+                spherical_kmeans_best(&data.embeddings, 3, 9002, 10),
+            ),
         ];
 
         for (name, pred) in &configs {
@@ -3045,17 +3154,25 @@ mod tests {
         eprintln!("\n  ┌─────────────────────────────────────────────────────────────────┐");
         eprintln!("  │ FINAL COMPARISON                                                │");
         eprintln!("  └─────────────────────────────────────────────────────────────────┘");
-        eprintln!("  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
-            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1");
+        eprintln!(
+            "  {:<30} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
+            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1"
+        );
         eprintln!("  {}", "-".repeat(75));
 
         for (name, pred) in &configs {
             let m = eval(&data.true_labels, pred);
             let assigned: usize = pred.iter().filter(|&&l| l >= 0).count();
             let correct = count_majority_correct(&data.true_labels, pred);
-            let acc = if assigned > 0 { correct as f64 / assigned as f64 * 100.0 } else { 0.0 };
-            eprintln!("  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
-                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1);
+            let acc = if assigned > 0 {
+                correct as f64 / assigned as f64 * 100.0
+            } else {
+                0.0
+            };
+            eprintln!(
+                "  {:<30} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
+                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1
+            );
         }
     }
 
@@ -3066,7 +3183,8 @@ mod tests {
     #[test]
     fn inspect_hard_overlap() {
         let data = gen_named_clusters(
-            9003, 128,
+            9003,
+            128,
             &["Buddy", "Luna", "Max", "Bella"],
             &[10, 10, 10, 10],
             0.20,
@@ -3089,33 +3207,63 @@ mod tests {
 
         // Sweep to find best threshold for each linkage
         let ts = thresholds(0.30, 1.10, 0.01);
-        let best_avg_t = ts.iter().copied()
+        let best_avg_t = ts
+            .iter()
+            .copied()
             .max_by(|&a, &b| {
                 let ma = eval(&data.true_labels, &agglomerative_precomputed(&dist, n, a));
                 let mb = eval(&data.true_labels, &agglomerative_precomputed(&dist, n, b));
                 ma.f1.partial_cmp(&mb.f1).unwrap()
-            }).unwrap();
-        let best_complete_t = ts.iter().copied()
+            })
+            .unwrap();
+        let best_complete_t = ts
+            .iter()
+            .copied()
             .max_by(|&a, &b| {
-                let ma = eval(&data.true_labels, &complete_linkage_precomputed(&dist, n, a));
-                let mb = eval(&data.true_labels, &complete_linkage_precomputed(&dist, n, b));
+                let ma = eval(
+                    &data.true_labels,
+                    &complete_linkage_precomputed(&dist, n, a),
+                );
+                let mb = eval(
+                    &data.true_labels,
+                    &complete_linkage_precomputed(&dist, n, b),
+                );
                 ma.f1.partial_cmp(&mb.f1).unwrap()
-            }).unwrap();
+            })
+            .unwrap();
 
         let avg_opt_name = format!("Agglom-Avg t={:.2} (OPT)", best_avg_t);
         let complete_opt_name = format!("Agglom-Complete t={:.2} (OPT)", best_complete_t);
 
         let configs: Vec<(&str, Vec<i32>)> = vec![
-            ("Agglom-Avg t=0.77 (PROD)", agglomerative_precomputed(&dist, n, 0.77)),
-            (&avg_opt_name, agglomerative_precomputed(&dist, n, best_avg_t)),
-            (&complete_opt_name, complete_linkage_precomputed(&dist, n, best_complete_t)),
-            ("DBSCAN eps=0.75 mp=2", dbscan_precomputed(&dist, n, 0.75, 2)),
-            ("DBSCAN eps=0.80 mp=2", dbscan_precomputed(&dist, n, 0.80, 2)),
+            (
+                "Agglom-Avg t=0.77 (PROD)",
+                agglomerative_precomputed(&dist, n, 0.77),
+            ),
+            (
+                &avg_opt_name,
+                agglomerative_precomputed(&dist, n, best_avg_t),
+            ),
+            (
+                &complete_opt_name,
+                complete_linkage_precomputed(&dist, n, best_complete_t),
+            ),
+            (
+                "DBSCAN eps=0.75 mp=2",
+                dbscan_precomputed(&dist, n, 0.75, 2),
+            ),
+            (
+                "DBSCAN eps=0.80 mp=2",
+                dbscan_precomputed(&dist, n, 0.80, 2),
+            ),
             ("Chinese Whispers t=0.20", {
                 let mut rng = Rng::new(9003);
                 chinese_whispers(&data.embeddings, 0.20, 30, &mut rng)
             }),
-            ("Sph-KMeans k=4", spherical_kmeans_best(&data.embeddings, 4, 9003, 10)),
+            (
+                "Sph-KMeans k=4",
+                spherical_kmeans_best(&data.embeddings, 4, 9003, 10),
+            ),
         ];
 
         for (name, pred) in &configs {
@@ -3125,17 +3273,25 @@ mod tests {
         eprintln!("\n  ┌─────────────────────────────────────────────────────────────────┐");
         eprintln!("  │ FINAL COMPARISON                                                │");
         eprintln!("  └─────────────────────────────────────────────────────────────────┘");
-        eprintln!("  {:<35} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
-            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1");
+        eprintln!(
+            "  {:<35} | {:>4} | {:>5} | {:>6} | {:>7} | {:>7}",
+            "Algorithm", "K", "Noise", "Acc%", "ARI", "F1"
+        );
         eprintln!("  {}", "-".repeat(80));
 
         for (name, pred) in &configs {
             let m = eval(&data.true_labels, pred);
             let assigned: usize = pred.iter().filter(|&&l| l >= 0).count();
             let correct = count_majority_correct(&data.true_labels, pred);
-            let acc = if assigned > 0 { correct as f64 / assigned as f64 * 100.0 } else { 0.0 };
-            eprintln!("  {:<35} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
-                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1);
+            let acc = if assigned > 0 {
+                correct as f64 / assigned as f64 * 100.0
+            } else {
+                0.0
+            };
+            eprintln!(
+                "  {:<35} | {:>4} | {:>5} | {:>5.1} | {:>7.4} | {:>7.4}",
+                name, m.n_clusters, m.n_noise, acc, m.ari, m.f1
+            );
         }
     }
 

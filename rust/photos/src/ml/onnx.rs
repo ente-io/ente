@@ -205,7 +205,10 @@ pub fn run_i32_f32<const N: usize>(
     } else {
         let tensor = output.try_extract_tensor::<half::f16>()?;
         let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
-        let data = tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>();
+        let data = tensor
+            .iter()
+            .map(|v: &half::f16| v.to_f32())
+            .collect::<Vec<_>>();
         Ok((shape, data))
     }
 }

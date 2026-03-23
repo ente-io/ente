@@ -249,10 +249,8 @@ fn correct_box_for_aspect_ratio(
         let pad_left = pad_left as f32;
         let pad_top = pad_top as f32;
 
-        let transform_x =
-            |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left) / scaled_width };
-        let transform_y =
-            |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top) / scaled_height };
+        let transform_x = |x: f32| -> f32 { (x * INPUT_WIDTH - pad_left) / scaled_width };
+        let transform_y = |y: f32| -> f32 { (y * INPUT_HEIGHT - pad_top) / scaled_height };
 
         box_xyxy[0] = transform_x(box_xyxy[0]);
         box_xyxy[1] = transform_y(box_xyxy[1]);

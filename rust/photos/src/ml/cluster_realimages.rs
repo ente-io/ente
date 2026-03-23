@@ -14,9 +14,7 @@
 mod tests {
     use crate::ml::cluster::{agglomerative_precomputed, dot};
     use crate::ml::onnx;
-    use crate::ml::pet::cluster::{
-        run_pet_clustering, ClusterConfig, PetClusterInput,
-    };
+    use crate::ml::pet::cluster::{ClusterConfig, PetClusterInput, run_pet_clustering};
     use crate::ml::runtime::ExecutionProviderPolicy;
     use std::collections::HashMap;
     use std::path::Path;
@@ -125,8 +123,8 @@ mod tests {
             input.extend_from_slice(img);
         }
 
-        let (shape, output) = onnx::run_f32(session, input, [n as i64, 3, 224, 224])
-            .expect("ONNX inference failed");
+        let (shape, output) =
+            onnx::run_f32(session, input, [n as i64, 3, 224, 224]).expect("ONNX inference failed");
 
         let batch = shape[0] as usize;
         let emb_size = output.len() / batch;
@@ -176,9 +174,21 @@ mod tests {
             }
         }
 
-        let prec = if tp + fp > 0 { tp as f64 / (tp + fp) as f64 } else { 0.0 };
-        let recall = if tp + fn_ > 0 { tp as f64 / (tp + fn_) as f64 } else { 0.0 };
-        let f1 = if prec + recall > 0.0 { 2.0 * prec * recall / (prec + recall) } else { 0.0 };
+        let prec = if tp + fp > 0 {
+            tp as f64 / (tp + fp) as f64
+        } else {
+            0.0
+        };
+        let recall = if tp + fn_ > 0 {
+            tp as f64 / (tp + fn_) as f64
+        } else {
+            0.0
+        };
+        let f1 = if prec + recall > 0.0 {
+            2.0 * prec * recall / (prec + recall)
+        } else {
+            0.0
+        };
         (prec, recall, f1, n_clusters, n_noise)
     }
 
@@ -202,7 +212,10 @@ mod tests {
         } else if Path::new(DOG_FACE_MODEL).exists() {
             DOG_FACE_MODEL
         } else {
-            eprintln!("\n  [SKIP] No model at {} or {}", DOG_FACE_MODEL, CAT_FACE_MODEL);
+            eprintln!(
+                "\n  [SKIP] No model at {} or {}",
+                DOG_FACE_MODEL, CAT_FACE_MODEL
+            );
             return;
         };
 
@@ -252,7 +265,11 @@ mod tests {
                 }
             }
         }
-        eprintln!("  Preprocessed {}/{} images", preprocessed.len(), entries.len());
+        eprintln!(
+            "  Preprocessed {}/{} images",
+            preprocessed.len(),
+            entries.len()
+        );
 
         // 5. Run embedding model
         eprintln!("  Running embedding model...");
@@ -262,12 +279,15 @@ mod tests {
             prefer_xnnpack: false,
             allow_cpu_fallback: true,
         };
-        let session = onnx::build_session(model_path, &policy)
-            .expect("Failed to load ONNX model");
+        let session = onnx::build_session(model_path, &policy).expect("Failed to load ONNX model");
 
         let embeddings = embed_batch(&session, &preprocessed);
         let emb_dim = embeddings.first().map(|e| e.len()).unwrap_or(0);
-        eprintln!("  Got {} embeddings of dimension {}", embeddings.len(), emb_dim);
+        eprintln!(
+            "  Got {} embeddings of dimension {}",
+            embeddings.len(),
+            emb_dim
+        );
 
         // Map back to original indices
         let valid_true_labels: Vec<i32> = valid_indices.iter().map(|&i| true_labels[i]).collect();
@@ -298,15 +318,24 @@ mod tests {
             eprintln!("\n  Distance statistics (cosine distance = 1 - dot):");
             eprintln!(
                 "    Intra-cluster: min={:.4} mean={:.4} p95={:.4} max={:.4} (n={})",
-                intra[0], imean, ip95, intra.last().unwrap(), intra.len()
+                intra[0],
+                imean,
+                ip95,
+                intra.last().unwrap(),
+                intra.len()
             );
             eprintln!(
                 "    Inter-cluster: min={:.4} p5={:.4} mean={:.4} max={:.4} (n={})",
-                inter[0], ep5, emean, inter.last().unwrap(), inter.len()
+                inter[0],
+                ep5,
+                emean,
+                inter.last().unwrap(),
+                inter.len()
             );
             eprintln!(
                 "    Ideal threshold range: ({:.4}, {:.4})",
-                intra.last().unwrap(), inter[0]
+                intra.last().unwrap(),
+                inter[0]
             );
         }
 
@@ -391,7 +420,11 @@ mod tests {
                 status
             );
             for &i in members {
-                let mark = if valid_entries[i].group == majority { "OK" } else { "XX" };
+                let mark = if valid_entries[i].group == majority {
+                    "OK"
+                } else {
+                    "XX"
+                };
                 eprintln!(
                     "    [{}] {:<28} group='{}'",
                     mark, valid_entries[i].filename, valid_entries[i].group
@@ -401,8 +434,7 @@ mod tests {
 
         // 9. Also test production threshold
         let prod_pred = agglomerative_precomputed(&dist, n, 0.85);
-        let (p_prec, p_recall, p_f1, p_k, p_noise) =
-            eval_pairwise(&valid_true_labels, &prod_pred);
+        let (p_prec, p_recall, p_f1, p_k, p_noise) = eval_pairwise(&valid_true_labels, &prod_pred);
         eprintln!("\n  --- Production (t=0.85) ---");
         eprintln!(
             "  K={} Noise={} Prec={:.4} Recall={:.4} F1={:.4}",
@@ -461,6 +493,9 @@ mod tests {
             );
         }
 
-        assert!(best_f1 > 0.0, "Should find at least some clustering structure");
+        assert!(
+            best_f1 > 0.0,
+            "Should find at least some clustering structure"
+        );
     }
 }

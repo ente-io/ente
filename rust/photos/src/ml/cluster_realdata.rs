@@ -12,9 +12,7 @@
 #[cfg(test)]
 mod tests {
     use crate::ml::cluster::dot;
-    use crate::ml::pet::cluster::{
-        run_pet_clustering, ClusterConfig, PetClusterInput, Species,
-    };
+    use crate::ml::pet::cluster::{ClusterConfig, PetClusterInput, Species, run_pet_clustering};
     use std::collections::HashMap;
     use std::fs;
     use std::path::Path;
@@ -470,7 +468,9 @@ mod tests {
             _ => {
                 eprintln!("\n  [SKIP] No fixture at {}", FIXTURE_PATH);
                 eprintln!("  To generate it:");
-                eprintln!("    1. In the app, call PetClusteringService.instance.dumpEmbeddingsJson(...)");
+                eprintln!(
+                    "    1. In the app, call PetClusteringService.instance.dumpEmbeddingsJson(...)"
+                );
                 eprintln!("    2. Copy the JSON file to rust/{}", FIXTURE_PATH);
                 eprintln!("    3. Re-run this test\n");
                 return;
@@ -492,12 +492,17 @@ mod tests {
             eprintln!("\n{}", "=".repeat(95));
             eprintln!(
                 "  REAL DATA: {} (species={}, {} inputs, {} existing clusters)",
-                ds.species_name, ds.species, ds.inputs.len(), n_true_clusters
+                ds.species_name,
+                ds.species,
+                ds.inputs.len(),
+                n_true_clusters
             );
             eprintln!("{}", "=".repeat(95));
 
             // Distance stats
-            let face_embs: Vec<Vec<f32>> = ds.inputs.iter()
+            let face_embs: Vec<Vec<f32>> = ds
+                .inputs
+                .iter()
                 .filter(|i| !i.face_embedding.is_empty())
                 .map(|i| i.face_embedding.clone())
                 .collect();
@@ -507,8 +512,16 @@ mod tests {
                 let mut inter = Vec::new();
                 for i in 0..face_embs.len() {
                     for j in (i + 1)..face_embs.len() {
-                        let idx_i = ds.inputs.iter().position(|inp| inp.face_embedding == face_embs[i]).unwrap();
-                        let idx_j = ds.inputs.iter().position(|inp| inp.face_embedding == face_embs[j]).unwrap();
+                        let idx_i = ds
+                            .inputs
+                            .iter()
+                            .position(|inp| inp.face_embedding == face_embs[i])
+                            .unwrap();
+                        let idx_j = ds
+                            .inputs
+                            .iter()
+                            .position(|inp| inp.face_embedding == face_embs[j])
+                            .unwrap();
                         let d = 1.0 - dot(&face_embs[i], &face_embs[j]);
                         if true_labels[idx_i] >= 0
                             && true_labels[idx_j] >= 0
@@ -528,11 +541,17 @@ mod tests {
                     let emean: f32 = inter.iter().sum::<f32>() / inter.len() as f32;
                     eprintln!(
                         "  Intra-cluster dist: min={:.4} mean={:.4} max={:.4} (n={})",
-                        intra[0], imean, intra.last().unwrap(), intra.len()
+                        intra[0],
+                        imean,
+                        intra.last().unwrap(),
+                        intra.len()
                     );
                     eprintln!(
                         "  Inter-cluster dist: min={:.4} mean={:.4} max={:.4} (n={})",
-                        inter[0], emean, inter.last().unwrap(), inter.len()
+                        inter[0],
+                        emean,
+                        inter.last().unwrap(),
+                        inter.len()
                     );
                     eprintln!(
                         "  Ideal threshold: ({:.4}, {:.4})",
@@ -543,13 +562,13 @@ mod tests {
             }
 
             // Threshold sweep using the full pipeline
-            eprintln!("\n  {:<12} | {:>4} | {:>5} | {:>7} | {:>7} | {:>7} | {:>13}",
-                "Threshold", "K", "Noise", "Prec", "Recall", "F1", "vs existing");
+            eprintln!(
+                "\n  {:<12} | {:>4} | {:>5} | {:>7} | {:>7} | {:>7} | {:>13}",
+                "Threshold", "K", "Noise", "Prec", "Recall", "F1", "vs existing"
+            );
             eprintln!("  {}", "-".repeat(75));
 
-            let thresholds: Vec<f32> = (30..=110)
-                .map(|i| i as f32 * 0.01)
-                .collect();
+            let thresholds: Vec<f32> = (30..=110).map(|i| i as f32 * 0.01).collect();
 
             let mut best_f1 = -1.0f64;
             let mut best_t = 0.0f32;
@@ -565,11 +584,15 @@ mod tests {
                 let n_noise = result.n_unclustered;
 
                 // Compare with existing: how many assignments match?
-                let n_match = ds.inputs.iter().filter(|inp| {
-                    let existing = ds.existing_clusters.get(&inp.pet_face_id);
-                    let new = result.face_to_cluster.get(&inp.pet_face_id);
-                    existing.is_some() && existing == new
-                }).count();
+                let n_match = ds
+                    .inputs
+                    .iter()
+                    .filter(|inp| {
+                        let existing = ds.existing_clusters.get(&inp.pet_face_id);
+                        let new = result.face_to_cluster.get(&inp.pet_face_id);
+                        existing.is_some() && existing == new
+                    })
+                    .count();
                 let match_pct = if !ds.existing_clusters.is_empty() {
                     n_match as f64 / ds.existing_clusters.len() as f64 * 100.0
                 } else {
@@ -600,7 +623,11 @@ mod tests {
             let mut sizes: Vec<(&String, &usize)> = result.cluster_counts.iter().collect();
             sizes.sort_by(|a, b| b.1.cmp(a.1));
             for (cid, count) in &sizes {
-                eprintln!("    {} : {} members", &cid[..std::cmp::min(20, cid.len())], count);
+                eprintln!(
+                    "    {} : {} members",
+                    &cid[..std::cmp::min(20, cid.len())],
+                    count
+                );
             }
         }
     }
@@ -619,7 +646,8 @@ mod tests {
             eprintln!("\n{}", "=".repeat(95));
             eprintln!(
                 "  CLUSTER INSPECTION: {} ({} inputs)",
-                ds.species_name, ds.inputs.len()
+                ds.species_name,
+                ds.inputs.len()
             );
             eprintln!("{}", "=".repeat(95));
 
@@ -674,12 +702,19 @@ mod tests {
             }
 
             let unclustered: Vec<usize> = (0..ds.inputs.len())
-                .filter(|i| !result.face_to_cluster.contains_key(&ds.inputs[*i].pet_face_id))
+                .filter(|i| {
+                    !result
+                        .face_to_cluster
+                        .contains_key(&ds.inputs[*i].pet_face_id)
+                })
                 .collect();
             if !unclustered.is_empty() {
                 eprintln!("\n  UNCLUSTERED ({}):", unclustered.len());
                 for &i in &unclustered {
-                    eprintln!("    file={} face={}", ds.inputs[i].file_id, ds.inputs[i].pet_face_id);
+                    eprintln!(
+                        "    file={} face={}",
+                        ds.inputs[i].file_id, ds.inputs[i].pet_face_id
+                    );
                 }
             }
         }

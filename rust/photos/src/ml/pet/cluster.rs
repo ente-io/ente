@@ -154,10 +154,7 @@ pub struct PetClusterResult {
 /// Run the full 3-phase pet clustering pipeline.
 ///
 /// This is the main entry point called from the API layer.
-pub fn run_pet_clustering(
-    inputs: &[PetClusterInput],
-    config: &ClusterConfig,
-) -> PetClusterResult {
+pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) -> PetClusterResult {
     let n = inputs.len();
     if n == 0 {
         return PetClusterResult::default();
@@ -174,7 +171,14 @@ pub fn run_pet_clustering(
     let face_centroids = compute_face_centroids(inputs, &labels, &has_face);
 
     // Phase 2: Body rescue
-    phase2_body_rescue(inputs, &mut labels, &has_face, &has_body, &face_centroids, config);
+    phase2_body_rescue(
+        inputs,
+        &mut labels,
+        &has_face,
+        &has_body,
+        &face_centroids,
+        config,
+    );
 
     // Phase 2b: Body-only clustering
     phase2b_body_cluster(inputs, &mut labels, &has_body, config);
@@ -493,7 +497,10 @@ fn phase2_body_rescue(
 
         labels[img_idx] = best_cluster;
         // Update cluster bodies for subsequent rescues
-        cluster_bodies.entry(best_cluster).or_default().push(img_idx);
+        cluster_bodies
+            .entry(best_cluster)
+            .or_default()
+            .push(img_idx);
     }
 }
 
@@ -719,7 +726,12 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
 ///   3. Build minimum spanning tree (Prim's algorithm)
 ///   4. Single-linkage hierarchy from MST
 ///   5. Extract clusters using EOM (Excess of Mass) stability
-pub(crate) fn hdbscan_precomputed(dist: &[f32], n: usize, min_cluster_size: usize, min_samples: usize) -> Vec<i32> {
+pub(crate) fn hdbscan_precomputed(
+    dist: &[f32],
+    n: usize,
+    min_cluster_size: usize,
+    min_samples: usize,
+) -> Vec<i32> {
     if n < min_cluster_size {
         return vec![-1i32; n];
     }
@@ -766,9 +778,7 @@ fn compute_mutual_reachability(dist: &[f32], core_dist: &[f32], n: usize) -> Vec
     let mut mrd = vec![0.0f32; n * n];
     for i in 0..n {
         for j in (i + 1)..n {
-            let d = dist[i * n + j]
-                .max(core_dist[i])
-                .max(core_dist[j]);
+            let d = dist[i * n + j].max(core_dist[i]).max(core_dist[j]);
             mrd[i * n + j] = d;
             mrd[j * n + i] = d;
         }
@@ -978,11 +988,7 @@ fn compute_face_centroids(
 
 // unique_cluster_ids and renumber_labels imported from crate::ml::cluster
 
-fn build_result(
-    inputs: &[PetClusterInput],
-    labels: &[i32],
-    has_face: &[bool],
-) -> PetClusterResult {
+fn build_result(inputs: &[PetClusterInput], labels: &[i32], has_face: &[bool]) -> PetClusterResult {
     let mut result = PetClusterResult::default();
 
     // Generate cluster ID strings (UUID-like from hash for determinism)
@@ -1204,6 +1210,9 @@ mod tests {
         assert_eq!(ca1, ca3, "a1 and a3 should be in same cluster");
         assert_eq!(cb1, cb2, "b1 and b2 should be in same cluster");
         assert_eq!(cb1, cb3, "b1 and b3 should be in same cluster");
-        assert_ne!(ca1, cb1, "group a and group b should be in different clusters");
+        assert_ne!(
+            ca1, cb1,
+            "group a and group b should be in different clusters"
+        );
     }
 }
