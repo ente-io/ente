@@ -25,6 +25,10 @@ class UploadBackgroundCoordinator {
     }
 
     if (FileUploader.instance.hasActiveUploads) {
+      if (!flagService.enableIOSBackgroundGraceWindow) {
+        return;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool(_keyIOSUploadGraceActive) ?? false) {
         return;
@@ -48,6 +52,13 @@ class UploadBackgroundCoordinator {
 
   Future<void> onAppForeground() async {
     if (!Platform.isIOS || !flagService.enableIOSBackgroundHandoff) {
+      return;
+    }
+
+    if (!flagService.enableIOSBackgroundGraceWindow) {
+      await BgTaskUtils.cancelIOSBackgroundProcessingTask(
+        source: "appForeground",
+      );
       return;
     }
 
