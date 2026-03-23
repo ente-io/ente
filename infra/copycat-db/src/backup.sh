@@ -66,7 +66,7 @@ else
                 '
         )"
 
-        scw rdb endpoint delete endpoint-id="$PUBLIC_ENDPOINT_ID" instance-id="$BACKUP_INSTANCE_ID"
+        scw rdb endpoint delete "$PUBLIC_ENDPOINT_ID" instance-id="$BACKUP_INSTANCE_ID"
         scw rdb instance wait "$BACKUP_INSTANCE_ID" timeout=12h
 
         DELETE_INSTANCE_ID=$BACKUP_INSTANCE_ID

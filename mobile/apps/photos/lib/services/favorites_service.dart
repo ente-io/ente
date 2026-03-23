@@ -9,6 +9,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/gateways/collections/models/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
@@ -157,6 +158,12 @@ class FavoritesService {
       await _collectionsService.addOrCopyToCollection(collectionID, files);
     }
     _updateFavoriteFilesCache(files, favFlag: true);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "favoriteAdd",
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
@@ -184,12 +191,20 @@ class FavoritesService {
       );
     }
     _updateFavoriteFilesCache(files, favFlag: favFlag);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: favFlag ? "favoriteAdd" : "favoriteRemove",
+      ),
+    );
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<void> removeFromFavorites(
     BuildContext context,
     EnteFile file,
   ) async {
+    final EnteFile originalFile = file;
     final inUploadID = file.uploadedFileID;
     if (inUploadID == null) {
       // Do nothing, ignore
@@ -213,6 +228,13 @@ class FavoritesService {
       file = favFile;
     }
     _updateFavoriteFilesCache([file], favFlag: false);
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        [originalFile],
+        source: "favoriteRemove",
+      ),
+    );
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<EnteFile?> _resolveFavoritesEntryForRemoval(

@@ -66,6 +66,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -123,22 +124,19 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        l10n.deviceInfoNote,
-                        style: textTheme.miniMuted,
-                      ),
-                      const SizedBox(height: 24),
-                      ButtonWidgetV2(
-                        buttonType: ButtonTypeV2.primary,
-                        labelText: l10n.send,
-                        isDisabled: _isSending,
-                        shouldSurfaceExecutionStates: false,
-                        onTap: _onSend,
-                      ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: l10n.continueInMailApp,
+                isDisabled: _isSending,
+                shouldSurfaceExecutionStates: false,
+                onTap: _onSend,
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -196,6 +194,11 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               subject: subject,
               body: body,
             );
+
+      if (didOpenComposer && mounted) {
+        Navigator.of(context).pop();
+        return;
+      }
 
       if (!didOpenComposer && mounted) {
         await showNoMailAppSheet(

@@ -695,25 +695,20 @@ class MLService {
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
-      final String errorString = e.toString();
       final String format = instruction.file.displayName.split('.').last;
       final int? size = instruction.file.fileSize;
       final fileType = instruction.file.fileType;
-      final bool acceptedIssue =
-          errorString.contains('ThumbnailRetrievalException') ||
-              errorString.contains('InvalidImageFormatException') ||
-              errorString.contains('UnhandledExifOrientation') ||
-              errorString.contains('FileSizeTooLargeForMobileIndexing');
+      final bool acceptedIssue = isExpectedMlSkipError(e);
       if (acceptedIssue) {
-        _logger.severe(
-          '$errorString for fileID ${instruction.fileKey} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
-          e,
-          s,
+        _logger.warning(
+          "Skipping ML indexing for fileID ${instruction.fileKey} (format $format, type $fileType, size $size): ${formatExpectedMlSkipReasonForLogs(e)}",
         );
+        final storedMarkers = <String>[];
         if (instruction.shouldRunFaces) {
           await mlDataDB.bulkInsertFaces(
             [Face.empty(instruction.fileKey, error: true)],
           );
+          storedMarkers.add("faces");
         }
         if (instruction.shouldRunClip) {
           if (instruction.isOffline) {
@@ -723,13 +718,18 @@ class MLService {
               instruction.file,
             );
           }
+          storedMarkers.add("clip");
         }
         if (instruction.shouldRunPets) {
           await mlDataDB.deletePetDataForFiles([instruction.fileKey]);
           await mlDataDB.bulkInsertPetFaces(
             [DBPetFace.empty(instruction.fileKey, error: true)],
           );
+          storedMarkers.add("pets");
         }
+        _logger.info(
+          "Stored empty ML result markers for fileID ${instruction.fileKey}: ${storedMarkers.join(', ')}",
+        );
         return true;
       }
       _logger.severe(

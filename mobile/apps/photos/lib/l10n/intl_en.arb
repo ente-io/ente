@@ -123,6 +123,7 @@
   "generatingEncryptionKeys": "Generating encryption keys...",
   "pleaseWait": "Please wait...",
   "continueLabel": "Continue",
+  "continueInMailApp": "Continue in mail app",
   "insecureDevice": "Insecure device",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
   "howItWorks": "How it works",
@@ -326,6 +327,7 @@
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
   "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnteForFamily": "Download Ente so I can add you to my family plan\n\nhttps://ente.io",
   "done": "Done",
   "applyCodeTitle": "Apply code",
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
@@ -667,6 +669,158 @@
     }
   },
   "familyPlans": "Family plans",
+  "family": "Family",
+  "designedForFamilies": "Designed for families",
+  "shareYourSubscription": "Share your subscription with loved ones",
+  "shareStorageWith5Members": "Share storage with 5 members",
+  "privateSpaceForEveryMember": "Private space for every member",
+  "feedToEngageWithFamily": "A feed to engage with family",
+  "plansStartAt": "Plans start at {price}/month",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "View plans",
+  "bringYourFamilyAlong": "Bring your family along",
+  "yourPlanSupportsFamily": "Your plan already supports a family",
+  "addUpTo5MembersFree": "Add up to 5 members free",
+  "addFamilyMember": "Add family member",
+  "addMember": "Add member",
+  "inviteMembers": "Invite members",
+  "enterEmailAddresses": "Enter their email addresses. They need an Ente account.",
+  "inviteLimitReached": "You've added 5 invites. Remove one to add another",
+  "emailAddress": "Email address",
+  "sendInvites": "Send invites",
+  "sendCountInvites": "{count, plural, =0 {Send invites} =1 {Send 1 invite} other {Send {count} invites}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "Enter an email address",
+  "enterAValidEmailAddress": "Enter a valid email address",
+  "alreadyAdded": "Already added",
+  "thisUserIsNotOnEnte": "This user is not on Ente",
+  "emailNeedsEnteAccountForFamily": "{email} does not have an Ente account.\n\nSend them an invite and add them to your family once they've created an account on Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "invitesSentCount": "{count, plural, =1 {Invite sent} other {Invites sent}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToInvite": "Couldn't invite {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Couldn't invite {count} members",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used} of {total} used",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Members",
+  "pending": "Pending",
+  "closeFamilyPlan": "Close family plan",
+  "closeFamilyConfirmTitle": "Close family plan?",
+  "closeFamilyConfirmBody": "All members will lose access to shared storage. This cannot be undone.",
+  "editStorageLimit": "Edit storage limit",
+  "noLimitSet": "No limit set",
+  "removeFromFamily": "Remove from family",
+  "removeMemberConfirmTitle": "Remove member?",
+  "removeMemberConfirmBody": "{email} will lose access to shared storage.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Resend invite",
+  "revokeInviteConfirmTitle": "Revoke invite?",
+  "revokeInviteConfirmBody": "The invitation to {email} will be cancelled.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Revoke",
+  "inviteResent": "Invite resent",
+  "memberStorageUsed": "{amount} used",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Storage limit",
+  "usingStorage": "Using {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Set the maximum storage this member can use. They will not be able to upload once the limit is reached.",
+  "limit": "Limit",
+  "noLimit": "No limit",
+  "currentUsageNote": "Current usage: {amount}. Set to 0 for no limit.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Leave family plan?",
+  "leaveFamilyConfirmBody": "You will lose access to shared storage.",
   "referrals": "Referrals",
   "notifications": "Notifications",
   "sharedPhotoNotifications": "New shared photos and albums",
@@ -726,7 +880,6 @@
   "anyAdditionalInformation": "Any additional information",
   "attachLogs": "Attach logs",
   "attachLogsHelper": "Helps us diagnose the issue faster",
-  "deviceInfoNote": "Device details such as OS version, app version, and device model will be included automatically.",
   "pleaseEnterASubject": "Please enter a subject",
   "pleaseEnterADescription": "Please enter a description",
   "noEmailAppFound": "No email app found",

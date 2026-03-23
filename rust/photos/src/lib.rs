@@ -1,3 +1,7 @@
+pub mod image;
+pub mod ml;
+pub mod vector_db;
+
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::fs;
