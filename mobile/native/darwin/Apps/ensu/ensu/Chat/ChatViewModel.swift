@@ -394,12 +394,12 @@ final class ChatViewModel: ObservableObject {
     }
 
     private static let defaultTemperature: Float = 0.5
-    private static let systemPromptBody = "Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
     private static let systemPromptDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         return formatter
     }()
+    private static let systemPromptDatePlaceholder = "$date"
     private static let defaultGenerationMaxTokens = 8_192
     private static let overflowSafetyTokens = 128
     private static let imageTokenEstimate = 768
@@ -408,9 +408,10 @@ final class ChatViewModel: ObservableObject {
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
     private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
 
-    private static func systemPrompt() -> String {
-        let dateAndTime = systemPromptDateFormatter.string(from: Date())
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: \(dateAndTime). \(systemPromptBody)"
+    private func systemPrompt() -> String {
+        let dateAndTime = Self.systemPromptDateFormatter.string(from: Date())
+        let promptBody = ModelSettingsStore.currentSystemPromptBody()
+        return promptBody.replacingOccurrences(of: Self.systemPromptDatePlaceholder, with: dateAndTime)
     }
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
@@ -487,6 +488,7 @@ final class ChatViewModel: ObservableObject {
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
+    private var downloadProgressMonitorTask: Task<Void, Never>?
     private var sharedModelReadyTask: Task<Void, Error>?
     private var sharedModelReadyTaskId: UUID?
     private var sharedModelReadyKey: ModelReadyKey?
@@ -1192,6 +1194,8 @@ final class ChatViewModel: ObservableObject {
         let target = modelSettings.currentTarget()
         isModelDownloaded = provider.isModelDownloaded(target: target)
         if isModelDownloaded {
+            downloadProgressMonitorTask?.cancel()
+            downloadProgressMonitorTask = nil
             clearDownloadProgressMemory()
             modelDownloadSizeBytes = nil
             return
@@ -1199,8 +1203,20 @@ final class ChatViewModel: ObservableObject {
 
         Task { [weak self] in
             guard let self else { return }
+            let progress = await provider.currentDownloadProgress(target: target)
             let size = await provider.estimatedDownloadSize(target: target)
             await MainActor.run {
+                guard self.modelReadyKey(for: self.modelSettings.currentTarget()) == self.modelReadyKey(for: target) else {
+                    return
+                }
+                if let progress {
+                    self.handleProgress(progress)
+                    self.startDownloadProgressMonitor(target: target)
+                } else if self.downloadToast?.phase == .downloading || self.downloadToast?.phase == .loading {
+                    self.downloadToast = nil
+                    self.isDownloading = false
+                    self.clearDownloadProgressMemory()
+                }
                 self.modelDownloadSizeBytes = size ?? self.modelDownloadSizeBytes
             }
         }
@@ -1291,6 +1307,7 @@ final class ChatViewModel: ObservableObject {
         logger.info("Model download started", details: "model=\(target.id)")
 
         modelDownloadTask?.cancel()
+        startDownloadProgressMonitor(target: target)
         modelDownloadTask = Task {
             do {
                 try await self.ensureModelReadyShared(target: target)
@@ -1354,6 +1371,8 @@ final class ChatViewModel: ObservableObject {
         resetGenerationState(stopRequested: true)
         modelDownloadTask?.cancel()
         modelDownloadTask = nil
+        downloadProgressMonitorTask?.cancel()
+        downloadProgressMonitorTask = nil
         sharedModelReadyTask?.cancel()
         clearSharedModelReadyTask()
         provider.cancelDownload()
@@ -1517,7 +1536,7 @@ final class ChatViewModel: ObservableObject {
             overflowAlert = nil
 
             let history = historySelection.messages
-            let systemMessage = InferenceMessage(text: Self.systemPrompt(), role: .system, hasAttachments: false)
+            let systemMessage = InferenceMessage(text: systemPrompt(), role: .system, hasAttachments: false)
             let messages = [systemMessage] + history + [InferenceMessage(text: prompt.text, role: .user, hasAttachments: !userNode.attachments.isEmpty)]
 
             let bufferLock = NSLock()
@@ -1738,6 +1757,44 @@ final class ChatViewModel: ObservableObject {
         )
         let visiblePercent = resolvedProgress.percent ?? progress.percent
         isDownloading = visiblePercent >= 0 && visiblePercent < 100
+    }
+
+    private func startDownloadProgressMonitor(target: InferenceModelTarget) {
+        downloadProgressMonitorTask?.cancel()
+        let targetKey = modelReadyKey(for: target)
+
+        downloadProgressMonitorTask = Task { [weak self] in
+            guard let self else { return }
+            var emptyPollCount = 0
+
+            while !Task.isCancelled {
+                guard self.modelReadyKey(for: self.modelSettings.currentTarget()) == targetKey else {
+                    return
+                }
+
+                let progress = await self.provider.currentDownloadProgress(target: target)
+                let isDownloaded = self.provider.isModelDownloaded(target: target)
+
+                if let progress {
+                    emptyPollCount = 0
+                    self.handleProgress(progress)
+                } else {
+                    emptyPollCount += 1
+                }
+
+                if isDownloaded {
+                    self.refreshModelDownloadInfo()
+                    return
+                }
+
+                if emptyPollCount >= 6 {
+                    self.refreshModelDownloadInfo()
+                    return
+                }
+
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+        }
     }
 
     private func buildSyncAuth() -> SyncAuth? {
@@ -2543,7 +2600,7 @@ final class ChatViewModel: ObservableObject {
         let historyMessages = path.prefix { $0.id != currentMessageId }
 
         let inputBudget = max(0, limits.contextLength - limits.maxOutput - Self.overflowSafetyTokens)
-        let systemTokens = estimateTokens(Self.systemPrompt())
+        let systemTokens = estimateTokens(systemPrompt())
         let promptTokens = estimatePromptTokens(promptText: promptText, imageCount: promptImageCount)
         let historyTokens = historyMessages.reduce(0) { total, node in
             total + estimateTokens(historyText(node))

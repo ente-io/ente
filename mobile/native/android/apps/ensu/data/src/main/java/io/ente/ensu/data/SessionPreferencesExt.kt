@@ -15,3 +15,7 @@ fun SessionPreferences.getSelectedSessionIdSync(): String? = runBlocking {
 fun SessionPreferences.getSessionSummariesSync(): Map<String, String> = runBlocking {
     sessionSummaries.first()
 }
+
+fun SessionPreferences.getModelDownloadRequestedSync(): Boolean = runBlocking {
+    modelDownloadRequested.first()
+}

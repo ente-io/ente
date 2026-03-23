@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
@@ -20,7 +21,9 @@ fun RootView(
     logs: List<LogEntry>,
     logRepository: FileLogRepository,
     authService: EnsuAuthService,
-    currentEndpointFlow: Flow<String>
+    currentEndpointFlow: Flow<String>,
+    advancedSettingsDataStore: AdvancedSettingsDataStore,
+    appVersion: String
 ) {
     Box(
         modifier = Modifier
@@ -33,7 +36,9 @@ fun RootView(
             logs = logs,
             logRepository = logRepository,
             authService = authService,
-            currentEndpointFlow = currentEndpointFlow
+            currentEndpointFlow = currentEndpointFlow,
+            advancedSettingsDataStore = advancedSettingsDataStore,
+            appVersion = appVersion
         )
     }
 }

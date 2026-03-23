@@ -22,6 +22,9 @@ final class ModelSettingsStore: ObservableObject {
     @Published var temperature: String {
         didSet { persist() }
     }
+    @Published var systemPromptBody: String {
+        didSet { persist() }
+    }
 
     private let defaults = UserDefaults.standard
 
@@ -32,6 +35,7 @@ final class ModelSettingsStore: ObservableObject {
         self.contextLength = defaults.string(forKey: Keys.contextLength) ?? ""
         self.maxTokens = defaults.string(forKey: Keys.maxTokens) ?? ""
         self.temperature = defaults.string(forKey: Keys.temperature) ?? ""
+        self.systemPromptBody = defaults.string(forKey: Keys.systemPromptBody) ?? ""
     }
 
     func saveCustomModel(url: String, mmproj: String, contextLength: String, maxTokens: String, temperature: String) {
@@ -65,6 +69,17 @@ final class ModelSettingsStore: ObservableObject {
     static var defaultModelName: String { Defaults.modelName }
     static var defaultModelUrl: String { Defaults.modelUrl }
     static var defaultMmprojUrl: String? { Defaults.mmprojUrl }
+    static var defaultSystemPromptBody: String { Defaults.systemPromptBody }
+
+    static func currentSystemPromptBody() -> String {
+        let stored = UserDefaults.standard.string(forKey: Keys.systemPromptBody) ?? ""
+        return resolveSystemPromptBody(stored)
+    }
+
+    static func resolveSystemPromptBody(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? Defaults.systemPromptBody : trimmed
+    }
 
     private func persist() {
         defaults.set(useCustomModel, forKey: Keys.useCustomModel)
@@ -73,20 +88,35 @@ final class ModelSettingsStore: ObservableObject {
         defaults.set(contextLength, forKey: Keys.contextLength)
         defaults.set(maxTokens, forKey: Keys.maxTokens)
         defaults.set(temperature, forKey: Keys.temperature)
+        defaults.set(systemPromptBody, forKey: Keys.systemPromptBody)
     }
 
-    private enum Keys {
+    fileprivate enum Keys {
         static let useCustomModel = "ensu.model.use_custom"
         static let modelUrl = "ensu.model.url"
         static let mmprojUrl = "ensu.model.mmproj"
         static let contextLength = "ensu.model.context"
         static let maxTokens = "ensu.model.max_tokens"
         static let temperature = "ensu.model.temperature"
+        static let systemPromptBody = "ensu.model.system_prompt_body"
     }
 
     private enum Defaults {
-        static let modelName = "Qwen 3.5 2B (Q8_0)"
-        static let modelUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true"
-        static let mmprojUrl = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+        static let modelName = "LFM 2.5 VL 1.6B (Q4_0)"
+        static let modelUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
+        static let mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+        static let systemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: $date\n\nUse Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request."
+    }
+}
+
+enum EnsuAdvancedSettings {
+    private static let advancedUnlockedKey = "ensu.settings.advanced_unlocked"
+
+    static var isUnlocked: Bool {
+        UserDefaults.standard.bool(forKey: advancedUnlockedKey)
+    }
+
+    static func unlock() {
+        UserDefaults.standard.set(true, forKey: advancedUnlockedKey)
     }
 }

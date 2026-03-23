@@ -10,7 +10,6 @@ export interface ModelInfo {
     name: string;
     url: string;
     mmprojUrl?: string;
-    description?: string;
     sizeHuman?: string;
     sizeBytes?: number;
     mmprojSizeBytes?: number;

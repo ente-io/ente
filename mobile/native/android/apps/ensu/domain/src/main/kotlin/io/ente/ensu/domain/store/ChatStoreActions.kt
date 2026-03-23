@@ -1221,7 +1221,8 @@ internal class ChatStoreActions(
     private fun buildSystemPrompt(nowMillis: Long = clock()): String {
         val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             .format(Date(nowMillis))
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: $dateAndTime. $SYSTEM_PROMPT_BODY"
+        val promptBody = SystemPromptDefaults.resolve(state.value.developerSettings.systemPrompt)
+        return promptBody.replace(SystemPromptDefaults.DATE_PLACEHOLDER, dateAndTime)
     }
 
     companion object {
@@ -1231,7 +1232,5 @@ internal class ChatStoreActions(
         private const val OVERFLOW_SAFETY_TOKENS = 128
         private const val IMAGE_TOKEN_ESTIMATE = 768
         private const val MAX_CACHED_SESSIONS = 8
-        private const val SYSTEM_PROMPT_BODY =
-            "Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
     }
 }

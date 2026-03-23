@@ -3,10 +3,13 @@ package io.ente.ensu
 import android.app.Application
 import android.os.Build
 import android.content.pm.PackageManager
+import android.os.Environment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
+import io.ente.ensu.data.getModelDownloadRequestedSync
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.CredentialStore
@@ -23,11 +26,15 @@ import java.io.File
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val sessionPreferences = SessionPreferencesDataStore(application)
     private val endpointPreferences = EndpointPreferencesDataStore(application)
+    val advancedSettingsDataStore = AdvancedSettingsDataStore(application)
     private val credentialStore = CredentialStore(application)
+    val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
 
     val logRepository = FileLogRepository(application)
     private val llmProvider = InferenceRsProvider(
-        modelDir = File(application.filesDir, "llm")
+        context = application,
+        modelDir = resolveModelDir(application),
+        legacyModelDir = File(application.filesDir, "llm")
     )
     private val chatRepository = RustChatRepository(application, credentialStore)
     private val chatSyncRepository = RustChatSyncRepository(
@@ -55,7 +62,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val currentEndpointFlow = authService.currentEndpointFlow
 
     init {
-        val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
         val launchMessage = "App launched app=$appVersion device=${Build.MANUFACTURER} ${Build.MODEL} os=${Build.VERSION.RELEASE} (sdk=${Build.VERSION.SDK_INT})"
         logRepository.log(LogLevel.Info, launchMessage, tag = "App")
 
@@ -76,6 +82,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        store.hydrateModelDownloadRequested(sessionPreferences.getModelDownloadRequestedSync())
         store.bootstrap(viewModelScope)
         val email = credentialStore.getEmail()
         if (credentialStore.isLoggedIn() && !email.isNullOrBlank()) {
@@ -85,6 +92,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             authService.storedEndpointFlow.collectLatest { endpoint ->
                 authService.updateEndpoint(endpoint)
+            }
+        }
+
+        viewModelScope.launch {
+            advancedSettingsDataStore.settingsFlow.collectLatest { settings ->
+                store.applyPersistedSettings(
+                    developerSettings = settings.developerSettings,
+                    modelSettings = settings.modelSettings
+                )
             }
         }
     }
@@ -105,5 +121,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             packageInfo.versionCode.toLong()
         }
         return "$versionName+$versionCode"
+    }
+
+    private fun resolveModelDir(application: Application): File {
+        val root = application.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            ?: application.getExternalFilesDir(null)
+            ?: application.externalCacheDir
+            ?: application.filesDir
+        return File(root, "llm")
     }
 }

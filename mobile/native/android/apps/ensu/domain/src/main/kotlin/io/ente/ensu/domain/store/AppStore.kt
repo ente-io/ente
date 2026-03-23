@@ -9,6 +9,7 @@ import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
+import io.ente.ensu.domain.state.DeveloperSettingsState
 import io.ente.ensu.domain.state.ModelSettingsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ class AppStore(
 
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
     private val attachmentActions = AttachmentStoreActions(_state, chatSyncRepository, messageStore)
-    private val modelSettingsActions = ModelSettingsActions(_state, llmProvider, logRepository)
+    private val modelSettingsActions = ModelSettingsActions(_state, sessionPreferences, llmProvider, logRepository)
     private val syncActions = SyncStoreActions(_state, chatSyncRepository, logRepository)
     private val chatActions = ChatStoreActions(
         state = _state,
@@ -57,6 +58,17 @@ class AppStore(
         modelSettingsActions.setScope(scope)
         chatActions.bootstrap(scope)
         modelSettingsActions.refreshModelDownloadInfo()
+    }
+
+    fun hydrateModelDownloadRequested(requested: Boolean) {
+        if (!requested) return
+        _state.value = _state.value.copy(
+            chat = _state.value.chat.copy(
+                hasRequestedModelDownload = true,
+                isDownloading = true,
+                downloadStatus = "Resuming download..."
+            )
+        )
     }
 
     fun createNewSession(): String = chatActions.createNewSession()
@@ -91,6 +103,8 @@ class AppStore(
     fun startModelDownload(userInitiated: Boolean = true) =
         modelSettingsActions.startModelDownload(userInitiated)
 
+    fun refreshModelDownloadInfo() = modelSettingsActions.refreshModelDownloadInfo()
+
     fun cancelDownload() {
         chatActions.cancelGenerationForDownload()
         modelSettingsActions.cancelModelDownload()
@@ -108,6 +122,27 @@ class AppStore(
         modelSettingsActions.updateModelSettings(state)
 
     fun resetModelSettings() = modelSettingsActions.resetModelSettings()
+
+    fun updateDeveloperSettings(state: DeveloperSettingsState) {
+        _state.value = _state.value.copy(developerSettings = state)
+    }
+
+    fun unlockAdvancedSettings() {
+        updateDeveloperSettings(
+            _state.value.developerSettings.copy(isAdvancedUnlocked = true)
+        )
+    }
+
+    fun applyPersistedSettings(
+        developerSettings: DeveloperSettingsState,
+        modelSettings: ModelSettingsState
+    ) {
+        _state.value = _state.value.copy(
+            developerSettings = developerSettings,
+            modelSettings = modelSettings
+        )
+        modelSettingsActions.refreshModelDownloadInfo()
+    }
 
     fun signIn(email: String) = authActions.signIn(email)
 

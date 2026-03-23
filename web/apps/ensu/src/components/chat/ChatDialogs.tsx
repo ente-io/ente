@@ -18,15 +18,14 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Divider,
     IconButton,
     ListItemButton,
+    MenuItem,
     Stack,
     TextField,
     Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { DevSettings } from "ente-new/photos/components/DevSettings";
 import {
     Notification,
     type NotificationAttributes,
@@ -69,12 +68,11 @@ export interface ChatDialogsProps {
     handleLogout: () => void;
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
-    developerSettingsEnabled: boolean;
-    modelSettingsEnabled: boolean;
-    showDeveloperMenu: boolean;
-    closeDeveloperMenu: () => void;
+    advancedUnlocked: boolean;
+    buildVersion: string;
+    handleBuildVersionTap: () => void;
     openModelSettings: () => void;
-    openDevSettings: () => void;
+    openSystemPromptSettings: () => void;
     isSmall: boolean;
     deleteSessionId: string | null;
     deleteSessionLabel: string;
@@ -84,17 +82,18 @@ export interface ChatDialogsProps {
     closeModelSettings: () => void;
     useCustomModel: boolean;
     defaultModelName: string;
+    defaultModelUrl: string;
     loadedModelName: string | null;
     allowMmproj: boolean;
     isTauriRuntime: boolean;
     modelUrl: string;
     setModelUrl: React.Dispatch<React.SetStateAction<string>>;
+    setUseCustomModel: React.Dispatch<React.SetStateAction<boolean>>;
     modelUrlError: string | null;
     mmprojUrl: string;
     setMmprojUrl: React.Dispatch<React.SetStateAction<string>>;
     mmprojError: string | null;
     suggestedModels: SuggestedModel[];
-    handleFillSuggestion: (url: string, mmproj?: string) => void;
     contextLength: string;
     setContextLength: React.Dispatch<React.SetStateAction<string>>;
     contextError: string | null;
@@ -104,11 +103,15 @@ export interface ChatDialogsProps {
     isSavingModel: boolean;
     handleSaveModel: () => void;
     handleUseDefaultModel: () => void;
+    showSystemPromptSettings: boolean;
+    closeSystemPromptSettings: () => void;
+    systemPrompt: string;
+    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>;
+    handleSaveSystemPrompt: () => void;
+    handleUseDefaultSystemPrompt: () => void;
     syncNotificationOpen: boolean;
     setSyncNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
     syncNotification?: NotificationAttributes;
-    showDevSettings: boolean;
-    closeDevSettings: () => void;
     modelGateStatus: ModelGateStatus;
 }
 
@@ -128,12 +131,11 @@ export const ChatDialogs = memo(
         handleLogout,
         openLoginFromChat,
         openPasskeysFromChat,
-        developerSettingsEnabled,
-        modelSettingsEnabled,
-        showDeveloperMenu,
-        closeDeveloperMenu,
+        advancedUnlocked,
+        buildVersion,
+        handleBuildVersionTap,
         openModelSettings,
-        openDevSettings,
+        openSystemPromptSettings,
         isSmall,
         deleteSessionId,
         deleteSessionLabel,
@@ -143,17 +145,18 @@ export const ChatDialogs = memo(
         closeModelSettings,
         useCustomModel,
         defaultModelName,
+        defaultModelUrl,
         loadedModelName,
         allowMmproj,
         isTauriRuntime,
         modelUrl,
         setModelUrl,
+        setUseCustomModel,
         modelUrlError,
         mmprojUrl,
         setMmprojUrl,
         mmprojError,
         suggestedModels,
-        handleFillSuggestion,
         contextLength,
         setContextLength,
         contextError,
@@ -163,11 +166,15 @@ export const ChatDialogs = memo(
         isSavingModel,
         handleSaveModel,
         handleUseDefaultModel,
+        showSystemPromptSettings,
+        closeSystemPromptSettings,
+        systemPrompt,
+        setSystemPrompt,
+        handleSaveSystemPrompt,
+        handleUseDefaultSystemPrompt,
         syncNotificationOpen,
         setSyncNotificationOpen,
         syncNotification,
-        showDevSettings,
-        closeDevSettings,
         modelGateStatus,
     }: ChatDialogsProps) => {
         const openExternalUrl = async (url: string) => {
@@ -195,6 +202,58 @@ export const ChatDialogs = memo(
                 }
             }
         };
+
+        const [showAdvancedLimits, setShowAdvancedLimits] =
+            React.useState(false);
+        const [selectedModelId, setSelectedModelId] = React.useState("default");
+        const modelOptions = React.useMemo(
+            () => [
+                {
+                    id: "default",
+                    name: `${defaultModelName} (Default)`,
+                    url: defaultModelUrl,
+                    mmproj: allowMmproj ? undefined : "",
+                },
+                ...suggestedModels
+                    .filter((model) => model.url !== defaultModelUrl)
+                    .map((model) => ({
+                        id: model.url,
+                        name: model.name,
+                        url: model.url,
+                        mmproj: model.mmproj,
+                    })),
+                {
+                    id: "custom",
+                    name: "Custom",
+                    url: "",
+                    mmproj: "",
+                },
+            ],
+            [allowMmproj, defaultModelName, defaultModelUrl, suggestedModels],
+        );
+        const isCustomSelected = selectedModelId === "custom";
+        const canSaveModelSettings =
+            !isCustomSelected || modelUrl.trim().length > 0;
+
+        React.useEffect(() => {
+            if (!showModelSettings) return;
+            const matchedOption = useCustomModel
+                ? modelOptions.find((model) => model.url === modelUrl)
+                : undefined;
+            setSelectedModelId(
+                !useCustomModel
+                    ? "default"
+                    : (matchedOption?.id ?? "custom"),
+            );
+            setShowAdvancedLimits(!!contextLength || !!maxTokens);
+        }, [
+            contextLength,
+            maxTokens,
+            modelUrl,
+            modelOptions,
+            showModelSettings,
+            useCustomModel,
+        ]);
 
         return (
             <>
@@ -443,28 +502,24 @@ export const ChatDialogs = memo(
                                     />
                                 </ListItemButton>
                             </Stack>
-                        </Stack>
-                    </DialogContent>
-                </Dialog>
 
-                {developerSettingsEnabled && modelSettingsEnabled && (
-                    <Dialog
-                        open={showDeveloperMenu}
-                        onClose={closeDeveloperMenu}
-                        fullScreen={isSmall}
-                        maxWidth="xs"
-                        fullWidth
-                        slotProps={{ paper: { sx: dialogPaperSx } }}
-                    >
-                        <DialogTitle sx={dialogTitleSx}>
-                            Developer Settings
-                        </DialogTitle>
-                        <DialogContent>
-                            <Stack sx={{ gap: 1 }}>
-                                {modelSettingsEnabled && (
+                            {advancedUnlocked && (
+                                <Stack sx={{ gap: 1 }}>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{
+                                            color: "text.muted",
+                                            px: 0.5,
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.08em",
+                                        }}
+                                    >
+                                        Advanced
+                                    </Typography>
+
                                     <ListItemButton
                                         onClick={() => {
-                                            closeDeveloperMenu();
+                                            closeSettingsModal();
                                             openModelSettings();
                                         }}
                                         sx={settingsItemSx}
@@ -484,42 +539,48 @@ export const ChatDialogs = memo(
                                             {...smallIconProps}
                                         />
                                     </ListItemButton>
-                                )}
-                                <ListItemButton
-                                    onClick={() => {
-                                        closeDeveloperMenu();
-                                        openDevSettings();
-                                    }}
-                                    sx={settingsItemSx}
-                                >
-                                    <HugeiconsIcon
-                                        icon={SlidersHorizontalIcon}
-                                        {...compactIconProps}
-                                    />
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1 }}
+
+                                    <ListItemButton
+                                        onClick={() => {
+                                            closeSettingsModal();
+                                            openSystemPromptSettings();
+                                        }}
+                                        sx={settingsItemSx}
                                     >
-                                        Server endpoint
-                                    </Typography>
-                                    <HugeiconsIcon
-                                        icon={ArrowRight01Icon}
-                                        {...smallIconProps}
-                                    />
-                                </ListItemButton>
-                            </Stack>
-                        </DialogContent>
-                        <DialogActions sx={{ px: 3, pb: 3 }}>
-                            <Button
-                                onClick={closeDeveloperMenu}
-                                color="secondary"
-                                fullWidth
+                                        <HugeiconsIcon
+                                            icon={SlidersHorizontalIcon}
+                                            {...compactIconProps}
+                                        />
+                                        <Typography
+                                            variant="small"
+                                            sx={{ flex: 1 }}
+                                        >
+                                            System prompt
+                                        </Typography>
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            {...smallIconProps}
+                                        />
+                                    </ListItemButton>
+                                </Stack>
+                            )}
+
+                            <Typography
+                                variant="mini"
+                                onClick={handleBuildVersionTap}
+                                sx={{
+                                    color: "text.muted",
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    userSelect: "none",
+                                    py: 1,
+                                }}
                             >
-                                Close
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                )}
+                                Build {buildVersion}
+                            </Typography>
+                        </Stack>
+                    </DialogContent>
+                </Dialog>
 
                 <Dialog
                     open={Boolean(deleteSessionId)}
@@ -552,7 +613,7 @@ export const ChatDialogs = memo(
                     </DialogActions>
                 </Dialog>
 
-                {modelSettingsEnabled && (
+                {advancedUnlocked && (
                     <Dialog
                         open={showModelSettings}
                         onClose={closeModelSettings}
@@ -566,151 +627,145 @@ export const ChatDialogs = memo(
                         </DialogTitle>
                         <DialogContent>
                             <Stack sx={{ gap: 3 }}>
-                                <Stack sx={{ gap: 0.5 }}>
+                                <Stack sx={{ gap: 1.5 }}>
                                     <Typography
                                         variant="small"
                                         sx={{ color: "text.muted" }}
                                     >
-                                        Selected model
-                                    </Typography>
-                                    <Typography variant="body">
-                                        {useCustomModel
-                                            ? "Custom model"
-                                            : defaultModelName}
-                                    </Typography>
-                                    <Typography
-                                        variant="mini"
-                                        sx={{
-                                            color: loadedModelName
-                                                ? "success.main"
-                                                : "text.muted",
-                                        }}
-                                    >
-                                        {loadedModelName
-                                            ? `Loaded: ${loadedModelName}`
-                                            : "Not loaded"}
-                                    </Typography>
-                                </Stack>
-
-                                <Divider />
-
-                                <Stack sx={{ gap: 1.5 }}>
-                                    <Typography variant="small">
-                                        Custom Hugging Face model
+                                        Select model
                                     </Typography>
                                     <TextField
+                                        select
                                         fullWidth
-                                        label="Direct .gguf file URL"
-                                        placeholder="https://huggingface.co/..."
-                                        value={modelUrl}
-                                        onChange={(event) =>
-                                            setModelUrl(event.target.value)
-                                        }
-                                        error={!!modelUrlError}
-                                        helperText={modelUrlError ?? " "}
-                                    />
-                                    {allowMmproj && (
-                                        <TextField
-                                            fullWidth
-                                            label="mmproj .gguf file URL"
-                                            placeholder="(optional for multimodal)"
-                                            value={mmprojUrl}
-                                            onChange={(event) =>
-                                                setMmprojUrl(event.target.value)
+                                        label="Model"
+                                        value={selectedModelId}
+                                        onChange={(event) => {
+                                            const nextId = event.target.value;
+                                            const nextModel = modelOptions.find(
+                                                (model) => model.id === nextId,
+                                            );
+                                            setSelectedModelId(nextId);
+                                            if (!nextModel) return;
+                                            if (nextId === "default") {
+                                                setUseCustomModel(false);
+                                                setModelUrl("");
+                                                setMmprojUrl("");
+                                                return;
                                             }
-                                            error={!!mmprojError}
-                                            helperText={mmprojError ?? " "}
-                                        />
-                                    )}
-                                    <Typography
-                                        variant="mini"
-                                        sx={{ color: "text.muted" }}
+                                            setUseCustomModel(true);
+                                            if (nextId === "custom") {
+                                                setModelUrl("");
+                                                setMmprojUrl("");
+                                                return;
+                                            }
+                                            setModelUrl(nextModel.url);
+                                            setMmprojUrl(
+                                                allowMmproj
+                                                    ? (nextModel.mmproj ?? "")
+                                                    : "",
+                                            );
+                                        }}
+                                        helperText={
+                                            loadedModelName
+                                                ? `Loaded: ${loadedModelName}`
+                                                : "Custom reveals direct Hugging Face URLs."
+                                        }
                                     >
-                                        Suggested models:
-                                    </Typography>
-                                    <Stack sx={{ gap: 1 }}>
-                                        {suggestedModels.map((model) => (
-                                            <Box
-                                                key={model.name}
-                                                sx={{
-                                                    border: "1px solid",
-                                                    borderColor: "divider",
-                                                    borderRadius: 2,
-                                                    p: 1.5,
-                                                }}
+                                        {modelOptions.map((model) => (
+                                            <MenuItem
+                                                key={model.id}
+                                                value={model.id}
                                             >
-                                                <Stack
-                                                    direction="row"
-                                                    sx={{
-                                                        gap: 1,
-                                                        alignItems: "center",
-                                                    }}
-                                                >
-                                                    <Box sx={{ flex: 1 }}>
-                                                        <Typography variant="small">
-                                                            {model.name}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="mini"
-                                                            sx={{
-                                                                color: "text.muted",
-                                                            }}
-                                                        >
-                                                            {isTauriRuntime &&
-                                                            model.mmproj
-                                                                ? "+ mmproj"
-                                                                : ""}
-                                                        </Typography>
-                                                    </Box>
-                                                    <Button
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleFillSuggestion(
-                                                                model.url,
-                                                                model.mmproj,
-                                                            )
-                                                        }
-                                                    >
-                                                        Fill
-                                                    </Button>
-                                                </Stack>
-                                            </Box>
+                                                {model.name}
+                                            </MenuItem>
                                         ))}
-                                    </Stack>
+                                    </TextField>
                                 </Stack>
 
-                                <Divider />
+                                {isCustomSelected && (
+                                    <Stack sx={{ gap: 1.5 }}>
+                                        <TextField
+                                            fullWidth
+                                            label="Model .gguf URL"
+                                            placeholder="https://huggingface.co/..."
+                                            value={modelUrl}
+                                            onChange={(event) =>
+                                                setModelUrl(event.target.value)
+                                            }
+                                            error={!!modelUrlError}
+                                            helperText={modelUrlError ?? " "}
+                                        />
+                                        {allowMmproj && (
+                                            <TextField
+                                                fullWidth
+                                                label="mmproj .gguf URL"
+                                                placeholder="(optional for multimodal)"
+                                                value={mmprojUrl}
+                                                onChange={(event) =>
+                                                    setMmprojUrl(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!mmprojError}
+                                                helperText={mmprojError ?? " "}
+                                            />
+                                        )}
+                                    </Stack>
+                                )}
 
                                 <Stack sx={{ gap: 1.5 }}>
-                                    <Typography variant="small">
-                                        Custom limits (optional)
-                                    </Typography>
-                                    <Stack direction="row" sx={{ gap: 1.5 }}>
-                                        <TextField
-                                            fullWidth
-                                            label="Context length"
-                                            placeholder="8192"
-                                            value={contextLength}
-                                            onChange={(event) =>
-                                                setContextLength(
-                                                    event.target.value,
-                                                )
-                                            }
-                                            error={!!contextError}
-                                            helperText={contextError ?? " "}
-                                        />
-                                        <TextField
-                                            fullWidth
-                                            label="Max output"
-                                            placeholder="2048"
-                                            value={maxTokens}
-                                            onChange={(event) =>
-                                                setMaxTokens(event.target.value)
-                                            }
-                                            error={!!maxTokensError}
-                                            helperText={maxTokensError ?? " "}
-                                        />
-                                    </Stack>
+                                    <Button
+                                        onClick={() =>
+                                            setShowAdvancedLimits((v) => !v)
+                                        }
+                                        color="secondary"
+                                        sx={{
+                                            justifyContent: "flex-start",
+                                            px: 0,
+                                        }}
+                                    >
+                                        Advanced limits
+                                    </Button>
+                                    {!showAdvancedLimits && (
+                                        <Typography
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            Context length and max output
+                                        </Typography>
+                                    )}
+                                    {showAdvancedLimits && (
+                                        <Stack direction="row" sx={{ gap: 1.5 }}>
+                                            <TextField
+                                                fullWidth
+                                                label="Context length"
+                                                placeholder="8192"
+                                                value={contextLength}
+                                                onChange={(event) =>
+                                                    setContextLength(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!contextError}
+                                                helperText={contextError ?? " "}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Max output"
+                                                placeholder="2048"
+                                                value={maxTokens}
+                                                onChange={(event) =>
+                                                    setMaxTokens(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                error={!!maxTokensError}
+                                                helperText={
+                                                    maxTokensError ?? " "
+                                                }
+                                            />
+                                        </Stack>
+                                    )}
                                     <Typography
                                         variant="mini"
                                         sx={{ color: "text.muted" }}
@@ -726,18 +781,19 @@ export const ChatDialogs = memo(
                                     variant="contained"
                                     color="accent"
                                     disabled={
+                                        !canSaveModelSettings ||
                                         isSavingModel ||
                                         modelGateStatus === "downloading"
                                     }
                                     onClick={handleSaveModel}
                                 >
-                                    Use Custom Model
+                                    Save Model Settings
                                 </Button>
                                 <Button
                                     onClick={handleUseDefaultModel}
                                     color="secondary"
                                 >
-                                    Use Default Model
+                                    Reset to defaults
                                 </Button>
                                 <Typography
                                     variant="mini"
@@ -746,12 +802,66 @@ export const ChatDialogs = memo(
                                         textAlign: "center",
                                     }}
                                 >
-                                    Changes require re-downloading the model.
+                                    Changes apply the next time the model loads.
                                 </Typography>
                             </Stack>
                         </DialogActions>
                     </Dialog>
                 )}
+
+                <Dialog
+                    open={showSystemPromptSettings}
+                    onClose={closeSystemPromptSettings}
+                    fullScreen={isSmall}
+                    maxWidth="sm"
+                    fullWidth
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle sx={dialogTitleSx}>
+                        System Prompt
+                    </DialogTitle>
+                    <DialogContent>
+                        <Stack sx={{ gap: 2.5 }}>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted" }}
+                            >
+                                This prompt is used as-is. Use $date anywhere
+                                to insert the current date and time. Leave
+                                blank to use the default prompt.
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                minRows={10}
+                                maxRows={18}
+                                label="Prompt text"
+                                placeholder="You are a concise assistant. Current date and time: $date"
+                                value={systemPrompt}
+                                onChange={(event) =>
+                                    setSystemPrompt(event.target.value)
+                                }
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Stack sx={{ width: "100%", gap: 1.5 }}>
+                            <Button
+                                variant="contained"
+                                color="accent"
+                                onClick={handleSaveSystemPrompt}
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                onClick={handleUseDefaultSystemPrompt}
+                                color="secondary"
+                            >
+                                Use Default Prompt
+                            </Button>
+                        </Stack>
+                    </DialogActions>
+                </Dialog>
 
                 <Notification
                     open={syncNotificationOpen}
@@ -786,12 +896,6 @@ export const ChatDialogs = memo(
                     }}
                 />
 
-                {developerSettingsEnabled && (
-                    <DevSettings
-                        open={showDevSettings}
-                        onClose={closeDevSettings}
-                    />
-                )}
             </>
         );
     },

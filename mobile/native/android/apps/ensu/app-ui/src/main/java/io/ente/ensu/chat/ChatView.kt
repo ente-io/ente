@@ -104,24 +104,6 @@ fun ChatView(
         }
     }
 
-    val shouldAutoDownload by remember(
-        chatState.hasRequestedModelDownload,
-        chatState.isDownloading,
-        chatState.isGenerating
-    ) {
-        derivedStateOf {
-            chatState.hasRequestedModelDownload &&
-                !chatState.isDownloading &&
-                !chatState.isGenerating
-        }
-    }
-
-    LaunchedEffect(chatState.isModelDownloaded, shouldAutoDownload) {
-        if (!chatState.isModelDownloaded && shouldAutoDownload) {
-            onStartDownload(false)
-        }
-    }
-
     val sessionKey = chatState.currentSessionId ?: "new-session"
 
     val editingMessage by remember(chatState.editingMessageId, chatState.messages) {
