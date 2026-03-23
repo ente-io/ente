@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:firebase_core/firebase_core.dart';
@@ -202,7 +203,7 @@ Future<bool> _shouldRunBackgroundTaskForBg() async {
   }
 
   final prefs = await SharedPreferences.getInstance();
-  return isIOSBackgroundHandoffEnabledFromPrefs(prefs);
+  return FlagService.isInternalUserEnabledInPrefs(prefs);
 }
 
 Future<bool> _runBackgroundTaskForBg(String taskId) async {
@@ -260,18 +261,16 @@ Future<void> ensureServiceLocatorBootstrap({SharedPreferences? prefs}) async {
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (Platform.isIOS && isIOSBackgroundHandoffEnabledFromPrefs(prefs)) {
-    await _runMinimalForBg(taskId, tlog, prefs);
-    return;
-  }
+  final useBackgroundBootstrap =
+      Platform.isIOS && FlagService.isInternalUserEnabledInPrefs(prefs);
   try {
-    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _scheduleHeartBeat(prefs, true);
     await _ensureRustInitialized(via: 'workmanager:$taskId');
+    await ensureServiceLocatorBootstrap(prefs: prefs);
 
-    _logger.info("(for debugging) Configuration init $tlog");
-    await Configuration.instance.init();
-    _logger.info("(for debugging) Configuration done $tlog");
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
 
     AppLifecycleService.instance.init(prefs);
     AppLifecycleService.instance.onAppInBackground(
@@ -280,18 +279,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     await Computer.shared().turnOn(workersCount: 4);
     CryptoUtil.init();
-
-    await NetworkClient.instance.init(packageInfo);
-
-    ServiceLocator.instance.init(
-      prefs,
-      NetworkClient.instance.enteDio,
-      NetworkClient.instance.getDio(),
-      packageInfo,
-    );
-    // Initialize early so thermal/battery listeners can warm up while the
-    // rest of background services are being initialized.
-    final controller = computeController;
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -310,6 +297,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     _logger.info("[BG TASK] update notification");
     updateService.showUpdateNotification().ignore();
+
     _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
     _logger.info("[BG TASK] sync completed");
@@ -327,64 +315,11 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     _logger.info("[BG TASK] $taskId completed");
   } catch (e, s) {
+    if (useBackgroundBootstrap) {
+      rethrow;
+    }
     _logger.severe("[BG TASK] $taskId error", e, s);
   }
-}
-
-Future<void> _runMinimalForBg(
-  String taskId,
-  TimeLogger tlog,
-  SharedPreferences prefs,
-) async {
-  await _scheduleHeartBeat(prefs, true);
-  await _ensureRustInitialized(via: 'workmanager:$taskId');
-
-  await ensureServiceLocatorBootstrap(prefs: prefs);
-  final controller = computeController;
-
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground(
-    'init via: backgroundRunner $tlog',
-  );
-
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
-
-  _logger.fine("CollectionsService init $tlog");
-  await CollectionsService.instance.init(prefs);
-  _logger.fine("CollectionsService init done $tlog");
-
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
-
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
-  SocialNotificationCoordinator.instance.init(prefs);
-  await NotificationService.instance.initializeForBackground();
-
-  _logger.info("[BG TASK] update notification");
-  updateService.showUpdateNotification().ignore();
-
-  _logger.info("[BG TASK] sync starting");
-  await _sync('bgTaskActiveProcess');
-  _logger.info("[BG TASK] sync completed");
-
-  _logger.info("[BG TASK] locale fetch");
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-
-  _logger.info("[BG TASK] home widget sync");
-  await _homeWidgetSync(true);
-
-  await _runBackgroundMLIfEligible(prefs, controller);
-
-  _logger.info("[BG TASK] smart albums sync");
-  await smartAlbumsService.syncSmartAlbums();
-
-  _logger.info("[BG TASK] $taskId completed");
 }
 
 Future<void> _runBackgroundMLIfEligible(
@@ -685,7 +620,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 
   final prefs = await SharedPreferences.getInstance();
-  if (isIOSBackgroundHandoffEnabledFromPrefs(prefs)) {
+  if (FlagService.isInternalUserEnabledInPrefs(prefs)) {
     await Firebase.initializeApp();
     await _firebaseMessagingBackgroundHandlerWithHandoff(message);
     return;

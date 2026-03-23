@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -19,7 +20,7 @@ void callbackDispatcher() {
     Future<bool> result = Future.error("Task didn't run");
     final prefs = await SharedPreferences.getInstance();
 
-    if (Platform.isIOS && isIOSBackgroundHandoffEnabledFromPrefs(prefs)) {
+    if (Platform.isIOS && FlagService.isInternalUserEnabledInPrefs(prefs)) {
       return _runHandoffCallbackTask(taskName, prefs);
     }
 

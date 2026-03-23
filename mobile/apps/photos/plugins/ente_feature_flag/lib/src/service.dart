@@ -44,10 +44,6 @@ class FlagService {
     }
   }
 
-  static bool isIOSBackgroundHandoffEnabledInPrefs(SharedPreferences prefs) {
-    return isInternalUserEnabledInPrefs(prefs);
-  }
-
   RemoteFlags get flags {
     try {
       if (!_prefs.containsKey("remote_flags")) {
@@ -128,8 +124,7 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
-  bool get enableIOSBackgroundHandoff =>
-      isIOSBackgroundHandoffEnabledInPrefs(_prefs);
+  bool get enableIOSBackgroundHandoff => internalUser;
   bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {
