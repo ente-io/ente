@@ -109,21 +109,6 @@ const LocalUser = z.object({
     isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
 });
 
-const readLocalUserRecord = (): PartialLocalUser | undefined => {
-    const jsonString = localStorage.getItem("user");
-    if (!jsonString) return undefined;
-    return PartialLocalUser.parse(JSON.parse(jsonString));
-};
-
-const writeLocalUserRecord = (user: PartialLocalUser | undefined) => {
-    if (!user || Object.keys(user).length === 0) {
-        localStorage.removeItem("user");
-        return;
-    }
-
-    localStorage.setItem("user", JSON.stringify(user));
-};
-
 /**
  * Return the local storage value of the user's data.
  *
@@ -134,8 +119,9 @@ const writeLocalUserRecord = (user: PartialLocalUser | undefined) => {
  * Use {@link replaceSavedLocalUser} to updated the saved value.
  */
 export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
-    const result = readLocalUserRecord();
-    if (!result) return undefined;
+    const jsonString = localStorage.getItem("user");
+    if (!jsonString) return undefined;
+    const result = PartialLocalUser.parse(JSON.parse(jsonString));
     void ensureTokensMatch(result);
     return result;
 };
@@ -148,9 +134,8 @@ export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
  * This method replaces the existing data. Use {@link updateSavedLocalUser} to
  * update selected fields while keeping the other fields as it is.
  */
-export const replaceSavedLocalUser = (partialLocalUser: PartialLocalUser) => {
-    writeLocalUserRecord(partialLocalUser);
-};
+export const replaceSavedLocalUser = (partialLocalUser: PartialLocalUser) =>
+    localStorage.setItem("user", JSON.stringify(partialLocalUser));
 
 /**
  * Partially update the saved user data.
@@ -182,6 +167,7 @@ export const updateSavedLocalUser = (updates: Partial<PartialLocalUser>) =>
 export const savedLocalUser = (): LocalUser | undefined => {
     const jsonString = localStorage.getItem("user");
     if (!jsonString) return undefined;
+    // We might have some data, but not all of it. So do a non-throwing parse.
     const { success, data } = LocalUser.safeParse(JSON.parse(jsonString));
     if (success) void ensureTokensMatch(data);
     return success ? data : undefined;

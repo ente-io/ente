@@ -19,27 +19,24 @@ export const ensureAuthToken = async () => {
  * The user's auth token is stored in KV DB using {@link saveAuthToken} during
  * the login / signup flow. This function returns that saved auth token.
  *
+ * The underlying data is stored in IndexedDB, and can be accessed from web
+ * workers.
+ *
  * If your code is running in a context where the user is already expected to be
  * logged in, use {@link ensureAuthToken} instead.
  */
-export const savedAuthToken = async () => {
-    return getKVS("token");
-};
+export const savedAuthToken = () => getKVS("token");
 
 /**
- * Save the user's auth token.
+ * Save the user's auth token in KV DB.
  *
  * This is the setter corresponding to {@link savedAuthToken}.
  */
-export const saveAuthToken = (token: string) => {
-    return setKV("token", token);
-};
+export const saveAuthToken = (token: string) => setKV("token", token);
 
 /**
- * Remove the user's auth token.
+ * Remove the user's auth token from KV DB.
  *
  * See {@link saveAuthToken}.
  */
-export const removeAuthToken = () => {
-    return removeKV("token");
-};
+export const removeAuthToken = () => removeKV("token");
