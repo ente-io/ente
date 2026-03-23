@@ -26,15 +26,19 @@ export const parseAndHandleRequest = async () => {
         const paymentToken = urlParams.get("paymentToken");
         const action = urlParams.get("action");
         const redirectURL = urlParams.get("redirectURL");
+        const accountCountry = urlParams.get("accountCountry");
 
         if (paymentIntentClientSecret) {
             const pendingPaymentContext = getPendingPaymentContext();
             const clientRedirectURL =
                 redirectURL ?? pendingPaymentContext?.redirectURL ?? null;
+            const clientAccountCountry = isStripeAccountCountry(accountCountry)
+                ? accountCountry
+                : (pendingPaymentContext?.accountCountry ?? null);
             try {
                 await handlePaymentIntentRedirect(
                     paymentIntentClientSecret,
-                    pendingPaymentContext,
+                    clientAccountCountry,
                     clientRedirectURL,
                 );
             } catch (error) {
@@ -210,7 +214,10 @@ const updateSubscription = async (
                 const result = await stripe.confirmPayment({
                     clientSecret,
                     confirmParams: {
-                        return_url: stripeConfirmationReturnURL(redirectURL),
+                        return_url: stripeConfirmationReturnURL(
+                            redirectURL,
+                            accountCountry,
+                        ),
                     },
                     redirect: "if_required",
                 });
@@ -267,19 +274,16 @@ interface UpdateStripeSubscriptionResponse {
 
 const handlePaymentIntentRedirect = async (
     clientSecret: string,
-    pendingPaymentContext: PendingPaymentContext | null,
+    accountCountry: StripeAccountCountry | null,
     redirectURL: string | null,
 ) => {
-    if (!pendingPaymentContext || !redirectURL) {
+    if (!accountCountry || !redirectURL) {
         throw new Error(
             "Required query parameter was not provided for payment confirmation",
         );
     }
 
-    const stripe = await getStripe(
-        redirectURL,
-        pendingPaymentContext.accountCountry,
-    );
+    const stripe = await getStripe(redirectURL, accountCountry);
     const result = await stripe.retrievePaymentIntent(clientSecret);
     if (result.error) throw ensureError(result.error);
     const status = await waitForTerminalPaymentIntentStatus(
@@ -314,12 +318,16 @@ const delay = (ms: number) =>
         setTimeout(resolve, ms);
     });
 
-const stripeConfirmationReturnURL = (redirectURL: string) => {
+const stripeConfirmationReturnURL = (
+    redirectURL: string,
+    accountCountry: StripeAccountCountry,
+) => {
     const url = new URL(window.location.href);
     url.searchParams.delete("paymentToken");
     url.searchParams.delete("productID");
     url.searchParams.delete("action");
     url.searchParams.set("redirectURL", redirectURL);
+    url.searchParams.set("accountCountry", accountCountry);
     return url.href;
 };
 
