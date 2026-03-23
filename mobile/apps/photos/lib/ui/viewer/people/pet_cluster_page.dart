@@ -3,6 +3,7 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -67,7 +68,39 @@ class _PetClusterPageState extends State<PetClusterPage> {
       }
     });
     _petsChanged = Bus.instance.on<PetsChangedEvent>().listen((_) {
-      if (mounted) setState(() {});
+      _reloadClusterFiles();
+    });
+  }
+
+  Future<void> _reloadClusterFiles() async {
+    if (!mounted) return;
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final clusterFileIds = await mlDataDB.getPetClusterFileIds();
+    final fileIds = clusterFileIds[widget.clusterId];
+    if (fileIds == null || fileIds.isEmpty) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
+    final List<EnteFile> files;
+    if (isOfflineMode) {
+      final localIdMap =
+          await OfflineFilesDB.instance.getLocalIdsForIntIds(fileIds.toSet());
+      final localIds = localIdMap.values.toList();
+      files = localIds.isEmpty
+          ? []
+          : await FilesDB.instance.getLocalFiles(localIds);
+    } else {
+      files = await FilesDB.instance.getFilesFromIDs(fileIds);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _files = files
+        ..sort(
+          (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
+        );
     });
   }
 

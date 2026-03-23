@@ -14,6 +14,7 @@ import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import "package:photos/db/ml/db_pet_model_mappers.dart";
+import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
@@ -2491,6 +2492,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
 
+    // Collect which clusters will lose members so we can recompute their
+    // summaries and centroids after the deletion.
+    final affectedClusterIds = <String>{};
+    if (faceIdsToRemove.isNotEmpty) {
+      final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
+      final clusterRows = await db.getAll(
+        'SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable '
+        'WHERE $petFaceIDColumn IN ($fpH)',
+        faceIdsToRemove,
+      );
+      for (final row in clusterRows) {
+        affectedClusterIds.add(row[clusterIDColumn] as String);
+      }
+    }
+
     // Delete mapping table entries, cluster assignments, and detection rows
     // atomically. Also clean up cluster summaries that become empty.
     await db.writeTransaction((tx) async {
@@ -2531,6 +2547,133 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         '(SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable)',
       );
     });
+
+    // Recompute summaries and centroids for clusters that lost members but
+    // still have remaining faces (empty ones were already deleted above).
+    if (affectedClusterIds.isNotEmpty) {
+      await _recomputeSurvivingPetClusterCentroids(db, affectedClusterIds);
+    }
+  }
+
+  /// Recompute pet_cluster_summary counts and centroid vectors for clusters
+  /// that lost members but were not emptied by a file deletion.
+  Future<void> _recomputeSurvivingPetClusterCentroids(
+    SqliteDatabase db,
+    Set<String> clusterIds,
+  ) async {
+    final summaries = <String, (int, int)>{};
+    final centroidsBySpecies = <int, Map<String, Float32List>>{};
+
+    for (final clusterId in clusterIds) {
+      // Get remaining faces for this cluster
+      final faceRows = await db.getAll(
+        'SELECT fc.$petFaceIDColumn, f.$speciesColumn, f.$faceVectorIdColumn '
+        'FROM $petFaceClustersTable fc '
+        'INNER JOIN $petFacesTable f '
+        'ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+        'WHERE fc.$clusterIDColumn = ?',
+        [clusterId],
+      );
+      if (faceRows.isEmpty) continue; // already deleted by transaction
+
+      final vectorIds = <int>[];
+      int? species;
+      for (final row in faceRows) {
+        species ??= row[speciesColumn] as int;
+        final vid = row[faceVectorIdColumn] as int?;
+        if (vid != null) vectorIds.add(vid);
+      }
+      if (vectorIds.isEmpty || species == null) continue;
+
+      try {
+        final vdb = PetVectorDB.forModel(
+          species: species,
+          isFace: true,
+          offline: _isOffline,
+        );
+        final embs = await vdb.getEmbeddings(vectorIds);
+        if (embs.isEmpty) continue;
+
+        // L2-normalized mean centroid
+        final dim = embs.first.length;
+        final centroid = Float32List(dim);
+        for (final emb in embs) {
+          for (int i = 0; i < dim; i++) {
+            centroid[i] += emb[i];
+          }
+        }
+        final n = embs.length.toDouble();
+        double norm = 0;
+        for (int i = 0; i < dim; i++) {
+          centroid[i] /= n;
+          norm += centroid[i] * centroid[i];
+        }
+        norm = sqrt(norm);
+        if (norm > 0) {
+          for (int i = 0; i < dim; i++) {
+            centroid[i] /= norm;
+          }
+        }
+
+        summaries[clusterId] = (faceRows.length, species);
+        centroidsBySpecies
+            .putIfAbsent(species, () => {})
+            .putIfAbsent(clusterId, () => centroid);
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to recompute centroid for cluster $clusterId",
+          e,
+          s,
+        );
+      }
+    }
+
+    // Update summary counts
+    if (summaries.isNotEmpty) {
+      for (final entry in summaries.entries) {
+        await db.execute(
+          'INSERT OR REPLACE INTO $petClusterSummaryTable '
+          '($clusterIDColumn, $countColumn, $speciesColumn) VALUES (?, ?, ?)',
+          [entry.key, entry.value.$1, entry.value.$2],
+        );
+      }
+    }
+
+    // Write updated centroids to vector DB
+    for (final entry in centroidsBySpecies.entries) {
+      try {
+        final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+          species: entry.key,
+          offline: _isOffline,
+        );
+        final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+          entry.value.keys,
+          db: db,
+          createIfMissing: true,
+        );
+        final vectorIds = <int>[];
+        final centroids = <Float32List>[];
+        for (final ce in entry.value.entries) {
+          final vectorId = idMap[ce.key];
+          if (vectorId != null) {
+            vectorIds.add(vectorId);
+            centroids.add(ce.value);
+          }
+        }
+        if (vectorIds.isNotEmpty) {
+          await centroidVdb.bulkInsertCentroids(
+            vectorIds: vectorIds,
+            centroids: centroids,
+          );
+        }
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to write centroid for species ${entry.key}",
+          e,
+          s,
+        );
+      }
+    }
   }
 
   @override

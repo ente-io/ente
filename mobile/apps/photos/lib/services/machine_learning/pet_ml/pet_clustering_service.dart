@@ -197,9 +197,11 @@ class PetClusteringService {
       offline: isOffline,
     );
 
-    // Build cluster inputs, tracking which are unclustered
+    // Build cluster inputs, tracking which are unclustered.
+    // Also collect body embeddings per existing cluster for incremental mode.
     final List<RustPetClusterInput> allInputs = [];
     final List<RustPetClusterInput> unclusteredInputs = [];
+    final clusterBodyEmbs = <String, List<Float64List>>{};
 
     for (final face in faces) {
       if (face.faceVectorId == null) continue;
@@ -239,6 +241,8 @@ class PetClusteringService {
       allInputs.add(input);
       if (face.clusterId == null) {
         unclusteredInputs.add(input);
+      } else if (bodyEmb.isNotEmpty) {
+        clusterBodyEmbs.putIfAbsent(face.clusterId!, () => []).add(bodyEmb);
       }
     }
 
@@ -303,10 +307,23 @@ class PetClusteringService {
         }
       }
 
+      // Compute mean body centroids from existing clustered body embeddings
+      final bodyCentroids = <RustPetClusterSummary>[];
+      for (final entry in clusterBodyEmbs.entries) {
+        if (entry.value.isEmpty) continue;
+        bodyCentroids.add(
+          RustPetClusterSummary(
+            clusterId: entry.key,
+            centroid: _meanCentroid(entry.value),
+            count: existingSummaries[entry.key]?.$1 ?? 0,
+          ),
+        );
+      }
+
       result = await runPetClusteringIncrementalRust(
         newInputs: unclusteredInputs,
         existingFaceCentroids: faceCentroids,
-        existingBodyCentroids: [],
+        existingBodyCentroids: bodyCentroids,
         species: species,
       );
     }
