@@ -735,10 +735,6 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 	return nil
 }
 
-func isSEPASubscription(stripeSubscription stripe.Subscription) bool {
-	return getSubscriptionPaymentMethodType(stripeSubscription) == stripe.PaymentMethodTypeSepaDebit
-}
-
 func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) stripe.PaymentMethodType {
 	if stripeSubscription.DefaultPaymentMethod == nil {
 		log.Info("No default payment method found")
