@@ -212,11 +212,11 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     final futures = <Future<void>>[];
     if (magicCacheService.lastMagicCacheUpdateTimeInMicroseconds >
         lastAppOpenTimeInMicroseconds) {
-      futures.add(magicCacheService.updateCache(forced: true));
+      futures.add(magicCacheService.refreshCache());
     }
     if (memoriesCacheService.lastMemoriesCacheUpdateTime >
         lastAppOpenTimeInMicroseconds) {
-      futures.add(memoriesCacheService.updateCache(forced: true));
+      futures.add(memoriesCacheService.refreshCache());
     }
     if (futures.isEmpty) {
       return;

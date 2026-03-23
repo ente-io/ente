@@ -304,6 +304,21 @@ class MagicCacheService {
     }
   }
 
+  Future<void> refreshCache() async {
+    if (!enableDiscover) {
+      return;
+    }
+    try {
+      final prompts = await _readPromptFromDiskOrNetwork();
+      final magicCaches = await _readResultFromDisk();
+      _promptFuture = Future.value(prompts);
+      _magicCacheFuture = Future.value(magicCaches);
+      Bus.instance.fire(MagicCacheUpdatedEvent());
+    } catch (e, s) {
+      _logger.info("Error refreshing magic cache", e, s);
+    }
+  }
+
   Future<List<Prompt>> getPrompts() async {
     if (_promptFuture != null) {
       return _promptFuture!;
