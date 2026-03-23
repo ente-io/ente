@@ -221,11 +221,13 @@ func (r *MemoryShareRepository) GetFileIDs(ctx context.Context, shareID int64) (
 
 // GetByUserID returns all non-deleted shares created by a user.
 func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) ([]ente.MemoryShare, error) {
+	activeCreatedAfter := ente.ActiveMemoryShareCreatedAfter()
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT id, user_id, type, COALESCE(memory_hash, ''), metadata_cipher, metadata_nonce,
 		       mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at
-		FROM memory_shares WHERE user_id = $1 AND is_deleted = false
-		ORDER BY created_at DESC`, userID)
+		FROM memory_shares
+		WHERE user_id = $1 AND is_deleted = false AND created_at > $2
+		ORDER BY created_at DESC`, userID, activeCreatedAfter)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to query user shares")
 	}

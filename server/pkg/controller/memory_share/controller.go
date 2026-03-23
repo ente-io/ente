@@ -158,5 +158,8 @@ func (c *Controller) GetByID(ctx context.Context, userID int64, shareID int64) (
 	if share.UserID != userID {
 		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "user does not own this share")
 	}
+	if share.IsDeleted || ente.IsMemoryShareExpired(share.CreatedAt) {
+		return nil, stacktrace.Propagate(ente.ErrNotFound, "memory share not available")
+	}
 	return share, nil
 }

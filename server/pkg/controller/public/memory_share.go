@@ -45,6 +45,9 @@ func (c *MemoryShareController) GetPublicMemoryShare(ctx context.Context, access
 	if share.IsDeleted {
 		return nil, stacktrace.Propagate(ente.ErrNotFound, "memory share is deleted")
 	}
+	if ente.IsMemoryShareExpired(share.CreatedAt) {
+		return nil, &ente.ApiError{Message: "memory share has expired", HttpStatusCode: 410}
+	}
 	return share, nil
 }
 
