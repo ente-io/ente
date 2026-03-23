@@ -11,7 +11,9 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/files/download/file_downloader.dart";
+import "package:locker/services/files/download/file_downloader.dart"
+    as file_downloader;
+import "package:locker/services/files/offline/offline_file_storage.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/ui/components/gradient_button.dart";
@@ -55,21 +57,22 @@ class FileUtil {
     try {
       await dialog.show();
       final fileKey = await CollectionService.instance.getFileKey(file);
-      final decryptedFile = await downloadAndDecrypt(
+      File? decryptedFile;
+      void progressCallback(int downloaded, int total) {
+        if (total > 0 && downloaded >= 0) {
+          final percentage = ((downloaded / total) * 100).clamp(0, 100).round();
+          dialog.update(
+            message: context.l10n.downloadingProgress(percentage),
+          );
+        } else {
+          dialog.update(message: context.l10n.downloading);
+        }
+      }
+
+      decryptedFile = await file_downloader.openFile(
         file,
         fileKey,
-        progressCallback: (downloaded, total) {
-          if (total > 0 && downloaded >= 0) {
-            final percentage =
-                ((downloaded / total) * 100).clamp(0, 100).round();
-            dialog.update(
-              message: context.l10n.downloadingProgress(percentage),
-            );
-          } else {
-            dialog.update(message: context.l10n.downloading);
-          }
-        },
-        shouldUseCache: true,
+        progressCallback: progressCallback,
       );
 
       await dialog.hide();
@@ -227,7 +230,7 @@ class FileUtil {
   }) async {
     final fileKey = await CollectionService.instance.getFileKey(file);
 
-    final decryptedFile = await downloadAndDecrypt(
+    final decryptedFile = await file_downloader.openFile(
       file,
       fileKey,
       progressCallback: (downloaded, total) {
@@ -239,7 +242,6 @@ class FileUtil {
           );
         }
       },
-      shouldUseCache: false,
     );
 
     if (decryptedFile == null) {
@@ -401,7 +403,10 @@ class FileUtil {
     String fileName,
   ) async {
     try {
-      await OpenFile.open(file.path);
+      final result = await OpenFile.open(file.path);
+      if (result.type != ResultType.done) {
+        throw Exception(result.message);
+      }
     } catch (e) {
       await showGenericErrorBottomSheet(
         context: context,

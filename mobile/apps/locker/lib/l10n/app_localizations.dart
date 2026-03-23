@@ -270,6 +270,66 @@ abstract class AppLocalizations {
   /// **'Downloading... {percentage}%'**
   String downloadingProgress(int percentage);
 
+  /// No description provided for @saveOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Save offline'**
+  String get saveOffline;
+
+  /// No description provided for @removeFromOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove offline'**
+  String get removeFromOffline;
+
+  /// No description provided for @savingOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving offline...'**
+  String get savingOffline;
+
+  /// Offline save progress message
+  ///
+  /// In en, this message translates to:
+  /// **'Saving offline... {percentage}%'**
+  String savingOfflineProgress(int percentage);
+
+  /// Success message when files are saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file saved offline} other{{count} files saved offline}}'**
+  String filesAvailableOffline(int count);
+
+  /// Partial success message for offline save
+  ///
+  /// In en, this message translates to:
+  /// **'{successCount} files saved offline, {failureCount} failed'**
+  String filesAvailableOfflinePartial(int successCount, int failureCount);
+
+  /// Failure message when files could not be saved offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}'**
+  String failedToSaveFilesOffline(int count);
+
+  /// Failure message when files could not be saved offline because the device was offline
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{No internet connection. Failed to save 1 file offline} other{No internet connection. Failed to save {count} files offline}}'**
+  String failedToSaveFilesOfflineNetwork(int count);
+
+  /// Failure message when files could not be saved offline because local storage failed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Failed to save 1 file offline. Check device storage} other{Failed to save {count} files offline. Check device storage}}'**
+  String failedToSaveFilesOfflineStorage(int count);
+
+  /// Success message when offline copies are removed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Offline removed for 1 file} other{Offline removed for {count} files}}'**
+  String filesRemovedFromOffline(int count);
+
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:

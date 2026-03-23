@@ -29,6 +29,83 @@
       }
     }
   },
+  "saveOffline": "Save offline",
+  "removeFromOffline": "Remove offline",
+  "savingOffline": "Saving offline...",
+  "savingOfflineProgress": "Saving offline... {percentage}%",
+  "@savingOfflineProgress": {
+    "description": "Offline save progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
+  "filesAvailableOffline": "{count, plural, =1{1 file saved offline} other{{count} files saved offline}}",
+  "@filesAvailableOffline": {
+    "description": "Success message when files are saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "filesAvailableOfflinePartial": "{successCount} files saved offline, {failureCount} failed",
+  "@filesAvailableOfflinePartial": {
+    "description": "Partial success message for offline save",
+    "placeholders": {
+      "successCount": {
+        "type": "int",
+        "example": "2"
+      },
+      "failureCount": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "failedToSaveFilesOffline": "{count, plural, =1{Failed to save 1 file offline} other{Failed to save {count} files offline}}",
+  "@failedToSaveFilesOffline": {
+    "description": "Failure message when files could not be saved offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToSaveFilesOfflineNetwork": "{count, plural, =1{No internet connection. Failed to save 1 file offline} other{No internet connection. Failed to save {count} files offline}}",
+  "@failedToSaveFilesOfflineNetwork": {
+    "description": "Failure message when files could not be saved offline because the device was offline",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToSaveFilesOfflineStorage": "{count, plural, =1{Failed to save 1 file offline. Check device storage} other{Failed to save {count} files offline. Check device storage}}",
+  "@failedToSaveFilesOfflineStorage": {
+    "description": "Failure message when files could not be saved offline because local storage failed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "filesRemovedFromOffline": "{count, plural, =1{Offline removed for 1 file} other{Offline removed for {count} files}}",
+  "@filesRemovedFromOffline": {
+    "description": "Success message when offline copies are removed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "downloadFailed": "Download failed",
   "failedToDownloadOrDecrypt": "Failed to download item",
   "errorOpeningFile": "Error opening item",

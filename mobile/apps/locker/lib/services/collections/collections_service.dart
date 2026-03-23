@@ -21,6 +21,7 @@ import "package:locker/services/collections/models/files_split.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import "package:locker/services/db/locker_db.dart";
+import 'package:locker/services/files/offline/offline_files_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
 import "package:locker/services/trash/trash_service.dart";
@@ -347,6 +348,10 @@ class CollectionService {
       requests.add(TrashRequest(file.uploadedFileID!, collection.id));
       await _apiClient.trash(requests);
 
+      await OfflineFilesService.instance.unmarkFilesOfflineLocally(
+        [file],
+        removeWorkingCopies: false,
+      );
       await _db.deleteFilesFromCollection(collection, [file]);
 
       if (runSync) {
@@ -436,11 +441,6 @@ class CollectionService {
     try {
       await _apiClient.removeFromCollection(collectionId, files);
 
-      final collection = await getCollectionByID(collectionId);
-      if (collection != null) {
-        await _db.deleteFilesFromCollection(collection, files);
-      }
-
       Bus.instance.fire(CollectionsUpdatedEvent('files_removed'));
 
       await sync();
@@ -469,17 +469,15 @@ class CollectionService {
       // Call API to move files on server
       await _apiClient.move(files, from, to);
 
-      // Update local database for all files
-      // Remove from source collection
-      await _db.deleteFilesFromCollection(from, files);
-
       // Update collectionID for all files
       for (final file in files) {
         file.collectionID = to.id;
       }
 
-      // Add to target collection
+      // Write the destination row first so local key material and offline state
+      // stay attached to the moved file before the source mapping is removed.
       await _db.addFilesToCollection(to, files);
+      await _db.deleteFilesFromCollection(from, files);
 
       // Let sync update the local state to ensure consistency
       if (runSync) {

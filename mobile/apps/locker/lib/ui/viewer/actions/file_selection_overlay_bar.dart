@@ -15,6 +15,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
+import "package:locker/services/files/offline/offline_files_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/add_to_collection_sheet.dart";
@@ -465,6 +466,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final files = selectedFiles.toList();
     final viewType = widget.collectionViewType;
     final actions = <Widget>[];
+    final canToggleOffline =
+        OfflineFilesService.instance.hasEligibleFiles(files);
+    final shouldRemoveOffline = canToggleOffline &&
+        OfflineFilesService.instance.shouldRemoveOfflineForSelection(
+          files,
+        );
 
     final showEdit = viewType?.showEditOption ?? true;
     final showShare = viewType?.showShareOption ?? true;
@@ -506,7 +513,45 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
+    if (canToggleOffline) {
+      actions.add(
+        SelectionActionButton(
+          icon: shouldRemoveOffline
+              ? Icons.cloud_off_outlined
+              : Icons.offline_pin_outlined,
+          label: shouldRemoveOffline
+              ? context.l10n.removeFromOffline
+              : context.l10n.saveOffline,
+          onTap: () => _toggleOfflineAvailability(
+            context,
+            files,
+            shouldRemoveOffline: shouldRemoveOffline,
+          ),
+        ),
+      );
+    }
+
     return actions;
+  }
+
+  Future<void> _toggleOfflineAvailability(
+    BuildContext context,
+    List<EnteFile> files, {
+    required bool shouldRemoveOffline,
+  }) async {
+    final success = shouldRemoveOffline
+        ? await OfflineFilesService.instance.unmarkFilesOffline(
+            context,
+            files,
+          )
+        : await OfflineFilesService.instance.markFilesOffline(
+            context,
+            files,
+          );
+
+    if (success) {
+      widget.selectedFiles.clearAll();
+    }
   }
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {

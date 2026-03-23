@@ -6,6 +6,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/services/db/locker_db.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/utils/file_icon_utils.dart";
@@ -46,6 +47,7 @@ class FileListWidget extends StatelessWidget {
     final bool isOutgoing = isOwner && hasSharees;
     final bool isIncoming = collection != null && !isOwner;
     final bool showSharingIndicator = isOutgoing || isIncoming;
+    final isMarkedOffline = LockerDB.instance.isFileMarkedOffline(file);
 
     final fileRowWidget = Flexible(
       flex: 6,
@@ -60,6 +62,23 @@ class FileListWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(10.0),
                   child: _buildFileIcon(),
                 ),
+                if (isMarkedOffline)
+                  Positioned(
+                    top: 4,
+                    right: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.backdropBase,
+                      ),
+                      padding: const EdgeInsets.all(1.0),
+                      child: Icon(
+                        Icons.offline_pin_rounded,
+                        color: colorScheme.primary700,
+                        size: 16.0,
+                      ),
+                    ),
+                  ),
                 if (showSharingIndicator)
                   Positioned(
                     right: 1,

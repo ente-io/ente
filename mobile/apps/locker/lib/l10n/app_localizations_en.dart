@@ -76,6 +76,80 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get saveOffline => 'Save offline';
+
+  @override
+  String get removeFromOffline => 'Remove offline';
+
+  @override
+  String get savingOffline => 'Saving offline...';
+
+  @override
+  String savingOfflineProgress(int percentage) {
+    return 'Saving offline... $percentage%';
+  }
+
+  @override
+  String filesAvailableOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files saved offline',
+      one: '1 file saved offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesAvailableOfflinePartial(int successCount, int failureCount) {
+    return '$successCount files saved offline, $failureCount failed';
+  }
+
+  @override
+  String failedToSaveFilesOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Failed to save $count files offline',
+      one: 'Failed to save 1 file offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToSaveFilesOfflineNetwork(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No internet connection. Failed to save $count files offline',
+      one: 'No internet connection. Failed to save 1 file offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToSaveFilesOfflineStorage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Failed to save $count files offline. Check device storage',
+      one: 'Failed to save 1 file offline. Check device storage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesRemovedFromOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Offline removed for $count files',
+      one: 'Offline removed for 1 file',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get downloadFailed => 'Download failed';
 
   @override

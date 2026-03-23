@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/favorites_service.dart';
+import 'package:locker/services/files/offline/offline_file_storage.dart';
 import 'package:logging/logging.dart';
 
 class Configuration extends BaseConfiguration {
@@ -25,6 +26,7 @@ class Configuration extends BaseConfiguration {
 
     await super.logout(autoLogout: autoLogout);
     await _clearCachedFiles();
+    await clearAllOfflineFileCopies();
   }
 
   Future<void> _clearCachedFiles() async {

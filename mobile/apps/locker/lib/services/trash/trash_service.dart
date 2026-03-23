@@ -15,6 +15,7 @@ import 'package:locker/services/collections/models/collection_file_item.dart';
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/db/locker_db.dart';
 import 'package:locker/services/db/trash_table.dart';
+import 'package:locker/services/files/offline/offline_files_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
@@ -54,10 +55,20 @@ class TrashService {
     if (diff.trashedFiles.isNotEmpty) {
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _db.insertTrashFiles(diff.trashedFiles);
+      final trashedFileIds =
+          diff.trashedFiles.map((file) => file.uploadedFileID!).toList();
+      await OfflineFilesService.instance.unmarkFilesOfflineById(
+        trashedFileIds,
+        removeWorkingCopies: false,
+      );
     }
     if (diff.deletedUploadIDs.isNotEmpty) {
       _logger.fine("discard ${diff.deletedUploadIDs.length} deleted items");
       await _db.deleteTrashFiles(diff.deletedUploadIDs);
+      await OfflineFilesService.instance.unmarkFilesOfflineById(
+        diff.deletedUploadIDs,
+        removeWorkingCopies: false,
+      );
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
@@ -72,6 +83,7 @@ class TrashService {
     if (diff.hasMore) {
       return syncTrash();
     }
+
   }
 
   Future<List<TrashFile>> getTrashFiles() async {
