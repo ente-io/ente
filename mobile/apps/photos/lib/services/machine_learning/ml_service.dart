@@ -245,7 +245,7 @@ class MLService {
         }
         // Persist refreshed caches after ML so foreground can pick them up
         // on the next resume, even when the work ran headlessly in background.
-        magicCacheService.updateCache(forced: force).ignore();
+        magicCacheService.updateCache().ignore();
         memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
