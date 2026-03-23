@@ -6,7 +6,6 @@ import "dart:ui";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -24,14 +23,12 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
-import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
-import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -885,141 +882,25 @@ Future<void> _showMemoryShareSheet(
   }
 
   if (shouldShareLink) {
-    await _showMemoryLinkDetailsSheet(context, inheritedData, memoryTitle);
+    final shareLinkData = await _getOrCreateMemoryLink(
+      context,
+      inheritedData,
+      memoryTitle,
+    );
+    if (!context.mounted || shareLinkData == null) {
+      return;
+    }
+    await showMemoryLinkDetailsSheet(
+      context,
+      shareUrl: shareLinkData.$1,
+      shareId: shareLinkData.$2,
+    );
     return;
   }
 
   final currentFile =
       inheritedData.memories[inheritedData.indexNotifier.value].file;
   await share(context, [currentFile]);
-}
-
-Future<void> _showMemoryLinkDetailsSheet(
-  BuildContext context,
-  FullScreenMemoryData inheritedData,
-  String memoryTitle,
-) async {
-  final shareLinkData = await _getOrCreateMemoryLink(
-    context,
-    inheritedData,
-    memoryTitle,
-  );
-  if (!context.mounted || shareLinkData == null) {
-    return;
-  }
-  final shareUrl = shareLinkData.$1;
-  final int shareId = shareLinkData.$2;
-
-  final l10n = AppLocalizations.of(context);
-  await showBaseBottomSheet<void>(
-    context,
-    title: l10n.shareLink,
-    padding: const EdgeInsets.all(16),
-    child: Builder(
-      builder: (context) {
-        final colorScheme = getEnteColorScheme(context);
-        final textTheme = getEnteTextTheme(context);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l10n.memoryShareLinkDescription, style: textTheme.smallMuted),
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorScheme.fillDark,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    child: SelectableText(shareUrl, style: textTheme.small),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: IconButton(
-                      tooltip: l10n.copyLink,
-                      iconSize: 20,
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () async {
-                        await Clipboard.setData(ClipboardData(text: shareUrl));
-                        if (context.mounted) {
-                          showShortToast(context, l10n.linkCopiedToClipboard);
-                        }
-                      },
-                      icon: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCopy01,
-                        color: colorScheme.textBase,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            ButtonWidgetV2(
-              buttonType: ButtonTypeV2.primary,
-              labelText: l10n.shareLink,
-              shouldSurfaceExecutionStates: false,
-              onTap: () async {
-                await shareText(shareUrl, context: context);
-              },
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: ButtonWidgetV2(
-                buttonType: ButtonTypeV2.critical,
-                labelText: l10n.deleteLink,
-                onTap: () async {
-                  final shouldDelete = await showAlertBottomSheet<bool>(
-                    context,
-                    title: l10n.deleteLinkQuestion,
-                    message: l10n.deleteMemoryLinkMessage,
-                    assetPath: "assets/warning-grey.png",
-                    buttons: [
-                      ButtonWidgetV2(
-                        buttonType: ButtonTypeV2.critical,
-                        labelText: l10n.deleteLink,
-                        onTap: () async {
-                          try {
-                            await MemoryShareService.instance.deleteMemoryShare(
-                              shareId,
-                            );
-                            if (context.mounted) {
-                              showShortToast(
-                                context,
-                                l10n.linkDeletedSuccessfully,
-                              );
-                              Navigator.of(context).pop(true);
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              showShortToast(context, l10n.somethingWentWrong);
-                              Navigator.of(context).pop(false);
-                            }
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                  if (shouldDelete != true) {
-                    return;
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    ),
-  );
 }
 
 Future<(String, int)?> _getOrCreateMemoryLink(

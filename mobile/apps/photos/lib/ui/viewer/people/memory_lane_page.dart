@@ -21,13 +21,10 @@ import "package:photos/services/memory_share_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/alert_bottom_sheet.dart";
-import "package:photos/ui/components/base_bottom_sheet.dart";
-import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/sharing/memory_link_details_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
-import "package:photos/utils/share_util.dart";
 
 class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
@@ -625,7 +622,16 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                             tooltip: l10n.shareLink,
                             onTap: () async {
                               _pausePlayback();
-                              await _showMemoryLaneLinkDetailsSheet(context);
+                              final shareLinkData =
+                                  await _getOrCreateMemoryLaneLinkData(context);
+                              if (!context.mounted || shareLinkData == null) {
+                                return;
+                              }
+                              await showMemoryLinkDetailsSheet(
+                                context,
+                                shareUrl: shareLinkData.$1,
+                                shareId: shareLinkData.$2,
+                              );
                             },
                           ),
                         if (_showShareAction) const SizedBox(width: 12),
@@ -1068,137 +1074,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
             color: colorScheme.textBase,
           ),
         ),
-      ),
-    );
-  }
-
-  Future<void> _showMemoryLaneLinkDetailsSheet(BuildContext context) async {
-    final shareLinkData = await _getOrCreateMemoryLaneLinkData(context);
-    if (!context.mounted || shareLinkData == null) {
-      return;
-    }
-    final l10n = context.l10n;
-    final shareUrl = shareLinkData.$1;
-    final int shareId = shareLinkData.$2;
-    await showBaseBottomSheet<void>(
-      context,
-      title: l10n.shareLink,
-      padding: const EdgeInsets.all(16),
-      child: Builder(
-        builder: (context) {
-          final colorScheme = getEnteColorScheme(context);
-          final textTheme = getEnteTextTheme(context);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.memoryShareLinkDescription,
-                style: textTheme.smallMuted,
-              ),
-              const SizedBox(height: 14),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorScheme.fillDark,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 16, 44, 16),
-                      child: SelectableText(shareUrl, style: textTheme.small),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: IconButton(
-                        tooltip: l10n.copyLink,
-                        iconSize: 20,
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: shareUrl),
-                          );
-                          if (context.mounted) {
-                            showShortToast(
-                              context,
-                              l10n.linkCopiedToClipboard,
-                            );
-                          }
-                        },
-                        icon: Icon(
-                          Icons.copy_rounded,
-                          color: colorScheme.textBase,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              ButtonWidgetV2(
-                buttonType: ButtonTypeV2.primary,
-                labelText: l10n.shareLink,
-                shouldSurfaceExecutionStates: false,
-                onTap: () async {
-                  await shareText(shareUrl, context: context);
-                },
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ButtonWidgetV2(
-                  buttonType: ButtonTypeV2.critical,
-                  labelText: l10n.deleteLink,
-                  onTap: () async {
-                    final shouldDelete = await showAlertBottomSheet<bool>(
-                      context,
-                      title: l10n.deleteLinkQuestion,
-                      message: l10n.deleteMemoryLinkMessage,
-                      assetPath: "assets/warning-grey.png",
-                      buttons: [
-                        ButtonWidgetV2(
-                          buttonType: ButtonTypeV2.critical,
-                          labelText: l10n.deleteLink,
-                          onTap: () async {
-                            try {
-                              await MemoryShareService.instance
-                                  .deleteMemoryShare(
-                                shareId,
-                              );
-                              if (context.mounted) {
-                                showShortToast(
-                                  context,
-                                  l10n.linkDeletedSuccessfully,
-                                );
-                                Navigator.of(context).pop(true);
-                              }
-                            } catch (_) {
-                              if (context.mounted) {
-                                showShortToast(
-                                  context,
-                                  l10n.somethingWentWrong,
-                                );
-                                Navigator.of(context).pop(false);
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                    if (shouldDelete != true) {
-                      return;
-                    }
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }
