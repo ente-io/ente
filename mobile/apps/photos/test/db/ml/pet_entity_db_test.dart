@@ -10,7 +10,7 @@ void main() {
 
   group('PetData', () {
     test('toJson/fromJson roundtrip', () {
-      const data = PetData(name: 'Buddy', species: 0);
+      final data = PetData(name: 'Buddy', species: 0);
       final restored = PetData.fromJson(data.toJson());
 
       expect(restored.name, 'Buddy');
@@ -18,7 +18,7 @@ void main() {
     });
 
     test('copyWith updates name only', () {
-      const data = PetData(name: 'Buddy', species: 0);
+      final data = PetData(name: 'Buddy', species: 0);
       final renamed = data.copyWith(name: 'Max');
 
       expect(renamed.name, 'Max');
@@ -26,7 +26,7 @@ void main() {
     });
 
     test('copyWith updates species only', () {
-      const data = PetData(name: 'Buddy', species: 0);
+      final data = PetData(name: 'Buddy', species: 0);
       final changed = data.copyWith(species: 1);
 
       expect(changed.name, 'Buddy');
@@ -34,11 +34,11 @@ void main() {
     });
 
     test('toJson contains expected keys', () {
-      const data = PetData(name: 'Luna', species: 1);
+      final data = PetData(name: 'Luna', species: 1);
       final map = data.toJson();
 
       expect(map.keys, containsAll(['name', 'species']));
-      expect(map.length, 2);
+      expect(map.length, 10);
     });
 
     test('fromJson handles missing fields with defaults', () {
@@ -53,9 +53,9 @@ void main() {
 
   group('PetEntity', () {
     test('copyWith replaces data', () {
-      const pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
+      final pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
       final updated = pet.copyWith(
-        data: const PetData(name: 'Max', species: 0),
+        data: PetData(name: 'Max', species: 0),
       );
 
       expect(updated.remoteID, 'pet-1');
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('remoteID is preserved on copyWith', () {
-      const pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
+      final pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
       final copy = pet.copyWith();
 
       expect(copy.remoteID, 'pet-1');
