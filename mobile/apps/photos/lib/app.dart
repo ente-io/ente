@@ -193,7 +193,6 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final String stateChangeReason = 'app -> $state';
-    final wasForeground = AppLifecycleService.instance.isForeground;
     if (state == AppLifecycleState.resumed) {
       final lastAppOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
       AppLifecycleService.instance

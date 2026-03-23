@@ -210,18 +210,21 @@ Future<bool> _runBackgroundTaskForBg(String taskId) async {
   final trigger = BgTaskUtils.backgroundTriggerForTask(taskId);
   final budget = BgTaskUtils.backgroundRunBudgetForTask(taskId);
   bool result = true;
-  await runWithLogs(() async {
-    try {
-      result = await _runBackgroundPass(
-        trigger: trigger,
-        taskId: taskId,
-        budget: budget,
-      );
-    } catch (e, s) {
-      result = false;
-      _logger.severe("Unhandled background task failure for $taskId", e, s);
-    }
-  }, prefix: _backgroundLogPrefix(trigger));
+  await runWithLogs(
+    () async {
+      try {
+        result = await _runBackgroundPass(
+          trigger: trigger,
+          taskId: taskId,
+          budget: budget,
+        );
+      } catch (e, s) {
+        result = false;
+        _logger.severe("Unhandled background task failure for $taskId", e, s);
+      }
+    },
+    prefix: _backgroundLogPrefix(trigger),
+  );
   return result;
 }
 
@@ -340,7 +343,7 @@ Future<void> _runBackgroundMLIfEligible(
   bool mlRunStarted = false;
   try {
     await MLService.instance.init();
-    await PersonService.init(entityService, MLDataDB.instance, prefs);
+    PersonService.init(entityService, MLDataDB.instance, prefs);
     mlRunStarted = true;
     await MLService.instance.runAllML(force: false);
   } finally {

@@ -8,6 +8,7 @@ import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/background_run_helper.dart";
 import "package:photos/utils/ios_background_handoff.dart" as ios_handoff;
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
@@ -37,6 +38,7 @@ void callbackDispatcher() {
                 "TLE, committing seppuku for taskID: $taskName",
               );
               await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+              return true;
             },
           );
           BgTaskUtils.$.info('Task run successful $tlog');
@@ -143,7 +145,7 @@ class BgTaskUtils {
     SharedPreferences prefs,
   ) async {
     await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-      ProcessType.background.toString(),
+      "ProcessType.background",
       DateTime.now().microsecondsSinceEpoch,
     );
     await prefs.remove(kLastBGTaskHeartBeatTime);
