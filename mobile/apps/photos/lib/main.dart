@@ -116,15 +116,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
 
 Future<void> _warmForegroundDeferredServices() async {
   try {
-    await PersonService.instance.refreshPersonCache(
-      notifyListeners: true,
-      source: 'startupForegroundWarm',
-    );
-  } catch (e, s) {
-    _logger.warning("Deferred PersonService warm failed", e, s);
-  }
-
-  try {
     await MemoryLaneService.instance.init();
     if (flagService.facesTimeline) {
       MemoryLaneService.instance
@@ -366,6 +357,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(MLService.instance.init());
     PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PersonService.instance.refreshPersonCache();
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
