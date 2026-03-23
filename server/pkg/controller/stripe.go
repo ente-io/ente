@@ -566,6 +566,8 @@ func (c *StripeController) getStripeSubscriptionWithPaymentMethod(subscription e
 	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
 	params := &stripe.SubscriptionParams{}
 	params.AddExpand("default_payment_method")
+	params.AddExpand("customer.invoice_settings.default_payment_method")
+	params.AddExpand("customer.default_source")
 	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, params)
 	if err != nil {
 		return stripe.Subscription{}, stacktrace.Propagate(err, "")
@@ -737,7 +739,21 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 
 func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) stripe.PaymentMethodType {
 	if stripeSubscription.DefaultPaymentMethod == nil {
-		log.Info("No default payment method found")
+		if stripeSubscription.Customer != nil {
+			if stripeSubscription.Customer.InvoiceSettings != nil &&
+				stripeSubscription.Customer.InvoiceSettings.DefaultPaymentMethod != nil {
+				return stripeSubscription.Customer.InvoiceSettings.DefaultPaymentMethod.Type
+			}
+			if stripeSubscription.Customer.DefaultSource != nil &&
+				stripeSubscription.Customer.DefaultSource.Type == stripe.PaymentSourceTypeCard {
+				return stripe.PaymentMethodTypeCard
+			}
+		}
+		if stripeSubscription.DefaultSource != nil &&
+			stripeSubscription.DefaultSource.Type == stripe.PaymentSourceTypeCard {
+			return stripe.PaymentMethodTypeCard
+		}
+		log.Info("No default payment method found on subscription or customer")
 		return ""
 	}
 	return stripeSubscription.DefaultPaymentMethod.Type
