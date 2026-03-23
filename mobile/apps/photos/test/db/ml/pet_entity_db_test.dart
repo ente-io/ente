@@ -6,152 +6,68 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 
 void main() {
-  // ── PetEntity model tests ──
+  // ── PetData model tests ──
 
-  group('PetEntity', () {
-    test('toMap/fromMap roundtrip', () {
-      const pet = PetEntity(id: 'pet-1', name: 'Buddy', species: 0);
-      final restored = PetEntity.fromMap(pet.toMap());
+  group('PetData', () {
+    test('toJson/fromJson roundtrip', () {
+      const data = PetData(name: 'Buddy', species: 0);
+      final restored = PetData.fromJson(data.toJson());
 
-      expect(restored.id, 'pet-1');
       expect(restored.name, 'Buddy');
       expect(restored.species, 0);
     });
 
     test('copyWith updates name only', () {
-      const pet = PetEntity(id: 'pet-1', name: 'Buddy', species: 0);
-      final renamed = pet.copyWith(name: 'Max');
+      const data = PetData(name: 'Buddy', species: 0);
+      final renamed = data.copyWith(name: 'Max');
 
-      expect(renamed.id, 'pet-1');
       expect(renamed.name, 'Max');
       expect(renamed.species, 0);
     });
 
     test('copyWith updates species only', () {
-      const pet = PetEntity(id: 'pet-1', name: 'Buddy', species: 0);
-      final changed = pet.copyWith(species: 1);
+      const data = PetData(name: 'Buddy', species: 0);
+      final changed = data.copyWith(species: 1);
 
-      expect(changed.id, 'pet-1');
       expect(changed.name, 'Buddy');
       expect(changed.species, 1);
     });
 
-    test('toMap contains expected keys', () {
-      const pet = PetEntity(id: 'abc', name: 'Luna', species: 1);
-      final map = pet.toMap();
+    test('toJson contains expected keys', () {
+      const data = PetData(name: 'Luna', species: 1);
+      final map = data.toJson();
 
-      expect(map.keys, containsAll(['id', 'name', 'species']));
-      expect(map.length, 3);
+      expect(map.keys, containsAll(['name', 'species']));
+      expect(map.length, 2);
+    });
+
+    test('fromJson handles missing fields with defaults', () {
+      final data = PetData.fromJson(<String, dynamic>{});
+
+      expect(data.name, '');
+      expect(data.species, -1);
     });
   });
 
-  // ── PetDB SQLite tests (using raw SqliteDatabase) ──
+  // ── PetEntity tests ──
 
-  group('PetDB queries', () {
-    late SqliteDatabase db;
-    late Directory tempDir;
-
-    const petsTable = 'pets';
-
-    setUp(() async {
-      tempDir = Directory.systemTemp.createTempSync('pet_db_test_');
-      final dbPath = '${tempDir.path}/test_pets.db';
-      db = SqliteDatabase(path: dbPath);
-      await db.writeTransaction((tx) async {
-        await tx.execute('''
-          CREATE TABLE IF NOT EXISTS $petsTable (
-            id TEXT NOT NULL PRIMARY KEY,
-            name TEXT NOT NULL DEFAULT '',
-            species INTEGER NOT NULL DEFAULT -1
-          )
-        ''');
-      });
-    });
-
-    tearDown(() async {
-      await db.close();
-    });
-
-    Future<void> upsertPet(PetEntity pet) async {
-      await db.execute(
-        '''INSERT INTO $petsTable (id, name, species) VALUES (?, ?, ?)
-           ON CONFLICT(id) DO UPDATE SET
-             name = excluded.name,
-             species = excluded.species''',
-        [pet.id, pet.name, pet.species],
+  group('PetEntity', () {
+    test('copyWith replaces data', () {
+      const pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
+      final updated = pet.copyWith(
+        data: const PetData(name: 'Max', species: 0),
       );
-    }
 
-    Future<PetEntity?> getPet(String id) async {
-      final rows = await db.getAll(
-        'SELECT * FROM $petsTable WHERE id = ?',
-        [id],
-      );
-      if (rows.isEmpty) return null;
-      return PetEntity.fromMap(rows.first);
-    }
-
-    Future<List<PetEntity>> getAllPets() async {
-      final rows = await db.getAll('SELECT * FROM $petsTable');
-      return rows.map(PetEntity.fromMap).toList();
-    }
-
-    test('insert and retrieve a pet', () async {
-      const pet = PetEntity(id: 'p1', name: 'Buddy', species: 0);
-      await upsertPet(pet);
-
-      final result = await getPet('p1');
-      expect(result, isNotNull);
-      expect(result!.id, 'p1');
-      expect(result.name, 'Buddy');
-      expect(result.species, 0);
+      expect(updated.remoteID, 'pet-1');
+      expect(updated.data.name, 'Max');
     });
 
-    test('upsert updates existing pet', () async {
-      const pet = PetEntity(id: 'p1', name: 'Buddy', species: 0);
-      await upsertPet(pet);
+    test('remoteID is preserved on copyWith', () {
+      const pet = PetEntity('pet-1', PetData(name: 'Buddy', species: 0));
+      final copy = pet.copyWith();
 
-      const updated = PetEntity(id: 'p1', name: 'Max', species: 0);
-      await upsertPet(updated);
-
-      final result = await getPet('p1');
-      expect(result!.name, 'Max');
-
-      final all = await getAllPets();
-      expect(all.length, 1);
-    });
-
-    test('get returns null for missing pet', () async {
-      final result = await getPet('nonexistent');
-      expect(result, isNull);
-    });
-
-    test('getAll returns all pets', () async {
-      await upsertPet(const PetEntity(id: 'p1', name: 'Buddy', species: 0));
-      await upsertPet(const PetEntity(id: 'p2', name: 'Luna', species: 1));
-      await upsertPet(const PetEntity(id: 'p3', name: 'Charlie', species: 0));
-
-      final all = await getAllPets();
-      expect(all.length, 3);
-
-      final names = all.map((p) => p.name).toSet();
-      expect(names, containsAll(['Buddy', 'Luna', 'Charlie']));
-    });
-
-    test('delete removes a pet', () async {
-      await upsertPet(const PetEntity(id: 'p1', name: 'Buddy', species: 0));
-      await db.execute('DELETE FROM $petsTable WHERE id = ?', ['p1']);
-
-      final result = await getPet('p1');
-      expect(result, isNull);
-    });
-
-    test('delete non-existent pet is a no-op', () async {
-      await upsertPet(const PetEntity(id: 'p1', name: 'Buddy', species: 0));
-      await db.execute('DELETE FROM $petsTable WHERE id = ?', ['p99']);
-
-      final all = await getAllPets();
-      expect(all.length, 1);
+      expect(copy.remoteID, 'pet-1');
+      expect(copy.data.name, 'Buddy');
     });
   });
 

@@ -1,14 +1,11 @@
 import "package:flutter/material.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/pet_db.dart";
-import "package:photos/events/pets_changed_event.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:uuid/uuid.dart";
 
 /// Bottom sheet page for naming or renaming a pet cluster.
 class SaveOrEditPet extends StatefulWidget {
@@ -92,20 +89,34 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
 
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final petService = PetService.instance;
 
     // Reuse existing pet ID if the cluster already has one, otherwise create.
     String petId;
     if (widget.petId != null) {
       petId = widget.petId!;
+      await petService.updatePet(
+        petId,
+        PetData(name: name, species: widget.species),
+      );
     } else {
       final existing = await mlDataDB.getClusterToPetId();
-      petId = existing[widget.clusterId] ?? const Uuid().v4();
+      final existingPetId = existing[widget.clusterId];
+      if (existingPetId != null) {
+        petId = existingPetId;
+        await petService.updatePet(
+          petId,
+          PetData(name: name, species: widget.species),
+        );
+      } else {
+        final pet = await petService.addPet(
+          PetData(name: name, species: widget.species),
+        );
+        petId = pet.remoteID;
+      }
     }
 
-    final pet = PetEntity(id: petId, name: name, species: widget.species);
-    await PetDB.instance.upsert(pet);
     await mlDataDB.setClusterPetId(widget.clusterId, petId);
-    Bus.instance.fire(PetsChangedEvent(source: "SaveOrEditPet"));
 
     if (mounted) {
       Navigator.pop(context, name);

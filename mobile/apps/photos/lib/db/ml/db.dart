@@ -1724,6 +1724,31 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     }
   }
 
+  /// WARNING: Deletes all pet clustering data (clusters, summaries, feedback,
+  /// centroid mappings). Preserves indexed pet faces/bodies. Debug only!
+  Future<void> dropPetClusteringData() async {
+    try {
+      final db = await asyncDB;
+
+      // Clear pet clustering tables
+      await db.execute(deletePetFaceClustersTable);
+      await db.execute(deletePetClusterSummaryTable);
+      await db.execute(deletePetClusterCentroidVectorIdMappingTable);
+      await db.execute(deletePetClusterPetTable);
+      await db.execute(deleteNotPetFeedbackTable);
+
+      // Recreate the tables
+      await db.execute(createPetFaceClustersTable);
+      await db.execute(petFcClusterIDIndex);
+      await db.execute(createPetClusterSummaryTable);
+      await db.execute(createPetClusterCentroidVectorIdMappingTable);
+      await db.execute(createPetClusterPetTable);
+      await db.execute(createNotPetFeedbackTable);
+    } catch (e, s) {
+      _logger.severe('Error dropping pet clustering data', e, s);
+    }
+  }
+
   @override
   Future<List<int>> getFileIDsOfPersonID(String personID) async {
     final db = await asyncDB;

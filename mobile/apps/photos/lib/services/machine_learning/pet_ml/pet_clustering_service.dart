@@ -9,7 +9,7 @@ import "package:photos/db/ml/db_pet_model_mappers.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
 import "package:photos/db/ml/schema.dart";
-import "package:photos/db/pet_db.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/src/rust/api/ml_indexing_api.dart";
 import "package:uuid/uuid.dart";
 
@@ -863,14 +863,14 @@ extension PetClusteringDB on MLDataDB {
     ''';
     final rows = await db.getAll(query);
 
-    // Resolve names via cluster → pet mapping + PetDB
+    // Resolve names via cluster → pet mapping + PetService
     final clusterToPetId = await getClusterToPetId();
-    final petEntities = await PetDB.instance.getAllAsMap();
+    final petEntities = await PetService.instance.getPetsMap();
     final names = <String, String>{};
     for (final entry in clusterToPetId.entries) {
       final pet = petEntities[entry.value];
-      if (pet != null && pet.name.isNotEmpty) {
-        names[entry.key] = pet.name;
+      if (pet != null && pet.data.name.isNotEmpty) {
+        names[entry.key] = pet.data.name;
       }
     }
 

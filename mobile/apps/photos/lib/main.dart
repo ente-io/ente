@@ -35,6 +35,7 @@ import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/notification_service.dart";
@@ -332,6 +333,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PetService.init(entityService);
     await MemoryLaneService.instance.init();
     if (flagService.facesTimeline) {
       MemoryLaneService.instance

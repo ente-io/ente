@@ -317,6 +317,12 @@ CREATE TABLE IF NOT EXISTS $petClusterPetTable (
 );
 ''';
 
+const deletePetFaceClustersTable = 'DELETE FROM $petFaceClustersTable';
+const deletePetClusterSummaryTable = 'DELETE FROM $petClusterSummaryTable';
+const deletePetClusterCentroidVectorIdMappingTable =
+    'DELETE FROM $petClusterCentroidVectorIdMappingTable';
+const deletePetClusterPetTable = 'DELETE FROM $petClusterPetTable';
+
 // ── Not-Pet Feedback Table ──
 
 const notPetFeedbackTable = 'not_pet_feedback';
@@ -328,3 +334,5 @@ CREATE TABLE IF NOT EXISTS $notPetFeedbackTable (
   PRIMARY KEY($clusterIDColumn, $petFaceIDColumn)
 );
 ''';
+
+const deleteNotPetFeedbackTable = 'DELETE FROM $notPetFeedbackTable';

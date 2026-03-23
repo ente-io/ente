@@ -16,7 +16,6 @@ import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
-import "package:photos/db/pet_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -56,6 +55,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -1886,14 +1886,14 @@ class SearchService {
       // Get cluster summaries for species info
       final clusterSummaries = await mlDataDB.getAllPetClusterSummary();
 
-      // Get pet names via cluster → pet mapping + PetDB
+      // Get pet names via cluster → pet mapping + PetService
       final clusterToPetId = await mlDataDB.getClusterToPetId();
-      final petEntities = await PetDB.instance.getAllAsMap();
+      final petEntities = await PetService.instance.getPetsMap();
       final petNames = <String, String>{};
       for (final entry in clusterToPetId.entries) {
         final pet = petEntities[entry.value];
-        if (pet != null && pet.name.isNotEmpty) {
-          petNames[entry.key] = pet.name;
+        if (pet != null && pet.data.name.isNotEmpty) {
+          petNames[entry.key] = pet.data.name;
         }
       }
 

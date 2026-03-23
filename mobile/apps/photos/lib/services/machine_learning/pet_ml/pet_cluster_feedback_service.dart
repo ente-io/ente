@@ -6,11 +6,11 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/pet_cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/pet_vector_db.dart";
-import "package:photos/db/pet_db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("PetClusterFeedbackService");
@@ -109,10 +109,10 @@ class PetClusterFeedbackService {
       // Target has no pet yet — create one using its cluster summary species.
       final summaries = await _db.getAllPetClusterSummary();
       final species = summaries[targetId]?.$2 ?? -1;
-      petId = const Uuid().v4();
-      await PetDB.instance.upsert(
-        PetEntity(id: petId, name: "", species: species),
+      final pet = await PetService.instance.addPet(
+        PetData(name: "", species: species),
       );
+      petId = pet.remoteID;
       await _db.setClusterPetId(targetId, petId);
     }
 
