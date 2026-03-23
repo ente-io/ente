@@ -1,16 +1,9 @@
-import "dart:io";
-
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/device_files_db.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/christmas_banner_event.dart";
-import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
@@ -253,20 +246,6 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                               showShortToast(context, "Done");
                             },
                           ),
-                          if (Platform.isIOS)
-                            MenuItemWidgetNew(
-                              title: "Check iOS local availability",
-                              leadingIconWidget: _buildIconWidget(
-                                context,
-                                HugeIcons.strokeRoundedCloudUpload,
-                              ),
-                              trailingIcon: Icons.chevron_right_outlined,
-                              trailingIconIsMuted: true,
-                              surfaceExecutionStates: true,
-                              onTap: () async {
-                                await _runIOSLocalAvailabilityCheck(context);
-                              },
-                            ),
                           MenuItemWidgetNew(
                             title: "Social settings",
                             leadingIconWidget: _buildIconWidget(
@@ -303,124 +282,6 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
       icon: icon,
       color: colorScheme.menuItemIconStroke,
       size: 20,
-    );
-  }
-
-  Future<void> _runIOSLocalAvailabilityCheck(BuildContext context) async {
-    if (!Platform.isIOS) {
-      showShortToast(context, "This check is only available on iOS");
-      return;
-    }
-
-    final pathIDToLocalIDs =
-        await FilesDB.instance.getDevicePathIDToLocalIDMap();
-    final localIDs =
-        pathIDToLocalIDs.values.expand((ids) => ids).toSet().toList()..sort();
-    if (localIDs.isEmpty) {
-      showShortToast(context, "No device DB files found");
-      return;
-    }
-
-    final files = await FilesDB.instance.getLocalFiles(
-      localIDs,
-      dedupeByLocalID: true,
-    );
-    files.sort((a, b) => (a.localID ?? "").compareTo(b.localID ?? ""));
-    if (files.isEmpty) {
-      showShortToast(context, "No matching file rows found");
-      return;
-    }
-
-    final scanWatch = Stopwatch()..start();
-    final results = <_IOSLocalAvailabilityCheckResult>[];
-    for (final file in files) {
-      final localID = file.localID;
-      if (localID == null || localID.isEmpty) {
-        continue;
-      }
-
-      final itemWatch = Stopwatch()..start();
-      try {
-        final isAvailable = await PhotoManager.plugin.isLocallyAvailable(
-          localID,
-          isOrigin: true,
-          subtype:
-              file.fileType == FileType.livePhoto ? (file.fileSubType ?? 0) : 0,
-        );
-        itemWatch.stop();
-        results.add(
-          _IOSLocalAvailabilityCheckResult(
-            file: file,
-            elapsed: itemWatch.elapsed,
-            isAvailable: isAvailable,
-          ),
-        );
-      } catch (e) {
-        itemWatch.stop();
-        results.add(
-          _IOSLocalAvailabilityCheckResult(
-            file: file,
-            elapsed: itemWatch.elapsed,
-            error: e.toString(),
-          ),
-        );
-      }
-    }
-    scanWatch.stop();
-
-    if (!mounted) {
-      return;
-    }
-
-    await _showIOSLocalAvailabilityReport(
-      context,
-      results,
-      totalElapsed: scanWatch.elapsed,
-    );
-  }
-
-  Future<void> _showIOSLocalAvailabilityReport(
-    BuildContext context,
-    List<_IOSLocalAvailabilityCheckResult> results, {
-    required Duration totalElapsed,
-  }) async {
-    final availableCount = results.where((r) => r.isAvailable == true).length;
-    final unavailableCount =
-        results.where((r) => r.isAvailable == false).length;
-    final errorCount = results.where((r) => r.error != null).length;
-    final lines = <String>[
-      "Scanned ${results.length} files in ${totalElapsed.inMilliseconds} ms",
-      "Available: $availableCount",
-      "Unavailable: $unavailableCount",
-      "Errors: $errorCount",
-      "",
-      for (var i = 0; i < results.length; i++) ...[
-        "${i + 1}. ${results[i].formattedLine}",
-      ],
-    ];
-
-    final alert = AlertDialog(
-      title: const Text("iOS local availability"),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: SelectableText(lines.join("\n")),
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: const Text("OK"),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    );
-
-    await showDialog<void>(
-      useRootNavigator: false,
-      context: context,
-      builder: (context) => alert,
     );
   }
 
@@ -475,28 +336,5 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
         return alert;
       },
     );
-  }
-}
-
-class _IOSLocalAvailabilityCheckResult {
-  const _IOSLocalAvailabilityCheckResult({
-    required this.file,
-    required this.elapsed,
-    this.isAvailable,
-    this.error,
-  });
-
-  final EnteFile file;
-  final Duration elapsed;
-  final bool? isAvailable;
-  final String? error;
-
-  String get formattedLine {
-    final status =
-        error != null ? "error=$error" : "available=${isAvailable == true}";
-    final title = file.title?.trim().isNotEmpty == true
-        ? file.title!.trim()
-        : "<untitled>";
-    return "${elapsed.inMilliseconds} ms | $status | ${file.localID} | $title";
   }
 }
