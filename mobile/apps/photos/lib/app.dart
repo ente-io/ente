@@ -21,6 +21,7 @@ import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/upload_background_coordinator.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/bg_task_utils.dart";
@@ -193,14 +194,21 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final String stateChangeReason = 'app -> $state';
+    final wasForeground = AppLifecycleService.instance.isAppInForeground();
     if (state == AppLifecycleState.resumed) {
       final lastAppOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
       AppLifecycleService.instance
           .onAppInForeground(stateChangeReason + ': sync now');
+      if (!wasForeground) {
+        unawaited(UploadBackgroundCoordinator.instance.onAppForeground());
+      }
       unawaited(_reloadCachesUpdatedInBackground(lastAppOpenTime));
       SyncService.instance.sync();
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
+      if (wasForeground) {
+        unawaited(UploadBackgroundCoordinator.instance.onAppBackground());
+      }
     }
   }
 

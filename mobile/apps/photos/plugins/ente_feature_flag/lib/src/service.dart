@@ -109,6 +109,7 @@ class FlagService {
   bool get qrFeatureEnabled => internalUser;
 
   bool get syncRecoveryDiagnostics => internalUser;
+  bool get enableIOSBackgroundGraceWindow => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {

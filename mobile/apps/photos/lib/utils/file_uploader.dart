@@ -1615,6 +1615,113 @@ class FileUploader {
       await _pollBackgroundUploadStatus();
     });
   }
+
+  Future<void> reconcileAfterBackground({
+    Future<EnteFile?> Function(int generatedID)? lookupFile,
+  }) async {
+    bool changed = false;
+    bool queueChanged = false;
+    final resolveFile = lookupFile ?? FilesDB.instance.getFile;
+    final backupEntries = _allBackups.entries.toList(growable: false);
+    for (final entry in backupEntries) {
+      final backup = entry.value;
+      final generatedID = backup.file.generatedID;
+      if (generatedID == null) {
+        continue;
+      }
+
+      final dbFile = await resolveFile(generatedID);
+      if (dbFile?.uploadedFileID == null) {
+        final queueItem = _queue[entry.key];
+        if (queueItem == null) {
+          continue;
+        }
+
+        final localID = backup.file.localID!;
+        bool shouldReconcile = false;
+
+        if (queueItem.status == UploadStatus.inBackground) {
+          final isStillLockedInBackground = await _uploadLocks.isLocked(
+            localID,
+            ProcessType.background.toString(),
+          );
+          shouldReconcile = !isStillLockedInBackground;
+        } else if (queueItem.status == UploadStatus.inProgress) {
+          final isStillLockedInForeground = await _uploadLocks.isLocked(
+            localID,
+            ProcessType.foreground.toString(),
+          );
+          if (!isStillLockedInForeground) {
+            final isTakenOverByBackground = await _uploadLocks.isLocked(
+              localID,
+              ProcessType.background.toString(),
+            );
+            shouldReconcile = !isTakenOverByBackground;
+          }
+        }
+
+        if (!shouldReconcile) {
+          continue;
+        }
+
+        _logger.info(
+          "Foreground reconciliation detected incomplete upload "
+          "(status=${queueItem.status}) ${backup.file.tag}",
+        );
+
+        if (queueItem.status == UploadStatus.inProgress) {
+          _allBackups[entry.key] = backup.copyWith(
+            status: BackupItemStatus.retry,
+            error: SilentlyCancelUploadsError(),
+          );
+          changed = true;
+          continue;
+        }
+
+        await _uploadLocks.releaseLock(
+          localID,
+          ProcessType.foreground.toString(),
+        );
+        final removedQueueItem = _queue.remove(entry.key);
+        if (removedQueueItem != null) {
+          queueChanged = true;
+          if (!removedQueueItem.completer.isCompleted) {
+            removedQueueItem.completer.completeError(
+              SilentlyCancelUploadsError(),
+            );
+          }
+        }
+        _allBackups[entry.key] = backup.copyWith(
+          status: BackupItemStatus.retry,
+          error: SilentlyCancelUploadsError(),
+        );
+        changed = true;
+        continue;
+      }
+
+      final queueItem = _queue.remove(entry.key);
+      if (queueItem != null) {
+        queueChanged = true;
+        if (!queueItem.completer.isCompleted) {
+          queueItem.completer.complete(dbFile!);
+        }
+      }
+      if (backup.status != BackupItemStatus.uploaded) {
+        _allBackups[entry.key] = backup.copyWith(
+          status: BackupItemStatus.uploaded,
+          file: dbFile,
+        );
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    }
+    if (queueChanged) {
+      _pollQueue();
+    }
+  }
 }
 
 class FileUploadItem {
