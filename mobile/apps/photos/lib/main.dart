@@ -234,7 +234,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
           await MLService.instance.init();
           await PersonService.init(entityService, MLDataDB.instance, prefs);
           mlRunStarted = true;
-          await MLService.instance.runAllML(force: true);
+          await MLService.instance.runAllML(force: false);
         } finally {
           if (!mlRunStarted) {
             controller.releaseCompute(ml: true);

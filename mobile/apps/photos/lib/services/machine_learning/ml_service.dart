@@ -131,10 +131,21 @@ class MLService {
         pauseIndexingAndClustering();
       }
     });
+    _syncMlControllerStatusForBg();
 
     _isInitialized = true;
     unawaited(_maybePredownloadLocalModels());
     _logger.info('init done');
+  }
+
+  void _syncMlControllerStatusForBg() {
+    if (!isProcessBg || !hasGrantedMLConsent) {
+      return;
+    }
+    _mlControllerStatus = computeController.shouldRunCompute;
+    _logger.info(
+      "Background init synced MLController status to $_mlControllerStatus",
+    );
   }
 
   Future<void> _maybePredownloadLocalModels() async {

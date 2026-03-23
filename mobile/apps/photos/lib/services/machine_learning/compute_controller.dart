@@ -55,6 +55,11 @@ class ComputeController {
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
+  bool get shouldRunCompute =>
+      _hasCompletedInitialHealthChecks &&
+      _isDeviceHealthy &&
+      _canRunMLGivenUserInteraction() &&
+      !computeBlocked;
 
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
@@ -271,7 +276,7 @@ class ComputeController {
       return;
     }
     final shouldRunCompute =
-        _isDeviceHealthy && _canRunMLGivenUserInteraction() && !computeBlocked;
+        this.shouldRunCompute;
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;
       _logger.info(
