@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { Box, Button, Fab, Snackbar, Stack, Typography } from "@mui/material";
 import { CreateItemDialog } from "components/CreateItemDialog";
 import { ItemList } from "components/ItemList";
@@ -8,6 +9,7 @@ import { LockerSidebar } from "components/LockerSidebar";
 import { sessionExpiredDialogAttributes } from "ente-accounts-rs/components/utils/dialog";
 import { stashRedirect } from "ente-accounts-rs/services/redirect";
 import { masterKeyFromSession } from "ente-accounts-rs/services/session-storage";
+import { ensureLocalUser } from "ente-accounts-rs/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -20,7 +22,7 @@ import { apiURL } from "ente-base/origins";
 import { useSetupLockerI18n } from "i18n/locker";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     isEnteProductionEndpoint,
@@ -31,6 +33,7 @@ import {
     createCollection as createCollectionAPI,
     createInfoItem,
     deleteCollection as deleteCollectionAPI,
+    deleteCollectionKeepingFiles,
     emptyTrash as emptyTrashAPI,
     fetchCollectionSharees,
     fetchLockerData,
@@ -43,9 +46,15 @@ import {
     unshareCollection as unshareCollectionAPI,
     updateInfoItem,
     uploadLockerFile,
+    type LockerUploadProgress,
 } from "services/remote";
-import type { LockerCollection, LockerItem, LockerItemType } from "types";
-import { getItemTitle } from "types";
+import type {
+    LockerCollection,
+    LockerItem,
+    LockerItemType,
+    LockerUploadCandidate,
+} from "types";
+import { getItemTitle, isCollectionOwner } from "types";
 
 /** Subset of /users/details/v2 we need for the sidebar. */
 interface UserDetails {
@@ -76,6 +85,93 @@ interface LockerUserDetailsResponse {
     };
 }
 
+type DragDataTransferItem = DataTransferItem & {
+    webkitGetAsEntry?: () => FileSystemEntry | null;
+};
+
+type FileSystemFileEntry = FileSystemEntry & {
+    file: (
+        successCallback: (file: File) => void,
+        errorCallback?: (error: DOMException) => void,
+    ) => void;
+};
+
+interface FileSystemDirectoryReader {
+    readEntries: (
+        successCallback: (entries: FileSystemEntry[]) => void,
+        errorCallback?: (error: DOMException) => void,
+    ) => void;
+}
+
+type FileSystemDirectoryEntry = FileSystemEntry & {
+    createReader: () => FileSystemDirectoryReader;
+};
+
+const fileFromEntry = (entry: FileSystemFileEntry) =>
+    new Promise<File>((resolve, reject) => {
+        entry.file(resolve, reject);
+    });
+
+const readDirectoryEntries = (entry: FileSystemDirectoryEntry) =>
+    new Promise<FileSystemEntry[]>((resolve, reject) => {
+        const reader = entry.createReader();
+        const entries: FileSystemEntry[] = [];
+        const readBatch = () => {
+            reader.readEntries((batch) => {
+                if (batch.length === 0) {
+                    resolve(entries);
+                    return;
+                }
+                entries.push(...batch);
+                readBatch();
+            }, reject);
+        };
+        readBatch();
+    });
+
+const collectionNamesFromRelativePath = (relativePath?: string) => [
+    ...new Set((relativePath?.split("/").slice(0, -1) ?? []).filter(Boolean)),
+];
+
+const uploadCandidateFromFile = (
+    file: File,
+    relativePath?: string,
+): LockerUploadCandidate => ({
+    file,
+    relativePath,
+    suggestedCollectionNames: collectionNamesFromRelativePath(relativePath),
+});
+
+const uploadCandidatesFromEntry = async (
+    entry: FileSystemEntry,
+    parentPath = "",
+): Promise<LockerUploadCandidate[]> => {
+    if (entry.isFile) {
+        const file = await fileFromEntry(entry as FileSystemFileEntry);
+        const relativePath = parentPath
+            ? `${parentPath}/${file.name}`
+            : file.name;
+        return [uploadCandidateFromFile(file, relativePath)];
+    }
+
+    if (entry.isDirectory) {
+        const directoryPath = parentPath
+            ? `${parentPath}/${entry.name}`
+            : entry.name;
+        const entries = await readDirectoryEntries(
+            entry as FileSystemDirectoryEntry,
+        );
+        const items = await Promise.all(
+            entries.map((childEntry) =>
+                uploadCandidatesFromEntry(childEntry, directoryPath),
+            ),
+        );
+        return items.flat();
+    }
+
+    return [];
+};
+
 const hasPaidLockerAccess = (json: {
     subscription?: { productID?: string; expiryTime?: number };
     familyData?: { members?: unknown[] };
@@ -96,8 +192,30 @@ const hasPaidLockerAccess = (json: {
     return hasActivePaidSubscription || isPartOfFamily || hasPaidAddon;
 };
 
-const Page: React.FC = () => {
+const isLockerAppPath = (path: string) => {
+    const pathname = path.split("?")[0] ?? path;
+    return (
+        pathname === "/" ||
+        pathname === "/collections" ||
+        pathname === "/trash" ||
+        pathname === "/collection"
+    );
+};
+
+const getCollectionIDFromPath = (path: string) => {
+    const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
+    const id = searchParams.get("id");
+    if (id === null) {
+        return null;
+    }
+
+    const parsedID = Number.parseInt(id, 10);
+    return Number.isFinite(parsedID) ? parsedID : null;
+};
+
+export const LockerPage: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
+    const currentUserID = ensureLocalUser().id;
     const router = useRouter();
     const isLockerI18nReady = useSetupLockerI18n();
 
@@ -115,17 +233,14 @@ const Page: React.FC = () => {
 
     // View mode state
     const [trashItems, setTrashItems] = useState<LockerItem[]>([]);
-    const [isTrashView, setIsTrashView] = useState(false);
-    const [isCollectionsView, setIsCollectionsView] = useState(false);
-
-    // Collection filter state
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(null);
+    const [trashLastUpdatedAt, setTrashLastUpdatedAt] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
 
     // Create/Edit dialog state
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [prefilledUploadItems, setPrefilledUploadItems] = useState<
+        LockerUploadCandidate[]
+    >([]);
     const [editItem, setEditItem] = useState<{
         id: number;
         type: LockerItemType;
@@ -138,6 +253,22 @@ const Page: React.FC = () => {
     const [shareCollectionID, setShareCollectionID] = useState<number | null>(
         null,
     );
+    const [isDragActive, setIsDragActive] = useState(false);
+    const dragDepthRef = useRef(0);
+    const lockerRouteStackRef = useRef<string[]>([]);
+    const lockerRouteIndexRef = useRef(-1);
+    const isNavigatingBackRef = useRef(false);
+    const isProgrammaticLockerNavigationRef = useRef(false);
+    const routeCollectionID =
+        router.pathname === "/collection"
+            ? getCollectionIDFromPath(router.asPath)
+            : null;
+    const selectedCollectionID =
+        routeCollectionID !== null && Number.isFinite(routeCollectionID)
+            ? routeCollectionID
+            : null;
+    const isTrashView = router.pathname === "/trash";
+    const isCollectionsView = router.pathname === "/collections";
 
     const loadUserDetails = useCallback(async () => {
         try {
@@ -180,7 +311,8 @@ const Page: React.FC = () => {
                 const data = await fetchLockerData(key);
                 const trash = await fetchLockerTrash(key);
                 setCollections(data);
-                setTrashItems(trash);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to refresh locker data", e);
@@ -192,10 +324,18 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
+        if (router.pathname !== "/locker") {
+            return;
+        }
+
+        void router.replace("/", undefined, { shallow: true });
+    }, [router]);
+
+    useEffect(() => {
         const load = async () => {
             const mk = await masterKeyFromSession();
             if (!mk) {
-                stashRedirect("/locker");
+                stashRedirect(router.asPath || "/");
                 void router.push("/login");
                 return;
             }
@@ -209,7 +349,8 @@ const Page: React.FC = () => {
                 const data = await fetchLockerData(mk);
                 const trash = await fetchLockerTrash(mk);
                 setCollections(data);
-                setTrashItems(trash);
+                setTrashItems(trash.items);
+                setTrashLastUpdatedAt(trash.lastUpdatedAt);
                 setInitialLoadError(null);
             } catch (e) {
                 log.error("Failed to fetch locker data", e);
@@ -226,26 +367,122 @@ const Page: React.FC = () => {
         void load();
     }, [loadUserDetails, router, logout, showMiniDialog]);
 
-    const handleSelectCollection = useCallback((id: number | null) => {
-        setSelectedCollectionID(id);
-        setIsTrashView(false);
-        setIsCollectionsView(false);
+    useEffect(() => {
+        if (!router.isReady || !isLockerAppPath(router.asPath)) {
+            return;
+        }
+
+        const routeStack = lockerRouteStackRef.current;
+        const currentIndex = lockerRouteIndexRef.current;
+        const currentPath = router.asPath;
+
+        if (isNavigatingBackRef.current) {
+            isNavigatingBackRef.current = false;
+            const previousIndex = routeStack.lastIndexOf(currentPath);
+            if (previousIndex >= 0) {
+                lockerRouteIndexRef.current = previousIndex;
+            } else {
+                routeStack.push(currentPath);
+                lockerRouteIndexRef.current = routeStack.length - 1;
+            }
+            return;
+        }
+
+        if (routeStack.length === 0) {
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = 0;
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (currentIndex >= 0 && routeStack[currentIndex] === currentPath) {
+            isProgrammaticLockerNavigationRef.current = false;
+            return;
+        }
+
+        if (isProgrammaticLockerNavigationRef.current) {
+            isProgrammaticLockerNavigationRef.current = false;
+            routeStack.splice(currentIndex + 1);
+            routeStack.push(currentPath);
+            lockerRouteIndexRef.current = routeStack.length - 1;
+            return;
+        }
+
+        const existingIndex = routeStack.lastIndexOf(currentPath);
+        if (existingIndex >= 0) {
+            lockerRouteIndexRef.current = existingIndex;
+            return;
+        }
+
+        routeStack.splice(currentIndex + 1);
+        routeStack.push(currentPath);
+        lockerRouteIndexRef.current = routeStack.length - 1;
+    }, [router.asPath, router.isReady]);
+
+    useEffect(() => {
+        if (
+            router.pathname === "/collection" &&
+            router.isReady &&
+            routeCollectionID === null
+        ) {
+            void router.replace("/", undefined, { shallow: true });
+        }
+    }, [routeCollectionID, router]);
+
+    const navigateHome = useCallback(() => {
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/", undefined, { shallow: true });
+    }, [router]);
+
+    const handleNavigateBack = useCallback(() => {
         setSidebarOpen(false);
-    }, []);
+
+        const currentIndex = lockerRouteIndexRef.current;
+        if (currentIndex > 0) {
+            lockerRouteIndexRef.current = currentIndex - 1;
+            isNavigatingBackRef.current = true;
+            router.back();
+            return;
+        }
+
+        if (router.asPath !== "/") {
+            lockerRouteStackRef.current = [router.asPath, "/"];
+            lockerRouteIndexRef.current = 1;
+            isNavigatingBackRef.current = true;
+            isProgrammaticLockerNavigationRef.current = true;
+            void router.push("/", undefined, { shallow: true });
+            return;
+        }
+    }, [router]);
+
+    const handleSelectCollection = useCallback(
+        (id: number | null) => {
+            if (id === null) {
+                navigateHome();
+            } else {
+                isProgrammaticLockerNavigationRef.current = true;
+                void router.push(
+                    { pathname: "/collection", query: { id: String(id) } },
+                    undefined,
+                    { shallow: true },
+                );
+            }
+            setSidebarOpen(false);
+        },
+        [navigateHome, router],
+    );
 
     const handleSelectCollections = useCallback(() => {
-        setIsCollectionsView(true);
-        setIsTrashView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/collections", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const handleSelectTrash = useCallback(() => {
-        setIsTrashView(true);
-        setIsCollectionsView(false);
-        setSelectedCollectionID(null);
+        isProgrammaticLockerNavigationRef.current = true;
+        void router.push("/trash", undefined, { shallow: true });
         setSidebarOpen(false);
-    }, []);
+    }, [router]);
 
     const isHomeView =
         !isTrashView && !isCollectionsView && selectedCollectionID === null;
@@ -256,25 +493,43 @@ const Page: React.FC = () => {
         async (
             type: LockerItemType,
             data: Record<string, unknown>,
-            collectionID: number,
+            collectionIDs: number[],
         ) => {
             if (!masterKey) throw new Error("No master key");
-            await createInfoItem(collectionID, type, data, masterKey);
+            await createInfoItem(collectionIDs, type, data, masterKey);
             await refreshData();
             setToast(t("recordSavedSuccessfully"));
         },
         [masterKey, refreshData],
     );
 
-    const handleUploadFile = useCallback(
-        async (file: File, collectionID: number) => {
+    const handleUploadFileWithProgress = useCallback(
+        async (
+            file: File,
+            collectionIDs: number[],
+            onProgress: (progress: LockerUploadProgress) => void,
+        ) => {
             if (!masterKey) throw new Error("No master key");
-            await uploadLockerFile(file, collectionID, masterKey);
-            await refreshData();
-            setToast(t("uploadComplete"));
+            await uploadLockerFile(file, collectionIDs, masterKey, onProgress);
         },
-        [masterKey, refreshData],
+        [masterKey],
     );
+
+    const handleUploadsFinished = useCallback(
+        async (uploadedCount: number) => {
+            await refreshData();
+            setToast(
+                uploadedCount === 1
+                    ? t("uploadComplete")
+                    : t("uploadMultipleComplete", { count: uploadedCount }),
+            );
+        },
+        [refreshData],
+    );
+
+    const handleUploadItemComplete = useCallback(() => {
+        void refreshData();
+    }, [refreshData]);
 
     const handleUpdateItem = useCallback(
         async (type: LockerItemType, data: Record<string, unknown>) => {
@@ -289,6 +544,12 @@ const Page: React.FC = () => {
 
     const handleDeleteItem = useCallback(
         (item: LockerItem) => {
+            const collectionIDs =
+                selectedCollectionID === null
+                    ? item.collectionIDs.length > 0
+                        ? item.collectionIDs
+                        : [item.collectionID]
+                    : [item.collectionID];
             showMiniDialog({
                 title: t("delete"),
                 message: (
@@ -309,14 +570,16 @@ const Page: React.FC = () => {
                     text: t("delete"),
                     color: "critical",
                     action: async () => {
-                        await trashFiles([item.id], item.collectionID);
+                        for (const collectionID of collectionIDs) {
+                            await trashFiles([item.id], collectionID);
+                        }
                         await refreshData();
                         setToast(t("fileDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [showMiniDialog, refreshData],
+        [refreshData, selectedCollectionID, showMiniDialog],
     );
     const handleDeleteItems = useCallback(
         (items: LockerItem[]) => {
@@ -335,14 +598,18 @@ const Page: React.FC = () => {
                     action: async () => {
                         const fileIDsByCollection = new Map<number, number[]>();
                         for (const item of items) {
-                            const existing =
-                                fileIDsByCollection.get(item.collectionID) ??
-                                [];
-                            existing.push(item.id);
-                            fileIDsByCollection.set(
-                                item.collectionID,
-                                existing,
-                            );
+                            const collectionIDs =
+                                selectedCollectionID === null
+                                    ? item.collectionIDs.length > 0
+                                        ? item.collectionIDs
+                                        : [item.collectionID]
+                                    : [item.collectionID];
+                            for (const collectionID of collectionIDs) {
+                                const existing =
+                                    fileIDsByCollection.get(collectionID) ?? [];
+                                existing.push(item.id);
+                                fileIDsByCollection.set(collectionID, existing);
+                            }
                         }
 
                         for (const [
@@ -362,7 +629,7 @@ const Page: React.FC = () => {
                 },
             });
         },
-        [showMiniDialog, refreshData],
+        [refreshData, selectedCollectionID, showMiniDialog],
     );
 
     const handleEditItem = useCallback((item: LockerItem) => {
@@ -419,19 +686,19 @@ const Page: React.FC = () => {
 
     const handleEmptyTrash = useCallback(() => {
         showMiniDialog({
-            title: t("empty_trash"),
-            message: t("confirm_empty_trash"),
+            title: t("empty_trash_title"),
+            message: t("empty_trash_message"),
             continue: {
                 text: t("empty_trash"),
                 color: "critical",
                 action: async () => {
-                    await emptyTrashAPI();
+                    await emptyTrashAPI(trashLastUpdatedAt);
                     await refreshData();
                     setToast(t("trashClearedSuccessfully"));
                 },
             },
         });
-    }, [showMiniDialog, refreshData]);
+    }, [showMiniDialog, refreshData, trashLastUpdatedAt]);
 
     // Collection management
 
@@ -446,6 +713,163 @@ const Page: React.FC = () => {
         [masterKey, refreshData],
     );
 
+    const ensureCollectionsExist = useCallback(
+        async (names: string[]) => {
+            if (!masterKey) throw new Error("No master key");
+
+            const normalizedNameToID = new Map(
+                collections
+                    .filter((collection) =>
+                        isCollectionOwner(collection, currentUserID),
+                    )
+                    .map((collection) => [
+                        collection.name.trim().toLocaleLowerCase(),
+                        collection.id,
+                    ]),
+            );
+            let createdCollection = false;
+
+            for (const name of names) {
+                const normalizedName = name.trim().toLocaleLowerCase();
+                if (!normalizedName || normalizedNameToID.has(normalizedName)) {
+                    continue;
+                }
+
+                const id = await createCollectionAPI(name, masterKey);
+                normalizedNameToID.set(normalizedName, id);
+                createdCollection = true;
+            }
+
+            if (createdCollection) {
+                await refreshData();
+            }
+
+            return normalizedNameToID;
+        },
+        [collections, currentUserID, masterKey, refreshData],
+    );
+
+    const handleCreateDialogClose = useCallback(() => {
+        setCreateDialogOpen(false);
+        setPrefilledUploadItems([]);
+    }, []);
+
+    const openUploadDialogForItems = useCallback(
+        (items: LockerUploadCandidate[]) => {
+            setPrefilledUploadItems(items);
+            setCreateDialogOpen(true);
+        },
+        [],
+    );
+
+    const openCreateDialog = useCallback(() => {
+        setPrefilledUploadItems([]);
+        setCreateDialogOpen(true);
+    }, []);
+
+    const handleDragEnter = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current += 1;
+            setIsDragActive(true);
+        },
+        [],
+    );
+
+    const handleDragOver = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = "copy";
+        },
+        [],
+    );
+
+    const handleDragLeave = useCallback(
+        (event: React.DragEvent<HTMLElement>) => {
+            if (!event.dataTransfer.types.includes("Files")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+            if (dragDepthRef.current === 0) {
+                setIsDragActive(false);
+            }
+        },
+        [],
+    );
+
+    const handleDrop = useCallback(
+        async (event: React.DragEvent<HTMLElement>) => {
+            event.preventDefault();
+            event.stopPropagation();
+            dragDepthRef.current = 0;
+            setIsDragActive(false);
+
+            const droppedItems = Array.from(
+                event.dataTransfer.items,
+            ) as DragDataTransferItem[];
+            const entryItems = (
+                await Promise.all(
+                    droppedItems
+                        .filter((item) => item.kind === "file")
+                        .map(async (item) => {
+                            const entry = item.webkitGetAsEntry();
+                            if (!entry) {
+                                const file = item.getAsFile();
+                                return file
+                                    ? [
+                                          uploadCandidateFromFile(
+                                              file,
+                                              file.webkitRelativePath ||
+                                                  file.name,
+                                          ),
+                                      ]
+                                    : [];
+                            }
+                            return uploadCandidatesFromEntry(entry);
+                        }),
+                )
+            ).flat();
+
+            const droppedItemsList =
+                entryItems.length > 0
+                    ? entryItems
+                    : Array.from(event.dataTransfer.files).map((file) =>
+                          uploadCandidateFromFile(
+                              file,
+                              file.webkitRelativePath || file.name,
+                          ),
+                      );
+            const uniqueItems = droppedItemsList.filter(
+                (item, index, items) =>
+                    items.findIndex(
+                        (candidate) =>
+                            (candidate.relativePath ?? candidate.file.name) ===
+                                (item.relativePath ?? item.file.name) &&
+                            candidate.file.size === item.file.size &&
+                            candidate.file.lastModified ===
+                                item.file.lastModified,
+                    ) === index,
+            );
+
+            if (uniqueItems.length === 0) {
+                return;
+            }
+
+            openUploadDialogForItems(uniqueItems);
+        },
+        [openUploadDialogForItems],
+    );
+
     const handleRenameCollection = useCallback(
         async (collectionID: number, newName: string) => {
             if (!masterKey) return;
@@ -458,9 +882,13 @@ const Page: React.FC = () => {
 
     const handleDeleteCollection = useCallback(
         (collectionID: number) => {
-            const collectionName =
-                collections.find((collection) => collection.id === collectionID)
-                    ?.name ?? "";
+            const collection = collections.find(
+                (candidate) => candidate.id === collectionID,
+            );
+            const collectionName = collection?.name ?? "";
+            const shouldNavigateHome =
+                router.pathname === "/collection" &&
+                selectedCollectionID === collectionID;
             showMiniDialog({
                 title: t("deleteCollection"),
                 message: t("deleteCollectionConfirmation", { collectionName }),
@@ -468,15 +896,40 @@ const Page: React.FC = () => {
                     text: t("delete"),
                     color: "critical",
                     action: async () => {
-                        await deleteCollectionAPI(collectionID);
-                        setSelectedCollectionID(null);
+                        if (!collection) {
+                            throw new Error("Collection not found");
+                        }
+
+                        if (collection.items.length > 0) {
+                            if (!masterKey) {
+                                throw new Error("Missing master key");
+                            }
+
+                            await deleteCollectionKeepingFiles(
+                                collection,
+                                masterKey,
+                            );
+                        } else {
+                            await deleteCollectionAPI(collectionID);
+                        }
+                        if (shouldNavigateHome) {
+                            navigateHome();
+                        }
                         await refreshData();
                         setToast(t("collectionDeletedSuccessfully"));
                     },
                 },
             });
         },
-        [collections, showMiniDialog, refreshData],
+        [
+            collections,
+            masterKey,
+            navigateHome,
+            refreshData,
+            router.pathname,
+            selectedCollectionID,
+            showMiniDialog,
+        ],
     );
 
     const handleOpenShareCollection = useCallback(
@@ -511,8 +964,14 @@ const Page: React.FC = () => {
             : (collections.find(
                   (collection) => collection.id === shareCollectionID,
               ) ?? null);
+    const isCollectionRoutePending =
+        router.pathname === "/collection" &&
+        (router.asPath.split("?")[0] ?? router.asPath) === "/collection" &&
+        !router.isReady;
+    const isViewLoading =
+        !hasFetched || !isLockerI18nReady || isCollectionRoutePending;
 
-    if (!hasFetched || !isLockerI18nReady) {
+    if (isViewLoading) {
         return <LoadingIndicator />;
     }
     if (initialLoadError && collections.length === 0) {
@@ -560,7 +1019,13 @@ const Page: React.FC = () => {
     }
 
     return (
-        <Stack sx={{ height: "100dvh", overflow: "hidden" }}>
+        <Stack
+            sx={{ height: "100dvh", overflow: "hidden", position: "relative" }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <LockerNavbar
                 onOpenSidebar={() => setSidebarOpen(true)}
                 showMenuButton
@@ -596,6 +1061,7 @@ const Page: React.FC = () => {
                     onCreateCollection={handleCreateCollection}
                     onShareCollection={handleOpenShareCollection}
                     searchTerm={searchTerm}
+                    onNavigateBack={handleNavigateBack}
                 />
             </Box>
             <LockerSidebar
@@ -625,7 +1091,7 @@ const Page: React.FC = () => {
                 <Fab
                     color="primary"
                     aria-label={t("saveToLocker")}
-                    onClick={() => setCreateDialogOpen(true)}
+                    onClick={openCreateDialog}
                     sx={{
                         position: "fixed",
                         right: "max(24px, env(safe-area-inset-right))",
@@ -652,12 +1118,16 @@ const Page: React.FC = () => {
             {/* Create dialog */}
             <CreateItemDialog
                 open={createDialogOpen}
-                onClose={() => setCreateDialogOpen(false)}
+                onClose={handleCreateDialogClose}
                 collections={collections}
                 onSave={handleCreateItem}
-                onUploadFile={handleUploadFile}
+                onUploadProgress={handleUploadFileWithProgress}
+                onUploadItemComplete={handleUploadItemComplete}
+                onUploadsFinished={handleUploadsFinished}
                 onCreateCollection={handleCreateCollection}
+                onEnsureCollections={ensureCollectionsExist}
                 defaultCollectionID={selectedCollectionID}
+                initialItems={prefilledUploadItems}
             />
 
             {/* Edit dialog */}
@@ -678,8 +1148,59 @@ const Page: React.FC = () => {
                 autoHideDuration={3000}
                 onClose={() => setToast(null)}
             />
+            {isDragActive && (
+                <Box
+                    sx={(theme) => ({
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 1600,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        pointerEvents: "none",
+                        backgroundColor: "rgba(8, 9, 10, 0.58)",
+                        backdropFilter: "blur(8px)",
+                        ...theme.applyStyles("light", {
+                            backgroundColor: "rgba(241, 245, 249, 0.78)",
+                        }),
+                    })}
+                >
+                    <Box
+                        sx={(theme) => ({
+                            width: "min(520px, calc(100vw - 48px))",
+                            px: 4,
+                            py: 5,
+                            borderRadius: "24px",
+                            border: "2px dashed rgba(127, 179, 255, 0.48)",
+                            background:
+                                "linear-gradient(180deg, rgba(16, 113, 255, 0.16) 0%, rgba(16, 113, 255, 0.08) 100%)",
+                            boxShadow: "0 20px 48px rgba(0, 0, 0, 0.26)",
+                            textAlign: "center",
+                            ...theme.applyStyles("light", {
+                                background:
+                                    "linear-gradient(180deg, rgba(16, 113, 255, 0.10) 0%, rgba(16, 113, 255, 0.06) 100%)",
+                                boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
+                            }),
+                        })}
+                    >
+                        <CloudUploadOutlinedIcon
+                            sx={{
+                                fontSize: 44,
+                                color: "primary.main",
+                                mb: 1.5,
+                            }}
+                        />
+                        <Typography variant="h4" sx={{ mb: 0.75 }}>
+                            {t("saveDocumentTitle")}
+                        </Typography>
+                        <Typography variant="body" sx={{ color: "text.muted" }}>
+                            {t("clickHereToUpload")}
+                        </Typography>
+                    </Box>
+                </Box>
+            )}
         </Stack>
     );
 };
 
-export default Page;
+export default LockerPage;

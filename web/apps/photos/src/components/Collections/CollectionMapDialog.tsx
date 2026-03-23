@@ -1,6 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -1659,6 +1658,7 @@ interface CollectionSidebarProps {
 
 // Fixed height for the cover image container (px)
 const COVER_IMAGE_HEIGHT = 320;
+const MOBILE_SIDEBAR_HEIGHT = "50%";
 // Mobile has less padding: 8px top + 12px bottom + 2px margin = 22px
 // Desktop has more padding: 16px top + 16px bottom + 2px margin = 34px
 // Use desktop value for consistency in the virtualized list
@@ -1833,7 +1833,7 @@ function CollectionSidebar({
                             selected={selected}
                             setSelected={setSelected}
                             onSetOpenFileViewer={onSetOpenFileViewer}
-                            listBorderRadius="0 0 32px 32px"
+                            listBorderRadius={isMobile ? "0" : "0 0 32px 32px"}
                             header={coverHeader}
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
@@ -1890,6 +1890,12 @@ interface MapCanvasProps {
     onPrefetchThumbnails: (fileIDs: number[]) => void;
 }
 
+const openStreetMapAttribution =
+    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors';
+
+const leafletAttributionPrefix =
+    '<a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>';
+
 const MapCanvas = React.memo(function MapCanvas({
     mapComponents,
     mapCenter,
@@ -1903,37 +1909,41 @@ const MapCanvas = React.memo(function MapCanvas({
     const { MapContainer, TileLayer, Marker, useMap } = mapComponents;
 
     return (
-        <MapContainer
-            center={mapCenter}
-            zoom={optimalZoom}
-            scrollWheelZoom
-            zoomControl={false}
-            style={{ width: "100%", height: "100%" }}
-        >
-            <TileLayer
-                attribution=""
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={MAX_MAP_ZOOM}
-                updateWhenZooming
-            />
-            <MapControls useMap={useMap} />
-            {mapIndex && (
-                <MapClusters
-                    useMap={useMap}
-                    mapIndex={mapIndex}
-                    thumbByFileID={thumbByFileID}
-                    onVisiblePhotosChange={onVisiblePhotosChange}
-                    onVisiblePhotosLoadingChange={onVisiblePhotosLoadingChange}
-                    onPrefetchThumbnails={onPrefetchThumbnails}
-                    Marker={Marker}
+        <MapCanvasContainer>
+            <MapContainer
+                center={mapCenter}
+                zoom={optimalZoom}
+                scrollWheelZoom
+                zoomControl={false}
+                style={{ width: "100%", height: "100%" }}
+            >
+                <TileLayer
+                    attribution={openStreetMapAttribution}
+                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    maxZoom={MAX_MAP_ZOOM}
+                    updateWhenZooming
                 />
-            )}
-        </MapContainer>
+                <MapControls useMap={useMap} />
+                {mapIndex && (
+                    <MapClusters
+                        useMap={useMap}
+                        mapIndex={mapIndex}
+                        thumbByFileID={thumbByFileID}
+                        onVisiblePhotosChange={onVisiblePhotosChange}
+                        onVisiblePhotosLoadingChange={
+                            onVisiblePhotosLoadingChange
+                        }
+                        onPrefetchThumbnails={onPrefetchThumbnails}
+                        Marker={Marker}
+                    />
+                )}
+            </MapContainer>
+        </MapCanvasContainer>
     );
 });
 
 /**
- * Floating map control buttons (open in Maps, zoom in/out, attribution)
+ * Floating map control buttons (open in Maps, zoom in/out)
  * Responsibility: Provide map navigation and external link controls
  */
 interface MapControlsProps {
@@ -1944,7 +1954,10 @@ const MapControls = React.memo(function MapControls({
     useMap,
 }: MapControlsProps) {
     const map = useMap();
-    const [showAttribution, setShowAttribution] = useState(false);
+
+    useEffect(() => {
+        map.attributionControl.setPrefix(leafletAttributionPrefix);
+    }, [map]);
 
     const handleOpenInMaps = useCallback(() => {
         const center = map.getCenter();
@@ -1954,10 +1967,6 @@ const MapControls = React.memo(function MapControls({
 
     const handleZoomIn = useCallback(() => map.zoomIn(), [map]);
     const handleZoomOut = useCallback(() => map.zoomOut(), [map]);
-    const toggleAttribution = useCallback(
-        () => setShowAttribution((prev) => !prev),
-        [],
-    );
 
     return (
         <>
@@ -2008,108 +2017,9 @@ const MapControls = React.memo(function MapControls({
             >
                 <LocationOnIcon />
             </FloatingIconButton>
-
-            {/* Desktop: Show attribution in bottom right corner */}
-            <DesktopAttribution>
-                <a
-                    href="https://leafletjs.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Leaflet
-                </a>
-                {" | © "}
-                <a
-                    href="https://www.openstreetmap.org/copyright"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    OpenStreetMap
-                </a>
-            </DesktopAttribution>
-
-            {/* Mobile: Attribution info button */}
-            <Box
-                sx={(theme) => ({
-                    position: "absolute",
-                    left: 12,
-                    bottom: 12,
-                    zIndex: 1000,
-                    [theme.breakpoints.up("md")]: { display: "none" },
-                })}
-            >
-                {showAttribution && (
-                    <AttributionPopup>
-                        <Typography variant="mini" color="text.primary">
-                            <a
-                                href="https://leafletjs.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "inherit" }}
-                            >
-                                Leaflet
-                            </a>
-                            {" | © "}
-                            <a
-                                href="https://www.openstreetmap.org/copyright"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "inherit" }}
-                            >
-                                OpenStreetMap
-                            </a>
-                        </Typography>
-                    </AttributionPopup>
-                )}
-                <IconButton
-                    onClick={toggleAttribution}
-                    size="small"
-                    sx={{
-                        width: 24,
-                        height: 24,
-                        opacity: 0.4,
-                        "&:hover": { opacity: 0.7 },
-                    }}
-                >
-                    <InfoOutlinedIcon sx={{ fontSize: 14, color: "#fff" }} />
-                </IconButton>
-            </Box>
         </>
     );
 });
-
-const DesktopAttribution = styled(Box)(({ theme }) => ({
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-        display: "block",
-        position: "absolute",
-        right: 8,
-        bottom: 8,
-        zIndex: 1000,
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: "2px 8px",
-        borderRadius: "4px",
-        fontSize: "11px",
-        color: "#333",
-        "& a": {
-            color: "#0078A8",
-            textDecoration: "none",
-            "&:hover": { textDecoration: "underline" },
-        },
-    },
-}));
-
-const AttributionPopup = styled(Box)(({ theme }) => ({
-    position: "absolute",
-    bottom: 44,
-    left: 0,
-    backgroundColor: theme.vars.palette.background.paper,
-    padding: "8px 12px",
-    borderRadius: "8px",
-    boxShadow: theme.shadows[4],
-    whiteSpace: "nowrap",
-    "& a": { textDecoration: "underline", "&:hover": { opacity: 0.8 } },
-}));
 
 interface MapClustersProps {
     useMap: typeof import("react-leaflet").useMap;
@@ -2519,6 +2429,14 @@ const MapCover = React.memo(function MapCover({
     );
 });
 
+const MapCanvasContainer = styled(Box)(({ theme }) => ({
+    width: "100%",
+    height: "100%",
+    [theme.breakpoints.down("md")]: {
+        "& .leaflet-bottom.leaflet-right": { bottom: MOBILE_SIDEBAR_HEIGHT },
+    },
+}));
+
 const CoverContainer = styled(Box)(({ theme }) => ({
     width: "100%",
     flexShrink: 0,
@@ -2591,7 +2509,7 @@ const SidebarWrapper = styled(Box)(({ theme }) => ({
     bottom: 0,
     right: 0,
     width: "100%",
-    height: "50%",
+    height: MOBILE_SIDEBAR_HEIGHT,
     zIndex: 1000,
     [theme.breakpoints.up("md")]: {
         left: 16,
@@ -2643,7 +2561,7 @@ const FileListContainer = styled(Box)(({ theme }) => ({
     paddingLeft: "8px",
     paddingRight: "8px",
     paddingTop: "0px",
-    paddingBottom: "40px",
+    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
     [theme.breakpoints.up("md")]: {
         paddingTop: "0px",
         paddingLeft: "16px",

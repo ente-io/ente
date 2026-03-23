@@ -1,8 +1,11 @@
 Latest changes:
+- Ashil: Help & Support screen improvements
+- Neeraj: Refresh Home favorites state on toggle
 - Ashil: Stop showing unknown user avatar on shared albums opened via deeplinking
 - Ashil: Fix album sorting state not persisting
 
 Still behind internal flag:
+- Ashil, Setal (I): Native family management screens
 - Amrithesh: (I) ML/Pet recognition [Indexing]
 - Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust
@@ -11,4 +14,5 @@ Still behind internal flag:
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
 - Prateek: (i) Enable BG sync notifications by default for internal users on iOS
+- Prateek: (i) Add internal sync recovery diagnostics to classify local discovery vs remote upload-prep misses
 - Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled

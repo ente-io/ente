@@ -874,6 +874,11 @@ const TrashDiffResponse = z.object({
     hasMore: z.boolean(),
 });
 
+interface LockerTrashData {
+    items: LockerItem[];
+    lastUpdatedAt: number;
+}
+
 /**
  * Fetch trashed Locker items from remote, decrypt them, and return them
  * ready for display. Must be called after {@link fetchLockerData} so that
@@ -881,7 +886,7 @@ const TrashDiffResponse = z.object({
  */
 export const fetchLockerTrash = async (
     masterKey: string,
-): Promise<LockerItem[]> => {
+): Promise<LockerTrashData> => {
     const trashItems: LockerItem[] = [];
     let sinceTime = 0;
     let hasMore = true;
@@ -968,7 +973,7 @@ export const fetchLockerTrash = async (
 
     // Sort by most recently trashed first
     trashItems.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-    return trashItems;
+    return { items: trashItems, lastUpdatedAt: sinceTime };
 };
 
 // ---------------------------------------------------------------------------
@@ -1233,11 +1238,15 @@ export const deleteLockerFileShareLink = async (
  * @param masterKey The user's master key.
  */
 export const createInfoItem = async (
-    collectionID: number,
+    collectionIDs: number[],
     infoType: LockerItemType,
     infoData: Record<string, unknown>,
     masterKey: string,
 ): Promise<void> => {
+    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
+    if (collectionID === undefined) {
+        throw new Error("No collection selected");
+    }
     const collectionRecord = encryptedCollections.get(collectionID);
     if (!collectionRecord)
         throw new Error(`Collection ${collectionID} not in cache`);
@@ -1301,6 +1310,16 @@ export const createInfoItem = async (
         }),
     });
     ensureOk(res);
+
+    const created = (await res.json()) as { id: number };
+    if (additionalCollectionIDs.length > 0) {
+        await addFileToCollections(
+            created.id,
+            fileKey,
+            additionalCollectionIDs,
+            masterKey,
+        );
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1459,14 +1478,122 @@ export const permanentlyDeleteFromTrash = async (
 /**
  * Empty the entire trash.
  */
-export const emptyTrash = async (): Promise<void> => {
+export const emptyTrash = async (lastUpdatedAt: number): Promise<void> => {
     const res = await fetch(await apiURL("/trash/empty"), {
         method: "POST",
         headers: {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ lastUpdatedAt }),
+    });
+    ensureOk(res);
+};
+
+const addFileToCollections = async (
+    fileID: number,
+    fileKey: string,
+    targetCollectionIDs: number[],
+    masterKey: string,
+): Promise<void> => {
+    for (const targetCollectionID of targetCollectionIDs) {
+        const collectionRecord = encryptedCollections.get(targetCollectionID);
+        if (!collectionRecord) {
+            throw new Error(`Collection ${targetCollectionID} not in cache`);
+        }
+
+        const collectionKey = await decryptCollectionKey(
+            collectionRecord,
+            masterKey,
+        );
+        const encryptedFileKey = await encryptBox(fileKey, collectionKey);
+
+        const res = await fetch(await apiURL("/collections/add-files"), {
+            method: "POST",
+            headers: {
+                ...(await authenticatedRequestHeaders()),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                collectionID: targetCollectionID,
+                files: [
+                    {
+                        id: fileID,
+                        encryptedKey: encryptedFileKey.encryptedData,
+                        keyDecryptionNonce: encryptedFileKey.nonce,
+                    },
+                ],
+            }),
+        });
+        ensureOk(res);
+    }
+};
+
+const decryptFileKeyForCollection = async (
+    fileID: number,
+    collectionID: number,
+    masterKey: string,
+): Promise<string> => {
+    const fileRecord = getEncryptedFileRecord(fileID, collectionID);
+    if (!fileRecord) {
+        throw new Error(
+            `File ${fileID} not in cache for collection ${collectionID}`,
+        );
+    }
+
+    const collectionRecord = encryptedCollections.get(collectionID);
+    if (!collectionRecord) {
+        throw new Error(`Collection ${collectionID} not in cache`);
+    }
+
+    const collectionKey = await decryptCollectionKey(
+        collectionRecord,
+        masterKey,
+    );
+    return await decryptBox(
+        {
+            encryptedData: fileRecord.encryptedKey,
+            nonce: fileRecord.keyDecryptionNonce,
+        },
+        collectionKey,
+    );
+};
+
+const removeFilesFromCollection = async (
+    collectionID: number,
+    fileIDs: number[],
+): Promise<void> => {
+    if (fileIDs.length === 0) {
+        return;
+    }
+
+    const res = await fetch(await apiURL("/collections/v3/remove-files"), {
+        method: "POST",
+        headers: {
+            ...(await authenticatedRequestHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ collectionID, fileIDs }),
+    });
+    ensureOk(res);
+};
+
+const moveFilesBetweenCollections = async (
+    fromCollectionID: number,
+    toCollectionID: number,
+    files: { id: number; encryptedKey: string; keyDecryptionNonce: string }[],
+): Promise<void> => {
+    if (files.length === 0) {
+        return;
+    }
+
+    const res = await fetch(await apiURL("/collections/move-files"), {
+        method: "POST",
+        headers: {
+            ...(await authenticatedRequestHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fromCollectionID, toCollectionID, files }),
     });
     ensureOk(res);
 };
@@ -1664,12 +1791,101 @@ export const renameCollection = async (
  *
  * @param collectionID The collection to delete.
  */
-export const deleteCollection = async (collectionID: number): Promise<void> => {
-    const res = await fetch(await apiURL(`/collections/v3/${collectionID}`), {
-        method: "DELETE",
-        headers: await authenticatedRequestHeaders(),
-    });
+export const deleteCollection = async (
+    collectionID: number,
+    opts?: { keepFiles?: boolean },
+): Promise<void> => {
+    const keepFiles = opts?.keepFiles ?? false;
+    const res = await fetch(
+        await apiURL(`/collections/v3/${collectionID}`, {
+            collectionID,
+            keepFiles,
+        }),
+        { method: "DELETE", headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
+};
+
+export const deleteCollectionKeepingFiles = async (
+    collection: LockerCollection,
+    masterKey: string,
+): Promise<void> => {
+    const collectionID = collection.id;
+    const currentUserID = ensureLocalUser().id;
+    const uncategorizedCollection = [...encryptedCollections.values()].find(
+        (candidate) => candidate.type === "uncategorized",
+    );
+    if (!uncategorizedCollection) {
+        throw new Error("Uncategorized collection not found in cache");
+    }
+
+    const fileIDsToRemove: number[] = [];
+    const filesToMoveByTargetCollectionID = new Map<
+        number,
+        { id: number; encryptedKey: string; keyDecryptionNonce: string }[]
+    >();
+
+    for (const item of collection.items) {
+        const isCurrentUserOwned =
+            (item.ownerID ?? currentUserID) === currentUserID;
+        if (!isCurrentUserOwned) {
+            fileIDsToRemove.push(item.id);
+            continue;
+        }
+
+        const otherOwnedCollectionIDs = item.collectionIDs.filter(
+            (itemCollectionID) => {
+                if (itemCollectionID === collectionID) {
+                    return false;
+                }
+
+                const targetCollection =
+                    encryptedCollections.get(itemCollectionID);
+                return (
+                    !!targetCollection &&
+                    targetCollection.ownerID === currentUserID &&
+                    targetCollection.type !== "uncategorized"
+                );
+            },
+        );
+
+        const targetCollectionID =
+            otherOwnedCollectionIDs[0] ?? uncategorizedCollection.id;
+        const fileKey = await decryptFileKeyForCollection(
+            item.id,
+            collectionID,
+            masterKey,
+        );
+        const targetCollectionRecord =
+            encryptedCollections.get(targetCollectionID);
+        if (!targetCollectionRecord) {
+            throw new Error(`Collection ${targetCollectionID} not in cache`);
+        }
+        const targetCollectionKey = await decryptCollectionKey(
+            targetCollectionRecord,
+            masterKey,
+        );
+        const encryptedFileKey = await encryptBox(fileKey, targetCollectionKey);
+        const filesToMove =
+            filesToMoveByTargetCollectionID.get(targetCollectionID) ?? [];
+        filesToMove.push({
+            id: item.id,
+            encryptedKey: encryptedFileKey.encryptedData,
+            keyDecryptionNonce: encryptedFileKey.nonce,
+        });
+        filesToMoveByTargetCollectionID.set(targetCollectionID, filesToMove);
+    }
+
+    for (const [targetCollectionID, files] of filesToMoveByTargetCollectionID) {
+        await moveFilesBetweenCollections(
+            collectionID,
+            targetCollectionID,
+            files,
+        );
+    }
+
+    await removeFilesFromCollection(collectionID, fileIDsToRemove);
+    await deleteCollection(collectionID, { keepFiles: true });
 };
 
 /**
@@ -1789,6 +2005,11 @@ interface MultipartCompletedPart {
     eTag: string;
 }
 
+export type LockerUploadProgress =
+    | { phase: "preparing" }
+    | { phase: "uploading"; loaded: number; total: number }
+    | { phase: "finalizing" };
+
 /**
  * Request a presigned upload URL from the server.
  *
@@ -1848,14 +2069,31 @@ const putFileToS3 = async (
     url: string,
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<void> => {
-    const res = await fetch(url, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/octet-stream",
-            "Content-MD5": contentMd5,
-        },
-        body: data,
+    const res = await new Promise<{
+        ok: boolean;
+        status: number;
+        statusText: string;
+    }>((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("PUT", url);
+        request.setRequestHeader("Content-Type", "application/octet-stream");
+        request.setRequestHeader("Content-MD5", contentMd5);
+        request.upload.onprogress = (event) => {
+            onProgress?.({
+                loaded: event.loaded,
+                total: event.lengthComputable ? event.total : data.length,
+            });
+        };
+        request.onload = () =>
+            resolve({
+                ok: request.status >= 200 && request.status < 300,
+                status: request.status,
+                statusText: request.statusText,
+            });
+        request.onerror = () => reject(new Error("S3 upload failed"));
+        request.send(data);
     });
     if (!res.ok) {
         throw new Error(`S3 upload failed: ${res.status} ${res.statusText}`);
@@ -1865,13 +2103,14 @@ const putFileToS3 = async (
 const uploadSingleObject = async (
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<string> => {
     const maxAttempts = 3;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const uploadURL = await fetchUploadURL(data.length, contentMd5);
-            await putFileToS3(uploadURL.url, data, contentMd5);
+            await putFileToS3(uploadURL.url, data, contentMd5, onProgress);
             return uploadURL.objectKey;
         } catch (error) {
             if (attempt === maxAttempts) {
@@ -1887,19 +2126,56 @@ const putFilePartToS3 = async (
     url: string,
     data: Uint8Array,
     contentMd5: string,
+    onProgress?: (progress: { loaded: number; total?: number }) => void,
 ): Promise<string> => {
-    const res = await retryEnsuringHTTPOk(() =>
-        fetch(url, {
-            method: "PUT",
-            headers: { ...publicRequestHeaders(), "Content-MD5": contentMd5 },
-            body: data,
-        }),
-    );
-    const eTag = res.headers.get("etag");
-    if (!eTag) {
-        throw new Error("Missing ETag from multipart upload response");
+    const maxAttempts = 3;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const eTag = await new Promise<string | null>((resolve, reject) => {
+                const request = new XMLHttpRequest();
+                request.open("PUT", url);
+                for (const [headerName, headerValue] of Object.entries({
+                    ...publicRequestHeaders(),
+                    "Content-MD5": contentMd5,
+                })) {
+                    request.setRequestHeader(headerName, headerValue);
+                }
+                request.upload.onprogress = (event) => {
+                    onProgress?.({
+                        loaded: event.loaded,
+                        total: event.lengthComputable
+                            ? event.total
+                            : data.length,
+                    });
+                };
+                request.onload = () => {
+                    if (request.status < 200 || request.status >= 300) {
+                        reject(
+                            new Error(
+                                `S3 multipart upload failed: ${request.status} ${request.statusText}`,
+                            ),
+                        );
+                        return;
+                    }
+                    resolve(request.getResponseHeader("etag"));
+                };
+                request.onerror = () =>
+                    reject(new Error("S3 multipart upload failed"));
+                request.send(data);
+            });
+            if (!eTag) {
+                throw new Error("Missing ETag from multipart upload response");
+            }
+            return eTag;
+        } catch (error) {
+            if (attempt === maxAttempts) {
+                throw error;
+            }
+        }
     }
-    return eTag;
+
+    throw new Error("Unreachable multipart upload retry state");
 };
 
 const completeMultipartUpload = async (
@@ -1935,6 +2211,31 @@ const mergeUint8Arrays = (chunks: Uint8Array[]): Uint8Array => {
     return merged;
 };
 
+const createAggregateUploadProgressReporter = (
+    total: number,
+    onProgress?: (progress: LockerUploadProgress) => void,
+) => {
+    let uploadedBytes = 0;
+
+    return {
+        reportPartProgress: (loaded: number) => {
+            onProgress?.({
+                phase: "uploading",
+                loaded: Math.min(total, uploadedBytes + loaded),
+                total,
+            });
+        },
+        completePart: (partLength: number) => {
+            uploadedBytes += partLength;
+            onProgress?.({
+                phase: "uploading",
+                loaded: Math.min(total, uploadedBytes),
+                total,
+            });
+        },
+    };
+};
+
 /**
  * Upload a file to Locker with E2E encryption.
  *
@@ -1955,9 +2256,16 @@ const mergeUint8Arrays = (chunks: Uint8Array[]): Uint8Array => {
  */
 export const uploadLockerFile = async (
     file: File,
-    collectionID: number,
+    collectionIDs: number[],
     masterKey: string,
+    onProgress?: (progress: LockerUploadProgress) => void,
 ): Promise<number> => {
+    const [collectionID, ...additionalCollectionIDs] = collectionIDs;
+    if (collectionID === undefined) {
+        throw new Error("No collection selected");
+    }
+    onProgress?.({ phase: "preparing" });
+
     const plaintextChunkCount = Math.max(
         1,
         Math.ceil(file.size / STREAM_ENCRYPTION_CHUNK_SIZE),
@@ -2020,6 +2328,10 @@ export const uploadLockerFile = async (
                 partMd5s,
             });
             const completedParts: MultipartCompletedPart[] = [];
+            const progressReporter = createAggregateUploadProgressReporter(
+                encryptedFileSize,
+                onProgress,
+            );
 
             for (const [index, partData] of parts.entries()) {
                 const partUploadURL = multipartUpload.partURLs[index];
@@ -2031,8 +2343,10 @@ export const uploadLockerFile = async (
                     partUploadURL,
                     partData,
                     partMd5,
+                    ({ loaded }) => progressReporter.reportPartProgress(loaded),
                 );
                 completedParts.push({ partNumber: index + 1, eTag });
+                progressReporter.completePart(partData.length);
                 parts[index] = new Uint8Array(0);
             }
 
@@ -2072,11 +2386,24 @@ export const uploadLockerFile = async (
             encryptedFileObjectKey = await uploadSingleObject(
                 encryptedFileBytes,
                 encryptedFileMd5,
+                ({ loaded, total }) =>
+                    onProgress?.({
+                        phase: "uploading",
+                        loaded,
+                        total: total ?? encryptedFileBytes.length,
+                    }),
             );
         }
     } finally {
         streamEncryptor.free();
     }
+
+    onProgress?.({
+        phase: "uploading",
+        loaded: encryptedFileSize,
+        total: encryptedFileSize,
+    });
+    onProgress?.({ phase: "finalizing" });
 
     // 3. Encrypt the black placeholder thumbnail with the file key
     const encryptedThumb = await encryptFileStreamWithKey(
@@ -2165,5 +2492,13 @@ export const uploadLockerFile = async (
     });
     ensureOk(res);
     const created = (await res.json()) as { id: number };
+    if (additionalCollectionIDs.length > 0) {
+        await addFileToCollections(
+            created.id,
+            fileKey,
+            additionalCollectionIDs,
+            masterKey,
+        );
+    }
     return created.id;
 };

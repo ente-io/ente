@@ -11,6 +11,7 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import { t } from "i18next";
 import React from "react";
 
@@ -44,7 +45,11 @@ export const LockerFileLinkDialog: React.FC<LockerFileLinkDialogProps> = ({
         onClose={loading || deleting ? undefined : onClose}
         fullWidth
         maxWidth="xs"
-        slotProps={{ paper: { sx: { width: "min(100%, 420px)" } } }}
+        slotProps={{
+            paper: {
+                sx: { ...lockerDialogPaperSx, width: "min(100%, 420px)" },
+            },
+        }}
     >
         <DialogTitle sx={{ pr: 6 }}>
             {itemTitle}

@@ -197,8 +197,8 @@ abstract class SuperIsolate {
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     logger.info('Disposing isolate');
-    await clearAllCachedData();
     await onDispose();
+    await clearAllCachedData();
     _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();
