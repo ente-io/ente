@@ -1,5 +1,5 @@
-import { HTTPError } from "ente-base/http";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
+import { HTTPError } from "ente-base/http";
 import {
     isTauriAppRuntime,
     secureStorageDelete,
@@ -43,7 +43,9 @@ const scopedRemoteChatKeyLocalStorageKey = () => {
 
 const scopedRemoteChatKeySecureStorageKey = () => {
     const userID = savedLocalUser()?.id;
-    return userID ? `${REMOTE_CHAT_KEY_SECURE_STORAGE_KEY}.${userID}` : undefined;
+    return userID
+        ? `${REMOTE_CHAT_KEY_SECURE_STORAGE_KEY}.${userID}`
+        : undefined;
 };
 
 const clearLegacyRemoteChatKeyLocalStorage = () =>

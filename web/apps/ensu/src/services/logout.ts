@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/tauri";
 import { accountLogout } from "ente-accounts/services/logout";
 import log from "ente-base/log";
 
