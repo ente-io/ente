@@ -5,7 +5,7 @@ void main() {
   group("BgTaskUtils.nextIOSBackgroundProcessingSchedule", () {
     test("returns null when handoff flag is disabled", () {
       final schedule = BgTaskUtils.nextIOSBackgroundProcessingSchedule(
-        isUploadHandoffEnabled: false,
+        isBackgroundHandoffEnabled: false,
         hasActiveUploads: true,
         isBackupEligible: true,
       );
@@ -15,7 +15,7 @@ void main() {
 
     test("returns continuation schedule when uploads are active", () {
       final schedule = BgTaskUtils.nextIOSBackgroundProcessingSchedule(
-        isUploadHandoffEnabled: true,
+        isBackgroundHandoffEnabled: true,
         hasActiveUploads: true,
         isBackupEligible: false,
       );
@@ -30,7 +30,7 @@ void main() {
 
     test("returns maintenance schedule when backup remains eligible", () {
       final schedule = BgTaskUtils.nextIOSBackgroundProcessingSchedule(
-        isUploadHandoffEnabled: true,
+        isBackgroundHandoffEnabled: true,
         hasActiveUploads: false,
         isBackupEligible: true,
       );

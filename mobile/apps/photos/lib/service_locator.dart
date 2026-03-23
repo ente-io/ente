@@ -83,6 +83,10 @@ FlagService get flagService {
   return _flagService!;
 }
 
+bool isIOSBackgroundHandoffEnabledFromPrefs(SharedPreferences prefs) {
+  return FlagService.isIOSBackgroundHandoffEnabledInPrefs(prefs);
+}
+
 CastService? _castService;
 
 CastService get castService {

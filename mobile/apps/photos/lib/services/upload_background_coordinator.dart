@@ -20,7 +20,7 @@ class UploadBackgroundCoordinator {
   final _logger = Logger("UploadBackgroundCoordinator");
 
   Future<void> onAppBackground() async {
-    if (!Platform.isIOS || !flagService.enableIOSUploadBackgroundHandoff) {
+    if (!Platform.isIOS || !flagService.enableIOSBackgroundHandoff) {
       return;
     }
 
@@ -47,7 +47,7 @@ class UploadBackgroundCoordinator {
   }
 
   Future<void> onAppForeground() async {
-    if (!Platform.isIOS || !flagService.enableIOSUploadBackgroundHandoff) {
+    if (!Platform.isIOS || !flagService.enableIOSBackgroundHandoff) {
       return;
     }
 

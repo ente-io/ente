@@ -27,6 +27,27 @@ class FlagService {
 
   RemoteFlags? _flags;
 
+  static bool isInternalUserEnabledInPrefs(SharedPreferences prefs) {
+    final isDisabled = prefs.getBool("ls.internal_user_disabled") ?? false;
+    if (isDisabled) {
+      return false;
+    }
+
+    try {
+      final flags = RemoteFlags.fromMap(
+        jsonDecode(prefs.getString("remote_flags") ?? "{}"),
+      );
+      return flags.internalUser || kDebugMode;
+    } catch (e) {
+      debugPrint("Failed to get internal user flag $e");
+      return kDebugMode;
+    }
+  }
+
+  static bool isIOSBackgroundHandoffEnabledInPrefs(SharedPreferences prefs) {
+    return isInternalUserEnabledInPrefs(prefs);
+  }
+
   RemoteFlags get flags {
     try {
       if (!_prefs.containsKey("remote_flags")) {
@@ -46,8 +67,7 @@ class FlagService {
 
   /// Returns true if the user is an internal user, respecting the debug toggle.
   bool get internalUser {
-    final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
-    return (flags.internalUser || kDebugMode) && !isDisabled;
+    return isInternalUserEnabledInPrefs(_prefs);
   }
 
   bool get cloudflareUploadWorker => internalUser;
@@ -106,7 +126,8 @@ class FlagService {
 
   bool get qrFeatureEnabled => internalUser;
 
-  bool get enableIOSUploadBackgroundHandoff => internalUser;
+  bool get enableIOSBackgroundHandoff =>
+      isIOSBackgroundHandoffEnabledInPrefs(_prefs);
   bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {

@@ -23,8 +23,14 @@ const _kDebugIOSBackgroundProcessingMaintenanceCadence = Duration(minutes: 15);
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   workmanager.Workmanager().executeTask((taskName, inputData) async {
-    final TimeLogger tlog = TimeLogger();
     final prefs = await SharedPreferences.getInstance();
+    final isIOSBackgroundHandoffEnabled =
+        Platform.isIOS && isIOSBackgroundHandoffEnabledFromPrefs(prefs);
+    if (!isIOSBackgroundHandoffEnabled) {
+      return _runLegacyCallbackTask(taskName, prefs);
+    }
+
+    final TimeLogger tlog = TimeLogger();
     final shouldRescheduleProcessingTask =
         Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
     bool didHandleExpiration = false;
@@ -34,8 +40,9 @@ void callbackDispatcher() {
       }
 
       didHandleExpiration = true;
-      BgTaskUtils.$
-          .warning("Task expired via iOS expirationHandler: $taskName");
+      BgTaskUtils.$.warning(
+        "Task expired via iOS expirationHandler: $taskName",
+      );
       await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
       if (shouldRescheduleProcessingTask) {
         await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
@@ -84,6 +91,42 @@ void callbackDispatcher() {
       await WorkmanagerApple.clearTaskExpirationHandler();
     }
   });
+}
+
+Future<bool> _runLegacyCallbackTask(
+  String taskName,
+  SharedPreferences prefs,
+) async {
+  final TimeLogger tlog = TimeLogger();
+  Future<bool> result = Future.error("Task didn't run");
+
+  await runWithLogs(() async {
+    try {
+      BgTaskUtils.$.info('Task started $tlog');
+      await runBackgroundTask(taskName, tlog).timeout(
+        Platform.isIOS ? kBGAppRefreshBudget : const Duration(hours: 1),
+        onTimeout: () async {
+          BgTaskUtils.$.warning(
+            "TLE, committing seppuku for taskID: $taskName",
+          );
+          await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+          return true;
+        },
+      );
+      BgTaskUtils.$.info('Task run successful $tlog');
+      result = Future.value(true);
+    } catch (e) {
+      BgTaskUtils.$.warning('Task error: $e');
+      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+      result = Future.error(e.toString());
+    }
+  }, prefix: "[bg]")
+      .onError((_, __) {
+    result = Future.error("Didn't finished correctly!");
+    return;
+  });
+
+  return result;
 }
 
 class BgTaskUtils {
@@ -142,11 +185,31 @@ class BgTaskUtils {
     }
     $.warning("Configuring Work Manager for background tasks");
     try {
-      await workmanager.Workmanager().initialize(
-        callbackDispatcher,
-      );
+      await workmanager.Workmanager().initialize(callbackDispatcher);
       if (Platform.isIOS) {
-        await requeueIOSBackgroundTasks(source: "configureWorkmanager");
+        if (flagService.enableIOSBackgroundHandoff) {
+          await requeueIOSBackgroundTasks(source: "configureWorkmanager");
+        } else {
+          await workmanager.Workmanager().registerPeriodicTask(
+            iOSBackgroundAppRefresh,
+            iOSBackgroundAppRefresh,
+            frequency: const Duration(minutes: 30),
+            initialDelay:
+                kDebugMode ? Duration.zero : _kBackgroundPeriodicInitialDelay,
+            constraints: workmanager.Constraints(
+              networkType: workmanager.NetworkType.connected,
+              requiresCharging: false,
+              requiresStorageNotLow: false,
+              requiresDeviceIdle: false,
+            ),
+            existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
+            backoffPolicy: workmanager.BackoffPolicy.linear,
+            backoffPolicyDelay: const Duration(minutes: 15),
+          );
+          await cancelIOSBackgroundProcessingTask(
+            source: "configureWorkmanager:legacy",
+          );
+        }
       } else {
         await workmanager.Workmanager().registerPeriodicTask(
           androidPeriodicTask,
@@ -172,9 +235,7 @@ class BgTaskUtils {
         final isScheduled = await workmanager.Workmanager()
             .isScheduledByUniqueName(androidPeriodicTask);
         if (!isScheduled) {
-          $.warning(
-            "Background task is not scheduled: $androidPeriodicTask",
-          );
+          $.warning("Background task is not scheduled: $androidPeriodicTask");
         }
       }
     } catch (e) {
@@ -189,12 +250,15 @@ class BgTaskUtils {
       return;
     }
 
+    final isBackgroundHandoffEnabled = flagService.enableIOSBackgroundHandoff;
     $.info("Requeueing iOS background tasks from $source");
 
     await workmanager.Workmanager().registerPeriodicTask(
       iOSBackgroundAppRefresh,
       iOSBackgroundAppRefresh,
-      frequency: _kIOSBackgroundRefreshCadence,
+      frequency: isBackgroundHandoffEnabled
+          ? _kIOSBackgroundRefreshCadence
+          : const Duration(minutes: 30),
       initialDelay:
           kDebugMode ? Duration.zero : _kBackgroundPeriodicInitialDelay,
       constraints: workmanager.Constraints(
@@ -205,9 +269,11 @@ class BgTaskUtils {
       ),
       existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
       backoffPolicy: workmanager.BackoffPolicy.linear,
-      backoffPolicyDelay: _kIOSBackgroundRefreshCadence,
+      backoffPolicyDelay: isBackgroundHandoffEnabled
+          ? _kIOSBackgroundRefreshCadence
+          : const Duration(minutes: 15),
     );
-    if (!flagService.enableIOSUploadBackgroundHandoff) {
+    if (!isBackgroundHandoffEnabled) {
       await workmanager.Workmanager().cancelByUniqueName(
         iOSBackgroundProcessingTask,
       );
@@ -226,11 +292,11 @@ class BgTaskUtils {
 
     final delay = initialDelay ?? _maintenanceDelay();
     final prefs = await SharedPreferences.getInstance();
-    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
-    if (!isUploadHandoffEnabled && reason != null) {
+    final isBackgroundHandoffEnabled = flagService.enableIOSBackgroundHandoff;
+    if (!isBackgroundHandoffEnabled) {
       $.info(
         "Skipping iOS background processing schedule from $source "
-        "because upload handoff flag is disabled",
+        "because background handoff flag is disabled",
       );
       return;
     }
@@ -281,14 +347,14 @@ class BgTaskUtils {
       return;
     }
 
-    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
-    if (!isUploadHandoffEnabled) {
+    final isBackgroundHandoffEnabled = flagService.enableIOSBackgroundHandoff;
+    if (!isBackgroundHandoffEnabled) {
       await _clearIOSBackgroundProcessingSchedulingState();
       return;
     }
 
     final nextSchedule = nextIOSBackgroundProcessingSchedule(
-      isUploadHandoffEnabled: isUploadHandoffEnabled,
+      isBackgroundHandoffEnabled: isBackgroundHandoffEnabled,
       hasActiveUploads: FileUploader.instance.hasActiveUploads,
       isBackupEligible: await isIOSBackupEligible(),
     );
@@ -312,8 +378,8 @@ class BgTaskUtils {
 
     await ensureServiceLocatorBootstrap();
     final prefs = await SharedPreferences.getInstance();
-    final isUploadHandoffEnabled = flagService.enableIOSUploadBackgroundHandoff;
-    if (!isUploadHandoffEnabled) {
+    final isBackgroundHandoffEnabled = flagService.enableIOSBackgroundHandoff;
+    if (!isBackgroundHandoffEnabled) {
       await _clearIOSBackgroundProcessingSchedulingState();
       return;
     }
@@ -322,7 +388,7 @@ class BgTaskUtils {
     await _clearIOSBackgroundProcessingSchedulingState();
 
     final nextSchedule = nextIOSBackgroundProcessingSchedule(
-      isUploadHandoffEnabled: isUploadHandoffEnabled,
+      isBackgroundHandoffEnabled: isBackgroundHandoffEnabled,
       hasActiveUploads: FileUploader.instance.hasActiveUploads,
       isBackupEligible: await isIOSBackupEligible(),
     );
@@ -362,11 +428,11 @@ class BgTaskUtils {
   }
 
   static IOSBackgroundProcessingSchedule? nextIOSBackgroundProcessingSchedule({
-    required bool isUploadHandoffEnabled,
+    required bool isBackgroundHandoffEnabled,
     required bool hasActiveUploads,
     required bool isBackupEligible,
   }) {
-    if (!isUploadHandoffEnabled) {
+    if (!isBackgroundHandoffEnabled) {
       return null;
     }
     if (hasActiveUploads) {
