@@ -17,6 +17,10 @@ export const sidebar = [
                     },
                     { text: "Sign up", link: "/photos/getting-started/signup" },
                     {
+                        text: "Gallery mode",
+                        link: "/photos/getting-started/gallery-mode",
+                    },
+                    {
                         text: "Migration",
                         link: "/photos/getting-started/migration",
                     },
@@ -75,10 +79,6 @@ export const sidebar = [
                             {
                                 text: "Passkeys",
                                 link: "/photos/features/account/passkeys",
-                            },
-                            {
-                                text: "App lock",
-                                link: "/photos/features/account/app-lock",
                             },
                             {
                                 text: "Referral program",
@@ -262,6 +262,10 @@ export const sidebar = [
                     {
                         text: "Account Creation",
                         link: "/photos/faq/account-creation",
+                    },
+                    {
+                        text: "Gallery Mode",
+                        link: "/photos/faq/gallery-mode",
                     },
                     {
                         text: "Advanced Features",

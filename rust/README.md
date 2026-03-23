@@ -33,14 +33,15 @@
 │ mobile/apps/photos/rust/  │
 │  (ente_photos_rust crate) │
 │                           │
-│  App-specific #[frb]:     │
-│  usearch, ML, etc.        │
+│  Thin app-specific #[frb] │
+│  wrappers for rust/photos │
 └───────────────────────────┘
 ```
 
 ## Contents (this repo)
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/photos/` (`ente_media_inspector`) - shared Photos Rust logic (motion photo, ML, image processing, vector DB).
 - `rust/cli/` (`ente-rs`) - Rust CLI.
 - `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
 
@@ -62,6 +63,14 @@ rust/
 │   ├── docs/
 │   │   ├── crypto.md
 │   │   └── auth.md
+│   └── Cargo.toml
+│
+├── photos/                       # Shared Photos Rust logic
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── image/
+│   │   ├── ml/
+│   │   └── vector_db.rs
 │   └── Cargo.toml
 │
 └── ensu/                         # LLM chat stack (see rust/ensu/README.md)
@@ -88,7 +97,7 @@ mobile/packages/rust/             # Shared FRB bindings for all mobile apps
 mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 ├── src/
 │   ├── lib.rs
-│   └── api/                      # #[frb] app-specific code (usearch, ML)
+│   └── api/                      # #[frb] thin wrappers over rust/photos
 │       └── *.rs
 └── Cargo.toml                    # crate name: ente_photos_rust
 ```
@@ -97,6 +106,7 @@ mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
+- `ente_media_inspector` - shared Photos Rust logic
 - `ente-rs` - CLI binary
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
@@ -127,7 +137,7 @@ wasm-pack is installed via npm as a devDependency, so `yarn install` handles it.
 Used for Flutter integration. FRB is used on two crates:
 
 - **`ente_rust`** (`mobile/packages/rust/`) - Shared wrappers around `ente-core`, used by multiple mobile apps (Photos, Auth, etc.)
-- **`ente_photos_rust`** (`mobile/apps/photos/rust/`) - Photos app-specific functionality (usearch, ML)
+- **`ente_photos_rust`** (`mobile/apps/photos/rust/`) - Thin Photos-specific wrappers around `rust/photos`
 
 Both depend on `ente-core` and use `#[frb]` annotations to generate Dart bindings.
 

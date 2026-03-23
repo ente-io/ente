@@ -239,8 +239,20 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
 File cachedThumbnailPath(EnteFile file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
+  final uploadedFileID = file.uploadedFileID;
+  if (uploadedFileID != null && uploadedFileID != -1) {
+    return File("$thumbnailCacheDirectory/$uploadedFileID");
+  }
+
+  final localID = file.localID;
+  if (localID != null && localID.isNotEmpty) {
+    return File(
+      "$thumbnailCacheDirectory/local-${Uri.encodeComponent(localID)}",
+    );
+  }
+
   return File(
-    thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
+    "$thumbnailCacheDirectory/generated-${file.generatedID ?? "unknown"}",
   );
 }
 

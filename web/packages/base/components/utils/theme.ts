@@ -128,7 +128,7 @@ const getColors = (appName: AppName) => ({
         accent:
             appName == "auth"
                 ? _colors.accentAuth
-                : appName == "share"
+                : appName == "share" || appName == "locker"
                   ? _colors.accentShare
                   : appName == "ensu"
                     ? _colors.accentEnsu
@@ -138,7 +138,7 @@ const getColors = (appName: AppName) => ({
                 ? _colors.accentEnsuDark
                 : appName == "auth"
                   ? _colors.accentAuth
-                  : appName == "share"
+                  : appName == "share" || appName == "locker"
                     ? _colors.accentShare
                     : _colors.accentPhotos,
     },
@@ -148,7 +148,7 @@ const getColors = (appName: AppName) => ({
     },
     ...{
         light:
-            appName == "share"
+            appName == "share" || appName == "locker"
                 ? _colors.lightShare
                 : appName == "ensu"
                   ? _colors.lightEnsu
@@ -156,7 +156,7 @@ const getColors = (appName: AppName) => ({
     },
     ...{
         dark:
-            appName == "share"
+            appName == "share" || appName == "locker"
                 ? _colors.darkShare
                 : appName == "ensu"
                   ? _colors.darkEnsu
@@ -953,13 +953,130 @@ const components: Components = {
 };
 
 const getComponents = (appName: AppName): Components => {
-    if (appName !== "ensu") return components;
+    if (appName !== "ensu" && appName !== "locker") return components;
 
     const muiButtonStyleOverrides = (components.MuiButton?.styleOverrides ??
         {}) as Record<string, unknown>;
     const muiButtonRootStyleOverrides =
         (muiButtonStyleOverrides.root as Record<string, unknown> | undefined) ??
         {};
+    const muiIconButtonStyleOverrides = (components.MuiIconButton
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiIconButtonRootStyleOverrides =
+        (muiIconButtonStyleOverrides.root as
+            | Record<string, unknown>
+            | undefined) ?? {};
+    const muiInputBaseStyleOverrides = (components.MuiInputBase
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiInputBaseFormControlStyleOverrides =
+        (muiInputBaseStyleOverrides.formControl as
+            | Record<string, unknown>
+            | undefined) ?? {};
+    const muiDialogTitleStyleOverrides = (components.MuiDialogTitle
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+    const muiDialogContentStyleOverrides = (components.MuiDialogContent
+        ?.styleOverrides ?? {}) as Record<string, unknown>;
+
+    if (appName === "locker") {
+        return {
+            ...components,
+            MuiButton: {
+                ...components.MuiButton,
+                styleOverrides: {
+                    ...muiButtonStyleOverrides,
+                    root: {
+                        ...muiButtonRootStyleOverrides,
+                        borderRadius: "20px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiButton"]>["styleOverrides"]
+                >,
+            },
+            MuiIconButton: {
+                ...components.MuiIconButton,
+                styleOverrides: {
+                    ...muiIconButtonStyleOverrides,
+                    root: {
+                        ...muiIconButtonRootStyleOverrides,
+                        borderRadius: "18px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiIconButton"]>["styleOverrides"]
+                >,
+            },
+            MuiInputBase: {
+                ...components.MuiInputBase,
+                styleOverrides: {
+                    ...muiInputBaseStyleOverrides,
+                    formControl: {
+                        ...muiInputBaseFormControlStyleOverrides,
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiInputBase"]>["styleOverrides"]
+                >,
+            },
+            MuiOutlinedInput: {
+                ...components.MuiOutlinedInput,
+                styleOverrides: {
+                    ...components.MuiOutlinedInput?.styleOverrides,
+                    root: {
+                        ...(components.MuiOutlinedInput?.styleOverrides
+                            ?.root as Record<string, unknown> | undefined),
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<
+                        Components["MuiOutlinedInput"]
+                    >["styleOverrides"]
+                >,
+            },
+            MuiFilledInput: {
+                ...components.MuiFilledInput,
+                styleOverrides: {
+                    ...components.MuiFilledInput?.styleOverrides,
+                    root: {
+                        ...(components.MuiFilledInput?.styleOverrides?.root as
+                            | Record<string, unknown>
+                            | undefined),
+                        borderRadius: "16px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiFilledInput"]>["styleOverrides"]
+                >,
+            },
+            MuiDialogTitle: {
+                ...components.MuiDialogTitle,
+                styleOverrides: {
+                    ...muiDialogTitleStyleOverrides,
+                    root: {
+                        ...(muiDialogTitleStyleOverrides.root as
+                            | Record<string, unknown>
+                            | undefined),
+                        paddingBottom: "12px",
+                    },
+                } as NonNullable<
+                    NonNullable<Components["MuiDialogTitle"]>["styleOverrides"]
+                >,
+            },
+            MuiDialogContent: {
+                ...components.MuiDialogContent,
+                styleOverrides: {
+                    ...muiDialogContentStyleOverrides,
+                    root: {
+                        ...(muiDialogContentStyleOverrides.root as
+                            | Record<string, unknown>
+                            | undefined),
+                        paddingTop: "8px",
+                    },
+                } as NonNullable<
+                    NonNullable<
+                        Components["MuiDialogContent"]
+                    >["styleOverrides"]
+                >,
+            },
+        };
+    }
 
     return {
         ...components,
@@ -1017,3 +1134,6 @@ export const ensuTheme = getTheme("ensu");
  * The MUI {@link Theme} to use for the locker public app.
  */
 export const shareTheme = getTheme("share");
+
+/** Theme for the locker app (blue accent, matching mobile Locker app). */
+export const lockerTheme = getTheme("locker");

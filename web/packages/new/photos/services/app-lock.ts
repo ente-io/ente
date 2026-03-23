@@ -21,15 +21,18 @@ import { haveMasterKeyInSession } from "ente-base/session";
 import type {
     NativeDeviceLockCapability,
     NativeDeviceLockUnavailableReason,
+    PersistedAppLockConfig,
 } from "ente-base/types/ipc";
 
 /**
  * In-memory state for the app lock feature.
  *
- * Some values are persisted to localStorage (synchronous, for cold-start reads)
- * and some to IndexedDB via KV DB (async, for tamper resistance).
+ * Desktop config is persisted only in Electron safe storage, while passphrase
+ * and brute-force state live in IndexedDB via KV DB.
  */
 export interface AppLockState {
+    /** Whether app lock is supported in the current desktop environment. */
+    supported: boolean;
     /** Whether app lock is enabled. */
     enabled: boolean;
     /** Active lock type. */
@@ -47,6 +50,7 @@ export interface AppLockState {
 }
 
 const createDefaultState = (): AppLockState => ({
+    supported: false,
     enabled: false,
     lockType: "none",
     lockScreenMode: "lock",
@@ -131,13 +135,6 @@ const setSnapshot = (snapshot: AppLockState) => {
     });
 };
 
-// -- localStorage keys (synchronous, for cold-start reads) --
-// lsKey => localStorageKey
-
-const lsKeyEnabled = "appLock.enabled";
-// Stores the selected app-lock method ("pin" | "password" | "device" | "none").
-const lsKeyAppLockMethod = "appLock.lockType";
-const lsKeyAutoLockTimeMs = "appLock.autoLockTimeMs";
 const ssKeySuppressNextSessionRefreshLock =
     "appLock.suppressNextSessionRefreshLock";
 
@@ -188,7 +185,7 @@ export const clearAutoLockBlurSuppression = () => {
  */
 export const suppressAppLockRefreshFromSessionForTrustedReload = () => {
     try {
-        if (localStorage.getItem(lsKeyEnabled) !== "true") return;
+        if (!appLockSnapshot().enabled) return;
         sessionStorage.setItem(ssKeySuppressNextSessionRefreshLock, "true");
     } catch {
         // Ignore storage write errors; fallback to regular app-lock behavior.
@@ -238,8 +235,8 @@ const logDeviceLockEvent = (
 /**
  * Return the cooldown duration for a failed-attempt count.
  *
- * This policy is shared by lockout enforcement and cooldown UI (used by
- * AppLockOverlay to render countdown progress).
+ * This policy is shared by lockout enforcement and cooldown UI (used by the
+ * app lock screen to render countdown progress).
  */
 export const appLockCooldownDurationMs = (attemptCount: number): number => {
     if (attemptCount < cooldownStartsAtAttempt) return 0;
@@ -275,62 +272,101 @@ const readBruteForceStateFromKV = async () => {
     };
 };
 
+/**
+ *
+ * @param value the autoLockTimeMS
+ * @returns clampedNonNegativeFinite integer value
+ *
+ * So this function is bascially a normalization function, to update the
+ * value of the autoLockTimeMs in case it becomes any non-negative/non-finite
+ * number like -4 or NaN in-case of some corruption or unexpected case.
+ */
 const clampNonNegativeInt = (value: number) =>
     Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 
-const isDesktopMacOS = () =>
-    !!globalThis.electron &&
-    typeof navigator != "undefined" &&
-    navigator.userAgent.toUpperCase().includes("MAC");
-
-const normalizeDeviceLockType = (lockType: AppLockState["lockType"]) =>
-    lockType === "device" && !isDesktopMacOS() ? "none" : lockType;
+const defaultPersistedAppLockConfig = (): PersistedAppLockConfig => ({
+    enabled: false,
+    lockType: "none",
+    autoLockTimeMs: 0,
+});
 
 /**
- * Shape of app-lock settings persisted in localStorage.
+ * Validates and retrieves the Electron app lock API from the global scope.
  *
- * Used to initialize or refresh the in-memory snapshot.
+ * Checks if the Electron API is available and has all required app lock
+ * related functions before returning it. This ensures safe access to
+ * Electron's secure storage capabilities for app lock configuration.
+ *
+ * @returns {Object | undefined} The Electron API object with app lock methods
+ *                                if all required functions are available,
+ *                                otherwise undefined.
  */
-interface PersistedAppLockConfig {
-    enabled: boolean;
-    lockType: AppLockState["lockType"];
-    autoLockTimeMs: number;
-}
-
-const readPersistedAppLockConfig = (): PersistedAppLockConfig => {
-    let enabled = localStorage.getItem(lsKeyEnabled) === "true";
-
-    // Read the currently persisted app-lock method.
-    const persistedLockType = localStorage.getItem(lsKeyAppLockMethod);
-    const parsedLockType: AppLockState["lockType"] =
-        persistedLockType === "pin" ||
-        persistedLockType === "password" ||
-        persistedLockType === "device" ||
-        persistedLockType === "none"
-            ? persistedLockType
-            : "none";
-
-    // Coerce missing values to "none" and gate "device" to supported platforms.
-    const lockType = normalizeDeviceLockType(parsedLockType);
-
-    if (enabled && lockType === "none") {
-        enabled = false;
-        localStorage.setItem(lsKeyEnabled, "false");
+const appLockElectron = () => {
+    const electron = globalThis.electron;
+    if (
+        !electron ||
+        typeof electron.isSafeStorageAvailable != "function" ||
+        typeof electron.appLockConfigFromSafeStorage != "function" ||
+        typeof electron.saveAppLockConfigInSafeStorage != "function" ||
+        typeof electron.clearAppLockConfigFromSafeStorage != "function"
+    ) {
+        return undefined;
     }
 
-    if (lockType === "none") {
-        localStorage.removeItem(lsKeyAppLockMethod);
-    } else if (persistedLockType !== lockType) {
-        localStorage.setItem(lsKeyAppLockMethod, lockType);
-    }
+    return electron;
+};
 
-    return {
-        enabled,
-        lockType,
-        autoLockTimeMs: clampNonNegativeInt(
-            Number(localStorage.getItem(lsKeyAutoLockTimeMs) ?? "0"),
-        ),
+const isAppLockSupported = async () => {
+    const electron = appLockElectron();
+    if (!electron) return false;
+
+    try {
+        return await electron.isSafeStorageAvailable();
+    } catch (e) {
+        log.warn("Failed to query safe storage support for app lock", e);
+        return false;
+    }
+};
+
+const readPersistedAppLockConfig =
+    async (): Promise<PersistedAppLockConfig> => {
+        const electron = appLockElectron();
+        if (!electron) {
+            throw new Error("App lock is not supported");
+        }
+
+        const persistedConfig = await electron.appLockConfigFromSafeStorage();
+        if (!persistedConfig) {
+            return defaultPersistedAppLockConfig();
+        }
+
+        return {
+            enabled: persistedConfig.enabled,
+            lockType: persistedConfig.lockType,
+            autoLockTimeMs: clampNonNegativeInt(persistedConfig.autoLockTimeMs),
+        };
     };
+
+const savePersistedAppLockConfig = async (config: PersistedAppLockConfig) => {
+    const electron = appLockElectron();
+    if (!electron || !(await isAppLockSupported())) {
+        throw new Error("App lock is not supported");
+    }
+
+    await electron.saveAppLockConfigInSafeStorage({
+        enabled: config.enabled,
+        lockType: config.lockType,
+        autoLockTimeMs: clampNonNegativeInt(config.autoLockTimeMs),
+    });
+};
+
+const clearPersistedAppLockConfig = async () => {
+    const electron = appLockElectron();
+    if (!electron) {
+        throw new Error("App lock is not supported");
+    }
+
+    await electron.clearAppLockConfigFromSafeStorage();
 };
 
 /**
@@ -342,10 +378,12 @@ const readPersistedAppLockConfig = (): PersistedAppLockConfig => {
 const setSnapshotFromPersistedConfig = (
     config: PersistedAppLockConfig,
     isLocked: boolean,
+    supported = true,
 ) => {
     const snapshot = appLockState().snapshot;
     setSnapshot({
         ...snapshot,
+        supported,
         enabled: config.enabled,
         lockType: config.lockType,
         lockScreenMode: "lock",
@@ -405,24 +443,30 @@ const withUnlockAttemptLock = async <T>(fn: () => Promise<T>) => {
 // -- Public API --
 
 /**
- * Initialize app lock state from localStorage on cold start.
+ * Initialize app lock state from persistent storage on cold start.
  *
- * Reads localStorage synchronously so the overlay can render immediately
- * without a flash of unlocked content. On desktop startup, it locks
- * pessimistically while safe-storage hydration is in flight.
+ * On desktop, this restores the config from Electron safe storage before
+ * gating rendering, then locks pessimistically while session hydration is in
+ * flight.
  *
- * After the synchronous snapshot, asynchronously restores the brute-force
+ * After the initial snapshot, asynchronously restores the brute-force
  * attempt count and cooldown expiry from KV DB so that a page refresh cannot
  * bypass the cooldown.
  */
-export const initAppLock = () => {
-    const config = readPersistedAppLockConfig();
+export const initAppLock = async () => {
+    if (!(await isAppLockSupported())) {
+        setSnapshot(createDefaultState());
+        stopBruteForceStateHydration();
+        return;
+    }
+
+    const config = await readPersistedAppLockConfig();
     const hasSession = haveMasterKeyInSession();
 
     // On desktop, lock pessimistically while safe-storage hydration is in flight.
     const isLocked = config.enabled && (hasSession || !!globalThis.electron);
 
-    setSnapshotFromPersistedConfig(config, isLocked);
+    setSnapshotFromPersistedConfig(config, isLocked, true);
 };
 
 /**
@@ -536,6 +580,8 @@ const resolveDeviceLockCapability = async (): Promise<DeviceLockCapability> => {
  * not enrolled).
  */
 export const shouldShowDeviceLockOption = async () => {
+    if (!appLockSnapshot().supported) return false;
+
     const capability = await nativeDeviceLockCapability();
     if (capability.available) return true;
 
@@ -605,15 +651,21 @@ export const cancelReauthentication = () => {
  *
  * Call this after desktop safe-storage restore to prevent auto-login bypass.
  */
-export const refreshAppLockStateFromSession = () => {
-    const config = readPersistedAppLockConfig();
+export const refreshAppLockStateFromSession = async () => {
+    if (!(await isAppLockSupported())) {
+        setSnapshot(createDefaultState());
+        stopBruteForceStateHydration();
+        return;
+    }
+
+    const config = await readPersistedAppLockConfig();
     const shouldSuppressLockForTrustedReload =
         consumeAppLockRefreshSuppressionFromSession();
     const isLocked =
         config.enabled &&
         haveMasterKeyInSession() &&
         !shouldSuppressLockForTrustedReload;
-    setSnapshotFromPersistedConfig(config, isLocked);
+    setSnapshotFromPersistedConfig(config, isLocked, true);
 };
 
 /**
@@ -638,6 +690,10 @@ const setupPassphraseLock = async (
     lockType: Extract<AppLockState["lockType"], "pin" | "password">,
     input: string,
 ) => {
+    if (!(await isAppLockSupported())) {
+        throw new Error("App lock is not supported");
+    }
+
     const derived = await deriveInteractiveKey(input);
     await Promise.all([
         setKV(kvKeyHash, derived.key),
@@ -647,10 +703,12 @@ const setupPassphraseLock = async (
         resetBruteForceState(),
     ]);
 
-    localStorage.setItem(lsKeyAppLockMethod, lockType);
-    localStorage.setItem(lsKeyEnabled, "true");
-
     const snapshot = appLockState().snapshot;
+    await savePersistedAppLockConfig({
+        enabled: true,
+        lockType,
+        autoLockTimeMs: snapshot.autoLockTimeMs,
+    });
     setSnapshot({
         ...snapshot,
         enabled: true,
@@ -675,6 +733,10 @@ export const setupPassword = async (password: string) =>
  * Set up native device lock authentication for app lock (macOS only).
  */
 export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
+    if (!(await isAppLockSupported())) {
+        return { status: "failed", reason: "unknown" };
+    }
+
     // Resolve whether native device lock is currently usable in this environment.
     // Flow: resolveDeviceLockCapability() -> nativeDeviceLockCapability() ->
     // globalThis.electron.getNativeDeviceLockCapability().
@@ -703,12 +765,13 @@ export const setupDeviceLock = async (): Promise<SetupDeviceLockResult> => {
         // Reset brute-force lockout/cooldown state in KV and in memory.
         await resetBruteForceState();
 
-        // Save the selected app-lock method and enabled state in localStorage.
-        localStorage.setItem(lsKeyAppLockMethod, "device");
-        localStorage.setItem(lsKeyEnabled, "true");
-
         // Update the in-memory app-lock snapshot.
         const snapshot = appLockState().snapshot;
+        await savePersistedAppLockConfig({
+            enabled: true,
+            lockType: "device",
+            autoLockTimeMs: snapshot.autoLockTimeMs,
+        });
         setSnapshot({
             ...snapshot,
             enabled: true,
@@ -952,13 +1015,13 @@ export const lock = (
 /**
  * Clear all app lock data on logout.
  *
- * Removes all localStorage and KV DB keys, and resets in-memory state to
+ * Removes all persisted config and KV DB keys, and resets in-memory state to
  * defaults.
  */
 export const logoutAppLock = async () => {
-    localStorage.removeItem(lsKeyEnabled);
-    localStorage.removeItem(lsKeyAppLockMethod);
-    localStorage.removeItem(lsKeyAutoLockTimeMs);
+    if (appLockElectron()) {
+        await clearPersistedAppLockConfig();
+    }
 
     await Promise.all([
         clearPassphraseMaterial(),
@@ -974,10 +1037,18 @@ export const logoutAppLock = async () => {
 /**
  * Update the auto-lock delay.
  */
-export const setAutoLockTime = (ms: number) => {
+export const setAutoLockTime = async (ms: number) => {
+    if (!(await isAppLockSupported())) {
+        throw new Error("App lock is not supported");
+    }
+
     const autoLockTimeMs = clampNonNegativeInt(ms);
-    localStorage.setItem(lsKeyAutoLockTimeMs, String(autoLockTimeMs));
     const snapshot = appLockState().snapshot;
+    await savePersistedAppLockConfig({
+        enabled: snapshot.enabled,
+        lockType: snapshot.lockType,
+        autoLockTimeMs,
+    });
     setSnapshot({ ...snapshot, autoLockTimeMs });
 };
 
@@ -985,19 +1056,25 @@ export const setAutoLockTime = (ms: number) => {
  * Disable app lock entirely.
  *
  * Clears all stored credentials from KV DB, resets attempts and cooldown, and
- * updates localStorage and in-memory state.
+ * updates persisted config and in-memory state.
  */
 export const disableAppLock = async () => {
+    if (!(await isAppLockSupported())) {
+        throw new Error("App lock is not supported");
+    }
+
     await Promise.all([
         clearPassphraseMaterial(),
         removeKV(kvKeyInvalidAttempts),
         removeKV(kvKeyCooldownExpiresAt),
     ]);
 
-    localStorage.setItem(lsKeyEnabled, "false");
-    localStorage.removeItem(lsKeyAppLockMethod);
-
     const snapshot = appLockState().snapshot;
+    await savePersistedAppLockConfig({
+        enabled: false,
+        lockType: "none",
+        autoLockTimeMs: snapshot.autoLockTimeMs,
+    });
     setSnapshot({
         ...snapshot,
         enabled: false,

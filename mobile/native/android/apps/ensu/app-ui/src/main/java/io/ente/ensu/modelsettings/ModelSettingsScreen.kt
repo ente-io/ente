@@ -45,10 +45,10 @@ fun ModelSettingsScreen(
 
     val suggestedModels = listOf(
         SuggestedModel(
-            title = "Qwen3-VL 2B Instruct (Q4_K_M)",
+            title = "Qwen 3.5 2B (Q8_0)",
             subtitle = "Requires mmproj",
-            url = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3-VL-2B-Instruct-Q4_K_M.gguf",
-            mmproj = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-qwen3-vl-2b.gguf"
+            url = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+            mmproj = "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
         ),
         SuggestedModel(
             title = "LFM 2.5 1.2B Instruct (Q4_0)",
@@ -243,6 +243,6 @@ private data class SuggestedModel(
     val mmproj: String?
 )
 
-private const val DEFAULT_MODEL_NAME = "LFM 2.5 VL 1.6B (Q4_0)"
+private const val DEFAULT_MODEL_NAME = "Qwen 3.5 2B (Q8_0)"
 private const val DEFAULT_MODEL_URL =
-    "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
+    "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true"

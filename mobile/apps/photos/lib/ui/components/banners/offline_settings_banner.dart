@@ -44,7 +44,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
     return GestureDetector(
       onTap: widget.onGetStarted,
       child: Container(
-        height: 175,
+        constraints: const BoxConstraints(minHeight: 190),
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -73,12 +73,9 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 235),
-                          child: Text(
-                            l10n.offlineSettingsBannerTitle,
-                            style: titleStyle,
-                          ),
+                        child: Text(
+                          l10n.offlineSettingsBannerTitle,
+                          style: titleStyle,
                         ),
                       ),
                       GestureDetector(
@@ -112,18 +109,15 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 40),
+                  BannerActionButton(
+                    label: l10n.getStarted,
+                    onTap: widget.onGetStarted,
+                    variant: BannerActionButtonVariant.primary,
+                    stickTagToLightTheme: true,
+                    showTag: true,
+                  ),
                 ],
-              ),
-            ),
-            Positioned(
-              left: 16,
-              bottom: 16,
-              child: BannerActionButton(
-                label: l10n.getStarted,
-                onTap: widget.onGetStarted,
-                variant: BannerActionButtonVariant.primary,
-                stickTagToLightTheme: true,
-                showTag: true,
               ),
             ),
             Positioned(
@@ -132,7 +126,7 @@ class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
               child: IgnorePointer(
                 child: Image.asset(
                   "assets/ducky_settings.png",
-                  height: 100,
+                  height: 110,
                   fit: BoxFit.contain,
                 ),
               ),
