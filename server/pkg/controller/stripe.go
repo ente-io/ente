@@ -451,12 +451,12 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 	}
-	isSEPA := isSEPASubscription(stripeSubscription)
+	defaultPaymentMethodType := getSubscriptionPaymentMethodType(stripeSubscription)
 	var paymentBehavior stripe.SubscriptionPaymentBehavior
-	if isSEPA {
-		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
-	} else {
+	if supportsPendingSubscriptionUpdate(defaultPaymentMethodType) {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
+	} else {
+		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
 	}
 	params := stripe.SubscriptionParams{
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionProrationBehaviorAlwaysInvoice)),
@@ -480,18 +480,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	if isSEPA {
-		if newStripeSubscription.Status == stripe.SubscriptionStatusPastDue {
-			if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresAction {
-				return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
-			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
-				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
-			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
-				return ente.SubscriptionUpdateResponse{Status: "success"}, nil
-			}
-			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
-		}
-	} else {
+	if paymentBehavior == stripe.SubscriptionPaymentBehaviorPendingIfIncomplete {
 		if newStripeSubscription.PendingUpdate != nil {
 			switch newStripeSubscription.LatestInvoice.PaymentIntent.Status {
 			case stripe.PaymentIntentStatusRequiresAction:
@@ -502,6 +491,15 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
 			}
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
+		}
+	} else if newStripeSubscription.LatestInvoice != nil && newStripeSubscription.LatestInvoice.PaymentIntent != nil {
+		switch newStripeSubscription.LatestInvoice.PaymentIntent.Status {
+		case stripe.PaymentIntentStatusRequiresAction:
+			return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
+		case stripe.PaymentIntentStatusRequiresPaymentMethod:
+			return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
+		case stripe.PaymentIntentStatusProcessing:
+			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
 		}
 	}
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
@@ -737,13 +735,19 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 }
 
 func isSEPASubscription(stripeSubscription stripe.Subscription) bool {
-	isSEPA := false
-	if stripeSubscription.DefaultPaymentMethod != nil {
-		isSEPA = stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
-	} else {
+	return getSubscriptionPaymentMethodType(stripeSubscription) == stripe.PaymentMethodTypeSepaDebit
+}
+
+func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) stripe.PaymentMethodType {
+	if stripeSubscription.DefaultPaymentMethod == nil {
 		log.Info("No default payment method found")
+		return ""
 	}
-	return isSEPA
+	return stripeSubscription.DefaultPaymentMethod.Type
+}
+
+func supportsPendingSubscriptionUpdate(paymentMethodType stripe.PaymentMethodType) bool {
+	return paymentMethodType == stripe.PaymentMethodTypeCard || paymentMethodType == stripe.PaymentMethodType("link")
 }
 
 // handleStripeError processes Stripe errors, sends Discord alerts for invalid_request_error,
