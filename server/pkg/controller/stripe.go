@@ -566,6 +566,7 @@ func (c *StripeController) getStripeSubscriptionWithPaymentMethod(subscription e
 	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
 	params := &stripe.SubscriptionParams{}
 	params.AddExpand("default_payment_method")
+	params.AddExpand("default_source")
 	params.AddExpand("customer.invoice_settings.default_payment_method")
 	params.AddExpand("customer.default_source")
 	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, params)
