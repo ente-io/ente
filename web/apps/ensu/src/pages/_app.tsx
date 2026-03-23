@@ -1,7 +1,6 @@
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
-import { accountLogout } from "ente-accounts/services/logout";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
 import {
@@ -21,6 +20,7 @@ import { logStartupBanner } from "ente-base/log-web";
 import "katex/dist/katex.min.css";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { ensuLogout } from "services/logout";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -68,7 +68,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const logout = useCallback(() => {
-        void accountLogout().then(() => window.location.replace("/"));
+        void ensuLogout();
     }, []);
 
     const baseContext = useMemo(

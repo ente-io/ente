@@ -196,11 +196,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     final String stateChangeReason = 'app -> $state';
     final wasForeground = AppLifecycleService.instance.isForeground;
     if (state == AppLifecycleState.resumed) {
+      final lastAppOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
       AppLifecycleService.instance
           .onAppInForeground(stateChangeReason + ': sync now');
       if (!wasForeground) {
         unawaited(UploadBackgroundCoordinator.instance.onAppForeground());
       }
+      unawaited(_reloadCachesUpdatedInBackground(lastAppOpenTime));
       SyncService.instance.sync();
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
@@ -208,5 +210,25 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         unawaited(UploadBackgroundCoordinator.instance.onAppBackground());
       }
     }
+  }
+
+  Future<void> _reloadCachesUpdatedInBackground(
+    int lastAppOpenTimeInMicroseconds,
+  ) async {
+    await ServiceLocator.instance.prefs.reload();
+
+    final futures = <Future<void>>[];
+    if (magicCacheService.lastMagicCacheUpdateTimeInMicroseconds >
+        lastAppOpenTimeInMicroseconds) {
+      futures.add(magicCacheService.refreshCache());
+    }
+    if (memoriesCacheService.lastMemoriesCacheUpdateTime >
+        lastAppOpenTimeInMicroseconds) {
+      futures.add(memoriesCacheService.refreshCache());
+    }
+    if (futures.isEmpty) {
+      return;
+    }
+    await Future.wait(futures);
   }
 }

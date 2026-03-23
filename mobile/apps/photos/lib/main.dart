@@ -36,6 +36,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
+import 'package:photos/services/machine_learning/compute_controller.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
@@ -121,8 +122,27 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(SemanticSearchService.instance.init());
+      unawaited(_warmForegroundDeferredServices());
+    });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmForegroundDeferredServices() async {
+  try {
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
+  } catch (e, s) {
+    _logger.warning("Deferred MemoryLaneService warm failed", e, s);
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -239,6 +259,7 @@ Future<void> _runMinimallyWithHandoff(
   await _ensureRustInitialized(via: 'workmanager:$taskId');
 
   await ensureServiceLocatorBootstrap(prefs: prefs);
+  final controller = computeController;
 
   AppLifecycleService.instance.init(prefs);
   AppLifecycleService.instance.onAppInBackground(
@@ -277,6 +298,8 @@ Future<void> _runMinimallyWithHandoff(
   _logger.info("[BG TASK] home widget sync");
   await _homeWidgetSync(true);
 
+  await _runBackgroundMLIfEligible(prefs, controller);
+
   _logger.info("[BG TASK] smart albums sync");
   await smartAlbumsService.syncSmartAlbums();
 
@@ -313,6 +336,9 @@ Future<void> _runMinimallyLegacy(
       NetworkClient.instance.getDio(),
       packageInfo,
     );
+    // Initialize early so thermal/battery listeners can warm up while the
+    // rest of background services are being initialized.
+    final controller = computeController;
 
     _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
@@ -341,12 +367,42 @@ Future<void> _runMinimallyLegacy(
     _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
+    await _runBackgroundMLIfEligible(prefs, controller);
+
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
     _logger.info("[BG TASK] $taskId completed");
   } catch (e, s) {
     _logger.severe("[BG TASK] $taskId error", e, s);
+  }
+}
+
+Future<void> _runBackgroundMLIfEligible(
+  SharedPreferences prefs,
+  ComputeController controller,
+) async {
+  if (!flagService.enableMLInBackground || !hasGrantedMLConsent) {
+    return;
+  }
+
+  await controller.init();
+  final canRunML = controller.requestCompute(ml: true);
+  if (!canRunML) {
+    _logger.info("[BG TASK] skipping ML, compute requirements not satisfied");
+    return;
+  }
+
+  bool mlRunStarted = false;
+  try {
+    await MLService.instance.init();
+    await PersonService.init(entityService, MLDataDB.instance, prefs);
+    mlRunStarted = true;
+    await MLService.instance.runAllML(force: false);
+  } finally {
+    if (!mlRunStarted) {
+      controller.releaseCompute(ml: true);
+    }
   }
 }
 
@@ -375,7 +431,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
-    await NotificationService.instance.initializeForBackground();
+    if (isBackground) {
+      await NotificationService.instance.initializeForBackground();
+    }
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -450,17 +508,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       PushService.instance.init().ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await MemoryLaneService.instance.init();
-    if (flagService.facesTimeline) {
-      MemoryLaneService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Memory Lane disabled via feature flag");
-    }
+    PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PersonService.instance.refreshPersonCache();
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();

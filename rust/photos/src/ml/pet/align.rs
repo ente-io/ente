@@ -8,7 +8,6 @@ use crate::ml::{
     types::{DecodedImage, PetAlignmentResult, PetFaceDetection, PetFaceResult, to_face_id},
 };
 
-
 const PET_FACE_CROP_SIZE: u32 = 224;
 /// Minimum eye distance in pixels below which alignment is skipped.
 const MIN_EYE_DISTANCE: f32 = 5.0;
@@ -103,18 +102,15 @@ pub fn run_pet_face_alignment(
             let local_cx = (box_x1 + box_x2) as f64 / 2.0 - region_x1 as f64;
             let local_cy = (box_y1 + box_y2) as f64 / 2.0 - region_y1 as f64;
 
-            let rotated = rotate_around_center(
-                &region,
-                angle_rad as f64,
-                local_cx,
-                local_cy,
-            );
+            let rotated = rotate_around_center(&region, angle_rad as f64, local_cx, local_cy);
 
             // Crop coordinates relative to the region
             let nx1 = (box_x1 as f32 - bw * CROP_EXPAND - region_x1 as f32).max(0.0) as u32;
             let ny1 = (box_y1 as f32 - bh * CROP_EXPAND - region_y1 as f32).max(0.0) as u32;
-            let nx2 = (box_x2 as f32 + bw * CROP_EXPAND - region_x1 as f32).min(region_w as f32) as u32;
-            let ny2 = (box_y2 as f32 + bh * CROP_EXPAND - region_y1 as f32).min(region_h as f32) as u32;
+            let nx2 =
+                (box_x2 as f32 + bw * CROP_EXPAND - region_x1 as f32).min(region_w as f32) as u32;
+            let ny2 =
+                (box_y2 as f32 + bh * CROP_EXPAND - region_y1 as f32).min(region_h as f32) as u32;
             let crop_w = nx2.saturating_sub(nx1);
             let crop_h = ny2.saturating_sub(ny1);
             if crop_w == 0 || crop_h == 0 {
@@ -155,12 +151,7 @@ pub fn run_pet_face_alignment(
 
 /// Rotate an image around a center point using bilinear interpolation
 /// with BORDER_REPLICATE behaviour (clamp to nearest edge pixel).
-fn rotate_around_center(
-    source: &RgbImage,
-    angle_rad: f64,
-    cx: f64,
-    cy: f64,
-) -> RgbImage {
+fn rotate_around_center(source: &RgbImage, angle_rad: f64, cx: f64, cy: f64) -> RgbImage {
     let w = source.width();
     let h = source.height();
     let cos_a = angle_rad.cos();
@@ -214,13 +205,7 @@ fn rotate_around_center(
 }
 
 /// Crop a region from an RGB image and resize to 224×224 using bilinear interpolation.
-fn crop_and_resize_rgb(
-    source: &RgbImage,
-    x: u32,
-    y: u32,
-    w: u32,
-    h: u32,
-) -> MlResult<RgbImage> {
+fn crop_and_resize_rgb(source: &RgbImage, x: u32, y: u32, w: u32, h: u32) -> MlResult<RgbImage> {
     // Extract crop bytes
     let src_w = source.width();
     let src_h = source.height();
@@ -271,7 +256,8 @@ fn extract_rgb_region(
         let end = start + (w as usize) * 3;
         if end > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
-                "region row {row} out of bounds (end={end}, len={})", decoded.rgb.len()
+                "region row {row} out of bounds (end={end}, len={})",
+                decoded.rgb.len()
             )));
         }
         buf.extend_from_slice(&decoded.rgb[start..end]);
@@ -296,7 +282,8 @@ fn crop_and_resize_decoded(
         let end = start + (w as usize) * 3;
         if end > decoded.rgb.len() {
             return Err(MlError::Preprocess(format!(
-                "crop row {row} out of bounds (end={end}, len={})", decoded.rgb.len()
+                "crop row {row} out of bounds (end={end}, len={})",
+                decoded.rgb.len()
             )));
         }
         crop_bytes.extend_from_slice(&decoded.rgb[start..end]);

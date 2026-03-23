@@ -1,6 +1,6 @@
 use ort::{
-    CPUExecutionProvider, ExecutionProviderDispatch, GraphOptimizationLevel, Session,
-    TensorElementType, Tensor, ValueType, XNNPACKExecutionProvider,
+    CPUExecutionProvider, ExecutionProviderDispatch, GraphOptimizationLevel, Session, Tensor,
+    TensorElementType, ValueType, XNNPACKExecutionProvider,
 };
 
 // Temporarily disabled on Rust side to avoid iOS duplicate ObjC class collisions
@@ -83,7 +83,11 @@ fn providers_for_policy(
         if include_xnnpack && policy.prefer_xnnpack {
             providers.push(XNNPACKExecutionProvider::default().build());
         }
-        providers.push(CPUExecutionProvider::default().with_arena_allocator().build());
+        providers.push(
+            CPUExecutionProvider::default()
+                .with_arena_allocator()
+                .build(),
+        );
     }
 
     providers
@@ -145,7 +149,10 @@ pub fn run_f32<const N: usize>(
     } else {
         let tensor = output.try_extract_tensor::<half::f16>()?;
         let shape = tensor.shape().iter().map(|d| *d as i64).collect::<Vec<_>>();
-        let data = tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>();
+        let data = tensor
+            .iter()
+            .map(|v: &half::f16| v.to_f32())
+            .collect::<Vec<_>>();
         Ok((shape, data))
     }
 }
@@ -171,7 +178,10 @@ pub fn run_f32_data<const N: usize>(
         Ok(tensor.iter().copied().collect::<Vec<_>>())
     } else {
         let tensor = output.try_extract_tensor::<half::f16>()?;
-        Ok(tensor.iter().map(|v: &half::f16| v.to_f32()).collect::<Vec<_>>())
+        Ok(tensor
+            .iter()
+            .map(|v: &half::f16| v.to_f32())
+            .collect::<Vec<_>>())
     }
 }
 

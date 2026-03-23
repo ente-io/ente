@@ -1,10 +1,11 @@
 name: "Lint (mobile packages)"
 
 on:
-    # Run when mobile/packages changes
+    # Run when mobile/packages or shared photos Rust changes
     pull_request:
         paths:
             - "mobile/packages/**"
+            - "rust/photos/**"
             - ".github/workflows/mobile-packages-lint.yml"
             - "mobile/analysis_options.yaml"
     # Allow manual trigger for testing
@@ -44,6 +45,7 @@ jobs:
                         - 'mobile/packages/rust/**/Cargo.lock'
                         - 'mobile/apps/photos/rust/**/*.rs'
                         - 'mobile/apps/photos/rust/**/Cargo.toml'
+                        - 'rust/photos/**'
                         - 'rust/core/**/*.rs'
                       workflow:
                         - '.github/workflows/mobile-packages-lint.yml'
