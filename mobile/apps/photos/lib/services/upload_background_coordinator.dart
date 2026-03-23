@@ -62,26 +62,31 @@ class UploadBackgroundCoordinator {
       return;
     }
 
-    final cutoffMicros = DateTime.now().microsecondsSinceEpoch;
-
-    _logger.info("Finishing iOS upload grace window and reconciling uploads");
-    await GraceWindowIos.endGraceWindow();
-    final didExpireGraceWindow = await GraceWindowIos.consumeExpiredState();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyIOSUploadGraceActive);
-    if (didExpireGraceWindow) {
-      _logger.info(
-        "Grace window expiration was observed natively before foreground recovery",
-      );
-      await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-        ProcessType.foreground.toString(),
-        cutoffMicros,
-      );
+    final graceWasActive = prefs.getBool(_keyIOSUploadGraceActive) ?? false;
+
+    if (graceWasActive) {
+      final cutoffMicros = DateTime.now().microsecondsSinceEpoch;
+
+      _logger.info("Finishing iOS upload grace window and reconciling uploads");
+      await GraceWindowIos.endGraceWindow();
+      final didExpireGraceWindow = await GraceWindowIos.consumeExpiredState();
+      await prefs.remove(_keyIOSUploadGraceActive);
+      if (didExpireGraceWindow) {
+        _logger.info(
+          "Grace window expiration was observed natively before foreground recovery",
+        );
+        await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
+          ProcessType.foreground.toString(),
+          cutoffMicros,
+        );
+      }
+      await FileUploader.instance.reconcileAfterBackground();
     }
+
     await BgTaskUtils.cancelIOSBackgroundProcessingTask(
       source: "appForeground",
     );
-    await FileUploader.instance.reconcileAfterBackground();
   }
 
   /// Best-effort same-process expiration detection via a pending MethodChannel

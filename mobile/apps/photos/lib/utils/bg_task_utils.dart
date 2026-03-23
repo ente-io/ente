@@ -20,7 +20,9 @@ void callbackDispatcher() {
     Future<bool> result = Future.error("Task didn't run");
     final prefs = await SharedPreferences.getInstance();
 
-    if (Platform.isIOS && FlagService.isInternalUserEnabledInPrefs(prefs)) {
+    if (Platform.isIOS &&
+        (FlagService.isInternalUserEnabledInPrefs(prefs) ||
+            taskName == BgTaskUtils.iOSBackgroundProcessingTask)) {
       return _runHandoffCallbackTask(taskName, prefs);
     }
 
@@ -63,6 +65,14 @@ Future<bool> _runHandoffCallbackTask(
   final shouldRescheduleProcessingTask =
       Platform.isIOS && taskName == BgTaskUtils.iOSBackgroundProcessingTask;
   bool didHandleExpiration = false;
+  Future<void> maybeReschedule(String source) async {
+    if (shouldRescheduleProcessingTask && !didHandleExpiration) {
+      await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
+        source: "callbackDispatcher:$taskName:$source",
+      );
+    }
+  }
+
   await WorkmanagerApple.setTaskExpirationHandler((expiredTaskName) async {
     if (expiredTaskName != taskName || didHandleExpiration) {
       return;
@@ -90,19 +100,11 @@ Future<bool> _runHandoffCallbackTask(
               if (!didHandleExpiration) {
                 await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
               }
-              if (shouldRescheduleProcessingTask && !didHandleExpiration) {
-                await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
-                  source: "callbackDispatcher:$taskName:timeout",
-                );
-              }
+              await maybeReschedule("timeout");
               return true;
             },
           );
-    if (shouldRescheduleProcessingTask && !didHandleExpiration) {
-      await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
-        source: "callbackDispatcher:$taskName:success",
-      );
-    }
+    await maybeReschedule("success");
     BgTaskUtils.$.info('Task run completed ($result) $tlog');
     return result;
   } catch (e) {
@@ -110,11 +112,7 @@ Future<bool> _runHandoffCallbackTask(
     if (!didHandleExpiration) {
       await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
     }
-    if (shouldRescheduleProcessingTask && !didHandleExpiration) {
-      await BgTaskUtils.handleIOSBackgroundProcessingTaskCompletion(
-        source: "callbackDispatcher:$taskName:error",
-      );
-    }
+    await maybeReschedule("error");
     return Platform.isIOS ? false : true;
   } finally {
     await WorkmanagerApple.clearTaskExpirationHandler();

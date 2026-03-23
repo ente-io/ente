@@ -116,5 +116,36 @@ void main() {
         isNull,
       );
     });
+
+    test("does not clear a newer lease after reload", () async {
+      final attempt = await helper.prepareRun(
+        trigger: BackgroundTrigger.remotePush,
+        taskId: "remote_push_sync",
+        budget: const Duration(seconds: 1),
+        pushPayload: const {"action": "sync"},
+      );
+
+      expect(attempt.shouldRun, isTrue);
+      final replacementStartedAt = DateTime.now().microsecondsSinceEpoch;
+      await prefs.setString(
+        BackgroundRunHelper.keyActiveBackgroundRunToken,
+        "replacement-run",
+      );
+      await prefs.setInt(
+        BackgroundRunHelper.keyActiveBackgroundRunStartedAt,
+        replacementStartedAt,
+      );
+
+      await helper.finishRun(attempt);
+
+      expect(
+        prefs.getString(BackgroundRunHelper.keyActiveBackgroundRunToken),
+        "replacement-run",
+      );
+      expect(
+        prefs.getInt(BackgroundRunHelper.keyActiveBackgroundRunStartedAt),
+        replacementStartedAt,
+      );
+    });
   });
 }

@@ -112,6 +112,7 @@ class BackgroundRunHelper {
       return;
     }
 
+    await attempt.prefs.reload();
     if (attempt.prefs.getString(keyActiveBackgroundRunToken) != leaseToken) {
       return;
     }
