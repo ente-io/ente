@@ -106,8 +106,27 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(SemanticSearchService.instance.init());
+      unawaited(_warmForegroundDeferredServices());
+    });
     unawaited(_scheduleFGSync('appStart in FG'));
   });
+}
+
+Future<void> _warmForegroundDeferredServices() async {
+  try {
+    await MemoryLaneService.instance.init();
+    if (flagService.facesTimeline) {
+      MemoryLaneService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Memory Lane disabled via feature flag");
+    }
+  } catch (e, s) {
+    _logger.warning("Deferred MemoryLaneService warm failed", e, s);
+  }
 }
 
 ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
@@ -255,7 +274,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
-    await NotificationService.instance.initializeForBackground();
+    if (isBackground) {
+      await NotificationService.instance.initializeForBackground();
+    }
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -334,17 +355,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await MemoryLaneService.instance.init();
-    if (flagService.facesTimeline) {
-      MemoryLaneService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Memory Lane disabled via feature flag");
-    }
+    PersonService.init(entityService, MLDataDB.instance, preferences);
+    await PersonService.instance.refreshPersonCache();
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
