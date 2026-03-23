@@ -21,7 +21,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -655,7 +654,7 @@ class MLService {
 
       // Pet results locally — delete stale rows before writing so
       // re-indexing with fewer detections doesn't leave old data behind.
-      final rustPets = result.petFaces != null || result.petBodies != null;
+      final rustPets = result.petFaces != null;
       if (rustPets) {
         await mlDataDB.deletePetDataForFiles([result.fileId]);
         if (result.petFaces != null && result.petFaces!.isNotEmpty) {
@@ -681,37 +680,6 @@ class MLService {
           // No pet faces detected; insert empty marker so the file is
           // considered pet-indexed (mirrors Face.empty for human faces).
           await mlDataDB.bulkInsertPetFaces([DBPetFace.empty(result.fileId)]);
-        }
-
-        if (result.petBodies != null && result.petBodies!.isNotEmpty) {
-          final dbPetBodies = result.petBodies!.map((obj) {
-            final detectionObj = FaceDetectionRelative(
-              score: obj.score,
-              box: [
-                obj.boxXyxy[0],
-                obj.boxXyxy[1],
-                obj.boxXyxy[2],
-                obj.boxXyxy[3],
-              ],
-              allKeypoints: const [],
-            );
-            return DBPetBody(
-              fileId: result.fileId,
-              petBodyId: obj.petBodyId,
-              detection: jsonEncode(detectionObj.toJson()),
-              bodyVectorId: null,
-              species: obj.cocoClass == 15 ? 1 : 0,
-              score: obj.score,
-              imageHeight: result.decodedImageSize.height,
-              imageWidth: result.decodedImageSize.width,
-              mlVersion: petMlVersion,
-            );
-          }).toList();
-          await mlDataDB.bulkInsertPetBodies(dbPetBodies);
-          await mlDataDB.storePetBodyEmbeddings(
-            dbPetBodies,
-            result.petBodies!,
-          );
         }
       }
       _logger.info("ML result for fileID ${result.fileId} stored remote+local");

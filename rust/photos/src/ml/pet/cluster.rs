@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 
 use crate::ml::cluster::{
-    agglomerative_precomputed, dot, l2_norm, median_centroid, renumber_labels, unique_cluster_ids,
+    agglomerative_precomputed, dot, median_centroid, renumber_labels, unique_cluster_ids,
 };
 
 // ── Species-specific configuration ──────────────────────────────────────
@@ -81,7 +81,7 @@ impl ClusterConfig {
             min_cluster_size: 2,
             min_samples: 2,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.85,
+            agglomerative_threshold: 0.77,
         }
     }
 
@@ -98,7 +98,7 @@ impl ClusterConfig {
             min_cluster_size: 2,
             min_samples: 2,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.85,
+            agglomerative_threshold: 0.77,
         }
     }
 
@@ -151,7 +151,7 @@ pub struct PetClusterResult {
 
 // ── Core clustering engine ──────────────────────────────────────────────
 
-/// Run the full 3-phase pet clustering pipeline.
+/// Run face-only pet clustering (agglomerative average linkage).
 ///
 /// This is the main entry point called from the API layer.
 pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) -> PetClusterResult {
@@ -160,31 +160,10 @@ pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) ->
         return PetClusterResult::default();
     }
 
-    // Build index arrays for fast lookup
     let has_face: Vec<bool> = inputs.iter().map(|i| i.has_face()).collect();
-    let has_body: Vec<bool> = inputs.iter().map(|i| i.has_body()).collect();
 
-    // Phase 1: Face-based clustering
+    // Face-based agglomerative clustering
     let mut labels = phase1_face_cluster(inputs, &has_face, config);
-
-    // Compute face centroids for phase 2
-    let face_centroids = compute_face_centroids(inputs, &labels, &has_face);
-
-    // Phase 2: Body rescue
-    phase2_body_rescue(
-        inputs,
-        &mut labels,
-        &has_face,
-        &has_body,
-        &face_centroids,
-        config,
-    );
-
-    // Phase 2b: Body-only clustering
-    phase2b_body_cluster(inputs, &mut labels, &has_body, config);
-
-    // Phase 3: Cross-cluster merge
-    phase3_cross_merge(inputs, &mut labels, &has_face, &has_body, config);
 
     // Renumber labels to contiguous 0..K-1
     renumber_labels(&mut labels);
@@ -193,12 +172,12 @@ pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) ->
     build_result(inputs, &labels, &has_face)
 }
 
-/// Run incremental clustering: assign new inputs to existing clusters,
-/// then cluster the remainder among themselves.
+/// Run incremental face-only clustering: assign new inputs to existing
+/// face clusters by centroid similarity, then cluster the remainder.
 pub fn run_pet_clustering_incremental(
     new_inputs: &[PetClusterInput],
     existing_centroids_face: &HashMap<String, Vec<f32>>,
-    existing_centroids_body: &HashMap<String, Vec<f32>>,
+    _existing_centroids_body: &HashMap<String, Vec<f32>>,
     config: &ClusterConfig,
 ) -> PetClusterResult {
     let n = new_inputs.len();
@@ -209,70 +188,29 @@ pub fn run_pet_clustering_incremental(
     let mut labels = vec![-1i32; n];
     let mut cluster_name_map: HashMap<i32, String> = HashMap::new();
 
-    // Step 1: Try to assign each new input to an existing cluster
-    let fw = config.face_weight;
-    let bw = 1.0 - fw;
-    let threshold = config.body_rescue_threshold;
-
-    let existing_ids: Vec<&String> = existing_centroids_face
-        .keys()
-        .chain(existing_centroids_body.keys())
-        .collect::<std::collections::HashSet<_>>()
-        .into_iter()
-        .collect();
+    // Step 1: Try to assign each new face to the closest existing cluster
+    let threshold = config.agglomerative_threshold;
 
     for (i, inp) in new_inputs.iter().enumerate() {
-        let mut best_score = -1.0f32;
+        if !inp.has_face() {
+            continue;
+        }
+
+        let mut best_sim = -1.0f32;
         let mut best_id: Option<&String> = None;
 
-        for cluster_id in &existing_ids {
-            let mut score = 0.0f32;
-            let mut n_modalities = 0u32;
-
-            if inp.has_face()
-                && let Some(centroid) = existing_centroids_face.get(*cluster_id)
-            {
-                let sim = dot(&inp.face_embedding, centroid);
-                score += fw * sim;
-                n_modalities += 1;
-            }
-            if inp.has_body()
-                && let Some(centroid) = existing_centroids_body.get(*cluster_id)
-            {
-                let sim = dot(&inp.body_embedding, centroid);
-                score += bw * sim;
-                n_modalities += 1;
-            }
-
-            if n_modalities == 0 {
-                continue;
-            }
-
-            // If only one modality, use its raw similarity
-            if n_modalities == 1 {
-                score = if inp.has_face() {
-                    existing_centroids_face
-                        .get(*cluster_id)
-                        .map(|c| dot(&inp.face_embedding, c))
-                        .unwrap_or(0.0)
-                } else {
-                    existing_centroids_body
-                        .get(*cluster_id)
-                        .map(|c| dot(&inp.body_embedding, c))
-                        .unwrap_or(0.0)
-                };
-            }
-
-            if score > best_score {
-                best_score = score;
+        for (cluster_id, centroid) in existing_centroids_face {
+            let sim = dot(&inp.face_embedding, centroid);
+            if sim > best_sim {
+                best_sim = sim;
                 best_id = Some(cluster_id);
             }
         }
 
-        if best_score > threshold
+        // Assign if similarity > (1 - threshold), i.e. distance < threshold
+        if best_sim > (1.0 - threshold)
             && let Some(cid) = best_id
         {
-            // Assign a temporary numeric label and record the mapping
             let numeric = cluster_name_map
                 .iter()
                 .find(|(_, v)| *v == cid)
@@ -299,12 +237,10 @@ pub fn run_pet_clustering_incremental(
             unassigned.iter().map(|&i| new_inputs[i].clone()).collect();
         let sub_result = run_pet_clustering(&sub_inputs, config);
 
-        // Merge sub-results back, offset cluster IDs
         let mut next_label = cluster_name_map.keys().copied().max().unwrap_or(-1) + 1;
         for (sub_idx, &global_idx) in unassigned.iter().enumerate() {
             let pet_face_id = &sub_inputs[sub_idx].pet_face_id;
             if let Some(cluster_id) = sub_result.face_to_cluster.get(pet_face_id) {
-                // Find or create numeric label for this cluster
                 let numeric = cluster_name_map
                     .iter()
                     .find(|(_, v)| *v == cluster_id)
@@ -320,7 +256,7 @@ pub fn run_pet_clustering_incremental(
         }
     }
 
-    // Build final result using the name map
+    // Build final result
     let mut result = PetClusterResult::default();
     for (i, inp) in new_inputs.iter().enumerate() {
         if labels[i] >= 0 {
@@ -335,27 +271,19 @@ pub fn run_pet_clustering_incremental(
         }
     }
 
-    // Recompute centroids for all clusters (existing and new). The Dart
-    // caller sends every face as input, so the assignments are comprehensive
-    // and centroids must reflect the current full membership.
+    // Recompute face centroids
     for cluster_id in result.cluster_counts.keys() {
-        let members: Vec<usize> = new_inputs
+        let face_embs: Vec<&Vec<f32>> = new_inputs
             .iter()
-            .enumerate()
-            .filter(|(_, inp)| {
+            .filter(|inp| {
                 result
                     .face_to_cluster
                     .get(&inp.pet_face_id)
                     .map(|c| c == cluster_id)
                     .unwrap_or(false)
+                    && inp.has_face()
             })
-            .map(|(i, _)| i)
-            .collect();
-
-        let face_embs: Vec<&Vec<f32>> = members
-            .iter()
-            .filter(|&&i| new_inputs[i].has_face())
-            .map(|&i| &new_inputs[i].face_embedding)
+            .map(|inp| &inp.face_embedding)
             .collect();
 
         if !face_embs.is_empty() {
@@ -422,282 +350,6 @@ fn phase1_face_cluster(
     }
 
     labels
-}
-
-// ── Phase 2: Body rescue ────────────────────────────────────────────────
-
-fn phase2_body_rescue(
-    inputs: &[PetClusterInput],
-    labels: &mut [i32],
-    has_face: &[bool],
-    has_body: &[bool],
-    face_centroids: &HashMap<i32, Vec<f32>>,
-    config: &ClusterConfig,
-) {
-    // Build per-cluster body embeddings
-    let mut cluster_bodies: HashMap<i32, Vec<usize>> = HashMap::new();
-    for (i, &label) in labels.iter().enumerate() {
-        if label >= 0 && has_body[i] {
-            cluster_bodies.entry(label).or_default().push(i);
-        }
-    }
-
-    let unclustered: Vec<usize> = labels
-        .iter()
-        .enumerate()
-        .filter(|(_, l)| **l == -1)
-        .map(|(i, _)| i)
-        .collect();
-
-    for img_idx in unclustered {
-        if !has_body[img_idx] {
-            continue;
-        }
-
-        let candidate = &inputs[img_idx].body_embedding;
-        let mut best_cluster = -1i32;
-        let mut best_avg_sim = -1.0f32;
-
-        for (&cluster_id, members) in &cluster_bodies {
-            let mut n_above = 0usize;
-            let mut sum_sim = 0.0f32;
-            for &m in members {
-                let sim = dot(candidate, &inputs[m].body_embedding);
-                sum_sim += sim;
-                if sim > config.body_rescue_threshold {
-                    n_above += 1;
-                }
-            }
-
-            let avg_sim = sum_sim / members.len() as f32;
-
-            if n_above >= config.min_body_agreements && avg_sim > best_avg_sim {
-                best_cluster = cluster_id;
-                best_avg_sim = avg_sim;
-            }
-        }
-
-        if best_cluster < 0 {
-            continue;
-        }
-
-        // Face veto check
-        if has_face[img_idx] {
-            let face_emb = &inputs[img_idx].face_embedding;
-            let norm = l2_norm(face_emb);
-            if norm > 0.1
-                && let Some(centroid) = face_centroids.get(&best_cluster)
-            {
-                let face_sim = dot(face_emb, centroid);
-                if face_sim < config.face_veto_threshold {
-                    continue; // Vetoed
-                }
-            }
-        }
-
-        labels[img_idx] = best_cluster;
-        // Update cluster bodies for subsequent rescues
-        cluster_bodies
-            .entry(best_cluster)
-            .or_default()
-            .push(img_idx);
-    }
-}
-
-// ── Phase 2b: Body-only clustering ──────────────────────────────────────
-
-fn phase2b_body_cluster(
-    inputs: &[PetClusterInput],
-    labels: &mut [i32],
-    has_body: &[bool],
-    config: &ClusterConfig,
-) {
-    let still_unclustered: Vec<usize> = labels
-        .iter()
-        .enumerate()
-        .filter(|(i, l)| **l == -1 && has_body[*i])
-        .map(|(i, _)| i)
-        .collect();
-
-    if still_unclustered.len() < config.min_cluster_size {
-        return;
-    }
-
-    let nf = still_unclustered.len();
-
-    // Guard against excessive memory usage on mobile devices.
-    if nf > 5000 {
-        return;
-    }
-
-    let mut dist = vec![0.0f32; nf * nf];
-    for i in 0..nf {
-        for j in (i + 1)..nf {
-            let sim = dot(
-                &inputs[still_unclustered[i]].body_embedding,
-                &inputs[still_unclustered[j]].body_embedding,
-            );
-            let d = (1.0 - sim).clamp(0.0, 2.0);
-            dist[i * nf + j] = d;
-            dist[j * nf + i] = d;
-        }
-    }
-
-    let body_labels = run_cluster(&dist, nf, config);
-
-    let existing_max = labels.iter().copied().max().unwrap_or(-1);
-
-    for (local, &global) in still_unclustered.iter().enumerate() {
-        if body_labels[local] >= 0 {
-            labels[global] = body_labels[local] + existing_max + 1;
-        }
-    }
-}
-
-// ── Phase 3: Cross-cluster merge ────────────────────────────────────────
-
-fn phase3_cross_merge(
-    inputs: &[PetClusterInput],
-    labels: &mut [i32],
-    has_face: &[bool],
-    has_body: &[bool],
-    config: &ClusterConfig,
-) {
-    let unique_clusters = unique_cluster_ids(labels);
-    if unique_clusters.len() < 2 {
-        return;
-    }
-
-    // Build per-cluster body centroids for pre-screening
-    let mut cluster_body_embs: HashMap<i32, Vec<usize>> = HashMap::new();
-    let mut cluster_face_embs: HashMap<i32, Vec<usize>> = HashMap::new();
-    for (i, &label) in labels.iter().enumerate() {
-        if label < 0 {
-            continue;
-        }
-        if has_body[i] {
-            cluster_body_embs.entry(label).or_default().push(i);
-        }
-        if has_face[i] {
-            cluster_face_embs.entry(label).or_default().push(i);
-        }
-    }
-
-    // Body centroids for pre-screening
-    let body_dim = inputs
-        .iter()
-        .find(|i| i.has_body())
-        .map(|i| i.body_embedding.len())
-        .unwrap_or(0);
-    if body_dim == 0 {
-        return;
-    }
-
-    let mut body_centroids: HashMap<i32, Vec<f32>> = HashMap::new();
-    for (&c, members) in &cluster_body_embs {
-        let embs: Vec<&Vec<f32>> = members.iter().map(|&i| &inputs[i].body_embedding).collect();
-        let centroid = median_centroid(&embs, body_dim);
-        body_centroids.insert(c, centroid);
-    }
-
-    let clusters_with_body: Vec<i32> = unique_clusters
-        .iter()
-        .copied()
-        .filter(|c| body_centroids.contains_key(c))
-        .collect();
-
-    if clusters_with_body.len() < 2 {
-        return;
-    }
-
-    let centroid_screen = config.body_merge_threshold * 0.7;
-
-    // Pre-screen candidate pairs
-    let mut candidate_pairs: Vec<(i32, i32)> = Vec::new();
-    for i in 0..clusters_with_body.len() {
-        for j in (i + 1)..clusters_with_body.len() {
-            let c1 = clusters_with_body[i];
-            let c2 = clusters_with_body[j];
-            let sim = dot(&body_centroids[&c1], &body_centroids[&c2]);
-            if sim > centroid_screen {
-                candidate_pairs.push((c1, c2));
-            }
-        }
-    }
-
-    // Evaluate candidate pairs
-    let mut merge_pairs: Vec<(i32, i32, f32)> = Vec::new();
-    for (c1, c2) in candidate_pairs {
-        let b1 = &cluster_body_embs[&c1];
-        let b2 = &cluster_body_embs[&c2];
-
-        let mut sum_sim = 0.0f32;
-        let mut n_above = 0usize;
-        let total = b1.len() * b2.len();
-
-        for &i in b1 {
-            for &j in b2 {
-                let sim = dot(&inputs[i].body_embedding, &inputs[j].body_embedding);
-                sum_sim += sim;
-                if sim > config.body_merge_threshold {
-                    n_above += 1;
-                }
-            }
-        }
-
-        let avg_body_sim = sum_sim / total as f32;
-        let ratio_above = n_above as f32 / total as f32;
-
-        if avg_body_sim < config.body_merge_threshold {
-            continue;
-        }
-        if ratio_above < config.min_body_overlap_ratio {
-            continue;
-        }
-
-        // Face contradiction check
-        let f1 = cluster_face_embs.get(&c1);
-        let f2 = cluster_face_embs.get(&c2);
-        if let (Some(f1m), Some(f2m)) = (f1, f2)
-            && !f1m.is_empty()
-            && !f2m.is_empty()
-        {
-            let mut face_sum = 0.0f32;
-            let face_total = f1m.len() * f2m.len();
-            for &i in f1m {
-                for &j in f2m {
-                    face_sum += dot(&inputs[i].face_embedding, &inputs[j].face_embedding);
-                }
-            }
-            let avg_face = face_sum / face_total as f32;
-            if avg_face < config.face_contradiction_threshold {
-                continue; // Blocked by face contradiction
-            }
-        }
-
-        merge_pairs.push((c1, c2, avg_body_sim));
-    }
-
-    // Sort by body similarity descending
-    merge_pairs.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap_or(std::cmp::Ordering::Equal));
-
-    // Union-find merge
-    let mut parent: HashMap<i32, i32> = unique_clusters.iter().map(|&c| (c, c)).collect();
-
-    for (c1, c2, _) in &merge_pairs {
-        let r1 = uf_find(&mut parent, *c1);
-        let r2 = uf_find(&mut parent, *c2);
-        if r1 != r2 {
-            parent.insert(r2, r1);
-        }
-    }
-
-    // Apply merges
-    for label in labels.iter_mut() {
-        if *label >= 0 {
-            *label = uf_find(&mut parent, *label);
-        }
-    }
 }
 
 // ── Clustering dispatch ──────────────────────────────────────────────────
@@ -948,44 +600,6 @@ fn find_root(parent: &[usize], mut x: usize) -> usize {
 // Helper functions (dot, l2_norm, normalize, median_centroid) imported
 // from crate::ml::cluster
 
-fn compute_face_centroids(
-    inputs: &[PetClusterInput],
-    labels: &[i32],
-    has_face: &[bool],
-) -> HashMap<i32, Vec<f32>> {
-    let dim = inputs
-        .iter()
-        .find(|i| i.has_face())
-        .map(|i| i.face_embedding.len())
-        .unwrap_or(128);
-
-    let mut centroids = HashMap::new();
-    for &c in &unique_cluster_ids(labels) {
-        let face_embs: Vec<&Vec<f32>> = labels
-            .iter()
-            .enumerate()
-            .filter(|(i, l)| **l == c && has_face[*i])
-            .map(|(i, _)| &inputs[i].face_embedding)
-            .collect();
-
-        if !face_embs.is_empty() {
-            centroids.insert(c, median_centroid(&face_embs, dim));
-        } else {
-            // Fallback: use all members (zero-embedding faces included)
-            let all_embs: Vec<&Vec<f32>> = labels
-                .iter()
-                .enumerate()
-                .filter(|(_, l)| **l == c)
-                .map(|(i, _)| &inputs[i].face_embedding)
-                .collect();
-            if !all_embs.is_empty() {
-                centroids.insert(c, median_centroid(&all_embs, dim));
-            }
-        }
-    }
-    centroids
-}
-
 // unique_cluster_ids and renumber_labels imported from crate::ml::cluster
 
 fn build_result(inputs: &[PetClusterInput], labels: &[i32], has_face: &[bool]) -> PetClusterResult {
@@ -1047,27 +661,6 @@ fn build_result(inputs: &[PetClusterInput], labels: &[i32], has_face: &[bool]) -
 }
 
 // ── Union-find helpers ──────────────────────────────────────────────────
-
-fn uf_find(parent: &mut HashMap<i32, i32>, x: i32) -> i32 {
-    let mut r = x;
-    while let Some(&p) = parent.get(&r) {
-        if p == r {
-            break;
-        }
-        r = p;
-    }
-    // Path compression
-    let mut c = x;
-    while c != r {
-        if let Some(&p) = parent.get(&c) {
-            parent.insert(c, r);
-            c = p;
-        } else {
-            break;
-        }
-    }
-    r
-}
 
 fn uf_find_vec(parent: &mut [usize], x: usize) -> usize {
     let mut r = x;
@@ -1213,6 +806,564 @@ mod tests {
         assert_ne!(
             ca1, cb1,
             "group a and group b should be in different clusters"
+        );
+    }
+
+    // ── Body rescue cost/benefit tests ──────────────────────────────────
+    //
+    // KEY INSIGHT: After Phase 1 (agglomerative face clustering), ALL inputs
+    // with face embeddings get a label >= 0 — even singletons. So body rescue
+    // (Phase 2) only helps inputs with NO face embedding at all (label == -1).
+    //
+    // The three body-related phases help in distinct ways:
+    //   Phase 2  (body rescue): assigns no-face images to face-based clusters
+    //   Phase 2b (body-only):   clusters no-face images among themselves
+    //   Phase 3  (cross-merge): merges separate face clusters using body similarity
+
+    /// Strip all body embeddings from inputs to isolate face-only clustering.
+    fn strip_bodies(inputs: &[PetClusterInput]) -> Vec<PetClusterInput> {
+        inputs
+            .iter()
+            .map(|i| PetClusterInput {
+                pet_face_id: i.pet_face_id.clone(),
+                face_embedding: i.face_embedding.clone(),
+                body_embedding: vec![],
+                species: i.species,
+                file_id: i.file_id,
+            })
+            .collect()
+    }
+
+    fn make_input_with_file(
+        face_id: &str,
+        face: Vec<f32>,
+        body: Vec<f32>,
+        species: u8,
+        file_id: i64,
+    ) -> PetClusterInput {
+        PetClusterInput {
+            pet_face_id: face_id.to_string(),
+            face_embedding: face,
+            body_embedding: body,
+            species,
+            file_id,
+        }
+    }
+
+    /// Make a face embedding clustered around a base direction.
+    /// `base_dim` is the dominant dimension, `noise_scale` adds jitter.
+    fn make_face(base_dim: usize, noise_seed: u32) -> Vec<f32> {
+        let mut v = vec![0.0f32; 128];
+        v[base_dim] = 1.0;
+        // Deterministic small perturbation
+        let noise_dim = ((noise_seed * 7 + 3) % 128) as usize;
+        v[noise_dim] += 0.02 * (noise_seed as f32 + 1.0) * 0.1;
+        normalized(v)
+    }
+
+    /// Make a body embedding clustered around a base direction.
+    fn make_body(base_dim: usize, noise_seed: u32) -> Vec<f32> {
+        let mut v = vec![0.0f32; 192];
+        v[base_dim] = 1.0;
+        let noise_dim = ((noise_seed * 11 + 5) % 192) as usize;
+        v[noise_dim] += 0.02 * (noise_seed as f32 + 1.0) * 0.1;
+        normalized(v)
+    }
+
+    // ── Test 1: Body rescue assigns no-face image to face cluster ───────
+
+    #[test]
+    fn test_body_rescue_assigns_faceless_image_to_cluster() {
+        // 3 images with faces + bodies form a cluster in Phase 1.
+        // 1 image has NO face but has a matching body.
+        //
+        // With bodies: body rescue assigns the faceless image to the cluster.
+        // Without bodies: faceless image stays unclustered.
+
+        let config = ClusterConfig::dog();
+        let body_a = make_body(10, 0);
+
+        let inputs = vec![
+            make_input("a1", make_face(0, 0), body_a.clone(), 0),
+            make_input("a2", make_face(0, 1), body_a.clone(), 0),
+            make_input("a3", make_face(0, 2), body_a.clone(), 0),
+            // No face, only body
+            make_input("no_face", vec![], body_a.clone(), 0),
+        ];
+
+        let with_bodies = run_pet_clustering(&inputs, &config);
+        let without_bodies = run_pet_clustering(&strip_bodies(&inputs), &config);
+
+        // Without bodies: no_face has no face, so it's unclustered
+        assert!(
+            without_bodies.face_to_cluster.get("no_face").is_none(),
+            "Without bodies, faceless image should be unclustered"
+        );
+
+        // With bodies: no_face should be rescued into cluster A
+        let ca1 = with_bodies.face_to_cluster.get("a1");
+        let c_no_face = with_bodies.face_to_cluster.get("no_face");
+        assert!(ca1.is_some(), "a1 should be clustered");
+        assert_eq!(
+            ca1, c_no_face,
+            "Body rescue should assign faceless image to matching cluster"
+        );
+
+        println!(
+            "RESCUE: without_bodies={} unclustered, with_bodies={} unclustered",
+            without_bodies.n_unclustered, with_bodies.n_unclustered
+        );
+    }
+
+    // ── Test 2: Faceless orphan rescued into correct cluster ────────────
+
+    #[test]
+    fn test_body_rescue_picks_correct_cluster() {
+        // Pet A: 3 faces in dim 0, bodies in dim 10
+        // Pet B: 3 faces in dim 64, bodies in dim 10 (same body region!)
+        // Orphan: weak face, body matches dim 10
+        //
+        // Body rescue might want to assign orphan to A or B (both have
+        // similar bodies), but face veto should block if orphan's face
+        // clearly contradicts the cluster's face centroid.
+
+        let mut config = ClusterConfig::dog();
+        config.min_samples = 1;
+
+        let body_a = make_body(10, 0);
+        let body_b = make_body(80, 0);
+
+        let inputs = vec![
+            make_input("a1", make_face(0, 0), body_a.clone(), 0),
+            make_input("a2", make_face(0, 1), body_a.clone(), 0),
+            make_input("a3", make_face(0, 2), body_a.clone(), 0),
+            make_input("b1", make_face(64, 0), body_b.clone(), 0),
+            make_input("b2", make_face(64, 1), body_b.clone(), 0),
+            make_input("b3", make_face(64, 2), body_b.clone(), 0),
+            // Faceless, body matches cluster A
+            make_input("orphan", vec![], body_a.clone(), 0),
+        ];
+
+        let result = run_pet_clustering(&inputs, &config);
+
+        let ca1 = result.face_to_cluster.get("a1");
+        let cb1 = result.face_to_cluster.get("b1");
+        let c_orphan = result.face_to_cluster.get("orphan");
+
+        assert_ne!(ca1, cb1, "Clusters A and B should remain separate");
+        assert_eq!(
+            ca1, c_orphan,
+            "Faceless orphan should be rescued into cluster A (matching body)"
+        );
+    }
+
+    // ── Test 3: Insufficient body agreements blocks rescue ──────────────
+
+    #[test]
+    fn test_body_rescue_needs_min_agreements() {
+        // Dog config requires min_body_agreements=3.
+        // Cluster with only 2 body members should NOT rescue a faceless image.
+
+        let config = ClusterConfig::dog();
+        assert_eq!(config.min_body_agreements, 3);
+
+        let body_a = make_body(10, 0);
+        let inputs = vec![
+            make_input("a1", make_face(0, 0), body_a.clone(), 0),
+            make_input("a2", make_face(0, 1), body_a.clone(), 0),
+            // Faceless with matching body — but only 2 cluster body members
+            make_input("orphan", vec![], body_a.clone(), 0),
+        ];
+
+        let result = run_pet_clustering(&inputs, &config);
+
+        let ca1 = result.face_to_cluster.get("a1");
+        let c_orphan = result.face_to_cluster.get("orphan");
+
+        assert_ne!(
+            ca1, c_orphan,
+            "Orphan should not be rescued with only 2 body agreements (need 3)"
+        );
+    }
+
+    // ── Test 4: Cat needs fewer agreements than dog ─────────────────────
+
+    #[test]
+    fn test_cat_rescue_needs_fewer_agreements() {
+        // Cat: min_body_agreements=2, Dog: min_body_agreements=3.
+        // With exactly 2 body members, cat should rescue but dog should not.
+
+        let dog_config = ClusterConfig::dog();
+        let cat_config = ClusterConfig::cat();
+
+        let body = make_body(10, 0);
+
+        // Dog: 2 face+body members + 1 faceless with matching body
+        let dog_inputs = vec![
+            make_input("a1", make_face(0, 0), body.clone(), 0),
+            make_input("a2", make_face(0, 1), body.clone(), 0),
+            make_input("orphan", vec![], body.clone(), 0),
+        ];
+
+        // Cat: same structure
+        let cat_inputs = vec![
+            make_input("a1", make_face(0, 0), body.clone(), 1),
+            make_input("a2", make_face(0, 1), body.clone(), 1),
+            make_input("orphan", vec![], body.clone(), 1),
+        ];
+
+        let dog_result = run_pet_clustering(&dog_inputs, &dog_config);
+        let cat_result = run_pet_clustering(&cat_inputs, &cat_config);
+
+        let dog_rescued = dog_result.face_to_cluster.get("orphan")
+            == dog_result.face_to_cluster.get("a1")
+            && dog_result.face_to_cluster.get("a1").is_some();
+
+        let cat_rescued = cat_result.face_to_cluster.get("orphan")
+            == cat_result.face_to_cluster.get("a1")
+            && cat_result.face_to_cluster.get("a1").is_some();
+
+        assert!(
+            !dog_rescued,
+            "Dog should NOT rescue with only 2 body agreements"
+        );
+        assert!(cat_rescued, "Cat SHOULD rescue with 2 body agreements");
+    }
+
+    // ── Test 5: Body-only inputs (no face) go through Phase 2b ──────────
+
+    #[test]
+    fn test_body_only_inputs_cluster_via_phase2b() {
+        // Inputs with body but NO face can only cluster in Phase 2b.
+        // Without body phases, they'd all be unclustered.
+
+        let config = ClusterConfig::dog();
+
+        let inputs = vec![
+            make_input("x1", vec![], make_body(10, 0), 0),
+            make_input("x2", vec![], make_body(10, 1), 0),
+            make_input("x3", vec![], make_body(10, 2), 0),
+            make_input("y1", vec![], make_body(80, 0), 0),
+            make_input("y2", vec![], make_body(80, 1), 0),
+            make_input("y3", vec![], make_body(80, 2), 0),
+        ];
+
+        let with_bodies = run_pet_clustering(&inputs, &config);
+        let without_bodies = run_pet_clustering(&strip_bodies(&inputs), &config);
+
+        // Without bodies: all faceless, all stay unclustered
+        assert_eq!(
+            without_bodies.n_unclustered, 6,
+            "Without body embeddings, all faceless inputs should be unclustered"
+        );
+
+        // With bodies: Phase 2b should form clusters
+        assert!(
+            with_bodies.n_unclustered < 6,
+            "Phase 2b should cluster some body-only inputs (got {} unclustered)",
+            with_bodies.n_unclustered
+        );
+
+        // Check group coherence
+        let cx1 = with_bodies.face_to_cluster.get("x1");
+        let cx2 = with_bodies.face_to_cluster.get("x2");
+        let cy1 = with_bodies.face_to_cluster.get("y1");
+        let cy2 = with_bodies.face_to_cluster.get("y2");
+
+        if cx1.is_some() && cy1.is_some() {
+            assert_eq!(cx1, cx2, "x1 and x2 should be in same cluster");
+            assert_eq!(cy1, cy2, "y1 and y2 should be in same cluster");
+            assert_ne!(cx1, cy1, "Group X and Y should be separate");
+        }
+
+        println!(
+            "Phase 2b: {} unclustered (from 6 faceless inputs)",
+            with_bodies.n_unclustered
+        );
+    }
+
+    // ── Test 6: Comparative cost/benefit across a mixed scenario ────────
+
+    #[test]
+    fn test_body_rescue_cost_benefit_analysis() {
+        // Simulate a realistic scenario:
+        //   Pet A: 5 good faces + bodies, 3 weak faces + matching bodies
+        //   Pet B: 4 good faces + bodies, 2 weak faces + matching bodies
+        //   Strays: 2 random faces, no bodies
+        //
+        // Measure: how many more correct assignments does body rescue give?
+
+        let mut config = ClusterConfig::dog();
+        config.min_samples = 1;
+        let mut inputs = Vec::new();
+        let mut ground_truth: HashMap<String, &str> = HashMap::new();
+
+        // Pet A: 5 faces with bodies
+        for i in 0..5u32 {
+            let id = format!("a_face_{}", i);
+            inputs.push(make_input_with_file(
+                &id,
+                make_face(0, i),
+                make_body(10, i),
+                0,
+                100 + i as i64,
+            ));
+            ground_truth.insert(id, "A");
+        }
+        // Pet A: 3 faceless with bodies (camera caught body only)
+        for i in 0..3u32 {
+            let id = format!("a_body_{}", i);
+            inputs.push(make_input_with_file(
+                &id,
+                vec![],
+                make_body(10, i + 50),
+                0,
+                200 + i as i64,
+            ));
+            ground_truth.insert(id, "A");
+        }
+
+        // Pet B: 4 faces with bodies
+        for i in 0..4u32 {
+            let id = format!("b_face_{}", i);
+            inputs.push(make_input_with_file(
+                &id,
+                make_face(64, i),
+                make_body(80, i),
+                0,
+                300 + i as i64,
+            ));
+            ground_truth.insert(id, "B");
+        }
+        // Pet B: 2 faceless with bodies
+        for i in 0..2u32 {
+            let id = format!("b_body_{}", i);
+            inputs.push(make_input_with_file(
+                &id,
+                vec![],
+                make_body(80, i + 50),
+                0,
+                400 + i as i64,
+            ));
+            ground_truth.insert(id, "B");
+        }
+
+        let with_bodies = run_pet_clustering(&inputs, &config);
+        let without_bodies = run_pet_clustering(&strip_bodies(&inputs), &config);
+
+        // Evaluate accuracy
+        fn eval_accuracy(
+            result: &PetClusterResult,
+            ground_truth: &HashMap<String, &str>,
+        ) -> (usize, usize, usize) {
+            // For each pair of inputs that share ground truth, check if
+            // they're in the same cluster (true positive) or not.
+            let ids: Vec<&String> = ground_truth.keys().collect();
+            let mut correct_same = 0usize;
+            let mut wrong_same = 0usize;
+            let mut correct_diff = 0usize;
+
+            for i in 0..ids.len() {
+                for j in (i + 1)..ids.len() {
+                    let gt_same = ground_truth[ids[i]] == ground_truth[ids[j]]
+                        && ground_truth[ids[i]] != "stray";
+                    let c_i = result.face_to_cluster.get(ids[i].as_str());
+                    let c_j = result.face_to_cluster.get(ids[j].as_str());
+                    let clustered_same = c_i.is_some() && c_i == c_j;
+
+                    if gt_same && clustered_same {
+                        correct_same += 1;
+                    } else if !gt_same && clustered_same {
+                        wrong_same += 1;
+                    } else if !gt_same && !clustered_same {
+                        correct_diff += 1;
+                    }
+                }
+            }
+            (correct_same, wrong_same, correct_diff)
+        }
+
+        let (tp_with, fp_with, _tn_with) = eval_accuracy(&with_bodies, &ground_truth);
+        let (tp_without, fp_without, _tn_without) = eval_accuracy(&without_bodies, &ground_truth);
+
+        println!("=== BODY PHASES COST/BENEFIT ===");
+        println!(
+            "WITHOUT bodies: TP={}, FP={}, unclustered={}",
+            tp_without, fp_without, without_bodies.n_unclustered
+        );
+        println!(
+            "WITH    bodies: TP={}, FP={}, unclustered={}",
+            tp_with, fp_with, with_bodies.n_unclustered
+        );
+        println!(
+            "DELTA: TP+{}, FP+{}, unclustered-{}",
+            tp_with.saturating_sub(tp_without),
+            fp_with.saturating_sub(fp_without),
+            without_bodies
+                .n_unclustered
+                .saturating_sub(with_bodies.n_unclustered),
+        );
+
+        // Body phases should increase true positives (more correct pairings)
+        assert!(
+            tp_with >= tp_without,
+            "Body phases should not reduce correct pairs ({} < {})",
+            tp_with,
+            tp_without,
+        );
+
+        // Body phases should not introduce many false positives
+        assert!(
+            fp_with <= fp_without + 2,
+            "Body phases should not cause many wrong merges ({} >> {})",
+            fp_with,
+            fp_without,
+        );
+    }
+
+    // ── Test 7: Phase 3 cross-cluster merge via body similarity ────────
+
+    #[test]
+    fn test_cross_cluster_merge_unifies_body_similar_clusters() {
+        // Same pet photographed from two very different angles:
+        // face group 1 and face group 2 don't cluster in Phase 1,
+        // but their bodies are very similar -> Phase 3 should merge.
+
+        let mut config = ClusterConfig::dog();
+        config.min_samples = 1;
+        // Lower merge threshold to make the test more robust
+        config.body_merge_threshold = 0.30;
+        config.face_contradiction_threshold = -1.0; // disable face contradiction
+
+        // Two face groups that won't cluster (orthogonal face embeddings)
+        // but identical body embeddings
+        let shared_body = make_body(10, 0);
+
+        let inputs = vec![
+            make_input("front1", make_face(0, 0), shared_body.clone(), 0),
+            make_input("front2", make_face(0, 1), shared_body.clone(), 0),
+            make_input("front3", make_face(0, 2), shared_body.clone(), 0),
+            make_input("back1", make_face(64, 10), shared_body.clone(), 0),
+            make_input("back2", make_face(64, 11), shared_body.clone(), 0),
+            make_input("back3", make_face(64, 12), shared_body.clone(), 0),
+        ];
+
+        let with_merge = run_pet_clustering(&inputs, &config);
+        let without_merge = run_pet_clustering(&strip_bodies(&inputs), &config);
+
+        let front_cluster = with_merge.face_to_cluster.get("front1");
+        let back_cluster = with_merge.face_to_cluster.get("back1");
+        let front_without = without_merge.face_to_cluster.get("front1");
+        let back_without = without_merge.face_to_cluster.get("back1");
+
+        println!(
+            "Cross-merge: with_merge front={:?} back={:?}",
+            front_cluster, back_cluster
+        );
+        println!(
+            "Cross-merge: without    front={:?} back={:?}",
+            front_without, back_without
+        );
+
+        // Without merge: should be 2 separate clusters
+        assert_ne!(
+            front_without, back_without,
+            "Without Phase 3, face groups should remain separate"
+        );
+
+        // With merge: Phase 3 should unify them
+        assert_eq!(
+            front_cluster, back_cluster,
+            "Phase 3 should merge clusters with similar bodies"
+        );
+    }
+
+    // ── Test 8: Face contradiction blocks cross-cluster merge ───────────
+
+    #[test]
+    fn test_face_contradiction_blocks_merge() {
+        // Two DIFFERENT pets with similar bodies but different faces.
+        // Phase 3 should NOT merge them because face contradiction fires.
+
+        let mut config = ClusterConfig::dog();
+        config.min_samples = 1;
+        config.body_merge_threshold = 0.20;
+        // Face contradiction enabled (default 0.10)
+
+        let shared_body = make_body(10, 0);
+
+        let inputs = vec![
+            // Pet A: face in dim 0
+            make_input("a1", make_face(0, 0), shared_body.clone(), 0),
+            make_input("a2", make_face(0, 1), shared_body.clone(), 0),
+            make_input("a3", make_face(0, 2), shared_body.clone(), 0),
+            // Pet B: face in dim 64 (orthogonal = sim ~0, well below 0.10)
+            make_input("b1", make_face(64, 10), shared_body.clone(), 0),
+            make_input("b2", make_face(64, 11), shared_body.clone(), 0),
+            make_input("b3", make_face(64, 12), shared_body.clone(), 0),
+        ];
+
+        let result = run_pet_clustering(&inputs, &config);
+
+        let ca = result.face_to_cluster.get("a1");
+        let cb = result.face_to_cluster.get("b1");
+
+        assert_ne!(
+            ca, cb,
+            "Face contradiction should block merge of different pets with similar bodies"
+        );
+    }
+
+    // ── Test 9: Computational cost scaling ──────────────────────────────
+
+    #[test]
+    fn test_body_rescue_cost_scales_linearly() {
+        // Body rescue is O(unclustered * clustered * body_members_per_cluster).
+        // Verify it completes in reasonable time for moderate input sizes.
+
+        let config = ClusterConfig::dog();
+        let mut inputs = Vec::new();
+        // 50 faces+bodies that will cluster in Phase 1
+        for i in 0..50u32 {
+            inputs.push(make_input_with_file(
+                &format!("c_{}", i),
+                make_face(0, i),
+                make_body(10, i),
+                0,
+                i as i64,
+            ));
+        }
+        // 20 faceless+body that need rescue via Phase 2
+        for i in 0..20u32 {
+            inputs.push(make_input_with_file(
+                &format!("u_{}", i),
+                vec![],
+                make_body(10, i + 500),
+                0,
+                1000 + i as i64,
+            ));
+        }
+
+        let start = std::time::Instant::now();
+        let result = run_pet_clustering(&inputs, &config);
+        let elapsed = start.elapsed();
+
+        println!(
+            "Cost: 70 inputs (50 face+body, 20 body-only) -> {:?}, {} unclustered",
+            elapsed, result.n_unclustered
+        );
+
+        assert!(
+            elapsed.as_secs() < 2,
+            "Clustering took too long: {:?}",
+            elapsed
+        );
+
+        // Most body-only inputs should have been rescued
+        assert!(
+            result.n_unclustered <= 5,
+            "Too many still unclustered: {} (expected most rescued)",
+            result.n_unclustered
         );
     }
 }

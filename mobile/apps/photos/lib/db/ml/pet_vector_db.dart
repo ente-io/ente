@@ -25,7 +25,6 @@ class PetVectorDB {
   static final Logger _logger = Logger("PetVectorDB");
 
   static const int faceDimension = 128;
-  static const int bodyDimension = 192;
 
   final String _databaseName;
   final BigInt _embeddingDimension;
@@ -50,16 +49,6 @@ class PetVectorDB {
     BigInt.from(faceDimension),
   );
 
-  static final dogBody = PetVectorDB._named(
-    "ente.ml.vectordb.pet.dog_body.usearch",
-    BigInt.from(bodyDimension),
-  );
-
-  static final catBody = PetVectorDB._named(
-    "ente.ml.vectordb.pet.cat_body.usearch",
-    BigInt.from(bodyDimension),
-  );
-
   // ── Offline vector spaces ──
 
   static final offlineDogFace = PetVectorDB._named(
@@ -72,38 +61,23 @@ class PetVectorDB {
     BigInt.from(faceDimension),
   );
 
-  static final offlineDogBody = PetVectorDB._named(
-    "ente.ml.offline.vectordb.pet.dog_body.usearch",
-    BigInt.from(bodyDimension),
-  );
-
-  static final offlineCatBody = PetVectorDB._named(
-    "ente.ml.offline.vectordb.pet.cat_body.usearch",
-    BigInt.from(bodyDimension),
-  );
-
   /// All online vector DB instances for iteration.
   static final List<PetVectorDB> allInstances = [
     dogFace,
     catFace,
-    dogBody,
-    catBody,
   ];
 
   /// All offline vector DB instances for iteration.
   static final List<PetVectorDB> allOfflineInstances = [
     offlineDogFace,
     offlineCatFace,
-    offlineDogBody,
-    offlineCatBody,
   ];
 
-  /// Get the correct vector DB for a species + embedding type.
+  /// Get the correct face vector DB for a species.
   /// [species]: 0 = dog, 1 = cat
-  /// [isFace]: true = face embedding, false = body embedding
   static PetVectorDB forModel({
     required int species,
-    required bool isFace,
+    bool isFace = true,
     bool offline = false,
   }) {
     assert(
@@ -111,17 +85,9 @@ class PetVectorDB {
       'Invalid pet species: $species (expected 0=dog or 1=cat)',
     );
     if (offline) {
-      if (species == 0) {
-        return isFace ? offlineDogFace : offlineDogBody;
-      } else {
-        return isFace ? offlineCatFace : offlineCatBody;
-      }
+      return species == 0 ? offlineDogFace : offlineCatFace;
     }
-    if (species == 0) {
-      return isFace ? dogFace : dogBody;
-    } else {
-      return isFace ? catFace : catBody;
-    }
+    return species == 0 ? dogFace : catFace;
   }
 
   Future<VectorDb>? _vectorDbFuture;
@@ -200,48 +166,6 @@ class PetVectorDB {
       for (final row in rows) {
         result[row[petFaceIDColumn] as String] =
             row[petFaceVectorIdColumn] as int;
-      }
-    }
-    return result;
-  }
-
-  /// Get or create integer vector IDs for body/object embeddings.
-  /// Uses [petBodyVectorIdMappingTable] — separate ID space from face embeddings.
-  Future<Map<String, int>> getObjectVectorIdMap(
-    Iterable<String> objectIds, {
-    required SqliteDatabase db,
-    bool createIfMissing = false,
-  }) async {
-    final uniqueIds = objectIds.toSet().toList(growable: false);
-    if (uniqueIds.isEmpty) return {};
-
-    if (createIfMissing) {
-      const insertSql = '''
-        INSERT OR IGNORE INTO $petBodyVectorIdMappingTable ($petBodyIDColumn)
-        VALUES (?)
-      ''';
-      final insertParams = <List<Object?>>[];
-      for (final id in uniqueIds) {
-        insertParams.add([id]);
-      }
-      await db.executeBatch(insertSql, insertParams);
-    }
-
-    final result = <String, int>{};
-    const chunkSize = 800;
-    for (int i = 0; i < uniqueIds.length; i += chunkSize) {
-      final chunk = uniqueIds.sublist(i, min(i + chunkSize, uniqueIds.length));
-      final rows = await db.getAll(
-        '''
-          SELECT $petBodyIDColumn, $petBodyVectorIdColumn
-          FROM $petBodyVectorIdMappingTable
-          WHERE $petBodyIDColumn IN (${List.filled(chunk.length, '?').join(',')})
-        ''',
-        chunk,
-      );
-      for (final row in rows) {
-        result[row[petBodyIDColumn] as String] =
-            row[petBodyVectorIdColumn] as int;
       }
     }
     return result;

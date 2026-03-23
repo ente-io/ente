@@ -167,6 +167,42 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                           )
                         : const SizedBox(),
                     widget.mlIsEnabled
+                        ? MenuItemWidget(
+                            captionedTextWidget: const CaptionedTextWidget(
+                              title: "Pet recognition",
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => localSettings.petRecognitionEnabled,
+                              onChanged: () async {
+                                try {
+                                  await localSettings.togglePetRecognition();
+                                  _logger.info(
+                                    'Pet recognition is turned ${localSettings.petRecognitionEnabled ? 'on' : 'off'}',
+                                  );
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                } catch (e, s) {
+                                  _logger.warning(
+                                    'Pet recognition toggle failed ',
+                                    e,
+                                    s,
+                                  );
+                                  await showGenericErrorDialog(
+                                    context: context,
+                                    error: e,
+                                  );
+                                }
+                              },
+                            ),
+                            singleBorderRadius: 8,
+                            alignCaptionedTextToLeft: true,
+                            isBottomBorderRadiusRemoved: true,
+                            isGestureDetectorDisabled: true,
+                          )
+                        : const SizedBox(),
+                    widget.mlIsEnabled
                         ? const SizedBox(height: 24)
                         : const SizedBox.shrink(),
                     widget.mlIsEnabled

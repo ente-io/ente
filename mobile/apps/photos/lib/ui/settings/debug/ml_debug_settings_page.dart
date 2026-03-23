@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
@@ -14,6 +15,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_cl
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -601,6 +603,16 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           onTap: () async => _onResetPetClustering(context),
         ),
         MenuItemWidgetNew(
+          title: "Dump pet embeddings JSON",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiImage,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onDumpPetEmbeddings(context),
+        ),
+        MenuItemWidgetNew(
           title: "Reset all local faces",
           leadingIconWidget: _buildIconWidget(
             context,
@@ -916,6 +928,26 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
         }
       },
     );
+  }
+
+  Future<void> _onDumpPetEmbeddings(BuildContext context) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final outputPath = '${dir.path}/pet_embeddings.json';
+      await PetClusteringService.instance.dumpEmbeddingsJson(
+        mlDataDB: mlDataDB,
+        outputPath: outputPath,
+      );
+      logger.info('Pet embeddings dumped to $outputPath');
+      if (context.mounted) {
+        showShortToast(context, "Saved to $outputPath");
+      }
+    } catch (e, s) {
+      logger.warning('dump pet embeddings failed', e, s);
+      if (context.mounted) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
   }
 
   Future<void> _onResetAllLocalFaces(BuildContext context) async {

@@ -45,23 +45,9 @@ class PetClusteringService {
       );
       if (faces.isEmpty) continue;
 
-      final bodies = await mlDataDB.getPetBodiesForClustering(
-        species,
-        isOffline: isOffline,
-      );
-      final bodyByFileId = <int, PetBodyClusterInfo>{};
-      for (final body in bodies) {
-        bodyByFileId.putIfAbsent(body.fileId, () => body);
-      }
-
       final faceVdb = PetVectorDB.forModel(
         species: species,
         isFace: true,
-        offline: isOffline,
-      );
-      final bodyVdb = PetVectorDB.forModel(
-        species: species,
-        isFace: false,
         offline: isOffline,
       );
 
@@ -77,21 +63,10 @@ class PetClusteringService {
           continue;
         }
 
-        List<double> bodyEmb = [];
-        final body = bodyByFileId[face.fileId];
-        if (body != null && body.bodyVectorId != null) {
-          try {
-            final bodyEmbs = await bodyVdb.getEmbeddings([body.bodyVectorId!]);
-            if (bodyEmbs.isNotEmpty) {
-              bodyEmb = bodyEmbs.first.toList();
-            }
-          } catch (_) {}
-        }
-
         inputs.add({
           "petFaceId": face.petFaceId,
           "faceEmbedding": faceEmb,
-          "bodyEmbedding": bodyEmb,
+          "bodyEmbedding": <double>[],
           "fileId": face.fileId,
         });
       }
@@ -174,34 +149,16 @@ class PetClusteringService {
       return;
     }
 
-    // 2. Read all pet bodies for this species (for body rescue + merge)
-    final bodies =
-        await mlDataDB.getPetBodiesForClustering(species, isOffline: isOffline);
-
-    // 3. Build a map from fileId to body info for pairing
-    final bodyByFileId = <int, PetBodyClusterInfo>{};
-    for (final body in bodies) {
-      // Keep the first (highest-scoring) body per file
-      bodyByFileId.putIfAbsent(body.fileId, () => body);
-    }
-
-    // 4. Fetch face embeddings from vector DB
+    // 2. Fetch face embeddings from vector DB
     final faceVdb = PetVectorDB.forModel(
       species: species,
       isFace: true,
       offline: isOffline,
     );
-    final bodyVdb = PetVectorDB.forModel(
-      species: species,
-      isFace: false,
-      offline: isOffline,
-    );
 
-    // Build cluster inputs, tracking which are unclustered.
-    // Also collect body embeddings per existing cluster for incremental mode.
+    // Build cluster inputs, tracking which are unclustered
     final List<RustPetClusterInput> allInputs = [];
     final List<RustPetClusterInput> unclusteredInputs = [];
-    final clusterBodyEmbs = <String, List<Float64List>>{};
 
     for (final face in faces) {
       if (face.faceVectorId == null) continue;
@@ -216,33 +173,16 @@ class PetClusteringService {
         continue;
       }
 
-      // Try to get matching body embedding
-      Float64List bodyEmb = Float64List(0);
-      final body = bodyByFileId[face.fileId];
-      if (body != null && body.bodyVectorId != null) {
-        try {
-          final bodyEmbs = await bodyVdb.getEmbeddings([body.bodyVectorId!]);
-          if (bodyEmbs.isNotEmpty) {
-            bodyEmb = _float32ToFloat64(bodyEmbs.first);
-          }
-        } catch (e) {
-          _logger
-              .warning("Failed to get body embedding for file ${face.fileId}");
-        }
-      }
-
       final input = RustPetClusterInput(
         petFaceId: face.petFaceId,
         faceEmbedding: faceEmb,
-        bodyEmbedding: bodyEmb,
+        bodyEmbedding: Float64List(0),
         species: species,
         fileId: face.fileId,
       );
       allInputs.add(input);
       if (face.clusterId == null) {
         unclusteredInputs.add(input);
-      } else if (bodyEmb.isNotEmpty) {
-        clusterBodyEmbs.putIfAbsent(face.clusterId!, () => []).add(bodyEmb);
       }
     }
 
@@ -307,23 +247,10 @@ class PetClusteringService {
         }
       }
 
-      // Compute mean body centroids from existing clustered body embeddings
-      final bodyCentroids = <RustPetClusterSummary>[];
-      for (final entry in clusterBodyEmbs.entries) {
-        if (entry.value.isEmpty) continue;
-        bodyCentroids.add(
-          RustPetClusterSummary(
-            clusterId: entry.key,
-            centroid: Float64List.fromList(_meanCentroid(entry.value)),
-            count: existingSummaries[entry.key]?.$1 ?? 0,
-          ),
-        );
-      }
-
       result = await runPetClusteringIncrementalRust(
         newInputs: unclusteredInputs,
         existingFaceCentroids: faceCentroids,
-        existingBodyCentroids: bodyCentroids,
+        existingBodyCentroids: [],
         species: species,
       );
     }
@@ -490,21 +417,6 @@ class PetFaceClusterInfo {
   });
 }
 
-/// Lightweight holder for pet body data needed for clustering.
-class PetBodyClusterInfo {
-  final int fileId;
-  final String petBodyId;
-  final int? bodyVectorId;
-  final int species;
-
-  PetBodyClusterInfo({
-    required this.fileId,
-    required this.petBodyId,
-    required this.bodyVectorId,
-    required this.species,
-  });
-}
-
 // ── DB helper methods (extension on MLDataDB) ───────────────────────────
 
 extension PetClusteringDB on MLDataDB {
@@ -547,32 +459,6 @@ extension PetClusteringDB on MLDataDB {
             faceVectorId: r[faceVectorIdColumn] as int?,
             species: r[speciesColumn] as int,
             clusterId: r[clusterIDColumn] as String?,
-          ),
-        )
-        .toList();
-  }
-
-  /// Get all pet bodies for a given species.
-  Future<List<PetBodyClusterInfo>> getPetBodiesForClustering(
-    int species, {
-    bool isOffline = false,
-  }) async {
-    final db = await asyncDB;
-    const String query = '''
-      SELECT $fileIDColumn, $petBodyIDColumn, $bodyVectorIdColumn, $speciesColumn
-      FROM $petBodiesTable
-      WHERE $speciesColumn = ?
-        AND $bodyVectorIdColumn IS NOT NULL
-      ORDER BY score DESC
-    ''';
-    final rows = await db.getAll(query, [species]);
-    return rows
-        .map(
-          (r) => PetBodyClusterInfo(
-            fileId: r[fileIDColumn] as int,
-            petBodyId: r[petBodyIDColumn] as String,
-            bodyVectorId: r[bodyVectorIdColumn] as int?,
-            species: r[speciesColumn] as int,
           ),
         )
         .toList();

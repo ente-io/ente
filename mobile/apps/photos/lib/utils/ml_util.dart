@@ -646,12 +646,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
         args["petFaceEmbeddingDogModelPath"] as String?;
     final String? petFaceEmbeddingCatModelPath =
         args["petFaceEmbeddingCatModelPath"] as String?;
-    final String? petBodyDetectionModelPath =
-        args["petBodyDetectionModelPath"] as String?;
-    final String? petBodyEmbeddingDogModelPath =
-        args["petBodyEmbeddingDogModelPath"] as String?;
-    final String? petBodyEmbeddingCatModelPath =
-        args["petBodyEmbeddingCatModelPath"] as String?;
     final bool preferCoreml = args["preferCoreml"] as bool? ?? true;
     final bool preferNnapi = args["preferNnapi"] as bool? ?? true;
     final bool preferXnnpack = args["preferXnnpack"] as bool? ?? false;
@@ -681,15 +675,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
       if (isMissingModelPath(petFaceEmbeddingCatModelPath)) {
         missingModelPaths.add("petFaceEmbeddingCatModelPath");
       }
-      if (isMissingModelPath(petBodyDetectionModelPath)) {
-        missingModelPaths.add("petBodyDetectionModelPath");
-      }
-      if (isMissingModelPath(petBodyEmbeddingDogModelPath)) {
-        missingModelPaths.add("petBodyEmbeddingDogModelPath");
-      }
-      if (isMissingModelPath(petBodyEmbeddingCatModelPath)) {
-        missingModelPaths.add("petBodyEmbeddingCatModelPath");
-      }
     }
     if (missingModelPaths.isNotEmpty) {
       throw Exception(
@@ -705,9 +690,9 @@ Future<MLResult> analyzeImageRust(Map args) async {
       petFaceDetection: petFaceDetectionModelPath ?? "",
       petFaceEmbeddingDog: petFaceEmbeddingDogModelPath ?? "",
       petFaceEmbeddingCat: petFaceEmbeddingCatModelPath ?? "",
-      petBodyDetection: petBodyDetectionModelPath ?? "",
-      petBodyEmbeddingDog: petBodyEmbeddingDogModelPath ?? "",
-      petBodyEmbeddingCat: petBodyEmbeddingCatModelPath ?? "",
+      petBodyDetection: "",
+      petBodyEmbeddingDog: "",
+      petBodyEmbeddingCat: "",
     );
     final providerPolicy = rust_ml.RustExecutionProviderPolicy(
       preferCoreml: preferCoreml,
@@ -904,18 +889,6 @@ Future<MLResult> analyzeImageRust(Map args) async {
             alignment: alignment,
             species: face.species,
             embedding: Embedding.from(face.faceEmbedding),
-          );
-        }).toList(growable: false);
-      }
-
-      if (rustResult.petBodies != null) {
-        result.petBodies = rustResult.petBodies!.map((body) {
-          return PetBodyResult(
-            boxXyxy: body.boxXyxy.toList(growable: false),
-            score: body.score,
-            cocoClass: body.cocoClass,
-            petBodyId: body.petBodyId,
-            embedding: Embedding.from(body.bodyEmbedding),
           );
         }).toList(growable: false);
       }
