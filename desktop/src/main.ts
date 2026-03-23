@@ -670,6 +670,8 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
                 if (key.toLowerCase() == "access-control-allow-origin") {
                     headers["Access-Control-Allow-Origin"] =
                         value[0] == "null" ? ["*"] : value;
+                } else if (key.toLowerCase() == "access-control-allow-headers") {
+                    headers["Access-Control-Allow-Headers"] = ["*"];
                 } else {
                     headers[key] = value;
                 }
