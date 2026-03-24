@@ -201,22 +201,32 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			name:    "first reminder at anchor day",
 			now:     expiredWarningAnchor,
 			history: map[string]int64{},
-			want:    expiredWarningStage30,
+			want:    expiredWarningStage0,
 		},
 		{
 			name: "second reminder after first sent",
 			now:  expiredWarningAnchor + storageWarningExpiredWarning30Delay,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: expiredWarningAnchor,
+				storageWarningExpired0TemplateID: expiredWarningAnchor,
 			},
-			want: expiredWarningStage60,
+			want: expiredWarningStage30,
 		},
 		{
 			name: "third reminder after earlier stages sent",
 			now:  expiredWarningAnchor + storageWarningExpiredWarning60Delay,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: expiredWarningAnchor,
-				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired0TemplateID:  expiredWarningAnchor,
+				storageWarningExpired30TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+			},
+			want: expiredWarningStage60,
+		},
+		{
+			name: "fourth reminder after earlier stages sent",
+			now:  expiredWarningAnchor + storageWarningExpiredWarning90Delay,
+			history: map[string]int64{
+				storageWarningExpired0TemplateID:  expiredWarningAnchor,
+				storageWarningExpired30TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning60Delay,
 			},
 			want: expiredWarningStage90,
 		},
@@ -224,9 +234,10 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			name: "final reminder for long expired user",
 			now:  expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: expiredWarningAnchor,
-				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
-				storageWarningExpired90TemplateID: expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired0TemplateID:  expiredWarningAnchor,
+				storageWarningExpired30TemplateID: expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired60TemplateID: expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired90TemplateID: expiredWarningAnchor + storageWarningExpiredWarning90Delay,
 			},
 			want: expiredWarningStage119,
 		},
@@ -234,9 +245,10 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			name: "scheduled deletion after final reminder sent",
 			now:  expiredWarningAnchor + storageWarningExpiredDeletionDelay,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID:  expiredWarningAnchor,
-				storageWarningExpired60TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning30Delay,
-				storageWarningExpired90TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired0TemplateID:   expiredWarningAnchor,
+				storageWarningExpired30TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired60TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired90TemplateID:  expiredWarningAnchor + storageWarningExpiredWarning90Delay,
 				storageWarningExpired119TemplateID: expiredWarningAnchor + storageWarningExpiredWarning119Delay,
 			},
 			want: expiredWarningStageScheduledDeletion,
@@ -245,9 +257,10 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			name: "scheduled deletion is sent only once",
 			now:  expiredWarningAnchor + storageWarningExpiredDeletionDelay + 10,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID:                     expiredWarningAnchor,
-				storageWarningExpired60TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning30Delay,
-				storageWarningExpired90TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired0TemplateID:                      expiredWarningAnchor,
+				storageWarningExpired30TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning30Delay,
+				storageWarningExpired60TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning60Delay,
+				storageWarningExpired90TemplateID:                     expiredWarningAnchor + storageWarningExpiredWarning90Delay,
 				storageWarningExpired119TemplateID:                    expiredWarningAnchor + storageWarningExpiredWarning119Delay,
 				repo.StorageWarningExpiredScheduledDeletionTemplateID: expiredWarningAnchor + storageWarningExpiredDeletionDelay,
 			},
@@ -257,15 +270,15 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 			name:    "long expired backfill without history starts at first reminder",
 			now:     expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10,
 			history: map[string]int64{},
-			want:    expiredWarningStage30,
+			want:    expiredWarningStage0,
 		},
 		{
 			name: "old cycle reminder ignored after renewal",
 			now:  expiredWarningAnchor,
 			history: map[string]int64{
-				storageWarningExpired30TemplateID: expiredWarningAnchor - 1,
+				storageWarningExpired0TemplateID: expiredWarningAnchor - 1,
 			},
-			want: expiredWarningStage30,
+			want: expiredWarningStage0,
 		},
 	}
 
@@ -493,27 +506,27 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			name: "expired previous stage from prior cycle is ignored",
 			snapshot: storageWarningSnapshot{
 				Bucket:            storageWarningBucketExpired,
-				ExpiredStage:      expiredWarningStage60,
+				ExpiredStage:      expiredWarningStage30,
 				EvaluatedAt:       now,
 				EffectiveExpiry:   now - storageWarningExpiredWarning30Delay,
 				WarningCycleStart: now - storageWarningExpiredWarning30Delay,
 				NotificationHistory: map[string]int64{
-					storageWarningExpired30TemplateID: now - storageWarningExpiredWarning30Delay - 1,
+					storageWarningExpired0TemplateID: now - storageWarningExpiredWarning30Delay - 1,
 				},
 			},
 			wantBroken: true,
-			wantStage:  string(expiredWarningStage30),
+			wantStage:  string(expiredWarningStage0),
 		},
 		{
 			name: "same cycle recent previous stage passes",
 			snapshot: storageWarningSnapshot{
 				Bucket:            storageWarningBucketExpired,
-				ExpiredStage:      expiredWarningStage90,
+				ExpiredStage:      expiredWarningStage60,
 				EvaluatedAt:       now,
 				EffectiveExpiry:   now - storageWarningExpiredWarning60Delay,
 				WarningCycleStart: now - storageWarningExpiredWarning60Delay,
 				NotificationHistory: map[string]int64{
-					storageWarningExpired60TemplateID: now - storageWarningOneDayInMicroseconds,
+					storageWarningExpired30TemplateID: now - storageWarningOneDayInMicroseconds,
 				},
 			},
 			wantBroken: false,
@@ -531,6 +544,18 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			},
 			wantBroken: true,
 			wantStage:  string(expiredWarningStage119),
+		},
+		{
+			name: "expired final reminder requires prior 90-day stage",
+			snapshot: storageWarningSnapshot{
+				Bucket:              storageWarningBucketExpired,
+				ExpiredStage:        expiredWarningStage119,
+				EvaluatedAt:         now,
+				WarningCycleStart:   now - storageWarningExpiredWarning119Delay,
+				NotificationHistory: map[string]int64{},
+			},
+			wantBroken: true,
+			wantStage:  string(expiredWarningStage90),
 		},
 		{
 			name: "terminal active overage stage requires final reminder",
@@ -682,7 +707,7 @@ func TestProcessStorageWarningSnapshotSkipsDueToRolloutWithoutPerRecipientLog(t 
 		AllottedStorage:  0,
 		AvailableStorage: -10,
 		Bucket:           storageWarningBucketExpired,
-		ExpiredStage:     expiredWarningStage30,
+		ExpiredStage:     expiredWarningStage0,
 		EffectiveExpiry:  1,
 	}
 
@@ -703,15 +728,15 @@ func TestBuildStorageWarningRunSummary(t *testing.T) {
 	stats := newStorageWarningRunStats()
 	stats.ProcessedUsers = 42
 	stats.SentEmails = 3
-	stats.SuccessByStage[string(expiredWarningStage30)] = 1
+	stats.SuccessByStage[string(expiredWarningStage0)] = 1
 	stats.SuccessByStage[string(activeOverageWarningStage0)] = 2
 	stats.FailureByStage[string(activeOverageWarningStage60)] = 1
-	stats.SkippedRolloutByStage[string(expiredWarningStage60)] = 39
+	stats.SkippedRolloutByStage[string(expiredWarningStage30)] = 39
 	stats.PreStageFailures = 4
 	stats.SkippedRolloutPct = 39
 
 	got := buildStorageWarningRunSummary(stats, 0)
-	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_30d=1, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | failures={expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0, active_overage_scheduled_deletion=0} | skipped_rollout={expired_30d=0, expired_60d=39, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
+	want := "Storage warning run summary (1970-01-01T00:00:00Z): processed=42 sent=3 | success={expired_0d=1, expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=2, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | failures={expired_0d=0, expired_30d=0, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=1, active_overage_89d=0, active_overage_scheduled_deletion=0} | skipped_rollout={expired_0d=0, expired_30d=39, expired_60d=0, expired_90d=0, expired_119d=0, expired_scheduled_deletion=0, active_overage_0d=0, active_overage_30d=0, active_overage_60d=0, active_overage_89d=0, active_overage_scheduled_deletion=0} | pre_stage_failures=4 | skipped_rollout_percentage=39 | rollout_percentage=0"
 	if got != want {
 		t.Fatalf("unexpected summary:\n got: %s\nwant: %s", got, want)
 	}

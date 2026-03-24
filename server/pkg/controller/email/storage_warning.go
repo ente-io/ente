@@ -96,6 +96,7 @@ const (
 )
 
 var storageWarningStageOrder = []string{
+	string(expiredWarningStage0),
 	string(expiredWarningStage30),
 	string(expiredWarningStage60),
 	string(expiredWarningStage90),
@@ -644,6 +645,8 @@ func storageWarningPreviousStage(snapshot storageWarningSnapshot) (templateID st
 	switch snapshot.Bucket {
 	case storageWarningBucketExpired:
 		switch snapshot.ExpiredStage {
+		case expiredWarningStage30:
+			return storageWarningExpired0TemplateID, string(expiredWarningStage0), true
 		case expiredWarningStage60:
 			return storageWarningExpired30TemplateID, string(expiredWarningStage30), true
 		case expiredWarningStage90:

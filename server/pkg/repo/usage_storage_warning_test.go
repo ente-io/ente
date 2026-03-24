@@ -180,7 +180,7 @@ func TestGetStorageWarningCandidatesCollapsesThresholdQualifiedMembersToAdmin(t 
 	}
 }
 
-func TestGetStorageWarningCandidatesExcludesFamilyTotalBelowPerMemberThreshold(t *testing.T) {
+func TestGetStorageWarningCandidatesIncludesFamiliesAboveThresholdByAggregateUsage(t *testing.T) {
 	db := getStorageWarningRepoTestDB(t)
 	repo := &UsageRepository{DB: db}
 	ctx := context.Background()
@@ -200,8 +200,39 @@ func TestGetStorageWarningCandidatesExcludesFamilyTotalBelowPerMemberThreshold(t
 	if err != nil {
 		t.Fatalf("GetStorageWarningCandidates() error = %v", err)
 	}
+	if len(candidates) != 1 {
+		t.Fatalf("expected aggregate family usage to select the admin, got %+v", candidates)
+	}
+	if candidates[0].RecipientID != adminID {
+		t.Fatalf("unexpected recipient id: got %d want %d", candidates[0].RecipientID, adminID)
+	}
+	if !candidates[0].IsFamilyPlan {
+		t.Fatal("expected aggregate family candidate to be marked as family plan")
+	}
+}
+
+func TestGetStorageWarningCandidatesExcludeFamiliesBelowAggregateThreshold(t *testing.T) {
+	db := getStorageWarningRepoTestDB(t)
+	repo := &UsageRepository{DB: db}
+	ctx := context.Background()
+
+	adminID := int64(211)
+	memberID := int64(212)
+
+	insertStorageWarningTestUser(t, db, adminID, &adminID)
+	insertStorageWarningTestUser(t, db, memberID, &adminID)
+	insertStorageWarningTestFamilyMember(t, db, adminID, adminID, "SELF")
+	insertStorageWarningTestFamilyMember(t, db, adminID, memberID, "ACCEPTED")
+	insertStorageWarningTestUsage(t, db, adminID, 12*testGiB)
+	insertStorageWarningTestUsage(t, db, memberID, 13*testGiB)
+	insertStorageWarningTestSubscription(t, db, adminID, "photos_yearly")
+
+	candidates, err := repo.GetStorageWarningCandidates(ctx, 25*testGiB)
+	if err != nil {
+		t.Fatalf("GetStorageWarningCandidates() error = %v", err)
+	}
 	if len(candidates) != 0 {
-		t.Fatalf("expected no candidates when no member exceeds threshold, got %+v", candidates)
+		t.Fatalf("expected no candidates below aggregate threshold, got %+v", candidates)
 	}
 }
 
