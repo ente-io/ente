@@ -3,19 +3,21 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/account/user_service.dart';
+import 'package:photos/services/family_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
+import 'package:photos/ui/family/family_ui.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class ChildSubscriptionWidget extends StatelessWidget {
   const ChildSubscriptionWidget({
     super.key,
     required this.userDetails,
+    required this.onLeaveFamily,
   });
 
   final UserDetails userDetails;
+  final Future<void> Function(UserDetails updatedUserDetails) onLeaveFamily;
 
   @override
   Widget build(BuildContext context) {
@@ -104,25 +106,26 @@ class ChildSubscriptionWidget extends StatelessWidget {
   }
 
   Future<void> _leaveFamilyPlan(BuildContext context) async {
-    final choice = await showChoiceDialog(
+    final confirmed = await showFamilyConfirmationSheet(
       context,
       title: AppLocalizations.of(context).leaveFamily,
       body: AppLocalizations.of(context).areYouSureThatYouWantToLeaveTheFamily,
-      firstButtonLabel: AppLocalizations.of(context).leave,
-      firstButtonOnTap: () async {
-        try {
-          await UserService.instance.leaveFamilyPlan();
-        } catch (e) {
-          Logger("ChildSubscriptionWidget").severe("failed to leave family");
-          rethrow;
-        }
-      },
+      actionLabel: AppLocalizations.of(context).leave,
     );
-    if (choice == null) {
+    if (!confirmed) {
       return;
     }
-    if (choice.action == ButtonAction.error) {
-      await showGenericErrorDialog(context: context, error: choice.exception);
+
+    try {
+      final updatedUserDetails = await FamilyService.instance.leaveFamily();
+      await onLeaveFamily(updatedUserDetails);
+    } catch (error, stackTrace) {
+      Logger("ChildSubscriptionWidget")
+          .severe("failed to leave family", error, stackTrace);
+      if (!context.mounted) {
+        return;
+      }
+      await showGenericErrorDialog(context: context, error: error);
     }
   }
 }

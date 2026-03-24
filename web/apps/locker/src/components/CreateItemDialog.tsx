@@ -1,6 +1,5 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
@@ -11,11 +10,21 @@ import {
     DialogTitle,
     IconButton,
     InputAdornment,
-    LinearProgress,
     Stack,
     TextField,
     Typography,
 } from "@mui/material";
+import { CollectionChipRow } from "components/createItemDialog/CollectionChipRow";
+import {
+    addCollectionName,
+    collectionNamesByUploadItem,
+    dedupeCollectionNames,
+    normalizeCollectionName,
+    toggleCollectionName,
+    uploadQueueItemKey,
+} from "components/createItemDialog/fileUploadHelpers";
+import { FileUploadSection } from "components/createItemDialog/FileUploadSection";
+import { lockerDialogPaperSx } from "components/lockerDialogStyles";
 import {
     createDocumentIcon,
     createDocumentIconConfig,
@@ -35,10 +44,16 @@ import React, {
     useState,
 } from "react";
 import { formatLockerMutationError } from "services/locker-errors";
-import type { LockerCollection, LockerItemType } from "types";
+import type { LockerUploadProgress } from "services/remote";
+import type {
+    LockerCollection,
+    LockerItemType,
+    LockerUploadCandidate,
+} from "types";
 import { isCollectionOwner, visibleLockerCollections } from "types";
 
 type CreateOption = LockerItemType | "file";
+const MAX_PARALLEL_UPLOADS = 4;
 
 interface LocalUser {
     id: number;
@@ -91,11 +106,21 @@ interface CreateItemDialogProps {
     onSave: (
         type: LockerItemType,
         data: Record<string, unknown>,
-        collectionID: number,
+        collectionIDs: number[],
     ) => Promise<void>;
-    onUploadFile?: (file: File, collectionID: number) => Promise<void>;
+    onUploadProgress?: (
+        file: File,
+        collectionIDs: number[],
+        onProgress: (progress: LockerUploadProgress) => void,
+    ) => Promise<void>;
+    onUploadItemComplete?: () => void;
+    onUploadsFinished?: (uploadedCount: number) => Promise<void>;
     onCreateCollection?: (name: string) => Promise<number>;
+    onEnsureCollections?: (
+        names: string[],
+    ) => Promise<Map<string, number> | Record<string, number>>;
     defaultCollectionID?: number | null;
+    initialItems?: LockerUploadCandidate[];
     editItem?: {
         id: number;
         type: LockerItemType;
@@ -104,14 +129,36 @@ interface CreateItemDialogProps {
     } | null;
 }
 
+interface UploadState {
+    completedFileKeys: Set<string>;
+    failedFileKeys: Set<string>;
+    uploadingFileKeys: Set<string>;
+    uploadProgressByFileKey: Record<string, LockerUploadProgress | null>;
+    uploadCapByFileKey: Record<string, number>;
+    finalizingStartedAtByFileKey: Record<string, number>;
+}
+
+const emptyUploadState = (): UploadState => ({
+    completedFileKeys: new Set(),
+    failedFileKeys: new Set(),
+    uploadingFileKeys: new Set(),
+    uploadProgressByFileKey: {},
+    uploadCapByFileKey: {},
+    finalizingStartedAtByFileKey: {},
+});
+
 export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     open,
     onClose,
     collections,
     onSave,
-    onUploadFile,
+    onUploadProgress,
+    onUploadItemComplete,
+    onUploadsFinished,
     onCreateCollection,
+    onEnsureCollections,
     defaultCollectionID,
+    initialItems,
     editItem,
 }) => {
     const isEditMode = !!editItem;
@@ -127,9 +174,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     const [selectedOption, setSelectedOption] = useState<CreateOption | null>(
         editItem?.type ?? null,
     );
-    const [selectedCollectionID, setSelectedCollectionID] = useState<
-        number | null
-    >(editItem?.collectionID ?? defaultCollectionID ?? null);
+    const [selectedCollectionIDs, setSelectedCollectionIDs] = useState<
+        number[]
+    >(editItem?.collectionID ? [editItem.collectionID] : []);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -137,7 +184,34 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         editItem ? (editItem.data as Record<string, string>) : {},
     );
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedUploadItems, setSelectedUploadItems] = useState<
+        LockerUploadCandidate[]
+    >([]);
+    const [
+        selectedCollectionNamesByFileKey,
+        setSelectedCollectionNamesByFileKey,
+    ] = useState<Record<string, string[]>>({});
+    const [customCollectionNames, setCustomCollectionNames] = useState<
+        string[]
+    >([]);
+    const [completedFileKeys, setCompletedFileKeys] = useState<Set<string>>(
+        () => new Set(),
+    );
+    const [failedFileKeys, setFailedFileKeys] = useState<Set<string>>(
+        () => new Set(),
+    );
+    const [uploadingFileKeys, setUploadingFileKeys] = useState<Set<string>>(
+        () => new Set(),
+    );
+    const [uploadProgressByFileKey, setUploadProgressByFileKey] = useState<
+        Record<string, LockerUploadProgress | null>
+    >({});
+    const [uploadCapByFileKey, setUploadCapByFileKey] = useState<
+        Record<string, number>
+    >({});
+    const [finalizingStartedAtByFileKey, setFinalizingStartedAtByFileKey] =
+        useState<Record<string, number>>({});
+    const [progressTick, setProgressTick] = useState(() => Date.now());
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isFileMode = selectedOption === "file";
@@ -151,56 +225,131 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
     displayCollectionsRef.current = displayCollections;
 
     // Keep this stable so collection refreshes do not look like dialog resets.
-    const normalizeSelectedCollectionID = useCallback(
-        (collectionID: number | null | undefined) =>
-            collectionID !== null &&
-            collectionID !== undefined &&
-            displayCollectionsRef.current.some(
-                (collection) => collection.id === collectionID,
-            )
-                ? collectionID
-                : null,
+    const normalizeSelectedCollectionIDs = useCallback(
+        (collectionIDs: number[]) =>
+            collectionIDs.filter((collectionID) =>
+                displayCollectionsRef.current.some(
+                    (collection) => collection.id === collectionID,
+                ),
+            ),
         [],
     );
+
+    const resetUploadState = useCallback(() => {
+        const nextState = emptyUploadState();
+        setCompletedFileKeys(nextState.completedFileKeys);
+        setFailedFileKeys(nextState.failedFileKeys);
+        setUploadingFileKeys(nextState.uploadingFileKeys);
+        setUploadProgressByFileKey(nextState.uploadProgressByFileKey);
+        setUploadCapByFileKey(nextState.uploadCapByFileKey);
+        setFinalizingStartedAtByFileKey(nextState.finalizingStartedAtByFileKey);
+    }, []);
 
     useEffect(() => {
         if (!open) {
             return;
         }
 
-        setSelectedOption(editItem?.type ?? null);
-        setSelectedCollectionID(
+        setSelectedOption(
+            editItem?.type ?? (initialItems?.length ? "file" : null),
+        );
+        const defaultCollectionName =
+            defaultCollectionID !== null && defaultCollectionID !== undefined
+                ? displayCollectionsRef.current.find(
+                      (collection) => collection.id === defaultCollectionID,
+                  )?.name
+                : undefined;
+        setSelectedCollectionIDs(
             isEditMode
                 ? editCollectionID
-                : normalizeSelectedCollectionID(defaultCollectionID),
+                    ? [editCollectionID]
+                    : []
+                : normalizeSelectedCollectionIDs(
+                      defaultCollectionID !== null &&
+                          defaultCollectionID !== undefined
+                          ? [defaultCollectionID]
+                          : [],
+                  ),
         );
         setFormData(editItem ? (editItem.data as Record<string, string>) : {});
         setShowPassword(false);
-        setSelectedFile(null);
+        setSelectedUploadItems(initialItems ?? []);
+        setCustomCollectionNames([]);
+        setSelectedCollectionNamesByFileKey(
+            collectionNamesByUploadItem(
+                initialItems ?? [],
+                defaultCollectionName,
+            ),
+        );
+        resetUploadState();
         setError(null);
     }, [
         defaultCollectionID,
         editCollectionID,
         editItem,
+        initialItems,
         isEditMode,
-        normalizeSelectedCollectionID,
+        normalizeSelectedCollectionIDs,
         open,
+        resetUploadState,
     ]);
 
     useEffect(() => {
         if (
             !open ||
             isEditMode ||
-            selectedCollectionID === null ||
-            displayCollections.some(
-                (collection) => collection.id === selectedCollectionID,
+            selectedCollectionIDs.every((selectedCollectionID) =>
+                displayCollections.some(
+                    (collection) => collection.id === selectedCollectionID,
+                ),
             )
         ) {
             return;
         }
 
-        setSelectedCollectionID(null);
-    }, [displayCollections, isEditMode, open, selectedCollectionID]);
+        setSelectedCollectionIDs((current) =>
+            current.filter((selectedCollectionID) =>
+                displayCollections.some(
+                    (collection) => collection.id === selectedCollectionID,
+                ),
+            ),
+        );
+    }, [displayCollections, isEditMode, open, selectedCollectionIDs]);
+
+    useEffect(() => {
+        if (
+            !open ||
+            isEditMode ||
+            selectedCollectionIDs.length > 0 ||
+            defaultCollectionID === null ||
+            defaultCollectionID === undefined ||
+            !displayCollections.some(
+                (collection) => collection.id === defaultCollectionID,
+            )
+        ) {
+            return;
+        }
+
+        setSelectedCollectionIDs([defaultCollectionID]);
+    }, [
+        defaultCollectionID,
+        displayCollections,
+        isEditMode,
+        open,
+        selectedCollectionIDs.length,
+    ]);
+
+    useEffect(() => {
+        if (!uploading) {
+            return;
+        }
+
+        const interval = window.setInterval(() => {
+            setProgressTick(Date.now());
+        }, 200);
+
+        return () => window.clearInterval(interval);
+    }, [uploading]);
 
     const handleClose = useCallback(() => {
         if (saving || uploading) {
@@ -209,16 +358,52 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
         setError(null);
         setShowPassword(false);
-        setSelectedFile(null);
+        setSelectedUploadItems([]);
+        setCustomCollectionNames([]);
+        setSelectedCollectionNamesByFileKey({});
+        resetUploadState();
         onClose();
-    }, [onClose, saving, uploading]);
+    }, [onClose, resetUploadState, saving, uploading]);
 
-    const handleSelectOption = useCallback((option: CreateOption) => {
-        setSelectedOption(option);
+    const handleStepBackToOptions = useCallback(() => {
+        if (isEditMode || saving || uploading) {
+            return;
+        }
+
+        setSelectedOption(null);
         setFormData({});
-        setSelectedFile(null);
+        setShowPassword(false);
         setError(null);
-    }, []);
+    }, [isEditMode, saving, uploading]);
+
+    const handleDialogClose = useCallback(
+        (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+            if (
+                reason === "escapeKeyDown" &&
+                selectedType !== null &&
+                !isEditMode
+            ) {
+                handleStepBackToOptions();
+                return;
+            }
+
+            handleClose();
+        },
+        [handleClose, handleStepBackToOptions, isEditMode, selectedType],
+    );
+
+    const handleSelectOption = useCallback(
+        (option: CreateOption) => {
+            setSelectedOption(option);
+            setFormData({});
+            setSelectedUploadItems([]);
+            setCustomCollectionNames([]);
+            setSelectedCollectionNamesByFileKey({});
+            resetUploadState();
+            setError(null);
+        },
+        [resetUploadState],
+    );
 
     const handleFieldChange = useCallback((field: string, value: string) => {
         setFormData((previous) => ({ ...previous, [field]: value }));
@@ -227,17 +412,33 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
 
     const handleFileSelect = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
-            const file = event.target.files?.[0];
-            if (file) {
-                setSelectedFile(file);
+            const files = Array.from(event.target.files ?? []);
+            if (files.length > 0) {
+                const defaultCollectionName =
+                    selectedCollectionIDs.length > 0
+                        ? displayCollectionsRef.current.find((collection) =>
+                              selectedCollectionIDs.includes(collection.id),
+                          )?.name
+                        : undefined;
+                const items = files.map((file) => ({
+                    file,
+                    relativePath: file.webkitRelativePath || file.name,
+                    suggestedCollectionNames: [],
+                }));
+                setSelectedUploadItems(items);
+                setCustomCollectionNames([]);
+                setSelectedCollectionNamesByFileKey(
+                    collectionNamesByUploadItem(items, defaultCollectionName),
+                );
+                resetUploadState();
                 setError(null);
             }
         },
-        [],
+        [resetUploadState, selectedCollectionIDs],
     );
 
     const handleSave = useCallback(async () => {
-        if (!selectedType || selectedCollectionID === null) {
+        if (!selectedType || selectedCollectionIDs.length === 0) {
             return;
         }
 
@@ -256,7 +457,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                     .filter(([, value]) => value.trim())
                     .map(([key, value]) => [key, value.trim()]),
             );
-            await onSave(selectedType, cleanData, selectedCollectionID);
+            await onSave(selectedType, cleanData, selectedCollectionIDs);
             handleClose();
         } catch (error) {
             log.error("Failed to save Locker item", error);
@@ -264,47 +465,242 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
         } finally {
             setSaving(false);
         }
-    }, [formData, handleClose, onSave, selectedCollectionID, selectedType]);
+    }, [formData, handleClose, onSave, selectedCollectionIDs, selectedType]);
 
     const handleUpload = useCallback(async () => {
-        if (!selectedFile || selectedCollectionID === null || !onUploadFile) {
+        if (selectedUploadItems.length === 0 || !onUploadProgress) {
+            return;
+        }
+
+        const pendingUploadItems = selectedUploadItems.filter(
+            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        );
+        if (pendingUploadItems.length === 0) {
             return;
         }
 
         setUploading(true);
         setError(null);
+        const pendingUploadFileKeys = new Set(
+            pendingUploadItems.map((item) => uploadQueueItemKey(item)),
+        );
+        setFailedFileKeys((current) => {
+            const next = new Set(current);
+            pendingUploadFileKeys.forEach((fileKey) => next.delete(fileKey));
+            return next;
+        });
+        setUploadingFileKeys((current) => {
+            const next = new Set(current);
+            pendingUploadFileKeys.forEach((fileKey) => next.delete(fileKey));
+            return next;
+        });
+        setUploadProgressByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
+        setUploadCapByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
+        setFinalizingStartedAtByFileKey((current) =>
+            Object.fromEntries(
+                Object.entries(current).filter(
+                    ([fileKey]) => !pendingUploadFileKeys.has(fileKey),
+                ),
+            ),
+        );
+        let uploadedCount = 0;
         try {
-            await onUploadFile(selectedFile, selectedCollectionID);
-            handleClose();
+            const existingNormalizedNameToID = new Map(
+                displayCollections.map((collection) => [
+                    normalizeCollectionName(collection.name),
+                    collection.id,
+                ]),
+            );
+            const normalizedNameToIDResult = await onEnsureCollections?.(
+                dedupeCollectionNames(
+                    Object.values(selectedCollectionNamesByFileKey).flat(),
+                ),
+            );
+            const normalizedNameToID = new Map(existingNormalizedNameToID);
+            if (normalizedNameToIDResult instanceof Map) {
+                for (const [name, id] of normalizedNameToIDResult.entries()) {
+                    normalizedNameToID.set(normalizeCollectionName(name), id);
+                }
+            } else {
+                for (const [name, id] of Object.entries(
+                    normalizedNameToIDResult ?? {},
+                )) {
+                    normalizedNameToID.set(normalizeCollectionName(name), id);
+                }
+            }
+            const uploadTargets = pendingUploadItems.map((item) => {
+                const fileKey = uploadQueueItemKey(item);
+                const collectionIDs = dedupeCollectionNames(
+                    selectedCollectionNamesByFileKey[fileKey] ?? [],
+                )
+                    .map((name) =>
+                        normalizedNameToID.get(normalizeCollectionName(name)),
+                    )
+                    .filter((id): id is number => typeof id === "number");
+                return { item, fileKey, collectionIDs };
+            });
+
+            if (
+                uploadTargets.some(
+                    ({ collectionIDs }) => collectionIDs.length === 0,
+                )
+            ) {
+                setError(t("required_field"));
+                return;
+            }
+
+            let nextIndex = 0;
+            const worker = async () => {
+                while (true) {
+                    const target = uploadTargets[nextIndex];
+                    nextIndex += 1;
+                    if (!target) {
+                        return;
+                    }
+
+                    const { item, fileKey, collectionIDs } = target;
+                    setUploadingFileKeys((current) =>
+                        new Set(current).add(fileKey),
+                    );
+                    setUploadCapByFileKey((current) => ({
+                        ...current,
+                        [fileKey]: 90 + Math.floor(Math.random() * 10),
+                    }));
+                    setUploadProgressByFileKey((current) => ({
+                        ...current,
+                        [fileKey]: { phase: "preparing" },
+                    }));
+
+                    try {
+                        await onUploadProgress(
+                            item.file,
+                            collectionIDs,
+                            (progress) => {
+                                if (progress.phase === "finalizing") {
+                                    setFinalizingStartedAtByFileKey(
+                                        (current) =>
+                                            current[fileKey]
+                                                ? current
+                                                : {
+                                                      ...current,
+                                                      [fileKey]: Date.now(),
+                                                  },
+                                    );
+                                }
+                                setUploadProgressByFileKey((current) => ({
+                                    ...current,
+                                    [fileKey]: progress,
+                                }));
+                            },
+                        );
+                        uploadedCount += 1;
+                        setCompletedFileKeys((current) =>
+                            new Set(current).add(fileKey),
+                        );
+                        setFailedFileKeys((current) => {
+                            const next = new Set(current);
+                            next.delete(fileKey);
+                            return next;
+                        });
+                        onUploadItemComplete?.();
+                    } catch (error) {
+                        log.error("Failed to upload Locker file", error);
+                        const formattedError = await formatLockerMutationError(
+                            error,
+                            "uploadFile",
+                        );
+                        setError((current) => current ?? formattedError);
+                        setFailedFileKeys((current) =>
+                            new Set(current).add(fileKey),
+                        );
+                    } finally {
+                        setUploadingFileKeys((current) => {
+                            const next = new Set(current);
+                            next.delete(fileKey);
+                            return next;
+                        });
+                    }
+                }
+            };
+
+            await Promise.all(
+                Array.from({
+                    length: Math.min(
+                        MAX_PARALLEL_UPLOADS,
+                        selectedUploadItems.length,
+                    ),
+                }).map(() => worker()),
+            );
+
+            if (uploadedCount > 0) {
+                await onUploadsFinished?.(uploadedCount);
+            }
+            if (
+                completedFileKeys.size + uploadedCount ===
+                selectedUploadItems.length
+            ) {
+                handleClose();
+            }
         } catch (error) {
-            log.error("Failed to upload Locker file", error);
+            log.error("Failed to upload Locker files", error);
             setError(await formatLockerMutationError(error, "uploadFile"));
         } finally {
             setUploading(false);
         }
-    }, [handleClose, onUploadFile, selectedCollectionID, selectedFile]);
+    }, [
+        handleClose,
+        displayCollections,
+        onEnsureCollections,
+        onUploadProgress,
+        onUploadItemComplete,
+        onUploadsFinished,
+        completedFileKeys,
+        selectedCollectionNamesByFileKey,
+        selectedUploadItems,
+    ]);
 
     const canSave =
         selectedType !== null &&
-        selectedCollectionID !== null &&
+        selectedCollectionIDs.length > 0 &&
         getRequiredFields(selectedType).every((field) =>
             formData[field]?.trim(),
         );
 
     const canUpload =
-        isFileMode && selectedCollectionID !== null && selectedFile !== null;
+        isFileMode &&
+        selectedUploadItems.length > 0 &&
+        selectedUploadItems.every(
+            (item) =>
+                (selectedCollectionNamesByFileKey[uploadQueueItemKey(item)]
+                    ?.length ?? 0) > 0,
+        ) &&
+        selectedUploadItems.some(
+            (item) => !completedFileKeys.has(uploadQueueItemKey(item)),
+        );
 
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={handleDialogClose}
             fullWidth
             maxWidth="sm"
             slotProps={{
                 paper: {
                     sx: {
+                        ...lockerDialogPaperSx,
                         maxHeight: "min(720px, 90vh)",
-                        borderRadius: "16px",
                         width: "min(100%, 520px)",
                     },
                 },
@@ -321,7 +717,9 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 {isEditMode
                     ? t("editItem")
                     : isFileMode
-                      ? t("saveDocumentTitle")
+                      ? selectedUploadItems.length > 1
+                          ? t("saveDocumentsTitle")
+                          : t("saveDocumentTitle")
                       : selectedType
                         ? typeDisplayName(selectedType)
                         : t("saveToLocker")}
@@ -353,149 +751,81 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                 )}
 
                 {isFileMode && (
-                    <Stack sx={{ gap: 2.5, pt: 0.5 }}>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            hidden
-                            onChange={handleFileSelect}
-                        />
-
-                        {!selectedFile ? (
-                            <ButtonBase
-                                onClick={() => fileInputRef.current?.click()}
-                                sx={(theme) => ({
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: 1.5,
-                                    p: 4,
-                                    borderRadius: "16px",
-                                    border: `2px dashed ${theme.vars.palette.divider}`,
-                                    backgroundColor:
-                                        theme.vars.palette.fill.faint,
-                                    transition: "background-color 0.15s",
-                                    "&:hover": {
-                                        backgroundColor:
-                                            theme.vars.palette.fill.faintHover,
-                                    },
-                                })}
-                            >
-                                <CloudUploadOutlinedIcon
-                                    sx={{ fontSize: 40, color: "text.faint" }}
-                                />
-                                <Typography
-                                    variant="body"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    {t("clickHereToUpload")}
-                                </Typography>
-                            </ButtonBase>
-                        ) : (
-                            <Stack
-                                direction="row"
-                                sx={{
-                                    alignItems: "center",
-                                    gap: 1.5,
-                                    p: 2,
-                                    borderRadius: "12px",
-                                    backgroundColor: (theme) =>
-                                        theme.vars.palette.fill.faint,
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        width: 48,
-                                        height: 48,
-                                        borderRadius: "12px",
-                                        backgroundColor: lockerItemIconConfig(
-                                            "file",
-                                            selectedFile.name,
-                                        ).backgroundColor,
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    {lockerItemIcon("file", {
-                                        fileName: selectedFile.name,
-                                        size: 24,
-                                        strokeWidth: 1.9,
-                                    })}
-                                </Box>
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                    <Typography variant="body" noWrap>
-                                        {selectedFile.name}
-                                    </Typography>
-                                    <Typography
-                                        variant="small"
-                                        sx={{ color: "text.faint" }}
-                                    >
-                                        {formatFileSize(selectedFile.size)}
-                                    </Typography>
-                                </Box>
-                                <FocusVisibleButton
-                                    size="small"
-                                    color="secondary"
-                                    onClick={() => {
-                                        setSelectedFile(null);
-                                        if (fileInputRef.current) {
-                                            fileInputRef.current.value = "";
-                                        }
-                                    }}
-                                >
-                                    {t("change")}
-                                </FocusVisibleButton>
-                            </Stack>
-                        )}
-
-                        {uploading && (
-                            <Box sx={{ width: "100%" }}>
-                                <LinearProgress />
-                            </Box>
-                        )}
-
-                        {!isEditMode && (
-                            <CollectionSelector
-                                collections={displayCollections}
-                                selectedID={selectedCollectionID}
-                                onSelect={setSelectedCollectionID}
-                                onCreateCollection={onCreateCollection}
-                            />
-                        )}
-
-                        {error && (
-                            <Typography
-                                variant="small"
-                                sx={{ color: "critical.main" }}
-                            >
-                                {error}
-                            </Typography>
-                        )}
-
-                        <Stack direction="row" sx={{ gap: 1, pt: 1 }}>
-                            <FocusVisibleButton
-                                fullWidth
-                                color="secondary"
-                                onClick={handleClose}
-                                disabled={uploading}
-                                sx={{ borderRadius: "16px", py: 1.25 }}
-                            >
-                                {t("cancel")}
-                            </FocusVisibleButton>
-                            <LoadingButton
-                                fullWidth
-                                color="accent"
-                                loading={uploading}
-                                disabled={!canUpload}
-                                sx={{ borderRadius: "16px", py: 1.25 }}
-                                onClick={() => void handleUpload()}
-                            >
-                                {t("upload")}
-                            </LoadingButton>
-                        </Stack>
-                    </Stack>
+                    <FileUploadSection
+                        fileInputRef={fileInputRef}
+                        selectedUploadItems={selectedUploadItems}
+                        collections={displayCollections}
+                        availableCollectionNames={customCollectionNames}
+                        selectedCollectionNamesByFileKey={
+                            selectedCollectionNamesByFileKey
+                        }
+                        completedFileKeys={completedFileKeys}
+                        failedFileKeys={failedFileKeys}
+                        uploadingFileKeys={uploadingFileKeys}
+                        uploadProgressByFileKey={uploadProgressByFileKey}
+                        uploadCapByFileKey={uploadCapByFileKey}
+                        finalizingStartedAtByFileKey={
+                            finalizingStartedAtByFileKey
+                        }
+                        progressTick={progressTick}
+                        uploading={uploading}
+                        error={error}
+                        canUpload={canUpload}
+                        onFileSelect={handleFileSelect}
+                        onToggleCollectionName={(fileKey, name) =>
+                            setSelectedCollectionNamesByFileKey((current) => ({
+                                ...current,
+                                [fileKey]: toggleCollectionName(
+                                    current[fileKey] ?? [],
+                                    name,
+                                ),
+                            }))
+                        }
+                        onAddCollectionName={(fileKey, name) => {
+                            setCustomCollectionNames((current) =>
+                                addCollectionName(current, name),
+                            );
+                            setSelectedCollectionNamesByFileKey((current) => ({
+                                ...current,
+                                [fileKey]: addCollectionName(
+                                    current[fileKey] ?? [],
+                                    name,
+                                ),
+                            }));
+                        }}
+                        onAddAvailableCollectionName={(name) =>
+                            setCustomCollectionNames((current) =>
+                                addCollectionName(current, name),
+                            )
+                        }
+                        onSetCollectionNamesForAllItems={(names) =>
+                            setSelectedCollectionNamesByFileKey(
+                                Object.fromEntries(
+                                    selectedUploadItems.map((item) => [
+                                        uploadQueueItemKey(item),
+                                        names,
+                                    ]),
+                                ),
+                            )
+                        }
+                        onRemoveItem={(fileKey) => {
+                            setSelectedUploadItems((current) =>
+                                current.filter(
+                                    (item) =>
+                                        uploadQueueItemKey(item) !== fileKey,
+                                ),
+                            );
+                            setSelectedCollectionNamesByFileKey((current) =>
+                                Object.fromEntries(
+                                    Object.entries(current).filter(
+                                        ([key]) => key !== fileKey,
+                                    ),
+                                ),
+                            );
+                        }}
+                        onClose={handleClose}
+                        onUpload={handleUpload}
+                    />
                 )}
 
                 {selectedType && (
@@ -510,12 +840,22 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                             }
                         />
 
-                        <CollectionSelector
-                            collections={displayCollections}
-                            selectedID={selectedCollectionID}
-                            onSelect={setSelectedCollectionID}
-                            onCreateCollection={onCreateCollection}
-                        />
+                        {!isEditMode && (
+                            <CollectionSelector
+                                collections={displayCollections}
+                                selectedIDs={selectedCollectionIDs}
+                                onToggle={(collectionID) =>
+                                    setSelectedCollectionIDs((current) =>
+                                        current.includes(collectionID)
+                                            ? current.filter(
+                                                  (id) => id !== collectionID,
+                                              )
+                                            : [...current, collectionID],
+                                    )
+                                }
+                                onCreateCollection={onCreateCollection}
+                            />
+                        )}
 
                         {error && (
                             <Typography
@@ -542,7 +882,7 @@ export const CreateItemDialog: React.FC<CreateItemDialogProps> = ({
                                 disabled={!canSave}
                                 onClick={() => void handleSave()}
                             >
-                                {isEditMode ? t("saveRecord") : t("create")}
+                                {t("saveRecord")}
                             </LoadingButton>
                         </Stack>
                     </Stack>
@@ -820,14 +1160,27 @@ const typeDisplayName = (type: LockerItemType): string => {
 
 const CollectionSelector: React.FC<{
     collections: LockerCollection[];
-    selectedID: number | null;
-    onSelect: (id: number) => void;
+    selectedIDs: number[];
+    onToggle: (id: number) => void;
     onCreateCollection?: (name: string) => Promise<number>;
-}> = ({ collections, selectedID, onSelect, onCreateCollection }) => {
+}> = ({ collections, selectedIDs, onToggle, onCreateCollection }) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [createName, setCreateName] = useState("");
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
+    const orderedCollections = useMemo(() => {
+        const selectedIDSet = new Set(selectedIDs);
+        const sortedCollections = [...collections].sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+        );
+        const selectedCollections = sortedCollections.filter((collection) =>
+            selectedIDSet.has(collection.id),
+        );
+        const remainingCollections = sortedCollections.filter(
+            (collection) => !selectedIDSet.has(collection.id),
+        );
+        return [...selectedCollections, ...remainingCollections];
+    }, [collections, selectedIDs]);
 
     const handleCreateCollection = useCallback(async () => {
         const name = createName.trim();
@@ -839,7 +1192,7 @@ const CollectionSelector: React.FC<{
         setCreateError(null);
         try {
             const newCollectionID = await onCreateCollection(name);
-            onSelect(newCollectionID);
+            onToggle(newCollectionID);
             setCreateName("");
             setCreateOpen(false);
         } catch (error) {
@@ -851,87 +1204,27 @@ const CollectionSelector: React.FC<{
         } finally {
             setCreating(false);
         }
-    }, [createName, onCreateCollection, onSelect]);
+    }, [createName, onCreateCollection, onToggle]);
 
     return (
         <Box>
-            <Stack
-                direction="row"
-                sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 1,
-                    mb: 1.5,
-                }}
-            >
-                <Typography
-                    variant="small"
-                    sx={{
-                        color: "text.faint",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        display: "block",
-                    }}
-                >
-                    {t("collections")}
-                </Typography>
-            </Stack>
-
-            {collections.length > 0 || onCreateCollection ? (
-                <Stack direction="row" sx={{ gap: 1.5, flexWrap: "wrap" }}>
-                    {onCreateCollection && (
-                        <ButtonBase
-                            onClick={() => {
-                                setCreateOpen((open) => !open);
-                                setCreateError(null);
-                            }}
-                            sx={(theme) => ({
-                                borderRadius: "999px",
-                                px: 1.5,
-                                py: 0.875,
-                                border: `1px dotted ${theme.vars.palette.stroke.muted}`,
-                                color: theme.vars.palette.text.muted,
-                                backgroundColor: createOpen
-                                    ? theme.vars.palette.fill.faint
-                                    : "transparent",
-                            })}
-                        >
-                            <Typography variant="small">
-                                + {t("collection")}
-                            </Typography>
-                        </ButtonBase>
-                    )}
-                    {collections.map((collection) => (
-                        <ButtonBase
-                            key={collection.id}
-                            onClick={() => onSelect(collection.id)}
-                            sx={(theme) => ({
-                                borderRadius: "999px",
-                                px: 1.5,
-                                py: 0.875,
-                                backgroundColor:
-                                    selectedID === collection.id
-                                        ? theme.vars.palette.primary.main
-                                        : theme.vars.palette.fill.faint,
-                                color:
-                                    selectedID === collection.id
-                                        ? theme.vars.palette.primary
-                                              .contrastText
-                                        : theme.vars.palette.text.base,
-                            })}
-                        >
-                            <Typography variant="small">
-                                {collection.name}
-                            </Typography>
-                        </ButtonBase>
-                    ))}
-                </Stack>
-            ) : (
-                <Typography variant="body" sx={{ color: "text.muted" }}>
-                    {t("noCollectionsAvailableForSelection")}
-                </Typography>
-            )}
+            <CollectionChipRow
+                items={orderedCollections.map((collection) => ({
+                    key: String(collection.id),
+                    label: collection.name,
+                    selected: selectedIDs.includes(collection.id),
+                    onClick: () => onToggle(collection.id),
+                }))}
+                createOpen={createOpen}
+                onCreateClick={
+                    onCreateCollection
+                        ? () => {
+                              setCreateOpen((open) => !open);
+                              setCreateError(null);
+                          }
+                        : undefined
+                }
+            />
 
             {createOpen && onCreateCollection && (
                 <Stack sx={{ gap: 1, mt: 1.5 }}>
@@ -957,6 +1250,13 @@ const CollectionSelector: React.FC<{
                                 setCreateError(null);
                             }}
                             onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setCreateOpen(false);
+                                    setCreateError(null);
+                                    return;
+                                }
                                 if (event.key === "Enter") {
                                     event.preventDefault();
                                     void handleCreateCollection();
@@ -993,17 +1293,4 @@ const CollectionSelector: React.FC<{
             )}
         </Box>
     );
-};
-
-const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) {
-        return `${bytes} B`;
-    }
-    if (bytes < 1024 * 1024) {
-        return `${(bytes / 1024).toFixed(1)} KB`;
-    }
-    if (bytes < 1024 * 1024 * 1024) {
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 };

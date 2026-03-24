@@ -285,7 +285,6 @@
   "discover_wallpapers": "Baggrundsbilleder",
   "discover_food": "Mad",
   "discover_sunset": "Solnedgang",
-  "mlIndexingDescription": "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk.",
   "loadingModel": "Downloader modeller...",
   "waitingForWifi": "Venter på Wi-fi...",
   "status": "Status",

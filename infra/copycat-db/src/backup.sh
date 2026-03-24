@@ -66,7 +66,7 @@ else
                 '
         )"
 
-        scw rdb endpoint delete endpoint-id="$PUBLIC_ENDPOINT_ID" instance-id="$BACKUP_INSTANCE_ID"
+        scw rdb endpoint delete "$PUBLIC_ENDPOINT_ID" instance-id="$BACKUP_INSTANCE_ID"
         scw rdb instance wait "$BACKUP_INSTANCE_ID" timeout=12h
 
         DELETE_INSTANCE_ID=$BACKUP_INSTANCE_ID
@@ -85,7 +85,7 @@ else
     BACKUP_ID=$(scw rdb backup create instance-id="$BACKUP_INSTANCE_ID" \
         name=$BACKUP_NAME expires-at=$EXPIRY \
         database-name=ente_db -o json | jq -r '.id')
-    scw rdb backup wait $BACKUP_ID timeout=12h
+    scw rdb backup wait $BACKUP_ID timeout=18h
     scw rdb backup download output=$BACKUP_FILE \
         $(scw rdb backup export $BACKUP_ID --wait -o json | jq -r '.id')
 

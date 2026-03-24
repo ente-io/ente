@@ -358,6 +358,7 @@ class _MachineLearningSettingsPageState
             value: () => localSettings.isMLLocalIndexingEnabled,
             onChanged: () async {
               final localIndexing = await localSettings.toggleLocalMLIndexing();
+              Bus.instance.fire(NotificationEvent());
               if (localIndexing) {
                 unawaited(MLService.instance.runAllML(force: true));
               } else {
