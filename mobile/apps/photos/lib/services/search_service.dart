@@ -18,7 +18,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
-import "package:photos/generated/intl/app_localizations.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -702,11 +702,32 @@ class SearchService {
         .toList();
   }
 
-  Future<List<GenericSearchResult>> getLocationResults(String query) async {
+  Future<List<GenericSearchResult>> getLocationResults(
+    BuildContext context,
+    String query,
+  ) async {
     final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
-    final bool showNoLocationTag = query.length > 2 &&
-        "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
+    final normalizedQuery = query.toLowerCase();
+    final noLocationName = AppLocalizations.of(context).noLocation;
+    final noLocationTagName = AppLocalizations.of(context).noLocationTag;
+    final normalizedNoLocationName = noLocationName.toLowerCase();
+    final normalizedNoLocationTagName = noLocationTagName.toLowerCase();
+    final disambiguationPrefixLength = min(
+      normalizedNoLocationName.length,
+      normalizedNoLocationTagName.length,
+    );
+    var sharedPrefixLength = 0;
+    while (sharedPrefixLength < disambiguationPrefixLength &&
+        normalizedNoLocationName.codeUnitAt(sharedPrefixLength) ==
+            normalizedNoLocationTagName.codeUnitAt(sharedPrefixLength)) {
+      sharedPrefixLength++;
+    }
+    final bool showNoLocation = normalizedQuery.length > 2 &&
+        normalizedNoLocationName.startsWith(normalizedQuery);
+    final bool showNoLocationTag =
+        normalizedQuery.length > sharedPrefixLength &&
+            normalizedNoLocationTagName.startsWith(normalizedQuery);
 
     final List<GenericSearchResult> searchResults = [];
 
@@ -729,8 +750,29 @@ class SearchService {
         }
       }
     }
+    if (showNoLocation) {
+      final noLocationFiles = allFiles.where((file) {
+        return file.isOwner && !file.hasLocation;
+      }).toList();
+      if (noLocationFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            noLocationName,
+            noLocationFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: noLocationName,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileType,
+              matchedUploadedIDs: filesToUploadedFileIDs(noLocationFiles),
+              filterIcon: Icons.not_listed_location_outlined,
+            ),
+          ),
+        );
+      }
+    }
     if (showNoLocationTag) {
-      _logger.info("finding photos with no location");
+      _logger.info("finding photos with no location tag");
       // find files that have location but the file's location is not inside
       // any location tag
       final noLocationTagFiles = allFiles.where((file) {
@@ -752,10 +794,10 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            "No Location Tag",
+            noLocationTagName,
             noLocationTagFiles,
             hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: "No Location Tag",
+              filterName: noLocationTagName,
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),
@@ -1939,66 +1981,98 @@ class SearchService {
         fileIdToFile = await _getFileIdToFileMap(allFileIds);
       }
 
-      final List<GenericSearchResult> results = [];
-      final speciesCounters = <String, int>{};
+      // Group clusters by petId. Clusters sharing the same petId (merged)
+      // are combined into a single search result, mirroring how persons
+      // aggregate multiple clusters.
+      final petIdToClusters = <String, List<String>>{};
+      final standaloneClusters = <String>[];
+      for (final clusterId in clusterToFileIds.keys) {
+        final petId = clusterToPetId[clusterId];
+        if (petId != null) {
+          petIdToClusters.putIfAbsent(petId, () => []).add(clusterId);
+        } else {
+          standaloneClusters.add(clusterId);
+        }
+      }
 
-      // Sort clusters by size descending
-      final sortedClusterIds = clusterToFileIds.keys.toList()
-        ..sort(
-          (a, b) => clusterToFileIds[b]!
-              .length
-              .compareTo(clusterToFileIds[a]!.length),
-        );
+      // Build groups: each group is (primaryClusterId, allFiles, species, name)
+      final groups = <(String, List<EnteFile>, int, String?)>[];
 
-      for (final clusterId in sortedClusterIds) {
-        final fileIds = clusterToFileIds[clusterId]!;
+      for (final entry in petIdToClusters.entries) {
+        final clusterIds = entry.value;
+        final allFiles = <EnteFile>[];
+        int? species;
+        for (final cid in clusterIds) {
+          final fids = clusterToFileIds[cid] ?? [];
+          for (final fid in fids) {
+            final file = fileIdToFile[fid];
+            if (file != null) allFiles.add(file);
+          }
+          species ??= clusterSummaries[cid]?.$2;
+        }
+        if (allFiles.isEmpty) continue;
+        final pet = petEntities[entry.key];
+        final name =
+            pet != null && pet.data.name.isNotEmpty ? pet.data.name : null;
+        groups.add((clusterIds.first, allFiles, species ?? -1, name));
+      }
+
+      for (final clusterId in standaloneClusters) {
+        final fids = clusterToFileIds[clusterId] ?? [];
         final files = <EnteFile>[];
-        for (final fid in fileIds) {
+        for (final fid in fids) {
           final file = fileIdToFile[fid];
           if (file != null) files.add(file);
         }
         if (files.isEmpty) continue;
+        final species = clusterSummaries[clusterId]?.$2 ?? -1;
+        groups.add((clusterId, files, species, null));
+      }
 
-        final summary = clusterSummaries[clusterId];
-        final species = summary != null
-            ? (summary.$2 == 0
-                ? dogLabel
-                : summary.$2 == 1
-                    ? catLabel
-                    : petLabel)
-            : petLabel;
-        final customName = petNames[clusterId];
-        speciesCounters[species] = (speciesCounters[species] ?? 0) + 1;
-        final clusterLabel = (customName != null && customName.isNotEmpty)
+      // Sort by file count descending
+      groups.sort((a, b) => b.$2.length.compareTo(a.$2.length));
+
+      final List<GenericSearchResult> results = [];
+      final speciesCounters = <String, int>{};
+
+      for (final (primaryClusterId, files, species, customName) in groups) {
+        final speciesLabel = species == 0
+            ? dogLabel
+            : species == 1
+                ? catLabel
+                : petLabel;
+        speciesCounters[speciesLabel] =
+            (speciesCounters[speciesLabel] ?? 0) + 1;
+        final label = (customName != null && customName.isNotEmpty)
             ? customName
-            : "$species ${speciesCounters[species]}";
+            : "$speciesLabel ${speciesCounters[speciesLabel]}";
 
         results.add(
           GenericSearchResult(
             ResultType.faces,
-            clusterLabel,
+            label,
             files,
             params: {
-              kPetClusterParamId: clusterId,
+              kPetClusterParamId: primaryClusterId,
               kFileID: files.first.uploadedFileID,
-              kPetSpecies: summary?.$2 ?? -1,
+              kPetSpecies: species,
               kPetHasCustomName: customName != null && customName.isNotEmpty,
-              if (clusterToPetId.containsKey(clusterId))
-                kPetId: clusterToPetId[clusterId],
+              if (clusterToPetId.containsKey(primaryClusterId))
+                kPetId: clusterToPetId[primaryClusterId],
             },
             onResultTap: (ctx) {
               routeToPage(
                 ctx,
                 PetClusterPage(
-                  clusterId: clusterId,
-                  clusterLabel: clusterLabel,
+                  clusterId: primaryClusterId,
+                  clusterLabel: label,
                   files: files,
-                  species: summary?.$2 ?? -1,
+                  species: species,
                 ),
               );
             },
             hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: clusterLabel,
+              filterName: label,
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.faces,
               matchedUploadedIDs: filesToUploadedFileIDs(files),

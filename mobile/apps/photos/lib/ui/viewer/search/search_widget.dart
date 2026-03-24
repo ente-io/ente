@@ -271,7 +271,7 @@ class SearchWidgetState extends State<SearchWidget> {
       },
     );
 
-    _searchService.getLocationResults(query).then(
+    _searchService.getLocationResults(context, query).then(
       (locationResult) {
         onResultsReceived(locationResult);
       },
