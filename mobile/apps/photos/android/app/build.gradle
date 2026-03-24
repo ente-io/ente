@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "io.ente.photos"
     compileSdk = 36
-    ndkVersion = "28.2.13676358"
+    ndkVersion = "28.0.13004108"
 
     compileOptions {
         coreLibraryDesugaringEnabled = true
@@ -56,15 +56,12 @@ android {
     defaultConfig {
         applicationId = "io.ente.photos"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         consumerProguardFiles 'proguard-rules.pro'
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a"
-        }
     }
 
     signingConfigs {
@@ -123,13 +120,6 @@ android {
               arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
             }
           }
-        }
-    }
-
-    packagingOptions {
-        jniLibs {
-            pickFirsts += ['**/libc++_shared.so']
-            useLegacyPackaging = false
         }
     }
 
