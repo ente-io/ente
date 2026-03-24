@@ -21,7 +21,7 @@ import (
 const (
 	StorageWarningMailLock = "storage_warning_mail_lock"
 
-	storageWarningBaseTemplate = "base.html"
+	storageWarningBaseTemplate = "ente_base.html"
 	storageWarningFromName     = "Ente"
 	storageWarningFromEmail    = "support@ente.io"
 
