@@ -154,7 +154,7 @@ const HELP_FAQS = [
                 is also{" "}
                 <Box
                     component="a"
-                    href="https://github.com/ente-io/ente"
+                    href="https://github.com/ente/ente"
                     target="_blank"
                     rel="noreferrer"
                     sx={{
@@ -193,7 +193,7 @@ const HELP_FAQS = [
                 Yes! 2of3 is part of Ente&apos;s{" "}
                 <Box
                     component="a"
-                    href="https://github.com/ente-io/ente"
+                    href="https://github.com/ente/ente"
                     target="_blank"
                     rel="noreferrer"
                     sx={{
@@ -2283,7 +2283,7 @@ const Page = () => {
                                 </Box>
                                 <Box
                                     component="a"
-                                    href="https://github.com/ente-io/ente"
+                                    href="https://github.com/ente/ente"
                                     target="_blank"
                                     rel="noreferrer"
                                     aria-label="View source on GitHub"
