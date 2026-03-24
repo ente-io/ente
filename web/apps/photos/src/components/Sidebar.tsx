@@ -79,6 +79,7 @@ import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSet
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
+    useAppLockSnapshot,
     useHLSGenerationStatusSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
@@ -244,9 +245,6 @@ type FreeUpSpaceAction = Extract<
 
 const appLockReauthenticationCancelledMessage =
     "app_lock_reauthentication_cancelled";
-
-const isAppLockFeatureEnabled =
-    process.env.NEXT_PUBLIC_ENTE_ENABLE_APP_LOCK == "true";
 
 const isReauthenticationCancellation = (error: unknown) =>
     error == undefined ||
@@ -1116,7 +1114,7 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
-                {isDesktop && isAppLockFeatureEnabled && (
+                {isDesktop && (
                     <DesktopAppLockSettings
                         onAuthenticateUser={onAuthenticateUser}
                         onRootClose={onRootClose}
@@ -1164,6 +1162,7 @@ const Account: React.FC<AccountProps> = ({
 const DesktopAppLockSettings: React.FC<
     Pick<SidebarProps, "onAuthenticateUser"> & Pick<AccountProps, "onRootClose">
 > = ({ onAuthenticateUser, onRootClose }) => {
+    const appLock = useAppLockSnapshot();
     const { show, props } = useModalVisibility();
 
     const handleOpen = useCallback(async () => {
@@ -1176,14 +1175,25 @@ const DesktopAppLockSettings: React.FC<
         }
     }, [onAuthenticateUser, show]);
 
-    return isAppLockFeatureEnabled ? (
+    return (
         <>
             <RowButtonGroup>
-                <RowButton label={t("app_lock")} onClick={handleOpen} />
+                <RowButton
+                    label={t("app_lock")}
+                    caption={
+                        !appLock.supported
+                            ? t("app_lock_not_supported", {
+                                  defaultValue: "App lock is not supported",
+                              })
+                            : undefined
+                    }
+                    disabled={!appLock.supported}
+                    onClick={handleOpen}
+                />
             </RowButtonGroup>
             <AppLockSettings {...props} onRootClose={onRootClose} />
         </>
-    ) : null;
+    );
 };
 
 type PreferencesProps = NestedSidebarDrawerVisibilityProps & {

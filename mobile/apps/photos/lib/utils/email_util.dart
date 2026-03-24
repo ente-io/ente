@@ -16,8 +16,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import "package:photos/generated/l10n.dart";
+import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/progress_dialog.dart";
+import 'package:photos/ui/components/base_bottom_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
@@ -260,11 +263,31 @@ Future<void> sendEmail(
       body: (body ?? '') + clientDebugInfo,
     );
     if (!didOpenComposer) {
-      _showNoMailAppsDialog(context, to);
+      await _showNoMailAppsSheet(context, to);
     }
   } catch (e) {
     _logger.severe("Failed to send emailContent to $to", e);
-    _showNoMailAppsDialog(context, to);
+    await _showNoMailAppsSheet(context, to);
+  }
+}
+
+Future<void> openEmailComposer(
+  BuildContext context, {
+  required String to,
+}) async {
+  try {
+    final didOpenComposer = await sendComposedEmail(
+      context,
+      to: to,
+      subject: '',
+      body: '',
+    );
+    if (!didOpenComposer) {
+      await _showNoMailAppsSheet(context, to);
+    }
+  } catch (e, s) {
+    _logger.severe("Failed to open email composer to $to", e, s);
+    await _showNoMailAppsSheet(context, to);
   }
 }
 
@@ -298,12 +321,10 @@ Future<bool> sendComposedEmail(
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
       // https://github.com/ente/photos-app/pull/253
-      final encodedSubject = Uri.encodeComponent(subject);
-      final encodedBody = Uri.encodeComponent(body);
-      final params = Uri(
-        scheme: 'mailto',
-        path: to,
-        query: 'subject=$encodedSubject&body=$encodedBody',
+      final params = _buildMailtoUri(
+        to,
+        subject: subject,
+        body: body,
       );
       if (!await canLaunchUrl(params)) {
         return false;
@@ -355,6 +376,25 @@ Future<bool> sendComposedEmail(
   }
 }
 
+Uri _buildMailtoUri(
+  String to, {
+  String? subject,
+  String? body,
+}) {
+  final queryParameters = <String>[];
+  if (subject != null && subject.isNotEmpty) {
+    queryParameters.add("subject=${Uri.encodeComponent(subject)}");
+  }
+  if (body != null && body.isNotEmpty) {
+    queryParameters.add("body=${Uri.encodeComponent(body)}");
+  }
+  return Uri(
+    scheme: "mailto",
+    path: to,
+    query: queryParameters.isEmpty ? null : queryParameters.join("&"),
+  );
+}
+
 Future<String> getSupportDeviceInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final platformDeviceInfo = await _getPlatformDeviceInfo();
@@ -394,18 +434,56 @@ Future<String> _clientInfo() async {
   return debugInfo;
 }
 
-void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showChoiceDialog(
+Future<void> _showNoMailAppsSheet(BuildContext context, String toEmail) async {
+  if (!context.mounted) {
+    return;
+  }
+  await showBaseBottomSheet<void>(
     context,
-    icon: Icons.email_outlined,
-    title: AppLocalizations.of(context).pleaseEmailUsAt(toEmail: toEmail),
-    firstButtonLabel: AppLocalizations.of(context).copyEmailAddress,
-    secondButtonLabel: AppLocalizations.of(context).dismiss,
-    firstButtonOnTap: () async {
-      await Clipboard.setData(ClipboardData(text: toEmail));
-      showShortToast(context, AppLocalizations.of(context).copied);
-    },
+    title: AppLocalizations.of(context).noEmailAppFound,
+    headerSpacing: 16,
+    child: _NoMailAppsSheet(toEmail: toEmail),
   );
+}
+
+class _NoMailAppsSheet extends StatelessWidget {
+  final String toEmail;
+
+  const _NoMailAppsSheet({
+    required this.toEmail,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.pleaseEmailUsAt(toEmail: toEmail),
+          style: textTheme.smallMuted,
+        ),
+        const SizedBox(height: 16),
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: l10n.copyEmailAddress,
+          onTap: () async {
+            await _copyEmailAddress(context, toEmail);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> _copyEmailAddress(BuildContext context, String toEmail) async {
+  await Clipboard.setData(ClipboardData(text: toEmail));
+  if (context.mounted) {
+    showShortToast(context, AppLocalizations.of(context).copied);
+  }
 }
 
 Future<({String osVersion, String deviceModel})>

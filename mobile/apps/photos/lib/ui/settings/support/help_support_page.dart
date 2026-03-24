@@ -8,7 +8,6 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/settings/support/ask_question_page.dart";
 import "package:photos/ui/settings/support/report_issue_page.dart";
 import "package:photos/utils/email_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
@@ -65,6 +64,62 @@ class HelpSupportPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      MenuSectionTitle(title: l10n.getInTouch),
+                      MenuItemWidgetNew(
+                        title: l10n.reportAnIssue,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedBug02,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ReportIssuePage(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: l10n.askAQuestion,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedHelpCircle,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await openEmailComposer(
+                            context,
+                            to: supportEmail,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: l10n.requestAFeature,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedIdea01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await launchUrlString(
+                            githubDiscussionsUrl,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        },
+                      ),
+                      _SupportLink(
+                        label: l10n.exportLogs,
+                        onTap: () async {
+                          await _exportLogs(context);
+                        },
+                      ),
+                      const SizedBox(height: 24),
                       MenuSectionTitle(title: l10n.browseHelpPages),
                       _buildHelpTopicItem(
                         context,
@@ -115,63 +170,6 @@ class HelpSupportPage extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 24),
-                      MenuSectionTitle(title: l10n.getInTouch),
-                      MenuItemWidgetNew(
-                        title: l10n.reportAnIssue,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedBug02,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ReportIssuePage(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: l10n.askAQuestion,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedHelpCircle,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AskQuestionPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: l10n.requestAFeature,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedIdea01,
-                        ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        onTap: () async {
-                          await launchUrlString(
-                            githubDiscussionsUrl,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        },
-                      ),
-                      _SupportLink(
-                        label: l10n.exportLogs,
-                        onTap: () async {
-                          await _exportLogs(context);
-                        },
-                      ),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -195,7 +193,6 @@ class HelpSupportPage extends StatelessWidget {
       title: title,
       subText: subText,
       subTextStyle: textTheme.miniMuted,
-      verticalPaddingWithSubText: 12,
       titleToSubTextSpacing: 2,
       leadingIconWidget: _buildIconWidget(context, icon),
       trailingIcon: Icons.chevron_right_outlined,

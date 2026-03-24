@@ -121,7 +121,6 @@
   "importAegisGuide": "Скористайтеся опцією «Export the vault» у параметрах Aegis.\n\nЯкщо ваше сховище зашифровано, вам потрібно буде ввести пароль сховища, щоб розшифрувати його.",
   "import2FasGuide": "Скористайтеся опцією «Settings->Backup -Export» у 2FAS.\n\nЯкщо ваша резервна копія зашифрована, вам потрібно буде ввести пароль, щоб розшифрувати її",
   "importLastpassGuide": "Скористайтеся опцією «Transfer accounts» у налаштуваннях Lastpass Authenticator і натисніть «Export accounts to file». Імпортуйте завантажений JSON.",
-  "importProtonAuthGuide": "Скористуйтеся опцією «Export» у налаштуваннях Proton Authenticator для експорту своїх кодів.",
   "exportCodes": "Експортувати коди",
   "importLabel": "Імпортувати",
   "importInstruction": "Будь ласка, виберіть файл, що містить список кодів у наступному форматі",

@@ -3,12 +3,18 @@
 //! This module provides the main entry points that CLI/GUI applications should use
 //! for authentication flows. It wraps the lower-level crypto operations.
 
+#[cfg(feature = "srp")]
+use crate::crypto::keys;
 use crate::crypto::{self, argon, kdf, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, Result, SrpAttributes};
 
 #[cfg(feature = "srp")]
 use super::srp::SrpSession;
+#[cfg(feature = "srp")]
+use sha2::Sha256;
+#[cfg(feature = "srp")]
+use srp::{client::SrpClient as SrpClientInner, groups::G_4096};
 
 /// Credentials derived from password for SRP authentication.
 #[derive(Debug)]
@@ -28,6 +34,31 @@ pub struct DecryptedSecrets {
     pub secret_key: Vec<u8>,
     /// Authentication token (decrypted).
     pub token: Vec<u8>,
+}
+
+/// A derived key-encryption-key and the parameters used to derive it.
+#[derive(Debug)]
+pub struct GeneratedKek {
+    /// Derived KEK bytes.
+    pub key: Vec<u8>,
+    /// Salt used for Argon2 derivation.
+    pub salt: Vec<u8>,
+    /// Argon2 memory limit in bytes.
+    pub mem_limit: u32,
+    /// Argon2 operations limit.
+    pub ops_limit: u32,
+}
+
+/// Attributes needed to register or update SRP for a user.
+#[cfg(feature = "srp")]
+#[derive(Debug)]
+pub struct GeneratedSrpSetup {
+    /// SRP salt bytes.
+    pub srp_salt: Vec<u8>,
+    /// SRP verifier bytes.
+    pub srp_verifier: Vec<u8>,
+    /// Derived 16-byte login sub-key bytes.
+    pub login_sub_key: Vec<u8>,
 }
 
 /// Derive SRP credentials from password.
@@ -77,6 +108,47 @@ pub fn derive_kek(
         crypto::decode_b64(kek_salt).map_err(|e| AuthError::Decode(format!("kek_salt: {}", e)))?;
 
     argon::derive_key(password, &salt, mem_limit, ops_limit).map_err(AuthError::from)
+}
+
+/// Generate a KEK using the current sensitive web policy.
+pub fn generate_sensitive_kek(password: &str) -> Result<GeneratedKek> {
+    let derived = argon::derive_sensitive_key(password).map_err(|e| match e {
+        crypto::CryptoError::InvalidKeyDerivationParams(_) => AuthError::Crypto(e),
+        _ => AuthError::InsufficientMemory,
+    })?;
+
+    Ok(GeneratedKek {
+        key: derived.key,
+        salt: derived.salt,
+        mem_limit: derived.mem_limit,
+        ops_limit: derived.ops_limit,
+    })
+}
+
+/// Generate a KEK using the current interactive web policy.
+pub fn generate_interactive_kek(password: &str) -> Result<GeneratedKek> {
+    let derived = argon::derive_interactive_key(password)?;
+    Ok(GeneratedKek {
+        key: derived.key,
+        salt: derived.salt,
+        mem_limit: derived.mem_limit,
+        ops_limit: derived.ops_limit,
+    })
+}
+
+/// Generate the SRP setup payload for a given KEK and SRP user ID.
+#[cfg(feature = "srp")]
+pub fn generate_srp_setup(kek: &[u8], srp_user_id: &str) -> Result<GeneratedSrpSetup> {
+    let login_sub_key = kdf::derive_login_key(kek)?;
+    let srp_salt = keys::generate_salt();
+    let client = SrpClientInner::<Sha256>::new(&G_4096);
+    let srp_verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_sub_key, &srp_salt);
+
+    Ok(GeneratedSrpSetup {
+        srp_salt,
+        srp_verifier,
+        login_sub_key,
+    })
 }
 
 /// Decrypt only the master key and secret key.
@@ -259,6 +331,49 @@ mod tests {
         // Decryption should fail
         let result = decrypt_secrets(&kek, &gen_result.key_attributes, &encrypted_token);
         assert!(matches!(result, Err(AuthError::IncorrectPassword)));
+    }
+
+    #[test]
+    fn test_generate_sensitive_kek() {
+        crate::crypto::init().unwrap();
+
+        let generated = generate_sensitive_kek("test_password").unwrap();
+
+        assert_eq!(generated.key.len(), 32);
+        assert_eq!(generated.salt.len(), 16);
+        assert!(generated.mem_limit > 0);
+        assert!(generated.ops_limit > 0);
+    }
+
+    #[test]
+    fn test_generate_interactive_kek() {
+        crate::crypto::init().unwrap();
+
+        let generated = generate_interactive_kek("test_password").unwrap();
+
+        assert_eq!(generated.key.len(), 32);
+        assert_eq!(generated.salt.len(), 16);
+        assert_eq!(
+            generated.mem_limit,
+            crate::crypto::argon::MEMLIMIT_INTERACTIVE
+        );
+        assert_eq!(
+            generated.ops_limit,
+            crate::crypto::argon::OPSLIMIT_INTERACTIVE
+        );
+    }
+
+    #[cfg(feature = "srp")]
+    #[test]
+    fn test_generate_srp_setup() {
+        crate::crypto::init().unwrap();
+
+        let generated = generate_sensitive_kek("test_password").unwrap();
+        let srp_setup = generate_srp_setup(&generated.key, "test-user-id").unwrap();
+
+        assert_eq!(srp_setup.srp_salt.len(), 16);
+        assert_eq!(srp_setup.login_sub_key.len(), 16);
+        assert!(!srp_setup.srp_verifier.is_empty());
     }
 
     #[cfg(feature = "srp")]

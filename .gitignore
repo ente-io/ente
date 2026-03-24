@@ -21,6 +21,7 @@ node_modules/
 mobile/native/android/packages/rust/build/
 mobile/native/darwin/Packages/Rust/build/
 mobile/native/darwin/Apps/ensu/build/
+mobile/native/darwin/Apps/ensu/build-native-check/
 target/
 
 # Generated native bindings / binaries (regenerate locally)

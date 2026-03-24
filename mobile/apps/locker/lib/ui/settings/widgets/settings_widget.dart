@@ -31,7 +31,7 @@ class SettingsItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        height: 56,
+        constraints: const BoxConstraints(minHeight: 56),
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: BorderRadius.circular(20),
@@ -50,6 +50,8 @@ class SettingsItem extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: textTheme.small.copyWith(
                   color: textColor ?? colorScheme.textBase,
                 ),

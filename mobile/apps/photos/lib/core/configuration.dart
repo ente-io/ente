@@ -41,6 +41,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
+import 'package:photos/utils/ios_backup_util.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -95,6 +96,10 @@ class Configuration {
         ),
       );
       _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+      final appSupportDirectory = await getApplicationSupportDirectory();
+      // Exclude Documents (SQLite, thumbnails, decrypted media) and Application Support (ML models) from backups since they’re server-derivable or must remain within the device’s E2EE boundary.
+      await excludeFromBackup(_documentsDirectory);
+      await excludeFromBackup(appSupportDirectory.path);
       _tempDocumentsDirPath = _documentsDirectory + "/temp/";
       final tempDocumentsDir = Directory(_tempDocumentsDirPath);
       await _cleanUpStaleFiles(tempDocumentsDir);
@@ -210,9 +215,6 @@ class Configuration {
         }
       }
     }
-
-    // Reset feed cutoff so it is recreated for the next login session.
-    await localSettings.clearSharedPhotoFeedCutoffTime();
 
     // Clear preferences and secure storage
     await _preferences.clear();

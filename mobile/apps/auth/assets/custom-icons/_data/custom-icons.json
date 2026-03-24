@@ -285,6 +285,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Biznet",
+      "altNames": [
+        "BiznetGio"
+      ]
+    },
+    {
       "title": "Blockchain",
       "altNames": [
         "blockchain.com",
@@ -1390,7 +1396,8 @@
       ]
     },
     {
-      "title": "nexo"
+      "title": "NEXO",
+      "slug": "nexo"
     },
     {
       "title": "Nextcloud",
@@ -2243,6 +2250,9 @@
     },
     {
       "title": "WHMCS"
+    },
+    {
+       "title": "Wick"
     },
     {
       "title": "Windscribe"

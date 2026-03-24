@@ -259,6 +259,13 @@ Locker is not intended as:
 - **Photo storage**: Use Ente Photos for photos and videos
 - **2FA code generation**: Use Ente Auth for TOTP codes
 
+### Can I import my password manager vault into Ente Locker? {#import-vault}
+
+Locker can securely store secrets such as usernames, passwords, notes, and
+files. However, it does not currently support importing vault files from other
+password managers. You would need to manually recreate any entries you want to
+use in Locker.
+
 ### Quick reference: Where to store what {#locker-where-to-store}
 
 | Item                  | Recommended App                  |

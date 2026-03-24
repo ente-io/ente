@@ -62,8 +62,15 @@ impl SrpSession {
 }
 
 // High-level API (recommended for applications)
-pub use api::{DecryptedSecrets, SrpCredentials};
-pub use api::{decrypt_keys_only, decrypt_secrets, derive_kek, derive_srp_credentials};
+#[cfg(feature = "srp")]
+pub use api::GeneratedSrpSetup;
+#[cfg(feature = "srp")]
+pub use api::generate_srp_setup;
+pub use api::{DecryptedSecrets, GeneratedKek, SrpCredentials};
+pub use api::{
+    decrypt_keys_only, decrypt_secrets, derive_kek, derive_srp_credentials,
+    generate_interactive_kek, generate_sensitive_kek,
+};
 
 // Key generation (for signup)
 pub use key_gen::{
@@ -79,7 +86,9 @@ pub use login::{
 };
 
 // Recovery
-pub use recovery::{get_recovery_key, recover_with_key};
+pub use recovery::{
+    get_recovery_key, recover_with_key, recovery_key_from_mnemonic_or_hex, recovery_key_to_mnemonic,
+};
 
 // Types
 pub use types::{

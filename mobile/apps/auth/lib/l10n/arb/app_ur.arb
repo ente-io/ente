@@ -121,7 +121,6 @@
   "importAegisGuide": "Aegis کی سیٹنگز میں ”Export the vault“ کا آپشن استعمال کریں۔\n\nاگر آپ کا والٹ انکرپٹڈ ہے، تو آپ کو والٹ کو ڈی کرپٹ کرنے کے لیے والٹ کا پاس ورڈ درج کرنا ہوگا۔",
   "import2FasGuide": "2FAS میں ”Settings->Backup -Export“ کا آپشن استعمال کریں۔\n\nاگر آپ کا بیک اپ انکرپٹڈ ہے، تو آپ کو بیک اپ کو ڈی کرپٹ کرنے کے لیے پاس ورڈ درج کرنا ہوگا۔",
   "importLastpassGuide": "LastPass Authenticator کی سیٹنگز میں ”Transfer accounts“ کا آپشن استعمال کریں اور ”Export accounts to file“ دبائیں۔\n\nڈاؤن لوڈ کردہ JSON کو امپورٹ کریں۔",
-  "importProtonAuthGuide": "اپنے کوڈز ایکسپورٹ کرنے کے لیے Proton Authenticator کی سیٹنگز میں ”Export“ کا آپشن استعمال کریں۔",
   "exportCodes": "کوڈز ایکسپورٹ کریں",
   "importLabel": "امپورٹ",
   "importInstruction": "براہ کرم ایک فائل منتخب کریں جس میں آپ کے کوڈز کی فہرست درج ذیل فارمیٹ میں ہو",

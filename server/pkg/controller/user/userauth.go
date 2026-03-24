@@ -406,11 +406,62 @@ func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, ap
 	return nil
 }
 
+// RemoveTokensForApps marks the given app tokens as deleted and evicts them from the auth cache.
+func (c *UserController) RemoveTokensForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	if err := c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
+		return err
+	}
+	if err := c.UserAuthRepo.RemoveTokensForApps(userID, apps); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	return nil
+}
+
+func (c *UserController) RemoveAllTokens(userID int64) error {
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	if err = c.deleteActiveTokenCacheEntriesForApps(userID, apps); err != nil {
+		return err
+	}
+	if err = c.UserAuthRepo.RemoveAllTokens(userID); err != nil {
+		return stacktrace.Propagate(err, "failed to remove tokens")
+	}
+	return nil
+}
+
 // TerminateSession removes the token for a user from cache and database
 func (c *UserController) TerminateSession(userID int64, token string) error {
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Photos, token))
-	c.Cache.Delete(fmt.Sprintf("%s:%s", ente.Auth, token))
+	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user apps")
+	}
+	for _, app := range apps {
+		c.Cache.Delete(fmt.Sprintf("%s:%s", app, token))
+	}
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
+}
+
+// Auth middleware trusts cached app:token entries for up to a minute, so token
+// revocation needs to evict those entries as well to take effect immediately.
+func (c *UserController) deleteActiveTokenCacheEntriesForApps(userID int64, apps []ente.App) error {
+	if len(apps) == 0 {
+		return nil
+	}
+	for _, app := range apps {
+		sessions, err := c.UserAuthRepo.GetActiveSessions(userID, app)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to get active sessions")
+		}
+		for _, session := range sessions {
+			c.Cache.Delete(fmt.Sprintf("%s:%s", app, session.Token))
+		}
+	}
+	return nil
 }
 
 func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) error {

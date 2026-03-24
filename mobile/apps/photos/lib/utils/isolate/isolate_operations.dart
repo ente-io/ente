@@ -313,12 +313,14 @@ Future<void> _ensureRustLoaded() async {
 }
 
 Future<void> _ensureRustDisposed() async {
-  final bool loaded = _isolateCache[_rustLibLoadedCacheKey] as bool? ?? false;
-  if (loaded) {
-    await _releaseRustRuntime();
-    EntePhotosRust.dispose();
-    _isolateCache.remove(_rustLibLoadedCacheKey);
-  }
+  // Intentionally a no-op.
+  //
+  // Rust ML residency is owned by the feature isolate that prepared it.
+  // The generic cache-clear path runs in multiple rust-using isolates, so
+  // letting it call process-global ML teardown would allow unrelated isolates
+  // to release indexing sessions they do not own. MLIndexingIsolate tracks
+  // whether it prepared the runtime and releases it explicitly during its own
+  // cleanup, even if the app mode or flags have changed since preparation.
 }
 
 Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
@@ -327,6 +329,16 @@ Future<void> _ensureRustRuntimePrepared(Map<String, dynamic> args) async {
     faceEmbedding: (args["faceEmbeddingModelPath"] as String?) ?? "",
     clipImage: (args["clipImageModelPath"] as String?) ?? "",
     clipText: (args["clipTextModelPath"] as String?) ?? "",
+    petFaceDetection: (args["petFaceDetectionModelPath"] as String?) ?? "",
+    petFaceEmbeddingDog:
+        (args["petFaceEmbeddingDogModelPath"] as String?) ?? "",
+    petFaceEmbeddingCat:
+        (args["petFaceEmbeddingCatModelPath"] as String?) ?? "",
+    petBodyDetection: (args["petBodyDetectionModelPath"] as String?) ?? "",
+    petBodyEmbeddingDog:
+        (args["petBodyEmbeddingDogModelPath"] as String?) ?? "",
+    petBodyEmbeddingCat:
+        (args["petBodyEmbeddingCatModelPath"] as String?) ?? "",
   );
   final providerPolicy = rust_ml.RustExecutionProviderPolicy(
     preferCoreml: args["preferCoreml"] as bool? ?? true,
@@ -374,7 +386,7 @@ Future<void> _releaseRustRuntime() async {
   try {
     await rust_ml.releaseMlRuntime();
   } catch (_) {
-    // no-op: runtime release is best-effort before process-wide bridge dispose.
+    // no-op: indexing-model release is best-effort.
   }
   _isolateCache.remove(_rustMlRuntimeConfigCacheKey);
 }
@@ -388,6 +400,12 @@ String _runtimeConfigCacheKey(
     modelPaths.faceEmbedding,
     modelPaths.clipImage,
     modelPaths.clipText,
+    modelPaths.petFaceDetection,
+    modelPaths.petFaceEmbeddingDog,
+    modelPaths.petFaceEmbeddingCat,
+    modelPaths.petBodyDetection,
+    modelPaths.petBodyEmbeddingDog,
+    modelPaths.petBodyEmbeddingCat,
     providerPolicy.preferCoreml,
     providerPolicy.preferNnapi,
     providerPolicy.preferXnnpack,
