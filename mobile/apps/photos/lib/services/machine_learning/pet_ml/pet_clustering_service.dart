@@ -580,6 +580,15 @@ extension PetClusteringDB on MLDataDB {
     );
   }
 
+  /// Remove a cluster's pet mapping (unmerge).
+  Future<void> removeClusterPetId(String clusterId) async {
+    final db = await asyncDB;
+    await db.execute(
+      'DELETE FROM $petClusterPetTable WHERE $clusterIDColumn = ?',
+      [clusterId],
+    );
+  }
+
   // ── Manual reassignment helpers ──
 
   /// Get petFaceIds for given fileIds within a specific cluster.

@@ -23,6 +23,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
+import "package:photos/ui/viewer/people/pet_clusters_page.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_pet.dart";
 import "package:photos/ui/viewer/people/save_person_banner.dart";
@@ -210,6 +211,11 @@ class _PetClusterPageState extends State<PetClusterPage> {
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.account_tree_outlined, size: 20),
+                tooltip: "View clusters",
+                onPressed: _viewClusters,
+              ),
               Text(
                 "${_files.length}",
                 style: textTheme.body.copyWith(color: colorScheme.textMuted),
@@ -262,6 +268,19 @@ class _PetClusterPageState extends State<PetClusterPage> {
         _isBannerDismissed = true;
       });
     }
+  }
+
+  Future<void> _viewClusters() async {
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final clusterToPetId = await mlDataDB.getClusterToPetId();
+    final petId = clusterToPetId[widget.clusterId];
+    if (petId == null || !mounted) return;
+    await routeToPage(
+      context,
+      PetClustersPage(petId: petId, petName: _label),
+    );
+    await _reloadClusterFiles();
   }
 
   Future<void> _handleMergePet() async {

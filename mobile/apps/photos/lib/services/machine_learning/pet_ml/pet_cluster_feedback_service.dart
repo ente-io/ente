@@ -129,6 +129,14 @@ class PetClusterFeedbackService {
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
   }
 
+  /// Remove a cluster from a pet (unmerge). The cluster's faces and summaries
+  /// are preserved — only the `pet_cluster_pet` mapping is removed.
+  Future<void> unmergePetCluster(String clusterId) async {
+    await _db.removeClusterPetId(clusterId);
+    _logger.info("Unmerged pet cluster $clusterId");
+    Bus.instance.fire(PetsChangedEvent(source: "unmergePetCluster"));
+  }
+
   /// Recompute cluster summaries for the given cluster IDs.
   ///
   /// Queries all faces currently assigned to each cluster, fetches their
