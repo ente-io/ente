@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 
 use crate::ml::cluster::{
-    agglomerative_precomputed, dot, median_centroid, renumber_labels, unique_cluster_ids,
+    agglomerative_precomputed, dot, mean_centroid, renumber_labels, unique_cluster_ids,
 };
 
 // ── Species-specific configuration ──────────────────────────────────────
@@ -162,10 +162,20 @@ pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) ->
 
     let has_face: Vec<bool> = inputs.iter().map(|i| i.has_face()).collect();
 
-    // Face-based agglomerative clustering
+    // Phase 1: Face-based agglomerative clustering
     let mut labels = phase1_face_cluster(inputs, &has_face, config);
 
     // Renumber labels to contiguous 0..K-1
+    renumber_labels(&mut labels);
+
+    // Phase 2: body rescue — assign unclustered (no face) inputs to existing clusters
+    phase2_body_rescue(inputs, &mut labels, &has_face, config);
+
+    // Phase 2b: body-only clustering for remaining unclustered
+    phase2b_body_only_cluster(inputs, &mut labels, config);
+
+    // Phase 3: cross-cluster merge via body similarity
+    phase3_cross_cluster_merge(inputs, &mut labels, &has_face, config);
     renumber_labels(&mut labels);
 
     // Build result
@@ -287,7 +297,7 @@ pub fn run_pet_clustering_incremental(
             .collect();
 
         if !face_embs.is_empty() {
-            let centroid = median_centroid(&face_embs, face_embs[0].len());
+            let centroid = mean_centroid(&face_embs, face_embs[0].len());
             result
                 .cluster_centroids
                 .insert(cluster_id.clone(), centroid);
@@ -350,6 +360,319 @@ fn phase1_face_cluster(
     }
 
     labels
+}
+
+// ── Phase 2: Body rescue ─────────────────────────────────────────────────
+
+/// For each input that is unclustered (label == -1) and has a body embedding,
+/// try to assign it to an existing cluster based on body similarity.
+///
+/// For each candidate cluster, count how many cluster members have body
+/// similarity > `config.body_rescue_threshold`. If that count >= `config.min_body_agreements`,
+/// the cluster is a rescue candidate. If the input also has a face, check face veto:
+/// if dot(input.face, cluster face centroid) < `config.face_veto_threshold`, skip.
+/// Assign to the cluster with the most body agreements (tie-break by avg body similarity).
+fn phase2_body_rescue(
+    inputs: &[PetClusterInput],
+    labels: &mut [i32],
+    has_face: &[bool],
+    config: &ClusterConfig,
+) {
+    let cluster_ids = unique_cluster_ids(labels);
+    if cluster_ids.is_empty() {
+        return;
+    }
+
+    // Collect unclustered indices that have body embeddings
+    let unclustered: Vec<usize> = labels
+        .iter()
+        .enumerate()
+        .filter(|(i, l)| **l == -1 && inputs[*i].has_body())
+        .map(|(i, _)| i)
+        .collect();
+
+    if unclustered.is_empty() {
+        return;
+    }
+
+    // Precompute per-cluster: body embeddings of members, and face centroid
+    let face_dim = inputs
+        .iter()
+        .find(|i| i.has_face())
+        .map(|i| i.face_embedding.len())
+        .unwrap_or(128);
+
+    for &ui in &unclustered {
+        let mut best_cluster: Option<i32> = None;
+        let mut best_agreements: usize = 0;
+        let mut best_avg_sim: f32 = -1.0;
+
+        for &cid in &cluster_ids {
+            // Collect body embeddings of cluster members
+            let cluster_bodies: Vec<&Vec<f32>> = labels
+                .iter()
+                .enumerate()
+                .filter(|(i, l)| **l == cid && inputs[*i].has_body())
+                .map(|(i, _)| &inputs[i].body_embedding)
+                .collect();
+
+            if cluster_bodies.is_empty() {
+                continue;
+            }
+
+            // Count agreements: how many cluster bodies have similarity > threshold
+            let mut agreements = 0usize;
+            let mut total_sim = 0.0f32;
+            for cb in &cluster_bodies {
+                let sim = dot(&inputs[ui].body_embedding, cb);
+                if sim > config.body_rescue_threshold {
+                    agreements += 1;
+                }
+                total_sim += sim;
+            }
+
+            if agreements < config.min_body_agreements {
+                continue;
+            }
+
+            // Face veto: if the unclustered input has a face, check against cluster face centroid
+            if has_face[ui] {
+                let cluster_face_embs: Vec<&Vec<f32>> = labels
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, l)| **l == cid && has_face[*i])
+                    .map(|(i, _)| &inputs[i].face_embedding)
+                    .collect();
+
+                if !cluster_face_embs.is_empty() {
+                    let centroid = mean_centroid(&cluster_face_embs, face_dim);
+                    let face_sim = dot(&inputs[ui].face_embedding, &centroid);
+                    if face_sim < config.face_veto_threshold {
+                        continue; // face veto
+                    }
+                }
+            }
+
+            let avg_sim = total_sim / cluster_bodies.len() as f32;
+
+            // Pick cluster with most agreements, break ties by avg body similarity
+            if agreements > best_agreements
+                || (agreements == best_agreements && avg_sim > best_avg_sim)
+            {
+                best_cluster = Some(cid);
+                best_agreements = agreements;
+                best_avg_sim = avg_sim;
+            }
+        }
+
+        if let Some(cid) = best_cluster {
+            labels[ui] = cid;
+        }
+    }
+}
+
+// ── Phase 2b: Body-only clustering ───────────────────────────────────────
+
+/// Cluster still-unclustered inputs that have body embeddings among themselves,
+/// using the same clustering algorithm as Phase 1 but on body embeddings.
+fn phase2b_body_only_cluster(
+    inputs: &[PetClusterInput],
+    labels: &mut [i32],
+    config: &ClusterConfig,
+) {
+    // Collect still-unclustered indices that have body embeddings
+    let body_indices: Vec<usize> = labels
+        .iter()
+        .enumerate()
+        .filter(|(i, l)| **l == -1 && inputs[*i].has_body())
+        .map(|(i, _)| i)
+        .collect();
+
+    if body_indices.len() < 2 {
+        return;
+    }
+
+    let nb = body_indices.len();
+
+    // Guard against excessive memory
+    if nb > 5000 {
+        return;
+    }
+
+    // Compute pairwise cosine distance matrix on body embeddings
+    let mut dist = vec![0.0f32; nb * nb];
+    for i in 0..nb {
+        for j in (i + 1)..nb {
+            let sim = dot(
+                &inputs[body_indices[i]].body_embedding,
+                &inputs[body_indices[j]].body_embedding,
+            );
+            let d = (1.0 - sim).clamp(0.0, 2.0);
+            dist[i * nb + j] = d;
+            dist[j * nb + i] = d;
+        }
+    }
+
+    // Run clustering on body distance matrix
+    let body_labels = run_cluster(&dist, nb, config);
+
+    // Find the next available label to avoid collision with existing clusters
+    let max_existing = labels.iter().copied().max().unwrap_or(-1);
+    let offset = if max_existing >= 0 {
+        max_existing + 1
+    } else {
+        0
+    };
+
+    // Map body cluster labels back to global labels
+    for (local, &global) in body_indices.iter().enumerate() {
+        if body_labels[local] >= 0 {
+            labels[global] = body_labels[local] + offset;
+        }
+    }
+}
+
+// ── Phase 3: Cross-cluster merge ─────────────────────────────────────────
+
+/// Merge clusters that are similar in body embedding space.
+///
+/// For each pair of clusters: compute average body similarity between all
+/// body-bearing members. If avg > `body_merge_threshold` and the fraction
+/// of pairs above threshold >= `min_body_overlap_ratio`, merge.
+/// But if average face similarity between clusters < `face_contradiction_threshold`,
+/// do NOT merge (face contradiction veto).
+fn phase3_cross_cluster_merge(
+    inputs: &[PetClusterInput],
+    labels: &mut [i32],
+    has_face: &[bool],
+    config: &ClusterConfig,
+) {
+    let cluster_ids = unique_cluster_ids(labels);
+    if cluster_ids.len() < 2 {
+        return;
+    }
+
+    let n = labels.len();
+    let face_dim = inputs
+        .iter()
+        .find(|i| i.has_face())
+        .map(|i| i.face_embedding.len())
+        .unwrap_or(128);
+
+    // Union-find for merging clusters
+    let num_clusters = cluster_ids.len();
+    let mut uf_parent: Vec<usize> = (0..num_clusters).collect();
+    let mut uf_size: Vec<usize> = vec![1; num_clusters];
+
+    // Map cluster_id -> index in cluster_ids for union-find
+    let cid_to_idx: HashMap<i32, usize> = cluster_ids
+        .iter()
+        .enumerate()
+        .map(|(idx, &cid)| (cid, idx))
+        .collect();
+
+    // Check each pair of clusters
+    for i in 0..num_clusters {
+        for j in (i + 1)..num_clusters {
+            let ci = cluster_ids[i];
+            let cj = cluster_ids[j];
+
+            // Check if already merged via union-find
+            let ri = uf_find_vec(&mut uf_parent, i);
+            let rj = uf_find_vec(&mut uf_parent, j);
+            if ri == rj {
+                continue;
+            }
+
+            // Collect body embeddings for each cluster
+            let bodies_i: Vec<&Vec<f32>> = labels
+                .iter()
+                .enumerate()
+                .filter(|(idx, l)| **l == ci && inputs[*idx].has_body())
+                .map(|(idx, _)| &inputs[idx].body_embedding)
+                .collect();
+
+            let bodies_j: Vec<&Vec<f32>> = labels
+                .iter()
+                .enumerate()
+                .filter(|(idx, l)| **l == cj && inputs[*idx].has_body())
+                .map(|(idx, _)| &inputs[idx].body_embedding)
+                .collect();
+
+            if bodies_i.is_empty() || bodies_j.is_empty() {
+                continue;
+            }
+
+            // Compute average body similarity and fraction above threshold
+            let total_pairs = bodies_i.len() * bodies_j.len();
+            let mut total_sim = 0.0f32;
+            let mut above_threshold = 0usize;
+
+            for bi in &bodies_i {
+                for bj in &bodies_j {
+                    let sim = dot(bi, bj);
+                    total_sim += sim;
+                    if sim > config.body_merge_threshold {
+                        above_threshold += 1;
+                    }
+                }
+            }
+
+            let avg_body_sim = total_sim / total_pairs as f32;
+            let overlap_ratio = above_threshold as f32 / total_pairs as f32;
+
+            if avg_body_sim <= config.body_merge_threshold
+                || overlap_ratio < config.min_body_overlap_ratio
+            {
+                continue;
+            }
+
+            // Face contradiction check: if both clusters have face embeddings,
+            // compute average face similarity. If too low, don't merge.
+            let faces_i: Vec<&Vec<f32>> = labels
+                .iter()
+                .enumerate()
+                .filter(|(idx, l)| **l == ci && has_face[*idx])
+                .map(|(idx, _)| &inputs[idx].face_embedding)
+                .collect();
+
+            let faces_j: Vec<&Vec<f32>> = labels
+                .iter()
+                .enumerate()
+                .filter(|(idx, l)| **l == cj && has_face[*idx])
+                .map(|(idx, _)| &inputs[idx].face_embedding)
+                .collect();
+
+            if !faces_i.is_empty() && !faces_j.is_empty() {
+                let centroid_i = mean_centroid(&faces_i, face_dim);
+                let centroid_j = mean_centroid(&faces_j, face_dim);
+                let face_sim = dot(&centroid_i, &centroid_j);
+                if face_sim < config.face_contradiction_threshold {
+                    continue; // face contradiction veto
+                }
+            }
+
+            // Merge clusters via union-find
+            uf_union_vec(&mut uf_parent, &mut uf_size, ri, rj);
+        }
+    }
+
+    // Apply merges: map each cluster's label to its union-find root's cluster id
+    let mut root_to_label: HashMap<usize, i32> = HashMap::new();
+    for (idx, &_cid) in cluster_ids.iter().enumerate() {
+        let root = uf_find_vec(&mut uf_parent, idx);
+        root_to_label.entry(root).or_insert(cluster_ids[root]);
+    }
+
+    // Update labels
+    for label in labels.iter_mut().take(n) {
+        if *label >= 0 {
+            if let Some(&idx) = cid_to_idx.get(label) {
+                let root = uf_find_vec(&mut uf_parent, idx);
+                *label = *root_to_label.get(&root).unwrap_or(label);
+            }
+        }
+    }
 }
 
 // ── Clustering dispatch ──────────────────────────────────────────────────
@@ -597,7 +920,7 @@ fn find_root(parent: &[usize], mut x: usize) -> usize {
     x
 }
 
-// Helper functions (dot, l2_norm, normalize, median_centroid) imported
+// Helper functions (dot, l2_norm, normalize, mean_centroid) imported
 // from crate::ml::cluster
 
 // unique_cluster_ids and renumber_labels imported from crate::ml::cluster
@@ -653,7 +976,7 @@ fn build_result(inputs: &[PetClusterInput], labels: &[i32], has_face: &[bool]) -
         if !face_embs.is_empty() {
             result
                 .cluster_centroids
-                .insert(cluster_id.clone(), median_centroid(&face_embs, face_dim));
+                .insert(cluster_id.clone(), mean_centroid(&face_embs, face_dim));
         }
     }
 

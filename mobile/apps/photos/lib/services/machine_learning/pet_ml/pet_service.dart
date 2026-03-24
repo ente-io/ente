@@ -10,6 +10,11 @@ import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 
+/// Manages pet entities synced via the entity sync service.
+///
+/// Reuses [EntityType.person] because PersonService migrated to
+/// [EntityType.cgroup]. The "person" type slot is unused and safe for pets.
+/// If a dedicated EntityType.pet is added later, a migration will be needed.
 class PetService {
   final EntityService entityService;
   final _logger = Logger("PetService");

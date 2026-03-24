@@ -76,9 +76,8 @@ class _PetClusterPageState extends State<PetClusterPage> {
     if (!mounted) return;
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-    final clusterFileIds = await mlDataDB.getPetClusterFileIds();
-    final fileIds = clusterFileIds[widget.clusterId];
-    if (fileIds == null || fileIds.isEmpty) {
+    final fileIds = await mlDataDB.getPetFileIdsForCluster(widget.clusterId);
+    if (fileIds.isEmpty) {
       if (mounted) Navigator.pop(context);
       return;
     }
