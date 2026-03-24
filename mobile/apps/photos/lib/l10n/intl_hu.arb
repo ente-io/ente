@@ -436,7 +436,6 @@
   "discover_sunset": "Napnyugta",
   "discover_hills": "Dombok",
   "discover_greenery": "Lomb",
-  "mlIndexingDescription": "Kérjük, vegye figyelembe, hogy a gépi tanulás nagyobb sávszélességet és akkumulátorhasználatot eredményez, amíg az összes elem indexelése meg nem történik. A gyorsabb indexelés érdekében érdemes lehet asztali alkalmazást használni, mivel minden eredmény automatikusan szinkronizálódik.",
   "loadingModel": "Modellek letöltése...",
   "waitingForWifi": "Várakozás a WiFi-re...",
   "status": "Állapot",

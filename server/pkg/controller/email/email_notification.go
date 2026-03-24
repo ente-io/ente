@@ -1,17 +1,24 @@
 package email
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
 	"github.com/avct/uasurfer"
 	"github.com/ente-io/museum/ente"
+	discordCtrl "github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	"github.com/ente-io/museum/pkg/repo"
+	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
 	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 )
+
+type UserAccessResetter interface {
+	ResetUserAccess(ctx context.Context, userID int64, logger *log.Entry) error
+}
 
 const (
 	WebAppFirstUploadTemplate    = "web_app_first_upload.html"
@@ -53,8 +60,13 @@ const (
 
 type EmailNotificationController struct {
 	UserRepo                           *repo.UserRepository
+	UsageRepo                          *repo.UsageRepository
+	BillingRepo                        *repo.BillingRepository
+	StorageBonusRepo                   *storageBonusRepo.Repository
+	DiscordController                  *discordCtrl.DiscordController
 	LockController                     *lock.LockController
 	NotificationHistoryRepo            *repo.NotificationHistoryRepository
+	UserAccessResetter                 UserAccessResetter
 	isSendingStorageLimitExceededMails bool
 }
 

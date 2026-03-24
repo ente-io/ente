@@ -299,7 +299,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await _homeWidgetSync(true);
 
     await _runBackgroundMLIfEligible(prefs, controller);
-
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
