@@ -12,7 +12,7 @@ use crate::{
             embed::run_pet_face_embedding,
         },
         runtime::{self, ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
-        types::{self, ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
+        types::{ClipResult, Dimensions, FaceResult, PetBodyResult, PetFaceResult},
     },
 };
 

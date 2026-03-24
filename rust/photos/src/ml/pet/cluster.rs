@@ -896,7 +896,7 @@ mod tests {
 
         // Without bodies: no_face has no face, so it's unclustered
         assert!(
-            without_bodies.face_to_cluster.get("no_face").is_none(),
+            !without_bodies.face_to_cluster.contains_key("no_face"),
             "Without bodies, faceless image should be unclustered"
         );
 
@@ -1017,11 +1017,11 @@ mod tests {
 
         let dog_rescued = dog_result.face_to_cluster.get("orphan")
             == dog_result.face_to_cluster.get("a1")
-            && dog_result.face_to_cluster.get("a1").is_some();
+            && dog_result.face_to_cluster.contains_key("a1");
 
         let cat_rescued = cat_result.face_to_cluster.get("orphan")
             == cat_result.face_to_cluster.get("a1")
-            && cat_result.face_to_cluster.get("a1").is_some();
+            && cat_result.face_to_cluster.contains_key("a1");
 
         assert!(
             !dog_rescued,
