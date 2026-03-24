@@ -19,18 +19,43 @@ import { lockerTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
 import type { AppProps } from "next/app";
+import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo } from "react";
+
+const publicRoutes = new Set([
+    "/login",
+    "/signup",
+    "/verify",
+    "/recover",
+    "/change-password",
+    "/change-email",
+    "/credentials",
+    "/generate",
+    "/two-factor/verify",
+    "/two-factor/setup",
+    "/two-factor/recover",
+    "/passkeys/finish",
+    "/passkeys/recover",
+]);
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 
+    const router = useRouter();
     const isI18nReady = useSetupI18n();
     const isChangingRoute = useIsRouteChangeInProgress();
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const isLoggedIn = !!savedLocalUser();
+    const requiresLogin = !publicRoutes.has(router.pathname);
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
     }, []);
+
+    useEffect(() => {
+        if (!router.isReady || isLoggedIn || !requiresLogin) return;
+        void router.replace("/login");
+    }, [isLoggedIn, requiresLogin, router]);
 
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/login"));
@@ -48,7 +73,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <AttributedMiniDialog {...miniDialogProps} />
 
             <BaseContext value={baseContext}>
-                {!isI18nReady ? (
+                {!isI18nReady || (!isLoggedIn && requiresLogin) ? (
                     <LoadingIndicator />
                 ) : (
                     <>
