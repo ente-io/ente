@@ -666,11 +666,11 @@ fn phase3_cross_cluster_merge(
 
     // Update labels
     for label in labels.iter_mut().take(n) {
-        if *label >= 0 {
-            if let Some(&idx) = cid_to_idx.get(label) {
-                let root = uf_find_vec(&mut uf_parent, idx);
-                *label = *root_to_label.get(&root).unwrap_or(label);
-            }
+        if *label >= 0
+            && let Some(&idx) = cid_to_idx.get(label)
+        {
+            let root = uf_find_vec(&mut uf_parent, idx);
+            *label = *root_to_label.get(&root).unwrap_or(label);
         }
     }
 }
