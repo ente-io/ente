@@ -569,11 +569,13 @@ class MLService {
   Future<void> _clusterPets(MLDataDB mlDataDB, MLMode mode) async {
     if (_shouldPauseIndexingAndClustering) return;
     try {
-      await PetClusteringService.instance.clusterPets(
+      final changed = await PetClusteringService.instance.clusterPets(
         mlDataDB: mlDataDB,
         isOffline: mode == MLMode.offline,
       );
-      Bus.instance.fire(PetsChangedEvent(source: "clustering"));
+      if (changed) {
+        Bus.instance.fire(PetsChangedEvent(source: "clustering"));
+      }
     } catch (e, s) {
       _logger.severe("Pet clustering failed", e, s);
     }

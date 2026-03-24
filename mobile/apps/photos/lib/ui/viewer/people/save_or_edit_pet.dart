@@ -93,27 +93,21 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
 
     // Reuse existing pet ID if the cluster already has one, otherwise create.
     String petId;
-    if (widget.petId != null) {
-      petId = widget.petId!;
-      await petService.updatePet(
-        petId,
+    final resolvedPetId = widget.petId ??
+        (await mlDataDB.getClusterToPetId())[widget.clusterId];
+
+    if (resolvedPetId != null) {
+      petId = resolvedPetId;
+      final existingPet = await petService.getPet(petId);
+      final updatedData = existingPet != null
+          ? existingPet.data.copyWith(name: name)
+          : PetData(name: name, species: widget.species);
+      await petService.updatePet(petId, updatedData);
+    } else {
+      final pet = await petService.addPet(
         PetData(name: name, species: widget.species),
       );
-    } else {
-      final existing = await mlDataDB.getClusterToPetId();
-      final existingPetId = existing[widget.clusterId];
-      if (existingPetId != null) {
-        petId = existingPetId;
-        await petService.updatePet(
-          petId,
-          PetData(name: name, species: widget.species),
-        );
-      } else {
-        final pet = await petService.addPet(
-          PetData(name: name, species: widget.species),
-        );
-        petId = pet.remoteID;
-      }
+      petId = pet.remoteID;
     }
 
     await mlDataDB.setClusterPetId(widget.clusterId, petId);
