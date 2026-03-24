@@ -41,6 +41,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
+import 'package:photos/services/background_run_helper.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -76,12 +77,6 @@ const kBGPushTimeout = kBGPushBudget;
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
 bool _stopHearBeat = false;
-
-// Background lease constants
-const _keyActiveBackgroundRunToken = "bg_active_run_token";
-const _keyActiveBackgroundRunStartedAt = "bg_active_run_started_at";
-const _kActiveLeaseGrace = Duration(seconds: 30);
-const _kActiveLeaseStartupGrace = Duration(seconds: 5);
 
 bool _isRustInitialized = false;
 Future<void>? _rustInitFuture;
@@ -174,8 +169,30 @@ Future<bool> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
-  if (await _shouldRunBackgroundTaskForBg()) {
-    return _runBackgroundTaskForBg(taskId);
+  if (Platform.isIOS) {
+    final prefs = await SharedPreferences.getInstance();
+    if (FlagService.isInternalUserEnabledInPrefs(prefs)) {
+      final trigger = BgTaskUtils.backgroundTriggerForTask(taskId);
+      final budget = BgTaskUtils.backgroundRunBudgetForTask(taskId);
+      bool result = true;
+      await runWithLogs(
+        () async {
+          try {
+            result = await _runBackgroundPass(
+              trigger: trigger,
+              taskId: taskId,
+              budget: budget,
+            );
+          } catch (e, s) {
+            result = false;
+            _logger.severe(
+                "Unhandled background task failure for $taskId", e, s);
+          }
+        },
+        prefix: _backgroundLogPrefix(trigger),
+      );
+      return result;
+    }
   }
 
   // Check if foreground is recently active to avoid conflicts
@@ -196,37 +213,6 @@ Future<bool> runBackgroundTask(
   // Mark BG as active
   await _runMinimally(taskId, tlog);
   return true;
-}
-
-Future<bool> _shouldRunBackgroundTaskForBg() async {
-  if (!Platform.isIOS) {
-    return false;
-  }
-
-  final prefs = await SharedPreferences.getInstance();
-  return FlagService.isInternalUserEnabledInPrefs(prefs);
-}
-
-Future<bool> _runBackgroundTaskForBg(String taskId) async {
-  final trigger = BgTaskUtils.backgroundTriggerForTask(taskId);
-  final budget = BgTaskUtils.backgroundRunBudgetForTask(taskId);
-  bool result = true;
-  await runWithLogs(
-    () async {
-      try {
-        result = await _runBackgroundPass(
-          trigger: trigger,
-          taskId: taskId,
-          budget: budget,
-        );
-      } catch (e, s) {
-        result = false;
-        _logger.severe("Unhandled background task failure for $taskId", e, s);
-      }
-    },
-    prefix: _backgroundLogPrefix(trigger),
-  );
-  return result;
 }
 
 Future<void> ensureServiceLocatorBootstrap({SharedPreferences? prefs}) async {
@@ -603,7 +589,7 @@ Future<bool> _isAnotherBackgroundRunAlive() async {
     prefs,
     kLastBGTaskHeartBeatTime,
     (Platform.isIOS ? kBGAppRefreshBudget : kAndroidBackgroundTaskTimeout) +
-        _kActiveLeaseGrace,
+        activeLeaseGrace,
   );
 }
 
@@ -701,25 +687,16 @@ Future<bool> _runBackgroundPass({
   required Duration budget,
   Map<String, String>? pushPayload,
 }) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.reload();
-
-  if (trigger == BackgroundTrigger.remotePush && !_isSyncPush(pushPayload)) {
-    _logger.info("Skipping $taskId: non-sync push");
-    return true;
-  }
-  if (await _isRunningInForeground()) {
-    _logger.info("Skipping $taskId: foreground active");
-    return true;
-  }
-
-  final leaseToken = await _tryAcquireBackgroundLease(
-    prefs,
+  final attempt = await prepareBackgroundRun(
+    logger: _logger,
     taskId: taskId,
     budget: budget,
+    isRunningInForeground: _isRunningInForeground,
+    isAnotherBackgroundRunAlive: _isAnotherBackgroundRunAlive,
+    pushPayload: trigger == BackgroundTrigger.remotePush ? pushPayload : null,
   );
-  if (leaseToken == null) {
-    _logger.info("Skipping $taskId: another background run active");
+  if (!attempt.shouldRun) {
+    _logger.info("Skipping $taskId: ${attempt.skipReason!.name}");
     return true;
   }
 
@@ -735,62 +712,10 @@ Future<bool> _runBackgroundPass({
   } catch (e, s) {
     success = false;
     _logger.severe("Background run failed for $taskId", e, s);
-    await BgTaskUtils.releaseResourcesForKill(taskId, prefs);
+    await BgTaskUtils.releaseResourcesForKill(taskId, attempt.prefs);
   } finally {
-    await _releaseBackgroundLease(prefs, leaseToken);
+    await finishBackgroundRun(attempt);
   }
 
   return success;
-}
-
-bool _isSyncPush(Map<String, String>? pushPayload) {
-  if (pushPayload == null || pushPayload.isEmpty) {
-    return false;
-  }
-  return pushPayload["action"] == "sync";
-}
-
-Future<String?> _tryAcquireBackgroundLease(
-  SharedPreferences prefs, {
-  required String taskId,
-  required Duration budget,
-}) async {
-  final existingToken = prefs.getString(_keyActiveBackgroundRunToken);
-  final existingStart = prefs.getInt(_keyActiveBackgroundRunStartedAt) ?? 0;
-  final now = DateTime.now().microsecondsSinceEpoch;
-  final leaseIsFresh = existingStart >
-      now - budget.inMicroseconds - _kActiveLeaseGrace.inMicroseconds;
-
-  if (existingToken != null) {
-    final hasRecentHeartbeat = await _isAnotherBackgroundRunAlive();
-    final withinStartupGrace =
-        existingStart > now - _kActiveLeaseStartupGrace.inMicroseconds;
-
-    if (hasRecentHeartbeat || (leaseIsFresh && withinStartupGrace)) {
-      return null;
-    }
-
-    _logger.info(
-      "Replacing stale background lease for $taskId "
-      "(leaseIsFresh=$leaseIsFresh, hasRecentHeartbeat=$hasRecentHeartbeat, "
-      "withinStartupGrace=$withinStartupGrace)",
-    );
-  }
-
-  final leaseToken = "$taskId:$now";
-  await prefs.setString(_keyActiveBackgroundRunToken, leaseToken);
-  await prefs.setInt(_keyActiveBackgroundRunStartedAt, now);
-  return leaseToken;
-}
-
-Future<void> _releaseBackgroundLease(
-  SharedPreferences prefs,
-  String leaseToken,
-) async {
-  await prefs.reload();
-  if (prefs.getString(_keyActiveBackgroundRunToken) != leaseToken) {
-    return;
-  }
-  await prefs.remove(_keyActiveBackgroundRunToken);
-  await prefs.remove(_keyActiveBackgroundRunStartedAt);
 }
