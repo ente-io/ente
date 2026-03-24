@@ -632,18 +632,16 @@ private fun AssistantMessageBubble(
                 showMenu = showMenu,
                 pressOffset = pressOffset,
                 onDismiss = { showMenu = false },
-                actions = buildList {
-                    add(MessageAction("Copy", HugeIcons.Copy01Icon) {
+                actions = listOf(
+                    MessageAction("Copy", HugeIcons.Copy01Icon) {
                         haptic.perform(HapticFeedbackType.TextHandleMove)
                         clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
-                    })
-                    if (!message.isSynthetic) {
-                        add(MessageAction("Retry", HugeIcons.RepeatIcon) {
-                            haptic.perform(HapticFeedbackType.TextHandleMove)
-                            onRetry()
-                        })
+                    },
+                    MessageAction("Retry", HugeIcons.RepeatIcon) {
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
+                        onRetry()
                     }
-                }
+                )
             )
         }
 

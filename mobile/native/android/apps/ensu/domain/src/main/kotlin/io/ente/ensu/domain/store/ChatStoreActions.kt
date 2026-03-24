@@ -285,10 +285,17 @@ internal class ChatStoreActions(
             stopGeneration()
         }
         val sessionId = state.value.chat.currentSessionId ?: return
-        val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
-        if (message.author != MessageAuthor.Assistant) return
-        val parentId = message.parentId ?: return
-        val parent = messageStore[sessionId]?.firstOrNull { it.id == parentId } ?: return
+
+        // For synthetic interrupted placeholders, find the parent user message directly
+        val parent = if (messageId.startsWith("interrupted-placeholder-")) {
+            val parentUserId = messageId.removePrefix("interrupted-placeholder-")
+            messageStore[sessionId]?.firstOrNull { it.id == parentUserId }
+        } else {
+            val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
+            if (message.author != MessageAuthor.Assistant) return
+            val parentId = message.parentId ?: return
+            messageStore[sessionId]?.firstOrNull { it.id == parentId }
+        } ?: return
 
         if (attachmentActions.missingAttachments(sessionId).isNotEmpty()) {
             attachmentActions.ensureAttachmentsAvailable(sessionId)
@@ -937,23 +944,29 @@ internal class ChatStoreActions(
             message.copy(branchCount = max(1, siblings.size))
         }
 
-        val finalMessages = if (
-            displayMessages.size >= 2
-            && displayMessages.last().author == MessageAuthor.User
-            && !state.value.chat.isGenerating
-        ) {
-            val lastUser = displayMessages.last()
-            displayMessages + ChatMessage(
-                id = "interrupted-placeholder-${lastUser.id}",
-                sessionId = sessionId,
-                parentId = lastUser.id,
-                author = MessageAuthor.Assistant,
-                text = "Response was interrupted",
-                timestampMillis = lastUser.timestampMillis,
-                isInterrupted = true,
-                isSynthetic = true
-            )
-        } else displayMessages
+        val isGenerating = state.value.chat.isGenerating
+        val finalMessages = buildList {
+            for (i in displayMessages.indices) {
+                val msg = displayMessages[i]
+                add(msg)
+                if (msg.author == MessageAuthor.User) {
+                    val next = displayMessages.getOrNull(i + 1)
+                    val isLastAndGenerating = i == displayMessages.lastIndex && isGenerating
+                    if (next?.author != MessageAuthor.Assistant && !isLastAndGenerating) {
+                        add(ChatMessage(
+                            id = "interrupted-placeholder-${msg.id}",
+                            sessionId = sessionId,
+                            parentId = msg.id,
+                            author = MessageAuthor.Assistant,
+                            text = "Response was interrupted",
+                            timestampMillis = msg.timestampMillis,
+                            isInterrupted = true,
+                            isSynthetic = true
+                        ))
+                    }
+                }
+            }
+        }
 
         return finalMessages to branchSelectionIndices
     }

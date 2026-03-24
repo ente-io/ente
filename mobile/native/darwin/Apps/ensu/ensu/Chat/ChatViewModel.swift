@@ -1396,10 +1396,19 @@ final class ChatViewModel: ObservableObject {
             stopGenerating()
         }
         guard let sessionId = currentSessionId else { return }
-        guard let parent = messageStore[sessionId]?.first(where: { $0.id == message.id })?.parentId,
-              let userNode = messageStore[sessionId]?.first(where: { $0.id == parent }) else {
-            return
+
+        let userNode: MessageNode?
+        if message.isSynthetic {
+            guard let syntheticIndex = messages.firstIndex(where: { $0.id == message.id }),
+                  syntheticIndex > 0 else { return }
+            let parentMessage = messages[syntheticIndex - 1]
+            guard parentMessage.role == .user else { return }
+            userNode = messageStore[sessionId]?.first(where: { $0.id == parentMessage.id })
+        } else {
+            guard let parentId = messageStore[sessionId]?.first(where: { $0.id == message.id })?.parentId else { return }
+            userNode = messageStore[sessionId]?.first(where: { $0.id == parentId })
         }
+        guard let userNode else { return }
         Task { @MainActor in
             let missing = await self.missingAttachments(for: sessionId)
             if !missing.isEmpty {
@@ -2196,19 +2205,25 @@ final class ChatViewModel: ObservableObject {
             )
         }
 
-        if messages.count >= 2,
-           let lastMessage = messages.last,
-           lastMessage.role == .user,
-           !isGenerating {
-            messages.append(ChatMessage(
-                id: UUID(),
-                role: .assistant,
-                text: "Response was interrupted",
-                timestamp: lastMessage.timestamp,
-                isInterrupted: true,
-                isSynthetic: true
-            ))
+        var augmented: [ChatMessage] = []
+        for (i, msg) in messages.enumerated() {
+            augmented.append(msg)
+            if msg.role == .user {
+                let next = i + 1 < messages.count ? messages[i + 1] : nil
+                let isLastAndGenerating = i == messages.count - 1 && isGenerating
+                if next?.role != .assistant && !isLastAndGenerating {
+                    augmented.append(ChatMessage(
+                        id: UUID(),
+                        role: .assistant,
+                        text: "Response was interrupted",
+                        timestamp: msg.timestamp,
+                        isInterrupted: true,
+                        isSynthetic: true
+                    ))
+                }
+            }
         }
+        messages = augmented
     }
 
     private func buildSelectedPath(for sessionId: UUID, childrenMap: [UUID: [MessageNode]]) -> [MessageNode] {

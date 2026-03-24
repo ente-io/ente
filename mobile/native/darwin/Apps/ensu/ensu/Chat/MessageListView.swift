@@ -131,12 +131,6 @@ struct MessageListView: View {
             }
         }
 
-        if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging {
-                scrollToBottom(scrollProxy, force: true, animated: false)
-            }
-        }
-
         if newValue.isGenerating != previous.isGenerating {
             if newValue.isGenerating {
                 autoScrollEnabled = true

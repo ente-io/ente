@@ -17,6 +17,8 @@ struct SettingsView: View {
     @State private var buildVersionTapCount = 0
     @State private var lastBuildVersionTapAt: Date?
     @State private var isAdvancedUnlocked = EnsuAdvancedSettings.isUnlocked
+    @State private var toastMessage: String?
+    @State private var toastTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -124,6 +126,13 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Signing out will remove your online chats from this device. Offline chats stay available.")
+            }
+            .overlay(alignment: .bottom) {
+                if let toastMessage {
+                    ToastView(message: toastMessage)
+                        .padding(.bottom, EnsuSpacing.xl)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
     }
@@ -287,6 +296,22 @@ struct SettingsView: View {
         EnsuAdvancedSettings.unlock()
         isAdvancedUnlocked = true
         buildVersionTapCount = 0
+        showToast("Advanced settings unlocked")
+    }
+
+    private func showToast(_ message: String) {
+        toastTask?.cancel()
+        withAnimation(.easeOut(duration: 0.2)) {
+            toastMessage = message
+        }
+        toastTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.2)) {
+                toastMessage = nil
+            }
+            toastTask = nil
+        }
     }
 
     private func openExternalLink(_ urlString: String) {

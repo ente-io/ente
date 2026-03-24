@@ -27,18 +27,9 @@ export const DEFAULT_MODEL: ModelInfo = {
     sizeHuman: "~664 MB",
 };
 
-const TAURI_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-3.5-2b-q8_0",
-    name: "Qwen 3.5 2B (Q8_0)",
-    url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-    mmprojUrl:
-        "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-    sizeBytes: 2_012_012_800,
-    mmprojSizeBytes: 668_227_264,
-    sizeHuman: "2.68 GB",
-};
+const TAURI_DEFAULT_MODEL: ModelInfo = DEFAULT_MODEL;
 
-const HIGH_RAM_MAC_MODEL: ModelInfo = {
+const DESKTOP_DEFAULT_MODEL: ModelInfo = {
     id: "qwen-3.5-4b-q4km",
     name: "Qwen 3.5 4B (Q4_K_M)",
     url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
@@ -364,7 +355,9 @@ export class LlmProvider {
 
     private async resolveDefaultModelForDevice() {
         this.defaultModel =
-            this.backend.kind === "tauri" ? TAURI_DEFAULT_MODEL : DEFAULT_MODEL;
+            this.backend.kind === "tauri"
+                ? TAURI_DEFAULT_MODEL
+                : DEFAULT_MODEL;
 
         if (this.backend.kind !== "tauri") {
             return;
@@ -386,7 +379,7 @@ export class LlmProvider {
                 platform === "mac";
 
             if (isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES) {
-                this.defaultModel = HIGH_RAM_MAC_MODEL;
+                this.defaultModel = DESKTOP_DEFAULT_MODEL;
             }
 
             log.info("LLM default model resolved", {

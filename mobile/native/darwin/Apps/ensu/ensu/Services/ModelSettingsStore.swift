@@ -59,18 +59,19 @@ final class ModelSettingsStore: ObservableObject {
     func currentTarget() -> InferenceModelTarget {
         let useCustom = useCustomModel && !modelUrl.isEmpty
         let defaults = EnsuRustDefaults.shared
-        let url = useCustom ? modelUrl : defaults.desktopDefaultModel.url
-        let mmproj = useCustom ? (mmprojUrl.isEmpty ? nil : mmprojUrl) : defaults.desktopDefaultModel.mmprojUrl
+        let defaultModel = Self.platformDefaultModel
+        let url = useCustom ? modelUrl : defaultModel.url
+        let mmproj = useCustom ? (mmprojUrl.isEmpty ? nil : mmprojUrl) : defaultModel.mmprojUrl
         let context = Int(contextLength)
         let maxOutput = Int(maxTokens).flatMap { $0 > 0 ? $0 : nil }
         let id = useCustom ? "custom:\(url)" : "default"
         return InferenceModelTarget(id: id, url: url, mmprojUrl: mmproj, contextLength: context, maxTokens: maxOutput)
     }
 
-    static var defaultModelName: String { EnsuRustDefaults.shared.desktopDefaultModel.title }
-    static var defaultModelUrl: String { EnsuRustDefaults.shared.desktopDefaultModel.url }
-    static var defaultMmprojUrl: String? { EnsuRustDefaults.shared.desktopDefaultModel.mmprojUrl }
-    static var defaultSystemPromptBody: String { EnsuRustDefaults.shared.desktopSystemPromptBody }
+    static var defaultModelName: String { platformDefaultModel.title }
+    static var defaultModelUrl: String { platformDefaultModel.url }
+    static var defaultMmprojUrl: String? { platformDefaultModel.mmprojUrl }
+    static var defaultSystemPromptBody: String { platformSystemPromptBody }
 
     static func currentSystemPromptBody() -> String {
         let stored = UserDefaults.standard.string(forKey: Keys.systemPromptBody) ?? ""
@@ -79,7 +80,23 @@ final class ModelSettingsStore: ObservableObject {
 
     static func resolveSystemPromptBody(_ value: String) -> String {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? EnsuRustDefaults.shared.desktopSystemPromptBody : trimmed
+        return trimmed.isEmpty ? platformSystemPromptBody : trimmed
+    }
+
+    private static var platformDefaultModel: EnsuRustModelPreset {
+        #if os(iOS)
+        EnsuRustDefaults.shared.mobileDefaultModel
+        #else
+        EnsuRustDefaults.shared.desktopDefaultModel
+        #endif
+    }
+
+    private static var platformSystemPromptBody: String {
+        #if os(iOS)
+        EnsuRustDefaults.shared.mobileSystemPromptBody
+        #else
+        EnsuRustDefaults.shared.desktopSystemPromptBody
+        #endif
     }
 
     private func persist() {

@@ -219,6 +219,9 @@ struct ChatView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        #if os(iOS)
+        .ignoresSafeArea(.keyboard)
+        #endif
     }
 
     @ViewBuilder
@@ -335,6 +338,7 @@ struct ChatView: View {
                         },
                         isFocused: $isInputFocused
                     )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .onPreferenceChange(InputBarHeightKey.self) { newValue in
                         viewState.inputBarHeight = newValue
                     }
@@ -352,6 +356,7 @@ struct ChatView: View {
                             viewState.didDismissKeyboard = false
                         }
                     }
+                    .padding(.bottom, keyboard.isVisible ? keyboard.height : 0)
                     .zIndex(1)
                 }
 
@@ -371,27 +376,6 @@ struct ChatView: View {
                     .zIndex(2)
                 }
 
-                #if os(iOS)
-                if keyboard.isVisible {
-                    Button {
-                        viewState.didDismissKeyboard = true
-                        isInputFocused = false
-                        hideKeyboard()
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(EnsuColor.textPrimary)
-                            .frame(width: 32, height: 32)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .padding(.trailing, EnsuSpacing.pageHorizontal)
-                    .padding(.bottom, viewState.inputBarHeight + EnsuSpacing.sm)
-                    .zIndex(3)
-                }
-                #endif
             }
             .animation(.easeInOut(duration: 0.32), value: viewState.sessionTransitionId)
         }

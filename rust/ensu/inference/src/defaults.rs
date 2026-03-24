@@ -58,9 +58,33 @@ fn qwen_0_8b() -> EnsuModelPreset {
     }
 }
 
+fn qwen_2b_q8() -> EnsuModelPreset {
+    EnsuModelPreset {
+        id: "qwen-2b-q8".to_string(),
+        title: "Qwen 3.5 2B (Q8_0)".to_string(),
+        url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true".to_string(),
+        mmproj_url: Some(
+            "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf"
+                .to_string(),
+        ),
+    }
+}
+
+fn qwen_4b_q4km() -> EnsuModelPreset {
+    EnsuModelPreset {
+        id: "qwen-4b-q4km".to_string(),
+        title: "Qwen 3.5 4B (Q4_K_M)".to_string(),
+        url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true".to_string(),
+        mmproj_url: Some(
+            "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf"
+                .to_string(),
+        ),
+    }
+}
+
 pub fn ensu_defaults() -> EnsuDefaults {
     let mobile_default_model = lfm_vl_1_6b();
-    let desktop_default_model = lfm_vl_1_6b();
+    let desktop_default_model = qwen_4b_q4km();
 
     EnsuDefaults {
         mobile_system_prompt_body: MOBILE_SYSTEM_PROMPT_BODY.to_string(),
@@ -68,8 +92,8 @@ pub fn ensu_defaults() -> EnsuDefaults {
         system_prompt_date_placeholder: SYSTEM_PROMPT_DATE_PLACEHOLDER.to_string(),
         session_summary_system_prompt: SESSION_SUMMARY_SYSTEM_PROMPT.to_string(),
         mobile_default_model,
-        mobile_model_presets: vec![lfm_1_2b(), qwen_0_8b()],
+        mobile_model_presets: vec![lfm_1_2b(), qwen_0_8b(), qwen_2b_q8()],
         desktop_default_model,
-        desktop_model_presets: vec![lfm_1_2b(), qwen_0_8b()],
+        desktop_model_presets: vec![lfm_vl_1_6b(), lfm_1_2b(), qwen_0_8b(), qwen_2b_q8()],
     }
 }

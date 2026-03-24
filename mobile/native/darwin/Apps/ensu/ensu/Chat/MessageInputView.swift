@@ -189,6 +189,27 @@ struct MessageInputView: View {
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input + 4, style: .continuous))
                 .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+                .overlay(alignment: .topTrailing) {
+                    #if os(iOS)
+                    if isFocused {
+                        Button {
+                            hapticTap()
+                            isFocused = false
+                            hideKeyboard()
+                            onDismissKeyboard()
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(EnsuColor.textPrimary)
+                                .frame(width: 32, height: 32)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                        }
+                        .offset(y: -(32 + EnsuSpacing.sm))
+                    }
+                    #endif
+                }
                 .padding(.horizontal, EnsuSpacing.pageHorizontal)
                 .padding(.bottom, bottomPadding)
             }
@@ -305,4 +326,3 @@ struct MessageInputView: View {
     }
 }
 #endif
-

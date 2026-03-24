@@ -1882,6 +1882,30 @@ const Page: React.FC = () => {
 
     const displayMessages = useMemo(() => {
         const base = messageState.path ?? [];
+        // Insert synthetic "Response was interrupted" placeholders for orphaned user messages
+        const augmented: ChatMessage[] = [];
+        for (let i = 0; i < base.length; i++) {
+            const msg = base[i];
+            augmented.push(msg);
+            if (msg.sender === "self") {
+                const next = base[i + 1];
+                const isLastAndGenerating =
+                    i === base.length - 1 && isGenerating;
+                if (
+                    next?.sender !== "assistant" &&
+                    !isLastAndGenerating
+                ) {
+                    augmented.push({
+                        messageUuid: `interrupted-placeholder-${msg.messageUuid}`,
+                        sessionUuid: msg.sessionUuid,
+                        parentMessageUuid: msg.messageUuid,
+                        sender: "assistant",
+                        text: "Response was interrupted",
+                        createdAt: msg.createdAt,
+                    });
+                }
+            }
+        }
         if (streamingParentId) {
             const streamingMessage: ChatMessage = {
                 messageUuid: STREAMING_SELECTION_KEY,
@@ -1891,10 +1915,10 @@ const Page: React.FC = () => {
                 text: streamingText,
                 createdAt: streamingCreatedAtRef.current ?? Date.now() * 1000,
             };
-            return [...base, streamingMessage];
+            return [...augmented, streamingMessage];
         }
-        return base;
-    }, [messageState.path, streamingParentId, streamingText, currentSessionId]);
+        return augmented;
+    }, [messageState.path, streamingParentId, streamingText, currentSessionId, isGenerating]);
 
     const branchSwitchers = messageState.switchers;
 

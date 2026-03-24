@@ -188,11 +188,9 @@ struct AssistantMessageBubbleView: View {
                         hapticTap()
                         onCopy()
                     }
-                    if !message.isSynthetic {
-                        Button("Retry") {
-                            hapticMedium()
-                            onRetry()
-                        }
+                    Button("Retry") {
+                        hapticMedium()
+                        onRetry()
                     }
                 }
                 #endif

@@ -20,18 +20,27 @@ struct ModelSettingsView: View {
     @State private var temperatureError: String?
     @State private var isSaving = false
     @State private var showAdvancedLimits = false
+    @State private var toastMessage: String?
+    @State private var toastTask: Task<Void, Never>?
 
     private let modelChoices: [ModelChoice] = {
         let defaults = EnsuRustDefaults.shared
+        #if os(iOS)
+        let defaultModel = defaults.mobileDefaultModel
+        let presets = defaults.mobileModelPresets
+        #else
+        let defaultModel = defaults.desktopDefaultModel
+        let presets = defaults.desktopModelPresets
+        #endif
         return [
             ModelChoice(
                 id: Self.defaultOptionId,
-                name: defaults.desktopDefaultModel.title,
-                url: defaults.desktopDefaultModel.url,
-                mmproj: defaults.desktopDefaultModel.mmprojUrl,
+                name: defaultModel.title,
+                url: defaultModel.url,
+                mmproj: defaultModel.mmprojUrl,
                 isDefault: true
             )
-        ] + defaults.desktopModelPresets.map { preset in
+        ] + presets.map { preset in
             ModelChoice(
                 id: preset.id,
                 name: preset.title,
@@ -94,6 +103,13 @@ struct ModelSettingsView: View {
             maxTokens = settings.maxTokens
             temperature = settings.temperature
             showAdvancedLimits = !settings.contextLength.isEmpty || !settings.maxTokens.isEmpty || !settings.temperature.isEmpty
+        }
+        .overlay(alignment: .bottom) {
+            if let toastMessage {
+                ToastView(message: toastMessage)
+                    .padding(.bottom, EnsuSpacing.xl)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         #if os(macOS)
         .safeAreaInset(edge: .top) {
@@ -346,6 +362,7 @@ struct ModelSettingsView: View {
                 )
             }
             isSaving = false
+            showToast("Model settings saved")
         }
     }
 
@@ -357,6 +374,22 @@ struct ModelSettingsView: View {
         contextLength = ""
         maxTokens = ""
         temperature = ""
+        showToast("Model settings reset")
+    }
+
+    private func showToast(_ message: String) {
+        toastTask?.cancel()
+        withAnimation(.easeOut(duration: 0.2)) {
+            toastMessage = message
+        }
+        toastTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.2)) {
+                toastMessage = nil
+            }
+            toastTask = nil
+        }
     }
 
     private func validate() -> Bool {
