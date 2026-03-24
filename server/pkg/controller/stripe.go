@@ -306,11 +306,10 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	defaultPaymentMethodType := getSubscriptionPaymentMethodType(fullStripeSub)
 
 	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue &&
-		supportsPendingSubscriptionUpdate(defaultPaymentMethodType) {
-		// Payment methods that support pending subscription updates surface
-		// update failures via customer.subscription.updated. Async methods that
-		// use allow_incomplete are handled within handlePaymentIntentFailed to
-		// avoid duplicate on-hold emails.
+		!usesAllowIncompleteSubscriptionUpdate(defaultPaymentMethodType) {
+		// Subscription updates that do not use allow_incomplete surface failures
+		// via customer.subscription.updated. SEPA and UPI are handled within
+		// handlePaymentIntentFailed to avoid duplicate on-hold emails.
 		err = c.sendAccountOnHoldEmail(userID)
 		if err != nil {
 			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
@@ -357,14 +356,15 @@ func (c *StripeController) handleInvoicePaid(event stripe.Event, country ente.St
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: *stripeSubscription, Event: event}, nil
 }
 
-// Event used to handle failures for payment methods that update subscriptions
-// using allow_incomplete. Payment methods that support pending updates are
-// handled synchronously in UpdateSubscription and customer.subscription.updated.
+// Event used to handle failures for payment methods whose subscription updates
+// use allow_incomplete (currently SEPA and UPI). Other subscription update
+// modes are handled synchronously in UpdateSubscription and
+// customer.subscription.updated.
 func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var paymentIntent stripe.PaymentIntent
 	json.Unmarshal(event.Data.Raw, &paymentIntent)
 	paymentMethodType := getPaymentIntentErrorPaymentMethodType(paymentIntent)
-	if supportsPendingSubscriptionUpdate(paymentMethodType) {
+	if !usesAllowIncompleteSubscriptionUpdate(paymentMethodType) {
 		// Ignore events for payment methods that are already handled
 		// synchronously.
 		log.Info("Ignoring payment intent failed event for payment method handled synchronously")
@@ -397,7 +397,6 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	productID := stripeSubscription.Items.Data[0].Price.ID
 	// If the current subscription is not the same as the one in the webhook,
 	// then ignore
-	fmt.Printf("productID: %s, currentSubscription.ProductID: %s\n", productID, currentSubscription.ProductID)
 	if currentSubscription.ProductID != productID {
 		// no-op
 		log.Warn("Webhook is reporting un-verified subscription update", stripeSubscription.ID, "invoiceID:", invoiceID)
@@ -454,10 +453,10 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	}
 	defaultPaymentMethodType := getSubscriptionPaymentMethodType(stripeSubscription)
 	var paymentBehavior stripe.SubscriptionPaymentBehavior
-	if supportsPendingSubscriptionUpdate(defaultPaymentMethodType) {
-		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
-	} else {
+	if usesAllowIncompleteSubscriptionUpdate(defaultPaymentMethodType) {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
+	} else {
+		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
 	}
 	params := stripe.SubscriptionParams{
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionProrationBehaviorAlwaysInvoice)),
@@ -501,6 +500,10 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
 		case stripe.PaymentIntentStatusProcessing:
 			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+		case stripe.PaymentIntentStatusSucceeded:
+			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+		default:
+			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 		}
 	}
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
@@ -760,8 +763,8 @@ func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) st
 	return stripeSubscription.DefaultPaymentMethod.Type
 }
 
-func supportsPendingSubscriptionUpdate(paymentMethodType stripe.PaymentMethodType) bool {
-	return paymentMethodType == stripe.PaymentMethodTypeCard || paymentMethodType == stripe.PaymentMethodType("link")
+func usesAllowIncompleteSubscriptionUpdate(paymentMethodType stripe.PaymentMethodType) bool {
+	return paymentMethodType == stripe.PaymentMethodTypeSepaDebit || paymentMethodType == stripe.PaymentMethodType("upi")
 }
 
 func getPaymentIntentErrorPaymentMethodType(paymentIntent stripe.PaymentIntent) stripe.PaymentMethodType {
