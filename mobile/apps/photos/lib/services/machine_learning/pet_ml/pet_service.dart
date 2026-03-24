@@ -1,14 +1,18 @@
 import "dart:convert";
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/pets_changed_event.dart";
 import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/local_entity_data.dart";
+import "package:photos/models/ml/face/person.dart" show ClusterInfo;
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 
 /// Manages pet entities synced via the entity sync service.
 ///
@@ -17,9 +21,10 @@ import "package:photos/services/entity_service.dart";
 /// If a dedicated EntityType.pet is added later, a migration will be needed.
 class PetService {
   final EntityService entityService;
+  final MLDataDB mlDataDB;
   final _logger = Logger("PetService");
 
-  PetService(this.entityService);
+  PetService(this.entityService, this.mlDataDB);
 
   static PetService? _instance;
 
@@ -35,8 +40,11 @@ class PetService {
   Future<List<PetEntity>>? _cachedPetsFuture;
   int _lastCacheRefreshTime = 0;
 
-  static Future<void> init(EntityService entityService) async {
-    _instance = PetService(entityService);
+  static Future<void> init(
+    EntityService entityService,
+    MLDataDB mlDataDB,
+  ) async {
+    _instance = PetService(entityService, mlDataDB);
     await _instance!._refreshCache();
   }
 
@@ -133,6 +141,126 @@ class PetService {
     final int changedEntities =
         await entityService.syncEntity(EntityType.person);
     return changedEntities > 0;
+  }
+
+  /// Sync remote pet entities to local DB, then push local changes back.
+  ///
+  /// Direction 1 (remote → local): Fetch pet entities from server, update
+  /// local `pet_cluster_pet` mappings and face-to-cluster assignments.
+  ///
+  /// Direction 2 (local → remote): Read local pet-to-cluster mappings,
+  /// compare with PetData.assigned, and sync any differences to the server.
+  Future<void> reconcileClusters() async {
+    await fetchRemoteClusterFeedback(skipIfNoChange: false);
+    await _pushLocalClustersToRemote();
+  }
+
+  /// Fetch remote pet entities and update local ML DB mappings.
+  /// Returns true if remote data changed.
+  Future<bool> fetchRemoteClusterFeedback({
+    bool skipIfNoChange = true,
+  }) async {
+    if (isOfflineMode) {
+      _logger.finest("Skip fetching remote pet clusters in offline mode");
+      return false;
+    }
+    final int changedEntities =
+        await entityService.syncEntity(EntityType.person);
+    final bool changed = changedEntities > 0;
+    if (!changed && skipIfNoChange) {
+      return false;
+    }
+
+    final entities = await entityService.getEntities(EntityType.person);
+    final remotePetIDs = entities.map((e) => e.id).toSet();
+
+    // Remove local mappings for pets that no longer exist remotely
+    final localMappings = await mlDataDB.getClusterToPetId();
+    final localPetIds = localMappings.values.toSet();
+    int removedOrphans = 0;
+    for (final localPetId in localPetIds) {
+      if (!remotePetIDs.contains(localPetId)) {
+        // Remove all cluster mappings for this orphaned pet
+        for (final entry in localMappings.entries) {
+          if (entry.value == localPetId) {
+            await mlDataDB.removeClusterPetId(entry.key);
+            removedOrphans++;
+          }
+        }
+      }
+    }
+    if (removedOrphans > 0) {
+      _logger.info(
+        "Removed $removedOrphans orphaned local pet cluster mappings",
+      );
+    }
+
+    // Apply remote assignments to local DB
+    entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
+    final Map<String, String> clusterToPetId = {};
+    for (final e in entities) {
+      final petData = PetData.fromJson(json.decode(e.data));
+      for (final cluster in petData.assigned) {
+        clusterToPetId[cluster.id] = e.id;
+      }
+      if (kDebugMode) {
+        _logger.info(
+          "Pet ${e.id} ${petData.name} has ${petData.assigned.length} clusters",
+        );
+      }
+    }
+
+    // Write all cluster-to-pet mappings
+    for (final entry in clusterToPetId.entries) {
+      await mlDataDB.setClusterPetId(entry.key, entry.value);
+    }
+
+    return changed;
+  }
+
+  /// Push local cluster assignments to remote PetData.assigned.
+  Future<void> _pushLocalClustersToRemote() async {
+    final dbPetClusterInfo = await mlDataDB.getPetToClusterIdToFaceIds();
+    final pets = await getPetsMap();
+
+    for (final petID in dbPetClusterInfo.keys) {
+      final pet = pets[petID];
+      if (pet == null) {
+        _logger.warning("Pet $petID not found in entities, skipping");
+        continue;
+      }
+      final dbClusters = dbPetClusterInfo[petID]!;
+      final petData = pet.data;
+
+      if (!_shouldUpdateAssigned(petData, dbClusters)) {
+        continue;
+      }
+
+      petData.assigned = dbClusters.entries
+          .map(
+            (e) => ClusterInfo(id: e.key, faces: e.value),
+          )
+          .toList();
+
+      _addOrUpdateEntity(petData.toJson(), id: petID).ignore();
+      petData.logStats();
+    }
+  }
+
+  bool _shouldUpdateAssigned(
+    PetData petData,
+    Map<String, Set<String>> dbClusters,
+  ) {
+    if (petData.assigned.length != dbClusters.length) return true;
+    for (final info in petData.assigned) {
+      final dbCluster = dbClusters[info.id];
+      if (dbCluster == null) return true;
+      if (info.faces.length != dbCluster.length) return true;
+      for (final faceId in info.faces) {
+        if (!dbCluster.contains(faceId)) return true;
+      }
+    }
+    return false;
   }
 
   Future<LocalEntityData> _addOrUpdateEntity(

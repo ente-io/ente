@@ -1,7 +1,7 @@
 import "dart:convert" show jsonEncode;
 import "dart:io" show File;
 import "dart:math" show min, sqrt;
-import "dart:typed_data" show Float32List, Float64List;
+import "dart:typed_data" show Float32List;
 
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
@@ -151,7 +151,7 @@ class PetClusteringService {
     final speciesName = species == 0 ? "dog" : "cat";
     _logger.info("Clustering $speciesName faces...");
 
-    // 1. Read all pet faces for this species
+    // 1. Read all pet faces for this species (lightweight metadata only)
     final faces =
         await mlDataDB.getPetFacesForClustering(species, isOffline: isOffline);
     if (faces.isEmpty) {
@@ -159,44 +159,33 @@ class PetClusteringService {
       return false;
     }
 
-    // 2. Fetch face embeddings from vector DB
+    // 2. Build lightweight metadata — no embeddings cross FFI
+    final allMetas = <RustPetFaceMeta>[];
+    final unclusteredMetas = <RustPetFaceMeta>[];
+    for (final face in faces) {
+      if (face.faceVectorId == null) continue;
+      final meta = RustPetFaceMeta(
+        petFaceId: face.petFaceId,
+        vectorId: face.faceVectorId!,
+        species: species,
+        fileId: face.fileId,
+        clusterId: face.clusterId ?? "",
+      );
+      allMetas.add(meta);
+      if (face.clusterId == null) {
+        unclusteredMetas.add(meta);
+      }
+    }
+
+    // 3. Get usearch index path — Rust reads embeddings directly
     final faceVdb = PetVectorDB.forModel(
       species: species,
       isFace: true,
       offline: isOffline,
     );
+    final faceIndexPath = await faceVdb.getIndexPath();
 
-    // Build cluster inputs, tracking which are unclustered
-    final List<RustPetClusterInput> allInputs = [];
-    final List<RustPetClusterInput> unclusteredInputs = [];
-
-    for (final face in faces) {
-      if (face.faceVectorId == null) continue;
-
-      Float64List faceEmb;
-      try {
-        final embs = await faceVdb.getEmbeddings([face.faceVectorId!]);
-        if (embs.isEmpty) continue;
-        faceEmb = _float32ToFloat64(embs.first);
-      } catch (e) {
-        _logger.warning("Failed to get face embedding for ${face.petFaceId}");
-        continue;
-      }
-
-      final input = RustPetClusterInput(
-        petFaceId: face.petFaceId,
-        faceEmbedding: faceEmb,
-        bodyEmbedding: Float64List(0),
-        species: species,
-        fileId: face.fileId,
-      );
-      allInputs.add(input);
-      if (face.clusterId == null) {
-        unclusteredInputs.add(input);
-      }
-    }
-
-    // 5. Check for existing clusters (incremental mode)
+    // 4. Check for existing clusters (incremental mode)
     final existingSummaries =
         await mlDataDB.getAllPetClusterSummary(species: species);
 
@@ -204,26 +193,27 @@ class PetClusteringService {
 
     if (existingSummaries.isEmpty) {
       // Batch mode — send all faces
-      if (allInputs.length < 2) {
+      if (allMetas.length < 2) {
         _logger.info("Not enough $speciesName faces to cluster "
-            "(${allInputs.length})");
+            "(${allMetas.length})");
         return false;
       }
       _logger.info(
-        "Batch clustering ${allInputs.length} $speciesName faces",
+        "Batch clustering ${allMetas.length} $speciesName faces",
       );
-      result = await runPetClusteringRust(
-        inputs: allInputs,
+      result = await runPetClusteringFromIndex(
+        faces: allMetas,
+        faceIndexPath: faceIndexPath,
         species: species,
       );
     } else {
       // Incremental mode — only send unclustered faces
-      if (unclusteredInputs.isEmpty) {
+      if (unclusteredMetas.isEmpty) {
         _logger.info("No unclustered $speciesName faces, skipping");
         return false;
       }
       _logger.info(
-        "Incremental clustering ${unclusteredInputs.length} new "
+        "Incremental clustering ${unclusteredMetas.length} new "
         "$speciesName faces (${existingSummaries.length} existing clusters)",
       );
 
@@ -231,41 +221,38 @@ class PetClusteringService {
         species: species,
         offline: isOffline,
       );
+      final centroidIndexPath = await centroidVdb.getIndexPath();
       final sqlDb = await mlDataDB.asyncDB;
       final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
         existingSummaries.keys,
         db: sqlDb,
       );
 
-      final faceCentroids = <RustPetClusterSummary>[];
-      if (idMap.isNotEmpty) {
-        final vectorIds = <int>[];
-        final clusterIds = <String>[];
-        for (final entry in idMap.entries) {
-          clusterIds.add(entry.key);
-          vectorIds.add(entry.value);
-        }
-        final centroids = await centroidVdb.getCentroids(vectorIds);
-        for (int i = 0; i < clusterIds.length && i < centroids.length; i++) {
-          faceCentroids.add(
-            RustPetClusterSummary(
-              clusterId: clusterIds[i],
-              centroid: _float32ToFloat64(centroids[i]),
-              count: existingSummaries[clusterIds[i]]?.$1 ?? 0,
-            ),
-          );
-        }
+      final centroidMappings = <RustCentroidMapping>[];
+      final centroidCounts = <RustCentroidCount>[];
+      for (final entry in idMap.entries) {
+        centroidMappings.add(
+          RustCentroidMapping(clusterId: entry.key, vectorId: entry.value),
+        );
+        centroidCounts.add(
+          RustCentroidCount(
+            clusterId: entry.key,
+            count: existingSummaries[entry.key]?.$1 ?? 0,
+          ),
+        );
       }
 
-      result = await runPetClusteringIncrementalRust(
-        newInputs: unclusteredInputs,
-        existingFaceCentroids: faceCentroids,
-        existingBodyCentroids: [],
+      result = await runPetClusteringIncrementalFromIndex(
+        newFaces: unclusteredMetas,
+        faceIndexPath: faceIndexPath,
+        centroidIndexPath: centroidIndexPath,
+        centroidMappings: centroidMappings,
+        centroidCounts: centroidCounts,
         species: species,
       );
     }
 
-    // 6. Store results — respect user feedback
+    // 5. Store results — respect user feedback
     final faceToCluster = <String, String>{};
     for (final assignment in result.assignments) {
       faceToCluster[assignment.petFaceId] = assignment.clusterId;
@@ -287,32 +274,36 @@ class PetClusteringService {
       await mlDataDB.updatePetFaceIdToClusterId(faceToCluster);
     }
 
-    // Recompute summaries from the DB's actual cluster membership (after
-    // the upsert), not just faceToCluster. Rust may leave some faces
-    // unclustered (nUnclustered > 0), and those retain their previous DB
-    // assignments which must be reflected in the summary.
-    final embeddingByFaceId = <String, Float64List>{};
-    for (final input in allInputs) {
-      if (input.faceEmbedding.isNotEmpty) {
-        embeddingByFaceId[input.petFaceId] = Float64List.fromList(
-          input.faceEmbedding,
-        );
+    // 6. Use Rust-returned centroids for clusters it created/modified.
+    // For clusters Rust didn't touch (e.g. incremental mode existing clusters),
+    // recompute from the VDB.
+    final rustCentroids = <String, Float32List>{};
+    for (final s in result.summaries) {
+      if (s.centroid.isNotEmpty) {
+        rustCentroids[s.clusterId] = _doublesToFloat32(s.centroid);
       }
     }
 
     final dbClusterToFaces = await mlDataDB.getPetClusterToFaceIds(species);
     final clusterSummaries = <String, (int, int)>{};
     final clusterCentroids = <String, Float32List>{};
+
     for (final entry in dbClusterToFaces.entries) {
-      final embs = <Float64List>[];
-      for (final faceId in entry.value) {
-        final emb = embeddingByFaceId[faceId];
-        if (emb != null) embs.add(emb);
-      }
-      if (embs.isEmpty) continue;
-      final centroid = _meanCentroid(embs);
-      clusterCentroids[entry.key] = _doublesToFloat32(centroid);
       clusterSummaries[entry.key] = (entry.value.length, species);
+      // Use Rust's centroid if available, otherwise recompute from VDB
+      final rustCentroid = rustCentroids[entry.key];
+      if (rustCentroid != null) {
+        clusterCentroids[entry.key] = rustCentroid;
+      } else {
+        final centroid = await _computeCentroidFromVdb(
+          entry.value,
+          mlDataDB,
+          faceVdb,
+        );
+        if (centroid != null) {
+          clusterCentroids[entry.key] = centroid;
+        }
+      }
     }
 
     // Delete existing summaries for clusters that no longer have any face
@@ -366,26 +357,32 @@ class PetClusteringService {
     return faceToCluster.isNotEmpty || clusterSummaries.isNotEmpty;
   }
 
-  static Float64List _float32ToFloat64(Float32List f32) {
-    final f64 = Float64List(f32.length);
-    for (int i = 0; i < f32.length; i++) {
-      f64[i] = f32[i];
+  /// Compute L2-normalized mean centroid for a cluster by reading embeddings
+  /// from the vector DB. Used for clusters Rust didn't return centroids for.
+  static Future<Float32List?> _computeCentroidFromVdb(
+    List<String> faceIds,
+    MLDataDB mlDataDB,
+    PetVectorDB faceVdb,
+  ) async {
+    final details = await mlDataDB.getPetFaceDetails(faceIds);
+    final vectorIds = <int>[];
+    for (final d in details.values) {
+      if (d.$2 != null) vectorIds.add(d.$2!);
     }
-    return f64;
+    if (vectorIds.isEmpty) return null;
+    try {
+      final embs = await faceVdb.getEmbeddings(vectorIds);
+      if (embs.isEmpty) return null;
+      return _computeMeanCentroidF32(embs);
+    } catch (e) {
+      return null;
+    }
   }
 
-  static Float32List _doublesToFloat32(List<double> values) {
-    final floats = Float32List(values.length);
-    for (int i = 0; i < values.length; i++) {
-      floats[i] = values[i];
-    }
-    return floats;
-  }
-
-  /// Compute the L2-normalized mean centroid of a list of embeddings.
-  static List<double> _meanCentroid(List<Float64List> embeddings) {
+  /// Compute L2-normalized mean centroid from Float32List embeddings.
+  static Float32List _computeMeanCentroidF32(List<Float32List> embeddings) {
     final dim = embeddings.first.length;
-    final centroid = Float64List(dim);
+    final centroid = Float32List(dim);
     for (final emb in embeddings) {
       for (int i = 0; i < dim; i++) {
         centroid[i] += emb[i];
@@ -404,6 +401,14 @@ class PetClusteringService {
       }
     }
     return centroid;
+  }
+
+  static Float32List _doublesToFloat32(List<double> values) {
+    final floats = Float32List(values.length);
+    for (int i = 0; i < values.length; i++) {
+      floats[i] = values[i];
+    }
+    return floats;
   }
 }
 
@@ -627,6 +632,29 @@ extension PetClusteringDB on MLDataDB {
       result
           .putIfAbsent(r[clusterIDColumn] as String, () => [])
           .add(r[petFaceIDColumn] as String);
+    }
+    return result;
+  }
+
+  /// Get petId → {clusterId → Set<faceIds>} for reconciliation.
+  Future<Map<String, Map<String, Set<String>>>>
+      getPetToClusterIdToFaceIds() async {
+    final db = await asyncDB;
+    final rows = await db.getAll(
+      'SELECT pcp.$petIdColumn, fc.$clusterIDColumn, fc.$petFaceIDColumn '
+      'FROM $petClusterPetTable pcp '
+      'INNER JOIN $petFaceClustersTable fc '
+      'ON pcp.$clusterIDColumn = fc.$clusterIDColumn',
+    );
+    final result = <String, Map<String, Set<String>>>{};
+    for (final r in rows) {
+      final petId = r[petIdColumn] as String;
+      final clusterId = r[clusterIDColumn] as String;
+      final faceId = r[petFaceIDColumn] as String;
+      result
+          .putIfAbsent(petId, () => {})
+          .putIfAbsent(clusterId, () => {})
+          .add(faceId);
     }
     return result;
   }

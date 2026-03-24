@@ -380,7 +380,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     PersonService.init(entityService, MLDataDB.instance, preferences);
     await PersonService.instance.refreshPersonCache();
-    await PetService.init(entityService);
+    await PetService.init(entityService, MLDataDB.instance);
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();

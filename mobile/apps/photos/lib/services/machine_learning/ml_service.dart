@@ -26,6 +26,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
+import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/video_preview_service.dart";
@@ -575,6 +576,10 @@ class MLService {
       );
       if (changed) {
         Bus.instance.fire(PetsChangedEvent(source: "clustering"));
+      }
+      // Reconcile local cluster mappings with synced PetEntity data
+      if (PetService.isInitialized) {
+        await PetService.instance.reconcileClusters();
       }
     } catch (e, s) {
       _logger.severe("Pet clustering failed", e, s);
