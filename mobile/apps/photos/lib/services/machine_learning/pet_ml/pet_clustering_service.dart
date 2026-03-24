@@ -72,14 +72,19 @@ class PetClusteringService {
         });
       }
 
-      // Read existing cluster assignments
+      // Read existing cluster assignments for this species only
       final clusters = <String, String>{};
       final sqlDb = await mlDataDB.asyncDB;
       final rows = await sqlDb.getAll(
-        "SELECT pet_face_id, cluster_id FROM $petFaceClustersTable",
+        'SELECT fc.$petFaceIDColumn, fc.$clusterIDColumn '
+        'FROM $petFaceClustersTable fc '
+        'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+        'WHERE f.$speciesColumn = ?',
+        [species],
       );
       for (final row in rows) {
-        clusters[row["pet_face_id"] as String] = row["cluster_id"] as String;
+        clusters[row[petFaceIDColumn] as String] =
+            row[clusterIDColumn] as String;
       }
 
       results.add({
