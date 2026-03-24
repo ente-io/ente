@@ -94,6 +94,16 @@ const (
 	storageWarningProcessResultSent           storageWarningProcessResult = "sent"
 )
 
+var sendStorageWarningTemplatedEmail = emailUtil.SendTemplatedEmailV2
+
+var persistStorageWarningHistory = func(notificationHistoryRepo *repo.NotificationHistoryRepository, snapshot storageWarningSnapshot, templateID string) error {
+	historyGroup := storageWarningHistoryGroup(snapshot)
+	if historyGroup == "" {
+		return notificationHistoryRepo.SetLastNotificationTimeToNow(snapshot.RecipientID, templateID)
+	}
+	return notificationHistoryRepo.SetLastNotificationTimeToNowWithGroup(snapshot.RecipientID, templateID, historyGroup)
+}
+
 var storageWarningStageOrder = []string{
 	string(expiredWarningStage0),
 	string(expiredWarningStage30),
@@ -501,23 +511,14 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(ctx context.
 	if !isInStorageWarningRollout(snapshot.RecipientID, snapshot.AccountEmail) {
 		return storageWarningProcessResultSkippedRollout, nil
 	}
-	if storageWarningShouldResetUserAccess(snapshot) {
-		if c.UserAccessResetter == nil {
-			err := errors.New("storage warning user access resetter is not configured")
-			logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
-			return storageWarningProcessResultSkipped, err
-		}
-		// Intentionally do not enqueue data cleanup here yet. We will start
-		// scheduling auto-deletion only after validating that this workflow is
-		// consistently identifying the correct deletion candidates.
-		if err := c.UserAccessResetter.ResetUserAccess(ctx, snapshot.RecipientID, logger); err != nil {
-			logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
-			return storageWarningProcessResultSkipped, err
-		}
-		logger.Info("Restricted user access for storage scheduled deletion")
+	shouldResetUserAccess := storageWarningShouldResetUserAccess(snapshot)
+	if shouldResetUserAccess && c.UserAccessResetter == nil {
+		err := errors.New("storage warning user access resetter is not configured")
+		logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
+		return storageWarningProcessResultSkipped, err
 	}
 
-	err := emailUtil.SendTemplatedEmailV2(
+	err := sendStorageWarningTemplatedEmail(
 		[]string{snapshot.AccountEmail},
 		storageWarningFromName,
 		storageWarningFromEmail,
@@ -532,12 +533,18 @@ func (c *EmailNotificationController) processStorageWarningSnapshot(ctx context.
 		return storageWarningProcessResultSkipped, err
 	}
 
-	historyGroup := storageWarningHistoryGroup(snapshot)
-	if historyGroup == "" {
-		err = c.NotificationHistoryRepo.SetLastNotificationTimeToNow(snapshot.RecipientID, templateID)
-	} else {
-		err = c.NotificationHistoryRepo.SetLastNotificationTimeToNowWithGroup(snapshot.RecipientID, templateID, historyGroup)
+	if shouldResetUserAccess {
+		// Intentionally do not enqueue data cleanup here yet. We will start
+		// scheduling auto-deletion only after validating that this workflow is
+		// consistently identifying the correct deletion candidates.
+		if err := c.UserAccessResetter.ResetUserAccess(ctx, snapshot.RecipientID, logger); err != nil {
+			logger.WithError(err).Error("Failed to restrict user access for storage scheduled deletion")
+			return storageWarningProcessResultSkipped, err
+		}
+		logger.Info("Restricted user access for storage scheduled deletion")
 	}
+
+	err = persistStorageWarningHistory(c.NotificationHistoryRepo, snapshot, templateID)
 	if err != nil {
 		logger.WithError(err).Error("Failed to persist storage warning history")
 		return storageWarningProcessResultSkipped, err

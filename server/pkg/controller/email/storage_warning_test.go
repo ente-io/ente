@@ -2,6 +2,7 @@ package email
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -14,6 +15,20 @@ import (
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
 )
+
+type recordingUserAccessResetter struct {
+	callCount int
+	callOrder *[]string
+	err       error
+}
+
+func (r *recordingUserAccessResetter) ResetUserAccess(_ context.Context, _ int64, _ *log.Entry) error {
+	r.callCount++
+	if r.callOrder != nil {
+		*r.callOrder = append(*r.callOrder, "reset")
+	}
+	return r.err
+}
 
 func TestBucketStorageWarningActiveOverage(t *testing.T) {
 	now := int64(100)
@@ -764,6 +779,97 @@ func TestProcessStorageWarningSnapshotSkipsDueToRolloutWithoutPerRecipientLog(t 
 
 	if entry := hook.LastEntry(); entry != nil {
 		t.Fatalf("expected no per-recipient rollout log, got %q", entry.Message)
+	}
+}
+
+func TestProcessStorageWarningSnapshotScheduledDeletionSkipsResetWhenEmailFails(t *testing.T) {
+	originalSendStorageWarningTemplatedEmail := sendStorageWarningTemplatedEmail
+	originalPersistStorageWarningHistory := persistStorageWarningHistory
+	defer func() {
+		sendStorageWarningTemplatedEmail = originalSendStorageWarningTemplatedEmail
+		persistStorageWarningHistory = originalPersistStorageWarningHistory
+	}()
+
+	sendStorageWarningTemplatedEmail = func(_ []string, _ string, _ string, _ string, _ string, _ string, _ map[string]interface{}, _ []map[string]interface{}) error {
+		return errors.New("boom")
+	}
+	persistStorageWarningHistory = func(_ *repo.NotificationHistoryRepository, _ storageWarningSnapshot, _ string) error {
+		t.Fatal("did not expect history persistence when email send fails")
+		return nil
+	}
+
+	resetter := &recordingUserAccessResetter{}
+	snapshot := storageWarningSnapshot{
+		RecipientID:      12345,
+		AccountEmail:     "user@ente.io",
+		TotalUsage:       storageWarningOverageThreshold + 10,
+		AllottedStorage:  0,
+		AvailableStorage: -10,
+		Bucket:           storageWarningBucketExpired,
+		ExpiredStage:     expiredWarningStageScheduledDeletion,
+		EffectiveExpiry:  1,
+		NotificationHistory: map[string]int64{
+			storageWarningExpired119TemplateID: 1,
+		},
+	}
+
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	if err == nil {
+		t.Fatal("expected email failure to be returned")
+	}
+	if result != storageWarningProcessResultSkipped {
+		t.Fatalf("unexpected result: got %q want %q", result, storageWarningProcessResultSkipped)
+	}
+	if resetter.callCount != 0 {
+		t.Fatalf("expected no access reset when email send fails, got %d resets", resetter.callCount)
+	}
+}
+
+func TestProcessStorageWarningSnapshotScheduledDeletionResetsAccessAfterEmail(t *testing.T) {
+	originalSendStorageWarningTemplatedEmail := sendStorageWarningTemplatedEmail
+	originalPersistStorageWarningHistory := persistStorageWarningHistory
+	defer func() {
+		sendStorageWarningTemplatedEmail = originalSendStorageWarningTemplatedEmail
+		persistStorageWarningHistory = originalPersistStorageWarningHistory
+	}()
+
+	callOrder := []string{}
+	sendStorageWarningTemplatedEmail = func(_ []string, _ string, _ string, _ string, _ string, _ string, _ map[string]interface{}, _ []map[string]interface{}) error {
+		callOrder = append(callOrder, "send")
+		return nil
+	}
+	persistStorageWarningHistory = func(_ *repo.NotificationHistoryRepository, _ storageWarningSnapshot, _ string) error {
+		callOrder = append(callOrder, "persist")
+		return nil
+	}
+
+	resetter := &recordingUserAccessResetter{callOrder: &callOrder}
+	snapshot := storageWarningSnapshot{
+		RecipientID:      12345,
+		AccountEmail:     "user@ente.io",
+		TotalUsage:       storageWarningOverageThreshold + 10,
+		AllottedStorage:  0,
+		AvailableStorage: -10,
+		Bucket:           storageWarningBucketExpired,
+		ExpiredStage:     expiredWarningStageScheduledDeletion,
+		EffectiveExpiry:  1,
+		NotificationHistory: map[string]int64{
+			storageWarningExpired119TemplateID: 1,
+		},
+	}
+
+	result, err := (&EmailNotificationController{UserAccessResetter: resetter}).processStorageWarningSnapshot(context.Background(), snapshot)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result != storageWarningProcessResultSent {
+		t.Fatalf("unexpected result: got %q want %q", result, storageWarningProcessResultSent)
+	}
+	if resetter.callCount != 1 {
+		t.Fatalf("expected one access reset after successful email, got %d", resetter.callCount)
+	}
+	if got, want := strings.Join(callOrder, ","), "send,reset,persist"; got != want {
+		t.Fatalf("unexpected call order: got %q want %q", got, want)
 	}
 }
 
