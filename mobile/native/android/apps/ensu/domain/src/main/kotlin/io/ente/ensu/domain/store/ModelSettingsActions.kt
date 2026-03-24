@@ -3,6 +3,7 @@ package io.ente.ensu.domain.store
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.logging.LogRepository
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
@@ -19,7 +20,8 @@ internal class ModelSettingsActions(
     private val state: MutableStateFlow<AppState>,
     private val sessionPreferences: SessionPreferences,
     private val llmProvider: LlmProvider,
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
+    private val ensuDefaults: EnsuDefaults
 ) {
     private var scope: CoroutineScope? = null
     private var modelDownloadJob: Job? = null
@@ -304,8 +306,12 @@ internal class ModelSettingsActions(
 
     fun resolveTarget(settings: ModelSettingsState): LlmModelTarget {
         val useCustom = settings.useCustomModel && settings.modelUrl.isNotBlank()
-        val url = if (useCustom) settings.modelUrl else DEFAULT_MODEL_URL
-        val mmproj = if (useCustom) settings.mmprojUrl.takeIf { it.isNotBlank() } else DEFAULT_MMPROJ_URL
+        val url = if (useCustom) settings.modelUrl else ensuDefaults.mobileDefaultModel.url
+        val mmproj = if (useCustom) {
+            settings.mmprojUrl.takeIf { it.isNotBlank() }
+        } else {
+            ensuDefaults.mobileDefaultModel.mmprojUrl
+        }
         val contextLength = settings.contextLength.toIntOrNull()
         val maxTokens = settings.maxTokens.toIntOrNull()?.takeIf { it > 0 }
         val id = if (useCustom) "custom:${url.hashCode()}" else "default"
@@ -329,10 +335,6 @@ internal class ModelSettingsActions(
         private const val MAX_DOWNLOAD_RETRIES = 5
         private const val RETRY_DELAY_BASE_MS = 1500L
         private const val RETRY_DELAY_MAX_MS = 12000L
-        private const val DEFAULT_MODEL_URL =
-            "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
-        private const val DEFAULT_MMPROJ_URL =
-            "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         private const val DEFAULT_TEMPERATURE = 0.5f
     }
 

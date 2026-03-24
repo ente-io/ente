@@ -25,15 +25,16 @@ import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
-import io.ente.ensu.domain.store.SystemPromptDefaults
 
 @Composable
 fun SystemPromptSettingsScreen(
+    defaultPromptBody: String,
+    datePlaceholder: String,
     systemPrompt: String,
     onSave: (String) -> Unit,
     onReset: () -> Unit
 ) {
-    val resolvedPrompt = SystemPromptDefaults.resolve(systemPrompt)
+    val resolvedPrompt = systemPrompt.trim().ifEmpty { defaultPromptBody }
     var value by remember(systemPrompt) { mutableStateOf(resolvedPrompt) }
 
     Column(
@@ -43,7 +44,7 @@ fun SystemPromptSettingsScreen(
             .padding(EnsuSpacing.pageHorizontal.dp)
     ) {
         Text(
-            text = "This prompt is used as-is. Use \$date anywhere to insert the current date and time.",
+            text = "This prompt is used as-is. Use $datePlaceholder anywhere to insert the current date and time.",
             style = EnsuTypography.small,
             color = EnsuColor.textMuted()
         )
@@ -58,7 +59,7 @@ fun SystemPromptSettingsScreen(
                 .height(220.dp),
             placeholder = {
                 Text(
-                    text = "Example: You are a concise assistant. Current date and time: \$date",
+                    text = "Example: You are a concise assistant. Current date and time: $datePlaceholder",
                     style = EnsuTypography.body
                 )
             },
@@ -86,14 +87,14 @@ fun SystemPromptSettingsScreen(
             isEnabled = value.trim() != resolvedPrompt
         ) {
             val normalizedValue = value.trim()
-            val valueToSave = if (normalizedValue == SystemPromptDefaults.BODY) "" else normalizedValue
+            val valueToSave = if (normalizedValue == defaultPromptBody) "" else normalizedValue
             onSave(valueToSave)
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
 
         TextButton(onClick = {
-            value = SystemPromptDefaults.BODY
+            value = defaultPromptBody
             onReset()
         }) {
             Text(

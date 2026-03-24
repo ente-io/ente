@@ -9,6 +9,7 @@ import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
@@ -23,7 +24,8 @@ fun RootView(
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
-    appVersion: String
+    appVersion: String,
+    ensuDefaults: EnsuDefaults
 ) {
     Box(
         modifier = Modifier
@@ -38,7 +40,8 @@ fun RootView(
             authService = authService,
             currentEndpointFlow = currentEndpointFlow,
             advancedSettingsDataStore = advancedSettingsDataStore,
-            appVersion = appVersion
+            appVersion = appVersion,
+            ensuDefaults = ensuDefaults
         )
     }
 }

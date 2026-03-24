@@ -11,6 +11,7 @@ import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
 import io.ente.ensu.data.getModelDownloadRequestedSync
 import io.ente.ensu.data.auth.EnsuAuthService
+import io.ente.ensu.data.llm.EnsuRustDefaults
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.data.storage.CredentialStore
 import io.ente.ensu.data.llm.InferenceRsProvider
@@ -42,12 +43,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         credentialStore = credentialStore,
         endpointPreferences = endpointPreferences
     )
+    val ensuDefaults = EnsuRustDefaults.load()
 
     val store = AppStore(
         sessionPreferences = sessionPreferences,
         chatRepository = chatRepository,
         chatSyncRepository = chatSyncRepository,
         llmProvider = llmProvider,
+        ensuDefaults = ensuDefaults,
         logRepository = logRepository
     )
     val authService = EnsuAuthService(

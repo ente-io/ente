@@ -62,6 +62,7 @@ import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
@@ -83,7 +84,8 @@ fun HomeView(
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
-    appVersion: String
+    appVersion: String,
+    ensuDefaults: EnsuDefaults
 ) {
     val drawerState = androidx.compose.material3.rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -257,6 +259,7 @@ fun HomeView(
             currentEndpointFlow = currentEndpointFlow,
             advancedSettingsDataStore = advancedSettingsDataStore,
             appVersion = appVersion,
+            ensuDefaults = ensuDefaults,
             navController = navController,
             drawerState = drawerState,
             currentRoute = currentRoute,

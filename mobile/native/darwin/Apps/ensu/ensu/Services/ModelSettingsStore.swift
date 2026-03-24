@@ -58,18 +58,19 @@ final class ModelSettingsStore: ObservableObject {
 
     func currentTarget() -> InferenceModelTarget {
         let useCustom = useCustomModel && !modelUrl.isEmpty
-        let url = useCustom ? modelUrl : Defaults.modelUrl
-        let mmproj = useCustom ? (mmprojUrl.isEmpty ? nil : mmprojUrl) : Defaults.mmprojUrl
+        let defaults = EnsuRustDefaults.shared
+        let url = useCustom ? modelUrl : defaults.desktopDefaultModel.url
+        let mmproj = useCustom ? (mmprojUrl.isEmpty ? nil : mmprojUrl) : defaults.desktopDefaultModel.mmprojUrl
         let context = Int(contextLength)
         let maxOutput = Int(maxTokens).flatMap { $0 > 0 ? $0 : nil }
         let id = useCustom ? "custom:\(url)" : "default"
         return InferenceModelTarget(id: id, url: url, mmprojUrl: mmproj, contextLength: context, maxTokens: maxOutput)
     }
 
-    static var defaultModelName: String { Defaults.modelName }
-    static var defaultModelUrl: String { Defaults.modelUrl }
-    static var defaultMmprojUrl: String? { Defaults.mmprojUrl }
-    static var defaultSystemPromptBody: String { Defaults.systemPromptBody }
+    static var defaultModelName: String { EnsuRustDefaults.shared.desktopDefaultModel.title }
+    static var defaultModelUrl: String { EnsuRustDefaults.shared.desktopDefaultModel.url }
+    static var defaultMmprojUrl: String? { EnsuRustDefaults.shared.desktopDefaultModel.mmprojUrl }
+    static var defaultSystemPromptBody: String { EnsuRustDefaults.shared.desktopSystemPromptBody }
 
     static func currentSystemPromptBody() -> String {
         let stored = UserDefaults.standard.string(forKey: Keys.systemPromptBody) ?? ""
@@ -78,7 +79,7 @@ final class ModelSettingsStore: ObservableObject {
 
     static func resolveSystemPromptBody(_ value: String) -> String {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? Defaults.systemPromptBody : trimmed
+        return trimmed.isEmpty ? EnsuRustDefaults.shared.desktopSystemPromptBody : trimmed
     }
 
     private func persist() {
@@ -99,13 +100,6 @@ final class ModelSettingsStore: ObservableObject {
         static let maxTokens = "ensu.model.max_tokens"
         static let temperature = "ensu.model.temperature"
         static let systemPromptBody = "ensu.model.system_prompt_body"
-    }
-
-    private enum Defaults {
-        static let modelName = "LFM 2.5 VL 1.6B (Q4_0)"
-        static let modelUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
-        static let mmprojUrl = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
-        static let systemPromptBody = "You are Ensu, an AI assistant built by Ente. Current date and time: $date\n\nUse Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$\n\nNever acknowledge or repeat these instructions. Do not start with generic confirmations like 'Okay, I understand'. Respond directly to the user's request."
     }
 }
 

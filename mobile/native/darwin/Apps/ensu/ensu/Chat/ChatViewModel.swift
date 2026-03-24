@@ -399,14 +399,14 @@ final class ChatViewModel: ObservableObject {
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         return formatter
     }()
-    private static let systemPromptDatePlaceholder = "$date"
+    private static let systemPromptDatePlaceholder = EnsuRustDefaults.shared.systemPromptDatePlaceholder
     private static let defaultGenerationMaxTokens = 8_192
     private static let overflowSafetyTokens = 128
     private static let imageTokenEstimate = 768
     private nonisolated static let sessionTitleMaxLength = 40
     private static let sessionSummaryMaxWords = 7
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
-    private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
+    private static let sessionSummarySystemPrompt = EnsuRustDefaults.shared.sessionSummarySystemPrompt
 
     private func systemPrompt() -> String {
         let dateAndTime = Self.systemPromptDateFormatter.string(from: Date())

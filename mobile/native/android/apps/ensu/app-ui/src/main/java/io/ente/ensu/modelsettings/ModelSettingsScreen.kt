@@ -33,11 +33,13 @@ import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.state.ModelSettingsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSettingsScreen(
+    defaults: EnsuDefaults,
     state: ModelSettingsState,
     onSave: (ModelSettingsState) -> Unit,
     onReset: () -> Unit
@@ -46,28 +48,19 @@ fun ModelSettingsScreen(
         listOf(
             ModelChoice(
                 id = DEFAULT_OPTION_ID,
-                title = DEFAULT_MODEL_NAME,
-                url = DEFAULT_MODEL_URL,
-                mmproj = DEFAULT_MMPROJ_URL,
+                title = defaults.mobileDefaultModel.title,
+                url = defaults.mobileDefaultModel.url,
+                mmproj = defaults.mobileDefaultModel.mmprojUrl,
                 isDefault = true
-            ),
+            )
+        ) + defaults.mobileModelPresets.map { preset ->
             ModelChoice(
-                id = "lfm-1.2b",
-                title = "LFM 2.5 1.2B Instruct (Q4_0)",
-                url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf"
-            ),
-            ModelChoice(
-                id = "lfm-vl-1.6b",
-                title = "LFM 2.5 VL 1.6B (Q4_0)",
-                url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                mmproj = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
-            ),
-            ModelChoice(
-                id = "qwen-0.8b",
-                title = "Qwen 3.5 0.8B (Q4_K_M)",
-                url = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                mmproj = "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
-            ),
+                id = preset.id,
+                title = preset.title,
+                url = preset.url,
+                mmproj = preset.mmprojUrl
+            )
+        } + listOf(
             ModelChoice(
                 id = CUSTOM_OPTION_ID,
                 title = "Custom",
@@ -346,8 +339,3 @@ private fun initialSelectionId(
 
 private const val DEFAULT_OPTION_ID = "default"
 private const val CUSTOM_OPTION_ID = "custom"
-private const val DEFAULT_MODEL_NAME = "LFM 2.5 VL 1.6B (Q4_0)"
-private const val DEFAULT_MODEL_URL =
-    "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"
-private const val DEFAULT_MMPROJ_URL =
-    "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"

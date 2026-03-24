@@ -31,6 +31,7 @@ import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.modelsettings.ModelSettingsScreen
@@ -48,6 +49,7 @@ internal fun HomeNavigation(
     currentEndpointFlow: Flow<String>,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
+    ensuDefaults: EnsuDefaults,
     navController: NavHostController,
     drawerState: DrawerState,
     currentRoute: String,
@@ -189,6 +191,7 @@ internal fun HomeNavigation(
                     popExitTransition = { backExit() }
                 ) {
                     ModelSettingsScreen(
+                        defaults = ensuDefaults,
                         state = appState.modelSettings,
                         onSave = { modelSettings ->
                             store.updateModelSettings(modelSettings)
@@ -212,6 +215,8 @@ internal fun HomeNavigation(
                     popExitTransition = { backExit() }
                 ) {
                     SystemPromptSettingsScreen(
+                        defaultPromptBody = ensuDefaults.mobileSystemPromptBody,
+                        datePlaceholder = ensuDefaults.systemPromptDatePlaceholder,
                         systemPrompt = appState.developerSettings.systemPrompt,
                         onSave = { value ->
                             val updated = appState.developerSettings.copy(systemPrompt = value)

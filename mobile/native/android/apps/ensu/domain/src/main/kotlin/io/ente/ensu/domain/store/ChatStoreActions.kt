@@ -9,6 +9,7 @@ import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
+import io.ente.ensu.domain.model.EnsuDefaults
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.model.sanitizeTitleText
@@ -42,7 +43,8 @@ internal class ChatStoreActions(
     private val messageStore: MutableMap<String, MutableList<ChatMessage>>,
     private val attachmentActions: AttachmentStoreActions,
     private val syncActions: SyncStoreActions,
-    private val modelSettingsActions: ModelSettingsActions
+    private val modelSettingsActions: ModelSettingsActions,
+    private val ensuDefaults: EnsuDefaults
 ) {
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
@@ -56,8 +58,7 @@ internal class ChatStoreActions(
     private var pendingOverflow: PendingOverflow? = null
     private var overflowBypassMessageId: String? = null
 
-    private val sessionSummarySystemPrompt =
-        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
+    private val sessionSummarySystemPrompt = ensuDefaults.sessionSummarySystemPrompt
     private val sessionSummaryMaxWords = 7
 
     fun setScope(scope: CoroutineScope) {
@@ -1221,8 +1222,9 @@ internal class ChatStoreActions(
     private fun buildSystemPrompt(nowMillis: Long = clock()): String {
         val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             .format(Date(nowMillis))
-        val promptBody = SystemPromptDefaults.resolve(state.value.developerSettings.systemPrompt)
-        return promptBody.replace(SystemPromptDefaults.DATE_PLACEHOLDER, dateAndTime)
+        val promptBody = state.value.developerSettings.systemPrompt.trim()
+            .ifEmpty { ensuDefaults.mobileSystemPromptBody }
+        return promptBody.replace(ensuDefaults.systemPromptDatePlaceholder, dateAndTime)
     }
 
     companion object {

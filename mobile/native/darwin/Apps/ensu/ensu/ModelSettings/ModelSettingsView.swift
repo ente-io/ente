@@ -21,37 +21,31 @@ struct ModelSettingsView: View {
     @State private var isSaving = false
     @State private var showAdvancedLimits = false
 
-    private let modelChoices: [ModelChoice] = [
-        ModelChoice(
-            id: Self.defaultOptionId,
-            name: ModelSettingsStore.defaultModelName,
-            url: ModelSettingsStore.defaultModelUrl,
-            mmproj: ModelSettingsStore.defaultMmprojUrl,
-            isDefault: true
-        ),
-        ModelChoice(
-            id: "lfm-1.2b",
-            name: "LFM 2.5 1.2B Instruct (Q4_0)",
-            url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf"
-        ),
-        ModelChoice(
-            id: "lfm-vl-1.6b",
-            name: "LFM 2.5 VL 1.6B (Q4_0)",
-            url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-            mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
-        ),
-        ModelChoice(
-            id: "qwen-0.8b",
-            name: "Qwen 3.5 0.8B (Q4_K_M)",
-            url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-            mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf"
-        ),
-        ModelChoice(
-            id: Self.customOptionId,
-            name: "Custom",
-            isCustom: true
-        )
-    ]
+    private let modelChoices: [ModelChoice] = {
+        let defaults = EnsuRustDefaults.shared
+        return [
+            ModelChoice(
+                id: Self.defaultOptionId,
+                name: defaults.desktopDefaultModel.title,
+                url: defaults.desktopDefaultModel.url,
+                mmproj: defaults.desktopDefaultModel.mmprojUrl,
+                isDefault: true
+            )
+        ] + defaults.desktopModelPresets.map { preset in
+            ModelChoice(
+                id: preset.id,
+                name: preset.title,
+                url: preset.url,
+                mmproj: preset.mmprojUrl
+            )
+        } + [
+            ModelChoice(
+                id: Self.customOptionId,
+                name: "Custom",
+                isCustom: true
+            )
+        ]
+    }()
 
     init(embeddedInNavigation: Bool = false) {
         self.embeddedInNavigation = embeddedInNavigation
