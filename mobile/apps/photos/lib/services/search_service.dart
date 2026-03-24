@@ -2000,11 +2000,13 @@ class SearchService {
 
       for (final entry in petIdToClusters.entries) {
         final clusterIds = entry.value;
+        final seenFids = <int>{};
         final allFiles = <EnteFile>[];
         int? species;
         for (final cid in clusterIds) {
           final fids = clusterToFileIds[cid] ?? [];
           for (final fid in fids) {
+            if (!seenFids.add(fid)) continue;
             final file = fileIdToFile[fid];
             if (file != null) allFiles.add(file);
           }

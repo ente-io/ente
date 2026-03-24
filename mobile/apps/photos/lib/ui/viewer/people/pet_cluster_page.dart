@@ -113,12 +113,21 @@ class _PetClusterPageState extends State<PetClusterPage> {
           ? []
           : await FilesDB.instance.getLocalFiles(localIds);
     } else {
-      files = await FilesDB.instance.getFilesFromIDs(fileIds);
+      files = await FilesDB.instance
+          .getFilesFromIDs(fileIds, dedupeByUploadId: true);
     }
 
     if (!mounted) return;
+    // Deduplicate by generatedID to avoid duplicate-key errors in Gallery.
+    final seen = <int>{};
+    final dedupedFiles = <EnteFile>[];
+    for (final f in files) {
+      if (seen.add(f.generatedID ?? 0)) {
+        dedupedFiles.add(f);
+      }
+    }
     setState(() {
-      _files = files
+      _files = dedupedFiles
         ..sort(
           (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
         );
