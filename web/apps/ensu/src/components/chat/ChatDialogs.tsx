@@ -53,6 +53,14 @@ type ModelGateStatus =
 
 type SxEntry = Exclude<SxProps<Theme>, readonly unknown[]>;
 
+export interface ModelSettingsDraft {
+    useCustomModel: boolean;
+    modelUrl: string;
+    mmprojUrl: string;
+    contextLength: string;
+    maxTokens: string;
+}
+
 export interface ChatDialogsProps {
     showSettingsModal: boolean;
     closeSettingsModal: () => void;
@@ -87,27 +95,17 @@ export interface ChatDialogsProps {
     allowMmproj: boolean;
     isTauriRuntime: boolean;
     modelUrl: string;
-    setModelUrl: React.Dispatch<React.SetStateAction<string>>;
-    setUseCustomModel: React.Dispatch<React.SetStateAction<boolean>>;
-    modelUrlError: string | null;
     mmprojUrl: string;
-    setMmprojUrl: React.Dispatch<React.SetStateAction<string>>;
-    mmprojError: string | null;
     suggestedModels: SuggestedModel[];
     contextLength: string;
-    setContextLength: React.Dispatch<React.SetStateAction<string>>;
-    contextError: string | null;
     maxTokens: string;
-    setMaxTokens: React.Dispatch<React.SetStateAction<string>>;
-    maxTokensError: string | null;
     isSavingModel: boolean;
-    handleSaveModel: () => void;
+    handleSaveModel: (draft: ModelSettingsDraft) => void;
     handleUseDefaultModel: () => void;
     showSystemPromptSettings: boolean;
     closeSystemPromptSettings: () => void;
     systemPrompt: string;
-    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>;
-    handleSaveSystemPrompt: () => void;
+    handleSaveSystemPrompt: (promptText: string) => void;
     handleUseDefaultSystemPrompt: () => void;
     syncNotificationOpen: boolean;
     setSyncNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -150,26 +148,16 @@ export const ChatDialogs = memo(
         allowMmproj,
         isTauriRuntime,
         modelUrl,
-        setModelUrl,
-        setUseCustomModel,
-        modelUrlError,
         mmprojUrl,
-        setMmprojUrl,
-        mmprojError,
         suggestedModels,
         contextLength,
-        setContextLength,
-        contextError,
         maxTokens,
-        setMaxTokens,
-        maxTokensError,
         isSavingModel,
         handleSaveModel,
         handleUseDefaultModel,
         showSystemPromptSettings,
         closeSystemPromptSettings,
         systemPrompt,
-        setSystemPrompt,
         handleSaveSystemPrompt,
         handleUseDefaultSystemPrompt,
         syncNotificationOpen,
@@ -203,9 +191,32 @@ export const ChatDialogs = memo(
             }
         };
 
+        // --- Model settings draft state ---
+        const [draftUseCustomModel, setDraftUseCustomModel] =
+            React.useState(false);
+        const [draftModelUrl, setDraftModelUrl] = React.useState("");
+        const [draftMmprojUrl, setDraftMmprojUrl] = React.useState("");
+        const [draftContextLength, setDraftContextLength] = React.useState("");
+        const [draftMaxTokens, setDraftMaxTokens] = React.useState("");
+        const [draftModelUrlError, setDraftModelUrlError] = React.useState<
+            string | null
+        >(null);
+        const [draftMmprojError, setDraftMmprojError] = React.useState<
+            string | null
+        >(null);
+        const [draftContextError, setDraftContextError] = React.useState<
+            string | null
+        >(null);
+        const [draftMaxTokensError, setDraftMaxTokensError] = React.useState<
+            string | null
+        >(null);
         const [showAdvancedLimits, setShowAdvancedLimits] =
             React.useState(false);
         const [selectedModelId, setSelectedModelId] = React.useState("default");
+
+        // --- System prompt draft state ---
+        const [draftSystemPrompt, setDraftSystemPrompt] = React.useState("");
+
         const modelOptions = React.useMemo(
             () => [
                 {
@@ -228,10 +239,20 @@ export const ChatDialogs = memo(
         );
         const isCustomSelected = selectedModelId === "custom";
         const canSaveModelSettings =
-            !isCustomSelected || modelUrl.trim().length > 0;
+            !isCustomSelected || draftModelUrl.trim().length > 0;
 
+        // Initialize model settings draft from parent state when dialog opens
         React.useEffect(() => {
             if (!showModelSettings) return;
+            setDraftUseCustomModel(useCustomModel);
+            setDraftModelUrl(modelUrl);
+            setDraftMmprojUrl(mmprojUrl);
+            setDraftContextLength(contextLength);
+            setDraftMaxTokens(maxTokens);
+            setDraftModelUrlError(null);
+            setDraftMmprojError(null);
+            setDraftContextError(null);
+            setDraftMaxTokensError(null);
             const matchedOption = useCustomModel
                 ? modelOptions.find((model) => model.url === modelUrl)
                 : undefined;
@@ -239,13 +260,83 @@ export const ChatDialogs = memo(
                 !useCustomModel ? "default" : (matchedOption?.id ?? "custom"),
             );
             setShowAdvancedLimits(!!contextLength || !!maxTokens);
+        }, [showModelSettings]); // eslint-disable-line react-hooks/exhaustive-deps
+
+        // Initialize system prompt draft from parent state when dialog opens
+        React.useEffect(() => {
+            if (!showSystemPromptSettings) return;
+            setDraftSystemPrompt(systemPrompt);
+        }, [showSystemPromptSettings]); // eslint-disable-line react-hooks/exhaustive-deps
+
+        const validateModelSettings = React.useCallback(() => {
+            const validateUrl = (value: string) => {
+                if (!value) return undefined;
+                try {
+                    const url = new URL(value);
+                    if (!url.hostname.includes("huggingface.co")) {
+                        return "URL must be a huggingface.co link";
+                    }
+                    if (!url.pathname.endsWith(".gguf")) {
+                        return "URL must end with .gguf";
+                    }
+                    return undefined;
+                } catch {
+                    return "Enter a valid URL";
+                }
+            };
+
+            const modelError = draftUseCustomModel
+                ? draftModelUrl
+                    ? validateUrl(draftModelUrl)
+                    : "Required"
+                : undefined;
+            const mmprojErr =
+                draftUseCustomModel && isTauriRuntime
+                    ? validateUrl(draftMmprojUrl)
+                    : undefined;
+
+            const contextErrorValue =
+                draftContextLength && !/^\d+$/.test(draftContextLength)
+                    ? "Enter a number"
+                    : undefined;
+            const maxTokensErrorValue =
+                draftMaxTokens && !/^\d+$/.test(draftMaxTokens)
+                    ? "Enter a number"
+                    : undefined;
+
+            const contextValue = draftContextLength
+                ? Number(draftContextLength)
+                : undefined;
+            const maxTokensValue = draftMaxTokens
+                ? Number(draftMaxTokens)
+                : undefined;
+
+            const maxTokensLimitError =
+                contextValue && maxTokensValue && maxTokensValue > contextValue
+                    ? "Must be <= context length"
+                    : undefined;
+
+            setDraftModelUrlError(modelError ?? null);
+            setDraftMmprojError(mmprojErr ?? null);
+            setDraftContextError(contextErrorValue ?? null);
+            setDraftMaxTokensError(
+                maxTokensErrorValue ?? maxTokensLimitError ?? null,
+            );
+
+            return !(
+                modelError ||
+                mmprojErr ||
+                contextErrorValue ||
+                maxTokensErrorValue ||
+                maxTokensLimitError
+            );
         }, [
-            contextLength,
-            maxTokens,
-            modelUrl,
-            modelOptions,
-            showModelSettings,
-            useCustomModel,
+            draftContextLength,
+            draftMaxTokens,
+            draftMmprojUrl,
+            draftModelUrl,
+            draftUseCustomModel,
+            isTauriRuntime,
         ]);
 
         return (
@@ -640,19 +731,19 @@ export const ChatDialogs = memo(
                                             setSelectedModelId(nextId);
                                             if (!nextModel) return;
                                             if (nextId === "default") {
-                                                setUseCustomModel(false);
-                                                setModelUrl("");
-                                                setMmprojUrl("");
+                                                setDraftUseCustomModel(false);
+                                                setDraftModelUrl("");
+                                                setDraftMmprojUrl("");
                                                 return;
                                             }
-                                            setUseCustomModel(true);
+                                            setDraftUseCustomModel(true);
                                             if (nextId === "custom") {
-                                                setModelUrl("");
-                                                setMmprojUrl("");
+                                                setDraftModelUrl("");
+                                                setDraftMmprojUrl("");
                                                 return;
                                             }
-                                            setModelUrl(nextModel.url);
-                                            setMmprojUrl(
+                                            setDraftModelUrl(nextModel.url);
+                                            setDraftMmprojUrl(
                                                 allowMmproj
                                                     ? (nextModel.mmproj ?? "")
                                                     : "",
@@ -681,26 +772,32 @@ export const ChatDialogs = memo(
                                             fullWidth
                                             label="Model .gguf URL"
                                             placeholder="https://huggingface.co/..."
-                                            value={modelUrl}
+                                            value={draftModelUrl}
                                             onChange={(event) =>
-                                                setModelUrl(event.target.value)
+                                                setDraftModelUrl(
+                                                    event.target.value,
+                                                )
                                             }
-                                            error={!!modelUrlError}
-                                            helperText={modelUrlError ?? " "}
+                                            error={!!draftModelUrlError}
+                                            helperText={
+                                                draftModelUrlError ?? " "
+                                            }
                                         />
                                         {allowMmproj && (
                                             <TextField
                                                 fullWidth
                                                 label="mmproj .gguf URL"
                                                 placeholder="(optional for multimodal)"
-                                                value={mmprojUrl}
+                                                value={draftMmprojUrl}
                                                 onChange={(event) =>
-                                                    setMmprojUrl(
+                                                    setDraftMmprojUrl(
                                                         event.target.value,
                                                     )
                                                 }
-                                                error={!!mmprojError}
-                                                helperText={mmprojError ?? " "}
+                                                error={!!draftMmprojError}
+                                                helperText={
+                                                    draftMmprojError ?? " "
+                                                }
                                             />
                                         )}
                                     </Stack>
@@ -736,28 +833,30 @@ export const ChatDialogs = memo(
                                                 fullWidth
                                                 label="Context length"
                                                 placeholder="8192"
-                                                value={contextLength}
+                                                value={draftContextLength}
                                                 onChange={(event) =>
-                                                    setContextLength(
+                                                    setDraftContextLength(
                                                         event.target.value,
                                                     )
                                                 }
-                                                error={!!contextError}
-                                                helperText={contextError ?? " "}
+                                                error={!!draftContextError}
+                                                helperText={
+                                                    draftContextError ?? " "
+                                                }
                                             />
                                             <TextField
                                                 fullWidth
                                                 label="Max output"
                                                 placeholder="2048"
-                                                value={maxTokens}
+                                                value={draftMaxTokens}
                                                 onChange={(event) =>
-                                                    setMaxTokens(
+                                                    setDraftMaxTokens(
                                                         event.target.value,
                                                     )
                                                 }
-                                                error={!!maxTokensError}
+                                                error={!!draftMaxTokensError}
                                                 helperText={
-                                                    maxTokensError ?? " "
+                                                    draftMaxTokensError ?? " "
                                                 }
                                             />
                                         </Stack>
@@ -781,7 +880,16 @@ export const ChatDialogs = memo(
                                         isSavingModel ||
                                         modelGateStatus === "downloading"
                                     }
-                                    onClick={handleSaveModel}
+                                    onClick={() => {
+                                        if (!validateModelSettings()) return;
+                                        handleSaveModel({
+                                            useCustomModel: draftUseCustomModel,
+                                            modelUrl: draftModelUrl,
+                                            mmprojUrl: draftMmprojUrl,
+                                            contextLength: draftContextLength,
+                                            maxTokens: draftMaxTokens,
+                                        });
+                                    }}
                                 >
                                     Save Model Settings
                                 </Button>
@@ -831,9 +939,9 @@ export const ChatDialogs = memo(
                                 maxRows={18}
                                 label="Prompt text"
                                 placeholder="You are a concise assistant. Current date and time: $date"
-                                value={systemPrompt}
+                                value={draftSystemPrompt}
                                 onChange={(event) =>
-                                    setSystemPrompt(event.target.value)
+                                    setDraftSystemPrompt(event.target.value)
                                 }
                             />
                         </Stack>
@@ -843,7 +951,9 @@ export const ChatDialogs = memo(
                             <Button
                                 variant="contained"
                                 color="accent"
-                                onClick={handleSaveSystemPrompt}
+                                onClick={() =>
+                                    handleSaveSystemPrompt(draftSystemPrompt)
+                                }
                             >
                                 Save
                             </Button>

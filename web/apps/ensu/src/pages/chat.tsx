@@ -799,10 +799,6 @@ const Page: React.FC = () => {
     const [systemPrompt, setSystemPrompt] = useState(
         DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
     );
-    const [modelUrlError, setModelUrlError] = useState<string | null>(null);
-    const [mmprojError, setMmprojError] = useState<string | null>(null);
-    const [contextError, setContextError] = useState<string | null>(null);
-    const [maxTokensError, setMaxTokensError] = useState<string | null>(null);
     const [isSavingModel, setIsSavingModel] = useState(false);
     const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
         null,
@@ -1847,7 +1843,6 @@ const Page: React.FC = () => {
         if (isTauriRuntime) return;
         if (mmprojUrl) {
             setMmprojUrl("");
-            setMmprojError(null);
         }
     }, [isTauriRuntime, mmprojUrl]);
 
@@ -3523,93 +3518,42 @@ const Page: React.FC = () => {
         [isTauriRuntime],
     );
 
-    const validateModelSettings = useCallback(() => {
-        const validateUrl = (value: string) => {
-            if (!value) return undefined;
-            try {
-                const url = new URL(value);
-                if (!url.hostname.includes("huggingface.co")) {
-                    return "URL must be a huggingface.co link";
-                }
-                if (!url.pathname.endsWith(".gguf")) {
-                    return "URL must end with .gguf";
-                }
-                return undefined;
-            } catch {
-                return "Enter a valid URL";
+    const handleSaveModel = useCallback(
+        (draft: {
+            useCustomModel: boolean;
+            modelUrl: string;
+            mmprojUrl: string;
+            contextLength: string;
+            maxTokens: string;
+        }) => {
+            setIsSavingModel(true);
+            const payload = {
+                useCustomModel: draft.useCustomModel,
+                modelUrl: draft.useCustomModel ? draft.modelUrl : "",
+                mmprojUrl:
+                    draft.useCustomModel && isTauriRuntime
+                        ? draft.mmprojUrl
+                        : "",
+                contextLength: draft.contextLength,
+                maxTokens: draft.maxTokens,
+            };
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem(
+                    MODEL_SETTINGS_STORAGE_KEY,
+                    JSON.stringify(payload),
+                );
             }
-        };
-
-        const modelError = useCustomModel
-            ? modelUrl
-                ? validateUrl(modelUrl)
-                : "Required"
-            : undefined;
-        const mmprojError =
-            useCustomModel && isTauriRuntime
-                ? validateUrl(mmprojUrl)
-                : undefined;
-
-        const contextErrorValue =
-            contextLength && !/^\d+$/.test(contextLength)
-                ? "Enter a number"
-                : undefined;
-        const maxTokensErrorValue =
-            maxTokens && !/^\d+$/.test(maxTokens)
-                ? "Enter a number"
-                : undefined;
-
-        const contextValue = contextLength ? Number(contextLength) : undefined;
-        const maxTokensValue = maxTokens ? Number(maxTokens) : undefined;
-
-        const maxTokensLimitError =
-            contextValue && maxTokensValue && maxTokensValue > contextValue
-                ? "Must be <= context length"
-                : undefined;
-
-        setModelUrlError(modelError ?? null);
-        setMmprojError(mmprojError ?? null);
-        setContextError(contextErrorValue ?? null);
-        setMaxTokensError(maxTokensErrorValue ?? maxTokensLimitError ?? null);
-
-        return !(
-            modelError ||
-            mmprojError ||
-            contextErrorValue ||
-            maxTokensErrorValue ||
-            maxTokensLimitError
-        );
-    }, [contextLength, maxTokens, mmprojUrl, modelUrl, isTauriRuntime]);
-
-    const handleSaveModel = useCallback(async () => {
-        if (!validateModelSettings()) return;
-        setIsSavingModel(true);
-        const payload = {
-            useCustomModel,
-            modelUrl: useCustomModel ? modelUrl : "",
-            mmprojUrl: useCustomModel && isTauriRuntime ? mmprojUrl : "",
-            contextLength,
-            maxTokens,
-        };
-        if (typeof window !== "undefined") {
-            window.localStorage.setItem(
-                MODEL_SETTINGS_STORAGE_KEY,
-                JSON.stringify(payload),
-            );
-        }
-        setUseCustomModel(useCustomModel);
-        setLoadedModelName(null);
-        setIsSavingModel(false);
-        setShowModelSettings(false);
-    }, [
-        contextLength,
-        maxTokens,
-        mmprojUrl,
-        modelUrl,
-        useCustomModel,
-        validateModelSettings,
-        isTauriRuntime,
-    ]);
+            setUseCustomModel(draft.useCustomModel);
+            setModelUrl(draft.modelUrl);
+            setMmprojUrl(draft.mmprojUrl);
+            setContextLength(draft.contextLength);
+            setMaxTokens(draft.maxTokens);
+            setLoadedModelName(null);
+            setIsSavingModel(false);
+            setShowModelSettings(false);
+        },
+        [isTauriRuntime],
+    );
 
     const handleUseDefaultModel = useCallback(() => {
         if (typeof window !== "undefined") {
@@ -3620,16 +3564,12 @@ const Page: React.FC = () => {
         setMmprojUrl("");
         setContextLength("");
         setMaxTokens("");
-        setModelUrlError(null);
-        setMmprojError(null);
-        setContextError(null);
-        setMaxTokensError(null);
         setLoadedModelName(null);
         setShowModelSettings(false);
     }, []);
 
-    const handleSaveSystemPrompt = useCallback(() => {
-        const normalizedPrompt = systemPrompt.trim();
+    const handleSaveSystemPrompt = useCallback((promptText: string) => {
+        const normalizedPrompt = promptText.trim();
         const isDefaultPrompt =
             !normalizedPrompt ||
             normalizedPrompt === DEFAULT_CHAT_SYSTEM_PROMPT_BODY;
@@ -3649,7 +3589,7 @@ const Page: React.FC = () => {
                 : normalizedPrompt,
         );
         setShowSystemPromptSettings(false);
-    }, [systemPrompt]);
+    }, []);
 
     const handleUseDefaultSystemPrompt = useCallback(() => {
         if (typeof window !== "undefined") {
@@ -4440,26 +4380,16 @@ const Page: React.FC = () => {
                 allowMmproj={allowMmproj}
                 isTauriRuntime={isTauriRuntime}
                 modelUrl={modelUrl}
-                setModelUrl={setModelUrl}
-                setUseCustomModel={setUseCustomModel}
-                modelUrlError={modelUrlError}
                 mmprojUrl={mmprojUrl}
-                setMmprojUrl={setMmprojUrl}
-                mmprojError={mmprojError}
                 suggestedModels={suggestedModels}
                 contextLength={contextLength}
-                setContextLength={setContextLength}
-                contextError={contextError}
                 maxTokens={maxTokens}
-                setMaxTokens={setMaxTokens}
-                maxTokensError={maxTokensError}
                 isSavingModel={isSavingModel}
                 handleSaveModel={handleSaveModel}
                 handleUseDefaultModel={handleUseDefaultModel}
                 showSystemPromptSettings={showSystemPromptSettings}
                 closeSystemPromptSettings={closeSystemPromptSettings}
                 systemPrompt={systemPrompt}
-                setSystemPrompt={setSystemPrompt}
                 handleSaveSystemPrompt={handleSaveSystemPrompt}
                 handleUseDefaultSystemPrompt={handleUseDefaultSystemPrompt}
                 syncNotificationOpen={syncNotificationOpen}
