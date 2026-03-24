@@ -252,7 +252,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
         bool mlRunStarted = false;
         try {
           await MLService.instance.init();
-          await PersonService.init(entityService, MLDataDB.instance, prefs);
+          PersonService.init(entityService, MLDataDB.instance, prefs);
           mlRunStarted = true;
           await MLService.instance.runAllML(force: false);
         } finally {
@@ -381,14 +381,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     PersonService.init(entityService, MLDataDB.instance, preferences);
     await PersonService.instance.refreshPersonCache();
     await PetService.init(entityService);
-    await MemoryLaneService.instance.init();
-    if (flagService.facesTimeline) {
-      MemoryLaneService.instance
-          .queueFullRecompute(trigger: "startup")
-          .ignore();
-    } else {
-      _logger.info("Memory Lane disabled via feature flag");
-    }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     logLocalSettings();
