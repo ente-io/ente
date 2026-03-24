@@ -292,6 +292,36 @@ func TestResolveExpiredWarningStage(t *testing.T) {
 	}
 }
 
+func TestResolveExpiredWarningStageLateBackfillSequence(t *testing.T) {
+	expiredWarningAnchor := int64(100)
+	now := expiredWarningAnchor + storageWarningExpiredWarning119Delay + 10
+	history := map[string]int64{}
+
+	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage0 {
+		t.Fatalf("expected first late-backfill stage %q, got %q", expiredWarningStage0, got)
+	}
+
+	history[storageWarningExpired0TemplateID] = expiredWarningAnchor
+	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage30 {
+		t.Fatalf("expected second late-backfill stage %q, got %q", expiredWarningStage30, got)
+	}
+
+	history[storageWarningExpired30TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning30Delay
+	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage60 {
+		t.Fatalf("expected third late-backfill stage %q, got %q", expiredWarningStage60, got)
+	}
+
+	history[storageWarningExpired60TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning60Delay
+	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage90 {
+		t.Fatalf("expected fourth late-backfill stage %q, got %q", expiredWarningStage90, got)
+	}
+
+	history[storageWarningExpired90TemplateID] = expiredWarningAnchor + storageWarningExpiredWarning90Delay
+	if got := resolveExpiredWarningStage(expiredWarningAnchor, now, history); got != expiredWarningStage119 {
+		t.Fatalf("expected final late-backfill reminder %q, got %q", expiredWarningStage119, got)
+	}
+}
+
 func TestExpiredWarningAutoDeleteDateClampsOverdueFinalStage(t *testing.T) {
 	now := int64(1000)
 	expiredWarningAnchor := now - storageWarningExpiredDeletionDelay - 10
@@ -556,6 +586,19 @@ func TestStorageWarningCadenceBroken(t *testing.T) {
 			},
 			wantBroken: true,
 			wantStage:  string(expiredWarningStage90),
+		},
+		{
+			name: "expired final reminder passes when prior 90-day stage exists in overdue cycle",
+			snapshot: storageWarningSnapshot{
+				Bucket:            storageWarningBucketExpired,
+				ExpiredStage:      expiredWarningStage119,
+				EvaluatedAt:       now,
+				WarningCycleStart: now - storageWarningExpiredWarning119Delay,
+				NotificationHistory: map[string]int64{
+					storageWarningExpired90TemplateID: now - storageWarningOneDayInMicroseconds,
+				},
+			},
+			wantBroken: false,
 		},
 		{
 			name: "terminal active overage stage requires final reminder",

@@ -93,7 +93,6 @@ func resolveExpiredWarningStage(expiredWarningAnchor int64, now int64, history m
 		return expiredWarningStage60
 	}
 	if daysSinceAnchor >= storageWarningExpiredWarning90Delay &&
-		daysSinceAnchor < storageWarningExpiredWarning119Delay &&
 		!storageWarningTemplateSentInCycle(history, storageWarningExpired90TemplateID, expiredWarningAnchor) {
 		return expiredWarningStage90
 	}
