@@ -79,7 +79,23 @@ class _PetClusterPageState extends State<PetClusterPage> {
     if (!mounted) return;
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
-    final fileIds = await mlDataDB.getPetFileIdsForCluster(widget.clusterId);
+
+    // Load files from all clusters sharing the same pet (after merge).
+    final clusterToPetId = await mlDataDB.getClusterToPetId();
+    final petId = clusterToPetId[widget.clusterId];
+    final allFileIds = <int>[];
+    if (petId != null) {
+      final siblingClusters = clusterToPetId.entries
+          .where((e) => e.value == petId)
+          .map((e) => e.key);
+      for (final cid in siblingClusters) {
+        allFileIds.addAll(await mlDataDB.getPetFileIdsForCluster(cid));
+      }
+    } else {
+      allFileIds
+          .addAll(await mlDataDB.getPetFileIdsForCluster(widget.clusterId));
+    }
+    final fileIds = allFileIds.toSet().toList();
     if (fileIds.isEmpty) {
       if (mounted) Navigator.pop(context);
       return;

@@ -12,11 +12,22 @@ use std::collections::HashMap;
 /// Mirrors Python's `sklearn.cluster.AgglomerativeClustering(
 ///     metric="precomputed", linkage="average", distance_threshold=threshold)`.
 pub fn agglomerative_precomputed(dist: &[f32], n: usize, threshold: f32) -> Vec<i32> {
+    agglomerative_precomputed_min_size(dist, n, threshold, 1)
+}
+
+/// Same as [agglomerative_precomputed] but clusters smaller than
+/// `min_cluster_size` are marked as noise (-1).
+pub fn agglomerative_precomputed_min_size(
+    dist: &[f32],
+    n: usize,
+    threshold: f32,
+    min_cluster_size: usize,
+) -> Vec<i32> {
     if n == 0 {
         return vec![];
     }
     if n == 1 {
-        return vec![0];
+        return if min_cluster_size <= 1 { vec![0] } else { vec![-1] };
     }
 
     let mut clusters: Vec<Option<Vec<usize>>> = (0..n).map(|i| Some(vec![i])).collect();
@@ -80,10 +91,13 @@ pub fn agglomerative_precomputed(dist: &[f32], n: usize, threshold: f32) -> Vec<
     let mut next_label = 0i32;
     for &ci in &active {
         if let Some(members) = &clusters[ci] {
-            for &m in members {
-                labels[m] = next_label;
+            if members.len() >= min_cluster_size {
+                for &m in members {
+                    labels[m] = next_label;
+                }
+                next_label += 1;
             }
-            next_label += 1;
+            // else: too small, stays -1 (noise)
         }
     }
 

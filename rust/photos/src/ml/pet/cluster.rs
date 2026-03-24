@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 
 use crate::ml::cluster::{
-    agglomerative_precomputed, dot, mean_centroid, renumber_labels, unique_cluster_ids,
+    agglomerative_precomputed_min_size, dot, mean_centroid, renumber_labels, unique_cluster_ids,
 };
 
 // ── Species-specific configuration ──────────────────────────────────────
@@ -683,9 +683,12 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
         ClusterAlgorithm::Hdbscan => {
             hdbscan_precomputed(dist, n, config.min_cluster_size, config.min_samples)
         }
-        ClusterAlgorithm::Agglomerative => {
-            agglomerative_precomputed(dist, n, config.agglomerative_threshold)
-        }
+        ClusterAlgorithm::Agglomerative => agglomerative_precomputed_min_size(
+            dist,
+            n,
+            config.agglomerative_threshold,
+            config.min_cluster_size,
+        ),
     }
 }
 
