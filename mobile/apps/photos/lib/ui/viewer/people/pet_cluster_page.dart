@@ -295,23 +295,17 @@ class _PetClusterPageState extends State<PetClusterPage> {
   }
 
   Future<void> _handleMergePet() async {
-    final targetClusterId = await showMergePetClusterPage(
+    final selection = await showMergePetPage(
       context,
       currentClusterId: widget.clusterId,
-      species: widget.species,
     );
 
-    if (targetClusterId == null || !mounted) return;
+    if (selection == null || !mounted) return;
 
-    final merged = await PetClusterFeedbackService.instance.mergePetClusters(
-      widget.clusterId,
-      targetClusterId,
-    );
-    if (!merged) {
-      // Neither cluster has a named pet — prompt user to name first.
-      if (mounted) _editName();
-      return;
-    }
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    await mlDataDB.setClusterPetId(widget.clusterId, selection.petId);
+    Bus.instance.fire(PetsChangedEvent(source: "mergeIntoPet"));
     if (mounted) Navigator.pop(context);
   }
 }

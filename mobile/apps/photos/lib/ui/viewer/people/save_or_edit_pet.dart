@@ -2,11 +2,12 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
-import "package:photos/services/machine_learning/pet_ml/pet_cluster_feedback_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -260,22 +261,22 @@ class _SaveOrEditPetState extends State<SaveOrEditPet> {
   }
 
   Future<void> _onMergeWithExisting() async {
-    final targetClusterId = await showMergePetClusterPage(
+    final selection = await showMergePetPage(
       context,
       currentClusterId: widget.clusterId,
-      species: widget.species,
     );
 
-    if (targetClusterId == null || !mounted) return;
+    if (selection == null || !mounted) return;
 
     _logger.info(
-      "Merge: merging ${widget.clusterId} into $targetClusterId",
+      "Merge: merging cluster ${widget.clusterId} into pet ${selection.petId}",
     );
     try {
-      await PetClusterFeedbackService.instance.mergePetClusters(
-        widget.clusterId,
-        targetClusterId,
-      );
+      final mlDataDB =
+          isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+      // Map this cluster to the selected pet
+      await mlDataDB.setClusterPetId(widget.clusterId, selection.petId);
+      Bus.instance.fire(PetsChangedEvent(source: "mergeIntoPet"));
       _logger.info("Merge: completed successfully");
       if (mounted) Navigator.pop(context);
     } catch (e, s) {
