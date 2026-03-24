@@ -6,6 +6,7 @@ export const appNames = [
     "share",
     "photos",
     "ensu",
+    "locker",
 ] as const;
 
 /**
@@ -69,6 +70,7 @@ export const staticAppTitle = {
     photos: "Ente Photos",
     // Ensu (chat) web app.
     ensu: "Ensu",
+    locker: "Ente Locker",
 }[appName];
 
 /**
@@ -94,6 +96,7 @@ export const clientPackageName = (() => {
         photos: "io.ente.photos.web",
         // Ensu (chat) web app.
         ensu: "io.ente.ensu",
+        locker: "io.ente.locker.web",
     }[appName];
 })();
 

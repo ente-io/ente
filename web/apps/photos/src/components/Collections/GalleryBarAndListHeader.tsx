@@ -1,5 +1,6 @@
 // TODO: Audit this file
 import { AllAlbums } from "components/Collections/AllAlbums";
+import { AllPeople } from "components/Collections/AllPeople";
 import {
     CollectionShare,
     type CollectionShareIntent,
@@ -13,6 +14,10 @@ import {
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
+import {
+    sortPeople,
+    type PeopleSortBy,
+} from "ente-new/photos/components/PeopleSortOptions";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -44,7 +49,10 @@ type GalleryBarAndListHeaderProps = Omit<
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
+    | "peopleSortBy"
+    | "onChangePeopleSortBy"
     | "onShowAllAlbums"
+    | "onShowAllPeople"
 > & {
     /**
      * When `true`, the bar is be hidden altogether.
@@ -126,6 +134,8 @@ export const GalleryBarAndListHeader: React.FC<
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
+    const { show: showAllPeople, props: allPeopleVisibilityProps } =
+        useModalVisibility();
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
@@ -150,6 +160,8 @@ export const GalleryBarAndListHeader: React.FC<
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
+    const [peopleSortBy, setPeopleSortBy] =
+        useState<PeopleSortBy>("count-desc");
 
     const shouldBeHidden = useMemo(
         () =>
@@ -166,6 +178,10 @@ export const GalleryBarAndListHeader: React.FC<
                 collectionsSortBy,
             ).sort((a, b) => b.sortPriority - a.sortPriority),
         [collectionsSortBy, toShowCollectionSummaries],
+    );
+    const sortedPeople = useMemo(
+        () => sortPeople(people, peopleSortBy),
+        [people, peopleSortBy],
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
@@ -272,14 +288,17 @@ export const GalleryBarAndListHeader: React.FC<
                     mode,
                     onChangeMode,
                     activeCollectionID,
-                    people,
+                    people: sortedPeople,
                     activePerson,
                     onSelectPerson,
                     collectionsSortBy,
+                    peopleSortBy,
                 }}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
+                onChangePeopleSortBy={setPeopleSortBy}
                 onShowAllAlbums={showAllAlbums}
+                onShowAllPeople={showAllPeople}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (cs) => !cs.attributes.has("hideFromCollectionBar"),
                 )}
@@ -295,6 +314,13 @@ export const GalleryBarAndListHeader: React.FC<
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
                 onRemotePull={onRemotePull}
+            />
+            <AllPeople
+                {...allPeopleVisibilityProps}
+                people={sortedPeople}
+                onSelectPerson={onSelectPerson}
+                peopleSortBy={peopleSortBy}
+                onChangePeopleSortBy={setPeopleSortBy}
             />
             {activeCollection && (
                 <>

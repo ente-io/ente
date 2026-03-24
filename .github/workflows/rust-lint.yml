@@ -7,6 +7,7 @@ on:
     pull_request:
         paths:
             - "rust/core/**"
+            - "rust/photos/**"
             - "web/packages/wasm/Cargo.*"
             - "web/packages/wasm/src/**"
             - ".github/workflows/rust-lint.yml"
@@ -36,8 +37,9 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       rust/core/target
+                      rust/photos/target
                       web/packages/wasm/target
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/core/Cargo.lock', 'web/packages/wasm/Cargo.lock') }}
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/core/Cargo.lock', 'rust/photos/Cargo.lock', 'web/packages/wasm/Cargo.lock') }}
 
             - name: Check formatting (core)
               working-directory: rust/core
@@ -53,6 +55,22 @@ jobs:
 
             - name: Test (core)
               working-directory: rust/core
+              run: cargo test
+
+            - name: Check formatting (photos)
+              working-directory: rust/photos
+              run: cargo fmt --check
+
+            - name: Run clippy (photos)
+              working-directory: rust/photos
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (photos)
+              working-directory: rust/photos
+              run: cargo build
+
+            - name: Test (photos)
+              working-directory: rust/photos
               run: cargo test
 
             - name: Check formatting (wasm)

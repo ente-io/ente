@@ -518,7 +518,6 @@
   "discover_sunset": "غروب آفتاب",
   "discover_hills": "پہاڑیاں",
   "discover_greenery": "ہریالی",
-  "mlIndexingDescription": "براہ کرم نوٹ کریں کہ مشین لرننگ کے نتیجے میں بینڈوتھ اور بیٹری کا استعمال زیادہ ہوگا جب تک کہ تمام آئٹمز انڈیکس نہ ہو جائیں. تیز تر انڈیکسنگ کے لیے ڈیسک ٹاپ ایپ استعمال کرنے پر غور کریں، تمام نتائج خود بخود مطابقت پذیر ہو جائیں گے.",
   "loadingModel": "ماڈلز ڈاؤن لوڈ ہو رہے ہیں...",
   "waitingForWifi": "وائی ​​فائی کا انتظار ہے...",
   "status": "حیثیت",
@@ -661,8 +660,6 @@
   "familyPlans": "فیملی پلانز",
   "referrals": "ریفرلز",
   "notifications": "نوٹیفکیشنز",
-  "sharedPhotoNotifications": "نئی مشترکہ تصاویر",
-  "sharedPhotoNotificationsExplanation": "جب کوئی آپ کے شامل کردہ مشترکہ البم میں تصویر شامل کرتا ہے تو نوٹیفکیشنز موصول کریں",
   "socialNotifications": "لائکس اور تبصرے",
   "socialNotificationsExplanation": "اپنی تصاویر پر لائکس اور جن البمز میں آپ شامل ہیں ان پر تبصروں کے لیے نوٹیفکیشنز موصول کریں",
   "advanced": "اعلیٰ",
@@ -699,7 +696,6 @@
   "darkTheme": "ڈارک",
   "systemTheme": "سسٹم",
   "freeTrial": "مفت ٹرائل",
-  "selectYourPlan": "اپنا پلان منتخب کریں",
   "enteSubscriptionPitch": "Ente آپ کی یادوں کو محفوظ رکھتا ہے، تاکہ وہ ہمیشہ آپ کے لیے دستیاب رہیں، چاہے آپ کی ڈیوائس کھو جائے.",
   "enteSubscriptionShareWithFamily": "آپ کی فیملی کو بھی آپ کے پلان میں شامل کیا جا سکتا ہے.",
   "currentUsageIs": "موجودہ استعمال ہے ",
@@ -800,7 +796,6 @@
   "grantFullAccessPrompt": "براہ کرم سیٹنگز ایپ میں تمام تصاویر تک رسائی کی اجازت دیں",
   "allowPermTitle": "تصاویر تک رسائی کی اجازت دیں",
   "allowPermBody": "براہ کرم سیٹنگز سے اپنی تصاویر تک رسائی کی اجازت دیں تاکہ Ente آپ کی لائبریری کو ڈسپلے اور بیک اپ کر سکے.",
-  "openSettings": "سیٹنگز کھولیں",
   "selectMorePhotos": "مزید تصاویر منتخب کریں",
   "existingUser": "موجودہ صارف",
   "newToEnte": "Ente پر نئے ہیں",
@@ -1216,7 +1211,6 @@
   "fileTypesAndNames": "فائل کی اقسام اور نام",
   "location": "مقام",
   "moments": "لمحات",
-  "searchFaceEmptySection": "انڈیکسنگ مکمل ہونے کے بعد لوگ یہاں دکھائے جائیں گے",
   "searchDatesEmptySection": "تاریخ، مہینہ یا سال کے لحاظ سے تلاش کریں",
   "searchLocationEmptySection": "ان تصاویر کو گروپ کریں جو تصویر کے کچھ رداس کے اندر لی گئی ہیں",
   "searchPeopleEmptySection": "لوگوں کو مدعو کریں، اور آپ ان کی طرف سے شیئر کردہ تمام تصاویر یہاں دیکھیں گے",
@@ -1646,7 +1640,6 @@
   },
   "extraPhotosFound": "اضافی تصاویر ملیں",
   "configuration": "کنفیگریشن",
-  "localIndexing": "مقامی انڈیکسنگ",
   "processed": "پروسیس شدہ",
   "resetPerson": "ہٹائیں",
   "areYouSureYouWantToResetThisPerson": "کیا آپ واقعی اس شخص کو ری سیٹ کرنا چاہتے ہیں؟",
@@ -2012,9 +2005,6 @@
   "curatedMemories": "منتخب کردہ یادیں",
   "widgets": "ویجٹ (Widgets)",
   "memories": "یادیں",
-  "peopleWidgetDesc": "ان لوگوں کو منتخب کریں جنہیں آپ اپنی ہوم اسکرین پر دیکھنا چاہتے ہیں.",
-  "albumsWidgetDesc": "وہ البمز منتخب کریں جنہیں آپ اپنی ہوم اسکرین پر دیکھنا چاہتے ہیں.",
-  "memoriesWidgetDesc": "اس قسم کی یادیں منتخب کریں جو آپ اپنی ہوم اسکرین پر دیکھنا چاہتے ہیں.",
   "smartMemories": "اسمارٹ یادیں",
   "pastYearsMemories": "پچھلے سالوں کی یادیں",
   "deleteMultipleAlbumDialog": "کیا ان {count} البمز میں موجود تصاویر (اور ویڈیوز) کو دیگر <bold>تمام</bold> البمز سے بھی ڈیلیٹ کر دیں جن کا وہ حصہ ہیں؟",
@@ -2028,9 +2018,6 @@
   "sorryWeHadToPauseYourBackups": "معذرت، ہمیں آپ کے بیک اپس روکنے پڑے",
   "clickToInstallOurBestVersionYet": "ہمارا اب تک کا بہترین ورژن انسٹال کرنے کے لیے کلک کریں",
   "onThisDayNotificationExplanation": "پچھلے سالوں میں اس دن کی یادوں کے بارے میں یاددہانی حاصل کریں.",
-  "addMemoriesWidgetPrompt": "اپنی ہوم اسکرین پر یادوں کا ویجٹ شامل کریں اور کسٹمائز کرنے کے لیے یہاں واپس آئیں.",
-  "addAlbumWidgetPrompt": "اپنی ہوم اسکرین پر البم ویجٹ شامل کریں اور کسٹمائز کرنے کے لیے یہاں واپس آئیں.",
-  "addPeopleWidgetPrompt": "اپنی ہوم اسکرین پر لوگوں کا ویجٹ شامل کریں اور کسٹمائز کرنے کے لیے یہاں واپس آئیں.",
   "birthdayNotifications": "سالگرہ کے نوٹیفکیشنز",
   "receiveRemindersOnBirthdays": "جب کسی کی سالگرہ ہو تو یاددہانی حاصل کریں. نوٹیفکیشن پر ٹیپ کرنے سے آپ سالگرہ والے شخص کی تصاویر پر پہنچ جائیں گے.",
   "happyBirthday": "سالگرہ مبارک! 🥳",
@@ -2060,7 +2047,6 @@
   "same": "وہی",
   "different": "مختلف",
   "sameperson": "وہی شخص؟",
-  "indexingPausedStatusDescription": "انڈیکسنگ موقوف ہے. آلہ تیار ہونے پر یہ خود بخود دوبارہ شروع ہو جائے گی. آلہ کو تب تیار سمجھا جاتا ہے جب اس کی بیٹری لیول، بیٹری کی صحت، اور تھرمل سٹیٹس صحت مند حد کے اندر ہوں.",
   "thisWeek": "اس ہفتے",
   "lastWeek": "پچھلے ہفتے",
   "thisMonth": "اس مہینے",
@@ -2435,38 +2421,6 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "آپ کی تصویر لائک کی",
-  "likedAPhoto": "ایک تصویر لائک کی",
-  "likedYourVideo": "آپ کی ویڈیو لائک کی",
-  "commentedOnYourPhoto": "آپ کی تصویر پر تبصرہ کیا",
-  "commentedOnAPhoto": "ایک تصویر پر تبصرہ کیا",
-  "commentedOnYourVideo": "آپ کی ویڈیو پر تبصرہ کیا",
-  "commentedOnAVideo": "ایک ویڈیو پر تبصرہ کیا",
-  "repliedToYourComment": "آپ کے تبصرے کا جواب دیا",
-  "repliedToAComment": "ایک تبصرے کا جواب دیا",
-  "likedYourComment": "آپ کا تبصرہ لائک کیا",
-  "likedAComment": "ایک تبصرہ لائک کیا",
-  "likedYourReply": "آپ کا جواب لائک کیا",
-  "likedAReply": "ایک جواب لائک کیا",
-  "addedAMemoryTo": "{albumName} میں ایک یاد شامل کی",
-  "@addedAMemoryTo": {
-    "placeholders": {
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
-  "addedNMemoriesTo": "{albumName} میں {count} یادیں شامل کیں",
-  "@addedNMemoriesTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
   "and1Other": "اور ۱ دیگر",
   "andXOthers": "اور {count} دیگر",
   "@andXOthers": {
@@ -2603,7 +2557,6 @@
   "deleteOnDeviceFiles": "ڈیوائس پر موجود فائلیں ڈیلیٹ کریں",
   "noHiddenFilesOnDevice": "ڈیوائس پر کوئی پوشیدہ فائل نہیں",
   "welcome": "خوش آمدید",
-  "grantGalleryPermissionDesc": "چہرے کی شناخت کے ساتھ تصاویر تک رسائی اور منظم کرنے کی اجازت دیں.\n\nتمام پروسیسنگ آپ کی ڈیوائس پر ہوتی ہے.",
   "grantPermission": "اجازت دیں",
   "privateAI": "نجی AI",
   "privateAIDescription": "Ente چہروں، اشیاء، مقامات اور متن کے لیے آپ کی تصاویر کا تجزیہ کرنے کے لیے آن ڈیوائس AI کا استعمال کرتا ہے. یہ ڈیٹا چہرے کی شناخت اور سمارٹ تلاش جیسی خصوصیات کو طاقت دینے کے لیے استعمال ہوتا ہے. ہر چیز پروسیس کی جاتی ہے اور مقامی طور پر آپ کی ڈیوائس پر محفوظ کی جاتی ہے — ہمارے سرورز پر کبھی کچھ اپ لوڈ نہیں کیا جاتا.",
@@ -2615,7 +2568,6 @@
   "enableOnDeviceMLDescription": "چہروں، مقامات اور مزید کے ذریعے تلاش کرنے کے لیے آن ڈیوائس ML کو فعال کریں. آپ کی تصاویر کبھی بھی آپ کی ڈیوائس سے نہیں نکلتیں.",
   "offlineEnableSharingTitle": "شیئرنگ یہاں سے شروع ہوتی ہے",
   "offlineEnableSharingDesc": "ہر ایک کے ساتھ تصاویر شیئر کرنے کے لیے سائن اپ کریں - ان لوگوں کے ساتھ بھی جو Ente پر نہیں ہیں",
-  "offlineEnableBackupTitle": "آپ کے بیک اپ شدہ البمز یہاں ظاہر ہوں گے",
   "offlineEnableBackupDesc": "Ente کے ساتھ اپنی یادیں محفوظ کرنے کے لیے سائن اپ کریں.",
   "offlineEnableBackupAction": "۱۰ جی بی مفت کے ساتھ شروع کریں",
   "offlineSettingsBannerTitle": "ہم آپ کی تصاویر نہیں دیکھ سکتے. کبھی بھی نہیں.",
@@ -2623,11 +2575,7 @@
   "alreadyHaveAnAccount": "کیا پہلے سے اکاؤنٹ موجود ہے؟",
   "loginToEnte": "Ente میں لاگ ان کریں",
   "searchAndDiscover": "تلاش کریں اور دریافت کریں",
-  "searchAndDiscoverDesc": "متن کے ساتھ تصاویر تلاش کریں یا آن ڈیوائس ML کے ساتھ پرانی یادیں دوبارہ دریافت کریں",
   "shareYourMemories": "اپنی یادیں شیئر کریں",
-  "shareYourMemoriesDesc": "اپنے البمز شیئر کریں، لنکس بنائیں، تصاویر جمع کریں اور تبصرہ کریں.",
-  "privateAndSecureBackups": "نجی اور محفوظ بیک اپ",
-  "privateAndSecureBackupsDesc": "اینڈ ٹو اینڈ انکرپٹڈ، ٹرپل ریپلیکیشن، اوپن سورس، اور آزادانہ طور پر آڈٹ شدہ",
   "mlProgressBannerTitle": "ڈٹے رہیں!",
   "mlProgressBannerDescription": "آپ کی تصاویر پر چہروں، اشیاء اور مزید کا پتہ لگانے کے لیے ڈیوائس پر کارروائی کی جا رہی ہے.",
   "mlProgressBannerStatus": "{total} میں سے {indexed} تصاویر پر کارروائی کی گئی",

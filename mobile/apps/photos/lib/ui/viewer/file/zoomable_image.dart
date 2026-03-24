@@ -481,27 +481,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isRawFile() {
     final extension = _photo.displayName.toLowerCase().split('.').last;
-    const rawExtensions = {
-      'arw', // Sony
-      'cr2', 'cr3', // Canon
-      'nef', 'nrw', // Nikon
-      'dng', // Adobe/generic
-      'orf', // Olympus
-      'raf', // Fuji
-      'rw2', // Panasonic
-      'pef', // Pentax
-      'srw', // Samsung
-      '3fr', 'fff', // Hasselblad
-      'rwl', // Leica
-      'x3f', // Sigma
-      'iiq', // Phase One
-      'kdc', 'dcr', // Kodak
-      'mrw', // Minolta
-      'erf', // Epson
-      'mef', // Mamiya
-      'raw', // Generic
-    };
-    return rawExtensions.contains(extension);
+    return isRawImageExtension(extension);
   }
 
   Future<void> _loadInSupportedFormat(
@@ -521,7 +501,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
-            .value = _photo.generatedID;
+            .value = detailPageFileIdentifier(_photo);
       }
       return;
     }
@@ -575,7 +555,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
-            .value = _photo.generatedID;
+            .value = detailPageFileIdentifier(_photo);
       }
     }
   }

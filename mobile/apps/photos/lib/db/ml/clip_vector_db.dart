@@ -13,11 +13,13 @@ import "package:synchronized/synchronized.dart";
 
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
+  static const int embeddingDimensions = 512;
+  static const int embeddingBytesLength = embeddingDimensions * 4;
 
   final String _databaseName;
   final String _migrationKey;
 
-  static final BigInt _embeddingDimension = BigInt.from(512);
+  static final BigInt _embeddingDimension = BigInt.from(embeddingDimensions);
 
   static Logger get logger => _logger;
 

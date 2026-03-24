@@ -4,6 +4,7 @@ import {
     ensureOk,
     HTTPError,
 } from "ente-base/http";
+import { getKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiOrigin, apiURL } from "ente-base/origins";
 import { savedAuthToken } from "ente-base/token";
@@ -161,7 +162,7 @@ const syncChatNative = async (chatKey: string, token: string) => {
     const masterKey = await masterKeyFromSession();
     if (!masterKey) return;
 
-    const { invoke } = await import("@tauri-apps/api/core");
+    const { invoke } = await import("@tauri-apps/api/tauri");
     const { getName, getVersion } = await import("@tauri-apps/api/app");
 
     const [baseUrl, clientPackage, clientVersion] = await Promise.all([
@@ -241,19 +242,15 @@ export const downloadAttachment = async (attachmentId: string) => {
 };
 
 const cursorStorageKey = () => {
-    if (typeof localStorage === "undefined") {
-        return "ensu.chat.sync.cursor.anon";
-    }
     const userId = savedLocalUser()?.id ?? "anon";
     return `ensu.chat.sync.cursor.${userId}`;
 };
 
-const loadCursor = (): DiffCursor => {
-    if (typeof localStorage === "undefined") return { ...DEFAULT_CURSOR };
-    const raw = localStorage.getItem(cursorStorageKey());
-    if (!raw) return { ...DEFAULT_CURSOR };
+const loadCursor = async (): Promise<DiffCursor> => {
+    const raw = await getKV(cursorStorageKey());
+    if (!raw || typeof raw !== "object") return { ...DEFAULT_CURSOR };
     try {
-        const parsed = JSON.parse(raw) as Partial<DiffCursor>;
+        const parsed = raw as Partial<DiffCursor>;
         return { ...DEFAULT_CURSOR, ...parsed };
     } catch (error) {
         log.error("Failed to parse chat sync cursor", error);
@@ -261,13 +258,10 @@ const loadCursor = (): DiffCursor => {
     }
 };
 
-const saveCursor = (cursor: DiffCursor) => {
-    if (typeof localStorage === "undefined") return;
-    localStorage.setItem(cursorStorageKey(), JSON.stringify(cursor));
-};
+const saveCursor = (cursor: DiffCursor) => setKV(cursorStorageKey(), cursor);
 
 const pullChat = async (chatKey: string) => {
-    let cursor = loadCursor();
+    let cursor = await loadCursor();
     let previousCursor = "";
     let iterations = 0;
 
@@ -276,7 +270,7 @@ const pullChat = async (chatKey: string) => {
         await applyDiff(response, chatKey);
 
         const nextCursor = normalizeCursor(response);
-        saveCursor(nextCursor);
+        await saveCursor(nextCursor);
         const serialized = JSON.stringify(nextCursor);
         if (serialized === previousCursor) {
             log.warn("Chat sync cursor stalled; stopping pull loop");

@@ -34,6 +34,7 @@ impl From<core_auth::AuthError> for AuthError {
             E::IncorrectPassword => "incorrect_password",
             E::IncorrectRecoveryKey => "incorrect_recovery_key",
             E::InvalidKeyAttributes => "invalid_key_attributes",
+            E::InsufficientMemory => "insufficient_memory",
             E::MissingField(_) => "missing_field",
             E::Crypto(_) => "crypto",
             E::Decode(_) => "decode",
@@ -109,6 +110,71 @@ impl DecryptedSecrets {
     }
 }
 
+/// A generated KEK and its derivation parameters.
+#[wasm_bindgen]
+pub struct GeneratedKek {
+    key: String,
+    salt: String,
+    mem_limit: u32,
+    ops_limit: u32,
+}
+
+#[wasm_bindgen]
+impl GeneratedKek {
+    /// Derived KEK (base64).
+    #[wasm_bindgen(getter)]
+    pub fn key(&self) -> String {
+        self.key.clone()
+    }
+
+    /// Salt used for derivation (base64).
+    #[wasm_bindgen(getter)]
+    pub fn salt(&self) -> String {
+        self.salt.clone()
+    }
+
+    /// Argon2 memory limit in bytes.
+    #[wasm_bindgen(getter)]
+    pub fn mem_limit(&self) -> u32 {
+        self.mem_limit
+    }
+
+    /// Argon2 operations limit.
+    #[wasm_bindgen(getter)]
+    pub fn ops_limit(&self) -> u32 {
+        self.ops_limit
+    }
+}
+
+/// SRP setup payload generated from a KEK.
+#[wasm_bindgen]
+pub struct GeneratedSrpSetup {
+    srp_salt: String,
+    srp_verifier: String,
+    login_sub_key: String,
+}
+
+#[wasm_bindgen]
+impl GeneratedSrpSetup {
+    /// SRP salt (base64).
+    #[wasm_bindgen(getter)]
+    pub fn srp_salt(&self) -> String {
+        self.srp_salt.clone()
+    }
+
+    /// SRP verifier (base64).
+    #[wasm_bindgen(getter)]
+    pub fn srp_verifier(&self) -> String {
+        self.srp_verifier.clone()
+    }
+
+    /// SRP login sub-key (base64, 16 bytes).
+    #[wasm_bindgen(getter)]
+    pub fn login_sub_key(&self) -> String {
+        self.login_sub_key.clone()
+    }
+}
+
 /// Derive SRP credentials (KEK + login key) from a password and SRP attributes.
 ///
 /// `srp_attrs` must match the shape returned by the Ente API's
@@ -140,6 +206,62 @@ pub fn auth_derive_kek(
 ) -> Result<String, AuthError> {
     let kek = core_auth::derive_kek(password, kek_salt_b64, mem_limit, ops_limit)?;
     Ok(core_crypto::encode_b64(&kek))
+}
+
+/// Generate a KEK using the current sensitive web derivation policy.
+#[wasm_bindgen]
+pub fn auth_generate_sensitive_kek(password: &str) -> Result<GeneratedKek, AuthError> {
+    let generated = core_auth::generate_sensitive_kek(password)?;
+    Ok(GeneratedKek {
+        key: core_crypto::encode_b64(&generated.key),
+        salt: core_crypto::encode_b64(&generated.salt),
+        mem_limit: generated.mem_limit,
+        ops_limit: generated.ops_limit,
+    })
+}
+
+/// Generate a KEK using the current interactive web derivation policy.
+#[wasm_bindgen]
+pub fn auth_generate_interactive_kek(password: &str) -> Result<GeneratedKek, AuthError> {
+    let generated = core_auth::generate_interactive_kek(password)?;
+    Ok(GeneratedKek {
+        key: core_crypto::encode_b64(&generated.key),
+        salt: core_crypto::encode_b64(&generated.salt),
+        mem_limit: generated.mem_limit,
+        ops_limit: generated.ops_limit,
+    })
+}
+
+/// Generate the SRP setup payload for a given KEK and SRP user ID.
+#[wasm_bindgen]
+pub fn auth_generate_srp_setup(
+    kek_b64: &str,
+    srp_user_id: &str,
+) -> Result<GeneratedSrpSetup, AuthError> {
+    let kek = core_crypto::decode_b64(kek_b64).map_err(|e| AuthError {
+        code: "decode".to_string(),
+        message: format!("kek: {}", e),
+    })?;
+
+    let generated = core_auth::generate_srp_setup(&kek, srp_user_id)?;
+    Ok(GeneratedSrpSetup {
+        srp_salt: core_crypto::encode_b64(&generated.srp_salt),
+        srp_verifier: core_crypto::encode_b64(&generated.srp_verifier),
+        login_sub_key: core_crypto::encode_b64(&generated.login_sub_key),
+    })
+}
+
+/// Convert a recovery key mnemonic or legacy hex string into base64 bytes.
+#[wasm_bindgen]
+pub fn auth_recovery_key_from_mnemonic_or_hex(input: &str) -> Result<String, AuthError> {
+    let recovery_key = core_auth::recovery_key_from_mnemonic_or_hex(input)?;
+    Ok(core_crypto::encode_b64(&recovery_key))
+}
+
+/// Convert a base64-encoded recovery key into its English mnemonic.
+#[wasm_bindgen]
+pub fn auth_recovery_key_to_mnemonic(recovery_key_b64: &str) -> Result<String, AuthError> {
+    core_auth::recovery_key_to_mnemonic(recovery_key_b64).map_err(Into::into)
 }
 
 /// Decrypt the master key, secret key and auth token.

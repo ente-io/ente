@@ -549,6 +549,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
+	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
 	privateAPI.PUT("/files/share-url", fileHandler.UpdateFileURL)
 	privateAPI.DELETE("/files/share-url/:fileID", fileHandler.DisableUrl)
 	privateAPI.GET("/files/share-urls/", fileHandler.GetUrls)

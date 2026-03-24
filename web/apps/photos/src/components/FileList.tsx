@@ -1,5 +1,6 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
@@ -2113,7 +2114,12 @@ const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
 }) => (
     <FileTypeIndicatorOverlay>
         {duration ? (
-            <Typography variant="mini">{duration}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+                <PlayArrowRoundedIcon
+                    sx={{ fontSize: 14, display: "block", mr: 0.5 }}
+                />
+                <Typography variant="mini">{duration}</Typography>
+            </Box>
         ) : (
             <PlayCircleOutlineOutlinedIcon fontSize="small" />
         )}

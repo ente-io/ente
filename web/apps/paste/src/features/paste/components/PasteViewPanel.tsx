@@ -144,16 +144,6 @@ export const PasteViewPanel = ({
 
             {resolvedText && (
                 <Stack spacing={1.8}>
-                    <Typography
-                        sx={{
-                            fontSize: "0.82rem",
-                            color: tokens.text.muted,
-                            fontWeight: 600,
-                            letterSpacing: "0.01em",
-                        }}
-                    >
-                        Paste contents
-                    </Typography>
                     <Box sx={{ position: "relative", width: "100%" }}>
                         <TextField
                             variant="filled"
@@ -277,6 +267,8 @@ export const PasteViewPanel = ({
                         sx={{
                             color: tokens.status.deletedNote,
                             fontWeight: 500,
+                            textAlign: "center",
+                            alignSelf: "center",
                         }}
                     >
                         This paste has been removed from Ente servers.

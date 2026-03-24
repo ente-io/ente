@@ -329,6 +329,15 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(SRCROOT)/ensu/Generated/core.swift",
+				"$(SRCROOT)/ensu/Generated/coreFFI.h",
+				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/db.swift",
+				"$(SRCROOT)/ensu/Generated/dbFFI.h",
+				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/sync.swift",
+				"$(SRCROOT)/ensu/Generated/syncFFI.h",
+				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -346,6 +355,15 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(SRCROOT)/ensu/Generated/core.swift",
+				"$(SRCROOT)/ensu/Generated/coreFFI.h",
+				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/db.swift",
+				"$(SRCROOT)/ensu/Generated/dbFFI.h",
+				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/sync.swift",
+				"$(SRCROOT)/ensu/Generated/syncFFI.h",
+				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

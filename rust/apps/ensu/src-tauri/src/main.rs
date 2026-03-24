@@ -6,15 +6,12 @@ mod commands;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_shell::init())
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
         .setup(|app| {
             // Show the main window after setup is complete
-            if let Some(window) = app.get_webview_window("main") {
+            if let Some(window) = app.get_window("main") {
                 window.show().unwrap();
             }
             Ok(())
@@ -26,6 +23,9 @@ fn main() {
             commands::crypto_decrypt_box,
             commands::crypto_encrypt_blob,
             commands::crypto_decrypt_blob,
+            commands::secure_storage_get,
+            commands::secure_storage_set,
+            commands::secure_storage_delete,
             commands::auth_derive_srp_credentials,
             commands::auth_decrypt_secrets,
             commands::auth_decrypt_keys_only,
