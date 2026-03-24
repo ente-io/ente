@@ -436,6 +436,8 @@ final class InferenceRsProvider {
         onProgress: @escaping (InferenceDownloadProgress) -> Void
     ) async throws {
         let managerTargets = expectedTargets.map(downloadTarget(for:))
+        let maxPolls = 7_200
+        var pollCount = 0
 
         while true {
             try Task.checkCancellation()
@@ -454,6 +456,14 @@ final class InferenceRsProvider {
                 onProgress(progress)
             }
 
+            pollCount += 1
+            if pollCount >= maxPolls {
+                throw NSError(
+                    domain: "InferenceRsProvider",
+                    code: -10,
+                    userInfo: [NSLocalizedDescriptionKey: "Download timed out"]
+                )
+            }
             try await Task.sleep(nanoseconds: 500_000_000)
         }
     }

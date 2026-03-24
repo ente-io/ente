@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import io.ente.ensu.domain.llm.DownloadProgress
 import io.ente.ensu.domain.llm.GenerationSummary
 import io.ente.ensu.domain.llm.LlmMessage
@@ -79,6 +80,7 @@ class InferenceRsProvider(
     @Volatile private var currentJobId: Long? = null
     @Volatile private var manualDownloadCancelled = false
     private var backendInitialized = false
+    private val migratedLegacyTargets = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     init {
         uniffiEnsureInitialized()
@@ -556,6 +558,7 @@ class InferenceRsProvider(
     private fun migrateLegacyDownloads(target: LlmModelTarget) {
         val legacyDir = legacyModelDir ?: return
         if (legacyDir.absolutePath == modelDir.absolutePath) return
+        if (migratedLegacyTargets.contains(target.id)) return
 
         val oldTargets = ModelDownloadSupport.expectedTargets(legacyDir, target)
         val newTargets = ModelDownloadSupport.expectedTargets(modelDir, target)
@@ -573,9 +576,16 @@ class InferenceRsProvider(
                 runCatching {
                     oldTarget.destination.copyTo(newTarget.destination, overwrite = false)
                     oldTarget.destination.delete()
+                }.onFailure { error ->
+                    Log.w(
+                        "InferenceRsProvider",
+                        "Legacy migration failed for ${oldTarget.destination.absolutePath}",
+                        error
+                    )
                 }
             }
         }
+        migratedLegacyTargets.add(target.id)
     }
 
     private fun userFacingDownloadFailure(reason: Int): String {

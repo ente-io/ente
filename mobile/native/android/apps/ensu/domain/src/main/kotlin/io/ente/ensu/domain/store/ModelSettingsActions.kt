@@ -283,7 +283,6 @@ internal class ModelSettingsActions(
                 }
                 delay(500)
             }
-            downloadProgressMonitorJob = null
             refreshModelDownloadInfo()
         }
     }

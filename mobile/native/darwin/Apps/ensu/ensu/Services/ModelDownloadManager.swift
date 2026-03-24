@@ -23,6 +23,7 @@ final class ModelDownloadManager: NSObject {
         let destinationPath: String
         var state: State
         var errorMessage: String?
+        var resumeData: Data?
     }
 
     private let recordsKey = "ensu.model.download.records"
@@ -62,17 +63,25 @@ final class ModelDownloadManager: NSObject {
                 url: target.url,
                 destinationPath: target.destination.path,
                 state: .queued,
-                errorMessage: nil
+                errorMessage: nil,
+                resumeData: nil
             )
-            saveRecord(record)
 
             guard let url = URL(string: target.url) else {
+                saveRecord(record)
                 markFailed(id: id, message: "Invalid URL")
                 continue
             }
 
-            let task = session.downloadTask(with: URLRequest(url: url))
+            let existingRecord = loadRecords()[id]
+            let task: URLSessionDownloadTask
+            if let resumeData = existingRecord?.resumeData, !resumeData.isEmpty {
+                task = session.downloadTask(withResumeData: resumeData)
+            } else {
+                task = session.downloadTask(with: URLRequest(url: url))
+            }
             task.taskDescription = id
+            saveRecord(record)
             task.resume()
         }
     }
@@ -226,6 +235,7 @@ final class ModelDownloadManager: NSObject {
         updateRecord(id: id) { record in
             record.state = .downloading
             record.errorMessage = nil
+            record.resumeData = nil
         }
     }
 
@@ -255,6 +265,11 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
     ) {
         guard let id = downloadTask.taskDescription else { return }
         guard let record = loadRecords()[id] else { return }
+        if let response = downloadTask.response as? HTTPURLResponse,
+           !(200...299).contains(response.statusCode) {
+            markFailed(id: id, message: "Download failed: HTTP \(response.statusCode)")
+            return
+        }
 
         let destination = URL(fileURLWithPath: record.destinationPath)
         do {
@@ -281,7 +296,13 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let id = task.taskDescription else { return }
         if let error, (error as NSError).code != NSURLErrorCancelled {
-            markFailed(id: id, message: error.localizedDescription)
+            let nsError = error as NSError
+            let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+            updateRecord(id: id) { record in
+                record.state = .failed
+                record.errorMessage = error.localizedDescription
+                record.resumeData = resumeData
+            }
         }
     }
 

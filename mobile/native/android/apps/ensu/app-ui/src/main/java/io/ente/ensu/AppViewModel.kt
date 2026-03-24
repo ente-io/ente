@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import io.ente.ensu.data.AdvancedSettingsDataStore
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.SessionPreferencesDataStore
-import io.ente.ensu.data.getModelDownloadRequestedSync
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.llm.EnsuRustDefaults
 import io.ente.ensu.data.logging.FileLogRepository
@@ -20,6 +19,7 @@ import io.ente.ensu.data.chat.RustChatSyncRepository
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -85,8 +85,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        store.hydrateModelDownloadRequested(sessionPreferences.getModelDownloadRequestedSync())
-        store.bootstrap(viewModelScope)
         val email = credentialStore.getEmail()
         if (credentialStore.isLoggedIn() && !email.isNullOrBlank()) {
             store.signIn(email)
@@ -99,7 +97,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            advancedSettingsDataStore.settingsFlow.collectLatest { settings ->
+            val initialSettings = advancedSettingsDataStore.settingsFlow.first()
+            store.applyPersistedSettings(
+                developerSettings = initialSettings.developerSettings,
+                modelSettings = initialSettings.modelSettings
+            )
+            store.hydrateModelDownloadRequested(sessionPreferences.modelDownloadRequested.first())
+            store.bootstrap(viewModelScope)
+
+            advancedSettingsDataStore.settingsFlow.drop(1).collectLatest { settings ->
                 store.applyPersistedSettings(
                     developerSettings = settings.developerSettings,
                     modelSettings = settings.modelSettings

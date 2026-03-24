@@ -205,7 +205,18 @@ internal object ModelDownloadSupport {
                 throw IOException("Downloaded file is not GGUF")
             }
             if (dest.exists()) dest.delete()
-            tmp.renameTo(dest)
+            if (!tmp.renameTo(dest)) {
+                try {
+                    tmp.copyTo(dest, overwrite = true)
+                    if (!tmp.delete()) {
+                        throw IOException("Failed to delete temporary download file")
+                    }
+                } catch (error: IOException) {
+                    dest.delete()
+                    tmp.delete()
+                    throw error
+                }
+            }
             return
         }
     }
