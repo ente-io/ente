@@ -1475,6 +1475,14 @@
   "searchCaptionEmptySection": "Add descriptions like \"#trip\" in photo info to quickly find them here",
   "language": "Language",
   "selectLanguage": "Select Language",
+  "noLocation": "No location",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "No location tag",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Location name",
   "addLocation": "Add location",
   "groupNearbyPhotos": "Group nearby photos",
