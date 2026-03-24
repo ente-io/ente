@@ -8,7 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  cronet_http: 1.3.4
+  cronet_http: 1.6.0
   dio: ^5.8.0+1
   ente_configuration:
     path: ../../packages/configuration
