@@ -9,6 +9,7 @@ import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/cluster_centroid_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/pets_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
@@ -920,7 +921,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
         try {
           await mlDataDB.dropPetClusteringData();
           await PetService.instance.deleteAllPets();
-          Bus.instance.fire(PeopleChangedEvent());
+          Bus.instance.fire(PetsChangedEvent(source: "resetPetClusters"));
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('reset pet clustering failed ', e, s);
