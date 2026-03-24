@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Miscellaneous FAQ
 
 The content from **Miscellaneous FAQ** has been reorganized into topic-specific sections.
 

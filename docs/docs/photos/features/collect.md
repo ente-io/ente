@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Collect Photos
 
 The **Collecting Photos** content has been reorganized. You can find it in the following locations:
 

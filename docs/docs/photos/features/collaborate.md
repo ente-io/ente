@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Collaboration
 
 The **Collaboration** feature guide has moved to:
 

@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Custom Domains
 
 The **Custom Domains** feature guide has moved to:
 

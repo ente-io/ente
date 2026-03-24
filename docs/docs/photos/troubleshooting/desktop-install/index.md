@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Desktop Installation Troubleshooting
 
 The content from **Desktop Installation Troubleshooting** has been reorganized. You can find it in the following locations:
 

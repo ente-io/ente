@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Map
 
 The **Map** feature guide has moved to:
 

@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Passkeys
 
 The **Passkeys** feature guide has moved to:
 

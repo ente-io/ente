@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Metadata FAQ
 
 The content from **Metadata FAQ** has been reorganized. You can find it in the following locations:
 

@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Network Drives (NAS)
 
 The content from **Network Drives (NAS)** has been reorganized. You can find it in the following locations:
 

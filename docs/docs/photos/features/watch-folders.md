@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Watch Folders
 
 The **Watch Folders** feature guide has moved to:
 

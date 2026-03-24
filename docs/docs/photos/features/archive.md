@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Archive
 
 The **Archive** feature guide has moved to:
 

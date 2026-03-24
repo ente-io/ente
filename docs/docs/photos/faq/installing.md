@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Installing Ente Photos
 
 The content from **Installing Ente Photos** has been reorganized. You can find it in the following locations:
 

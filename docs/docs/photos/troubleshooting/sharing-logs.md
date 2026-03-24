@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Sharing Debug Logs
 
 The content from **Sharing Logs** has been reorganized. You can find it in the following locations:
 

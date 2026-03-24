@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Video Streaming FAQ
 
 The content from **Video Streaming FAQ** has been reorganized. You can find it in the following locations:
 

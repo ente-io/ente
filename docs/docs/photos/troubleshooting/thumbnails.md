@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Missing Thumbnails
 
 The content from **Missing Thumbnails** has been reorganized. You can find it in the following locations:
 

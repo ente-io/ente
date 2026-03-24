@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Trash
 
 The **Trash** feature guide has moved to:
 

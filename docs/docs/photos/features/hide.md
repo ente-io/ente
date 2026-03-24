@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Hidden Photos
 
 The **Hidden Photos** feature guide has moved to:
 

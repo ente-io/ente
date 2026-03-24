@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Public Links
 
 The **Public Links** feature guide has moved to:
 

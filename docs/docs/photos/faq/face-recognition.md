@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Face Recognition FAQ
 
 The content from **Face Recognition FAQ** has been reorganized. You can find it in the following locations:
 

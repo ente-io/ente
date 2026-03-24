@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Notifications
 
 The **Notifications** feature guide has moved to:
 

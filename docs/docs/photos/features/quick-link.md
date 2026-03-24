@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Quick Links
 
 The **Quick Links** content has been reorganized. You can find it in the following locations:
 

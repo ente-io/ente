@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# General FAQ
 
 The content from **General FAQ** has been reorganized into topic-specific FAQ sections:
 

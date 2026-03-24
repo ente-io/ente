@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Sharing
 
 The **Sharing** feature guide has moved to:
 

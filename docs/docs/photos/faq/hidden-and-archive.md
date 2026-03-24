@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Hide vs Archive
 
 The content from **Hide vs Archive** has been reorganized. You can find it in the following locations:
 

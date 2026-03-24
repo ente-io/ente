@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Legacy
 
 The **Legacy** (Trusted Contacts) feature guide has moved to:
 

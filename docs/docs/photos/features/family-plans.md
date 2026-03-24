@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Family Plans
 
 The **Family Plans** feature guide has moved to:
 

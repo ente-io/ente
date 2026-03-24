@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Referral Program
 
 The **Referral Program** feature guide has moved to:
 

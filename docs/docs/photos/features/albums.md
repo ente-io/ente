@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Albums
 
 The **Albums** feature guide has moved to:
 

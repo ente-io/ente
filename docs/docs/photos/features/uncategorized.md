@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Uncategorized
 
 The **Uncategorized** feature guide has moved to:
 

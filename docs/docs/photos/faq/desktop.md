@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Desktop FAQ
 
 The content from **Desktop FAQ** has been reorganized. You can find it in the following locations:
 

@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Location Tags
 
 The **Location Tags** content has been reorganized. You can find it in the following locations:
 

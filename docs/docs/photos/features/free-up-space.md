@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Free Up Space
 
 The **Free Up Space** feature guide has moved to:
 

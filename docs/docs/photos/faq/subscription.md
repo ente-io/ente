@@ -8,7 +8,7 @@ head:
       content: noindex
 ---
 
-# This Page Has Moved
+# Subscription FAQ
 
 The content from **Subscription FAQ** has been reorganized. You can find it in the following locations:
 
