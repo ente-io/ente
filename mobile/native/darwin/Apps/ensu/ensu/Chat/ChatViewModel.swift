@@ -1787,18 +1787,24 @@ final class ChatViewModel: ObservableObject {
 
                 if let progress {
                     emptyPollCount = 0
-                    self.handleProgress(progress)
+                    await MainActor.run {
+                        self.handleProgress(progress)
+                    }
                 } else {
                     emptyPollCount += 1
                 }
 
                 if isDownloaded {
-                    self.refreshModelDownloadInfo()
+                    await MainActor.run {
+                        self.refreshModelDownloadInfo()
+                    }
                     return
                 }
 
                 if emptyPollCount >= 6 {
-                    self.refreshModelDownloadInfo()
+                    await MainActor.run {
+                        self.refreshModelDownloadInfo()
+                    }
                     return
                 }
 
@@ -2213,7 +2219,7 @@ final class ChatViewModel: ObservableObject {
                 let isLastAndGenerating = i == messages.count - 1 && isGenerating
                 if next?.role != .assistant && !isLastAndGenerating {
                     augmented.append(ChatMessage(
-                        id: UUID(),
+                        id: deterministicSyntheticMessageId(parentId: msg.id),
                         role: .assistant,
                         text: "Response was interrupted",
                         timestamp: msg.timestamp,
@@ -2224,6 +2230,13 @@ final class ChatViewModel: ObservableObject {
             }
         }
         messages = augmented
+    }
+
+    private func deterministicSyntheticMessageId(parentId: UUID) -> UUID {
+        var uuid = parentId.uuid
+        uuid.0 ^= 0xA5
+        uuid.15 ^= 0x5A
+        return UUID(uuid: uuid)
     }
 
     private func buildSelectedPath(for sessionId: UUID, childrenMap: [UUID: [MessageNode]]) -> [MessageNode] {

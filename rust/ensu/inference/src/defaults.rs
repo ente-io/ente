@@ -29,7 +29,7 @@ fn lfm_vl_1_6b() -> EnsuModelPreset {
     EnsuModelPreset {
         id: "lfm-vl-1.6b".to_string(),
         title: "LFM 2.5 VL 1.6B (Q4_0)".to_string(),
-        url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf".to_string(),
+        url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true".to_string(),
         mmproj_url: Some(
             "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
                 .to_string(),
@@ -41,7 +41,7 @@ fn lfm_1_2b() -> EnsuModelPreset {
     EnsuModelPreset {
         id: "lfm-1.2b".to_string(),
         title: "LFM 2.5 1.2B Instruct (Q4_0)".to_string(),
-        url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf".to_string(),
+        url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true".to_string(),
         mmproj_url: None,
     }
 }

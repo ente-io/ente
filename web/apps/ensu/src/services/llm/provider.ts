@@ -19,15 +19,13 @@ const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 export const DEFAULT_MODEL: ModelInfo = {
     id: "lfm-2.5-vl-1.6b",
     name: "LFM 2.5 VL 1.6B (Q4_0)",
-    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+    url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
     mmprojUrl:
         "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
     sizeBytes: 695_752_160,
     mmprojSizeBytes: 583_109_888,
     sizeHuman: "~664 MB",
 };
-
-const TAURI_DEFAULT_MODEL: ModelInfo = DEFAULT_MODEL;
 
 const DESKTOP_DEFAULT_MODEL: ModelInfo = {
     id: "qwen-3.5-4b-q4km",
@@ -354,8 +352,7 @@ export class LlmProvider {
     }
 
     private async resolveDefaultModelForDevice() {
-        this.defaultModel =
-            this.backend.kind === "tauri" ? TAURI_DEFAULT_MODEL : DEFAULT_MODEL;
+        this.defaultModel = DEFAULT_MODEL;
 
         if (this.backend.kind !== "tauri") {
             return;

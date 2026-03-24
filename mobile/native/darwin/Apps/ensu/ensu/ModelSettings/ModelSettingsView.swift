@@ -336,7 +336,8 @@ struct ModelSettingsView: View {
         guard validate() else { return }
 
         isSaving = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
             if selectedModel.isDefault {
                 settings.useCustomModel = false
                 settings.modelUrl = ""
@@ -362,7 +363,10 @@ struct ModelSettingsView: View {
                 )
             }
             isSaving = false
-            showToast("Model settings saved")
+            toastTask?.cancel()
+            toastTask = presentToast("Model settings saved") { message in
+                toastMessage = message
+            }
         }
     }
 
@@ -374,21 +378,9 @@ struct ModelSettingsView: View {
         contextLength = ""
         maxTokens = ""
         temperature = ""
-        showToast("Model settings reset")
-    }
-
-    private func showToast(_ message: String) {
         toastTask?.cancel()
-        withAnimation(.easeOut(duration: 0.2)) {
+        toastTask = presentToast("Model settings reset") { message in
             toastMessage = message
-        }
-        toastTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 1_500_000_000)
-            guard !Task.isCancelled else { return }
-            withAnimation(.easeIn(duration: 0.2)) {
-                toastMessage = nil
-            }
-            toastTask = nil
         }
     }
 

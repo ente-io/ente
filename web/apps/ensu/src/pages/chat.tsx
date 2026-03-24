@@ -1900,6 +1900,7 @@ const Page: React.FC = () => {
                         sender: "assistant",
                         text: "Response was interrupted",
                         createdAt: msg.createdAt,
+                        isSynthetic: true,
                     });
                 }
             }

@@ -178,8 +178,9 @@ const MessageRow = memo(
     }: MessageRowProps) => {
         const isSelf = message.sender === "self";
         const isStreaming = message.messageUuid === STREAMING_SELECTION_KEY;
+        const isSynthetic = !!message.isSynthetic;
         const switcher = branchSwitchers[message.messageUuid];
-        const showSwitcher = !!switcher && switcher.total > 1;
+        const showSwitcher = !isSynthetic && !!switcher && switcher.total > 1;
         const timestamp = formatTime(message.createdAt);
         const attachments = message.attachments ?? [];
         const assistantMessagePaddingX = "8px";
@@ -335,7 +336,7 @@ const MessageRow = memo(
                             alignSelf: isSelf ? "flex-end" : "flex-start",
                         }}
                     >
-                        {isStreaming ? null : isSelf ? (
+                        {isStreaming || isSynthetic ? null : isSelf ? (
                             <>
                                 <IconButton
                                     aria-label="Edit"
@@ -384,7 +385,7 @@ const MessageRow = memo(
                         )}
                     </Stack>
 
-                    {isStreaming ? null : (
+                    {isStreaming || isSynthetic ? null : (
                         <Stack
                             direction="row"
                             sx={{

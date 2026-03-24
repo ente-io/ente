@@ -296,21 +296,9 @@ struct SettingsView: View {
         EnsuAdvancedSettings.unlock()
         isAdvancedUnlocked = true
         buildVersionTapCount = 0
-        showToast("Advanced settings unlocked")
-    }
-
-    private func showToast(_ message: String) {
         toastTask?.cancel()
-        withAnimation(.easeOut(duration: 0.2)) {
+        toastTask = presentToast("Advanced settings unlocked") { message in
             toastMessage = message
-        }
-        toastTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 1_500_000_000)
-            guard !Task.isCancelled else { return }
-            withAnimation(.easeIn(duration: 0.2)) {
-                toastMessage = nil
-            }
-            toastTask = nil
         }
     }
 
@@ -370,6 +358,8 @@ private struct SystemPromptSettingsView: View {
     @ObservedObject private var settings = ModelSettingsStore.shared
     @State private var promptBody: String = ""
     @State private var isSaving = false
+    @State private var toastMessage: String?
+    @State private var toastTask: Task<Void, Never>?
 
     init(embeddedInNavigation: Bool = false) {
         self.embeddedInNavigation = embeddedInNavigation
@@ -412,6 +402,13 @@ private struct SystemPromptSettingsView: View {
         }
         .onAppear {
             promptBody = ModelSettingsStore.resolveSystemPromptBody(settings.systemPromptBody)
+        }
+        .overlay(alignment: .bottom) {
+            if let toastMessage {
+                ToastView(message: toastMessage)
+                    .padding(.bottom, EnsuSpacing.xl)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         #if os(macOS)
         .safeAreaInset(edge: .top) {
@@ -491,18 +488,27 @@ private struct SystemPromptSettingsView: View {
 
     private func saveTapped() {
         isSaving = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
             let trimmedPrompt = promptBody.trimmingCharacters(in: .whitespacesAndNewlines)
             let defaultPrompt = ModelSettingsStore.defaultSystemPromptBody.trimmingCharacters(in: .whitespacesAndNewlines)
             settings.systemPromptBody = trimmedPrompt == defaultPrompt ? "" : trimmedPrompt
             promptBody = ModelSettingsStore.resolveSystemPromptBody(settings.systemPromptBody)
             isSaving = false
+            toastTask?.cancel()
+            toastTask = presentToast("Prompt saved") { message in
+                toastMessage = message
+            }
         }
     }
 
     private func resetTapped() {
         settings.systemPromptBody = ""
         promptBody = ModelSettingsStore.defaultSystemPromptBody
+        toastTask?.cancel()
+        toastTask = presentToast("Prompt reset") { message in
+            toastMessage = message
+        }
     }
 }
 

@@ -28,6 +28,12 @@ final class ModelDownloadManager: NSObject {
 
     private let recordsKey = "ensu.model.download.records"
     private let syncQueue = DispatchQueue(label: "io.ente.ensu.model-download-manager")
+    private let delegateQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.name = "io.ente.ensu.model-download-manager.delegate"
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
     private lazy var session: URLSession = {
         let configuration: URLSessionConfiguration
         configuration = URLSessionConfiguration.background(withIdentifier: "io.ente.ensu.model-downloads")
@@ -35,8 +41,8 @@ final class ModelDownloadManager: NSObject {
         configuration.sessionSendsLaunchEvents = true
         #endif
         configuration.isDiscretionary = false
-        configuration.waitsForConnectivity = true
-        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+       configuration.waitsForConnectivity = true
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: delegateQueue)
     }()
 
     private var backgroundCompletionHandler: (() -> Void)?
