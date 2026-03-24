@@ -34,6 +34,7 @@ getrandom = { version = "0.2", features = ["js"] }
 # Common dependencies
 base64 = "0.22"
 hex = "0.4"
+bip39 = { version = "2", default-features = false, features = ["std"] }
 zeroize = { version = "1.8", features = ["derive"] }
 
 [dev-dependencies]

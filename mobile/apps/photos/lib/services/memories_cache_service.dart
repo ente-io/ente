@@ -597,6 +597,24 @@ class MemoriesCacheService {
     });
   }
 
+  Future<void> refreshCache() async {
+    if (!showAnyMemories) {
+      return;
+    }
+    if (!enableSmartMemories) {
+      return;
+    }
+
+    return _memoriesUpdateLock.synchronized(() async {
+      try {
+        _cachedMemories = await _getMemoriesFromCache();
+        Bus.instance.fire(MemoriesChangedEvent());
+      } catch (e, s) {
+        _logger.info("Error refreshing memories cache", e, s);
+      }
+    });
+  }
+
   static Map<int, String> _localIntIdToLocalId = {};
   static final Map<String, int> _localIdToIntIdCache = {};
 

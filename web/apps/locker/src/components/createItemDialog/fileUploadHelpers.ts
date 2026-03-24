@@ -1,0 +1,106 @@
+import type { LockerUploadProgress } from "services/remote";
+import type { LockerUploadCandidate } from "types";
+
+export const normalizeCollectionName = (name: string) =>
+    name.trim().toLocaleLowerCase();
+
+export const dedupeCollectionNames = (names: string[]) => {
+    const seen = new Set<string>();
+    return names.filter((name) => {
+        const trimmedName = name.trim();
+        const normalizedName = normalizeCollectionName(trimmedName);
+        if (!normalizedName || seen.has(normalizedName)) {
+            return false;
+        }
+        seen.add(normalizedName);
+        return true;
+    });
+};
+
+export const addCollectionName = (names: string[], name: string) =>
+    dedupeCollectionNames([...names, name.trim()]);
+
+export const toggleCollectionName = (names: string[], name: string) => {
+    const normalizedName = normalizeCollectionName(name);
+    if (!normalizedName) {
+        return names;
+    }
+
+    return names.some(
+        (candidate) => normalizeCollectionName(candidate) === normalizedName,
+    )
+        ? names.filter(
+              (candidate) =>
+                  normalizeCollectionName(candidate) !== normalizedName,
+          )
+        : addCollectionName(names, name);
+};
+
+export const uploadQueueItemKey = (item: LockerUploadCandidate) =>
+    `${item.relativePath ?? item.file.name}:${item.file.size}:${item.file.lastModified}`;
+
+export const uploadItemParentPath = (item: LockerUploadCandidate) => {
+    const segments = (item.relativePath ?? item.file.name)
+        .split("/")
+        .filter(Boolean);
+    return segments.slice(0, -1).join("/");
+};
+
+export const collectionNamesByUploadItem = (
+    items: LockerUploadCandidate[],
+    defaultCollectionName?: string,
+) =>
+    Object.fromEntries(
+        items.map((item) => [
+            uploadQueueItemKey(item),
+            item.suggestedCollectionNames.length > 0
+                ? dedupeCollectionNames(item.suggestedCollectionNames)
+                : defaultCollectionName
+                  ? [defaultCollectionName]
+                  : [],
+        ]),
+    );
+
+export const uploadProgressValue = (
+    progress: LockerUploadProgress | null | undefined,
+    uploadCap: number,
+    finalizingStartedAt?: number,
+    now = Date.now(),
+) => {
+    if (!progress) {
+        return 0;
+    }
+
+    if (progress.phase === "uploading") {
+        return Math.min(
+            uploadCap,
+            (progress.loaded / Math.max(progress.total, 1)) * uploadCap,
+        );
+    }
+
+    if (progress.phase === "finalizing") {
+        const start = finalizingStartedAt ?? now;
+        const elapsed = Math.max(0, now - start);
+        const finalTarget = 99;
+        const easedFraction = 1 - Math.exp(-elapsed / 2200);
+        return Math.min(
+            finalTarget,
+            uploadCap + (finalTarget - uploadCap) * easedFraction,
+        );
+    }
+
+    return 0;
+};
+
+export const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    if (bytes < 1024 * 1024 * 1024) {
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+};

@@ -90,6 +90,7 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
       !_dismissed &&
       hasGrantedMLConsent &&
       !localSettings.isMLProgressBannerDismissed &&
+      !(isOfflineMode && !localSettings.isMLLocalIndexingEnabled) &&
       !_indexingComplete;
 
   Future<void> _fetchStatus() async {
@@ -121,6 +122,9 @@ class _MLProgressBannerState extends State<MLProgressBanner> {
     if (_dismissed) return const SizedBox.shrink();
     if (!hasGrantedMLConsent) return const SizedBox.shrink();
     if (localSettings.isMLProgressBannerDismissed) {
+      return const SizedBox.shrink();
+    }
+    if (isOfflineMode && !localSettings.isMLLocalIndexingEnabled) {
       return const SizedBox.shrink();
     }
 

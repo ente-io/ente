@@ -80,16 +80,16 @@ networks:
     name: proxy
 ```
 
-Now login into your tailscale account admin counsle > settings > keys > Generate
-authkey. Give any description and must select resuable, because the key get
-purged if not selected after rebooting machine. It is advisable to create
+Now login into your tailscale account admin counsel > settings > keys > Generate
+authkey. Give any description and select resuable, because the key will get
+purged if not selected after rebooting the machine. It is advisable to create
 **Tags** in **ACLs settings** `tag: tsdproxy` `tag: ente` `tag: minio` as well.
 This will create a tag nodes with no key expirory. One is safe to reboot restart
 docker or machine.
 
 > Copy the generated authkey as it is shown only once. Make tsdproxy.yaml file
 > in `cd docker/tsdproxy/config` by running `sudo nano tsdproxy.yaml` and
-> pupolate it with the following contant:
+> populate it with the following content:
 
 ```
 defaultproxyprovider: default
@@ -117,8 +117,8 @@ proxyaccesslog: true
 In the same directory run `sudo nano authkey` and paste the authkey just copied
 earlier from tailscale admin counsel.
 
-> Here Tailscale (TSDPROXY) setup is complet in all respect. Just run
-> `docker compose up -d`. Check your tailscale amdin counsel and you will see
+> Here Tailscale (TSDPROXY) setup is complete in all respect. Just run
+> `docker compose up -d`. Check your tailscale admin counsel and you will see
 > tsdproxy node up and running. Make sure that **HTTPS** is enabled in tailscale
 > DNS settings. You can visit the TSDPROXY web GUI by
 > https://tsdproxy.xyz.ts.net. (xyz is change value for everyone)
@@ -135,11 +135,11 @@ sudo mkdir -p /home/ubuntu/docker/ente/postgres-data
 sudo mkdir -p /home/ubuntu/docker/ente/scripts/compose
 ```
 
-Than give user permission for each of the above directory.
+Then give user permission for each of the above directory.
 `sudo chown -R 1000:1000 /home/ubuntu/docker/ente/custom-logs` etc etc. Make
 sure not to skip `/home/ubuntu/docker/tsdproxy/config`
 
-`cd docker/ente/script/compose` and run `sudo nano credentials.yaml` than
+`cd docker/ente/script/compose` and run `sudo nano credentials.yaml` then
 populate it with the following:
 
 ```
@@ -303,16 +303,16 @@ networks:
     external: true
 ```
 
-> Thats it. Run `docker compose up -d`. Wait till every container become
-> healthy. Open web browser. Make sure tailscale is installed on the machine.
+> Thats it. Run `docker compose up -d`. Wait until every container becomes
+> healthy. Open a web browser. Make sure tailscale is installed on the machine.
 > Visit https://ente.xyz.ts.net/ping. It will pong. All good if you see it.
 > First time it will take minute or two to get SSL cert. Downnload Desktop or
 > mobile app. Tap 7 time on the screen, which will prompt developer mode. Add
-> https://ente.xyz.ts.net. Add new user. When asked for OTP. Just go to linux
+> https://ente.xyz.ts.net. Add new user. When asked for OTP, go to your linux
 > terminal and run `docker logs ente-museum-1`. Search for userauth. Feed the
 > six digit and Done.
 
-> For getting 100TB (limitless) storage. Just Install ente-cli for windows.
+> For getting 100TB (limitless) storage, install ente-cli for windows.
 > Extract it and add folder. Name it **export**. Add config.yaml file along and
 > populate it with the following:
 
@@ -331,10 +331,10 @@ Right-Click in the directory where you have extracted ente-cli. Select
 .\ente.exe account bob # change bob to yours
 ```
 
-Hit Enter twice. For export directory, just write export. As already created
-**export** folder earlier. **Write email. The one which is already used befor
-when creating ente account in ente desktop app.** Type the same Password used
-before for the account.Run
+Hit Enter twice. For export directory, just write export, as you already created the
+**export** folder earlier. **Write email. The one which is already used before
+when creating ente account in ente desktop app.** Type the same password used
+before for the account. Run
 
 ```
 .\ente.ext account list

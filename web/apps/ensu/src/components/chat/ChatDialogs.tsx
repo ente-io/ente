@@ -180,7 +180,7 @@ export const ChatDialogs = memo(
 
             if (isTauriRuntime || hasTauriBridge) {
                 try {
-                    const { open } = await import("@tauri-apps/plugin-shell");
+                    const { open } = await import("@tauri-apps/api/shell");
                     await open(url);
                     return;
                 } catch {
