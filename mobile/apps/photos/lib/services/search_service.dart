@@ -4,6 +4,7 @@ import "dart:math";
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import 'package:logging/logging.dart';
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
@@ -911,15 +912,24 @@ class SearchService {
   }
 
   /// Returns combined people + pets results for the unified section.
-  Future<List<GenericSearchResult>> getAllPeopleAndPets(int? limit) async {
+  Future<List<GenericSearchResult>> getAllPeopleAndPets(
+    int? limit, {
+    BuildContext? context,
+  }) async {
     final people = await getAllFace(
       null,
       minClusterSize: limit == null
           ? kMinimumClusterSizeAllFaces
           : kMinimumClusterSizeSearchResult,
     );
+    final l10n = context != null ? AppLocalizations.of(context) : null;
     final pets = flagService.petEnabled
-        ? await getAllPets(null)
+        ? await getAllPets(
+            null,
+            dogLabel: l10n?.dog ?? "Dog",
+            catLabel: l10n?.cat ?? "Cat",
+            petLabel: l10n?.pet ?? "Pet",
+          )
         : <GenericSearchResult>[];
     if (limit != null && people.length + pets.length > limit) {
       // Reserve up to 1/3 of slots for pets, but no more than available.
@@ -1874,7 +1884,12 @@ class SearchService {
     return map;
   }
 
-  Future<List<GenericSearchResult>> getAllPets(int? limit) async {
+  Future<List<GenericSearchResult>> getAllPets(
+    int? limit, {
+    String dogLabel = "Dog",
+    String catLabel = "Cat",
+    String petLabel = "Pet",
+  }) async {
     try {
       final mlDataDB =
           isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
@@ -1947,11 +1962,11 @@ class SearchService {
         final summary = clusterSummaries[clusterId];
         final species = summary != null
             ? (summary.$2 == 0
-                ? "Dog"
+                ? dogLabel
                 : summary.$2 == 1
-                    ? "Cat"
-                    : "Pet")
-            : "Pet";
+                    ? catLabel
+                    : petLabel)
+            : petLabel;
         final customName = petNames[clusterId];
         speciesCounters[species] = (speciesCounters[species] ?? 0) + 1;
         final clusterLabel = (customName != null && customName.isNotEmpty)

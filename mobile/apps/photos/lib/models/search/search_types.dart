@@ -252,7 +252,8 @@ extension SectionTypeExtensions on SectionType {
   }) {
     switch (this) {
       case SectionType.face:
-        return SearchService.instance.getAllPeopleAndPets(limit);
+        return SearchService.instance
+            .getAllPeopleAndPets(limit, context: context);
       case SectionType.magic:
         return SearchService.instance.getMagicSectionResults(context!);
       case SectionType.wrapped:
