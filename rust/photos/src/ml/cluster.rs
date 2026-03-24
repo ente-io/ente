@@ -27,7 +27,11 @@ pub fn agglomerative_precomputed_min_size(
         return vec![];
     }
     if n == 1 {
-        return if min_cluster_size <= 1 { vec![0] } else { vec![-1] };
+        return if min_cluster_size <= 1 {
+            vec![0]
+        } else {
+            vec![-1]
+        };
     }
 
     let mut clusters: Vec<Option<Vec<usize>>> = (0..n).map(|i| Some(vec![i])).collect();

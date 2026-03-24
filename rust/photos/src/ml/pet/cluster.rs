@@ -414,11 +414,7 @@ fn eject_outliers(
         }
 
         // Compute centroid from face embeddings of cluster members
-        let face_members: Vec<usize> = members
-            .iter()
-            .copied()
-            .filter(|&i| has_face[i])
-            .collect();
+        let face_members: Vec<usize> = members.iter().copied().filter(|&i| has_face[i]).collect();
         if face_members.is_empty() {
             continue;
         }
@@ -822,12 +818,7 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
 /// This is the Phase 1 variant of BIRCH (without the CF-tree, since we
 /// have a precomputed distance matrix and moderate N). It's equivalent to
 /// single-pass leader clustering with centroid updates.
-fn birch_precomputed(
-    dist: &[f32],
-    n: usize,
-    threshold: f32,
-    min_cluster_size: usize,
-) -> Vec<i32> {
+fn birch_precomputed(dist: &[f32], n: usize, threshold: f32, min_cluster_size: usize) -> Vec<i32> {
     if n == 0 {
         return vec![];
     }
@@ -844,9 +835,8 @@ fn birch_precomputed(
 
         for (ci, (_, members)) in clusters.iter().enumerate() {
             // Average distance from point i to all members of this cluster
-            let avg_dist: f32 = members.iter()
-                .map(|&m| dist[i * n + m])
-                .sum::<f32>() / members.len() as f32;
+            let avg_dist: f32 =
+                members.iter().map(|&m| dist[i * n + m]).sum::<f32>() / members.len() as f32;
 
             if avg_dist < best_dist {
                 best_dist = avg_dist;
@@ -1304,7 +1294,8 @@ mod tests {
             assert_eq!(
                 c0,
                 result.face_to_cluster.get(&format!("a{}", i)),
-                "a{} should be in same cluster as a0", i
+                "a{} should be in same cluster as a0",
+                i
             );
         }
         // Groups should be separate
@@ -1509,12 +1500,18 @@ mod tests {
         let mut inputs = Vec::new();
         for i in 0..5 {
             inputs.push(make_input(
-                &format!("a{}", i), make_face(0, i), body_a.clone(), 0,
+                &format!("a{}", i),
+                make_face(0, i),
+                body_a.clone(),
+                0,
             ));
         }
         for i in 0..5 {
             inputs.push(make_input(
-                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 0,
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                body_b.clone(),
+                0,
             ));
         }
         // Faceless, body matches cluster A
@@ -1601,7 +1598,10 @@ mod tests {
         ];
         for i in 0..5 {
             dog_inputs.push(make_input(
-                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 0,
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                body_b.clone(),
+                0,
             ));
         }
 
@@ -1616,7 +1616,10 @@ mod tests {
         ];
         for i in 0..5 {
             cat_inputs.push(make_input(
-                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 1,
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                body_b.clone(),
+                1,
             ));
         }
 
