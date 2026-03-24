@@ -93,6 +93,12 @@ class PetVectorDB {
   Future<VectorDb>? _vectorDbFuture;
   final Lock _writeLock = Lock();
 
+  /// Get the on-disk file path for this vector index without opening it.
+  Future<String> getIndexPath() async {
+    final documentsDirectory = await getApplicationDocumentsDirectory();
+    return join(documentsDirectory.path, _databaseName);
+  }
+
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
     return _vectorDbFuture!;

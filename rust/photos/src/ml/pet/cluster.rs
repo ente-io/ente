@@ -37,6 +37,7 @@ impl Species {
 pub enum ClusterAlgorithm {
     Hdbscan,
     Agglomerative,
+    Birch,
 }
 
 /// Clustering thresholds per species, mirroring Python `SpeciesConfig`.
@@ -65,6 +66,10 @@ pub struct ClusterConfig {
     pub min_body_overlap_ratio: f32,
     /// Distance threshold for agglomerative clustering (average linkage).
     pub agglomerative_threshold: f32,
+    /// Maximum cosine distance from a member to its cluster centroid.
+    /// Members exceeding this are ejected as noise (-1) after clustering.
+    /// Set to 0.0 to disable outlier ejection.
+    pub outlier_max_centroid_distance: f32,
 }
 
 impl ClusterConfig {
@@ -79,9 +84,10 @@ impl ClusterConfig {
             face_veto_threshold: 0.05,
             face_contradiction_threshold: 0.10,
             min_cluster_size: 2,
-            min_samples: 2,
+            min_samples: 1,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.77,
+            agglomerative_threshold: 0.85,
+            outlier_max_centroid_distance: 0.0,
         }
     }
 
@@ -96,9 +102,10 @@ impl ClusterConfig {
             face_veto_threshold: 0.05,
             face_contradiction_threshold: 0.10,
             min_cluster_size: 2,
-            min_samples: 2,
+            min_samples: 1,
             min_body_overlap_ratio: 0.5,
-            agglomerative_threshold: 0.77,
+            agglomerative_threshold: 0.75,
+            outlier_max_centroid_distance: 0.0,
         }
     }
 
@@ -164,6 +171,11 @@ pub fn run_pet_clustering(inputs: &[PetClusterInput], config: &ClusterConfig) ->
 
     // Phase 1: Face-based agglomerative clustering
     let mut labels = phase1_face_cluster(inputs, &has_face, config);
+
+    // Eject outliers: remove members too far from their cluster centroid
+    if config.outlier_max_centroid_distance > 0.0 {
+        eject_outliers(inputs, &mut labels, &has_face, config);
+    }
 
     // Renumber labels to contiguous 0..K-1
     renumber_labels(&mut labels);
@@ -360,6 +372,104 @@ fn phase1_face_cluster(
     }
 
     labels
+}
+
+// ── Outlier ejection ────────────────────────────────────────────────────
+
+/// After clustering, eject members whose cosine distance to their cluster
+/// centroid exceeds `outlier_max_centroid_distance`. Ejected members are
+/// set to -1 (noise) so body rescue can attempt to reclaim them.
+fn eject_outliers(
+    inputs: &[PetClusterInput],
+    labels: &mut [i32],
+    has_face: &[bool],
+    config: &ClusterConfig,
+) {
+    let threshold = config.outlier_max_centroid_distance;
+    let cluster_ids = unique_cluster_ids(labels);
+    if cluster_ids.is_empty() {
+        return;
+    }
+
+    // Compute centroid per cluster using face embeddings
+    let dim = inputs
+        .iter()
+        .find(|i| i.has_face())
+        .map(|i| i.face_embedding.len())
+        .unwrap_or(128);
+
+    let mut ejected = 0usize;
+
+    for &c in &cluster_ids {
+        let members: Vec<usize> = labels
+            .iter()
+            .enumerate()
+            .filter(|(_, l)| **l == c)
+            .map(|(i, _)| i)
+            .collect();
+
+        if members.len() <= 2 {
+            // Don't eject from tiny clusters — not enough data for a reliable centroid
+            continue;
+        }
+
+        // Compute centroid from face embeddings of cluster members
+        let face_members: Vec<usize> = members
+            .iter()
+            .copied()
+            .filter(|&i| has_face[i])
+            .collect();
+        if face_members.is_empty() {
+            continue;
+        }
+
+        let mut centroid = vec![0.0f32; dim];
+        for &i in &face_members {
+            for (d, val) in centroid.iter_mut().zip(inputs[i].face_embedding.iter()) {
+                *d += val;
+            }
+        }
+        let n = face_members.len() as f32;
+        let mut norm = 0.0f32;
+        for d in centroid.iter_mut() {
+            *d /= n;
+            norm += *d * *d;
+        }
+        norm = norm.sqrt();
+        if norm > 0.0 {
+            for d in centroid.iter_mut() {
+                *d /= norm;
+            }
+        }
+
+        // Check each member's distance to centroid
+        for &i in &members {
+            if !has_face[i] {
+                continue;
+            }
+            let dist = 1.0 - dot(&inputs[i].face_embedding, &centroid);
+            if dist > threshold {
+                labels[i] = -1;
+                ejected += 1;
+            }
+        }
+    }
+
+    if ejected > 0 {
+        // Re-check: clusters that fell below min_cluster_size become all noise
+        let remaining_ids = unique_cluster_ids(labels);
+        for &c in &remaining_ids {
+            let count = labels.iter().filter(|&&l| l == c).count();
+            if count < config.min_cluster_size {
+                for l in labels.iter_mut() {
+                    if *l == c {
+                        *l = -1;
+                        ejected += 1;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // ── Phase 2: Body rescue ─────────────────────────────────────────────────
@@ -681,9 +791,15 @@ fn phase3_cross_cluster_merge(
 fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
     match config.cluster_algorithm {
         ClusterAlgorithm::Hdbscan => {
-            hdbscan_precomputed(dist, n, config.min_cluster_size, config.min_samples)
+            hdbscan_crate_precomputed(dist, n, config.min_cluster_size, config.min_samples)
         }
         ClusterAlgorithm::Agglomerative => agglomerative_precomputed_min_size(
+            dist,
+            n,
+            config.agglomerative_threshold,
+            config.min_cluster_size,
+        ),
+        ClusterAlgorithm::Birch => birch_precomputed(
             dist,
             n,
             config.agglomerative_threshold,
@@ -692,18 +808,121 @@ fn run_cluster(dist: &[f32], n: usize, config: &ClusterConfig) -> Vec<i32> {
     }
 }
 
+// ── BIRCH clustering (precomputed distance matrix) ──────────────────────
+
+/// BIRCH-style incremental clustering on a precomputed distance matrix.
+///
+/// Each point is inserted one at a time. For each new point, find the
+/// nearest existing cluster centroid. If the distance is below `threshold`,
+/// absorb the point into that cluster. Otherwise, create a new cluster.
+///
+/// After all points are inserted, clusters smaller than `min_cluster_size`
+/// are marked as noise (-1).
+///
+/// This is the Phase 1 variant of BIRCH (without the CF-tree, since we
+/// have a precomputed distance matrix and moderate N). It's equivalent to
+/// single-pass leader clustering with centroid updates.
+fn birch_precomputed(
+    dist: &[f32],
+    n: usize,
+    threshold: f32,
+    min_cluster_size: usize,
+) -> Vec<i32> {
+    if n == 0 {
+        return vec![];
+    }
+
+    let mut labels = vec![-1i32; n];
+    // Each cluster: (label, members, centroid as average of member distances)
+    let mut clusters: Vec<(i32, Vec<usize>)> = Vec::new();
+    let mut next_label = 0i32;
+
+    for i in 0..n {
+        // Find nearest cluster centroid
+        let mut best_cluster = -1i32;
+        let mut best_dist = f32::INFINITY;
+
+        for (ci, (_, members)) in clusters.iter().enumerate() {
+            // Average distance from point i to all members of this cluster
+            let avg_dist: f32 = members.iter()
+                .map(|&m| dist[i * n + m])
+                .sum::<f32>() / members.len() as f32;
+
+            if avg_dist < best_dist {
+                best_dist = avg_dist;
+                best_cluster = ci as i32;
+            }
+        }
+
+        if best_cluster >= 0 && best_dist < threshold {
+            // Absorb into nearest cluster
+            let ci = best_cluster as usize;
+            let label = clusters[ci].0;
+            clusters[ci].1.push(i);
+            labels[i] = label;
+        } else {
+            // Create new cluster
+            let label = next_label;
+            next_label += 1;
+            clusters.push((label, vec![i]));
+            labels[i] = label;
+        }
+    }
+
+    // Mark small clusters as noise
+    for (label, members) in &clusters {
+        if members.len() < min_cluster_size {
+            for &m in members {
+                labels[m] = -1;
+            }
+        }
+    }
+
+    labels
+}
+
+/// HDBSCAN via the `hdbscan` crate with a precomputed distance matrix.
+fn hdbscan_crate_precomputed(
+    dist: &[f32],
+    n: usize,
+    min_cluster_size: usize,
+    min_samples: usize,
+) -> Vec<i32> {
+    if n < min_cluster_size {
+        return vec![-1i32; n];
+    }
+
+    // Build Vec<Vec<f64>> distance matrix for the crate
+    let mut dist_matrix: Vec<Vec<f64>> = Vec::with_capacity(n);
+    for i in 0..n {
+        let mut row = Vec::with_capacity(n);
+        for j in 0..n {
+            row.push(dist[i * n + j] as f64);
+        }
+        dist_matrix.push(row);
+    }
+
+    let params = hdbscan::HdbscanHyperParams::builder()
+        .min_cluster_size(min_cluster_size)
+        .min_samples(min_samples)
+        .dist_metric(hdbscan::DistanceMetric::Precalculated)
+        .allow_single_cluster(true)
+        .epsilon(0.5)
+        .build();
+
+    let clusterer = hdbscan::Hdbscan::new(&dist_matrix, params);
+    match clusterer.cluster() {
+        Ok(labels) => labels,
+        Err(_) => vec![-1i32; n],
+    }
+}
+
 // Agglomerative clustering imported from crate::ml::cluster
 
-// ── HDBSCAN implementation (precomputed distance matrix) ────────────────
+// ── Legacy HDBSCAN (kept for cluster_eval tests) ────────────────────────
 
-/// Simplified HDBSCAN on a precomputed distance matrix.
-///
-/// Steps:
-///   1. Compute core distances (k-th nearest neighbor distance, k = min_samples)
-///   2. Compute mutual reachability distances
-///   3. Build minimum spanning tree (Prim's algorithm)
-///   4. Single-linkage hierarchy from MST
-///   5. Extract clusters using EOM (Excess of Mass) stability
+/// Custom HDBSCAN on a precomputed distance matrix.
+/// Production now uses the `hdbscan` crate via `hdbscan_crate_precomputed`.
 pub(crate) fn hdbscan_precomputed(
     dist: &[f32],
     n: usize,
@@ -1064,22 +1283,35 @@ mod tests {
     #[test]
     fn test_two_similar_faces_cluster() {
         let config = ClusterConfig::dog();
-        let face_a = normalized(vec![1.0; 128]);
-        let mut face_b = face_a.clone();
-        // Slightly perturb
-        face_b[0] += 0.01;
-        let face_b = normalized(face_b);
+        // HDBSCAN needs density contrast — provide 2 groups
+        let mut inputs: Vec<_> = (0..5)
+            .map(|i| make_input(&format!("a{}", i), make_face(0, i), vec![], 0))
+            .collect();
+        // Second group so HDBSCAN sees density contrast
+        for i in 0..5 {
+            inputs.push(make_input(
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                vec![],
+                0,
+            ));
+        }
 
-        let inputs = vec![
-            make_input("a", face_a, vec![], 0),
-            make_input("b", face_b, vec![], 0),
-        ];
         let result = run_pet_clustering(&inputs, &config);
-        // Should cluster together
-        assert_eq!(result.n_unclustered, 0);
-        assert_eq!(
-            result.face_to_cluster.get("a"),
-            result.face_to_cluster.get("b")
+        let c0 = result.face_to_cluster.get("a0");
+        assert!(c0.is_some(), "a0 should be clustered");
+        for i in 1..5 {
+            assert_eq!(
+                c0,
+                result.face_to_cluster.get(&format!("a{}", i)),
+                "a{} should be in same cluster as a0", i
+            );
+        }
+        // Groups should be separate
+        assert_ne!(
+            result.face_to_cluster.get("a0"),
+            result.face_to_cluster.get("b0"),
+            "Group A and B should be separate"
         );
     }
 
@@ -1177,13 +1409,17 @@ mod tests {
     }
 
     /// Make a face embedding clustered around a base direction.
-    /// `base_dim` is the dominant dimension, `noise_scale` adds jitter.
+    /// Produces realistic intra-cluster distances (cosine ~0.05-0.3).
     fn make_face(base_dim: usize, noise_seed: u32) -> Vec<f32> {
         let mut v = vec![0.0f32; 128];
         v[base_dim] = 1.0;
-        // Deterministic small perturbation
-        let noise_dim = ((noise_seed * 7 + 3) % 128) as usize;
-        v[noise_dim] += 0.02 * (noise_seed as f32 + 1.0) * 0.1;
+        // Spread noise across ~10 dimensions for realistic variance
+        for k in 0..10 {
+            let dim = ((noise_seed.wrapping_mul(7).wrapping_add(k * 13 + 3)) % 128) as usize;
+            // Deterministic pseudo-random sign and magnitude
+            let t = (noise_seed as f32 * 0.618 + k as f32 * 1.377).sin();
+            v[dim] += t * 0.35;
+        }
         normalized(v)
     }
 
@@ -1191,8 +1427,11 @@ mod tests {
     fn make_body(base_dim: usize, noise_seed: u32) -> Vec<f32> {
         let mut v = vec![0.0f32; 192];
         v[base_dim] = 1.0;
-        let noise_dim = ((noise_seed * 11 + 5) % 192) as usize;
-        v[noise_dim] += 0.02 * (noise_seed as f32 + 1.0) * 0.1;
+        for k in 0..10 {
+            let dim = ((noise_seed.wrapping_mul(11).wrapping_add(k * 17 + 5)) % 192) as usize;
+            let t = (noise_seed as f32 * 0.618 + k as f32 * 1.377).sin();
+            v[dim] += t * 0.35;
+        }
         normalized(v)
     }
 
@@ -1200,22 +1439,31 @@ mod tests {
 
     #[test]
     fn test_body_rescue_assigns_faceless_image_to_cluster() {
-        // 3 images with faces + bodies form a cluster in Phase 1.
-        // 1 image has NO face but has a matching body.
-        //
-        // With bodies: body rescue assigns the faceless image to the cluster.
-        // Without bodies: faceless image stays unclustered.
+        // Two groups of faces so HDBSCAN has density contrast.
+        // 1 image has NO face but has a body matching group A.
 
         let config = ClusterConfig::dog();
         let body_a = make_body(10, 0);
+        let body_b = make_body(80, 0);
 
-        let inputs = vec![
+        let mut inputs = vec![
             make_input("a1", make_face(0, 0), body_a.clone(), 0),
             make_input("a2", make_face(0, 1), body_a.clone(), 0),
             make_input("a3", make_face(0, 2), body_a.clone(), 0),
-            // No face, only body
+            make_input("a4", make_face(0, 3), body_a.clone(), 0),
+            make_input("a5", make_face(0, 4), body_a.clone(), 0),
+            // No face, only body matching group A
             make_input("no_face", vec![], body_a.clone(), 0),
         ];
+        // Second group for density contrast
+        for i in 0..5 {
+            inputs.push(make_input(
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                body_b.clone(),
+                0,
+            ));
+        }
 
         let with_bodies = run_pet_clustering(&inputs, &config);
         let without_bodies = run_pet_clustering(&strip_bodies(&inputs), &config);
@@ -1253,32 +1501,34 @@ mod tests {
         // similar bodies), but face veto should block if orphan's face
         // clearly contradicts the cluster's face centroid.
 
-        let mut config = ClusterConfig::dog();
-        config.min_samples = 1;
+        let config = ClusterConfig::dog();
 
         let body_a = make_body(10, 0);
         let body_b = make_body(80, 0);
 
-        let inputs = vec![
-            make_input("a1", make_face(0, 0), body_a.clone(), 0),
-            make_input("a2", make_face(0, 1), body_a.clone(), 0),
-            make_input("a3", make_face(0, 2), body_a.clone(), 0),
-            make_input("b1", make_face(64, 0), body_b.clone(), 0),
-            make_input("b2", make_face(64, 1), body_b.clone(), 0),
-            make_input("b3", make_face(64, 2), body_b.clone(), 0),
-            // Faceless, body matches cluster A
-            make_input("orphan", vec![], body_a.clone(), 0),
-        ];
+        let mut inputs = Vec::new();
+        for i in 0..5 {
+            inputs.push(make_input(
+                &format!("a{}", i), make_face(0, i), body_a.clone(), 0,
+            ));
+        }
+        for i in 0..5 {
+            inputs.push(make_input(
+                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 0,
+            ));
+        }
+        // Faceless, body matches cluster A
+        inputs.push(make_input("orphan", vec![], body_a.clone(), 0));
 
         let result = run_pet_clustering(&inputs, &config);
 
-        let ca1 = result.face_to_cluster.get("a1");
-        let cb1 = result.face_to_cluster.get("b1");
+        let ca0 = result.face_to_cluster.get("a0");
+        let cb0 = result.face_to_cluster.get("b0");
         let c_orphan = result.face_to_cluster.get("orphan");
 
-        assert_ne!(ca1, cb1, "Clusters A and B should remain separate");
+        assert_ne!(ca0, cb0, "Clusters A and B should remain separate");
         assert_eq!(
-            ca1, c_orphan,
+            ca0, c_orphan,
             "Faceless orphan should be rescued into cluster A (matching body)"
         );
     }
@@ -1294,12 +1544,26 @@ mod tests {
         assert_eq!(config.min_body_agreements, 3);
 
         let body_a = make_body(10, 0);
-        let inputs = vec![
+        let body_b = make_body(80, 0);
+        let mut inputs = vec![
+            // 5 faces form a cluster, but only 2 have bodies
             make_input("a1", make_face(0, 0), body_a.clone(), 0),
             make_input("a2", make_face(0, 1), body_a.clone(), 0),
+            make_input("a3", make_face(0, 2), vec![], 0),
+            make_input("a4", make_face(0, 3), vec![], 0),
+            make_input("a5", make_face(0, 4), vec![], 0),
             // Faceless with matching body — but only 2 cluster body members
             make_input("orphan", vec![], body_a.clone(), 0),
         ];
+        // Second group for density contrast
+        for i in 0..5 {
+            inputs.push(make_input(
+                &format!("b{}", i),
+                make_face(64, i + 100),
+                body_b.clone(),
+                0,
+            ));
+        }
 
         let result = run_pet_clustering(&inputs, &config);
 
@@ -1324,19 +1588,37 @@ mod tests {
 
         let body = make_body(10, 0);
 
-        // Dog: 2 face+body members + 1 faceless with matching body
-        let dog_inputs = vec![
+        let body_b = make_body(80, 0);
+
+        // Dog: 2 groups for density contrast, only 2 body members in group A
+        let mut dog_inputs = vec![
             make_input("a1", make_face(0, 0), body.clone(), 0),
             make_input("a2", make_face(0, 1), body.clone(), 0),
+            make_input("a3", make_face(0, 2), vec![], 0),
+            make_input("a4", make_face(0, 3), vec![], 0),
+            make_input("a5", make_face(0, 4), vec![], 0),
             make_input("orphan", vec![], body.clone(), 0),
         ];
+        for i in 0..5 {
+            dog_inputs.push(make_input(
+                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 0,
+            ));
+        }
 
-        // Cat: same structure
-        let cat_inputs = vec![
+        // Cat: all 5 have bodies (well above cat's min_body_agreements=2)
+        let mut cat_inputs = vec![
             make_input("a1", make_face(0, 0), body.clone(), 1),
             make_input("a2", make_face(0, 1), body.clone(), 1),
+            make_input("a3", make_face(0, 2), body.clone(), 1),
+            make_input("a4", make_face(0, 3), body.clone(), 1),
+            make_input("a5", make_face(0, 4), body.clone(), 1),
             make_input("orphan", vec![], body.clone(), 1),
         ];
+        for i in 0..5 {
+            cat_inputs.push(make_input(
+                &format!("b{}", i), make_face(64, i + 100), body_b.clone(), 1,
+            ));
+        }
 
         let dog_result = run_pet_clustering(&dog_inputs, &dog_config);
         let cat_result = run_pet_clustering(&cat_inputs, &cat_config);

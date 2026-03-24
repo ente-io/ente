@@ -1017,15 +1017,53 @@ mod tests {
             })
             .collect();
 
+        // Step 5: Threshold sweep
+        eprintln!("\n  === THRESHOLD SWEEP (BIRCH) ===");
+        eprintln!("  {:>6} | {:>4} | {:>6} | {:>8} | cluster sizes",
+            "Thresh", "K", "Noise", "Largest");
+        eprintln!("  {}", "-".repeat(65));
+
+        for t_int in (30..=100).step_by(5) {
+            let t = t_int as f32 * 0.01;
+            let mut config = ClusterConfig::for_species(
+                crate::ml::pet::cluster::Species::from_u8(
+                    all_face_results[0].species,
+                ),
+            );
+            config.agglomerative_threshold = t;
+            let result = run_pet_clustering(&inputs, &config);
+
+            let mut cluster_sizes: Vec<usize> = {
+                let mut m: HashMap<String, usize> = HashMap::new();
+                for inp in &inputs {
+                    if let Some(cid) = result.face_to_cluster.get(&inp.pet_face_id) {
+                        *m.entry(cid.clone()).or_default() += 1;
+                    }
+                }
+                m.values().copied().collect()
+            };
+            cluster_sizes.sort_by(|a, b| b.cmp(a));
+            let largest = cluster_sizes.first().copied().unwrap_or(0);
+            let sizes_str: String = cluster_sizes.iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+
+            eprintln!("  {:>6.2} | {:>4} | {:>6} | {:>8} | [{}]",
+                t, cluster_sizes.len(), result.n_unclustered, largest, sizes_str);
+        }
+
+        // Show detailed clusters at production threshold
+        let prod_t = 0.77;
+        eprintln!("\n  === CLUSTERS AT t={} (production) ===", prod_t);
         let mut config = ClusterConfig::for_species(
             crate::ml::pet::cluster::Species::from_u8(
                 all_face_results[0].species,
             ),
         );
-        config.agglomerative_threshold = 0.85;
+        config.agglomerative_threshold = prod_t as f32;
         let result = run_pet_clustering(&inputs, &config);
 
-        // Print clusters
         let mut cluster_members: HashMap<String, Vec<usize>> = HashMap::new();
         for (i, inp) in inputs.iter().enumerate() {
             if let Some(cid) = result.face_to_cluster.get(&inp.pet_face_id) {
@@ -1039,21 +1077,8 @@ mod tests {
         eprintln!("  {} clusters, {} unclustered\n", sorted_clusters.len(), result.n_unclustered);
 
         for (cid, members) in &sorted_clusters {
-            let species_counts: HashMap<u8, usize> = {
-                let mut m = HashMap::new();
-                for &i in members {
-                    *m.entry(all_face_results[i].species).or_default() += 1;
-                }
-                m
-            };
-            let sp_str: String = species_counts
-                .iter()
-                .map(|(s, c)| format!("{}x{}", c, if *s == 0 { "dog" } else { "cat" }))
-                .collect::<Vec<_>>()
-                .join("+");
-
-            eprintln!("  Cluster {} (size={}, {})",
-                &cid[..std::cmp::min(30, cid.len())], members.len(), sp_str);
+            eprintln!("  Cluster {} (size={})",
+                &cid[..std::cmp::min(30, cid.len())], members.len());
             for &i in members {
                 let sp = if all_face_results[i].species == 0 { "dog" } else { "cat" };
                 eprintln!("    {} ({}, score={:.3})", face_source_photo[i], sp, all_face_results[i].detection.score);

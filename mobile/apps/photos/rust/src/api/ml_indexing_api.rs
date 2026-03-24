@@ -6,6 +6,7 @@ use ente_media_inspector::ml::{
     runtime::{ExecutionProviderPolicy, MlRuntimeConfig, ModelPaths},
     types as shared_types,
 };
+use ente_media_inspector::vector_db::VectorDB;
 
 #[derive(Clone, Debug)]
 pub struct RustExecutionProviderPolicy {
@@ -481,5 +482,147 @@ fn to_api_cluster_result(result: cluster::PetClusterResult) -> RustPetClusterRes
         summaries,
         n_unclustered: result.n_unclustered as i32,
     }
+}
+
+// -- Pet Clustering with direct usearch access --
+
+/// Lightweight face metadata passed from Dart (no embeddings).
+#[derive(Clone, Debug)]
+pub struct RustPetFaceMeta {
+    pub pet_face_id: String,
+    /// Integer key in the usearch index.
+    pub vector_id: i64,
+    pub species: u8,
+    pub file_id: i64,
+    /// Existing cluster ID, or empty string if unclustered.
+    pub cluster_id: String,
+}
+
+/// Run batch pet clustering by reading embeddings directly from usearch.
+///
+/// Dart passes only lightweight metadata + the path to the usearch index file.
+/// Rust opens the index, bulk-reads embeddings, clusters, and returns
+/// assignments — no embedding round-trip through FFI.
+pub fn run_pet_clustering_from_index(
+    faces: Vec<RustPetFaceMeta>,
+    face_index_path: String,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+    let dim = 128; // pet face embedding dimension
+
+    let vdb = VectorDB::new(&face_index_path, dim)
+        .map_err(|e| format!("Failed to open face index: {e}"))?;
+
+    let mut inputs = Vec::with_capacity(faces.len());
+    for face in &faces {
+        let emb = match vdb.get_vector(face.vector_id as u64) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        inputs.push(PetClusterInput {
+            pet_face_id: face.pet_face_id.clone(),
+            face_embedding: emb,
+            body_embedding: Vec::new(),
+            species: face.species,
+            file_id: face.file_id,
+        });
+    }
+
+    if inputs.len() < 2 {
+        return Ok(RustPetClusterResult {
+            assignments: Vec::new(),
+            summaries: Vec::new(),
+            n_unclustered: inputs.len() as i32,
+        });
+    }
+
+    let result = cluster::run_pet_clustering(&inputs, &config);
+    Ok(to_api_cluster_result(result))
+}
+
+/// Run incremental pet clustering by reading embeddings directly from usearch.
+///
+/// Only unclustered faces are clustered against existing centroids.
+/// Centroids are read from a separate usearch index.
+pub fn run_pet_clustering_incremental_from_index(
+    new_faces: Vec<RustPetFaceMeta>,
+    face_index_path: String,
+    centroid_index_path: String,
+    // cluster_id -> vector_id in the centroid index
+    centroid_mappings: Vec<RustCentroidMapping>,
+    // cluster_id -> face count (unused for now, reserved for weighted merge)
+    _centroid_counts: Vec<RustCentroidCount>,
+    species: u8,
+) -> Result<RustPetClusterResult, String> {
+    let config = ClusterConfig::for_species(Species::from_u8(species));
+    let dim = 128;
+
+    let vdb = VectorDB::new(&face_index_path, dim)
+        .map_err(|e| format!("Failed to open face index: {e}"))?;
+
+    let mut inputs = Vec::with_capacity(new_faces.len());
+    for face in &new_faces {
+        let emb = match vdb.get_vector(face.vector_id as u64) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        inputs.push(PetClusterInput {
+            pet_face_id: face.pet_face_id.clone(),
+            face_embedding: emb,
+            body_embedding: Vec::new(),
+            species: face.species,
+            file_id: face.file_id,
+        });
+    }
+
+    if inputs.is_empty() {
+        return Ok(RustPetClusterResult {
+            assignments: Vec::new(),
+            summaries: Vec::new(),
+            n_unclustered: 0,
+        });
+    }
+
+    // Load existing centroids from centroid index
+    let face_centroids: HashMap<String, Vec<f32>> = if !centroid_mappings.is_empty() {
+        let centroid_vdb = VectorDB::new(&centroid_index_path, dim)
+            .map_err(|e| format!("Failed to open centroid index: {e}"))?;
+
+        let mut centroids = HashMap::new();
+        for mapping in &centroid_mappings {
+            if let Ok(emb) = centroid_vdb.get_vector(mapping.vector_id as u64) {
+                centroids.insert(mapping.cluster_id.clone(), emb);
+            }
+        }
+        centroids
+    } else {
+        HashMap::new()
+    };
+
+    let body_centroids: HashMap<String, Vec<f32>> = HashMap::new();
+
+    let result = cluster::run_pet_clustering_incremental(
+        &inputs,
+        &face_centroids,
+        &body_centroids,
+        &config,
+    );
+
+    Ok(to_api_cluster_result(result))
+}
+
+/// Mapping from cluster ID to its vector ID in the centroid usearch index.
+#[derive(Clone, Debug)]
+pub struct RustCentroidMapping {
+    pub cluster_id: String,
+    pub vector_id: i64,
+}
+
+/// Cluster ID with its face count (for incremental clustering).
+#[derive(Clone, Debug)]
+pub struct RustCentroidCount {
+    pub cluster_id: String,
+    pub count: i32,
 }
 
