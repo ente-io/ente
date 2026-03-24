@@ -1,24 +1,37 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/generated/intl/app_localizations.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/pet/pet_entity.dart";
 import "package:photos/service_locator.dart" show isOfflineMode;
+import "package:photos/services/machine_learning/pet_ml/pet_cluster_feedback_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_clustering_service.dart";
 import "package:photos/services/machine_learning/pet_ml/pet_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/date_input.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
+import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
+import "package:photos/ui/viewer/people/pet_face_widget.dart";
 
-/// Bottom sheet page for naming or renaming a pet cluster.
+/// Full-page screen for saving or editing a pet, mirroring the person
+/// save/edit screen layout (minus email/suggestions).
 class SaveOrEditPet extends StatefulWidget {
   final String clusterId;
   final int species;
   final String? currentName;
   final String? petId;
+  final bool isEditing;
 
   const SaveOrEditPet({
     required this.clusterId,
     required this.species,
     this.currentName,
     this.petId,
+    this.isEditing = false,
     super.key,
   });
 
@@ -27,93 +40,246 @@ class SaveOrEditPet extends StatefulWidget {
 }
 
 class _SaveOrEditPetState extends State<SaveOrEditPet> {
-  late final TextEditingController _controller;
+  final _logger = Logger("_SaveOrEditPetState");
+  String _inputName = "";
+  String? _selectedDate;
+  PetData? _existingData;
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.currentName ?? "");
+    _inputName = widget.currentName ?? "";
+    _loadExistingData();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadExistingData() async {
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final resolvedPetId =
+        widget.petId ?? (await mlDataDB.getClusterToPetId())[widget.clusterId];
+    if (resolvedPetId != null) {
+      final pet = await PetService.instance.getPet(resolvedPetId);
+      if (pet != null && mounted) {
+        setState(() {
+          _existingData = pet.data;
+          _selectedDate = pet.data.birthDate;
+          if (_inputName.isEmpty) _inputName = pet.data.name;
+        });
+      }
+    }
+  }
+
+  bool get _hasChanges {
+    if (_existingData == null) return _inputName.isNotEmpty;
+    return _inputName != _existingData!.name ||
+        _selectedDate != _existingData!.birthDate;
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(l10n.addName),
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            widget.isEditing ? context.l10n.editPerson : context.l10n.savePet,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: l10n.addName,
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                    bottom: 32.0,
+                    left: 16.0,
+                    right: 16.0,
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+                      SizedBox(
+                        height: 110,
+                        width: 110,
+                        child: FaceThumbnailSquircleClip(
+                          child: PetFaceWidget(
+                            petClusterId: widget.clusterId,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 36),
+                      TextFormField(
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.words,
+                        autocorrect: false,
+                        initialValue: _inputName,
+                        onChanged: (value) {
+                          if (_debounce?.isActive ?? false) {
+                            _debounce?.cancel();
+                          }
+                          _debounce =
+                              Timer(const Duration(milliseconds: 300), () {
+                            setState(() => _inputName = value);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeMuted,
+                            ),
+                          ),
+                          fillColor: colorScheme.fillFaint,
+                          filled: true,
+                          hintText: context.l10n.enterName,
+                          hintStyle: textTheme.bodyFaint,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      DatePickerField(
+                        hintText: context.l10n.enterDateOfBirth,
+                        firstDate: DateTime(100),
+                        lastDate: DateTime.now(),
+                        initialValue: _selectedDate,
+                        isRequired: false,
+                        onChanged: (date) {
+                          setState(() {
+                            _selectedDate =
+                                date?.toIso8601String().split("T").first;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      ButtonWidget(
+                        buttonType: ButtonType.primary,
+                        labelText: context.l10n.save,
+                        isDisabled: !_hasChanges || _inputName.trim().isEmpty,
+                        onTap: () async => _save(),
+                      ),
+                      if (!widget.isEditing) ...[
+                        const SizedBox(height: 24),
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            onPressed: _onMergeWithExisting,
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              context.l10n.mergeWithExisting,
+                              style: textTheme.small.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: colorScheme.primary500,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                border: const UnderlineInputBorder(),
               ),
-              style: textTheme.body,
-              textCapitalization: TextCapitalization.words,
-              onSubmitted: (_) => _save(),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _save,
-                child: Text(l10n.save),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Future<void> _save() async {
-    final name = _controller.text.trim();
+    final name = _inputName.trim();
     if (name.isEmpty) return;
 
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     final petService = PetService.instance;
 
-    // Reuse existing pet ID if the cluster already has one, otherwise create.
-    String petId;
-    final resolvedPetId = widget.petId ??
-        (await mlDataDB.getClusterToPetId())[widget.clusterId];
+    try {
+      String petId;
+      final resolvedPetId = widget.petId ??
+          (await mlDataDB.getClusterToPetId())[widget.clusterId];
 
-    if (resolvedPetId != null) {
-      petId = resolvedPetId;
-      final existingPet = await petService.getPet(petId);
-      final updatedData = existingPet != null
-          ? existingPet.data.copyWith(name: name)
-          : PetData(name: name, species: widget.species);
-      await petService.updatePet(petId, updatedData);
-    } else {
-      final pet = await petService.addPet(
-        PetData(name: name, species: widget.species),
-      );
-      petId = pet.remoteID;
+      if (resolvedPetId != null) {
+        petId = resolvedPetId;
+        final existingPet = await petService.getPet(petId);
+        final updatedData = existingPet != null
+            ? existingPet.data.copyWith(name: name, birthDate: _selectedDate)
+            : PetData(
+                name: name,
+                species: widget.species,
+                birthDate: _selectedDate,
+              );
+        await petService.updatePet(petId, updatedData);
+      } else {
+        final pet = await petService.addPet(
+          PetData(
+            name: name,
+            species: widget.species,
+            birthDate: _selectedDate,
+          ),
+        );
+        petId = pet.remoteID;
+      }
+
+      await mlDataDB.setClusterPetId(widget.clusterId, petId);
+
+      if (mounted) {
+        Navigator.pop(context, name);
+      }
+    } catch (e) {
+      _logger.severe("Error saving pet", e);
     }
+  }
 
-    await mlDataDB.setClusterPetId(widget.clusterId, petId);
+  Future<void> _onMergeWithExisting() async {
+    final targetClusterId = await showMergePetClusterPage(
+      context,
+      currentClusterId: widget.clusterId,
+      species: widget.species,
+    );
 
-    if (mounted) {
-      Navigator.pop(context, name);
+    if (targetClusterId == null || !mounted) return;
+
+    _logger.info(
+      "Merge: merging ${widget.clusterId} into $targetClusterId",
+    );
+    try {
+      await PetClusterFeedbackService.instance.mergePetClusters(
+        widget.clusterId,
+        targetClusterId,
+      );
+      _logger.info("Merge: completed successfully");
+      if (mounted) Navigator.pop(context);
+    } catch (e, s) {
+      _logger.severe("Merge failed", e, s);
     }
   }
 }

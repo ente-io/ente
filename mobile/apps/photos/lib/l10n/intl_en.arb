@@ -1719,6 +1719,7 @@
   "viewPersonToUnlink": "View {name} to unlink",
   "enterName": "Enter name",
   "savePerson": "Save person",
+  "savePet": "Save pet",
   "editPerson": "Edit person",
   "mergedPhotos": "Merged photos",
   "orMergeWithExistingPerson": "Or merge with existing",

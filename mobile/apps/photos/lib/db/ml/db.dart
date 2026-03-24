@@ -2336,9 +2336,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     for (final row in faceRows) {
       final vid = row[faceVectorIdColumn] as int?;
       final petFaceId = row[petFaceIDColumn] as String;
+      final species = row[speciesColumn] as int;
       faceIdsToRemove.add(petFaceId);
       if (vid != null) {
-        final species = row[speciesColumn] as int;
         faceVidsBySpecies.putIfAbsent(species, () => []);
         faceVidsBySpecies[species]!.add(vid);
       }
@@ -2360,15 +2360,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     // Collect which clusters will lose members so we can recompute their
     // summaries and centroids after the deletion.
     final affectedClusterIds = <String>{};
+    final speciesByCluster = <String, int>{};
     if (faceIdsToRemove.isNotEmpty) {
       final fpH = List.filled(faceIdsToRemove.length, '?').join(',');
       final clusterRows = await db.getAll(
-        'SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable '
-        'WHERE $petFaceIDColumn IN ($fpH)',
+        'SELECT DISTINCT fc.$clusterIDColumn, f.$speciesColumn '
+        'FROM $petFaceClustersTable fc '
+        'INNER JOIN $petFacesTable f ON fc.$petFaceIDColumn = f.$petFaceIDColumn '
+        'WHERE fc.$petFaceIDColumn IN ($fpH)',
         faceIdsToRemove,
       );
       for (final row in clusterRows) {
-        affectedClusterIds.add(row[clusterIDColumn] as String);
+        final cid = row[clusterIDColumn] as String;
+        affectedClusterIds.add(cid);
+        speciesByCluster[cid] = row[speciesColumn] as int;
       }
     }
 
@@ -2404,6 +2409,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         '(SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable)',
       );
     });
+
+    // Find clusters that were emptied and clean up their centroid data.
+    if (affectedClusterIds.isNotEmpty) {
+      final survivingRows = await db.getAll(
+        'SELECT DISTINCT $clusterIDColumn FROM $petFaceClustersTable '
+        'WHERE $clusterIDColumn IN '
+        '(${List.filled(affectedClusterIds.length, '?').join(',')})',
+        affectedClusterIds.toList(),
+      );
+      final survivingIds =
+          survivingRows.map((r) => r[clusterIDColumn] as String).toSet();
+      final emptiedIds =
+          affectedClusterIds.where((id) => !survivingIds.contains(id));
+      await _deletePetClusterCentroids(db, emptiedIds, speciesByCluster);
+    }
 
     // Recompute summaries and centroids for clusters that lost members but
     // still have remaining faces (empty ones were already deleted above).
@@ -2526,6 +2546,49 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       } catch (e, s) {
         _logger.warning(
           "Failed to write centroid for species ${entry.key}",
+          e,
+          s,
+        );
+      }
+    }
+  }
+
+  /// Delete centroid vector IDs and usearch vectors for emptied pet clusters.
+  Future<void> _deletePetClusterCentroids(
+    SqliteDatabase db,
+    Iterable<String> clusterIds,
+    Map<String, int> speciesByCluster,
+  ) async {
+    if (clusterIds.isEmpty) return;
+
+    // Group by species so we target the correct centroid vector DB.
+    final idsBySpecies = <int, List<String>>{};
+    for (final cid in clusterIds) {
+      final species = speciesByCluster[cid];
+      if (species == null) continue;
+      idsBySpecies.putIfAbsent(species, () => []).add(cid);
+    }
+
+    for (final entry in idsBySpecies.entries) {
+      try {
+        final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+          species: entry.key,
+          offline: _isOffline,
+        );
+        final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+          entry.value,
+          db: db,
+        );
+        if (idMap.isNotEmpty) {
+          await centroidVdb.deleteCentroids(idMap.values.toList());
+          // Remove mapping rows
+          for (final cid in idMap.keys) {
+            await centroidVdb.deleteClusterCentroidMapping(cid, db: db);
+          }
+        }
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to delete pet centroids for species ${entry.key}",
           e,
           s,
         );

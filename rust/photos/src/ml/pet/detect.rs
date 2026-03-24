@@ -35,12 +35,20 @@ pub fn run_pet_face_detection(
     runtime: &MlRuntimeView<'_>,
     decoded: &DecodedImage,
 ) -> MlResult<Vec<PetFaceDetection>> {
+    let session = runtime.pet_face_detection_session()?;
+    run_pet_face_detection_with_session(&session, decoded)
+}
+
+/// Same as [run_pet_face_detection] but accepts a pre-built session directly.
+pub fn run_pet_face_detection_with_session(
+    session: &ort::Session,
+    decoded: &DecodedImage,
+) -> MlResult<Vec<PetFaceDetection>> {
     let (input, scaled_width, scaled_height, pad_left, pad_top) =
         preprocess::preprocess_yolo(decoded)?;
 
-    let pet_face_detection = runtime.pet_face_detection_session()?;
     let (output_shape, output_data) = onnx::run_f32(
-        &pet_face_detection,
+        session,
         input,
         [1, 3, INPUT_HEIGHT as i64, INPUT_WIDTH as i64],
     )?;

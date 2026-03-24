@@ -103,13 +103,16 @@ class PetClusterFeedbackService {
     String sourceId,
     String targetId,
   ) async {
-    // Find or create the PetEntity for the target cluster.
+    // Find or create the PetEntity for the merged cluster.
+    // Prefer target's mapping, then source's, then create a new one.
     final mappings = await _db.getClusterToPetId();
     String petId;
     if (mappings.containsKey(targetId)) {
       petId = mappings[targetId]!;
+    } else if (mappings.containsKey(sourceId)) {
+      petId = mappings[sourceId]!;
+      await _db.setClusterPetId(targetId, petId);
     } else {
-      // Target has no pet yet — create one using its cluster summary species.
       final summaries = await _db.getAllPetClusterSummary();
       final species = summaries[targetId]?.$2 ?? -1;
       final pet = await PetService.instance.addPet(
@@ -168,8 +171,36 @@ class PetClusterFeedbackService {
             .putIfAbsent(clusterId, () => centroid);
       }
 
-      for (final id in emptyIds) {
-        await _db.deletePetClusterSummary(id);
+      if (emptyIds.isNotEmpty) {
+        // Look up species before deleting summaries so we can target the
+        // correct centroid vector DB for cleanup.
+        final existingSummaries = await _db.getAllPetClusterSummary();
+        final sqlDb = await _db.asyncDB;
+        for (final id in emptyIds) {
+          await _db.deletePetClusterSummary(id);
+          final species = existingSummaries[id]?.$2;
+          if (species == null) continue;
+          try {
+            final centroidVdb = PetClusterCentroidVectorDB.forSpecies(
+              species: species,
+              offline: isOfflineMode,
+            );
+            final idMap = await centroidVdb.getClusterCentroidVectorIdMap(
+              [id],
+              db: sqlDb,
+            );
+            if (idMap.isNotEmpty) {
+              await centroidVdb.deleteCentroids(idMap.values.toList());
+              await centroidVdb.deleteClusterCentroidMapping(id, db: sqlDb);
+            }
+          } catch (e, s) {
+            _logger.warning(
+              "Failed to delete centroid for emptied cluster $id",
+              e,
+              s,
+            );
+          }
+        }
       }
       if (sqlSummaries.isNotEmpty) {
         await _db.petClusterSummaryUpdate(sqlSummaries);

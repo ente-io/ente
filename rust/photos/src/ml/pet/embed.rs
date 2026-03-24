@@ -26,6 +26,40 @@ pub fn run_pet_face_embedding(
     aligned_faces: &[Vec<f32>],
     face_results: &mut [PetFaceResult],
 ) -> MlResult<()> {
+    let get_session = |species: u8| -> MlResult<_> {
+        if species == 0 {
+            runtime.pet_face_embedding_dog_session()
+        } else {
+            runtime.pet_face_embedding_cat_session()
+        }
+    };
+    run_pet_face_embedding_inner(aligned_faces, face_results, &get_session)
+}
+
+/// Same as [run_pet_face_embedding] but accepts pre-built sessions directly.
+pub fn run_pet_face_embedding_with_sessions(
+    aligned_faces: &[Vec<f32>],
+    face_results: &mut [PetFaceResult],
+    dog_session: &ort::Session,
+    cat_session: &ort::Session,
+) -> MlResult<()> {
+    let get_session = |species: u8| -> MlResult<_> {
+        // Return a reference that satisfies the closure's lifetime.
+        // We wrap in Ok() since the caller already built the sessions.
+        if species == 0 {
+            Ok(dog_session)
+        } else {
+            Ok(cat_session)
+        }
+    };
+    run_pet_face_embedding_inner(aligned_faces, face_results, &get_session)
+}
+
+fn run_pet_face_embedding_inner<S: std::ops::Deref<Target = ort::Session>>(
+    aligned_faces: &[Vec<f32>],
+    face_results: &mut [PetFaceResult],
+    get_session: &dyn Fn(u8) -> MlResult<S>,
+) -> MlResult<()> {
     if aligned_faces.is_empty() {
         return Ok(());
     }
@@ -70,11 +104,7 @@ pub fn run_pet_face_embedding(
             input.extend_from_slice(aligned);
         }
 
-        let session = if species == 0 {
-            runtime.pet_face_embedding_dog_session()?
-        } else {
-            runtime.pet_face_embedding_cat_session()?
-        };
+        let session = get_session(species)?;
 
         let (shape, output) = onnx::run_f32(
             &session,

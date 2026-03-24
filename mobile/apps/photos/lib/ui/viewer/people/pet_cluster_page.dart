@@ -22,8 +22,10 @@ import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart"
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
+import "package:photos/ui/viewer/people/merge_pet_sheet.dart";
 import "package:photos/ui/viewer/people/pet_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_pet.dart";
+import "package:photos/ui/viewer/people/save_person_banner.dart";
 
 /// Detail page for a pet cluster with gallery, name editing, and reassignment.
 class PetClusterPage extends StatefulWidget {
@@ -48,6 +50,7 @@ class _PetClusterPageState extends State<PetClusterPage> {
   final _selectedFiles = SelectedFiles();
   late List<EnteFile> _files;
   late String _label;
+  bool _isBannerDismissed = false;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdated;
   late final StreamSubscription<PetsChangedEvent> _petsChanged;
 
@@ -112,8 +115,16 @@ class _PetClusterPageState extends State<PetClusterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+
+    final bool showBanner = !_isBannerDismissed &&
+        _files.isNotEmpty &&
+        (widget.clusterLabel.isEmpty ||
+            widget.clusterLabel.startsWith("Dog") ||
+            widget.clusterLabel.startsWith("Cat") ||
+            widget.clusterLabel.startsWith("Pet"));
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -139,6 +150,19 @@ class _PetClusterPageState extends State<PetClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: true,
       initialFiles: _files,
+      header: showBanner
+          ? SavePersonBanner(
+              faceWidget: PetFaceWidget(petClusterId: widget.clusterId),
+              text: l10n.savePet,
+              subText: l10n.findThemQuickly,
+              primaryActionLabel: l10n.save,
+              secondaryActionLabel: l10n.merge,
+              onPrimaryTap: () => _editName(),
+              onSecondaryTap: _handleMergePet,
+              onDismissed: () => setState(() => _isBannerDismissed = true),
+              dismissibleKey: ValueKey("pet_banner_${widget.clusterId}"),
+            )
+          : null,
     );
 
     return GalleryBoundariesProvider(
@@ -217,8 +241,27 @@ class _PetClusterPageState extends State<PetClusterPage> {
       ),
     );
     if (result is String && result.isNotEmpty && mounted) {
-      setState(() => _label = result);
+      setState(() {
+        _label = result;
+        _isBannerDismissed = true;
+      });
     }
+  }
+
+  Future<void> _handleMergePet() async {
+    final targetClusterId = await showMergePetClusterPage(
+      context,
+      currentClusterId: widget.clusterId,
+      species: widget.species,
+    );
+
+    if (targetClusterId == null || !mounted) return;
+
+    await PetClusterFeedbackService.instance.mergePetClusters(
+      widget.clusterId,
+      targetClusterId,
+    );
+    if (mounted) Navigator.pop(context);
   }
 }
 
