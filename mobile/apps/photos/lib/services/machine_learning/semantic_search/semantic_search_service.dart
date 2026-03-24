@@ -45,6 +45,7 @@ class SemanticSearchService {
   bool? _cachedEmbeddingsOffline;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
+  static const Duration _vectorDbMigrationDelay = Duration(seconds: 10);
   Future<void>? _prepareVectorDbFuture;
 
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
@@ -106,6 +107,9 @@ class SemanticSearchService {
       if (!flagService.usearchForSearch) return;
       if (!flagService.hasGrantedMLConsent) return;
       if (!await _vectorDB.checkIfMigrationDone()) {
+        await Future.delayed(_vectorDbMigrationDelay);
+        if (!flagService.usearchForSearch) return;
+        if (!flagService.hasGrantedMLConsent) return;
         await _mlDataDB.checkMigrateFillClipVectorDB();
       }
       if (await _vectorDB.checkIfMigrationDone()) {
