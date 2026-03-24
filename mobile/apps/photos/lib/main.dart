@@ -691,6 +691,7 @@ Future<bool> _runBackgroundPass({
     logger: _logger,
     taskId: taskId,
     budget: budget,
+    requiresSyncPush: trigger == BackgroundTrigger.remotePush,
     isRunningInForeground: _isRunningInForeground,
     isAnotherBackgroundRunAlive: _isAnotherBackgroundRunAlive,
     pushPayload: trigger == BackgroundTrigger.remotePush ? pushPayload : null,

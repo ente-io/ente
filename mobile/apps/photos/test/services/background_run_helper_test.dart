@@ -19,9 +19,39 @@ void main() {
         logger: Logger("BackgroundRunHelperTest"),
         taskId: "remote_push_sync",
         budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
         isRunningInForeground: () async => false,
         isAnotherBackgroundRunAlive: () async => false,
         pushPayload: const {"action": "noop"},
+      );
+
+      expect(attempt.shouldRun, isFalse);
+      expect(attempt.skipReason, BackgroundSkipReason.nonSyncPush);
+    });
+
+    test("ignores missing remote push payloads", () async {
+      final attempt = await prepareBackgroundRun(
+        logger: Logger("BackgroundRunHelperTest"),
+        taskId: "remote_push_sync",
+        budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
+        isRunningInForeground: () async => false,
+        isAnotherBackgroundRunAlive: () async => false,
+      );
+
+      expect(attempt.shouldRun, isFalse);
+      expect(attempt.skipReason, BackgroundSkipReason.nonSyncPush);
+    });
+
+    test("ignores empty remote pushes", () async {
+      final attempt = await prepareBackgroundRun(
+        logger: Logger("BackgroundRunHelperTest"),
+        taskId: "remote_push_sync",
+        budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
+        isRunningInForeground: () async => false,
+        isAnotherBackgroundRunAlive: () async => false,
+        pushPayload: const {},
       );
 
       expect(attempt.shouldRun, isFalse);
@@ -33,6 +63,7 @@ void main() {
         logger: Logger("BackgroundRunHelperTest"),
         taskId: "remote_push_sync",
         budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
         isRunningInForeground: () async => true,
         isAnotherBackgroundRunAlive: () async => false,
         pushPayload: const {"action": "sync"},
@@ -55,6 +86,7 @@ void main() {
         logger: Logger("BackgroundRunHelperTest"),
         taskId: "remote_push_sync",
         budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
         isRunningInForeground: () async => false,
         isAnotherBackgroundRunAlive: () async => true,
         pushPayload: const {"action": "sync"},
@@ -77,6 +109,7 @@ void main() {
         logger: Logger("BackgroundRunHelperTest"),
         taskId: "remote_push_sync",
         budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
         isRunningInForeground: () async => false,
         isAnotherBackgroundRunAlive: () async => false,
         pushPayload: const {"action": "sync"},
@@ -100,6 +133,7 @@ void main() {
         logger: Logger("BackgroundRunHelperTest"),
         taskId: "remote_push_sync",
         budget: const Duration(seconds: 1),
+        requiresSyncPush: true,
         isRunningInForeground: () async => false,
         isAnotherBackgroundRunAlive: () async => false,
         pushPayload: const {"action": "sync"},

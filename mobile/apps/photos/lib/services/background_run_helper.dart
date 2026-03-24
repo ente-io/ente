@@ -48,6 +48,7 @@ Future<BackgroundRunAttempt> prepareBackgroundRun({
   required Logger logger,
   required String taskId,
   required Duration budget,
+  required bool requiresSyncPush,
   required Future<bool> Function() isRunningInForeground,
   required Future<bool> Function() isAnotherBackgroundRunAlive,
   Map<String, String>? pushPayload,
@@ -55,9 +56,10 @@ Future<BackgroundRunAttempt> prepareBackgroundRun({
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
 
-  if (pushPayload != null &&
-      pushPayload.isNotEmpty &&
-      pushPayload["action"] != "sync") {
+  if (requiresSyncPush &&
+      (pushPayload == null ||
+          pushPayload.isEmpty ||
+          pushPayload["action"] != "sync")) {
     return BackgroundRunAttempt.skip(
       prefs: prefs,
       skipReason: BackgroundSkipReason.nonSyncPush,
