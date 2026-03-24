@@ -355,9 +355,7 @@ export class LlmProvider {
 
     private async resolveDefaultModelForDevice() {
         this.defaultModel =
-            this.backend.kind === "tauri"
-                ? TAURI_DEFAULT_MODEL
-                : DEFAULT_MODEL;
+            this.backend.kind === "tauri" ? TAURI_DEFAULT_MODEL : DEFAULT_MODEL;
 
         if (this.backend.kind !== "tauri") {
             return;

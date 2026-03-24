@@ -1886,15 +1886,13 @@ const Page: React.FC = () => {
         const augmented: ChatMessage[] = [];
         for (let i = 0; i < base.length; i++) {
             const msg = base[i];
+            if (!msg) continue;
             augmented.push(msg);
             if (msg.sender === "self") {
                 const next = base[i + 1];
                 const isLastAndGenerating =
                     i === base.length - 1 && isGenerating;
-                if (
-                    next?.sender !== "assistant" &&
-                    !isLastAndGenerating
-                ) {
+                if (next?.sender !== "assistant" && !isLastAndGenerating) {
                     augmented.push({
                         messageUuid: `interrupted-placeholder-${msg.messageUuid}`,
                         sessionUuid: msg.sessionUuid,
@@ -1918,7 +1916,13 @@ const Page: React.FC = () => {
             return [...augmented, streamingMessage];
         }
         return augmented;
-    }, [messageState.path, streamingParentId, streamingText, currentSessionId, isGenerating]);
+    }, [
+        messageState.path,
+        streamingParentId,
+        streamingText,
+        currentSessionId,
+        isGenerating,
+    ]);
 
     const branchSwitchers = messageState.switchers;
 
@@ -3639,7 +3643,9 @@ const Page: React.FC = () => {
             }
         }
         setSystemPrompt(
-            isDefaultPrompt ? DEFAULT_CHAT_SYSTEM_PROMPT_BODY : normalizedPrompt,
+            isDefaultPrompt
+                ? DEFAULT_CHAT_SYSTEM_PROMPT_BODY
+                : normalizedPrompt,
         );
         setShowSystemPromptSettings(false);
     }, [systemPrompt]);
@@ -4454,9 +4460,7 @@ const Page: React.FC = () => {
                 systemPrompt={systemPrompt}
                 setSystemPrompt={setSystemPrompt}
                 handleSaveSystemPrompt={handleSaveSystemPrompt}
-                handleUseDefaultSystemPrompt={
-                    handleUseDefaultSystemPrompt
-                }
+                handleUseDefaultSystemPrompt={handleUseDefaultSystemPrompt}
                 syncNotificationOpen={syncNotificationOpen}
                 setSyncNotificationOpen={setSyncNotificationOpen}
                 syncNotification={syncNotification}

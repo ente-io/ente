@@ -222,12 +222,7 @@ export const ChatDialogs = memo(
                         url: model.url,
                         mmproj: model.mmproj,
                     })),
-                {
-                    id: "custom",
-                    name: "Custom",
-                    url: "",
-                    mmproj: "",
-                },
+                { id: "custom", name: "Custom", url: "", mmproj: "" },
             ],
             [allowMmproj, defaultModelName, defaultModelUrl, suggestedModels],
         );
@@ -241,9 +236,7 @@ export const ChatDialogs = memo(
                 ? modelOptions.find((model) => model.url === modelUrl)
                 : undefined;
             setSelectedModelId(
-                !useCustomModel
-                    ? "default"
-                    : (matchedOption?.id ?? "custom"),
+                !useCustomModel ? "default" : (matchedOption?.id ?? "custom"),
             );
             setShowAdvancedLimits(!!contextLength || !!maxTokens);
         }, [
@@ -735,7 +728,10 @@ export const ChatDialogs = memo(
                                         </Typography>
                                     )}
                                     {showAdvancedLimits && (
-                                        <Stack direction="row" sx={{ gap: 1.5 }}>
+                                        <Stack
+                                            direction="row"
+                                            sx={{ gap: 1.5 }}
+                                        >
                                             <TextField
                                                 fullWidth
                                                 label="Context length"
@@ -817,18 +813,16 @@ export const ChatDialogs = memo(
                     fullWidth
                     slotProps={{ paper: { sx: dialogPaperSx } }}
                 >
-                    <DialogTitle sx={dialogTitleSx}>
-                        System Prompt
-                    </DialogTitle>
+                    <DialogTitle sx={dialogTitleSx}>System Prompt</DialogTitle>
                     <DialogContent>
                         <Stack sx={{ gap: 2.5 }}>
                             <Typography
                                 variant="small"
                                 sx={{ color: "text.muted" }}
                             >
-                                This prompt is used as-is. Use $date anywhere
-                                to insert the current date and time. Leave
-                                blank to use the default prompt.
+                                This prompt is used as-is. Use $date anywhere to
+                                insert the current date and time. Leave blank to
+                                use the default prompt.
                             </Typography>
                             <TextField
                                 fullWidth
@@ -895,7 +889,6 @@ export const ChatDialogs = memo(
                         },
                     }}
                 />
-
             </>
         );
     },
