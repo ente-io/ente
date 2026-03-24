@@ -1170,6 +1170,7 @@ final class ChatViewModel: ObservableObject {
     func stopGenerating() {
         stopRequested = true
         provider.stopGeneration()
+        generationTask?.cancel()
     }
 
     func confirmOverflowTrim() {
@@ -2188,10 +2189,25 @@ final class ChatViewModel: ObservableObject {
                 timestamp: node.timestamp,
                 attachments: node.attachments,
                 isInterrupted: node.isInterrupted,
+                isSynthetic: false,
                 tokensPerSecond: node.tokensPerSecond,
                 branchIndex: max(1, index + 1),
                 branchCount: max(1, siblings.count)
             )
+        }
+
+        if messages.count >= 2,
+           let lastMessage = messages.last,
+           lastMessage.role == .user,
+           !isGenerating {
+            messages.append(ChatMessage(
+                id: UUID(),
+                role: .assistant,
+                text: "Response was interrupted",
+                timestamp: lastMessage.timestamp,
+                isInterrupted: true,
+                isSynthetic: true
+            ))
         }
     }
 

@@ -370,6 +370,28 @@ struct ChatView: View {
                     .background(EnsuColor.backgroundBase)
                     .zIndex(2)
                 }
+
+                #if os(iOS)
+                if keyboard.isVisible {
+                    Button {
+                        viewState.didDismissKeyboard = true
+                        isInputFocused = false
+                        hideKeyboard()
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(EnsuColor.textPrimary)
+                            .frame(width: 32, height: 32)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, EnsuSpacing.pageHorizontal)
+                    .padding(.bottom, viewState.inputBarHeight + EnsuSpacing.sm)
+                    .zIndex(3)
+                }
+                #endif
             }
             .animation(.easeInOut(duration: 0.32), value: viewState.sessionTransitionId)
         }

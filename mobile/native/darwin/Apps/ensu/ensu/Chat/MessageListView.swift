@@ -285,7 +285,7 @@ struct MessageListView: View {
         let fallbackPadding = EnsuSpacing.xxxl + EnsuSpacing.xxl + 60
         let measuredPadding = inputBarHeight > 0 ? inputBarHeight + EnsuSpacing.md : fallbackPadding
         let basePadding = max(fallbackPadding, measuredPadding)
-        return basePadding
+        return basePadding + keyboardHeight
     }
 
     private func scheduleInitialScroll(_ proxy: ScrollViewProxy) {

@@ -85,11 +85,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        val email = credentialStore.getEmail()
-        if (credentialStore.isLoggedIn() && !email.isNullOrBlank()) {
-            store.signIn(email)
-        }
-
         viewModelScope.launch {
             authService.storedEndpointFlow.collectLatest { endpoint ->
                 authService.updateEndpoint(endpoint)
@@ -104,6 +99,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             )
             store.hydrateModelDownloadRequested(sessionPreferences.modelDownloadRequested.first())
             store.bootstrap(viewModelScope)
+
+            val email = credentialStore.getEmail()
+            if (credentialStore.isLoggedIn() && !email.isNullOrBlank()) {
+                store.signIn(email)
+            }
 
             advancedSettingsDataStore.settingsFlow.drop(1).collectLatest { settings ->
                 store.applyPersistedSettings(

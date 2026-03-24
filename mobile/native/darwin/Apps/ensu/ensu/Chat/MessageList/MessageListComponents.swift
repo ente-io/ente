@@ -188,14 +188,16 @@ struct AssistantMessageBubbleView: View {
                         hapticTap()
                         onCopy()
                     }
-                    Button("Retry") {
-                        hapticMedium()
-                        onRetry()
+                    if !message.isSynthetic {
+                        Button("Retry") {
+                            hapticMedium()
+                            onRetry()
+                        }
                     }
                 }
                 #endif
 
-                if showsMetadata {
+                if showsMetadata && !message.isSynthetic {
                     HStack(spacing: EnsuSpacing.sm) {
                         TimestampView(date: message.timestamp)
                         if message.branchCount > 1 {

@@ -277,6 +277,7 @@ internal class ChatStoreActions(
     fun stopGeneration() {
         stopRequested = true
         llmProvider.stopGeneration()
+        generationJob?.cancel()
     }
 
     fun retryAssistantMessage(messageId: String) {
@@ -936,7 +937,25 @@ internal class ChatStoreActions(
             message.copy(branchCount = max(1, siblings.size))
         }
 
-        return displayMessages to branchSelectionIndices
+        val finalMessages = if (
+            displayMessages.size >= 2
+            && displayMessages.last().author == MessageAuthor.User
+            && !state.value.chat.isGenerating
+        ) {
+            val lastUser = displayMessages.last()
+            displayMessages + ChatMessage(
+                id = "interrupted-placeholder-${lastUser.id}",
+                sessionId = sessionId,
+                parentId = lastUser.id,
+                author = MessageAuthor.Assistant,
+                text = "Response was interrupted",
+                timestampMillis = lastUser.timestampMillis,
+                isInterrupted = true,
+                isSynthetic = true
+            )
+        } else displayMessages
+
+        return finalMessages to branchSelectionIndices
     }
 
     private fun buildSelectedPath(sessionId: String): List<ChatMessage> {
