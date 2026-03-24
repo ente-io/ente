@@ -1,6 +1,9 @@
 import { defineConfig } from "vitepress";
 import { sidebar } from "./sidebar";
 
+// Pages with noindex in frontmatter, collected during build to exclude from sitemap
+const noindexPages = new Set<string>();
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     base: "/help/", // Serve under /help path
@@ -23,6 +26,10 @@ export default defineConfig({
                     url: item.url.replace(/\/$/, ""),
                 }))
                 .filter((item) => {
+                    const path = item.url.replace(/\/$/, "");
+                    if (noindexPages.has(path)) {
+                        return false;
+                    }
                     if (seen.has(item.url)) {
                         return false;
                     }
@@ -32,6 +39,25 @@ export default defineConfig({
         },
     },
     transformPageData(pageData) {
+        // Track noindex pages for sitemap exclusion
+        const head = pageData.frontmatter.head;
+        if (Array.isArray(head)) {
+            for (const tag of head) {
+                if (
+                    Array.isArray(tag) &&
+                    tag[0] === "meta" &&
+                    tag[1]?.name === "robots" &&
+                    tag[1]?.content?.includes("noindex")
+                ) {
+                    const path = pageData.relativePath
+                        .replace(/index\.md$/, "")
+                        .replace(/\.md$/, "");
+                    noindexPages.add(path);
+                    break;
+                }
+            }
+        }
+
         // Add canonical URL to all pages
         const canonicalUrl = `https://ente.io/help/${pageData.relativePath}`
             .replace(/index\.md$/, "")
