@@ -51,12 +51,32 @@ class SemanticSearchService {
   String? _latestPendingQuery;
 
   Future<void> init() async {
+    if (!hasGrantedMLConsent) return;
+
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: true);
+  }
+
+  Future<void> prepareForInteractiveSearch() async {
+    if (!hasGrantedMLConsent) return;
+
+    _initializeIfNeeded();
+    _scheduleWarmup(delayTextModelLoad: false);
+  }
+
+  bool isMagicSearchEnabledAndReady() {
+    return hasGrantedMLConsent && _textModelIsLoaded;
+  }
+
+  Future<void> _prepareVectorDbForSearch() {
+    _prepareVectorDbFuture ??= _prepareVectorDbForSearchInternal();
+    return _prepareVectorDbFuture!;
+  }
+
+  void _initializeIfNeeded() {
     if (_hasInitialized) {
-      _logger.info("Initialized already");
       return;
     }
-    final hasGivenConsent = hasGrantedMLConsent;
-    if (!hasGivenConsent) return;
 
     _logger.info("init called");
     _hasInitialized = true;
@@ -67,21 +87,18 @@ class SemanticSearchService {
         _imageEmbeddingsAreCached = false;
       }
     });
+  }
 
+  void _scheduleWarmup({required bool delayTextModelLoad}) {
     if (flagService.usearchForSearch) {
       unawaited(_prepareVectorDbForSearch());
     }
 
-    unawaited(_loadTextModel(delay: true));
-  }
+    if (_textModelIsLoaded) {
+      return;
+    }
 
-  bool isMagicSearchEnabledAndReady() {
-    return hasGrantedMLConsent && _textModelIsLoaded;
-  }
-
-  Future<void> _prepareVectorDbForSearch() {
-    _prepareVectorDbFuture ??= _prepareVectorDbForSearchInternal();
-    return _prepareVectorDbFuture!;
+    unawaited(_loadTextModel(delay: delayTextModelLoad));
   }
 
   Future<void> _prepareVectorDbForSearchInternal() async {

@@ -100,6 +100,8 @@ class FlagService {
 
   bool get useRustForML => internalUser;
 
+  bool get enableMLInBackground => internalUser;
+
   bool get useRustForFaceThumbnails => internalUser;
 
   bool get petEnabled => internalUser;
