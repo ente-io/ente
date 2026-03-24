@@ -20,9 +20,10 @@ enum FamilyMemberStatus {
   final String serverValue;
 
   static FamilyMemberStatus fromServerValue(String? value) {
-    return FamilyMemberStatus.values.firstWhere(
-      (status) => status.serverValue == value,
-    );
+    return FamilyMemberStatus.values.firstWhereOrNull(
+          (status) => status.serverValue == value,
+        ) ??
+        FamilyMemberStatus.accepted;
   }
 }
 

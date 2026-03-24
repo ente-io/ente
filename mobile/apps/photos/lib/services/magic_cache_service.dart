@@ -230,6 +230,10 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateKey) ?? 0;
   }
 
+  int get lastMagicCacheUpdateTimeInMicroseconds {
+    return lastMagicCacheUpdateTime * 1000;
+  }
+
   bool get enableDiscover => hasGrantedMLConsent;
 
   void queueUpdate(String reason) {
@@ -297,6 +301,21 @@ class MagicCacheService {
     } finally {
       _isUpdateInProgress = false;
       Bus.instance.fire(MagicCacheUpdatedEvent());
+    }
+  }
+
+  Future<void> refreshCache() async {
+    if (!enableDiscover) {
+      return;
+    }
+    try {
+      final prompts = await _readPromptFromDiskOrNetwork();
+      final magicCaches = await _readResultFromDisk();
+      _promptFuture = Future.value(prompts);
+      _magicCacheFuture = Future.value(magicCaches);
+      Bus.instance.fire(MagicCacheUpdatedEvent());
+    } catch (e, s) {
+      _logger.info("Error refreshing magic cache", e, s);
     }
   }
 
