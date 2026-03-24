@@ -19,8 +19,7 @@ import (
 )
 
 const (
-	StorageWarningMailLock       = "family_storage_warning_mail_lock"
-	FamilyStorageWarningMailLock = StorageWarningMailLock
+	StorageWarningMailLock = "storage_warning_mail_lock"
 
 	storageWarningBaseTemplate = "base.html"
 	storageWarningFromName     = "Ente"
