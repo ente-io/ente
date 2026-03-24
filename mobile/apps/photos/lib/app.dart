@@ -200,14 +200,14 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       AppLifecycleService.instance
           .onAppInForeground(stateChangeReason + ': sync now');
       if (!wasForeground) {
-        unawaited(UploadBackgroundCoordinator.instance.onAppForeground());
+        unawaited(onUploadAppForeground());
       }
       unawaited(_reloadCachesUpdatedInBackground(lastAppOpenTime));
       SyncService.instance.sync();
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
       if (wasForeground) {
-        unawaited(UploadBackgroundCoordinator.instance.onAppBackground());
+        unawaited(onUploadAppBackground());
       }
     }
   }
