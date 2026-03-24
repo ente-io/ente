@@ -1,7 +1,11 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Location Tags
+description: Create and manage location tags in Ente Photos
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
 # This Page Has Moved

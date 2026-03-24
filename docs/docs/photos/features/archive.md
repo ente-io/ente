@@ -1,7 +1,11 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Archive
+description: Archive photos to declutter your timeline in Ente Photos
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
 # This Page Has Moved

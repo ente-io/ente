@@ -1,7 +1,11 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Large Uploads
+description: Troubleshoot large file and multi-TB library uploads in Ente Photos
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
 # This Page Has Moved

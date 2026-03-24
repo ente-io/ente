@@ -1,7 +1,11 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Desktop FAQ
+description: FAQ about the Ente Photos desktop app
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
 # This Page Has Moved

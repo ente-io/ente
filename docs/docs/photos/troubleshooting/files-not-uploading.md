@@ -1,7 +1,11 @@
 ---
-title: This Page Has Moved
-description: This content has been reorganized
+title: Files Not Uploading
+description: Troubleshoot photo and video upload issues in Ente Photos
 search: false
+head:
+  - - meta
+    - name: robots
+      content: noindex
 ---
 
 # This Page Has Moved
