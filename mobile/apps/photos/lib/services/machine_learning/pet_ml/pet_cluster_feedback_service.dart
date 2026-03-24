@@ -80,6 +80,9 @@ class PetClusterFeedbackService {
     // Record feedback first so that if the app crashes between the two writes,
     // re-clustering still respects the user's correction.
     await _db.bulkInsertNotPetFeedback(feedback);
+    // Clear any prior "not this pet" rejection for the target cluster,
+    // otherwise re-clustering would eject the face again.
+    await _db.clearNotPetFeedback(targetClusterId, petFaceIds);
     await _db.forceUpdatePetFaceClusterIds(updates);
 
     // Recompute summaries for both clusters so centroids/counts stay current.

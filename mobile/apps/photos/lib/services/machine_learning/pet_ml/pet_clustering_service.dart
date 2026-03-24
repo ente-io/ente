@@ -699,6 +699,22 @@ extension PetClusteringDB on MLDataDB {
     await db.executeBatch(sql, params);
   }
 
+  /// Remove "not this pet" feedback for faces being moved to a cluster.
+  /// This clears prior rejections so re-clustering won't eject them.
+  Future<void> clearNotPetFeedback(
+    String clusterId,
+    List<String> petFaceIds,
+  ) async {
+    if (petFaceIds.isEmpty) return;
+    final db = await asyncDB;
+    final placeholders = List.filled(petFaceIds.length, '?').join(',');
+    await db.execute(
+      'DELETE FROM $notPetFeedbackTable '
+      'WHERE $clusterIDColumn = ? AND $petFaceIDColumn IN ($placeholders)',
+      [clusterId, ...petFaceIds],
+    );
+  }
+
   /// Get all rejected petFaceIds for a cluster.
   Future<Set<String>> getRejectedPetFaceIds(String clusterId) async {
     final db = await asyncDB;
