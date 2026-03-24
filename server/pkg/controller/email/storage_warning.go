@@ -172,6 +172,10 @@ func (c *EmailNotificationController) SendStorageWarningMails() {
 		log.Error("Skipping storage warning mails: controller dependencies are not fully configured")
 		return
 	}
+	if c.UserRepo.IsLikelySelfHosted() {
+		return
+	}
+	log.Info("Running storage warning mails for cloud instance")
 
 	lockStatus := c.LockController.TryLock(StorageWarningMailLock, time.MicrosecondsAfterHours(24))
 	if !lockStatus {
