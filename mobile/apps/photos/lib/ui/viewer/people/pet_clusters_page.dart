@@ -29,66 +29,16 @@ class PetClustersPage extends StatefulWidget {
 
 class _PetClustersPageState extends State<PetClustersPage> {
   final _logger = Logger("PetClustersPage");
+  List<(String clusterId, int fileCount, int species)>? _clusters;
+  bool _loading = true;
 
   @override
-  Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.petName),
-      ),
-      body: FutureBuilder<List<(String clusterId, int fileCount, int species)>>(
-        future: _loadClusters(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final clusters = snapshot.data ?? [];
-          if (clusters.isEmpty) {
-            return Center(
-              child: Text(
-                "No clusters",
-                style: textTheme.body.copyWith(color: colorScheme.textMuted),
-              ),
-            );
-          }
-          return ListView.builder(
-            itemCount: clusters.length,
-            itemBuilder: (context, index) {
-              final (clusterId, fileCount, _) = clusters[index];
-              final isFirst = index == 0;
-              return ListTile(
-                leading: SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: FaceThumbnailSquircleClip(
-                    child: PetFaceWidget(petClusterId: clusterId),
-                  ),
-                ),
-                title: Text(
-                  context.l10n.photosCount(count: fileCount),
-                  style: textTheme.body,
-                ),
-                trailing: !isFirst
-                    ? GestureDetector(
-                        onTap: () => _removeCluster(clusterId),
-                        child: Icon(
-                          Icons.remove_circle_outline,
-                          color: colorScheme.strokeMuted,
-                        ),
-                      )
-                    : null,
-              );
-            },
-          );
-        },
-      ),
-    );
+  void initState() {
+    super.initState();
+    _loadClusters();
   }
 
-  Future<List<(String, int, int)>> _loadClusters() async {
+  Future<void> _loadClusters() async {
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     final clusterToPetId = await mlDataDB.getClusterToPetId();
@@ -109,7 +59,66 @@ class _PetClustersPageState extends State<PetClustersPage> {
     }
     // Largest cluster first (primary)
     result.sort((a, b) => b.$2.compareTo(a.$2));
-    return result;
+    if (mounted) {
+      setState(() {
+        _clusters = result;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.petName),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _clusters == null || _clusters!.isEmpty
+              ? Center(
+                  child: Text(
+                    "No clusters",
+                    style:
+                        textTheme.body.copyWith(color: colorScheme.textMuted),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _clusters!.length,
+                  itemBuilder: (context, index) {
+                    final (clusterId, fileCount, _) = _clusters![index];
+                    // Only the primary (first/largest) cluster can't be removed
+                    final canRemove = _clusters!.length > 1 && index != 0;
+                    return ListTile(
+                      leading: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: FaceThumbnailSquircleClip(
+                          child: PetFaceWidget(petClusterId: clusterId),
+                        ),
+                      ),
+                      title: Text(
+                        context.l10n.photosCount(count: fileCount),
+                        style: textTheme.body,
+                      ),
+                      trailing: canRemove
+                          ? GestureDetector(
+                              onTap: () => _removeCluster(clusterId),
+                              child: Text(
+                                context.l10n.remove,
+                                style: textTheme.small.copyWith(
+                                  color: colorScheme.warning700,
+                                ),
+                              ),
+                            )
+                          : null,
+                    );
+                  },
+                ),
+    );
   }
 
   Future<void> _removeCluster(String clusterId) async {
@@ -117,7 +126,7 @@ class _PetClustersPageState extends State<PetClustersPage> {
       await PetClusterFeedbackService.instance.unmergePetCluster(clusterId);
       _logger.info("Unmerged cluster $clusterId from pet ${widget.petId}");
       Bus.instance.fire(PetsChangedEvent(source: "unmergePetCluster"));
-      if (mounted) setState(() {});
+      await _loadClusters();
     } catch (e) {
       _logger.severe("Failed to unmerge cluster", e);
     }
