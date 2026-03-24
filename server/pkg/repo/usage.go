@@ -66,36 +66,20 @@ func (repo *UsageRepository) GetCombinedUsage(ctx context.Context, userIDs []int
 }
 
 func (repo *UsageRepository) GetStorageWarningCandidates(ctx context.Context, usageThreshold int64) ([]StorageWarningCandidate, error) {
+	// Intentionally use per-member usage when selecting family candidates. The
+	// mailer evaluates aggregate family usage later, but candidate selection is
+	// deliberately narrower so families are only pulled into the workflow when a
+	// specific member crosses the threshold.
 	rows, err := repo.DB.QueryContext(ctx, `
-		SELECT recipient_id, is_family_plan
-		FROM (
-			SELECT
-				admin.user_id AS recipient_id,
-				TRUE AS is_family_plan
-			FROM users admin
-			LEFT JOIN users members
-				ON members.family_admin_id = admin.user_id
-			LEFT JOIN usage us
-				ON us.user_id = members.user_id
-			WHERE
-				admin.family_admin_id = admin.user_id
-				AND admin.encrypted_email IS NOT NULL
-			GROUP BY admin.user_id
-			HAVING COALESCE(SUM(us.storage_consumed), 0) > $1
-
-			UNION ALL
-
-			SELECT
-				u.user_id AS recipient_id,
-				FALSE AS is_family_plan
-			FROM users u
-			INNER JOIN usage us
-				ON us.user_id = u.user_id
-			WHERE
-				u.family_admin_id IS NULL
-				AND u.encrypted_email IS NOT NULL
-				AND us.storage_consumed > $1
-		) candidates
+		SELECT
+			COALESCE(u.family_admin_id, u.user_id) AS recipient_id,
+			u.family_admin_id IS NOT NULL AS is_family_plan
+		FROM users u
+		INNER JOIN usage us
+			ON us.user_id = u.user_id
+		WHERE
+			us.storage_consumed > $1
+			AND u.encrypted_email IS NOT NULL
 		ORDER BY recipient_id
 	`, usageThreshold)
 	if err != nil {
