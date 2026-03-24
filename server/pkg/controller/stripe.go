@@ -743,6 +743,10 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 
 func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) stripe.PaymentMethodType {
 	if stripeSubscription.DefaultPaymentMethod == nil {
+		if stripeSubscription.DefaultSource != nil &&
+			stripeSubscription.DefaultSource.Type == stripe.PaymentSourceTypeCard {
+			return stripe.PaymentMethodTypeCard
+		}
 		if stripeSubscription.Customer != nil {
 			if stripeSubscription.Customer.InvoiceSettings != nil &&
 				stripeSubscription.Customer.InvoiceSettings.DefaultPaymentMethod != nil {
@@ -752,10 +756,6 @@ func getSubscriptionPaymentMethodType(stripeSubscription stripe.Subscription) st
 				stripeSubscription.Customer.DefaultSource.Type == stripe.PaymentSourceTypeCard {
 				return stripe.PaymentMethodTypeCard
 			}
-		}
-		if stripeSubscription.DefaultSource != nil &&
-			stripeSubscription.DefaultSource.Type == stripe.PaymentSourceTypeCard {
-			return stripe.PaymentMethodTypeCard
 		}
 		log.Info("No default payment method found on subscription or customer")
 		return ""
@@ -773,6 +773,10 @@ func getPaymentIntentErrorPaymentMethodType(paymentIntent stripe.PaymentIntent) 
 	}
 	if paymentIntent.LastPaymentError.PaymentMethod != nil {
 		return paymentIntent.LastPaymentError.PaymentMethod.Type
+	}
+	if paymentIntent.LastPaymentError.Source != nil &&
+		paymentIntent.LastPaymentError.Source.Type == stripe.PaymentSourceTypeCard {
+		return stripe.PaymentMethodTypeCard
 	}
 	return paymentIntent.LastPaymentError.PaymentMethodType
 }
