@@ -303,10 +303,15 @@ class _PetClusterPageState extends State<PetClusterPage> {
 
     if (targetClusterId == null || !mounted) return;
 
-    await PetClusterFeedbackService.instance.mergePetClusters(
+    final merged = await PetClusterFeedbackService.instance.mergePetClusters(
       widget.clusterId,
       targetClusterId,
     );
+    if (!merged) {
+      // Neither cluster has a named pet — prompt user to name first.
+      if (mounted) _editName();
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 }

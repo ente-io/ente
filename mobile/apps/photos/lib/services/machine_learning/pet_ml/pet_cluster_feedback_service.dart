@@ -96,30 +96,29 @@ class PetClusterFeedbackService {
 
   /// Merge two pet clusters by mapping them to the same [PetEntity].
   ///
+  /// At least one cluster must already have a named pet. If neither does,
+  /// returns false (caller should prompt the user to name a pet first).
   /// Both clusters keep their faces and summaries intact — only the
   /// `pet_cluster_pet` mapping is updated so both point to the same pet.
   /// This is reversible: removing the mapping "unmerges" the cluster.
-  Future<void> mergePetClusters(
+  Future<bool> mergePetClusters(
     String sourceId,
     String targetId,
   ) async {
-    // Find or create the PetEntity for the merged cluster.
-    // Prefer target's mapping, then source's, then create a new one.
     final mappings = await _db.getClusterToPetId();
-    String petId;
+    String? petId;
     if (mappings.containsKey(targetId)) {
       petId = mappings[targetId]!;
     } else if (mappings.containsKey(sourceId)) {
       petId = mappings[sourceId]!;
       await _db.setClusterPetId(targetId, petId);
-    } else {
-      final summaries = await _db.getAllPetClusterSummary();
-      final species = summaries[targetId]?.$2 ?? -1;
-      final pet = await PetService.instance.addPet(
-        PetData(name: "", species: species),
+    }
+
+    if (petId == null) {
+      _logger.info(
+        "Cannot merge: neither $sourceId nor $targetId has a named pet",
       );
-      petId = pet.remoteID;
-      await _db.setClusterPetId(targetId, petId);
+      return false;
     }
 
     // Map the source cluster to the same pet.
@@ -127,6 +126,7 @@ class PetClusterFeedbackService {
 
     _logger.info("Merged pet cluster $sourceId into $targetId (pet $petId)");
     Bus.instance.fire(PetsChangedEvent(source: "mergePetClusters"));
+    return true;
   }
 
   /// Remove a cluster from a pet (unmerge). The cluster's faces and summaries
