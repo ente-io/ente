@@ -72,7 +72,9 @@ class _PetClusterPageState extends State<PetClusterPage> {
       }
     });
     _petsChanged = Bus.instance.on<PetsChangedEvent>().listen((_) {
-      _reloadClusterFiles();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _reloadClusterFiles();
+      });
     });
   }
 
