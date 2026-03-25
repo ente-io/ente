@@ -1,9 +1,91 @@
 use ente_media_inspector::vector_db;
 use flutter_rust_bridge::frb;
+use simsimd::SpatialSimilarity;
 
 type SearchMatch = (Vec<u64>, Vec<f32>);
 type BulkSearchMatch = (Vec<Vec<u64>>, Vec<Vec<f32>>);
 type BulkSearchByKeyMatch = (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>);
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactRequest {
+    pub image_file_ids: Vec<i64>,
+    pub image_embeddings: Vec<Vec<f32>>,
+    pub query_embeddings: Vec<Vec<f32>>,
+    pub minimum_similarities: Vec<f32>,
+}
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactMatch {
+    pub file_id: i64,
+    pub score: f64,
+}
+
+#[derive(Clone, Debug)]
+pub struct SemanticSearchExactResponse {
+    pub matches_per_query: Vec<Vec<SemanticSearchExactMatch>>,
+}
+
+pub fn semantic_search_exact(
+    req: SemanticSearchExactRequest,
+) -> Result<SemanticSearchExactResponse, String> {
+    if req.image_file_ids.len() != req.image_embeddings.len() {
+        return Err(format!(
+            "image_file_ids length {} does not match image_embeddings length {}",
+            req.image_file_ids.len(),
+            req.image_embeddings.len()
+        ));
+    }
+
+    if req.query_embeddings.len() != req.minimum_similarities.len() {
+        return Err(format!(
+            "query_embeddings length {} does not match minimum_similarities length {}",
+            req.query_embeddings.len(),
+            req.minimum_similarities.len()
+        ));
+    }
+
+    let matches_per_query = req
+        .query_embeddings
+        .iter()
+        .zip(req.minimum_similarities.iter())
+        .map(|(query_embedding, minimum_similarity)| {
+            let minimum_similarity = f64::from(*minimum_similarity);
+            let mut query_matches = Vec::new();
+
+            for (file_id, image_embedding) in
+                req.image_file_ids.iter().zip(req.image_embeddings.iter())
+            {
+                if image_embedding.len() != query_embedding.len() {
+                    return Err(format!(
+                        "embedding dimension mismatch for file_id {file_id}: image={} query={}",
+                        image_embedding.len(),
+                        query_embedding.len()
+                    ));
+                }
+
+                let Some(score) = <f32 as SpatialSimilarity>::dot(image_embedding, query_embedding)
+                else {
+                    return Err(format!(
+                        "failed to compute dot product for file_id {file_id} with dimension {}",
+                        image_embedding.len()
+                    ));
+                };
+
+                if score >= minimum_similarity {
+                    query_matches.push(SemanticSearchExactMatch {
+                        file_id: *file_id,
+                        score,
+                    });
+                }
+            }
+
+            query_matches.sort_by(|left, right| right.score.total_cmp(&left.score));
+            Ok(query_matches)
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+
+    Ok(SemanticSearchExactResponse { matches_per_query })
+}
 
 #[frb(opaque)]
 pub struct VectorDB {
@@ -125,5 +207,70 @@ impl VectorDB {
 
     pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize, usize, usize) {
         self.inner.get_index_stats()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SemanticSearchExactRequest, semantic_search_exact};
+
+    #[test]
+    fn semantic_search_exact_filters_and_sorts_matches() {
+        let response = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![101, 102, 103],
+            image_embeddings: vec![
+                vec![1.0, 0.0, 0.0],
+                vec![0.8, 0.6, 0.0],
+                vec![0.0, 1.0, 0.0],
+            ],
+            query_embeddings: vec![vec![1.0, 0.0, 0.0]],
+            minimum_similarities: vec![0.7],
+        })
+        .expect("semantic search exact should succeed");
+
+        let matches = &response.matches_per_query[0];
+        assert_eq!(matches.len(), 2);
+        assert_eq!(matches[0].file_id, 101);
+        assert_eq!(matches[1].file_id, 102);
+        assert!(matches[0].score > matches[1].score);
+    }
+
+    #[test]
+    fn semantic_search_exact_supports_multiple_queries() {
+        let response = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![201, 202, 203],
+            image_embeddings: vec![vec![1.0, 0.0], vec![0.0, 1.0], vec![0.70710677, 0.70710677]],
+            query_embeddings: vec![vec![1.0, 0.0], vec![0.0, 1.0]],
+            minimum_similarities: vec![0.5, 0.5],
+        })
+        .expect("semantic search exact should succeed");
+
+        assert_eq!(
+            response.matches_per_query[0]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![201, 203]
+        );
+        assert_eq!(
+            response.matches_per_query[1]
+                .iter()
+                .map(|entry| entry.file_id)
+                .collect::<Vec<_>>(),
+            vec![202, 203]
+        );
+    }
+
+    #[test]
+    fn semantic_search_exact_rejects_dimension_mismatch() {
+        let err = semantic_search_exact(SemanticSearchExactRequest {
+            image_file_ids: vec![301],
+            image_embeddings: vec![vec![1.0, 0.0]],
+            query_embeddings: vec![vec![1.0, 0.0, 0.0]],
+            minimum_similarities: vec![0.1],
+        })
+        .expect_err("semantic search exact should fail on dimension mismatch");
+
+        assert!(err.contains("embedding dimension mismatch"));
     }
 }
