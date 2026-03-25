@@ -244,6 +244,13 @@ final class InferenceRsProvider {
         }
     }
 
+    func cancelStaleDownloads(target: InferenceModelTarget) {
+        let targets = expectedTargets(for: target).map(downloadTarget(for:))
+        Task {
+            await downloadManager.cancelDownloads(except: targets)
+        }
+    }
+
     func isModelDownloaded(target: InferenceModelTarget) -> Bool {
         let modelPath = modelPathFor(target: target)
         if !FileManager.default.fileExists(atPath: modelPath.path) {
@@ -363,7 +370,7 @@ final class InferenceRsProvider {
         if size <= 0 {
             return true
         }
-        return !looksLikeGguf(file: url)
+        return !url.looksLikeGgufFile
     }
 
     private func recoverFromCachedModelLoadFailure(modelPath: URL, mmprojPath: URL?) -> Bool {
@@ -377,15 +384,6 @@ final class InferenceRsProvider {
             removedAny = true
         }
         return removedAny
-    }
-
-    private func looksLikeGguf(file: URL) -> Bool {
-        guard let handle = try? FileHandle(forReadingFrom: file) else { return false }
-        let data = handle.readData(ofLength: 4)
-        try? handle.close()
-        guard data.count == 4 else { return false }
-        let header = String(decoding: data, as: UTF8.self)
-        return header == "GGUF"
     }
 
     private func modelPathFor(target: InferenceModelTarget) -> URL {
@@ -517,6 +515,10 @@ final class InferenceRsProvider {
     func resetContext() {}
 
     func cancelDownload() {}
+
+    func cancelStaleDownloads(target: InferenceModelTarget) {
+        _ = target
+    }
 
     func isModelDownloaded(target: InferenceModelTarget) -> Bool {
         _ = target

@@ -141,11 +141,8 @@ class AppStore(
         developerSettings: DeveloperSettingsState,
         modelSettings: ModelSettingsState
     ) {
-        _state.value = _state.value.copy(
-            developerSettings = developerSettings,
-            modelSettings = modelSettings
-        )
-        modelSettingsActions.refreshModelDownloadInfo()
+        _state.value = _state.value.copy(developerSettings = developerSettings)
+        modelSettingsActions.updateModelSettings(modelSettings)
     }
 
     fun signIn(email: String) = authActions.signIn(email)

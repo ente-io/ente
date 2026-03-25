@@ -41,7 +41,7 @@ final class ModelDownloadManager: NSObject {
         configuration.sessionSendsLaunchEvents = true
         #endif
         configuration.isDiscretionary = false
-       configuration.waitsForConnectivity = true
+        configuration.waitsForConnectivity = true
         return URLSession(configuration: configuration, delegate: self, delegateQueue: delegateQueue)
     }()
 
@@ -154,6 +154,20 @@ final class ModelDownloadManager: NSObject {
         let tasks = await allTasks()
         tasks.forEach { $0.cancel() }
         clearAllRecords()
+    }
+
+    func cancelDownloads(except targets: [ModelDownloadTarget]) async {
+        let allowedIds = Set(targets.map { recordId(for: $0.destination) })
+        let tasks = await allTasks()
+        tasks.forEach { task in
+            guard let taskId = task.taskDescription, !allowedIds.contains(taskId) else { return }
+            task.cancel()
+        }
+        mutateRecords { records in
+            records.keys
+                .filter { !allowedIds.contains($0) }
+                .forEach { records.removeValue(forKey: $0) }
+        }
     }
 
     private func allTasks() async -> [URLSessionTask] {
@@ -323,7 +337,7 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
     }
 }
 
-private extension URL {
+extension URL {
     var looksLikeGgufFile: Bool {
         guard let handle = try? FileHandle(forReadingFrom: self) else { return false }
         let data = handle.readData(ofLength: 4)

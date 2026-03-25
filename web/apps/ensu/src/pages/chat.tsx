@@ -19,7 +19,7 @@ import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
-import { getKV } from "ente-base/kv";
+import { getKV, removeKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
@@ -1291,6 +1291,7 @@ const Page: React.FC = () => {
                 setMmprojUrl(canMmproj ? (parsed.mmprojUrl ?? "") : "");
                 setContextLength(clampedContextLength);
                 setMaxTokens(parsed.maxTokens ?? "");
+                void removeKV(MODEL_SETTINGS_STORAGE_KEY);
             });
             return;
         }
@@ -3602,6 +3603,7 @@ const Page: React.FC = () => {
     const handleUseDefaultModel = useCallback(() => {
         if (typeof window !== "undefined") {
             window.localStorage.removeItem(MODEL_SETTINGS_STORAGE_KEY);
+            void removeKV(MODEL_SETTINGS_STORAGE_KEY);
         }
         setUseCustomModel(false);
         setModelUrl("");

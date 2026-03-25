@@ -600,13 +600,29 @@ private fun AssistantMessageBubble(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
+        val actions = buildList {
+            if (!message.isSynthetic) {
+                add(MessageAction("Copy", HugeIcons.Copy01Icon) {
+                    haptic.perform(HapticFeedbackType.TextHandleMove)
+                    clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
+                })
+            }
+            if (!message.isSynthetic || isLastMessage) {
+                add(MessageAction("Retry", HugeIcons.RepeatIcon) {
+                    haptic.perform(HapticFeedbackType.TextHandleMove)
+                    onRetry()
+                })
+            }
+        }
+
         Box {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .pointerInput(Unit) {
+                    .pointerInput(message.id, message.isSynthetic, isLastMessage) {
                         detectTapGestures(
                             onLongPress = { offset ->
+                                if (actions.isEmpty()) return@detectTapGestures
                                 haptic.perform(HapticFeedbackType.LongPress)
                                 pressOffset = offset
                                 showMenu = true
@@ -634,20 +650,7 @@ private fun AssistantMessageBubble(
                 showMenu = showMenu,
                 pressOffset = pressOffset,
                 onDismiss = { showMenu = false },
-                actions = buildList {
-                    if (!message.isSynthetic) {
-                        add(MessageAction("Copy", HugeIcons.Copy01Icon) {
-                            haptic.perform(HapticFeedbackType.TextHandleMove)
-                            clipboard.setText(AnnotatedString(stripHiddenMessageParts(message.text)))
-                        })
-                    }
-                    if (!message.isSynthetic || isLastMessage) {
-                        add(MessageAction("Retry", HugeIcons.RepeatIcon) {
-                            haptic.perform(HapticFeedbackType.TextHandleMove)
-                            onRetry()
-                        })
-                    }
-                }
+                actions = actions
             )
         }
 
@@ -693,7 +696,7 @@ private fun MessageActionsMenu(
     onDismiss: () -> Unit,
     actions: List<MessageAction>
 ) {
-    if (!showMenu) return
+    if (!showMenu || actions.isEmpty()) return
     val menuSurface = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color.White
     val offset = IntOffset(pressOffset.x.roundToInt(), pressOffset.y.roundToInt())
 

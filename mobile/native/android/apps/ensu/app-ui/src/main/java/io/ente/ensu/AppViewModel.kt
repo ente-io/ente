@@ -135,7 +135,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private fun resolveModelDir(application: Application): File {
         val root = application.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             ?: application.getExternalFilesDir(null)
-            ?: application.externalCacheDir
             ?: application.filesDir
         return File(root, "llm")
     }

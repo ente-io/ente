@@ -1193,6 +1193,7 @@ final class ChatViewModel: ObservableObject {
 
     func refreshModelDownloadInfo() {
         let target = modelSettings.currentTarget()
+        provider.cancelStaleDownloads(target: target)
         isModelDownloaded = provider.isModelDownloaded(target: target)
         if isModelDownloaded {
             downloadProgressMonitorTask?.cancel()
@@ -1295,6 +1296,7 @@ final class ChatViewModel: ObservableObject {
         }
 
         let target = modelSettings.currentTarget()
+        provider.cancelStaleDownloads(target: target)
         let isDownloaded = provider.isModelDownloaded(target: target)
         if isDownloaded {
             isModelDownloaded = true

@@ -375,7 +375,9 @@ class InferenceRsProvider(
             return
         }
         ensureDownloadsEnqueued(target)
+        val maxPolls = 7_200
         var emptyPollCount = 0
+        var pollCount = 0
         while (true) {
             val progress = currentDownloadProgress(target)
             if (progress == null) {
@@ -393,6 +395,10 @@ class InferenceRsProvider(
                     throw IOException(progress.status)
                 }
                 onProgress(progress)
+            }
+            pollCount += 1
+            if (pollCount >= maxPolls) {
+                throw IOException("Download timed out")
             }
             delay(500)
         }
