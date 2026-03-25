@@ -79,13 +79,9 @@ enum IsolateOperation {
 class _CachedImageEmbeddings {
   _CachedImageEmbeddings({
     required this.embeddingVectors,
-    required this.imageFileIds,
-    required this.imageEmbeddings,
   });
 
   final List<EmbeddingVector> embeddingVectors;
-  final Int64List imageFileIds;
-  final List<Float32List> imageEmbeddings;
   rust_usearch.SemanticSearchExactCache? rustExactCache;
 }
 
@@ -340,16 +336,6 @@ Future<dynamic> isolateFunction(
       final cacheRustExact = args['cacheRustExact'] as bool? ?? false;
       final cachedEmbeddings = _CachedImageEmbeddings(
         embeddingVectors: embeddings,
-        imageFileIds: Int64List.fromList(
-          embeddings.map((embedding) => embedding.fileID).toList(),
-        ),
-        imageEmbeddings: embeddings
-            .map(
-              (embedding) => Float32List.fromList(
-                embedding.vector.toList(),
-              ),
-            )
-            .toList(growable: false),
       );
       if (cacheRustExact) {
         cachedEmbeddings.rustExactCache =
@@ -412,9 +398,21 @@ Future<rust_usearch.SemanticSearchExactCache> _createRustExactCache(
   _CachedImageEmbeddings cachedEmbeddings,
 ) async {
   await _ensureRustLoaded();
+  final imageFileIds = Int64List.fromList(
+    cachedEmbeddings.embeddingVectors
+        .map((embedding) => embedding.fileID)
+        .toList(growable: false),
+  );
+  final imageEmbeddings = cachedEmbeddings.embeddingVectors
+      .map(
+        (embedding) => Float32List.fromList(
+          embedding.vector.toList(),
+        ),
+      )
+      .toList(growable: false);
   return rust_usearch.SemanticSearchExactCache(
-    imageFileIds: cachedEmbeddings.imageFileIds,
-    imageEmbeddings: cachedEmbeddings.imageEmbeddings,
+    imageFileIds: imageFileIds,
+    imageEmbeddings: imageEmbeddings,
   );
 }
 
