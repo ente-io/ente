@@ -39,6 +39,7 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/memories/memories_computation_context.dart";
 import "package:photos/services/search_service.dart";
 
 class MemoriesResult {
@@ -222,30 +223,31 @@ class SmartMemoriesService {
       _logger.info('get locale and S $t');
 
       _logger.info('all data fetched $t at ${DateTime.now()}, to computer');
+      final computationContext = MemoriesComputationContext(
+        allFiles: allFiles,
+        allFileIdsToFile: allFileIdsToFile,
+        collectionIDsToExclude: collectionIDsToExclude,
+        isOfflineMode: isOfflineMode,
+        now: now,
+        oldCache: oldCache,
+        debugSurfaceAll: debugSurfaceAll,
+        canUseUnnamedFallback: canUseUnnamedFallback,
+        seenTimes: seenTimes,
+        persons: persons,
+        currentUserEmail: currentUserEmail,
+        cities: cities,
+        fileIdToFaces: fileIdToFaces,
+        clusterIdToFaceCount: clusterIdToFaceCount,
+        clusterIdToFaceIDs: clusterIdToFaceIDs,
+        assignedClusterIDs: assignedClusterIDs,
+        allImageEmbeddings: allImageEmbeddings,
+        clipPositiveTextVector: clipPositiveTextVector,
+        clipPeopleActivityVectors: clipPeopleActivityVectors,
+        clipMemoryTypeVectors: clipMemoryTypeVectors,
+      );
       final memoriesResult = await Computer.shared().compute(
         _allMemoriesCalculations,
-        param: <String, dynamic>{
-          "allFiles": allFiles,
-          "allFileIdsToFile": allFileIdsToFile,
-          "collectionIDsToExclude": collectionIDsToExclude,
-          "isOfflineMode": isOfflineMode,
-          "now": now,
-          "oldCache": oldCache,
-          "debugSurfaceAll": debugSurfaceAll,
-          "canUseUnnamedFallback": canUseUnnamedFallback,
-          "seenTimes": seenTimes,
-          "persons": persons,
-          "currentUserEmail": currentUserEmail,
-          "cities": cities,
-          "fileIdToFaces": fileIdToFaces,
-          "clusterIdToFaceCount": clusterIdToFaceCount,
-          "clusterIdToFaceIDs": clusterIdToFaceIDs,
-          "assignedClusterIDs": assignedClusterIDs,
-          "allImageEmbeddings": allImageEmbeddings,
-          "clipPositiveTextVector": clipPositiveTextVector,
-          "clipPeopleActivityVectors": clipPeopleActivityVectors,
-          "clipMemoryTypeVectors": clipMemoryTypeVectors,
-        },
+        param: computationContext.toIsolateArgs(),
       ) as MemoriesResult;
       _logger.info(
         '${memoriesResult.memories.length} memories computed in computer $t',
@@ -758,39 +760,42 @@ class SmartMemoriesService {
   ) async {
     try {
       final TimeLogger t = TimeLogger(context: "_allMemoriesCalculations");
-      // Arguments: direct data
-      final Set<EnteFile> allFiles = args["allFiles"];
-      final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
-      final Set<int> collectionIDsToExclude = args["collectionIDsToExclude"];
-      final bool isOfflineMode = args["isOfflineMode"] ?? false;
-      final DateTime now = args["now"];
-      final MemoriesCache oldCache = args["oldCache"];
-      final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
-      final bool canUseUnnamedFallback = args["canUseUnnamedFallback"] ?? false;
-      final Map<int, int> seenTimes = args["seenTimes"];
-      final List<PersonEntity> persons = (args["persons"] as List<PersonEntity>)
+      final computationContext = MemoriesComputationContext.fromIsolateArgs(
+        args,
+      );
+      final Set<EnteFile> allFiles = computationContext.allFiles;
+      final Map<int, EnteFile> allFileIdsToFile =
+          computationContext.allFileIdsToFile;
+      final Set<int> collectionIDsToExclude =
+          computationContext.collectionIDsToExclude;
+      final bool isOfflineMode = computationContext.isOfflineMode;
+      final DateTime now = computationContext.now;
+      final MemoriesCache oldCache = computationContext.oldCache;
+      final bool debugSurfaceAll = computationContext.debugSurfaceAll;
+      final bool canUseUnnamedFallback =
+          computationContext.canUseUnnamedFallback;
+      final Map<int, int> seenTimes = computationContext.seenTimes;
+      final List<PersonEntity> persons = computationContext.persons
           .where((person) => !person.data.hideFromMemories)
           .toList();
-      final String? currentUserEmail = args["currentUserEmail"];
-      final List<City> cities = args["cities"];
+      final String? currentUserEmail = computationContext.currentUserEmail;
+      final List<City> cities = computationContext.cities;
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
-          args["fileIdToFaces"];
-      final Map<String, int> clusterIdToFaceCount = Map<String, int>.from(
-        args["clusterIdToFaceCount"] as Map,
-      );
+          computationContext.fileIdToFaces;
+      final Map<String, int> clusterIdToFaceCount =
+          computationContext.clusterIdToFaceCount;
       final Map<String, Iterable<String>> clusterIdToFaceIDs =
-          Map<String, Iterable<String>>.from(
-        args["clusterIdToFaceIDs"] as Map,
-      );
+          computationContext.clusterIdToFaceIDs;
       final Set<String> assignedClusterIDs =
-          (args["assignedClusterIDs"] as Set).cast<String>();
+          computationContext.assignedClusterIDs;
       final List<EmbeddingVector> allImageEmbeddings =
-          args["allImageEmbeddings"];
-      final Vector clipPositiveTextVector = args["clipPositiveTextVector"];
+          computationContext.allImageEmbeddings;
+      final Vector clipPositiveTextVector =
+          computationContext.clipPositiveTextVector;
       final Map<PeopleActivity, Vector> clipPeopleActivityVectors =
-          args["clipPeopleActivityVectors"];
+          computationContext.clipPeopleActivityVectors;
       final Map<ClipMemoryType, Vector> clipMemoryTypeVectors =
-          args["clipMemoryTypeVectors"];
+          computationContext.clipMemoryTypeVectors;
       dev.log('All arguments (direct data) unwrapped $t');
 
       final Map<String, String> faceIDsToPersonID = {};
