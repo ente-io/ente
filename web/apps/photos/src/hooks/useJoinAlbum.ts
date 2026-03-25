@@ -28,8 +28,8 @@ const buildWebRedirectURL = (
     jwtToken?: string,
 ): string => {
     const webAppURL = photosAppOrigin();
-    const jwtParam = jwtToken ? `&jwt=${encodeURIComponent(jwtToken)}` : "";
-    return `${webAppURL}/?joinAlbum=${accessToken}&collectionId=${collectionId}${jwtParam}#${currentHash}`;
+    const hashSuffix = jwtToken ? `&jwt=${encodeURIComponent(jwtToken)}` : "";
+    return `${webAppURL}/?joinAlbum=${accessToken}&collectionId=${collectionId}#${currentHash}${hashSuffix}`;
 };
 
 /**

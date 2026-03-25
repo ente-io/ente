@@ -26,6 +26,7 @@ export type NativeDeviceLockProvider = "touchid" | "none";
 export type NativeDeviceLockUnavailableReason =
     | "unsupported-platform"
     | "touchid-not-enrolled"
+    | "touchid-temporarily-unavailable"
     | "touchid-api-error";
 
 /**
@@ -38,6 +39,18 @@ export interface NativeDeviceLockCapability {
     provider: NativeDeviceLockProvider;
     /** Present when unavailable, with a machine-readable reason. */
     reason?: NativeDeviceLockUnavailableReason;
+}
+
+/**
+ * Persisted desktop app-lock configuration.
+ *
+ * This excludes the passphrase hash material, which continues to live in the
+ * renderer KV DB.
+ */
+export interface PersistedAppLockConfig {
+    enabled: boolean;
+    lockType: "pin" | "password" | "device" | "none";
+    autoLockTimeMs: number;
 }
 
 export interface FolderWatch {

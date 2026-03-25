@@ -10,6 +10,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 
@@ -78,6 +79,16 @@ func (repo *UserRepository) GetUserByIDInternal(id int64) (ente.User, error) {
 	}
 	user.Email = email
 	return user, nil
+}
+
+// Return true if userId 1 doesn't exists in the system.
+func (repo *UserRepository) IsLikelySelfHosted() bool {
+	var userOneExists bool
+	if err := repo.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE user_id = 1)`).Scan(&userOneExists); err != nil {
+		return false
+	}
+
+	return !userOneExists
 }
 
 // Delete removes the email_hash and encrypted email information for the user. It replaces email_hash with placeholder value
@@ -319,7 +330,7 @@ func (repo *UserRepository) UpdateEmail(userID int64, encryptedEmail ente.Encryp
 
 // GetUserIDWithEmail returns the userID associated with a provided email
 func (repo *UserRepository) GetUserIDWithEmail(email string) (int64, error) {
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
+	sanitizedEmail := emailUtil.NormalizeEmail(email)
 	emailHash, err := crypto.GetHash(sanitizedEmail, repo.HashingKey)
 	if err != nil {
 		return -1, stacktrace.Propagate(err, "")
@@ -542,6 +553,56 @@ func (repo *UserRepository) GetEmailsFromHashes(hashes []string) ([]string, erro
 		emails = append(emails, email)
 	}
 	return emails, nil
+}
+
+// CountActiveUsersByEmailHashes returns count of active users matching any of
+// the provided hashes.
+func (repo *UserRepository) CountActiveUsersByEmailHashes(hashes []string) (int, error) {
+	if len(hashes) == 0 {
+		return 0, nil
+	}
+	var count int
+	err := repo.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes)).Scan(&count)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	return count, nil
+}
+
+// GetActiveUserEmailHashes returns active user email hashes present in the
+// provided list of hashes.
+func (repo *UserRepository) GetActiveUserEmailHashes(hashes []string) ([]string, error) {
+	if len(hashes) == 0 {
+		return []string{}, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT email_hash
+		FROM users
+		WHERE encrypted_email IS NOT NULL
+		  AND email_hash = ANY($1);
+	`, pq.Array(hashes))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	matchedHashes := make([]string, 0, len(hashes))
+	for rows.Next() {
+		var emailHash string
+		if err := rows.Scan(&emailHash); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		matchedHashes = append(matchedHashes, emailHash)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return matchedHashes, nil
 }
 
 // GetActiveUsersForIds  returns a map of users by their IDs, similar to GetUserByID

@@ -1,5 +1,7 @@
 //! Account recovery using recovery key.
 
+use bip39::{Language, Mnemonic};
+
 use crate::crypto::{self, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, LoginResult, Result};
@@ -92,6 +94,51 @@ pub fn get_recovery_key(master_key: &[u8], attributes: &KeyAttributes) -> Result
     Ok(crypto::encode_hex(&recovery_key))
 }
 
+/// Convert a user-provided recovery key mnemonic or hex string into raw bytes.
+///
+/// The mnemonic form must be a 24-word English BIP-39 phrase. The legacy hex
+/// form is still accepted for compatibility.
+pub fn recovery_key_from_mnemonic_or_hex(recovery_key_mnemonic_or_hex: &str) -> Result<Vec<u8>> {
+    let trimmed_input = recovery_key_mnemonic_or_hex
+        .split_whitespace()
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ");
+
+    let recovery_key = if trimmed_input.contains(' ') {
+        if trimmed_input.split(' ').count() != 24 {
+            return Err(AuthError::IncorrectRecoveryKey);
+        }
+
+        let mnemonic = Mnemonic::parse_in_normalized(Language::English, &trimmed_input)
+            .map_err(|_| AuthError::IncorrectRecoveryKey)?;
+        mnemonic.to_entropy()
+    } else {
+        crypto::decode_hex(&trimmed_input).map_err(|_| AuthError::IncorrectRecoveryKey)?
+    };
+
+    if recovery_key.len() != 32 {
+        return Err(AuthError::IncorrectRecoveryKey);
+    }
+
+    Ok(recovery_key)
+}
+
+/// Convert a base64-encoded recovery key into its 24-word English mnemonic.
+pub fn recovery_key_to_mnemonic(recovery_key_b64: &str) -> Result<String> {
+    let recovery_key = crypto::decode_b64(recovery_key_b64)
+        .map_err(|e| AuthError::Decode(format!("recovery_key: {}", e)))?;
+
+    if recovery_key.len() != 32 {
+        return Err(AuthError::IncorrectRecoveryKey);
+    }
+
+    Mnemonic::from_entropy_in(Language::English, &recovery_key)
+        .map(|mnemonic| mnemonic.to_string())
+        .map_err(|e| AuthError::InvalidKey(format!("recovery_key: {}", e)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -149,5 +196,35 @@ mod tests {
 
         let recovered = get_recovery_key(&master_key, &gen_result.key_attributes).unwrap();
         assert_eq!(recovered, gen_result.private_key_attributes.recovery_key);
+    }
+
+    #[test]
+    fn test_recovery_key_mnemonic_roundtrip() {
+        crypto::init().unwrap();
+
+        let gen_result = generate_test_keys("password");
+        let master_key = crypto::decode_b64(&gen_result.private_key_attributes.key).unwrap();
+        let recovery_key_hex = get_recovery_key(&master_key, &gen_result.key_attributes).unwrap();
+        let recovery_key_b64 = crypto::encode_b64(&crypto::decode_hex(&recovery_key_hex).unwrap());
+
+        let mnemonic = recovery_key_to_mnemonic(&recovery_key_b64).unwrap();
+        let decoded = recovery_key_from_mnemonic_or_hex(&mnemonic).unwrap();
+
+        assert_eq!(decoded, crypto::decode_hex(&recovery_key_hex).unwrap());
+    }
+
+    #[test]
+    fn test_recovery_key_from_hex_accepts_legacy_format() {
+        crypto::init().unwrap();
+
+        let gen_result = generate_test_keys("password");
+        let decoded =
+            recovery_key_from_mnemonic_or_hex(&gen_result.private_key_attributes.recovery_key)
+                .unwrap();
+
+        assert_eq!(
+            decoded,
+            crypto::decode_hex(&gen_result.private_key_attributes.recovery_key).unwrap()
+        );
     }
 }

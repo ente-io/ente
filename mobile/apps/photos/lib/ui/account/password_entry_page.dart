@@ -309,7 +309,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         builder: (BuildContext context) {
                           return WebPage(
                             AppLocalizations.of(context).howItWorks,
-                            "https://ente.io/architecture",
+                            "https://ente.com/architecture",
                           );
                         },
                       ),

@@ -1,7 +1,6 @@
 package io.ente.ensu.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,38 +30,36 @@ import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.domain.state.OverflowDialogState
+import io.ente.ensu.domain.util.formatBytes
 import io.ente.ensu.utils.rememberEnsuHaptics
+import kotlin.math.roundToLong
 
 @Composable
 internal fun OverflowDialog(
     state: OverflowDialogState,
     onTrim: () -> Unit,
-    onIncreaseContext: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val overflowMessage = "This conversation is too long for the model to process. Some older messages will be dropped to make room."
+
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(text = "Context limit reached", style = EnsuTypography.h3) },
+        title = { Text(text = "Conversation too long", style = EnsuTypography.h3) },
         text = {
             Text(
-                text = "Input uses ${state.inputTokens} tokens (budget ${state.inputBudget}). Trim history or increase context size?",
+                text = overflowMessage,
                 style = EnsuTypography.body,
                 color = EnsuColor.textPrimary()
             )
         },
         confirmButton = {
             TextButton(onClick = onTrim) {
-                Text(text = "Trim history", color = EnsuColor.textPrimary())
+                Text(text = "Continue", color = EnsuColor.textPrimary())
             }
         },
         dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                TextButton(onClick = onIncreaseContext) {
-                    Text(text = "Increase context", color = EnsuColor.textPrimary())
-                }
-                TextButton(onClick = onCancel) {
-                    Text(text = "Cancel", color = EnsuColor.textMuted())
-                }
+            TextButton(onClick = onCancel) {
+                Text(text = "Cancel", color = EnsuColor.textMuted())
             }
         },
         containerColor = EnsuColor.backgroundBase()
@@ -73,6 +70,7 @@ internal fun OverflowDialog(
 internal fun DownloadToastOverlay(
     status: String,
     percent: Int,
+    totalBytes: Long?,
     isLoading: Boolean,
     onCancel: () -> Unit
 ) {
@@ -85,6 +83,14 @@ internal fun DownloadToastOverlay(
     ) {
         val title = if (isLoading) "Loading model" else "Downloading model"
         val clamped = percent.coerceIn(0, 100)
+        val statusText = when {
+            isLoading -> status
+            totalBytes != null -> {
+                val downloadedBytes = (totalBytes * (clamped / 100f)).roundToLong()
+                "Downloading... ${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}"
+            }
+            else -> status
+        }
         Column(
             modifier = Modifier
                 .padding(horizontal = EnsuSpacing.lg.dp)
@@ -126,7 +132,7 @@ internal fun DownloadToastOverlay(
             )
             Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = status, style = EnsuTypography.small, color = EnsuColor.textMuted())
+                Text(text = statusText, style = EnsuTypography.small, color = EnsuColor.textMuted())
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = "$clamped%", style = EnsuTypography.mini, color = EnsuColor.textMuted())
             }

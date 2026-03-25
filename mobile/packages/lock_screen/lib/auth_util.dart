@@ -12,7 +12,8 @@ import 'package:logging/logging.dart';
 
 Future<bool> requestAuthentication(
   BuildContext context,
-  String reason, {
+  String defaultReason, {
+  required String macOSReason,
   bool isOpeningApp = false,
   bool isAuthenticatingForInAppChange = false,
 }) async {
@@ -37,7 +38,7 @@ Future<bool> requestAuthentication(
     await LocalAuthentication().stopAuthentication();
     final l10n = context.strings;
     return await LocalAuthentication().authenticate(
-      localizedReason: reason,
+      localizedReason: Platform.isMacOS ? macOSReason : defaultReason,
       authMessages: [
         AndroidAuthMessages(
           biometricHint: l10n.androidBiometricHint,

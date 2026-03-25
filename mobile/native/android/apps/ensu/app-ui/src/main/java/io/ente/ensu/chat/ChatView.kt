@@ -52,7 +52,6 @@ fun ChatView(
     onOpenAttachment: (Attachment) -> Unit,
     onStartDownload: (Boolean) -> Unit,
     onOverflowTrim: () -> Unit,
-    onOverflowIncreaseContext: () -> Unit,
     onOverflowCancel: () -> Unit
 ) {
     val showDownloadOnboarding by remember(
@@ -187,7 +186,6 @@ fun ChatView(
                 OverflowDialog(
                     state = overflow,
                     onTrim = onOverflowTrim,
-                    onIncreaseContext = onOverflowIncreaseContext,
                     onCancel = onOverflowCancel
                 )
             }
@@ -235,6 +233,7 @@ fun ChatView(
             DownloadToastOverlay(
                 status = status ?: "",
                 percent = chatState.downloadPercent ?: 0,
+                totalBytes = chatState.modelDownloadSizeBytes,
                 isLoading = isLoading,
                 onCancel = onCancelDownload
             )

@@ -22,6 +22,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/directory_utils.dart' as auth_dir_utils;
+import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_crypto_dart_adapter/ente_crypto_dart_adapter.dart';
@@ -172,6 +173,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await CodeStore.instance.init();
   await CodeDisplayStore.instance.init();
   await Configuration.instance.init([AuthenticatorDB.instance]);
+  await cleanupPickedImagesOnStartup(logger: _logger);
   await Network.instance.init(Configuration.instance);
   await UserService.instance.init(
     Configuration.instance,

@@ -4,30 +4,30 @@ Ak ste hľadali alternatívu ktorá rešpektuje vaše súkromie a uchováva vaš
 
 Máme aplikácie pre všetky platformy a vaše fotky sa bezpečne synchronizujú medzi všetkými zariadeniami (E2EE).
 
-Ente tiež robí zdieľanie vašich albumov s vašimi blízkymi jednoduché. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+Ente tiež robí zdieľanie vašich albumov s vašimi blízkymi jednoduché. Môžete ich zdieľať priamo s inými používateľmi Ente s end-to-end šifrovaním alebo prostredníctvom verejne prístupných odkazov.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Vaše šifrované dáta sú uložené na viacerých miestach vrátane protiatómového krytu v Paríži. Budúcnosť berieme vážne a uľahčujeme vám zabezpečiť, aby vaše spomienky prežili aj vás.
 
-We are here to make the safest photos app ever, come join our journey!
+Sme tu, aby sme vytvorili najbezpečnejšiu aplikáciu na fotografie. Pridajte sa k nám!
 
 KĽÚČOVÉ FUNKCIE
 - Záloha v originálnej kvalite, pretože každý pixel je dôležitý
 - Rodinné plány, aby ste vedeli zdielať svoje úložisko s celou rodinou
 - Zdieľané albumy, v prípade, že chcete aby váš partner videl všetky vaše zábery z fotoaparátu
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
+– Odkazy na albumy, ktoré možno chrániť heslom a nastaviť ich platnosť
+– Možnosť uvoľniť miesto odstránením súborov, ktoré sú už bezpečne zálohované
+– Editor obrázkov na doladenie detailov
+– Označte obľúbené, skryte a znovu prežite svoje spomienky, pretože sú vzácne
+– Import jedným kliknutím zo všetkých hlavných úložísk
+– Tmavý režim, pretože vaše fotografie v ňom vyzerajú lepšie
 - 2FA, 3FA, biometrické overenie
 - a oveľa viac!
 
 CENNÍK
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+Neponúkame bezplatné programy navždy, pretože je pre nás dôležité zostať udržateľní a obstáť v skúške času. Namiesto toho ponúkame cenovo dostupné programy, ktoré môžete jednoducho zdieľať s rodinou. Viac informácií nájdete na ente.com.
 
 PODPORA
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+Zakladáme si na ľudskej podpore. Ak ste naším platiacim zákazníkom, môžete nás kontaktovať na team@ente.io a odpoveď od nášho tímu očakávajte do 24 hodín.
 
 PODMIENKY
-https://ente.io/terms
+https://ente.com/terms

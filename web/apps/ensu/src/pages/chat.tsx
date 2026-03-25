@@ -9,7 +9,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
-import { open as openFileDialog, save } from "@tauri-apps/plugin-dialog";
+import { open as openFileDialog, save } from "@tauri-apps/api/dialog";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -19,6 +19,7 @@ import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
+import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
@@ -43,12 +44,14 @@ import {
     cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
+    initChatKeyStore,
 } from "services/chat/chatKey";
 import {
     addMessage,
     createSession,
     deleteSession,
     getBranchSelections,
+    initializeChatStorePersistence,
     listMessages,
     listSessions,
     readDecryptedAttachmentBytes,
@@ -80,8 +83,9 @@ import type {
     ModelSettings,
 } from "services/llm/types";
 import {
-    clearMasterKeyFromSession,
+    clearMasterKeyFromEverywhere,
     masterKeyFromSession,
+    updateSessionFromTauriSecureStorageIfNeeded,
 } from "services/session";
 
 const formatTime = (timestamp: number) => {
@@ -92,6 +96,10 @@ const formatTime = (timestamp: number) => {
     const hour12 = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}:${minute} ${period}`;
 };
+
+const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
+const OVERFLOW_SAFETY_TOKENS = 256;
+const DEFAULT_WEB_CONTEXT_SIZE = 4096;
 
 const loadingPhraseVerbs = [
     "Generating",
@@ -183,6 +191,8 @@ const buildChatSystemPrompt = () => {
 
 const SESSION_TITLE_PROMPT =
     "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.";
+
+const MODEL_SETTINGS_KEY = "ensu.modelSettings";
 
 const REPEAT_PENALTY = 1.18;
 const STREAMING_OUTRO_DURATION_MS = 520;
@@ -807,6 +817,7 @@ const Page: React.FC = () => {
     const [loadingPhrase, setLoadingPhrase] = useState<string | null>(null);
     const [loadingDots, setLoadingDots] = useState(1);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isChatStoreBridgeReady, setIsChatStoreBridgeReady] = useState(false);
     const [attachmentPreviews, setAttachmentPreviews] = useState<
         Record<string, string>
     >({});
@@ -929,6 +940,8 @@ const Page: React.FC = () => {
     );
 
     const refreshAuthState = useCallback(async () => {
+        await initChatKeyStore();
+        await updateSessionFromTauriSecureStorageIfNeeded();
         const token = await savedAuthToken();
         const hasToken = !!token;
 
@@ -949,7 +962,7 @@ const Page: React.FC = () => {
                 masterKey = await masterKeyFromSession();
             } catch (error) {
                 log.error("Failed to read master key from session", error);
-                clearMasterKeyFromSession();
+                await clearMasterKeyFromEverywhere();
             }
 
             if (!masterKey) {
@@ -1027,6 +1040,32 @@ const Page: React.FC = () => {
     }, [chatKey]);
 
     useEffect(() => {
+        if (!chatKey) {
+            setIsChatStoreBridgeReady(false);
+            return;
+        }
+
+        let cancelled = false;
+        const run = async () => {
+            try {
+                await initializeChatStorePersistence(chatKey);
+            } catch (error) {
+                log.error("Failed to initialize chat persistence", error);
+            } finally {
+                if (!cancelled) {
+                    setIsChatStoreBridgeReady(true);
+                }
+            }
+        };
+        void run();
+
+        return () => {
+            cancelled = true;
+            setIsChatStoreBridgeReady(false);
+        };
+    }, [chatKey]);
+
+    useEffect(() => {
         isDraftSessionRef.current = isDraftSession;
     }, [isDraftSession]);
 
@@ -1046,7 +1085,7 @@ const Page: React.FC = () => {
                 masterKey = await masterKeyFromSession();
             } catch (error) {
                 log.error("Failed to read master key from session", error);
-                clearMasterKeyFromSession();
+                await clearMasterKeyFromEverywhere();
             }
 
             const remoteKey = cachedChatKey();
@@ -1195,28 +1234,50 @@ const Page: React.FC = () => {
     }, [loading]);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-        const raw = window.localStorage.getItem("ensu.modelSettings");
-        if (!raw) return;
-        try {
-            const parsed = JSON.parse(raw) as {
-                useCustomModel?: boolean;
-                modelUrl?: string;
-                mmprojUrl?: string;
-                contextLength?: string;
-                maxTokens?: string;
-            };
-            setUseCustomModel(
-                MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
-            );
-            setModelUrl(parsed.modelUrl ?? "");
-            setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
-            setContextLength(parsed.contextLength ?? "");
-            setMaxTokens(parsed.maxTokens ?? "");
-        } catch (error) {
-            log.error("Failed to read model settings", error);
-        }
-    }, [allowMmproj]);
+        let cancelled = false;
+        void getKV(MODEL_SETTINGS_KEY)
+            .then(async (raw) => {
+                if (!raw || typeof raw !== "object") return;
+                const parsed = raw as {
+                    useCustomModel?: boolean;
+                    modelUrl?: string;
+                    mmprojUrl?: string;
+                    contextLength?: string;
+                    maxTokens?: string;
+                };
+                const rawContextLength = parsed.contextLength ?? "";
+                const clampedContextLength =
+                    !isTauriRuntime &&
+                    rawContextLength &&
+                    Number(rawContextLength) > DEFAULT_WEB_CONTEXT_SIZE
+                        ? String(DEFAULT_WEB_CONTEXT_SIZE)
+                        : rawContextLength;
+                if (clampedContextLength !== rawContextLength) {
+                    const nextSettings = {
+                        useCustomModel: !!parsed.useCustomModel,
+                        modelUrl: parsed.modelUrl ?? "",
+                        mmprojUrl: allowMmproj ? (parsed.mmprojUrl ?? "") : "",
+                        contextLength: clampedContextLength,
+                        maxTokens: parsed.maxTokens ?? "",
+                    };
+                    await setKV(MODEL_SETTINGS_KEY, nextSettings);
+                }
+                if (cancelled) return;
+                setUseCustomModel(
+                    MODEL_SETTINGS_ENABLED && !!parsed.useCustomModel,
+                );
+                setModelUrl(parsed.modelUrl ?? "");
+                setMmprojUrl(allowMmproj ? (parsed.mmprojUrl ?? "") : "");
+                setContextLength(clampedContextLength);
+                setMaxTokens(parsed.maxTokens ?? "");
+            })
+            .catch((error: unknown) => {
+                log.error("Failed to read model settings", error);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [allowMmproj, isTauriRuntime]);
 
     const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);
@@ -1594,13 +1655,13 @@ const Page: React.FC = () => {
     }, [deleteSessionTarget]);
 
     useEffect(() => {
-        if (!chatKey) return;
+        if (!chatKey || !isChatStoreBridgeReady) return;
         if (isLoggedIn) {
             void syncNow();
             return;
         }
         void refreshSessions();
-    }, [chatKey, isLoggedIn, refreshSessions, syncNow]);
+    }, [chatKey, isChatStoreBridgeReady, isLoggedIn, refreshSessions, syncNow]);
 
     useEffect(() => {
         currentSessionIdRef.current = currentSessionId;
@@ -1748,9 +1809,23 @@ const Page: React.FC = () => {
             setBranchSelections({});
             return;
         }
-        setBranchSelections(
-            getBranchSelections(currentSession.rootSessionUuid),
-        );
+        let cancelled = false;
+        void getBranchSelections(currentSession.rootSessionUuid)
+            .then((selections) => {
+                if (!cancelled) {
+                    setBranchSelections(selections);
+                }
+            })
+            .catch((error: unknown) => {
+                log.error("Failed to load branch selections", error);
+                if (!cancelled) {
+                    setBranchSelections({});
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [currentSession?.rootSessionUuid]);
 
     useEffect(() => {
@@ -1820,6 +1895,7 @@ const Page: React.FC = () => {
             });
         });
 
+        // Clean up blob URLs for attachments no longer displayed.
         setAttachmentPreviews((prev) => {
             const next = { ...prev };
             Object.keys(next).forEach((id) => {
@@ -1834,7 +1910,17 @@ const Page: React.FC = () => {
             attachmentPreviewUrlsRef.current = next;
             return next;
         });
-    }, [chatKey, displayMessages]);
+
+        // Load previews for persisted image attachments that do not have blob
+        // URLs yet, such as after reopening the app.
+        for (const message of displayMessages) {
+            for (const attachment of message.attachments ?? []) {
+                if (attachment.kind === "image") {
+                    void loadAttachmentPreview(attachment, message.sessionUuid);
+                }
+            }
+        }
+    }, [chatKey, displayMessages, loadAttachmentPreview]);
 
     const showDrawerToggle = isSmall || drawerCollapsed;
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
@@ -1922,7 +2008,10 @@ const Page: React.FC = () => {
                     ? mmprojUrl.trim()
                     : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
-            maxTokens: maxTokens ? Number(maxTokens) : undefined,
+            maxTokens:
+                maxTokens && Number(maxTokens) > 0
+                    ? Number(maxTokens)
+                    : undefined,
         };
     }, [
         useCustomModel,
@@ -1939,25 +2028,34 @@ const Page: React.FC = () => {
     );
 
     const formatErrorMessage = useCallback((error: unknown) => {
-        if (error instanceof Error) return error.message;
-        if (typeof error === "string") return error;
+        const normalizeErrorMessage = (message: string) => {
+            if (
+                message.toLowerCase().includes("length out of range of buffer")
+            ) {
+                return "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.";
+            }
+            return message;
+        };
+
+        if (error instanceof Error) return normalizeErrorMessage(error.message);
+        if (typeof error === "string") return normalizeErrorMessage(error);
         if (error && typeof error === "object") {
             const maybeMessage = (error as { message?: unknown }).message;
             if (typeof maybeMessage === "string" && maybeMessage.trim()) {
-                return maybeMessage;
+                return normalizeErrorMessage(maybeMessage);
             }
             if ("__wbg_ptr" in error) {
                 return "Model failed to start. Please refresh and try again.";
             }
             const text = String(error);
             if (text && text !== "[object Object]") {
-                return text;
+                return normalizeErrorMessage(text);
             }
         }
         try {
-            return JSON.stringify(error);
+            return normalizeErrorMessage(JSON.stringify(error));
         } catch {
-            return String(error);
+            return normalizeErrorMessage(String(error));
         }
     }, []);
 
@@ -1983,8 +2081,8 @@ const Page: React.FC = () => {
         async (images: ImageAttachment[]) => {
             if (!isTauriRuntime || images.length === 0) return [] as string[];
             const { appDataDir, join } = await import("@tauri-apps/api/path");
-            const { mkdir: createDir, writeFile } = await import(
-                "@tauri-apps/plugin-fs"
+            const { createDir, writeBinaryFile } = await import(
+                "@tauri-apps/api/fs"
             );
             const root = await appDataDir();
             const dir = await join(root, "ensu_llmchat_inference_images");
@@ -1999,7 +2097,7 @@ const Page: React.FC = () => {
                         );
                     const suffix = extension ? `.${extension}` : ".jpg";
                     const path = await join(dir, `${image.id}${suffix}`);
-                    await writeFile(path, bytes);
+                    await writeBinaryFile({ path, contents: bytes });
                     return path;
                 }),
             );
@@ -2012,11 +2110,11 @@ const Page: React.FC = () => {
     const cleanupInferenceImages = useCallback(
         async (paths: string[]) => {
             if (!isTauriRuntime || paths.length === 0) return;
-            const { remove } = await import("@tauri-apps/plugin-fs");
+            const { removeFile } = await import("@tauri-apps/api/fs");
             await Promise.all(
                 paths.map(async (path) => {
                     try {
-                        await remove(path);
+                        await removeFile(path);
                     } catch {
                         // ignore cleanup failures
                     }
@@ -2230,7 +2328,11 @@ const Page: React.FC = () => {
     ]);
 
     const updateBranchSelectionState = useCallback(
-        (selectionKey: string, selectedMessageUuid: string, persist = true) => {
+        async (
+            selectionKey: string,
+            selectedMessageUuid: string,
+            persist = true,
+        ) => {
             setBranchSelections((prev) => ({
                 ...prev,
                 [selectionKey]: selectedMessageUuid,
@@ -2244,7 +2346,7 @@ const Page: React.FC = () => {
                 return;
             }
 
-            setBranchSelection(
+            await setBranchSelection(
                 rootSessionUuid,
                 selectionKey,
                 selectedMessageUuid,
@@ -2347,7 +2449,7 @@ const Page: React.FC = () => {
             path: ChatMessage[],
             promptText: string,
             contextSize: number,
-            maxTokensCount: number,
+            maxTokensCount?: number,
             stopAtMessageUuid?: string | null,
         ): Promise<LlmMessage[]> => {
             const candidates = slicePathUntil(path, stopAtMessageUuid);
@@ -2360,7 +2462,11 @@ const Page: React.FC = () => {
                     : candidates;
 
             const safetyMargin = 256;
-            let budget = contextSize - maxTokensCount - safetyMargin;
+            let budget =
+                contextSize -
+                (maxTokensCount ?? DEFAULT_GENERATION_MAX_TOKENS) -
+                safetyMargin;
+            budget -= approxTokens(buildChatSystemPrompt());
             budget -= approxTokens(promptText);
 
             if (budget <= 0) return [];
@@ -2637,22 +2743,21 @@ const Page: React.FC = () => {
                 if (isTauriRuntime) {
                     const [
                         { appDataDir, join },
-                        { mkdir: createDir, writeFile },
+                        { createDir, writeBinaryFile },
                         { open },
                     ] = await Promise.all([
                         import("@tauri-apps/api/path"),
-                        import("@tauri-apps/plugin-fs"),
-                        import("@tauri-apps/plugin-shell"),
+                        import("@tauri-apps/api/fs"),
+                        import("@tauri-apps/api/shell"),
                     ]);
                     const root = await appDataDir();
                     const dir = await join(root, "ensu_llmchat_attachments");
                     await createDir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
-                    await writeFile(filePath, bytes);
+                    await writeBinaryFile({ path: filePath, contents: bytes });
 
-                    const fileUrl = encodeURI(`file://${filePath}`);
-                    await open(fileUrl);
+                    await open(filePath);
                     return;
                 }
 
@@ -2749,7 +2854,7 @@ const Page: React.FC = () => {
                         parentMessageUuid,
                     );
 
-                    updateBranchSelectionState(
+                    void updateBranchSelectionState(
                         parentMessageUuid,
                         assistantMessage.messageUuid,
                     );
@@ -2764,7 +2869,7 @@ const Page: React.FC = () => {
                 } catch (error) {
                     log.error("Failed to finalize stopped generation", error);
                     if (last?.previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             last.parentMessageUuid,
                             last.previousSelection,
                         );
@@ -2775,7 +2880,7 @@ const Page: React.FC = () => {
             })();
         } else {
             if (last?.previousSelection) {
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     last.parentMessageUuid,
                     last.previousSelection,
                 );
@@ -2861,7 +2966,7 @@ const Page: React.FC = () => {
                 previousSelection,
             };
 
-            updateBranchSelectionState(
+            void updateBranchSelectionState(
                 parentMessageUuid,
                 STREAMING_SELECTION_KEY,
                 false,
@@ -2905,13 +3010,24 @@ const Page: React.FC = () => {
                     ...history,
                     { role: "user", content: promptText },
                 ];
+                const promptTokenEstimate = messages.reduce(
+                    (total, message) => total + approxTokens(message.content),
+                    0,
+                );
+                const inputBudget =
+                    contextSize - maxTokens - OVERFLOW_SAFETY_TOKENS;
+                if (promptTokenEstimate > inputBudget) {
+                    throw new Error(
+                        "Prompt exceeds the model context window. Reduce history, lower max tokens, or increase context length.",
+                    );
+                }
 
                 if (pendingCancelRef.current || stopRequestedRef.current) {
                     pendingCancelRef.current = false;
                     stopRequestedRef.current = false;
                     provider.cancelGeneration(-1);
                     if (previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             parentMessageUuid,
                             previousSelection,
                         );
@@ -2989,7 +3105,7 @@ const Page: React.FC = () => {
                         });
                     }
                     if (previousSelection) {
-                        updateBranchSelectionState(
+                        void updateBranchSelectionState(
                             parentMessageUuid,
                             previousSelection,
                         );
@@ -3016,7 +3132,7 @@ const Page: React.FC = () => {
                     parentMessageUuid,
                 );
 
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     parentMessageUuid,
                     assistantMessage.messageUuid,
                 );
@@ -3036,7 +3152,7 @@ const Page: React.FC = () => {
                 const message = formatErrorMessage(error);
                 showMiniDialog({ title: "Model error", message });
                 if (previousSelection) {
-                    updateBranchSelectionState(
+                    void updateBranchSelectionState(
                         parentMessageUuid,
                         previousSelection,
                     );
@@ -3141,7 +3257,7 @@ const Page: React.FC = () => {
                 (switcher.currentIndex - 1 + switcher.total) % switcher.total;
             const target = switcher.targets[nextIndex];
             if (!target) return;
-            updateBranchSelectionState(switcher.selectionKey, target);
+            void updateBranchSelectionState(switcher.selectionKey, target);
         },
         [updateBranchSelectionState],
     );
@@ -3152,7 +3268,7 @@ const Page: React.FC = () => {
             const nextIndex = (switcher.currentIndex + 1) % switcher.total;
             const target = switcher.targets[nextIndex];
             if (!target) return;
-            updateBranchSelectionState(switcher.selectionKey, target);
+            void updateBranchSelectionState(switcher.selectionKey, target);
         },
         [updateBranchSelectionState],
     );
@@ -3302,9 +3418,9 @@ const Page: React.FC = () => {
                     filters: [{ name: "Logs", extensions: ["txt"] }],
                 });
                 if (!path) return;
-                const { writeFile } = await import("@tauri-apps/plugin-fs");
+                const { writeBinaryFile } = await import("@tauri-apps/api/fs");
                 const encoded = new TextEncoder().encode(savedLogs());
-                await writeFile(path, encoded);
+                await writeBinaryFile({ path, contents: encoded });
                 return;
             } catch (error) {
                 log.error("Failed to export logs", error);
@@ -3330,27 +3446,38 @@ const Page: React.FC = () => {
     );
 
     const suggestedModels = useMemo(
-        () => [
-            {
-                name: "LFM 2.5 VL 1.6B (Q4_0)",
-                url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-                mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-            },
-            {
-                name: "LFM 2.5 1.2B Instruct (Q4_0)",
-                url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF/resolve/main/LFM2.5-1.2B-Instruct-Q4_0.gguf",
-            },
-            {
-                name: "Qwen3-VL 2B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
-                mmproj: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf",
-            },
-            {
-                name: "Llama 3.2 1B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-            },
-        ],
-        [],
+        () =>
+            isTauriRuntime
+                ? [
+                      {
+                          name: "Qwen 3.5 0.8B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 2B (Q8_0)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 4B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                  ]
+                : [
+                      {
+                          name: "LFM 2.5 VL 1.6B (Q4_0)",
+                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+                          mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+                      },
+                      {
+                          name: "Qwen 3.5 0.8B (Q4_K_M)",
+                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+                      },
+                  ],
+        [isTauriRuntime],
     );
 
     const validateModelSettings = useCallback(() => {
@@ -3404,7 +3531,7 @@ const Page: React.FC = () => {
         );
     }, [contextLength, maxTokens, mmprojUrl, modelUrl, isTauriRuntime]);
 
-    const handleSaveModel = useCallback(() => {
+    const handleSaveModel = useCallback(async () => {
         if (!validateModelSettings()) return;
         setIsSavingModel(true);
         const payload = {
@@ -3414,12 +3541,7 @@ const Page: React.FC = () => {
             contextLength,
             maxTokens,
         };
-        if (typeof window !== "undefined") {
-            window.localStorage.setItem(
-                "ensu.modelSettings",
-                JSON.stringify(payload),
-            );
-        }
+        await setKV(MODEL_SETTINGS_KEY, payload);
         setUseCustomModel(true);
         setLoadedModelName(null);
         setIsSavingModel(false);
@@ -3433,10 +3555,8 @@ const Page: React.FC = () => {
         isTauriRuntime,
     ]);
 
-    const handleUseDefaultModel = useCallback(() => {
-        if (typeof window !== "undefined") {
-            window.localStorage.removeItem("ensu.modelSettings");
-        }
+    const handleUseDefaultModel = useCallback(async () => {
+        await removeKV(MODEL_SETTINGS_KEY);
         setUseCustomModel(false);
         setModelUrl("");
         setMmprojUrl("");
@@ -3571,14 +3691,14 @@ const Page: React.FC = () => {
                 return;
             }
 
-            const { readFile } = await import("@tauri-apps/plugin-fs");
+            const { readBinaryFile } = await import("@tauri-apps/api/fs");
             const files = await Promise.all(
                 selectedPaths.map(async (selectedPath) => {
                     const normalized = selectedPath.replace(/\\/g, "/");
                     const name =
                         normalized.split("/").pop()?.replace(/\0/g, "") ||
                         "image";
-                    const bytes = await readFile(selectedPath);
+                    const bytes = await readBinaryFile(selectedPath);
                     return new File([toSafeBlobPart(bytes)], name, {
                         type: inferImageMime(name),
                     });
@@ -3855,7 +3975,7 @@ const Page: React.FC = () => {
                     attachments,
                 );
 
-                updateBranchSelectionState(
+                void updateBranchSelectionState(
                     selectionKey,
                     newUserMessage.messageUuid,
                 );
@@ -3892,7 +4012,10 @@ const Page: React.FC = () => {
                 attachments,
             );
 
-            updateBranchSelectionState(selectionKey, userMessage.messageUuid);
+            void updateBranchSelectionState(
+                selectionKey,
+                userMessage.messageUuid,
+            );
             appendMessageToState(userMessage);
             updateSessionAfterMessage(userMessage);
             setPendingDocuments([]);

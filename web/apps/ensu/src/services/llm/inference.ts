@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/tauri";
 import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,
@@ -16,8 +16,9 @@ import type {
 } from "./types";
 
 const WLLAMA_VERSION = "2.3.7";
-const CDN_BASE = `https://unpkg.com/@wllama/wllama@${WLLAMA_VERSION}/esm`;
+const CDN_BASE = `https://cdn.jsdelivr.net/npm/@wllama/wllama@${WLLAMA_VERSION}/src`;
 const MIN_GGUF_BYTES = 1024 * 1024;
+const DEFAULT_GENERATION_MAX_TOKENS = 8_192;
 
 export type WasmProgressCallback = (event: {
     loaded: number;
@@ -421,7 +422,8 @@ class WasmInference implements InferenceBackend {
             );
 
             const sampling = buildSamplingConfig(request);
-            const maxTokens = request.maxTokens ?? 128;
+            const maxTokens =
+                request.maxTokens ?? DEFAULT_GENERATION_MAX_TOKENS;
 
             const stream = await this.wllama.createCompletion(prompt, {
                 stream: true,
@@ -533,7 +535,7 @@ class TauriInference implements InferenceBackend {
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
-        const { exists } = await import("@tauri-apps/plugin-fs");
+        const { exists } = await import("@tauri-apps/api/fs");
         if (!(await exists(modelPath))) return false;
         try {
             const size = await invoke<number | null>("fs_file_size", {

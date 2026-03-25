@@ -111,7 +111,7 @@ struct SettingsView: View {
         SettingsActionItem(
             title: "About",
             iconName: "InformationCircleIcon",
-            action: { openExternalLink("https://ente.io/blog/ensu/") }
+            action: { openExternalLink("https://ente.com/blog/ensu/") }
         )
     }
 
@@ -120,12 +120,12 @@ struct SettingsView: View {
             SettingsActionItem(
                 title: "Privacy Policy",
                 iconName: "ViewIcon",
-                action: { openExternalLink("https://ente.io/privacy") }
+                action: { openExternalLink("https://ente.com/privacy") }
             ),
             SettingsActionItem(
                 title: "Terms of Service",
                 iconName: "DescriptionIcon",
-                action: { openExternalLink("https://ente.io/terms") }
+                action: { openExternalLink("https://ente.com/terms") }
             )
         ]
     }

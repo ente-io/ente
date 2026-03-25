@@ -380,6 +380,33 @@ const parseDimensions = (tags: RawExifTags) => {
     const pair = (w: number | undefined, h: number | undefined) =>
         w && h ? { width: w, height: h } : undefined;
 
+    const shouldSwapForExifOrientation = (orientation: number | undefined) => {
+        switch (orientation) {
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    const shouldSwapForXMPOrientation = (
+        orientation: ExifReader.XmpTag["value"] | undefined,
+    ) => {
+        if (typeof orientation != "string") return false;
+        switch (orientation) {
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+                return true;
+            default:
+                return false;
+        }
+    };
+
     // 1. Use the width and height from the file itself (e.g. JPEG data).
 
     let wh =
@@ -397,7 +424,14 @@ const parseDimensions = (tags: RawExifTags) => {
         ) ??
         pair(tags.riff?.ImageWidth?.value, tags.riff?.ImageHeight?.value);
     if (wh) {
-        return wh;
+        // The dimensions read from the file headers can still correspond to
+        // the un-rotated pixel matrix. For orientations 5-8, we need to swap
+        // them to represent the display dimensions used by masonry.
+        const shouldSwap =
+            shouldSwapForExifOrientation(tags.exif?.Orientation?.value) ||
+            (tags.exif?.Orientation?.value == undefined &&
+                shouldSwapForXMPOrientation(tags.xmp?.Orientation?.value));
+        return shouldSwap ? { width: wh.height, height: wh.width } : wh;
     }
 
     // 2. Exif dimensions, taking Orientation also into account if needed.
@@ -426,16 +460,9 @@ const parseDimensions = (tags: RawExifTags) => {
         //
         // Ref: https://exiftool.org/TagNames/EXIF.html
 
-        let swap = false;
-
-        switch (tags.exif?.Orientation?.value) {
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                swap = true;
-                break;
-        }
+        const swap = shouldSwapForExifOrientation(
+            tags.exif?.Orientation?.value,
+        );
 
         return swap ? { width: wh.height, height: wh.width } : wh;
     }
@@ -458,15 +485,7 @@ const parseDimensions = (tags: RawExifTags) => {
         //
         // Ref: https://exiftool.org/TagNames/XMP.html
 
-        let swap = false;
-
-        switch (tags.xmp?.Orientation?.value) {
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-                swap = true;
-        }
+        const swap = shouldSwapForXMPOrientation(tags.xmp?.Orientation?.value);
 
         return swap ? { width: wh.height, height: wh.width } : wh;
     }

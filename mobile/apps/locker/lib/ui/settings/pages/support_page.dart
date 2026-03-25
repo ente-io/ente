@@ -71,7 +71,7 @@ class SupportPage extends StatelessWidget {
     await PlatformUtil.openWebView(
       context,
       l10n.help,
-      "https://ente.io/help",
+      "https://ente.com/help",
     );
   }
 

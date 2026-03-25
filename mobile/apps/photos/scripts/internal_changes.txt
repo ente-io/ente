@@ -1,12 +1,18 @@
+Latest changes:
+- Ashil: Help & Support screen improvements
+- Neeraj: Refresh Home favorites state on toggle
+- Ashil: Stop showing unknown user avatar on shared albums opened via deeplinking
+- Ashil: Fix album sorting state not persisting
+
+Still behind internal flag:
+- Ashil, Setal (I): Native family management screens
+- Amrithesh: (I) ML/Pet recognition [Indexing]
+- Amrithesh: (I) QR code detection
 - Laurens: (I) Clip text encoding in rust
-- Setal,Ashil: Improve Help & Support section in settings
 - Laurens: (I) Generate and compress face thumbnails in rust
 - Laurens: (I) Use rust indexing ML pipeline for internal users
-- Neeraj: Improve public album link 429/device-limit error handling
-- Neeraj: File details: hide timezone in creation time and prefer editedTime over public metadata dateTime, falling back to creationTime
-- Neeraj: Fix video playback for Motion photo with two videos
-- Ashil: Enable sentence capitalization for comment input field
-- Ashil: Fix files uploaded by sharing from outside of Ente missing in map
-- Laurens: Use vectorDB for more accurate suggestions in the people overview
 - Laurens: (I) Use cloudflare worker for upload for internal users
 - Neeraj: (I) Add internal-only resumable gallery download queue with persistence/restart fixes and completion banner updates
+- Prateek: (i) Enable BG sync notifications by default for internal users on iOS
+- Prateek: (i) Add internal sync recovery diagnostics to classify local discovery vs remote upload-prep misses
+- Prateek: Background sync now short-circuits upload prep on mobile data when "Backup over mobile data" is disabled

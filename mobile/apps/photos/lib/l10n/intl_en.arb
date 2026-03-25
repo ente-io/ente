@@ -5,6 +5,7 @@
   "accountWelcomeBack": "Welcome back!",
   "emailAlreadyRegistered": "Email already registered.",
   "emailNotRegistered": "Email not registered.",
+  "accountSetupIncompleteCreateAccount": "Account setup incomplete. Create account to finish setup.",
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",
@@ -122,6 +123,7 @@
   "generatingEncryptionKeys": "Generating encryption keys...",
   "pleaseWait": "Please wait...",
   "continueLabel": "Continue",
+  "continueInMailApp": "Continue in mail app",
   "insecureDevice": "Insecure device",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
   "howItWorks": "How it works",
@@ -320,11 +322,12 @@
   "verificationId": "Verification ID",
   "verifyEmailID": "Verify {email}",
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share photos.",
-  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.com verification ID: {verificationID}",
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Download Ente so I can add you to my family plan\n\nhttps://ente.com",
   "done": "Done",
   "applyCodeTitle": "Apply code",
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
@@ -352,7 +355,7 @@
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
-  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.io/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
+  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.com/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
   "claimFreeStorage": "Claim free storage",
   "inviteYourFriends": "Invite your friends",
   "earnFreeStorage": "Earn free storage",
@@ -523,7 +526,7 @@
   "discover_sunset": "Sunset",
   "discover_hills": "Hills",
   "discover_greenery": "Greenery",
-  "mlIndexingDescription": "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.",
+  "mlIndexingDescription": "Please note that machine learning will result in higher bandwidth and battery usage until all items are processed. Consider using the desktop app for faster processing, and all results will be synced automatically.",
   "loadingModel": "Downloading models...",
   "waitingForWifi": "Waiting for WiFi...",
   "status": "Status",
@@ -666,10 +669,162 @@
     }
   },
   "familyPlans": "Family plans",
+  "family": "Family",
+  "designedForFamilies": "Designed for families",
+  "shareYourSubscription": "Share your subscription with loved ones",
+  "shareStorageWith5Members": "Share storage with 5 members",
+  "privateSpaceForEveryMember": "Private space for every member",
+  "feedToEngageWithFamily": "A feed to engage with family",
+  "plansStartAt": "Plans start at {price}/month",
+  "@plansStartAt": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.99"
+      }
+    }
+  },
+  "viewPlans": "View plans",
+  "bringYourFamilyAlong": "Bring your family along",
+  "yourPlanSupportsFamily": "Your plan already supports a family",
+  "addUpTo5MembersFree": "Add up to 5 members free",
+  "addFamilyMember": "Add family member",
+  "addMember": "Add member",
+  "inviteMembers": "Invite members",
+  "enterEmailAddresses": "Enter their email addresses. They need an Ente account.",
+  "inviteLimitReached": "You've added 5 invites. Remove one to add another",
+  "emailAddress": "Email address",
+  "sendInvites": "Send invites",
+  "sendCountInvites": "{count, plural, =0 {Send invites} =1 {Send 1 invite} other {Send {count} invites}}",
+  "@sendCountInvites": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterAnEmailAddress": "Enter an email address",
+  "enterAValidEmailAddress": "Enter a valid email address",
+  "alreadyAdded": "Already added",
+  "thisUserIsNotOnEnte": "This user is not on Ente",
+  "emailNeedsEnteAccountForFamily": "{email} does not have an Ente account.\n\nSend them an invite and add them to your family once they've created an account on Ente.",
+  "@emailNeedsEnteAccountForFamily": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "invitesSentCount": "{count, plural, =1 {Invite sent} other {Invites sent}}",
+  "@invitesSentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "failedToInvite": "Couldn't invite {email}",
+  "@failedToInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "failedToInviteCount": "Couldn't invite {count} members",
+  "@failedToInviteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "storageUsedOfTotal": "{used} of {total} used",
+  "@storageUsedOfTotal": {
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "67 GB"
+      },
+      "total": {
+        "type": "String",
+        "example": "200 GB"
+      }
+    }
+  },
+  "members": "Members",
+  "pending": "Pending",
+  "closeFamilyPlan": "Close family plan",
+  "closeFamilyConfirmTitle": "Close family plan?",
+  "closeFamilyConfirmBody": "All members will lose access to shared storage. This cannot be undone.",
+  "editStorageLimit": "Edit storage limit",
+  "noLimitSet": "No limit set",
+  "removeFromFamily": "Remove from family",
+  "removeMemberConfirmTitle": "Remove member?",
+  "removeMemberConfirmBody": "{email} will lose access to shared storage.",
+  "@removeMemberConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "resendInvite": "Resend invite",
+  "revokeInviteConfirmTitle": "Revoke invite?",
+  "revokeInviteConfirmBody": "The invitation to {email} will be cancelled.",
+  "@revokeInviteConfirmBody": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "member@example.com"
+      }
+    }
+  },
+  "revoke": "Revoke",
+  "inviteResent": "Invite resent",
+  "memberStorageUsed": "{amount} used",
+  "@memberStorageUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimit": "Storage limit",
+  "usingStorage": "Using {amount}",
+  "@usingStorage": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "storageLimitExplanation": "Set the maximum storage this member can use. They will not be able to upload once the limit is reached.",
+  "limit": "Limit",
+  "noLimit": "No limit",
+  "currentUsageNote": "Current usage: {amount}. Set to 0 for no limit.",
+  "@currentUsageNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "20 GB"
+      }
+    }
+  },
+  "leaveFamilyConfirmTitle": "Leave family plan?",
+  "leaveFamilyConfirmBody": "You will lose access to shared storage.",
   "referrals": "Referrals",
   "notifications": "Notifications",
-  "sharedPhotoNotifications": "New shared photos",
-  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "sharedPhotoNotifications": "New shared photos and albums",
+  "sharedPhotoNotificationsExplanation": "Get notifications for new photos in shared albums you're in and for new albums shared with you.",
   "socialNotifications": "Likes and comments",
   "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
@@ -725,7 +880,6 @@
   "anyAdditionalInformation": "Any additional information",
   "attachLogs": "Attach logs",
   "attachLogsHelper": "Helps us diagnose the issue faster",
-  "deviceInfoNote": "Device details such as OS version, app version, and device model will be included automatically.",
   "pleaseEnterASubject": "Please enter a subject",
   "pleaseEnterADescription": "Please enter a description",
   "noEmailAppFound": "No email app found",
@@ -966,6 +1120,9 @@
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorites",
   "shareLink": "Share link",
+  "openLink": "Open link",
+  "pay": "Pay",
+  "noPaymentAppFound": "No payment app found",
   "createCollage": "Create collage",
   "saveCollage": "Save collage",
   "collageSaved": "Collage saved to gallery",
@@ -1309,7 +1466,7 @@
   "fileTypesAndNames": "File types and names",
   "location": "Location",
   "moments": "Moments",
-  "searchFaceEmptySection": "People will be shown here once indexing is done",
+  "searchFaceEmptySection": "People will be shown here once processing is done",
   "searchDatesEmptySection": "Search by a date, month or year",
   "searchLocationEmptySection": "Group photos that are taken within some radius of a photo",
   "searchPeopleEmptySection": "Invite people, and you'll see all photos shared by them here",
@@ -1318,6 +1475,14 @@
   "searchCaptionEmptySection": "Add descriptions like \"#trip\" in photo info to quickly find them here",
   "language": "Language",
   "selectLanguage": "Select Language",
+  "noLocation": "No location",
+  "@noLocation": {
+    "description": "Search result label for files owned by the user with missing location metadata"
+  },
+  "noLocationTag": "No location tag",
+  "@noLocationTag": {
+    "description": "Search result label for files that do not have a manual location tag"
+  },
   "locationName": "Location name",
   "addLocation": "Add location",
   "groupNearbyPhotos": "Group nearby photos",
@@ -1739,7 +1904,9 @@
   },
   "extraPhotosFound": "Extra photos found",
   "configuration": "Configuration",
-  "localIndexing": "Local indexing",
+  "localIndexing": "Local processing",
+  "offlineLocalIndexingDisabledDescription": "This device keeps local processing off by default to reduce memory use.",
+  "offlineLocalIndexingDisabledCardDescription": "This device keeps local processing off by default to reduce memory use. Turn it on in settings if you want offline face and smart search.",
   "processed": "Processed",
   "resetPerson": "Remove",
   "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
@@ -2203,9 +2370,9 @@
   "curatedMemories": "Curated memories",
   "widgets": "Widgets",
   "memories": "Memories",
-  "peopleWidgetDesc": "Select the people you wish to see on your homescreen.",
-  "albumsWidgetDesc": "Select the albums you wish to see on your homescreen.",
-  "memoriesWidgetDesc": "Select the kind of memories you wish to see on your homescreen.",
+  "peopleWidgetDesc": "Select the people you want to see on your home screen.",
+  "albumsWidgetDesc": "Select the albums you want to see on your home screen.",
+  "memoriesWidgetDesc": "Select the kinds of memories you want to see on your home screen.",
   "smartMemories": "Smart memories",
   "pastYearsMemories": "Past years' memories",
   "deleteMultipleAlbumDialog": "Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?",
@@ -2219,9 +2386,9 @@
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
   "clickToInstallOurBestVersionYet": "Click to install our best version yet",
   "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
-  "addMemoriesWidgetPrompt": "Add a memories widget to your homescreen and come back here to customize.",
-  "addAlbumWidgetPrompt": "Add an album widget to your homescreen and come back here to customize.",
-  "addPeopleWidgetPrompt": "Add a people widget to your homescreen and come back here to customize.",
+  "addMemoriesWidgetPrompt": "Add a memories widget to your home screen to customize it here.",
+  "addAlbumWidgetPrompt": "Add an album widget to your home screen to customize it here.",
+  "addPeopleWidgetPrompt": "Add a people widget to your home screen to customize it here.",
   "birthdayNotifications": "Birthday notifications",
   "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
   "happyBirthday": "Happy birthday! 🥳",
@@ -2251,7 +2418,7 @@
   "same": "Same",
   "different": "Different",
   "sameperson": "Same person?",
-  "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
+  "indexingPausedStatusDescription": "Processing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
   "thisWeek": "This week",
   "lastWeek": "Last week",
   "thisMonth": "This month",
@@ -2526,6 +2693,16 @@
   },
   "playfulKids": "Playful kids",
   "coastalCliffs": "Cliffs by the sea",
+  "candidLaughter": "Burst of laughter",
+  "groupSelfies": "All of us",
+  "birthdayJoy": "Birthday joy",
+  "weddingMoments": "Wedding day glow",
+  "goldenHourPortraits": "Golden hour faces",
+  "concertNights": "Concert nights",
+  "poolDays": "Poolside days",
+  "picnicDays": "Picnic memories",
+  "campingMoments": "Campfire moments",
+  "babySmiles": "Baby smiles",
   "ritualsTitle": "Rituals",
   "ritualAddTooltip": "Add ritual",
   "ritualActivityHeading": "Activity",
@@ -2626,33 +2803,83 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "Liked your photo",
-  "likedAPhoto": "Liked a photo",
-  "likedYourVideo": "Liked your video",
-  "commentedOnYourPhoto": "Commented on your photo",
-  "commentedOnAPhoto": "Commented on a photo",
-  "commentedOnYourVideo": "Commented on your video",
-  "commentedOnAVideo": "Commented on a video",
-  "repliedToYourComment": "Replied to your comment",
-  "repliedToAComment": "Replied to a comment",
-  "likedYourComment": "Liked your comment",
-  "likedAComment": "Liked a comment",
-  "likedYourReply": "Liked your reply",
-  "likedAReply": "Liked a reply",
-  "addedAMemoryTo": "Added a memory to {albumName}",
+  "likedYourPhoto": "liked your photo",
+  "@likedYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAPhoto": "liked a photo",
+  "@likedAPhoto": {
+    "description": "Social action text shown after a person's name, for example 'John liked a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourVideo": "liked your video",
+  "@likedYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John liked your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourPhoto": "commented on your photo",
+  "@commentedOnYourPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAPhoto": "commented on a photo",
+  "@commentedOnAPhoto": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a photo'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnYourVideo": "commented on your video",
+  "@commentedOnYourVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on your video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "commentedOnAVideo": "commented on a video",
+  "@commentedOnAVideo": {
+    "description": "Social notification action text shown after a person's name, for example 'John commented on a video'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToYourComment": "replied to your comment",
+  "@repliedToYourComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "repliedToAComment": "replied to a comment",
+  "@repliedToAComment": {
+    "description": "Social notification action text shown after a person's name, for example 'John replied to a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourComment": "liked your comment",
+  "@likedYourComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked your comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAComment": "liked a comment",
+  "@likedAComment": {
+    "description": "Social action text shown after a person's name, for example 'John liked a comment'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedYourReply": "liked your reply",
+  "@likedYourReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked your reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "likedAReply": "liked a reply",
+  "@likedAReply": {
+    "description": "Social action text shown after a person's name, for example 'John liked a reply'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter."
+  },
+  "addedAMemoryTo": "added a memory to {albumName}",
   "@addedAMemoryTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added a memory to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
     "placeholders": {
       "albumName": {
         "type": "String"
       }
     }
   },
-  "addedNMemoriesTo": "Added {count} memories to {albumName}",
+  "addedNMemoriesTo": "added {count} memories to {albumName}",
   "@addedNMemoriesTo": {
+    "description": "Social notification action text shown after a person's name, for example 'John added 4 memories to Recents'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
     "placeholders": {
       "count": {
         "type": "int"
       },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedAlbumWithYou": "shared {albumName} with you",
+  "@sharedAlbumWithYou": {
+    "description": "Social notification action text shown after a person's name, for example 'John shared Recents with you'. Make sure the translation reads naturally with a name before it, and do not capitalize the first letter.",
+    "placeholders": {
       "albumName": {
         "type": "String"
       }
@@ -2838,5 +3065,7 @@
   "offlineFacesBannerSubtitle": "Sign up to tag people and easily find them later.",
   "offlineNameFaceBannerTitle": "Give this face a name",
   "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
-  "signUp": "Sign up"
+  "signUp": "Sign up",
+  "dog": "Dog",
+  "cat": "Cat"
 }

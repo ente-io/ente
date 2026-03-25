@@ -21,7 +21,7 @@ You can install Ente Photos on your iPhone or iPad from the [iOS AppStore](https
 
 ### How do I install Ente Photos on my desktop? {#install-desktop}
 
-You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.io/download/desktop).
+You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.com/download/desktop).
 
 **Supported platforms:**
 
@@ -178,6 +178,8 @@ Yes! Ente recommends enabling 2FA for additional security. Supported methods inc
 - **Passkeys** as an alternative 2FA mechanism
 
 You can set up 2FA in Settings on mobile or desktop apps.
+
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
 
 Learn more in our [Security and Privacy FAQ](/photos/faq/security-and-privacy).
 

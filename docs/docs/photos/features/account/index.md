@@ -71,6 +71,8 @@ Ente supports multiple 2FA methods for additional security:
 
 Enable 2FA in `Settings > Security` on mobile or desktop apps.
 
+Warning: if you use the same account in Ente Auth, enabling 2FA in Ente Photos also enables it for Ente Auth, which can be a problem if you store your Ente account's 2FA code inside Ente Auth itself. See [Enteception](/auth/faq/enteception/).
+
 Learn more about [Passkeys](/photos/features/account/passkeys).
 
 ### End-to-end encryption
@@ -102,7 +104,7 @@ Ente offers **10 GB of storage for free, forever**. The free plan includes:
 - ✅ Map view and location tags
 - ✅ Background sync
 - ✅ Creating /receiving shared albums
-- ✅ Public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
+- ✅ Public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 
 **Free plan limitations:**
 
@@ -118,7 +120,7 @@ Paid plans unlock additional features and storage:
 - Family plan capability to share storage with 5 family members
 - Priority support
 
-See the [pricing page](https://ente.io#pricing) for current plans and pricing.
+See the [pricing page](https://ente.com#pricing) for current plans and pricing.
 
 ### Student discounts
 

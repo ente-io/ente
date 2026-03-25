@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"mime/quotedprintable"
 	"net/http"
 	"net/smtp"
 	"path"
@@ -26,6 +27,11 @@ import (
 var knownInvalidEmailErrors = []string{
 	"Invalid RCPT TO address provided",
 	"Invalid domain name",
+}
+
+// NormalizeEmail returns a canonical form for case-insensitive email lookup and hashing.
+func NormalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
 }
 
 // https://datatracker.ietf.org/doc/html/rfc5322#section-2.1.1
@@ -83,6 +89,21 @@ func wrapToMaxLineLength(s string, maxLen int) string {
 		}
 	}
 	return b.String()
+}
+
+func buildHTMLMIMEPart(htmlBody string) (string, error) {
+	var encodedBody bytes.Buffer
+	writer := quotedprintable.NewWriter(&encodedBody)
+	if _, err := writer.Write([]byte(htmlBody)); err != nil {
+		return "", err
+	}
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
+
+	return "Content-Type: text/html; charset=utf-8\n" +
+		"Content-Transfer-Encoding: quoted-printable\n\n" +
+		encodedBody.String() + "\n", nil
 }
 
 // Send sends an email
@@ -147,14 +168,17 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		emailAddresses += sanitizeHeaderValue(addr)
 	}
 
-	header :=  "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
+	header := "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
 		"From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
 		"To: " + emailAddresses + "\n" +
 		"Subject: " + cleanSubject + "\n" +
 		"MIME-Version: 1.0\n" +
 		"Content-Type: multipart/related; boundary=boundary\n\n" +
 		"--boundary\n"
-	htmlContent := "Content-Type: text/html; charset=us-ascii\n\n" + htmlBody + "\n"
+	htmlContent, err := buildHTMLMIMEPart(htmlBody)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to encode html body")
+	}
 
 	emailMessage = header + htmlContent
 

@@ -56,7 +56,7 @@ class NotificationService {
 
   Future<void> _ensurePluginInitialized() async {
     if (_pluginInitialized) return;
-    await initTimezones();
+    final pluginInitStopwatch = Stopwatch()..start();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -73,6 +73,9 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse: _handleNotificationResponse,
     );
+    _logger.info(
+      "flutter_local_notifications.initialize took ${pluginInitStopwatch.elapsedMilliseconds}ms",
+    );
     _pluginInitialized = true;
   }
 
@@ -88,8 +91,12 @@ class NotificationService {
 
   Future<void> _handleLaunchDetailsIfNeeded() async {
     if (_launchDetailsHandled) return;
+    final launchDetailsStopwatch = Stopwatch()..start();
     final launchDetails =
         await _notificationsPlugin.getNotificationAppLaunchDetails();
+    _logger.info(
+      "getNotificationAppLaunchDetails took ${launchDetailsStopwatch.elapsedMilliseconds}ms",
+    );
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
@@ -100,11 +107,23 @@ class NotificationService {
 
   Future<void> initTimezones() async {
     if (timezoneInitialized) return;
+    final timezoneInitStopwatch = Stopwatch()..start();
+    final tzdbStopwatch = Stopwatch()..start();
     tzdb.initializeTimeZones();
+    _logger.info(
+      "tz.initializeTimeZones took ${tzdbStopwatch.elapsedMilliseconds}ms",
+    );
+    final localTimezoneStopwatch = Stopwatch()..start();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    _logger.info(
+      "FlutterTimezone.getLocalTimezone took ${localTimezoneStopwatch.elapsedMilliseconds}ms",
+    );
     final String resolvedTimeZone = _resolveTimeZoneName(currentTimeZone);
     tz.setLocalLocation(tz.getLocation(resolvedTimeZone));
     timezoneInitialized = true;
+    _logger.info(
+      "Notification timezone init took ${timezoneInitStopwatch.elapsedMilliseconds}ms",
+    );
   }
 
   String _resolveTimeZoneName(String timeZoneName) {
@@ -151,6 +170,7 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
+    await _ensurePluginInitialized();
     bool? result;
     if (Platform.isIOS) {
       result = await _notificationsPlugin
@@ -176,13 +196,13 @@ class NotificationService {
     return result ?? false;
   }
 
-  bool shouldShowNotificationsForSharedPhotos() {
+  bool shouldShowNotificationsForSharedPhotosAndAlbums() {
     final result =
         _preferences.getBool(keyShouldShowNotificationsForSharedPhotos);
     return result ?? true;
   }
 
-  Future<void> setShouldShowNotificationsForSharedPhotos(bool value) {
+  Future<void> setShouldShowNotificationsForSharedPhotosAndAlbums(bool value) {
     return _preferences.setBool(
       keyShouldShowNotificationsForSharedPhotos,
       value,
@@ -209,6 +229,7 @@ class NotificationService {
     String channelName = "ente",
     String payload = "ente://home",
   }) async {
+    await _ensurePluginInitialized();
     _logger.info(
       "Showing notification with: $title, $message, $channelID, $channelName, $payload",
     );
@@ -245,6 +266,7 @@ class NotificationService {
     bool logSchedule = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logSchedule) {
         _logger.info(
           "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
@@ -315,6 +337,7 @@ class NotificationService {
     bool logLines = true,
   }) async {
     try {
+      await _ensurePluginInitialized();
       if (logLines) {
         _logger.info("Clearing all scheduled notifications");
       }
@@ -353,6 +376,7 @@ class NotificationService {
   }
 
   Future<int> pendingNotifications() async {
+    await _ensurePluginInitialized();
     final pending = await _notificationsPlugin.pendingNotificationRequests();
     return pending.length;
   }

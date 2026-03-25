@@ -206,6 +206,10 @@ func main() {
 
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
+		UsageRepo:               usageRepo,
+		BillingRepo:             billingRepo,
+		StorageBonusRepo:        storagBonusRepo,
+		DiscordController:       discordController,
 		LockController:          lockController,
 		NotificationHistoryRepo: notificationHistoryRepo,
 	}
@@ -405,6 +409,7 @@ func main() {
 		collectionController,
 		collectionRepo,
 		dataCleanupRepository,
+		notificationHistoryRepo,
 		billingRepo,
 		secretEncryptionKeyBytes,
 		hashingKeyBytes,
@@ -418,6 +423,7 @@ func main() {
 		userCache,
 		userCacheCtrl,
 	)
+	emailNotificationCtrl.UserAccessResetter = userController
 	inactiveUserOrchestrator := user.NewInactiveUserOrchestrator(
 		userRepo,
 		notificationHistoryRepo,
@@ -565,6 +571,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.POST("/files/share-url", fileHandler.ShareUrl)
+	privateAPI.GET("/files/share-url", fileHandler.GetUrls)
 	privateAPI.PUT("/files/share-url", fileHandler.UpdateFileURL)
 	privateAPI.DELETE("/files/share-url/:fileID", fileHandler.DisableUrl)
 	privateAPI.GET("/files/share-urls/", fileHandler.GetUrls)
@@ -896,12 +903,14 @@ func main() {
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
 	adminAPI.POST("/mail/unsubscribe", adminHandler.UnsubscribeMail)
+	adminAPI.GET("/listmonk/missing-subscribers/count", adminHandler.GetListmonkMissingSubscribersCount)
 	adminAPI.GET("/users", adminHandler.GetUsers)
 	adminAPI.GET("/user", adminHandler.GetUser)
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
 	adminAPI.POST("/user/update-referral", adminHandler.UpdateReferral)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/update-email-mfa", adminHandler.UpdateEmailMFA)
+	adminAPI.POST("/user/unblock-storage-warning-login", adminHandler.UnblockStorageWarningLogin)
 	adminAPI.POST("/user/add-ott", adminHandler.AddOtt)
 	adminAPI.POST("/user/terminate-session", adminHandler.TerminateSession)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
@@ -926,7 +935,7 @@ func main() {
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
-	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo}
+	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo, UserRepo: userRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
 
 	privateAPI.POST("/authenticator/key", authenticatorHandler.CreateKey)
@@ -1083,6 +1092,8 @@ func setupDatabase() *sql.DB {
 
 	db.SetMaxIdleConns(6)
 	db.SetMaxOpenConns(45)
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	log.Println("Database was configured successfully.")
 
@@ -1233,6 +1244,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	scheduleAndRun(c, "@every 24h", func() {
 		inactiveUserOrchestrator.ProcessInactiveUsers()
+	})
+
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.SendStorageWarningMails()
 	})
 
 	schedule(c, "@every 1m", func() {

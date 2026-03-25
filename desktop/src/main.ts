@@ -148,6 +148,7 @@ const main = () => {
             allowExternalLinks(webContents);
             handleBackOnStripeCheckout(mainWindow);
             allowAllCORSOrigins(webContents);
+            allowOpenStreetMapRequestIdentification(webContents);
 
             // Start loading the renderer.
             void mainWindow.loadURL(rendererURL);
@@ -676,6 +677,44 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
             callback({ responseHeaders: headers });
         },
     );
+
+/**
+ * OSM services expect requests to identify the originating app. Our desktop
+ * renderer is served from the custom "ente://app" origin, so requests from the
+ * Electron session do not naturally carry an app-specific browser identity.
+ *
+ * Prefix OSM requests with a truthful desktop app User-Agent token instead of
+ * forging a web Referer. This applies to both map tiles and Nominatim lookups.
+ */
+const allowOpenStreetMapRequestIdentification = (webContents: WebContents) =>
+    webContents.session.webRequest.onBeforeSendHeaders(
+        {
+            urls: [
+                "https://tile.openstreetmap.org/*",
+                "https://nominatim.openstreetmap.org/*",
+            ],
+        },
+        ({ requestHeaders }, callback) => {
+            const existingUserAgent =
+                requestHeaders["User-Agent"] ?? requestHeaders["user-agent"];
+            delete requestHeaders["User-Agent"];
+            delete requestHeaders["user-agent"];
+            requestHeaders["User-Agent"] =
+                openStreetMapUserAgent(existingUserAgent);
+            delete requestHeaders.Referer;
+            delete requestHeaders.referer;
+            callback({ requestHeaders });
+        },
+    );
+
+const openStreetMapUserAgent = (existingUserAgent: string | undefined) => {
+    const appName = app.getName().trim() || "app";
+    const version = isDev ? "dev" : app.getVersion();
+    const appIdentifier = `${appName}-desktop/${version}`;
+    return existingUserAgent
+        ? `${appIdentifier} ${existingUserAgent}`
+        : appIdentifier;
+};
 
 /**
  * Add an icon for our app in the system tray.

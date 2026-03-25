@@ -329,6 +329,15 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(SRCROOT)/ensu/Generated/core.swift",
+				"$(SRCROOT)/ensu/Generated/coreFFI.h",
+				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/db.swift",
+				"$(SRCROOT)/ensu/Generated/dbFFI.h",
+				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/sync.swift",
+				"$(SRCROOT)/ensu/Generated/syncFFI.h",
+				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -346,6 +355,15 @@
 				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
+				"$(SRCROOT)/ensu/Generated/core.swift",
+				"$(SRCROOT)/ensu/Generated/coreFFI.h",
+				"$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/db.swift",
+				"$(SRCROOT)/ensu/Generated/dbFFI.h",
+				"$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
+				"$(SRCROOT)/ensu/Generated/sync.swift",
+				"$(SRCROOT)/ensu/Generated/syncFFI.h",
+				"$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -516,7 +534,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -532,7 +550,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -577,7 +595,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -593,7 +611,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -638,7 +656,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -651,7 +669,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				HEADER_SEARCH_PATHS = (
@@ -698,7 +716,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -711,7 +729,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				HEADER_SEARCH_PATHS = (

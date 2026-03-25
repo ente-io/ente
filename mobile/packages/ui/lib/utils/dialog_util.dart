@@ -153,7 +153,7 @@ Future<ButtonResult?> showGenericErrorDialog({
             PlatformUtil.openWebView(
               context,
               context.strings.faq,
-              "https://ente.io/help/auth/troubleshooting/windows-login",
+              "https://ente.com/help/auth/troubleshooting/windows-login",
             );
           },
         ),

@@ -95,7 +95,7 @@ To continue backing up:
 
 ### What plans does Ente offer? {#available-plans}
 
-See our [website](https://ente.io#pricing) for the complete list of supported plans and pricing.
+See our [website](https://ente.com#pricing) for the complete list of supported plans and pricing.
 
 We offer:
 
@@ -142,7 +142,7 @@ If you need a custom plan, please contact [support@ente.io](mailto:support@ente.
 
 ### Does Ente have Family Plans? {#family-plans-faq}
 
-Yes we do! Please check out our announcement post [here](https://ente.io/blog/family-plans).
+Yes we do! Please check out our announcement post [here](https://ente.com/blog/family-plans).
 
 In brief:
 
@@ -235,7 +235,7 @@ Common reasons and solutions:
 **Problem 3: "Invalid email address" or invitation fails**
 
 - Make sure the email address is correct
-- The person must have an Ente account already (ask them to sign up first at [ente.io](https://ente.io))
+- The person must have an Ente account already (ask them to sign up first at [ente.com](https://ente.com))
 - Free accounts can be invited to family plans
 
 **Problem 4: Family plan not available**
@@ -267,6 +267,12 @@ Referral bonus storage is not included when you join a family plan. You will onl
 When you join a family plan, your individual plan (including any referral bonuses) is replaced by the shared family storage. Referral bonus storage does not carry over or get added on top of the family plan.
 
 (Example: If you were on the free 10 GB plan with an additional 10 GB from referrals - 20 GB total - and you join a family plan with 200 GB of storage, you will have access to 200 GB of shared family storage, not 220 GB.)
+
+### Are duplicate photos deduplicated across family members? {#family-plan-deduplication}
+
+No. Family plans are a way to share storage, but each family member has their own separate account. Ente cannot deduplicate files across different accounts.
+
+If you and a family member both upload the same photo (for example, from Google Takeout), it will be counted separately in each account's storage usage. Unlike [deduplication within a single account](#deduplication), which avoids counting the same file twice, deduplication does not apply across different accounts in a family plan.
 
 ## Student Discounts
 
@@ -377,7 +383,7 @@ We support **annual** subscriptions over PayPal.
 **How to purchase with PayPal:**
 
 1. Email **paypal@ente.io** from your registered Ente email address
-2. In your email, mention the [storage plan](https://ente.io#pricing) of your choice (e.g., "100 GB annual plan")
+2. In your email, mention the [storage plan](https://ente.com#pricing) of your choice (e.g., "100 GB annual plan")
 3. We will send you an invoice with a PayPal payment link
 4. Complete the payment through PayPal
 5. Your account will be upgraded once payment is confirmed
@@ -400,7 +406,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 1. Email **crypto@ente.io** from your registered Ente email address
 2. In your email, specify:
-    - The [storage plan](https://ente.io#pricing) of your choice
+    - The [storage plan](https://ente.com#pricing) of your choice
     - Your preferred cryptocurrency
 3. We will send you an invoice with payment instructions
 4. Complete the payment using your crypto wallet
@@ -410,7 +416,7 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 ⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.io instead.
 
-⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.io/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
+⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 
 **Processing time:**
 
@@ -583,6 +589,11 @@ Yes! Switching between monthly and yearly billing works the same as upgrading or
 
 The same prorating calculation applies as described above.
 
+### If I subscribed to a plan with a reference code and a discount, and then need to upgrade/downgrade, what happens to my discount and bonus? {#upgrade-discount-referral}
+
+The referral bonus remains, and the discount stays valid for 12 months even on
+an upgraded/downgraded plan. The amount is prorated.
+
 ### How can I update my payment method? {#update-payment}
 
 You can view and manage your payment method via Settings > click on the Storage (subscription) card at the top > Manage payment method.
@@ -608,3 +619,31 @@ After cancellation, you'll have access to your data for 30 days, after which it 
 ### How can I earn free storage? {#earn-free-storage}
 
 Use our [referral program](/photos/features/account/referral-program/). When friends sign up using your referral code and subscribe to a paid plan, both you and your friend earn additional free storage.
+
+## Inactive Account Email
+
+### Why did I receive this email? {#inactive-account-email-received}
+
+We recently sent an email to accounts that have not shown activity for 12
+months as part of our inactive-account policy.
+
+### I use Ente regularly. Why did I receive this email? {#inactive-but-active}
+
+The email includes the email address associated with the inactive account.
+
+If you are using Ente regularly, check the registered email address shown inside
+the app to confirm which account you are currently using.
+
+Open `Settings > Account`. The registered email address will appear in a green
+box.
+
+### What should I do if I received this email? {#inactive-account-action}
+
+Simply sign in to the account mentioned in the email before the date specified.
+This will mark the account as active.
+
+### I think this email was sent by mistake {#inactive-account-mistake}
+
+Contact support at [support@ente.io](mailto:support@ente.io) and share a
+screenshot of the `Settings > Account` page showing the registered email address
+(green box), so we can verify the account.

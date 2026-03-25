@@ -30,7 +30,7 @@ TILLATELSER
 Ente ber om visse tillatelser for å fungere som en foto lagringstjeneste, og disse kan gjennomgås her: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 PRISER
-Vi tilbyr ikke livslange gratisabonnementer, fordi det er viktig for oss at vi forblir bærekraftige og tåler tidens tann. I stedet tilbyr vi rimelige abonnementer som du fritt kan dele med familien din. Du finner mer informasjon på ente.io.
+Vi tilbyr ikke livslange gratisabonnementer, fordi det er viktig for oss at vi forblir bærekraftige og tåler tidens tann. I stedet tilbyr vi rimelige abonnementer som du fritt kan dele med familien din. Du finner mer informasjon på ente.com.
 
 SUPPORT
 Vi er stolte av å tilby menneskelig support. Hvis du er en betalende kunde, kan du kontakte team@ente.io og forvente et svar fra vårt team innen 24 timer.

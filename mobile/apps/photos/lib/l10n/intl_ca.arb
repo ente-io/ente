@@ -294,11 +294,11 @@
   "verificationId": "ID de verificació",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} no té un compte d'Ente.\n\nEnvia'ls una invitació per compartir fotos.",
-  "shareMyVerificationID": "Aquí tens el meu ID de verificació: {verificationID} per a ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ei, pots confirmar que aquest és el teu ID de verificació d'ente.io: {verificationID}",
+  "shareMyVerificationID": "Aquí tens el meu ID de verificació: {verificationID} per a ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ei, pots confirmar que aquest és el teu ID de verificació d'ente.com: {verificationID}",
   "somethingWentWrong": "Alguna cosa ha anat malament",
   "sendInvite": "Envia invitació",
-  "shareTextRecommendUsingEnte": "Descarrega Ente perquè puguem compartir fàcilment fotos i vídeos en qualitat original\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarrega Ente perquè puguem compartir fàcilment fotos i vídeos en qualitat original\n\nhttps://ente.com",
   "done": "Fet",
   "applyCodeTitle": "Aplica codi",
   "enterCodeDescription": "Introdueix el codi proporcionat pel teu amic per reclamar emmagatzematge gratuït per a tots dos",
@@ -326,7 +326,7 @@
   "theyAlsoGetXGb": "Ells també obtenen {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB per a ells + {storageAmountInGB} GB per a tu quan millorin el pla.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vegada que algú es registra per a un pla de pagament i aplica el teu codi",
-  "shareTextReferralCode": "Ente Photos és una llar privada i segura per a les teves fotos\n* Descarrega Ente Photos des de https://ente.io/app\n* Crea un compte\n* Aplica el codi de referència {referralCode} a Configuració->Referència\n* Aconsegueix {referralStorageInGB}GB gratis quan milloris a un pla de pagament",
+  "shareTextReferralCode": "Ente Photos és una llar privada i segura per a les teves fotos\n* Descarrega Ente Photos des de https://ente.com/app\n* Crea un compte\n* Aplica el codi de referència {referralCode} a Configuració->Referència\n* Aconsegueix {referralStorageInGB}GB gratis quan milloris a un pla de pagament",
   "claimFreeStorage": "Reclama emmagatzematge gratuït",
   "inviteYourFriends": "Convida els teus amics",
   "earnFreeStorage": "Guanya emmagatzematge gratuït",
@@ -497,7 +497,6 @@
   "discover_sunset": "Posta de sol",
   "discover_hills": "Turons",
   "discover_greenery": "Verdor",
-  "mlIndexingDescription": "Si us plau, tingues en compte que l'aprenentatge automàtic resultarà en un major ús d'ample de banda i bateria fins que tots els elements estiguin indexats. Considera utilitzar l'aplicació d'escriptori per a una indexació més ràpida, tots els resultats es sincronitzaran automàticament.",
   "loadingModel": "Descarregant models...",
   "waitingForWifi": "Esperant WiFi...",
   "status": "Estat",
@@ -640,8 +639,6 @@
   "familyPlans": "Plans familiars",
   "referrals": "Referències",
   "notifications": "Notificacions",
-  "sharedPhotoNotifications": "Noves fotos compartides",
-  "sharedPhotoNotificationsExplanation": "Rep notificacions quan algú afegeix una foto a un àlbum compartit del qual formes part",
   "socialNotifications": "M'agrada i comentaris",
   "socialNotificationsExplanation": "Rep notificacions de m'agrada a les teves fotos i comentaris als àlbums dels quals formes part",
   "advanced": "Avançat",
@@ -678,7 +675,6 @@
   "darkTheme": "Fosc",
   "systemTheme": "Sistema",
   "freeTrial": "Prova gratuïta",
-  "selectYourPlan": "Selecciona el teu pla",
   "enteSubscriptionPitch": "Ente preserva els teus records, perquè estiguin sempre disponibles per a tu, fins i tot si perds el teu dispositiu.",
   "enteSubscriptionShareWithFamily": "La teva família també es pot afegir al teu pla.",
   "currentUsageIs": "L'ús actual és ",
@@ -779,7 +775,6 @@
   "grantFullAccessPrompt": "Si us plau, permet l'accés a totes les fotos a l'aplicació de Configuració",
   "allowPermTitle": "Permet l'accés a les fotos",
   "allowPermBody": "Si us plau, permet l'accés a les teves fotos des de Configuració perquè Ente pugui mostrar i fer còpia de seguretat de la teva biblioteca.",
-  "openSettings": "Obre Configuració",
   "selectMorePhotos": "Selecciona més fotos",
   "existingUser": "Usuari existent",
   "newToEnte": "Nou a Ente",
@@ -1155,7 +1150,6 @@
   "fileTypesAndNames": "Tipus i noms de fitxers",
   "location": "Ubicació",
   "moments": "Moments",
-  "searchFaceEmptySection": "La gent es mostrarà aquí un cop finalitzada la indexació",
   "searchDatesEmptySection": "Cerca per data, mes o any",
   "searchLocationEmptySection": "Agrupa fotos que s'han fet dins d'un cert radi d'una foto",
   "searchPeopleEmptySection": "Convida gent, i veuràs totes les fotos compartides per ells aquí",
@@ -1584,7 +1578,6 @@
   },
   "extraPhotosFound": "Fotos extra trobades",
   "configuration": "Configuració",
-  "localIndexing": "Indexació local",
   "processed": "Processat",
   "resetPerson": "Elimina",
   "areYouSureYouWantToResetThisPerson": "Estàs segur que vols restablir aquesta persona?",
@@ -1946,9 +1939,6 @@
   "curatedMemories": "Records seleccionats",
   "widgets": "Widgets",
   "memories": "Records",
-  "peopleWidgetDesc": "Selecciona les persones que vols veure a la teva pantalla d'inici.",
-  "albumsWidgetDesc": "Selecciona els àlbums que vols veure a la teva pantalla d'inici.",
-  "memoriesWidgetDesc": "Selecciona el tipus de records que vols veure a la teva pantalla d'inici.",
   "smartMemories": "Records intel·ligents",
   "pastYearsMemories": "Records d'anys passats",
   "deleteMultipleAlbumDialog": "Esborrar també les fotos (i vídeos) presents en aquests {count} àlbums de <bold>tots</bold> els altres àlbums dels quals formen part?",
@@ -1962,9 +1952,6 @@
   "sorryWeHadToPauseYourBackups": "Ho sentim, hem hagut de pausar les teves còpies de seguretat",
   "clickToInstallOurBestVersionYet": "Fes clic per instal·lar la nostra millor versió fins ara",
   "onThisDayNotificationExplanation": "Rep recordatoris sobre records d'aquest dia en anys anteriors.",
-  "addMemoriesWidgetPrompt": "Afegeix un widget de records a la teva pantalla d'inici i torna aquí per personalitzar.",
-  "addAlbumWidgetPrompt": "Afegeix un widget d'àlbum a la teva pantalla d'inici i torna aquí per personalitzar.",
-  "addPeopleWidgetPrompt": "Afegeix un widget de persones a la teva pantalla d'inici i torna aquí per personalitzar.",
   "birthdayNotifications": "Notificacions d'aniversari",
   "receiveRemindersOnBirthdays": "Rep recordatoris quan sigui l'aniversari d'algú. Tocar la notificació et portarà a fotos de la persona que fa anys.",
   "happyBirthday": "Per molts anys! 🥳",
@@ -1990,7 +1977,6 @@
   "same": "Igual",
   "different": "Diferent",
   "sameperson": "Mateixa persona?",
-  "indexingPausedStatusDescription": "La indexació està en pausa. Es reprendrà automàticament quan el dispositiu estigui llest. El dispositiu es considera llest quan el nivell de bateria, la salut de la bateria i l'estat tèrmic estan dins d'un rang saludable.",
   "thisWeek": "Aquesta setmana",
   "lastWeek": "La setmana passada",
   "thisMonth": "Aquest mes",
@@ -2364,38 +2350,6 @@
   "newLikeNotificationTitle": "Tens un m'agrada",
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
-  },
-  "likedYourPhoto": "Li ha agradat la teva foto",
-  "likedAPhoto": "Li ha agradat una foto",
-  "likedYourVideo": "Li ha agradat el teu vídeo",
-  "commentedOnYourPhoto": "Ha comentat la teva foto",
-  "commentedOnAPhoto": "Ha comentat una foto",
-  "commentedOnYourVideo": "Ha comentat el teu vídeo",
-  "commentedOnAVideo": "Ha comentat un vídeo",
-  "repliedToYourComment": "Ha respost al teu comentari",
-  "repliedToAComment": "Ha respost a un comentari",
-  "likedYourComment": "Li ha agradat el teu comentari",
-  "likedAComment": "Li ha agradat un comentari",
-  "likedYourReply": "Li ha agradat la teva resposta",
-  "likedAReply": "Li ha agradat una resposta",
-  "addedAMemoryTo": "Ha afegit un record a {albumName}",
-  "@addedAMemoryTo": {
-    "placeholders": {
-      "albumName": {
-        "type": "String"
-      }
-    }
-  },
-  "addedNMemoriesTo": "Ha afegit {count} records a {albumName}",
-  "@addedNMemoriesTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "albumName": {
-        "type": "String"
-      }
-    }
   },
   "and1Other": "i 1 altre",
   "andXOthers": "i {count} altres",

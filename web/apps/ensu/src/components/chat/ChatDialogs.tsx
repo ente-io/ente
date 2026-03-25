@@ -180,7 +180,7 @@ export const ChatDialogs = memo(
 
             if (isTauriRuntime || hasTauriBridge) {
                 try {
-                    const { open } = await import("@tauri-apps/plugin-shell");
+                    const { open } = await import("@tauri-apps/api/shell");
                     await open(url);
                     return;
                 } catch {
@@ -271,7 +271,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/blog/ensu/",
+                                            "https://ente.com/blog/ensu/",
                                         );
                                     }}
                                     sx={settingsItemSx}
@@ -397,7 +397,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/privacy",
+                                            "https://ente.com/privacy",
                                         );
                                     }}
                                     sx={settingsItemSx}
@@ -422,7 +422,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/terms",
+                                            "https://ente.com/terms",
                                         );
                                     }}
                                     sx={settingsItemSx}

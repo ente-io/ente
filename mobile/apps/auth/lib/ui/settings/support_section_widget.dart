@@ -46,7 +46,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
               await PlatformUtil.openWebView(
                 context,
                 context.l10n.faq,
-                "https://ente.io/help/auth/faq",
+                "https://ente.com/help/auth/faq",
               );
             } catch (e) {
               Logger("SupportSection").severe("Failed to open FAQ", e);

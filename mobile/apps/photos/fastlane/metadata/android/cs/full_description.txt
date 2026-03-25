@@ -30,7 +30,7 @@ OPRÁVNĚNÍ
 ente žádá o určitá oprávnění, aby mohla plnit funkci poskytovatele úložiště fotografií. Tato oprávnění si můžete prohlédnout zde: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 CENY
-Nenabízíme doživotní plány, protože je pro nás důležité zůstat udržitelnými a obstát ve zkoušce času. Místo toho nabízíme cenově dostupné plány, které můžete svobodně sdílet se svou rodinou. Více informací najdete na ente.io.
+Nenabízíme doživotní plány, protože je pro nás důležité zůstat udržitelnými a obstát ve zkoušce času. Místo toho nabízíme cenově dostupné plány, které můžete svobodně sdílet se svou rodinou. Více informací najdete na ente.com.
 
 PODPORA
 Jsme hrdí na to, že poskytujeme lidskou podporu. Pokud máte placený plán, můžete se obrátit na team@ente.io a do 24 hodin od našeho týmu očekávat odpověď.

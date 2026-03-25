@@ -1,6 +1,6 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { DialogActions, Stack, TextField, Typography } from "@mui/material";
+import { Stack, TextField, Typography } from "@mui/material";
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
@@ -11,8 +11,8 @@ import {
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
@@ -51,13 +51,18 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const [isSettingDeviceLock, setIsSettingDeviceLock] = useState(false);
     // Controls whether the Device lock option should be shown after a compatibility check.
     const [showDeviceLockOption, setShowDeviceLockOption] = useState(false);
-    // For the auto-lock duration selection dialog.
-    const [autoLockDialogOpen, setAutoLockDialogOpen] = useState(false);
+    // For the auto-lock duration selection nested drawer.
+    const [autoLockOptionsOpen, setAutoLockOptionsOpen] = useState(false);
     // Cancel flag used to avoid state updates after unmount.
     const isDeviceLockOptionRequestCancelled = useRef(false);
     const { showMiniDialog } = useBaseContext();
 
     useEffect(() => {
+        if (!state.supported) {
+            setShowDeviceLockOption(false);
+            return;
+        }
+
         isDeviceLockOptionRequestCancelled.current = false;
 
         void (async () => {
@@ -80,12 +85,19 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         return () => {
             isDeviceLockOptionRequestCancelled.current = true;
         };
-    }, []);
+    }, [state.supported]);
+
+    useEffect(() => {
+        if (!open) {
+            setAutoLockOptionsOpen(false);
+        }
+    }, [open]);
 
     /**
      * Close both levels of the nested drawer.
      */
     const handleRootClose = () => {
+        setAutoLockOptionsOpen(false);
         onClose();
         onRootClose();
     };
@@ -128,6 +140,8 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         }, [isSettingDeviceLock, showMiniDialog]);
 
     const handleToggleEnabled = useCallback(() => {
+        if (!state.supported) return;
+
         if (state.enabled) {
             showMiniDialog({
                 title: t("disable"),
@@ -266,17 +280,20 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                             state.autoLockTimeMs,
                                         )}
                                         onClick={() =>
-                                            setAutoLockDialogOpen(true)
+                                            setAutoLockOptionsOpen(true)
                                         }
                                     />
                                 </RowButtonGroup>
-                                <RowButtonGroupHint>
-                                    {t("auto_lock_hint")}
-                                </RowButtonGroupHint>
                             </Stack>
                         </>
                     )}
                 </Stack>
+                <AutoLockOptionsDrawer
+                    open={autoLockOptionsOpen}
+                    onClose={() => setAutoLockOptionsOpen(false)}
+                    onRootClose={handleRootClose}
+                    currentValue={state.autoLockTimeMs}
+                />
             </TitledNestedSidebarDrawer>
 
             <PinSetupDialog
@@ -289,11 +306,6 @@ export const AppLockSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 onClose={() => setPasswordDialogOpen(false)}
                 onComplete={handlePasswordSetupComplete}
             />
-            <AutoLockDialog
-                open={autoLockDialogOpen}
-                onClose={() => setAutoLockDialogOpen(false)}
-                currentValue={state.autoLockTimeMs}
-            />
         </>
     );
 };
@@ -303,6 +315,7 @@ const deviceLockSetupErrorText = (result: SetupDeviceLockResult): string => {
 
     if (result.status === "not-supported") {
         switch (result.reason) {
+            case "touchid-temporarily-unavailable":
             case "touchid-api-error":
                 return t("device_lock_setup_failed");
             case "unsupported-platform":
@@ -390,6 +403,19 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         };
     }, []);
 
+    useEffect(() => {
+        if (!open) return;
+
+        queueFocus(
+            () =>
+                (step === "enter"
+                    ? inputRefs
+                    : confirmInputRefs
+                ).current[0]?.focus(),
+            50,
+        );
+    }, [open, step, queueFocus]);
+
     const resetState = useCallback(() => {
         setStep("enter");
         setPin(["", "", "", ""]);
@@ -462,8 +488,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (pin.some((d) => !d)) return;
         setStep("confirm");
-        queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
-    }, [pin, queueFocus]);
+    }, [pin]);
 
     /**
      * If Back is pressed in the confirmation step, reset the
@@ -473,10 +498,11 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         setStep("enter");
         setConfirmPin(["", "", "", ""]);
         setError("");
-        queueFocus(() => inputRefs.current[0]?.focus(), 50);
-    }, [queueFocus]);
+    }, []);
 
     const handleConfirm = useCallback(async () => {
+        if (confirmPin.some((d) => !d)) return;
+
         const pinStr = pin.join("");
         const confirmStr = confirmPin.join("");
         if (pinStr !== confirmStr) {
@@ -496,6 +522,18 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
             queueFocus(() => confirmInputRefs.current[0]?.focus(), 50);
         }
     }, [pin, confirmPin, onComplete, queueFocus, resetState]);
+
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            if (step === "enter") {
+                handleNext();
+                return;
+            }
+            void handleConfirm();
+        },
+        [step, handleNext, handleConfirm],
+    );
 
     const renderPinInputs = (
         values: string[],
@@ -550,7 +588,11 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                 "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
             }}
         >
-            <Stack sx={{ gap: 1.5, py: 0 }}>
+            <Stack
+                component="form"
+                onSubmit={(e: React.FormEvent) => handleSubmit(e)}
+                sx={{ gap: 1.5, py: 0 }}
+            >
                 {step === "enter" ? (
                     <>
                         <Typography
@@ -562,8 +604,8 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                         <FocusVisibleButton
                             fullWidth
                             color="accent"
+                            type="submit"
                             disabled={pin.some((d) => !d)}
-                            onClick={handleNext}
                         >
                             {t("next")}
                         </FocusVisibleButton>
@@ -596,14 +638,15 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
+                                type="submit"
                                 disabled={confirmPin.some((d) => !d)}
-                                onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
                             </FocusVisibleButton>
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
+                                type="button"
                                 onClick={handleBack}
                             >
                                 {t("go_back")}
@@ -651,10 +694,17 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     }, []);
 
     useEffect(() => {
-        if (open) {
-            queueFocus(() => passwordInputRef.current?.focus(), 300);
-        }
-    }, [open, queueFocus]);
+        if (!open) return;
+
+        queueFocus(
+            () =>
+                (step === "enter"
+                    ? passwordInputRef.current
+                    : confirmPasswordInputRef.current
+                )?.focus(),
+            50,
+        );
+    }, [open, step, queueFocus]);
 
     const resetState = useCallback(() => {
         setStep("enter");
@@ -673,20 +723,19 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (!password) return;
         setStep("confirm");
-        queueFocus(() => confirmPasswordInputRef.current?.focus(), 300);
-    }, [password, queueFocus]);
+    }, [password]);
 
     const handleBack = useCallback(() => {
         setStep("enter");
         setConfirmPassword("");
         setError("");
-        queueFocus(() => passwordInputRef.current?.focus(), 300);
-    }, [queueFocus]);
+    }, []);
 
     const handleConfirm = useCallback(async () => {
         if (password !== confirmPassword) {
             setError(t("app_lock_password_mismatch"));
             setConfirmPassword("");
+            queueFocus(() => confirmPasswordInputRef.current?.focus(), 50);
             return;
         }
         try {
@@ -697,9 +746,21 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
             log.error("Failed to set up password app lock", e);
             setError(t("generic_error"));
             setConfirmPassword("");
-            queueFocus(() => confirmPasswordInputRef.current?.focus(), 300);
+            queueFocus(() => confirmPasswordInputRef.current?.focus(), 50);
         }
     }, [password, confirmPassword, onComplete, queueFocus, resetState]);
+
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            if (step === "enter") {
+                handleNext();
+                return;
+            }
+            void handleConfirm();
+        },
+        [step, handleNext, handleConfirm],
+    );
 
     return (
         <TitledMiniDialog
@@ -711,11 +772,16 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                 "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
             }}
         >
-            <Stack sx={{ gap: 2, py: 1 }}>
+            <Stack
+                component="form"
+                onSubmit={(e: React.FormEvent) => handleSubmit(e)}
+                sx={{ gap: 2, py: 1 }}
+            >
                 {step === "enter" ? (
                     <>
                         <TextField
                             fullWidth
+                            inputRef={passwordInputRef}
                             label={t("app_lock_enter_password")}
                             type={showPassword ? "text" : "password"}
                             value={password}
@@ -724,7 +790,6 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: { ref: passwordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -740,8 +805,8 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                         <FocusVisibleButton
                             fullWidth
                             color="accent"
+                            type="submit"
                             disabled={!password}
-                            onClick={handleNext}
                         >
                             {t("next")}
                         </FocusVisibleButton>
@@ -750,6 +815,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                     <>
                         <TextField
                             fullWidth
+                            inputRef={confirmPasswordInputRef}
                             label={t("app_lock_confirm_password")}
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
@@ -760,7 +826,6 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 setError("");
                             }}
                             slotProps={{
-                                htmlInput: { ref: confirmPasswordInputRef },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -779,14 +844,15 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
+                                type="submit"
                                 disabled={!confirmPassword}
-                                onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
                             </FocusVisibleButton>
                             <FocusVisibleButton
                                 fullWidth
                                 color="secondary"
+                                type="button"
                                 onClick={handleBack}
                             >
                                 {t("go_back")}
@@ -799,55 +865,80 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     );
 };
 
-// -- Auto-Lock Dialog --
+// -- Auto-lock nested drawer --
 
-interface AutoLockDialogProps {
-    open: boolean;
-    onClose: () => void;
+interface AutoLockOptionsDrawerProps
+    extends NestedSidebarDrawerVisibilityProps {
     currentValue: number;
 }
 
-const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
+const AutoLockOptionsDrawer: React.FC<AutoLockOptionsDrawerProps> = ({
     open,
     onClose,
+    onRootClose,
     currentValue,
 }) => {
+    const [pendingAutoLockMs, setPendingAutoLockMs] = useState<number | null>(
+        null,
+    );
+
     const selectedMs = autoLockOptions.some((o) => o.ms === currentValue)
         ? currentValue
         : autoLockOptions[0]!.ms;
 
+    const setAutoLockTimeValue = useCallback(
+        (ms: number) => {
+            if (pendingAutoLockMs !== null || ms === currentValue) return;
+
+            setPendingAutoLockMs(ms);
+            void (async () => {
+                try {
+                    await setAutoLockTime(ms);
+                    onClose();
+                } catch (e) {
+                    log.error("Failed to update app lock auto-lock time", e);
+                } finally {
+                    setPendingAutoLockMs((pending) =>
+                        pending === ms ? null : pending,
+                    );
+                }
+            })();
+        },
+        [pendingAutoLockMs, currentValue, onClose],
+    );
+
     return (
-        <TitledMiniDialog open={open} onClose={onClose} title={t("auto_lock")}>
-            <Stack sx={{ gap: 1.25, pt: 0.25, pb: 0.5, mt: -0.75 }}>
+        <TitledNestedSidebarDrawer
+            anchor="left"
+            {...{ open, onClose }}
+            onRootClose={onRootClose}
+            title={t("auto_lock")}
+        >
+            <Stack sx={{ py: "20px", px: "8px" }}>
                 <RowButtonGroup>
                     {autoLockOptions.map((option, index) => (
                         <React.Fragment key={option.ms}>
-                            {index > 0 && <RowButtonDivider />}
                             <RowButton
                                 label={t(option.labelKey)}
+                                disabled={pendingAutoLockMs !== null}
                                 endIcon={
-                                    selectedMs === option.ms ? (
+                                    pendingAutoLockMs === option.ms ? (
+                                        <RowButtonEndActivityIndicator />
+                                    ) : selectedMs === option.ms ? (
                                         <CheckIcon
                                             sx={{ color: "accent.main" }}
                                         />
                                     ) : undefined
                                 }
-                                onClick={() => setAutoLockTime(option.ms)}
+                                onClick={() => setAutoLockTimeValue(option.ms)}
                             />
+                            {index != autoLockOptions.length - 1 && (
+                                <RowButtonDivider />
+                            )}
                         </React.Fragment>
                     ))}
                 </RowButtonGroup>
             </Stack>
-            <DialogActions sx={{ px: 0, mx: "-16px", pt: 0.75, pb: 0 }}>
-                <FocusVisibleButton
-                    fullWidth
-                    color="accent"
-                    sx={{ minHeight: 48 }}
-                    onClick={onClose}
-                >
-                    {t("done")}
-                </FocusVisibleButton>
-            </DialogActions>
-        </TitledMiniDialog>
+        </TitledNestedSidebarDrawer>
     );
 };

@@ -13,7 +13,6 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
-  static const int _commentsFlag = 1 << 1;
   static const int _backupOptionsFlag = 1 << 2;
   static const int _videoStreamingFlag = 1 << 3;
 
@@ -99,12 +98,17 @@ class FlagService {
 
   bool get enableShareePin => true;
 
-  bool get isSocialEnabled =>
-      internalUser || _isServerFlagEnabled(_commentsFlag);
-
   bool get useRustForML => internalUser;
 
+  bool get enableMLInBackground => internalUser;
+
   bool get useRustForFaceThumbnails => internalUser;
+
+  bool get petEnabled => internalUser;
+
+  bool get qrFeatureEnabled => internalUser;
+
+  bool get syncRecoveryDiagnostics => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
