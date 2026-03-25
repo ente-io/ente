@@ -80,6 +80,7 @@ class InferenceRsProvider(
     @Volatile private var currentContextLength: Int? = null
     @Volatile private var currentJobId: Long? = null
     @Volatile private var manualDownloadCancelled = false
+    @Volatile private var manualDownloadActive = false
     private var backendInitialized = false
     private val migratedLegacyTargets = java.util.Collections.synchronizedSet(mutableSetOf<String>())
     private val legacyMigrationLocks = ConcurrentHashMap<String, ReentrantLock>()
@@ -159,6 +160,8 @@ class InferenceRsProvider(
         val summary = generateStreamWithCallback(context, request, onToken)
         GenerationSummary(summary.jobId, summary.generatedTokens ?: 0, summary.totalTimeMs)
     }
+
+    override val isManualDownloadActive: Boolean get() = manualDownloadActive
 
     override fun isModelDownloaded(target: LlmModelTarget): Boolean {
         migrateLegacyDownloads(target)
@@ -411,13 +414,18 @@ class InferenceRsProvider(
         onProgress: (DownloadProgress) -> Unit
     ) {
         manualDownloadCancelled = false
-        val targets = ModelDownloadSupport.expectedTargets(modelDir, target)
-        ModelDownloadSupport.downloadTargets(
-            httpClient,
-            targets,
-            onProgress,
-            isCancelled = { manualDownloadCancelled }
-        )
+        manualDownloadActive = true
+        try {
+            val targets = ModelDownloadSupport.expectedTargets(modelDir, target)
+            ModelDownloadSupport.downloadTargets(
+                httpClient,
+                targets,
+                onProgress,
+                isCancelled = { manualDownloadCancelled }
+            )
+        } finally {
+            manualDownloadActive = false
+        }
     }
 
     private fun ensureDownloadsEnqueued(target: LlmModelTarget) {

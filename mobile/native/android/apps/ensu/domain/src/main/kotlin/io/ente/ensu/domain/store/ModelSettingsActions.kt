@@ -102,7 +102,7 @@ internal class ModelSettingsActions(
                 if (!isFailure) {
                     startDownloadProgressMonitor(target)
                 }
-            } else {
+            } else if (!llmProvider.isManualDownloadActive) {
                 persistModelDownloadRequested(false)
                 state.update { appState ->
                     appState.copy(
