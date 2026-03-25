@@ -107,7 +107,7 @@ adb uninstall io.ente.ensu
 
 ## Custom API Endpoint
 
-Set `ENTE_API_ENDPOINT` to override the default (`https://api.ente.io`).
+Set `ENTE_API_ENDPOINT` to override the default (`https://api.ente.com`).
 
 ```bash
 ENTE_API_ENDPOINT=https://your-endpoint ./gradlew :app-ui:installDebug

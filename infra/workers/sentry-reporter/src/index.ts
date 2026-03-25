@@ -84,15 +84,15 @@ const mapDSN = (originalBody: string, originalDSNString: string) => {
 
 const dsnMappings: Record<string, string> = {
     // photos-mobile
-    "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4":
-        "https://1b13ae41ee7c898ce3c49d04781eb908@sentry.ente.io/2",
+    "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.com/4":
+        "https://1b13ae41ee7c898ce3c49d04781eb908@sentry.ente.com/2",
 
     // photos-mobile-debug
     // Nb: Maps to the same project in Sentry.
-    "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3":
-        "https://1b13ae41ee7c898ce3c49d04781eb908@sentry.ente.io/2",
+    "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.com/3":
+        "https://1b13ae41ee7c898ce3c49d04781eb908@sentry.ente.com/2",
 
     // auth-mobile
-    "https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.io/9":
-        "https://47c2aa45d5e359ada9f5fe3c44c98f12@sentry.ente.io/3",
+    "https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.com/9":
+        "https://47c2aa45d5e359ada9f5fe3c44c98f12@sentry.ente.com/3",
 };

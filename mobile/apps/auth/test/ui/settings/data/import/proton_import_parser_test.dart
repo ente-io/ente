@@ -15,14 +15,14 @@ void main() {
         codes[0],
         type: Type.totp,
         issuer: '.env',
-        account: 'example@ente.io',
+        account: 'example@ente.com',
         secret: 'MI4GCOJSGIZTKLJSGMZWKLJUGEZDQLJYG5STILJSMUYDIYTCMQ3TSOJRGI',
         algorithm: Algorithm.sha1,
         digits: 6,
         period: 30,
         rawData: _expectedStoredTotpRawData(
           issuer: '.env',
-          account: 'example@ente.io',
+          account: 'example@ente.com',
           secret: 'MI4GCOJSGIZTKLJSGMZWKLJUGEZDQLJYG5STILJSMUYDIYTCMQ3TSOJRGI',
         ),
       );

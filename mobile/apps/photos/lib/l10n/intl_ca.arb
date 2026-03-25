@@ -27,7 +27,7 @@
   "deleteReason4": "La meva raó no està llistada",
   "sendEmail": "Envia correu",
   "deleteRequestSLAText": "La teva sol·licitud es processarà en 72 hores.",
-  "deleteEmailRequest": "Si us plau, envia un correu a <warning>account-deletion@ente.io</warning> des de la teva adreça de correu registrada.",
+  "deleteEmailRequest": "Si us plau, envia un correu a <warning>account-deletion@ente.com</warning> des de la teva adreça de correu registrada.",
   "entePhotosPerm": "Ente <i>necessita permís per</i> preservar les teves fotos",
   "ok": "D'acord",
   "createAccount": "Crea compte",
@@ -73,7 +73,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -140,7 +140,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -287,18 +287,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificació",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} no té un compte d'Ente.\n\nEnvia'ls una invitació per compartir fotos.",
-  "shareMyVerificationID": "Aquí tens el meu ID de verificació: {verificationID} per a ente.io.",
-  "shareTextConfirmOthersVerificationID": "Ei, pots confirmar que aquest és el teu ID de verificació d'ente.io: {verificationID}",
+  "shareMyVerificationID": "Aquí tens el meu ID de verificació: {verificationID} per a ente.com.",
+  "shareTextConfirmOthersVerificationID": "Ei, pots confirmar que aquest és el teu ID de verificació d'ente.com: {verificationID}",
   "somethingWentWrong": "Alguna cosa ha anat malament",
   "sendInvite": "Envia invitació",
-  "shareTextRecommendUsingEnte": "Descarrega Ente perquè puguem compartir fàcilment fotos i vídeos en qualitat original\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarrega Ente perquè puguem compartir fàcilment fotos i vídeos en qualitat original\n\nhttps://ente.com",
   "done": "Fet",
   "applyCodeTitle": "Aplica codi",
   "enterCodeDescription": "Introdueix el codi proporcionat pel teu amic per reclamar emmagatzematge gratuït per a tots dos",
@@ -326,7 +326,7 @@
   "theyAlsoGetXGb": "Ells també obtenen {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB per a ells + {storageAmountInGB} GB per a tu quan millorin el pla.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vegada que algú es registra per a un pla de pagament i aplica el teu codi",
-  "shareTextReferralCode": "Ente Photos és una llar privada i segura per a les teves fotos\n* Descarrega Ente Photos des de https://ente.io/app\n* Crea un compte\n* Aplica el codi de referència {referralCode} a Configuració->Referència\n* Aconsegueix {referralStorageInGB}GB gratis quan milloris a un pla de pagament",
+  "shareTextReferralCode": "Ente Photos és una llar privada i segura per a les teves fotos\n* Descarrega Ente Photos des de https://ente.com/app\n* Crea un compte\n* Aplica el codi de referència {referralCode} a Configuració->Referència\n* Aconsegueix {referralStorageInGB}GB gratis quan milloris a un pla de pagament",
   "claimFreeStorage": "Reclama emmagatzematge gratuït",
   "inviteYourFriends": "Convida els teus amics",
   "earnFreeStorage": "Guanya emmagatzematge gratuït",
@@ -695,7 +695,7 @@
   "subscription": "Subscripció",
   "paymentDetails": "Detalls del pagament",
   "manageFamily": "Gestiona família",
-  "contactToManageSubscription": "Si us plau, contacta amb nosaltres a support@ente.io per gestionar la teva subscripció de {provider}.",
+  "contactToManageSubscription": "Si us plau, contacta amb nosaltres a support@ente.com per gestionar la teva subscripció de {provider}.",
   "renewSubscription": "Renova subscripció",
   "cancelSubscription": "Cancel·la subscripció",
   "areYouSureYouWantToRenew": "Estàs segur que vols renovar?",
@@ -742,9 +742,9 @@
   "playstoreSubscription": "Subscripció de PlayStore",
   "appstoreSubscription": "Subscripció d'AppStore",
   "subAlreadyLinkedErrMessage": "El teu {id} ja està vinculat a un altre compte d'Ente.\nSi vols utilitzar el teu {id} amb aquest compte, si us plau contacta amb el nostre suport''",
-  "visitWebToManage": "Si us plau, visita web.ente.io per gestionar la teva subscripció",
+  "visitWebToManage": "Si us plau, visita web.ente.com per gestionar la teva subscripció",
   "couldNotUpdateSubscription": "No s'ha pogut actualitzar la subscripció",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Si us plau, contacta amb support@ente.io i estarem encantats d'ajudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Si us plau, contacta amb support@ente.com i estarem encantats d'ajudar!",
   "paymentFailed": "El pagament ha fallat",
   "paymentFailedTalkToProvider": "Si us plau, parla amb el suport de {providerName} si se t'ha cobrat",
   "@paymentFailedTalkToProvider": {
@@ -1104,7 +1104,7 @@
   "loadMessage5": "El nostre codi font i criptografia han estat auditats externament",
   "loadMessage6": "Pots compartir enllaços als teus àlbums amb els teus éssers estimats",
   "loadMessage7": "Les nostres aplicacions mòbils s'executen en segon pla per xifrar i fer còpia de seguretat de qualsevol foto nova que facis",
-  "loadMessage8": "web.ente.io té un carregador elegant",
+  "loadMessage8": "web.ente.com té un carregador elegant",
   "loadMessage9": "Utilitzem Xchacha20Poly1305 per xifrar de manera segura les teves dades",
   "photoDescriptions": "Descripcions de fotos",
   "searchResultFileName": "Nom de fitxer",
@@ -1373,7 +1373,7 @@
   "playOnTv": "Reprodueix àlbum a la TV",
   "pair": "Aparella",
   "deviceNotFound": "Dispositiu no trobat",
-  "castInstruction": "Visita cast.ente.io al dispositiu que vols aparellar.\n\nIntrodueix el codi de sota per reproduir l'àlbum a la teva TV.",
+  "castInstruction": "Visita cast.ente.com al dispositiu que vols aparellar.\n\nIntrodueix el codi de sota per reproduir l'àlbum a la teva TV.",
   "deviceCodeHint": "Introdueix el codi",
   "joinDiscord": "Uneix-te a Discord",
   "locations": "Ubicacions",

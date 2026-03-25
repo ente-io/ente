@@ -41,13 +41,13 @@ class SocialSectionWidget extends StatelessWidget {
       [
         SocialsMenuItemWidget(
           AppLocalizations.of(context).blog,
-          "https://ente.io/blog",
+          "https://ente.com/blog",
           launchInExternalApp: !Platform.isAndroid,
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
           AppLocalizations.of(context).merchandise,
-          "https://shop.ente.io",
+          "https://shop.ente.com",
           launchInExternalApp: !Platform.isAndroid,
         ),
         sectionOptionSpacing,
@@ -63,7 +63,7 @@ class SocialSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         SocialsMenuItemWidget(
           AppLocalizations.of(context).discord,
-          "https://ente.io/discord",
+          "https://ente.com/discord",
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(

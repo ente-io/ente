@@ -388,7 +388,7 @@ export const cancelStripeSubscription = async () => {
     return pullUserDetails();
 };
 
-const paymentsAppOrigin = "https://payments.ente.io";
+const paymentsAppOrigin = "https://payments.ente.com";
 
 /**
  * Start the flow to purchase or update a subscription by redirecting the user

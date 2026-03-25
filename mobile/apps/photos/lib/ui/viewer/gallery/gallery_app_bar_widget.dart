@@ -1038,7 +1038,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             MaterialPageRoute(
               builder: (context) => WebPage(
                 widget.title ?? "",
-                "https://albums.ente.io/?t=$authToken#$albumKey",
+                "https://albums.ente.com/?t=$authToken#$albumKey",
               ),
             ),
           );
@@ -1143,7 +1143,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       context,
       title: context.l10n.playOnTv,
       body: AppLocalizations.of(context).castInstruction.replaceFirst(
-            'cast.ente.io',
+            'cast.ente.com',
             flagService.castUrl,
           ),
       submitButtonLabel: AppLocalizations.of(context).pair,

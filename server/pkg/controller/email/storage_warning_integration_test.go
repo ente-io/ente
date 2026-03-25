@@ -27,7 +27,7 @@ func TestSendStorageWarningMailsActiveOverageIntegration(t *testing.T) {
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:        storageWarningIntegrationTestUserID,
-		Email:        "active-overage@ente.io",
+		Email:        "active-overage@ente.com",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 36*storageWarningIntegrationTestGiB)
@@ -57,7 +57,7 @@ func TestSendStorageWarningMailsExpiredIntegration(t *testing.T) {
 	now := timeutil.Microseconds()
 	userID := testutil.InsertUser(t, db, testutil.UserFixture{
 		UserID:        storageWarningIntegrationTestUserID,
-		Email:        "expired-subscription@ente.io",
+		Email:        "expired-subscription@ente.com",
 		CreationTime: now - timeutil.MicroSecondsInOneHour,
 	})
 	testutil.InsertUsage(t, db, userID, 26*storageWarningIntegrationTestGiB)

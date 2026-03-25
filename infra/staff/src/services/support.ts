@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const apiOrigin =
-    import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.io";
+    import.meta.env.VITE_ENTE_API_ORIGIN ?? "https://api.ente.com";
 
 const UserDetails = z.object({}).passthrough();
 

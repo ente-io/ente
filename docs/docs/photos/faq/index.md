@@ -415,7 +415,7 @@ Jump to a category:
 - [Why does AppImage say it requires FUSE?](/photos/faq/troubleshooting#appimage-fuse)
 - [Why do I get a "SUID sandbox helper" error on Linux?](/photos/faq/troubleshooting#suid-sandbox-error)
 - [Why won't the Windows desktop app start (JavaScript error)?](/photos/faq/troubleshooting#windows-javascript-error)
-- [Why can't I log in to web.ente.io on my mobile browser?](/photos/faq/troubleshooting#web-login-mobile)
+- [Why can't I log in to web.ente.com on my mobile browser?](/photos/faq/troubleshooting#web-login-mobile)
 - [How do I identify which files failed to upload?](/photos/faq/troubleshooting#identify-failed-uploads)
 
 ### Performance Issues
@@ -544,4 +544,4 @@ Jump to a category:
 - Try using the search function at the top of the page
 - Check the [Getting Started guide](/photos/getting-started/)
 - Visit the [main Photos documentation](/photos/)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)

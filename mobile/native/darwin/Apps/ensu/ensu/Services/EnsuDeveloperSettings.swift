@@ -6,7 +6,7 @@ struct NetworkConfiguration {
     let apiEndpoint: URL
 
     static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
     }
 
     static func selfHosted(baseURL: URL) -> NetworkConfiguration {

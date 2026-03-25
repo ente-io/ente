@@ -186,7 +186,7 @@ const CHAT_SYSTEM_PROMPT_BODY =
 
 const buildChatSystemPrompt = () => {
     const dateAndTime = new Date().toLocaleString();
-    return `Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: ${dateAndTime}. ${CHAT_SYSTEM_PROMPT_BODY}`;
+    return `Your name is ensu and you're a friendly ai assistant created by ente.com. ente.com is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: ${dateAndTime}. ${CHAT_SYSTEM_PROMPT_BODY}`;
 };
 
 const SESSION_TITLE_PROMPT =

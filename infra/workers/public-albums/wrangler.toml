@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2025-06-03"
 
 routes = [
-    { pattern = "public-albums.ente.io", custom_domain = true }
+    { pattern = "public-albums.ente.com", custom_domain = true }
 ]
 
 tail_consumers = [

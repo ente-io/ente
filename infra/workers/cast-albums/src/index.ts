@@ -29,7 +29,7 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
-    const allowed = ["cast.ente.io", "cast.ente.sh", "localhost"];
+    const allowed = ["cast.ente.com", "cast.ente.sh", "localhost"];
 
     if (!origin) return false;
     try {
@@ -70,7 +70,7 @@ const handleGET = async (request: Request) => {
     };
 
     let response = await fetch(
-        `https://api.ente.io/cast/files${pathname}${fileID}?${params.toString()}`,
+        `https://api.ente.com/cast/files${pathname}${fileID}?${params.toString()}`,
         { headers },
     );
 

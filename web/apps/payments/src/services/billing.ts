@@ -57,7 +57,7 @@ export const parseAndHandleRequest = async () => {
             // Maybe someone attempted to directly open this page in their
             // browser. Not much we can do, just redirect them to the main site.
             console.log(
-                "None of the required query parameters were supplied, redirecting to the ente.io",
+                "None of the required query parameters were supplied, redirecting to the ente.com",
             );
             redirectHome();
             return;
@@ -83,7 +83,7 @@ export const parseAndHandleRequest = async () => {
     }
 };
 
-const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
+const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.com";
 const paymentIntentPollIntervalMs = 2_000;
 const paymentIntentPollTimeoutMs = 300_000;
 const pendingPaymentContextStorageKey = "ente.payments.pending-context";
@@ -494,5 +494,5 @@ const redirectToApp = (
 };
 
 const redirectHome = () => {
-    window.location.href = "https://ente.io";
+    window.location.href = "https://ente.com";
 };

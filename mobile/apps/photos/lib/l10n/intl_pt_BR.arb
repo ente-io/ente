@@ -29,7 +29,7 @@
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
   "deleteRequestSLAText": "Sua solicitação será revisada em até 72 horas.",
-  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.io</warning> do seu e-mail registrado.",
+  "deleteEmailRequest": "Por favor, envie um e-mail a <warning>account-deletion@ente.com</warning> do seu e-mail registrado.",
   "entePhotosPerm": "Ente <i>precisa de permissão para</i> preservar suas fotos",
   "ok": "OK",
   "createAccount": "Criar conta",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -313,18 +313,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificação",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} não tem uma conta Ente.\n\nEnvie-os um convite para compartilhar fotos.",
-  "shareMyVerificationID": "Aqui está meu ID de verificação para o ente.io: {verificationID}",
-  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar se este ID de verificação do ente.io é seu?: {verificationID}",
+  "shareMyVerificationID": "Aqui está meu ID de verificação para o ente.com: {verificationID}",
+  "shareTextConfirmOthersVerificationID": "Ei, você pode confirmar se este ID de verificação do ente.com é seu?: {verificationID}",
   "somethingWentWrong": "Algo deu errado",
   "sendInvite": "Enviar convite",
-  "shareTextRecommendUsingEnte": "Baixe o Ente para que nós possamos compartilhar com facilidade fotos e vídeos de qualidade original\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Baixe o Ente para que nós possamos compartilhar com facilidade fotos e vídeos de qualidade original\n\nhttps://ente.com",
   "done": "Concluído",
   "applyCodeTitle": "Aplicar código",
   "enterCodeDescription": "Insira o código fornecido por um amigo para reivindicar armazenamento grátis para ambos",
@@ -685,7 +685,7 @@
   "subscription": "Assinatura",
   "paymentDetails": "Detalhes de pagamento",
   "manageFamily": "Gerenciar família",
-  "contactToManageSubscription": "Entre em contato conosco em support@ente.io para gerenciar sua assinatura {provider}.",
+  "contactToManageSubscription": "Entre em contato conosco em support@ente.com para gerenciar sua assinatura {provider}.",
   "renewSubscription": "Renovar assinatura",
   "cancelSubscription": "Cancelar assinatura",
   "areYouSureYouWantToRenew": "Deseja renovar?",
@@ -732,9 +732,9 @@
   "playstoreSubscription": "Assinatura da PlayStore",
   "appstoreSubscription": "Assinatura da AppStore",
   "subAlreadyLinkedErrMessage": "Seu {id} já está vinculado a outra conta Ente. Se você gostaria de usar seu {id} com esta conta, entre em contato conosco\"",
-  "visitWebToManage": "Visite o web.ente.io para gerenciar sua assinatura",
+  "visitWebToManage": "Visite o web.ente.com para gerenciar sua assinatura",
   "couldNotUpdateSubscription": "Não foi possível atualizar a assinatura",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Entre em contato com support@ente.io e nós ficaremos felizes em ajudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Entre em contato com support@ente.com e nós ficaremos felizes em ajudar!",
   "paymentFailed": "O pagamento falhou",
   "paymentFailedTalkToProvider": "Fale com o suporte {providerName} se você foi cobrado",
   "@paymentFailedTalkToProvider": {
@@ -1092,7 +1092,7 @@
   "loadMessage5": "Nosso código-fonte e criptografia foram auditadas externamente",
   "loadMessage6": "Você pode compartilhar links para seus álbuns com seus entes queridos",
   "loadMessage7": "Nossos aplicativos móveis são executados em segundo plano para criptografar e salvar em segurança quaisquer fotos novas que você acessar",
-  "loadMessage8": "web.ente.io tem um enviador mais rápido",
+  "loadMessage8": "web.ente.com tem um enviador mais rápido",
   "loadMessage9": "Nós usamos Xchacha20Poly1305 para criptografar seus dados com segurança",
   "photoDescriptions": "Descrições das fotos",
   "fileTypesAndNames": "Tipos de arquivo e nomes",
@@ -1312,7 +1312,7 @@
   "playOnTv": "Reproduzir álbum na TV",
   "pair": "Parear",
   "deviceNotFound": "Dispositivo não encontrado",
-  "castInstruction": "Acesse cast.ente.io no dispositivo desejado para parear.\n\nInsira o código abaixo para reproduzir o álbum na sua TV.",
+  "castInstruction": "Acesse cast.ente.com no dispositivo desejado para parear.\n\nInsira o código abaixo para reproduzir o álbum na sua TV.",
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
   "locations": "Localizações",

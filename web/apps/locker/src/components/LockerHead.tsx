@@ -1,12 +1,12 @@
 import Head from "next/head";
 import React from "react";
 
-const url = "https://locker.ente.io";
+const url = "https://locker.ente.com";
 const title = "Ente Locker - Safe space for your most important documents";
 const description =
     "Store your important documents and credentials. Share them with trusted contacts or pass them on in emergencies.";
 const image =
-    "https://ente.io/static/locker-meta-preview-0db171b861bdbc3262b8289e40cf7efe.png";
+    "https://ente.com/static/locker-meta-preview-0db171b861bdbc3262b8289e40cf7efe.png";
 
 export const LockerHead: React.FC = () => (
     <Head>

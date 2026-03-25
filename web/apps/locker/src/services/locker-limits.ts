@@ -3,7 +3,7 @@ import { apiOrigin } from "ente-base/origins";
 export const LOCKER_FILE_LIMIT_FREE = 100;
 export const LOCKER_FILE_LIMIT_PAID = 1000;
 
-const ENTE_PRODUCTION_API_ORIGIN = "https://api.ente.io";
+const ENTE_PRODUCTION_API_ORIGIN = "https://api.ente.com";
 
 const normalizedOrigin = (origin: string) => new URL(origin).origin;
 

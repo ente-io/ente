@@ -10,7 +10,7 @@ Custom domains allow you to serve your public links with your own personalized d
 For example, if I have an Ente album and wish to share it with my friends, I can open the album's sharing settings and create a public link. When I copy this link, it will be of the form of
 
 ```
-https://albums.ente.io/?t=...
+https://albums.ente.com/?t=...
 ```
 
 The custom domains feature allows you to instead create a link that uses your own domain, say
@@ -30,7 +30,7 @@ The custom domains feature is available to all Ente users, including those on th
 The setup involves two steps:
 
 1. Letting Ente know about the domain you wish to use for serving your public links
-2. Updating your DNS settings to point your domain (or subdomain) to **my.ente.io**
+2. Updating your DNS settings to point your domain (or subdomain) to **my.ente.com**
 
 For people who are comfortable with changing DNS settings on their domain provider, this entire process is very simple will take a minute. For people who are not comfortable with changing DNS, we will provide a more detailed breakdown below.
 
@@ -46,13 +46,13 @@ Head over to Settings > Preferences > Custom domains, in the domain field enter 
 
 ### Step 2 - Add DNS entry
 
-The second step is to add a CNAME entry in your DNS provider that forwards requests for pics.example.org (replace with your subdomain) to **my.ente.io**.
+The second step is to add a CNAME entry in your DNS provider that forwards requests for pics.example.org (replace with your subdomain) to **my.ente.com**.
 
-Specifically, you need to add a `CNAME record` from the domain (or subdomain) of your choice to `my.ente.io`. You can leave the `TTL` at its default.
+Specifically, you need to add a `CNAME record` from the domain (or subdomain) of your choice to `my.ente.com`. You can leave the `TTL` at its default.
 
 | Record Type |            Name            |        Value | TTL            |
 | ----------- | :------------------------: | -----------: | -------------- |
-| CNAME       | Your subdomain, e.g `pics` | `my.ente.io` | Auto (default) |
+| CNAME       | Your subdomain, e.g `pics` | `my.ente.com` | Auto (default) |
 
 The exact steps for doing this depend on the DNS provider that you're using.
 
@@ -72,7 +72,7 @@ Note that orange proxy option is off. And here is how it would look for Namechea
 
 The time it takes for DNS records to update is dependent on your DNS provider. Usually the changes should start reflecting within a few minutes, and should almost always reflect within an hour.
 
-Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.io` with your choice (e.g. `pics.example.org`), and the link will still work.
+Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.com` with your choice (e.g. `pics.example.org`), and the link will still work.
 
 You don't need to do this manually though, the apps will do it for you. More on this in the next section. But first, some troubleshooting tips.
 
@@ -80,7 +80,7 @@ You don't need to do this manually though, the apps will do it for you. More on 
 
 If your domain is not working, go through the following checklist.
 
-- The CNAME should be from your domain to my.ente.io, not the other way around. That is, `pics.example.org => my.ente.io`.
+- The CNAME should be from your domain to my.ente.com, not the other way around. That is, `pics.example.org => my.ente.com`.
 
 - If you're using Cloudflare DNS, make sure that the "Orange" proxy status toggle is off, and the Proxy status is the "Grey" DNS only.
 
@@ -98,4 +98,4 @@ To stop using your custom domain, we need to undo the two steps we did during se
 
 ## Implementation
 
-Our engineers also wrote [explainer](https://ente.io/blog/custom-domains/) of how this works behind the scenes.
+Our engineers also wrote [explainer](https://ente.com/blog/custom-domains/) of how this works behind the scenes.

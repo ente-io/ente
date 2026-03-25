@@ -513,7 +513,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           onTap: () async {
             await sendEmail(
               context,
-              to: "support@ente.io",
+              to: "support@ente.com",
               body: message,
             );
           },

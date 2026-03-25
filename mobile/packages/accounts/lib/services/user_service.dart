@@ -46,7 +46,7 @@ import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
-const String kAccountsUrl = "https://accounts.ente.io";
+const String kAccountsUrl = "https://accounts.ente.com";
 
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";

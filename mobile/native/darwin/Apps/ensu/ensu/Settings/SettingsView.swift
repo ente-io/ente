@@ -111,7 +111,7 @@ struct SettingsView: View {
         SettingsActionItem(
             title: "About",
             iconName: "InformationCircleIcon",
-            action: { openExternalLink("https://ente.io/blog/ensu/") }
+            action: { openExternalLink("https://ente.com/blog/ensu/") }
         )
     }
 
@@ -120,12 +120,12 @@ struct SettingsView: View {
             SettingsActionItem(
                 title: "Privacy Policy",
                 iconName: "ViewIcon",
-                action: { openExternalLink("https://ente.io/privacy") }
+                action: { openExternalLink("https://ente.com/privacy") }
             ),
             SettingsActionItem(
                 title: "Terms of Service",
                 iconName: "DescriptionIcon",
-                action: { openExternalLink("https://ente.io/terms") }
+                action: { openExternalLink("https://ente.com/terms") }
             )
         ]
     }
@@ -191,7 +191,7 @@ struct SettingsView: View {
     private var endpointInfoText: String? {
         guard trimmedQuery.isEmpty else { return nil }
 
-        let defaultEndpoint = "https://api.ente.io"
+        let defaultEndpoint = "https://api.ente.com"
         let endpoint = EnsuDeveloperSettings.currentEndpointString
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
@@ -207,7 +207,7 @@ struct SettingsView: View {
     private func openDeleteAccountEmail() {
         let subject = "Request Deletion for Ente Account"
         let encoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
-        guard let url = URL(string: "mailto:support@ente.io?subject=\(encoded)") else { return }
+        guard let url = URL(string: "mailto:support@ente.com?subject=\(encoded)") else { return }
         openURL(url)
     }
 

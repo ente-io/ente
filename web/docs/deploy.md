@@ -5,7 +5,7 @@ Cloudflare Pages using GitHub workflows.
 
 - Automated production deployments of `main` daily 8:00 AM IST.
 
-- [ente.io/help](https://ente.io/help) gets deployed whenever a PR that changes
+- [ente.com/help](https://ente.com/help) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
 - Production deployments can made manually by triggering the
@@ -18,25 +18,25 @@ deployments, and the action that triggers them:
 
 | URL                                          | Type       | Deployment action                           |
 | -------------------------------------------- | ---------- | ------------------------------------------- |
-| [web.ente.io](https://web.ente.io)           | Production | Daily deploy of `main`                      |
-| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io) |
-| [auth.ente.io](https://auth.ente.io)         | Production | Daily deploy of `main`                      |
-| [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
-| [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
-| [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
-| [ente.io/help](https://ente.io/help)         | Production | Changes in `docs/` on push to `main`        |
+| [web.ente.com](https://web.ente.com)           | Production | Daily deploy of `main`                      |
+| [photos.ente.com](https://photos.ente.com)     | Production | Alias of [web.ente.com](https://web.ente.com) |
+| [auth.ente.com](https://auth.ente.com)         | Production | Daily deploy of `main`                      |
+| [accounts.ente.com](https://accounts.ente.com) | Production | Daily deploy of `main`                      |
+| [cast.ente.com](https://cast.ente.com)         | Production | Daily deploy of `main`                      |
+| [payments.ente.com](https://payments.ente.com) | Production | Daily deploy of `main`                      |
+| [ente.com/help](https://ente.com/help)         | Production | Changes in `docs/` on push to `main`        |
 | [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
 
 ### Other subdomains
 
 Apart from this, there are also some other deployments:
 
-- `albums.ente.io` is a CNAME alias to the production deployment
-  (`web.ente.io`). However, when the code detects that it is being served from
-  `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
+- `albums.ente.com` is a CNAME alias to the production deployment
+  (`web.ente.com`). However, when the code detects that it is being served from
+  `albums.ente.com`, it redirects to the `/shared-albums` page (Enhancement:
   serve it as a separate app with a smaller bundle size).
 
-- `family.ente.io` is currently in a separate repository (Enhancement: bring it
+- `family.ente.com` is currently in a separate repository (Enhancement: bring it
   in here).
 
 ---
@@ -99,4 +99,4 @@ to point to these deployments from our user facing DNS names.
 As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
 the branch name. The resulting deployment is available at "help.ente.pages.dev".
 Finally, we add a custom domain to point to it from
-[ente.io/help](https://ente.io/help).
+[ente.com/help](https://ente.com/help).

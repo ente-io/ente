@@ -4,11 +4,11 @@ Source code for Ente's various web apps and supporting websites.
 
 Live versions are at:
 
-- Ente Photos: [web.ente.io](https://web.ente.io)
-- Ente Auth: [auth.ente.io](https://auth.ente.io)
+- Ente Photos: [web.ente.com](https://web.ente.com)
+- Ente Auth: [auth.ente.com](https://auth.ente.com)
 
 To know more about Ente, see [our main README](../README.md) or visit
-[ente.io](https://ente.io).
+[ente.com](https://ente.com).
 
 ## Building from source
 

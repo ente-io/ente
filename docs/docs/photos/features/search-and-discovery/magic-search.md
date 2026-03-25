@@ -57,7 +57,7 @@ Open `Settings > Machine learning`, enable **Machine learning** and/or **Local i
 
 Open `Settings > Preferences > Machine learning`, enable **Machine learning** and/or **Local indexing**, and monitor indexing progress.
 
-> **Note**: Magic search is not available on web.ente.io. You must use the mobile or desktop app.
+> **Note**: Magic search is not available on web.ente.com. You must use the mobile or desktop app.
 
 ### Initial Indexing
 

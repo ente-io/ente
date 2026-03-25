@@ -1221,7 +1221,7 @@ internal class ChatStoreActions(
     private fun buildSystemPrompt(nowMillis: Long = clock()): String {
         val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             .format(Date(nowMillis))
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: $dateAndTime. $SYSTEM_PROMPT_BODY"
+        return "Your name is ensu and you're a friendly ai assistant created by ente.com. ente.com is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: $dateAndTime. $SYSTEM_PROMPT_BODY"
     }
 
     companion object {

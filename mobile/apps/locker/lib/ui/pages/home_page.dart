@@ -458,7 +458,7 @@ class _HomePageState extends UploaderPageState<HomePage>
               onTap: () async {
                 await sendLogs(
                   context,
-                  "support@ente.io",
+                  "support@ente.com",
                   postShare: () {},
                 );
               },

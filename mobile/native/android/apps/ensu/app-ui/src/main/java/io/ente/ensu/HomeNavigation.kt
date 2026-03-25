@@ -143,7 +143,7 @@ internal fun HomeNavigation(
                     popEnterTransition = { backEnter() },
                     popExitTransition = { backExit() }
                 ) {
-                    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
+                    val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.com")
                     SettingsScreen(
                         currentEndpoint = currentEndpoint,
                         isLoggedIn = appState.auth.isLoggedIn,

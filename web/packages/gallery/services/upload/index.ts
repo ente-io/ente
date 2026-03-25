@@ -454,7 +454,7 @@ export type UploadResult =
  * [Note: Faster uploads via workers]
  *
  * These workers were introduced as a way of make file uploads faster:
- * https://ente.io/blog/tech/making-uploads-faster/
+ * https://ente.com/blog/tech/making-uploads-faster/
  *
  * By default, that's the route we take. However, there are multiple reasons why
  * this might be disabled.
@@ -513,7 +513,7 @@ const computeShouldDisableCFUploadProxy = async () => {
 
     // See if the global flag to disable this is set.
     try {
-        const res = await fetch("https://static.ente.io/feature_flags.json");
+        const res = await fetch("https://static.ente.com/feature_flags.json");
         return (
             StaticFeatureFlags.parse(await res.json()).disableCFUploadProxy ??
             false

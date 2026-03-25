@@ -203,7 +203,7 @@ While video streaming is in beta, streams do not count against your storage quot
 Video streaming is still in beta. If something isn't working:
 
 - Create a thread in `#feedback` on [Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
-- Contact [support@ente.io](mailto:support@ente.io)
+- Contact [support@ente.com](mailto:support@ente.com)
 
 For crashes or upload failures with streaming enabled, see [Troubleshooting](/photos/faq/troubleshooting#app-crashes-ml-video).
 
@@ -215,7 +215,7 @@ For setup instructions, see the [Cast feature guide](/photos/features/utilities/
 
 ### Can I use Cast without Chromecast? {#cast-without-chromecast}
 
-Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente.io](https://cast.ente.io) on your large screen device and enter the displayed PIN on your mobile or web device.
+Yes! Use the "Pair with PIN" option which works with any device. Load [cast.ente.com](https://cast.ente.com) on your large screen device and enter the displayed PIN on your mobile or web device.
 
 ### App crashes with video streaming enabled {#app-crashes-video-streaming}
 
@@ -244,7 +244,7 @@ Large video uploads may fail when streaming is enabled, especially on mobile:
 
 ### PIN pairing isn't working for Cast {#cast-pin-not-working}
 
-- Verify that [cast.ente.io](https://cast.ente.io) is loaded on your large screen device
+- Verify that [cast.ente.com](https://cast.ente.com) is loaded on your large screen device
 - Check that both devices have internet connectivity
 - Make sure you're entering the PIN exactly as displayed (case-sensitive)
 - The PIN expires after a short time - refresh for a new PIN if needed
@@ -348,7 +348,7 @@ No, home widgets are only available on mobile apps (iOS and Android). Desktop ap
 
 ### Can I access Ente from multiple browsers? {#multiple-browsers}
 
-Yes! You can access Ente from any browser by going to [web.ente.io](https://web.ente.io) and logging in with your credentials.
+Yes! You can access Ente from any browser by going to [web.ente.com](https://web.ente.com) and logging in with your credentials.
 
 Your data syncs across all browsers and devices where you're logged in.
 
@@ -369,7 +369,7 @@ Note that these FAQs are primarily for Ente's cloud service. Self-hosting has ad
 You can:
 
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
-2. **Discord**: Join our [Discord community](https://ente.io/discord) for discussions
-3. **Email**: Contact [support@ente.io](mailto:support@ente.io)
+2. **Discord**: Join our [Discord community](https://ente.com/discord) for discussions
+3. **Email**: Contact [support@ente.com](mailto:support@ente.com)
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

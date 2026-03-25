@@ -70,12 +70,12 @@ Learn more: [Public links guide](/photos/features/sharing-and-collaboration/publ
 
 ### Can I use my own domain for public links? {#custom-domains}
 
-Yes! Ente's custom domains feature lets you serve your public album links using your own personalized domain instead of `albums.ente.io`.
+Yes! Ente's custom domains feature lets you serve your public album links using your own personalized domain instead of `albums.ente.com`.
 
 For example, instead of:
 
 ```
-https://albums.ente.io/?t=...
+https://albums.ente.com/?t=...
 ```
 
 You can use:
@@ -92,7 +92,7 @@ https://pics.example.org/?t=...
 **Setup:**
 
 1. Link your domain in `Settings > Preferences > Custom domains` (currently web only)
-2. Add a CNAME DNS record pointing your domain to `my.ente.io`
+2. Add a CNAME DNS record pointing your domain to `my.ente.com`
 3. Wait for DNS changes to propagate (usually a few minutes)
 
 Once configured, Ente automatically uses your custom domain when creating new public links. Ente still hosts and serves your albums - only the URL changes.
@@ -101,7 +101,7 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 
 ### Do Trip albums work with custom domains? {#trip-custom-domains}
 
-Trip albums (albums with the Trip layout feature) are not currently supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.io` domain.
+Trip albums (albums with the Trip layout feature) are not currently supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.com` domain.
 
 Regular albums continue to work perfectly on your custom domain - only the Trip layout feature has this limitation.
 
@@ -505,13 +505,13 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
 - Create and receive shared albums
 - Share albums directly with other Ente users
-- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
+- Create public links ([device limit](https://ente.com/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 
@@ -553,7 +553,7 @@ Learn more about [public link encryption](/photos/faq/security-and-privacy#publi
 
 The information required to decrypt an album is encrypted with the recipient's public key such that only they can decrypt them.
 
-You can read more about this in our [architecture documentation](https://ente.io/architecture#sharing).
+You can read more about this in our [architecture documentation](https://ente.com/architecture#sharing).
 
 In case of sharable links, the key to decrypt the album is appended by the client as a [fragment to the URL](https://en.wikipedia.org/wiki/URI_fragment), and is never sent to our servers.
 
@@ -580,11 +580,11 @@ Open the album in Ente (web or mobile app), create a public link, open link sett
 
 **Manual method:**
 
-Create a public link for your album, then add an iframe to your HTML with the URL, replacing `albums.ente.io` with `embed.ente.io`:
+Create a public link for your album, then add an iframe to your HTML with the URL, replacing `albums.ente.com` with `embed.ente.com`:
 
 ```html
 <iframe
-    src="https://embed.ente.io/?t=...#..."
+    src="https://embed.ente.com/?t=...#..."
     width="800"
     height="600"
     frameborder="0"
@@ -597,14 +597,14 @@ For complete details, see the [Embed albums guide](/photos/features/sharing-and-
 
 ### Do embedded albums work with custom domains? {#embed-custom-domains}
 
-Yes, but you need to use `embed.ente.io` instead of your custom domain in the iframe src.
+Yes, but you need to use `embed.ente.com` instead of your custom domain in the iframe src.
 
-If you're using the easy method (copy embed HTML button), the app automatically handles this for you - it will use `embed.ente.io` regardless of your custom domain setting.
+If you're using the easy method (copy embed HTML button), the app automatically handles this for you - it will use `embed.ente.com` regardless of your custom domain setting.
 
 If you're creating the embed code manually and have a custom domain configured:
 
-- Replace your custom domain with `embed.ente.io` in the iframe src
-- For example: `https://embed.ente.io/?t=...` (not `https://pics.example.org/?t=...`)
+- Replace your custom domain with `embed.ente.com` in the iframe src
+- For example: `https://embed.ente.com/?t=...` (not `https://pics.example.org/?t=...`)
 
 The embed will still work perfectly - it's just served from the embed subdomain instead of your custom domain.
 

@@ -39,7 +39,7 @@ import {
     useState,
 } from "react";
 
-const APP_LINK = "2of3.ente.io";
+const APP_LINK = "2of3.ente.com";
 const MAX_CARD_TITLE_LENGTH = 80;
 const CARD_LABEL_FALLBACK = "Today";
 const textEncoder = new TextEncoder();
@@ -145,7 +145,7 @@ const HELP_FAQS = [
         answer: "No. Your secret is split and recovered in your browser. The downloaded recovery page also works fully offline.",
     },
     {
-        question: "What if 2of3.ente.io is unavailable?",
+        question: "What if 2of3.ente.com is unavailable?",
         answer: (
             <>
                 A fully offline HTML recovery page is included when you use{" "}
@@ -1110,7 +1110,7 @@ const Page = () => {
                                 <Box component="span">by</Box>
                                 <Box
                                     component="a"
-                                    href="https://ente.io"
+                                    href="https://ente.com"
                                     target="_blank"
                                     rel="noreferrer"
                                     sx={{
@@ -2214,7 +2214,7 @@ const Page = () => {
                             >
                                 <Box
                                     component="a"
-                                    href="https://ente.io"
+                                    href="https://ente.com"
                                     target="_blank"
                                     rel="noreferrer"
                                     sx={{

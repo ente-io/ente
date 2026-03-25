@@ -12,7 +12,7 @@ const CARD_WIDTH = 1400;
 const CARD_HEIGHT = 1840;
 const CARD_RADIUS = 64;
 const QR_SIZE = 860;
-const APP_LINK = "2of3.ente.io";
+const APP_LINK = "2of3.ente.com";
 const PRINTED_SHARE_CHARS_PER_LINE = 80;
 const PRINTED_SHARE_LINE_COUNT = 4;
 export const MAX_PRINTED_SHARE_LENGTH =
@@ -620,7 +620,7 @@ export const createOfflineRecoveryHtml = async () => {
   <main>
     <div class="topbar">
       <div class="brand">2of3</div>
-      <div class="byline">by <a href="https://ente.io" target="_blank" rel="noreferrer">Ente</a></div>
+      <div class="byline">by <a href="https://ente.com" target="_blank" rel="noreferrer">Ente</a></div>
     </div>
     <div class="shell">
       <div class="panel">

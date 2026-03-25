@@ -9,7 +9,7 @@ use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::time::sleep;
 
-const ENTE_API_ENDPOINT: &str = "https://api.ente.io";
+const ENTE_API_ENDPOINT: &str = "https://api.ente.com";
 const TOKEN_HEADER: &str = "X-Auth-Token";
 const CLIENT_PKG_HEADER: &str = "X-Client-Package";
 const CLIENT_PACKAGE: &str = "io.ente.cli";

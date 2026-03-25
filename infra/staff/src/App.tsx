@@ -231,7 +231,7 @@ const App: React.FC = () => {
                             rel="noopener noreferrer"
                             className="link-text"
                         >
-                            staff.ente.io
+                            staff.ente.com
                         </a>
                         <div className="text-fields">
                             <TextField

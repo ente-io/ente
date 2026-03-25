@@ -196,7 +196,7 @@ export default function PublicCollectionGallery() {
         });
 
     /**
-     * Check if we need to redirect Trip albums from custom domains to albums.ente.io
+     * Check if we need to redirect Trip albums from custom domains to albums.ente.com
      * Returns true if a redirect was initiated, false otherwise.
      * Reason: custom domains do not support the Trip layout fully
      */
@@ -249,9 +249,9 @@ export default function PublicCollectionGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    // Only redirect to ente.com if this is NOT a custom/self-hosted instance
                     if (!isCustomAlbumsAppOrigin) {
-                        window.location.href = "https://ente.io";
+                        window.location.href = "https://ente.com";
                         redirectingToWebsite = true;
                     }
                 }
@@ -659,7 +659,7 @@ export default function PublicCollectionGallery() {
                             />
                         ) : (
                             <SpacedRow sx={{ flex: 1 }}>
-                                <EnteLogoLink href="https://ente.io">
+                                <EnteLogoLink href="https://ente.com">
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
                                 <Stack direction="row" spacing={2}>

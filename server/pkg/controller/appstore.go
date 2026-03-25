@@ -83,7 +83,7 @@ func (c *AppStoreController) validateSandboxRequest(ctx context.Context, environ
 	c.DiscordController.NotifyThrottled(fmt.Sprintf("iOS Sandbox %s for user: %s (userID: %d)",
 		sandboxContext, maskedEmail, userID), 10*time.Minute)
 
-	if strings.HasSuffix(email.NormalizeEmail(user.Email), "@ente.io") {
+	if strings.HasSuffix(email.NormalizeEmail(user.Email), "@ente.com") {
 		return nil
 	}
 

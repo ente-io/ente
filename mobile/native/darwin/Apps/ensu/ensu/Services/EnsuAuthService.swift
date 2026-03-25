@@ -33,7 +33,7 @@ final class EnsuAuthService {
     private var networkFactory: NetworkFactory
 
     private var accountsUrlFallback: String {
-        networkFactory.configuration.accountsEndpoint?.absoluteString ?? "https://accounts.ente.io"
+        networkFactory.configuration.accountsEndpoint?.absoluteString ?? "https://accounts.ente.com"
     }
 
     private init() {

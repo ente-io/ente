@@ -1,6 +1,6 @@
 # Ente Accounts
 
-Code that runs on `accounts.ente.io`.
+Code that runs on `accounts.ente.com`.
 
 Primarily, this serves a common domain where our clients can create and
 authenticate using shared passkeys tied to the user's Ente account.

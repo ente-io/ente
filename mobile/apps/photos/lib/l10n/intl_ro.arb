@@ -25,7 +25,7 @@
   "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
-  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.io</warning> de pe adresa dvs. de e-mail înregistrată.",
+  "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.com</warning> de pe adresa dvs. de e-mail înregistrată.",
   "entePhotosPerm": "Ente <i>are nevoie de permisiune</i> pentru a vă păstra fotografiile",
   "ok": "Ok",
   "createAccount": "Creare cont",
@@ -61,7 +61,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -124,7 +124,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -256,18 +256,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimiteți-le o invitație pentru a distribui fotografii.",
-  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.io.",
-  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.io: {verificationID}",
+  "shareMyVerificationID": "Acesta este ID-ul meu de verificare: {verificationID} pentru ente.com.",
+  "shareTextConfirmOthersVerificationID": "Poți confirma că acesta este ID-ul tău de verificare ente.com: {verificationID}",
   "somethingWentWrong": "Ceva nu a funcţionat corect",
   "sendInvite": "Trimiteți invitația",
-  "shareTextRecommendUsingEnte": "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.com",
   "done": "Finalizat",
   "applyCodeTitle": "Aplicați codul",
   "enterCodeDescription": "Introduceți codul oferit de prietenul dvs. pentru a beneficia de spațiu gratuit pentru amândoi",
@@ -586,7 +586,7 @@
   "subscription": "Abonament",
   "paymentDetails": "Detalii de plată",
   "manageFamily": "Administrați familia",
-  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.io pentru a vă gestiona abonamentul {provider}.",
+  "contactToManageSubscription": "Vă rugăm să ne contactați la support@ente.com pentru a vă gestiona abonamentul {provider}.",
   "renewSubscription": "Reînnoire abonament",
   "cancelSubscription": "Anulare abonament",
   "areYouSureYouWantToRenew": "Sunteți sigur că doriți să reînnoiți?",
@@ -633,9 +633,9 @@
   "playstoreSubscription": "Abonament PlayStore",
   "appstoreSubscription": "Abonament AppStore",
   "subAlreadyLinkedErrMessage": "{id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți {id} cu acest cont, vă rugăm să contactați asistența noastră",
-  "visitWebToManage": "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul",
+  "visitWebToManage": "Vă rugăm să vizitați web.ente.com pentru a vă gestiona abonamentul",
   "couldNotUpdateSubscription": "Nu s-a putut actualiza abonamentul",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.io și vom fi bucuroși să vă ajutăm!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vă rugăm să contactați support@ente.com și vom fi bucuroși să vă ajutăm!",
   "paymentFailed": "Plata nu a reușit",
   "paymentFailedTalkToProvider": "Vă rugăm să vorbiți cu asistența {providerName} dacă ați fost taxat",
   "@paymentFailedTalkToProvider": {
@@ -971,7 +971,7 @@
   "loadMessage5": "Codul nostru sursă și criptografia au fost evaluate extern",
   "loadMessage6": "Puteți distribui linkuri către albumele dvs. celor dragi",
   "loadMessage7": "Aplicațiile noastre mobile rulează în fundal pentru a cripta și salva orice fotografie nouă pe care o realizați",
-  "loadMessage8": "web.ente.io are un instrument de încărcare sofisticat",
+  "loadMessage8": "web.ente.com are un instrument de încărcare sofisticat",
   "loadMessage9": "Folosim Xchacha20Poly1305 pentru a vă cripta datele în siguranță",
   "photoDescriptions": "Descrieri fotografie",
   "fileTypesAndNames": "Tipuri de fișiere și denumiri",
@@ -1189,7 +1189,7 @@
   "playOnTv": "Redare album pe TV",
   "pair": "Asociere",
   "deviceNotFound": "Dispozitivul nu a fost găsit",
-  "castInstruction": "Accesați cast.ente.io de pe dispozitivul pe care doriți să îl asociați.\n\nIntroduceți codul de mai jos pentru a reda albumul pe TV.",
+  "castInstruction": "Accesați cast.ente.com de pe dispozitivul pe care doriți să îl asociați.\n\nIntroduceți codul de mai jos pentru a reda albumul pe TV.",
   "deviceCodeHint": "Introduceți codul",
   "joinDiscord": "Alăturați-vă pe Discord",
   "locations": "Locații",

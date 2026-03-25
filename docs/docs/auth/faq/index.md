@@ -19,7 +19,7 @@ that item.
 ### How can I support this project?
 
 You can support the development of this project by subscribing to our Photos app
-at [ente.io](https://ente.io).
+at [ente.com](https://ente.com).
 
 ### How can I enable FaceID lock in Ente Auth?
 
@@ -61,7 +61,7 @@ Also ensure that your system time is accurate, as any time drift can cause TOTP 
 
 ### Can I access my codes on web?
 
-You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
+You can access your codes on the web at [auth.ente.com](https://auth.ente.com).
 
 ### Does Ente Auth require an account?
 

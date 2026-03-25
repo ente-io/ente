@@ -104,7 +104,7 @@ struct NetworkConfiguration {
     let apiEndpoint: URL
 
     static var `default`: NetworkConfiguration {
-        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.com")!)
     }
 }
 
@@ -410,7 +410,7 @@ final class ChatViewModel: ObservableObject {
 
     private static func systemPrompt() -> String {
         let dateAndTime = systemPromptDateFormatter.string(from: Date())
-        return "Your name is ensu and you're a friendly ai assistant created by ente.io. ente.io is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: \(dateAndTime). \(systemPromptBody)"
+        return "Your name is ensu and you're a friendly ai assistant created by ente.com. ente.com is privacy-focused and consumer-focused with products like Ente Auth, Ente Photos and Ente Locker. Current Date and time is: \(dateAndTime). \(systemPromptBody)"
     }
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")

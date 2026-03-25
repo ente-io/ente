@@ -109,7 +109,7 @@
         <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
 
         <meta-data android:name="io.sentry.dsn"
-                   android:value="https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.io/9"/>
+                   android:value="https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.com/9"/>
     </application>
 
     <queries>

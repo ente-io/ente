@@ -65,7 +65,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data 
                     android:scheme="https" 
-                    android:host="albums.ente.io"/>
+                    android:host="albums.ente.com"/>
             </intent-filter>
             
             <!-- file provider to share files having a file:// URI -->
@@ -160,7 +160,7 @@
         <meta-data android:name="asset_statements"
             android:resource="@string/asset_statements" />
         <meta-data android:name="io.sentry.dsn"
-            android:value="https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4" />
+            android:value="https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.com/4" />
         <meta-data android:name="firebase_analytics_collection_deactivated"
             android:value="true" />
         <receiver android:name="EnteMemoryWidgetProvider" android:label="Memories" android:exported="true">

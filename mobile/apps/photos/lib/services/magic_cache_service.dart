@@ -191,7 +191,7 @@ GenericSearchResult? toGenericSearchResult(
 
 class MagicCacheService {
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
-  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v2.json";
+  static const _kMagicPromptsDataUrl = "https://discover.ente.com/v2.json";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.

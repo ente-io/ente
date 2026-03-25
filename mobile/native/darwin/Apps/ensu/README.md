@@ -109,7 +109,7 @@ Note: App Store IPA export requires valid distribution signing certificate/profi
 
 ## Custom API Endpoint
 
-Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the app defaults to `https://api.ente.io`.
+Set the endpoint at build time using `ENTE_API_ENDPOINT`. If it is not set, the app defaults to `https://api.ente.com`.
 
 ```bash
 cd darwin/Apps/ensu

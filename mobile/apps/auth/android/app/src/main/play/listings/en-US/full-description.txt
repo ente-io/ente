@@ -10,7 +10,7 @@ Auth provides end-to-end encrypted cloud backups so that you don't have to worry
 Auth will automatically sync the 2FA tokens you add to your account, across all your devices. Every new device you sign into will have access to these tokens.
 
 - Web access
-You can access your 2FA code from any web browser by visiting https://auth.ente.io .
+You can access your 2FA code from any web browser by visiting https://auth.ente.com .
 
 - Offline Mode
 Auth generates 2FA tokens offline, so your network connectivity will not get in the way of your workflow.
@@ -30,5 +30,5 @@ You can also export the codes you have added to Auth, to an **unencrypted** text
 
 SUPPORT
 
-If you need help, please write to support@ente.io, and someone will get in touch with you.
+If you need help, please write to support@ente.com, and someone will get in touch with you.
 If you have feature requests, please visit @ https://github.com/ente-io/ente/discussions/categories/enhancements

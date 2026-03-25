@@ -355,7 +355,7 @@ prepare_local_model_mirror_cache() {
     fi
 
     local tmp_path="$target_path.tmp"
-    if curl -fsSL --retry 3 --retry-delay 1 "https://models.ente.io/$model_file" -o "$tmp_path"; then
+    if curl -fsSL --retry 3 --retry-delay 1 "https://models.ente.com/$model_file" -o "$tmp_path"; then
       mv "$tmp_path" "$target_path"
       downloaded=$((downloaded + 1))
     else

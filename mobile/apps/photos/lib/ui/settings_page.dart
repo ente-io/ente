@@ -656,7 +656,7 @@ class _SettingsBody extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             await launchUrlString(
-              "https://shop.ente.io",
+              "https://shop.ente.com",
               mode: LaunchMode.externalApplication,
             );
           },

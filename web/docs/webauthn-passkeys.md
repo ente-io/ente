@@ -55,7 +55,7 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys?token=<accountsToken>`.
+`https://accounts.ente.com/passkeys?token=<accountsToken>`.
 
 If the token is valid, the user will be show a list of their passkeys, and they
 can edit / delete them, or add new ones.
@@ -124,7 +124,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 {
     "options": {
         "publicKey": {
-            "rp": { "name": "Ente", "id": "ente.io" },
+            "rp": { "name": "Ente", "id": "ente.com" },
             "user": {
                 "name": "james@example.org",
                 "displayName": "",
@@ -303,7 +303,7 @@ The client should redirect the user to the Ente Accounts web app with this
 session ID to prompt credential authentication.
 
 ```
-https://accounts.ente.io/passkeys?
+https://accounts.ente.com/passkeys?
     passkeySessionID=<sid>&clientPackage=<pkg>&
     redirect=<redirect>&recover=<recover-redirect>
 ```
@@ -332,7 +332,7 @@ mobile and desktop clients too.
         "publicKey": {
             "challenge": "dF-mmdZSBxP6Z7OhZrmQ4h-k-BkuuX6ERnW_ckYdkvc",
             "timeout": 300000,
-            "rpId": "ente.io",
+            "rpId": "ente.com",
             "allowCredentials": [
                 {
                     "type": "public-key",

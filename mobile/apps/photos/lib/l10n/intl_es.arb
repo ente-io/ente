@@ -29,7 +29,7 @@
   "deleteReason4": "Mi motivo no se encuentra en la lista",
   "sendEmail": "Enviar correo electrónico",
   "deleteRequestSLAText": "Tu solicitud será procesada dentro de las siguientes 72 horas.",
-  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.io</warning> desde la dirección de correo electrónico que usó para registrarse.",
+  "deleteEmailRequest": "Por favor, envía un correo electrónico a <warning>account-deletion@ente.com</warning> desde la dirección de correo electrónico que usó para registrarse.",
   "entePhotosPerm": "Ente <i>necesita permiso para</i> preservar tus fotos",
   "ok": "Aceptar",
   "createAccount": "Crear cuenta",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -164,7 +164,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -314,18 +314,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de verificación",
   "verifyEmailID": "Verificar {email}",
   "emailNoEnteAccount": "{email} no tiene una cuente en Ente.\n\nEnvíale una invitación para compartir fotos.",
-  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: {verificationID}?",
+  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.com: {verificationID}?",
   "somethingWentWrong": "Algo salió mal",
   "sendInvite": "Enviar invitación",
-  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.com",
   "done": "Hecho",
   "applyCodeTitle": "Usar código",
   "enterCodeDescription": "Introduce el código proporcionado por tu amigo para reclamar almacenamiento gratuito para ambos",
@@ -353,7 +353,7 @@
   "theyAlsoGetXGb": "También obtienen {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB para ellos + {storageAmountInGB} GB para ti cuando actualicen.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código",
-  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.io/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
+  "shareTextReferralCode": "Ente Fotos es un lugar seguro y privado para tus fotos\n* Descarga Ente Fotos de https://ente.com/app\n* Crea una cuenta\n* Aplica el código de referido {referralCode} en Ajustes → Referido\n* Obtén {referralStorageInGB}GB gratis cuando actualice a un plan de pago",
   "claimFreeStorage": "Obtén almacenamiento gratuito",
   "inviteYourFriends": "Invita a tus amigos",
   "earnFreeStorage": "Gana almacenamiento gratuito",
@@ -734,7 +734,7 @@
   "subscription": "Suscripción",
   "paymentDetails": "Detalles de pago",
   "manageFamily": "Administrar familia",
-  "contactToManageSubscription": "Por favor, contáctanos en support@ente.io para gestionar tu suscripción a {provider}.",
+  "contactToManageSubscription": "Por favor, contáctanos en support@ente.com para gestionar tu suscripción a {provider}.",
   "renewSubscription": "Renovar suscripción",
   "cancelSubscription": "Cancelar suscripción",
   "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
@@ -781,10 +781,10 @@
   "playstoreSubscription": "Suscripción en la PlayStore",
   "appstoreSubscription": "Suscripción en la AppStore",
   "subAlreadyLinkedErrMessage": "Tu {id} ya está vinculada a otra cuenta de Ente.\nSi deseas utilizar tu {id} con esta cuenta, ponte en contacto con nuestro servicio de asistencia''",
-  "visitWebToManage": "Por favor, visita web.ente.io para administrar tu suscripción",
+  "visitWebToManage": "Por favor, visita web.ente.com para administrar tu suscripción",
   "managePaymentMethod": "Gestionar métodos de pago",
   "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.io y estaremos encantados de ayudar!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.com y estaremos encantados de ayudar!",
   "paymentFailed": "Pago fallido",
   "paymentFailedTalkToProvider": "Por favor, habla con el soporte de {providerName} si se te cobró",
   "@paymentFailedTalkToProvider": {
@@ -1214,7 +1214,7 @@
   "loadMessage5": "Nuestro código fuente y criptografía han sido auditados externamente",
   "loadMessage6": "Puedes compartir enlaces a tus álbumes con tus seres queridos",
   "loadMessage7": "Nuestras aplicaciones móviles se ejecutan en segundo plano para cifrar y hacer copias de seguridad de las nuevas fotos que hagas clic",
-  "loadMessage8": "web.ente.io tiene un cargador sofisticado",
+  "loadMessage8": "web.ente.com tiene un cargador sofisticado",
   "loadMessage9": "Utilizamos Xchacha20Poly1305 para cifrar tus datos de forma segura",
   "photoDescriptions": "Descripciones de fotos",
   "searchResultFileName": "Nombre del archivo",
@@ -1484,7 +1484,7 @@
   "playOnTv": "Reproducir álbum en TV",
   "pair": "Emparejar",
   "deviceNotFound": "Dispositivo no encontrado",
-  "castInstruction": "Visita cast.ente.io en el dispositivo que quieres emparejar.\n\nIntroduce el código de abajo para reproducir el álbum en tu TV.",
+  "castInstruction": "Visita cast.ente.com en el dispositivo que quieres emparejar.\n\nIntroduce el código de abajo para reproducir el álbum en tu TV.",
   "deviceCodeHint": "Introduce el código",
   "joinDiscord": "Únete al Discord",
   "locations": "Ubicaciones",

@@ -95,7 +95,7 @@ To continue backing up:
 
 ### What plans does Ente offer? {#available-plans}
 
-See our [website](https://ente.io#pricing) for the complete list of supported plans and pricing.
+See our [website](https://ente.com#pricing) for the complete list of supported plans and pricing.
 
 We offer:
 
@@ -136,13 +136,13 @@ To keep things fair, our plans don't increase linearly, and the tiers are such t
 
 In addition, we also offer [family plans](/photos/features/account/family-plans) so that you can gain more value out of a single subscription.
 
-If you need a custom plan, please contact [support@ente.io](mailto:support@ente.io).
+If you need a custom plan, please contact [support@ente.com](mailto:support@ente.com).
 
 ## Family Plans
 
 ### Does Ente have Family Plans? {#family-plans-faq}
 
-Yes we do! Please check out our announcement post [here](https://ente.io/blog/family-plans).
+Yes we do! Please check out our announcement post [here](https://ente.com/blog/family-plans).
 
 In brief:
 
@@ -211,7 +211,7 @@ Open `Settings > Family plans`, find the member in the list, click the edit icon
 
 **If the issue persists:**
 
-Contact [support@ente.io](mailto:support@ente.io) with:
+Contact [support@ente.com](mailto:support@ente.com) with:
 
 - Your email address (family plan admin)
 - The family member's email address
@@ -235,7 +235,7 @@ Common reasons and solutions:
 **Problem 3: "Invalid email address" or invitation fails**
 
 - Make sure the email address is correct
-- The person must have an Ente account already (ask them to sign up first at [ente.io](https://ente.io))
+- The person must have an Ente account already (ask them to sign up first at [ente.com](https://ente.com))
 - Free accounts can be invited to family plans
 
 **Problem 4: Family plan not available**
@@ -247,7 +247,7 @@ Common reasons and solutions:
 **Problem 5: Purchased through App Store**
 
 - Family plans may have limited functionality for App Store purchases
-- Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
+- Consider managing your subscription through [web.ente.com](https://web.ente.com) instead
 
 ### How do I remove someone from my family plan? {#remove-family-member}
 
@@ -282,7 +282,7 @@ Yes we do!
 
 We believe that privacy should be made accessible to everyone. In this spirit, we offer **30% off** our subscription plans to students.
 
-To apply for this discount, please verify your enrollment status in a school / college / university by writing to [students@ente.io](mailto:students@ente.io) from the email address assigned to you by your institute.
+To apply for this discount, please verify your enrollment status in a school / college / university by writing to [students@ente.com](mailto:students@ente.com) from the email address assigned to you by your institute.
 
 In case you do not have access to such an email address, please send us proof (such as your institute's identity card) that verifies your identity as a student.
 
@@ -299,7 +299,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 **Step-by-step process:**
 
 1. **Do NOT purchase through the iOS/Android App Store** - App Stores don't support discount codes
-2. Go to [web.ente.io](https://web.ente.io) on a desktop or laptop computer
+2. Go to [web.ente.com](https://web.ente.com) on a desktop or laptop computer
 3. Log in to your Ente account
 4. Open `Settings > Account > Manage subscription`
 5. Click "Buy subscription" or "Change plan"
@@ -314,7 +314,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 - Discount codes only work for **NEW paying customers** (first-time purchases)
 - Cannot be applied to existing paid subscriptions
 - Cannot be combined with cryptocurrency payments
-- Must purchase from web.ente.io or desktop app, NOT mobile app stores
+- Must purchase from web.ente.com or desktop app, NOT mobile app stores
 
 **If you already purchased without applying a code:**
 
@@ -324,7 +324,7 @@ Unfortunately, we cannot apply discount codes retroactively. However, you can:
 2. Wait for the subscription period to end
 3. Resubscribe using the discount code
 
-Contact [support@ente.io](mailto:support@ente.io) if you have questions about your specific situation.
+Contact [support@ente.com](mailto:support@ente.com) if you have questions about your specific situation.
 
 ## Referral Program
 
@@ -382,8 +382,8 @@ We support **annual** subscriptions over PayPal.
 
 **How to purchase with PayPal:**
 
-1. Email **paypal@ente.io** from your registered Ente email address
-2. In your email, mention the [storage plan](https://ente.io#pricing) of your choice (e.g., "100 GB annual plan")
+1. Email **paypal@ente.com** from your registered Ente email address
+2. In your email, mention the [storage plan](https://ente.com#pricing) of your choice (e.g., "100 GB annual plan")
 3. We will send you an invoice with a PayPal payment link
 4. Complete the payment through PayPal
 5. Your account will be upgraded once payment is confirmed
@@ -404,9 +404,9 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 **How to purchase with cryptocurrency:**
 
-1. Email **crypto@ente.io** from your registered Ente email address
+1. Email **crypto@ente.com** from your registered Ente email address
 2. In your email, specify:
-    - The [storage plan](https://ente.io#pricing) of your choice
+    - The [storage plan](https://ente.com#pricing) of your choice
     - Your preferred cryptocurrency
 3. We will send you an invoice with payment instructions
 4. Complete the payment using your crypto wallet
@@ -414,16 +414,16 @@ Yes! We support _annual plans_ with crypto payments and accept the following cry
 
 **Important limitations:**
 
-⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.io instead.
+⚠️ **Discount codes CANNOT be combined with cryptocurrency payments**. If you have a discount code, you must pay via credit card through web.ente.com instead.
 
-⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.io/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
+⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.com/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 
 **Processing time:**
 
 - Invoice generation: 1-2 business days
 - Payment confirmation: Depends on blockchain confirmation times (varies by cryptocurrency)
 
-For questions about crypto payments, contact [support@ente.io](mailto:support@ente.io).
+For questions about crypto payments, contact [support@ente.com](mailto:support@ente.com).
 
 ### Does Ente store my card details? {#card-security}
 
@@ -482,7 +482,7 @@ When your subscription expires, you enter a **30-day grace period** before your 
 Yes! If you had data exceeding the free 10 GB limit and your subscription expired:
 
 - Your data enters the 30-day grace period
-- To restore access to your data on the free plan, contact [support@ente.io](mailto:support@ente.io)
+- To restore access to your data on the free plan, contact [support@ente.com](mailto:support@ente.com)
 - We can restore your account to the free plan if you're within the grace period
 - You'll need to delete data to get under the 10 GB limit
 
@@ -567,7 +567,7 @@ You're 10 days into a 500 GB monthly plan ($5/month) and downgrade to 100 GB mon
 
 **Want a refund instead of credit?**
 
-If you prefer to have your credit refunded to your original payment method instead of storing it for future invoices, contact [support@ente.io](mailto:support@ente.io) and we'll assist you.
+If you prefer to have your credit refunded to your original payment method instead of storing it for future invoices, contact [support@ente.com](mailto:support@ente.com) and we'll assist you.
 
 ### Can I switch between monthly and yearly plans? {#switch-billing-cycle}
 
@@ -604,7 +604,7 @@ You can also access this via Settings > Account > Manage subscription > Manage p
 
 You will be able to see all of your previous invoices, with details regarding their payment status. In case of failed payments, you will also have an option to retry those charges.
 
-If you would like to change your payment method entirely (e.g., switch between App Store, Play Store, PayPal, or crypto), please contact [support@ente.io](mailto:support@ente.io).
+If you would like to change your payment method entirely (e.g., switch between App Store, Play Store, PayPal, or crypto), please contact [support@ente.com](mailto:support@ente.com).
 
 ### How can I cancel my subscription? {#cancel-subscription}
 
@@ -644,6 +644,6 @@ This will mark the account as active.
 
 ### I think this email was sent by mistake {#inactive-account-mistake}
 
-Contact support at [support@ente.io](mailto:support@ente.io) and share a
+Contact support at [support@ente.com](mailto:support@ente.com) and share a
 screenshot of the `Settings > Account` page showing the registered email address
 (green box), so we can verify the account.

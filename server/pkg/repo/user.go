@@ -21,7 +21,7 @@ import (
 
 const (
 	// Format for updated email_hash once the account is deleted
-	DELETED_EMAIL_HASH_FORMAT = "deleted+%d@ente.io"
+	DELETED_EMAIL_HASH_FORMAT = "deleted+%d@ente.com"
 )
 
 // UserRepository defines the methods for inserting, updating and retrieving

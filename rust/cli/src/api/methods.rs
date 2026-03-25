@@ -104,9 +104,9 @@ impl<'a> ApiMethods<'a> {
     pub async fn get_file_url(&self, _account_id: &str, file_id: i64) -> Result<String> {
         // Check if we're using the default API endpoint
         let base_url = &self.api.base_url;
-        if base_url == "https://api.ente.io" {
+        if base_url == "https://api.ente.com" {
             // Use the CDN URL for production
-            Ok(format!("https://files.ente.io/?fileID={file_id}"))
+            Ok(format!("https://files.ente.com/?fileID={file_id}"))
         } else {
             // For custom/dev environments, use direct download URL
             // The Go implementation shows this is the pattern
@@ -172,6 +172,6 @@ mod tests {
         // For production endpoint, should use CDN
         let url = methods.get_file_url("test", 12345).await;
         assert!(url.is_ok());
-        assert!(url.unwrap().contains("files.ente.io"));
+        assert!(url.unwrap().contains("files.ente.com"));
     }
 }

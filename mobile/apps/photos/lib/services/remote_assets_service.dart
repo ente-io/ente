@@ -119,13 +119,13 @@ class RemoteAssetsService {
   Future<void> cleanupOldModelsIfNeeded() async {
     if (checkRemovedOldAssets) return;
     const oldModelNames = [
-      "https://models.ente.io/clip-image-vit-32-float32.onnx",
-      "https://models.ente.io/clip-text-vit-32-uint8.onnx",
-      "https://models.ente.io/mobileclip_s2_image_opset18_rgba_sim.onnx",
-      "https://models.ente.io/mobileclip_s2_image_opset18_rgba_opt.onnx",
-      "https://models.ente.io/mobileclip_s2_text_int32.onnx",
-      "https://models.ente.io/yolov5s_face_opset18_rgba_opt.onnx",
-      "https://models.ente.io/yolov5s_face_opset18_rgba_opt_nosplits.onnx",
+      "https://models.ente.com/clip-image-vit-32-float32.onnx",
+      "https://models.ente.com/clip-text-vit-32-uint8.onnx",
+      "https://models.ente.com/mobileclip_s2_image_opset18_rgba_sim.onnx",
+      "https://models.ente.com/mobileclip_s2_image_opset18_rgba_opt.onnx",
+      "https://models.ente.com/mobileclip_s2_text_int32.onnx",
+      "https://models.ente.com/yolov5s_face_opset18_rgba_opt.onnx",
+      "https://models.ente.com/yolov5s_face_opset18_rgba_opt_nosplits.onnx",
     ];
 
     await cleanupSelectedModels(oldModelNames);

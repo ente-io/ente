@@ -5,7 +5,7 @@ const (
 	// ZeptoMail), Zoho's transactional email service.
 	TransmailEndPoint = "https://api.transmail.com/v1.1/email"
 	// BounceAddress is the emailAddress to send bounce messages to
-	TransmailEndBounceAddress = "bounces@bounce.ente.io"
+	TransmailEndBounceAddress = "bounces@bounce.ente.com"
 )
 
 type SendEmailRequest struct {

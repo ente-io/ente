@@ -7,10 +7,10 @@
 
 ### Overview
 
-Clients tunnel events to sentry-reporter.ente.io, and include the DSN in the
+Clients tunnel events to sentry-reporter.ente.com, and include the DSN in the
 request. At the other end of the tunnel is a Cloudflare Worker which unwraps the
 event, remaps the DSN if needed, and sends it to our actual self-hosted Sentry
-instance, sentry.ente.io.
+instance, sentry.ente.com.
 
 Among other things, this indirection allows us to treat the Sentry instance as
 disposable, and recreate it from scratch anytime. The existing DSN's change, but
@@ -23,14 +23,14 @@ Sentry identifies each project with a unique ID it calls **DSN** (Data Source
 Name). The DSN is a URL that includes the project ID. For example, here is the
 DSN for the debug builds of the photos mobile app:
 
-    https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3
+    https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.com/3
 
 The DSN is considered public information and is included as part of the client's
 code. The DSN has 3 parts:
 
     https://<public-key-for-project>@<host>/<project-id>
 
-The `<host>` for our case is sentry.ente.io.
+The `<host>` for our case is sentry.ente.com.
 
 Each client has a separate project, and some clients have multiple projects
 (e.g. production / debug). Each of these get a separate DSN.
@@ -46,11 +46,11 @@ other end of the tunnel is a service that unwraps the original payload and
 forwards it to the actual Sentry instance.
 
 Usage on the client is simple - the mobile SDKs for Sentry support a `tunnel`
-parameter which can be set to "https://sentry-reporter.ente.io"
+parameter which can be set to "https://sentry-reporter.ente.com"
 
 The other end of the tunnel is handled by a Cloudflare Worker that listens for
-incoming requests to 'https://sentry-reporter.ente.io', and forwards the
-requests to `sentry.ente.io`. Before forwarding, it also remaps the DSNs sent by
+incoming requests to 'https://sentry-reporter.ente.com', and forwards the
+requests to `sentry.ente.com`. Before forwarding, it also remaps the DSNs sent by
 the client with the latest ones. This allows us to hardcode the DSN in the
 client - if the DSN on the Sentry backend changes, we can just update or add a
 new mapping in the worker.
@@ -97,7 +97,7 @@ Modify `sentry/config.yml`, adding relevant bits from the contents of
 Next, modify `.env`, setting
 
     SENTRY_EVENT_RETENTION_DAYS=30
-    SENTRY_MAIL_HOST=ente.io
+    SENTRY_MAIL_HOST=ente.com
 
 ### Configure external nginx
 

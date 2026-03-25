@@ -28,7 +28,7 @@
   "deleteReason4": "Səbəbim siyahıda yoxdur",
   "sendEmail": "E-poçtu göndər",
   "deleteRequestSLAText": "Sorğunuz 72 saat ərzində icra olunacaq.",
-  "deleteEmailRequest": "Zəhmət olmasa, qeydiyyatdan keçdiyiniz e-poçt ünvanından <warning>account-deletion@ente.io</warning> ünvanına e-poçt göndərin.",
+  "deleteEmailRequest": "Zəhmət olmasa, qeydiyyatdan keçdiyiniz e-poçt ünvanından <warning>account-deletion@ente.com</warning> ünvanına e-poçt göndərin.",
   "entePhotosPerm": "Ente şəkillərinizi qorumaq üçün <i>icazə tələb edir</i>",
   "ok": "Bəli",
   "createAccount": "Hesab yarat",
@@ -76,7 +76,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -87,7 +87,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -162,7 +162,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -310,18 +310,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Doğrulama ID-si",
   "verifyEmailID": "{email} ünvanını doğrula",
   "emailNoEnteAccount": "{email} ünvanının Ente hesabı yoxdur. Fotoları paylaşmaq üçün onlara dəvət göndərin.",
-  "shareMyVerificationID": "Budur mənim ente.io üçün doğrulama ID-m: {verificationID}.",
-  "shareTextConfirmOthersVerificationID": "Salam, bunun sizin ente.io doğrulama ID-niz olduğunu təsdiqləyə bilərsinizmi: {verificationID}",
+  "shareMyVerificationID": "Budur mənim ente.com üçün doğrulama ID-m: {verificationID}.",
+  "shareTextConfirmOthersVerificationID": "Salam, bunun sizin ente.com doğrulama ID-niz olduğunu təsdiqləyə bilərsinizmi: {verificationID}",
   "somethingWentWrong": "Xəta baş verdi",
   "sendInvite": "Dəvət göndər",
-  "shareTextRecommendUsingEnte": "Orijinal keyfiyyətdə foto və videoları asanlıqla paylaşa bilməyimiz üçün Ente-ni yükləyin\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Orijinal keyfiyyətdə foto və videoları asanlıqla paylaşa bilməyimiz üçün Ente-ni yükləyin\n\nhttps://ente.com",
   "done": "Hazırdır",
   "applyCodeTitle": "Kodu tətbiq et",
   "enterCodeDescription": "Hər ikiniz üçün pulsuz yaddaş əldə etmək üçün dostunuz tərəfindən verilən kodu daxil edin",
@@ -349,7 +349,7 @@
   "theyAlsoGetXGb": "Onlar da {storageAmountInGB} GB əldə edirlər",
   "referralStorageForBoth": "Onlar üçün {storageAmountInGB} GB + onlar abunəliklərini yüksəltdikdə sizin üçün {storageAmountInGB} GB.",
   "freeStorageOnReferralSuccess": "Hər dəfə kimsə ödənişli plana keçid etdikdə və sizin kodunuzu tətbiq etdikdə {storageAmountInGB} GB",
-  "shareTextReferralCode": "Ente Photos fotolarınız üçün şəxsi və təhlükəsiz məkandır\n* Ente Photos-u https://ente.io/app ünvanından yükləyin\n* Hesab yaradın\n* Tənzimləmələr->Referal bölməsində {referralCode} referal kodunu tətbiq edin\n* Ödənişli plana keçid etdikdə pulsuz {referralStorageInGB} GB əldə edin",
+  "shareTextReferralCode": "Ente Photos fotolarınız üçün şəxsi və təhlükəsiz məkandır\n* Ente Photos-u https://ente.com/app ünvanından yükləyin\n* Hesab yaradın\n* Tənzimləmələr->Referal bölməsində {referralCode} referal kodunu tətbiq edin\n* Ödənişli plana keçid etdikdə pulsuz {referralStorageInGB} GB əldə edin",
   "claimFreeStorage": "Pulsuz yaddaş əldə et",
   "inviteYourFriends": "Dostlarını dəvət et",
   "earnFreeStorage": "Pulsuz yaddaş qazanın",
@@ -720,7 +720,7 @@
   "subscription": "Abunəlik",
   "paymentDetails": "Ödəniş məlumatları",
   "manageFamily": "Ailəni idarə et",
-  "contactToManageSubscription": "{provider} abunəliyinizi idarə etmək üçün lütfən support@ente.io ünvanı vasitəsilə bizimlə əlaqə saxlayın.",
+  "contactToManageSubscription": "{provider} abunəliyinizi idarə etmək üçün lütfən support@ente.com ünvanı vasitəsilə bizimlə əlaqə saxlayın.",
   "renewSubscription": "Abunəliyi yenilə",
   "cancelSubscription": "Abunəliyi ləğv et",
   "areYouSureYouWantToRenew": "Yeniləmək istədiyinizdən əminsiniz?",
@@ -767,9 +767,9 @@
   "playstoreSubscription": "PlayStore abunəliyi",
   "appstoreSubscription": "AppStore abunəliyi",
   "subAlreadyLinkedErrMessage": "Sizin {id} artıq başqa bir Ente hesabına bağlanıb.\nƏgər {id} kimliyinizi bu hesab ilə istifadə etmək istəyirsinizsə, lütfən dəstək xidmətimizlə əlaqə saxlayın",
-  "visitWebToManage": "Abunəliyinizi idarə etmək üçün lütfən web.ente.io saytına daxil olun",
+  "visitWebToManage": "Abunəliyinizi idarə etmək üçün lütfən web.ente.com saytına daxil olun",
   "couldNotUpdateSubscription": "Abunəliyi yeniləmək mümkün olmadı",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lütfən support@ente.io ilə əlaqə saxlayın, kömək etməkdən məmnun olarıq!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Lütfən support@ente.com ilə əlaqə saxlayın, kömək etməkdən məmnun olarıq!",
   "paymentFailed": "Ödəniş uğursuz oldu",
   "paymentFailedTalkToProvider": "Əgər ödəniş balansımdan çıxılıbsa, lütfən {providerName} dəstək xidməti ilə danışın",
   "@paymentFailedTalkToProvider": {
@@ -1189,7 +1189,7 @@
   "loadMessage5": "Mənbə kodumuz və kriptoqrafiyamız kənar auditdən keçib",
   "loadMessage6": "Albomlarınızın linklərini sevdiklərinizlə bölüşə bilərsiniz",
   "loadMessage7": "Mobil tətbiqlərimiz çəkdiyiniz hər bir yeni şəkli şifrələmək və yedəkləmək üçün arxa fonda çalışır",
-  "loadMessage8": "web.ente.io-nun rahat yükləyicisi var",
+  "loadMessage8": "web.ente.com-nun rahat yükləyicisi var",
   "loadMessage9": "Məlumatlarınızı təhlükəsiz şəkildə şifrələmək üçün Xchacha20Poly1305-dən istifadə edirik",
   "photoDescriptions": "Şəkil təsvirləri",
   "searchResultFileName": "Fayl adı",
@@ -1459,7 +1459,7 @@
   "playOnTv": "Albomu TV-də oxudun",
   "pair": "Cütləşdirin",
   "deviceNotFound": "Cihaz tapılmadı",
-  "castInstruction": "Qoşmaq istədiyiniz cihazda cast.ente.io səhifəsinə daxil olun.\n\nAlbomu TV-nizdə oxutmaq üçün aşağıdakı kodu daxil edin.",
+  "castInstruction": "Qoşmaq istədiyiniz cihazda cast.ente.com səhifəsinə daxil olun.\n\nAlbomu TV-nizdə oxutmaq üçün aşağıdakı kodu daxil edin.",
   "deviceCodeHint": "Kodu daxil edin",
   "joinDiscord": "Discord qoşul",
   "locations": "Məkanlar",

@@ -27,7 +27,7 @@
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
-  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.io</warning> dal tuo indirizzo email registrato.",
+  "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.com</warning> dal tuo indirizzo email registrato.",
   "entePhotosPerm": "Ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
@@ -69,7 +69,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -132,7 +132,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -273,18 +273,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID di verifica",
   "verifyEmailID": "Verifica {email}",
   "emailNoEnteAccount": "{email} non ha un account Ente.\n\nInvia un invito per condividere foto.",
-  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.io",
+  "shareMyVerificationID": "Ecco il mio ID di verifica: {verificationID} per ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.com",
   "somethingWentWrong": "Qualcosa è andato storto",
   "sendInvite": "Invita",
-  "shareTextRecommendUsingEnte": "Scarica Ente in modo da poter facilmente condividere foto e video in qualità originale\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Scarica Ente in modo da poter facilmente condividere foto e video in qualità originale\n\nhttps://ente.com",
   "done": "Completato",
   "applyCodeTitle": "Applica codice",
   "enterCodeDescription": "Inserisci il codice fornito dal tuo amico per richiedere spazio gratuito per entrambi",
@@ -631,7 +631,7 @@
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
   "manageFamily": "Gestisci Piano famiglia",
-  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.io per gestire il tuo abbonamento {provider}.",
+  "contactToManageSubscription": "Scrivi all'indirizzo support@ente.com per gestire il tuo abbonamento {provider}.",
   "renewSubscription": "Rinnova abbonamento",
   "cancelSubscription": "Annulla abbonamento",
   "areYouSureYouWantToRenew": "Vuoi davvero rinnovare?",
@@ -678,9 +678,9 @@
   "playstoreSubscription": "Abbonamento su PlayStore",
   "appstoreSubscription": "abbonamento AppStore",
   "subAlreadyLinkedErrMessage": "Il tuo {id} è già collegato a un altro account Ente.\nSe desideri utilizzare il tuo {id} con questo account, per favore contatta il nostro supporto''",
-  "visitWebToManage": "Visita web.ente.io per gestire il tuo abbonamento",
+  "visitWebToManage": "Visita web.ente.com per gestire il tuo abbonamento",
   "couldNotUpdateSubscription": "Impossibile aggiornare l'abbonamento",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.io e saremo felici di aiutarti!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Contatta support@ente.com e saremo felici di aiutarti!",
   "paymentFailed": "Pagamento non riuscito",
   "paymentFailedTalkToProvider": "Si prega di parlare con il supporto di {providerName} se ti è stato addebitato qualcosa",
   "@paymentFailedTalkToProvider": {
@@ -1029,7 +1029,7 @@
   "loadMessage5": "Il nostro codice sorgente e la crittografia hanno ricevuto audit esterni",
   "loadMessage6": "Puoi condividere i link ai tuoi album con i tuoi cari",
   "loadMessage7": "Le nostre app per smartphone vengono eseguite in background per crittografare e eseguire il backup di qualsiasi nuova foto o video",
-  "loadMessage8": "web.ente.io ha un uploader intuitivo",
+  "loadMessage8": "web.ente.com ha un uploader intuitivo",
   "loadMessage9": "Usiamo Xchacha20Poly1305 per crittografare in modo sicuro i tuoi dati",
   "photoDescriptions": "Descrizioni delle foto",
   "fileTypesAndNames": "Tipi e nomi di file",
@@ -1248,7 +1248,7 @@
   "playOnTv": "Riproduci album sulla TV",
   "pair": "Abbina",
   "deviceNotFound": "Dispositivo non trovato",
-  "castInstruction": "Visita cast.ente.io sul dispositivo che vuoi abbinare.\n\nInserisci il codice qui sotto per riprodurre l'album sulla tua TV.",
+  "castInstruction": "Visita cast.ente.com sul dispositivo che vuoi abbinare.\n\nInserisci il codice qui sotto per riprodurre l'album sulla tua TV.",
   "deviceCodeHint": "Inserisci il codice",
   "joinDiscord": "Unisciti a Discord",
   "locations": "Luoghi",

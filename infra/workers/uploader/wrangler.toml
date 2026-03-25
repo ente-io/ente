@@ -2,6 +2,6 @@ name = "uploader"
 main = "src/index.ts"
 compatibility_date = "2024-06-14"
 
-routes = [{ pattern = "uploader.ente.io", custom_domain = true }]
+routes = [{ pattern = "uploader.ente.com", custom_domain = true }]
 
 tail_consumers = [{ service = "tail" }]

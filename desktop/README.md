@@ -6,7 +6,7 @@ You can
 [**download** a pre-built binary from releases](https://github.com/ente-io/photos-desktop/releases/latest).
 
 To know more about Ente, see [our main README](../README.md) or visit
-[ente.io](https://ente.io).
+[ente.com](https://ente.com).
 
 ## Building from source
 

@@ -9,13 +9,13 @@
 
 **This is the most impactful contribution you can make**.
 
-[Spread the word](https://ente.io/help/photos/features/account/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
+[Spread the word](https://ente.com/help/photos/features/account/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
 
 ## Engage with the community
 
 Just hang around, enjoy the vibe. The Ente community — the people who are building Ente, and the people who are using Ente — hang out at various places depending on their proclivity:
 
-- [Discord](https://discord.ente.io)
+- [Discord](https://discord.ente.com)
 - [Mastodon](https://fosstodon.org/@ente)
 - [X / Twitter](https://twitter.com/enteio)
 - [Github Discussions](https://github.com/ente-io/ente/discussions)

@@ -23,7 +23,7 @@ const (
 
 	storageWarningBaseTemplate = "ente_base.html"
 	storageWarningFromName     = "Ente"
-	storageWarningFromEmail    = "support@ente.io"
+	storageWarningFromEmail    = "support@ente.com"
 
 	storageWarningOverageThreshold             = 25 * (1 << 30)
 	storageWarningPreviousStageFreshnessWindow = 35 * 24 * time.MicroSecondsInOneHour
@@ -768,7 +768,7 @@ func storageWarningStageKey(snapshot storageWarningSnapshot) string {
 }
 
 func isEnteDomainStorageWarningAccount(email string) bool {
-	return strings.HasSuffix(emailUtil.NormalizeEmail(email), "@ente.io")
+	return strings.HasSuffix(emailUtil.NormalizeEmail(email), "@ente.com")
 }
 
 func isInStorageWarningRollout(userID int64, email string) bool {

@@ -29,7 +29,7 @@
   "deleteReason4": "Ma raison n'est pas listée",
   "sendEmail": "Envoyer un e-mail",
   "deleteRequestSLAText": "Votre demande sera traitée sous 72 heures.",
-  "deleteEmailRequest": "Veuillez envoyer un e-mail à <warning>account-deletion@ente.io</warning> à partir de votre adresse e-mail enregistrée.",
+  "deleteEmailRequest": "Veuillez envoyer un e-mail à <warning>account-deletion@ente.com</warning> à partir de votre adresse e-mail enregistrée.",
   "entePhotosPerm": "Ente <i>a besoin d'une autorisation pour</i> sauvegarder vos photos",
   "ok": "Ok",
   "createAccount": "Créer un compte",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -315,19 +315,19 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID de vérification",
   "verifyEmailID": "Vérifier {email}",
   "emailNoEnteAccount": "{email} n'a pas de compte Ente.\n\nEnvoyez une invitation pour partager des photos.",
-  "shareMyVerificationID": "Voici mon ID de vérification : {verificationID} pour ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hé, pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.io : {verificationID}",
+  "shareMyVerificationID": "Voici mon ID de vérification : {verificationID} pour ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hé, pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.com : {verificationID}",
   "somethingWentWrong": "Un problème est survenu",
   "sendInvite": "Envoyer Invitations",
-  "shareTextRecommendUsingEnte": "Téléchargez Ente pour pouvoir facilement partager des photos et vidéos en qualité originale\n\nhttps://ente.io",
-  "shareTextRecommendUsingEnteForFamily": "Téléchargez Ente pour que je puisse vous ajouter à mon abonnement familial\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Téléchargez Ente pour pouvoir facilement partager des photos et vidéos en qualité originale\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Téléchargez Ente pour que je puisse vous ajouter à mon abonnement familial\n\nhttps://ente.com",
   "done": "Terminé",
   "applyCodeTitle": "Utiliser le code",
   "enterCodeDescription": "Entrez le code fourni par votre ami·e pour débloquer l'espace de stockage gratuit",
@@ -877,7 +877,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -925,7 +925,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Détails de paiement",
   "manageFamily": "Gérer la famille",
-  "contactToManageSubscription": "Veuillez nous contacter à support@ente.io pour gérer votre abonnement {provider}.",
+  "contactToManageSubscription": "Veuillez nous contacter à support@ente.com pour gérer votre abonnement {provider}.",
   "renewSubscription": "Renouveler l’abonnement",
   "cancelSubscription": "Annuler l'abonnement",
   "areYouSureYouWantToRenew": "Êtes-vous sûr de vouloir renouveler ?",
@@ -972,10 +972,10 @@
   "playstoreSubscription": "Abonnement au PlayStore",
   "appstoreSubscription": "Abonnement à l'AppStore",
   "subAlreadyLinkedErrMessage": "Votre {id} est déjà lié à un autre compte Ente.\nSi vous souhaitez utiliser votre {id} avec ce compte, veuillez contacter notre support",
-  "visitWebToManage": "Vous pouvez gérer votre abonnement sur web.ente.io",
+  "visitWebToManage": "Vous pouvez gérer votre abonnement sur web.ente.com",
   "managePaymentMethod": "Gérer le mode de paiement",
   "couldNotUpdateSubscription": "Impossible de mettre à jour l’abonnement",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Veuillez contacter support@ente.io et nous serons heureux de vous aider!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Veuillez contacter support@ente.com et nous serons heureux de vous aider!",
   "paymentFailed": "Échec du paiement",
   "paymentFailedTalkToProvider": "Veuillez contacter le support {providerName} si vous avez été facturé",
   "@paymentFailedTalkToProvider": {
@@ -1408,7 +1408,7 @@
   "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",
   "loadMessage6": "Vous pouvez partager des liens vers vos albums avec vos proches",
   "loadMessage7": "Nos applications mobiles s'exécutent en arrière-plan pour chiffrer et sauvegarder automatiquement les nouvelles photos que vous prenez",
-  "loadMessage8": "web.ente.io dispose d'un outil de téléchargement facile à utiliser",
+  "loadMessage8": "web.ente.com dispose d'un outil de téléchargement facile à utiliser",
   "loadMessage9": "Nous utilisons Xchacha20Poly1305 pour chiffrer vos données en toute sécurité",
   "photoDescriptions": "Descriptions de la photo",
   "searchResultFileName": "Nom du fichier",
@@ -1679,7 +1679,7 @@
   "playOnTv": "Lire l'album sur la TV",
   "pair": "Associer",
   "deviceNotFound": "Appareil non trouvé",
-  "castInstruction": "Visitez cast.ente.io sur l'appareil que vous voulez associer.\n\nEntrez le code ci-dessous pour lire l'album sur votre TV.",
+  "castInstruction": "Visitez cast.ente.com sur l'appareil que vous voulez associer.\n\nEntrez le code ci-dessous pour lire l'album sur votre TV.",
   "deviceCodeHint": "Saisissez le code",
   "joinDiscord": "Rejoindre Discord",
   "locations": "Lieux",

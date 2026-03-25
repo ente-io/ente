@@ -15,7 +15,7 @@ Run commands from `android/apps/ensu`.
 - `./gradlew lint`: Run Android lint checks (if configured).
 
 ### Custom API Endpoint
-Override the default API (`https://api.ente.io`) with `ENTE_API_ENDPOINT`:
+Override the default API (`https://api.ente.com`) with `ENTE_API_ENDPOINT`:
 
 ```bash
 ENTE_API_ENDPOINT=https://your-endpoint ./gradlew :app-ui:installDebug

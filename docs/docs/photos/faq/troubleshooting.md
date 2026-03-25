@@ -64,7 +64,7 @@ If a specific video keeps failing:
 1. Check your network connection is stable
 2. Make sure you're not running out of storage quota
 3. Try uploading via WiFi instead of mobile data
-4. Contact [support@ente.io](mailto:support@ente.io) with debug logs (see [How to share logs](#sharing-logs))
+4. Contact [support@ente.com](mailto:support@ente.com) with debug logs (see [How to share logs](#sharing-logs))
 
 ### Why does the app crash when watching videos or using ML? {#app-crashes-ml-video}
 
@@ -120,7 +120,7 @@ If your photos or videos aren't uploading to Ente, try these troubleshooting ste
 - Ente supports all `image/*` and `video/*` file types
 - RAW format support is currently limited
 - Files larger than 10 GB cannot be uploaded
-- If a valid file isn't uploading, contact [support@ente.io](mailto:support@ente.io)
+- If a valid file isn't uploading, contact [support@ente.com](mailto:support@ente.com)
 
 ### Why does upload show "Waiting to upload"? {#waiting-to-upload}
 
@@ -134,7 +134,7 @@ This usually indicates a network connectivity issue:
 
 ### Why are uploads failing on desktop or web? {#faster-uploads}
 
-We use a Cloudflare proxy to speed up uploads ([blog post](https://ente.io/blog/tech/making-uploads-faster/)). However, in some network configurations (depending on your ISP) this might prevent uploads from going through.
+We use a Cloudflare proxy to speed up uploads ([blog post](https://ente.com/blog/tech/making-uploads-faster/)). However, in some network configurations (depending on your ISP) this might prevent uploads from going through.
 
 **Solution:**
 
@@ -154,7 +154,7 @@ When files fail to download, a modal dialog appears showing the failed downloads
 
 The desktop/web app tries to detect if a particular file is a video or image. If the detection fails, the app skips the upload.
 
-**Solution:** Contact [support@ente.io](mailto:support@ente.io) if you find that a valid image or video file was not detected and uploaded. Include:
+**Solution:** Contact [support@ente.com](mailto:support@ente.com) if you find that a valid image or video file was not detected and uploaded. Include:
 
 - The file extension (e.g., .jpg, .mp4)
 - The file's MIME type if you know it
@@ -330,7 +330,7 @@ If you purchased a subscription through the iOS App Store but the app shows "Ple
 **Recommended solution:**
 
 1. Request a refund from Apple for the App Store purchase
-2. Purchase your subscription directly from [web.ente.io](https://web.ente.io) instead
+2. Purchase your subscription directly from [web.ente.com](https://web.ente.com) instead
 
 **How to request a refund from Apple:**
 
@@ -347,14 +347,14 @@ If you purchased a subscription through the iOS App Store but the app shows "Ple
 3. Reopen the app and wait a few minutes
 4. If still stuck, proceed with the refund and web purchase
 
-**Why purchase from web.ente.io?**
+**Why purchase from web.ente.com?**
 
 - More reliable payment processing
 - Can apply discount codes (not possible through App Store)
 - Avoid App Store's 30% fee
 - Better refund and support options
 
-If you continue experiencing issues after purchasing from the web, contact [support@ente.io](mailto:support@ente.io).
+If you continue experiencing issues after purchasing from the web, contact [support@ente.com](mailto:support@ente.com).
 
 ### Why is my Android app stuck on the splash screen? {#android-splash-freeze}
 
@@ -377,7 +377,7 @@ Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear
 3. Log back in
 4. Your backed-up photos are safe in the cloud
 
-**Note**: This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.io](mailto:support@ente.io) with your device model and Android version.
+**Note**: This is a known issue being investigated by our team. If none of these solutions work, please contact [support@ente.com](mailto:support@ente.com) with your device model and Android version.
 
 ### Why is the Linux desktop app still showing the old icon after updating? {#linux-icon-update}
 
@@ -451,9 +451,9 @@ If you see "A JavaScript error occurred in the main process - The specified modu
 **Solution:**
 Install the [Microsoft VC++ redistributable runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
 
-### Why can't I log in to web.ente.io on my mobile browser? {#web-login-mobile}
+### Why can't I log in to web.ente.com on my mobile browser? {#web-login-mobile}
 
-If web.ente.io loads infinitely or gets stuck when you try to log in on a mobile browser (Safari on iPhone, Chrome on Android), this is a known limitation.
+If web.ente.com loads infinitely or gets stuck when you try to log in on a mobile browser (Safari on iPhone, Chrome on Android), this is a known limitation.
 
 **Why this happens:**
 
@@ -467,12 +467,12 @@ Mobile browsers cannot handle the computationally intensive password derivation 
     - Full feature support including machine learning
 
 2. **Use a desktop or laptop computer**:
-    - web.ente.io works on desktop browsers (Chrome, Firefox, Safari, Edge)
-    - Or install the [desktop app](https://ente.io/download/desktop)
+    - web.ente.com works on desktop browsers (Chrome, Firefox, Safari, Edge)
+    - Or install the [desktop app](https://ente.com/download/desktop)
 
 **Feature differences:**
 
-Mobile browsers on web.ente.io are not supported. Use native apps for the best experience:
+Mobile browsers on web.ente.com are not supported. Use native apps for the best experience:
 
 - ✅ Mobile apps: Full features including ML, search, video streaming
 - ✅ Desktop/laptop web: Most features (no ML)
@@ -494,11 +494,11 @@ Open `Settings > Backup` to see the backup status and any errors.
 
 ### Why aren't videos playing on web? {#content-blocker-videos}
 
-If videos aren't playing on web.ente.io, browser content blockers or ad blockers may be blocking video playback.
+If videos aren't playing on web.ente.com, browser content blockers or ad blockers may be blocking video playback.
 
 **Solution:**
 
-Disable your content blocker or add `web.ente.io` to your allowlist. Wait 15-20 seconds for changes to take effect before trying again.
+Disable your content blocker or add `web.ente.com` to your allowlist. Wait 15-20 seconds for changes to take effect before trying again.
 
 **Known issue with AdGuard:** AdGuard's basic filter blocks videos in Ente when using AdGuard Mini on Safari. This has been [reported to AdGuard filter developers](https://github.com/AdguardTeam/AdguardFilters/issues/216424).
 
@@ -580,10 +580,10 @@ Open `Settings > Support > Help` to view logs location, then go back to `Setting
 
 **On web:**
 
-Open `Settings > Support > Help` to download logs, then email the downloaded logs to [support@ente.io](mailto:support@ente.io).
+Open `Settings > Support > Help` to download logs, then email the downloaded logs to [support@ente.com](mailto:support@ente.com).
 
 **Email manually:**
-If the automatic email doesn't work, send logs directly to [support@ente.io](mailto:support@ente.io) with:
+If the automatic email doesn't work, send logs directly to [support@ente.com](mailto:support@ente.com) with:
 
 - Your platform (iOS, Android, Desktop, Web)
 - Description of the issue
@@ -593,8 +593,8 @@ If the automatic email doesn't work, send logs directly to [support@ente.io](mai
 ### Where can I get help? {#get-help}
 
 1. **Check the FAQ sections** for answers to common questions
-2. **Join our [Discord community](https://ente.io/discord)** for community support
-3. **Email us at [support@ente.io](mailto:support@ente.io)** with details about your issue
+2. **Join our [Discord community](https://ente.com/discord)** for community support
+3. **Email us at [support@ente.com](mailto:support@ente.com)** with details about your issue
 4. **Report bugs on [GitHub](https://github.com/ente-io/ente/issues)** if you've found a technical issue
 
-For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+For security vulnerabilities, please email [security@ente.com](mailto:security@ente.com) directly.

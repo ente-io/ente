@@ -29,7 +29,7 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
-    const allowed = ["albums.ente.io", "albums.ente.sh", "localhost"];
+    const allowed = ["albums.ente.com", "albums.ente.sh", "localhost"];
 
     if (!origin) return false;
     try {
@@ -79,7 +79,7 @@ const handleGET = async (request: Request) => {
     };
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
+        `https://api.ente.com/public-collection/files${pathname}${fileID}?${params.toString()}`,
         { headers },
     );
 

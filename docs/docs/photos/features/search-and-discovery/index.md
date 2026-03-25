@@ -155,11 +155,11 @@ Learn more in [Albums and Organization FAQ](/photos/faq/albums-and-organization#
 
 ### Platform-specific features
 
-- **Web (web.ente.io)**: Basic search (date, file name, description, album) - ML features not available
+- **Web (web.ente.com)**: Basic search (date, file name, description, album) - ML features not available
 - **Mobile apps**: All search features including ML (face recognition and magic search)
 - **Desktop apps**: All search features including ML (face recognition and magic search)
 
-> **Note**: Machine learning features (face recognition and magic search) only work on mobile and desktop apps, not on web.ente.io.
+> **Note**: Machine learning features (face recognition and magic search) only work on mobile and desktop apps, not on web.ente.com.
 
 ## Privacy and Security
 

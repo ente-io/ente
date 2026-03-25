@@ -343,8 +343,8 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 
 	templateData := make(map[string]interface{})
-	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
-	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
+	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.com", recoverToken)
+	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.com",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to send the account deletion email to %s", userEmail)

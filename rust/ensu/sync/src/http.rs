@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::errors::SyncError;
 
-const DEFAULT_BASE_URL: &str = "https://api.ente.io";
+const DEFAULT_BASE_URL: &str = "https://api.ente.com";
 
 #[derive(Debug, Clone)]
 pub struct HttpConfig {

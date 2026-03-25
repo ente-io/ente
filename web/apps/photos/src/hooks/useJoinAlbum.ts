@@ -44,7 +44,7 @@ const handleWebFallback = (
 ): void => {
     // Redirect to web app with joinAlbum parameter
     // The URL contains all necessary context (token, collectionId, JWT, hash) which will be
-    // stored on web.ente.io after the domain transition
+    // stored on web.ente.com after the domain transition
     const redirectURL = buildWebRedirectURL(
         accessToken,
         collectionId,

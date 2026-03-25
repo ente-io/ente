@@ -4,7 +4,7 @@
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
-    "author": "Ente <code@ente.io>",
+    "author": "Ente <code@ente.com>",
     "main": "app/main.js",
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",

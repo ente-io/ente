@@ -21,7 +21,7 @@ The simplest way to get the embed code is directly from Ente, whether you're on 
 
 **On web:**
 
-1. Open the album in [web.ente.io](https://web.ente.io)
+1. Open the album in [web.ente.com](https://web.ente.com)
 2. Open the album's sharing settings
 3. Create a public link (if you haven't already)
 4. Open the link settings ("Manage link")
@@ -48,15 +48,15 @@ First, you need to create a public link for the album you want to embed:
 1. Open the album in Ente (web or mobile app)
 2. Open the album's sharing settings
 3. Create a public link
-4. Copy the link (it will look like `https://albums.ente.io/?t=...#...`)
+4. Copy the link (it will look like `https://albums.ente.com/?t=...#...`)
 
 #### Step 2 - Add iframe to your website
 
-Add an iframe to your HTML with the public link as the source, replacing `albums.ente.io` with `embed.ente.io`:
+Add an iframe to your HTML with the public link as the source, replacing `albums.ente.com` with `embed.ente.com`:
 
 ```html
 <iframe
-    src="https://embed.ente.io/?t=...#..."
+    src="https://embed.ente.com/?t=...#..."
     width="800"
     height="600"
     frameborder="0"
@@ -67,7 +67,7 @@ Add an iframe to your HTML with the public link as the source, replacing `albums
 
 > [!NOTE]
 >
-> If you're using a custom domain for your public links, then replace your custom domain with `embed.ente.io`. The easy method will automatically do this for you.
+> If you're using a custom domain for your public links, then replace your custom domain with `embed.ente.com`. The easy method will automatically do this for you.
 
 ### Embedding in WordPress (Block Editor)
 
@@ -94,7 +94,7 @@ You can customize the appearance by adjusting the iframe attributes:
     style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"
 >
     <iframe
-        src="https://embed.ente.io/?t=...#..."
+        src="https://embed.ente.com/?t=...#..."
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
         frameborder="0"
         allowfullscreen
@@ -129,7 +129,7 @@ The embedded album viewer includes:
 
 Note that by putting the embed link in a webpage, you're making it public for anyone who can view the page, including search engines that can index your webpages. This isn't any different from putting the public link in your webpage or sharing it in a public forum, but it is good to call this out.
 
-The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.io/blog/building-shareable-links/).
+The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.com/blog/building-shareable-links/).
 
 ## Related topics
 

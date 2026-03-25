@@ -160,11 +160,11 @@ func TestBuildInactiveUserRunSummary(t *testing.T) {
 }
 
 func TestIsInInactiveUserRollout(t *testing.T) {
-	if !isInInactiveUserRollout(12345, "internal@ente.io") {
-		t.Fatal("expected @ente.io users to always be in rollout")
+	if !isInInactiveUserRollout(12345, "internal@ente.com") {
+		t.Fatal("expected @ente.com users to always be in rollout")
 	}
 	if !isInInactiveUserRollout(12345, " INTERNAL@ENTE.IO ") {
-		t.Fatal("expected normalized @ente.io users to always be in rollout")
+		t.Fatal("expected normalized @ente.com users to always be in rollout")
 	}
 
 	userID := int64(987654321)

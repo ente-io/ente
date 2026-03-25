@@ -29,7 +29,7 @@
   "deleteReason4": "Lý do không có trong danh sách",
   "sendEmail": "Gửi email",
   "deleteRequestSLAText": "Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.",
-  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.io</warning> từ địa chỉ email đã đăng ký của bạn.",
+  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.com</warning> từ địa chỉ email đã đăng ký của bạn.",
   "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
   "ok": "OK",
   "createAccount": "Tạo tài khoản",
@@ -78,7 +78,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -89,7 +89,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -165,7 +165,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -315,19 +315,19 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "ID xác minh",
   "verifyEmailID": "Xác minh {email}",
   "emailNoEnteAccount": "{email} không có tài khoản Ente.\n\nGửi họ một lời mời để chia sẻ ảnh.",
-  "shareMyVerificationID": "Đây là ID xác minh của tôi: {verificationID} cho ente.io.",
-  "shareTextConfirmOthersVerificationID": "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.io của bạn: {verificationID}",
+  "shareMyVerificationID": "Đây là ID xác minh của tôi: {verificationID} cho ente.com.",
+  "shareTextConfirmOthersVerificationID": "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.com của bạn: {verificationID}",
   "somethingWentWrong": "Có gì đó không ổn",
   "sendInvite": "Gửi lời mời",
-  "shareTextRecommendUsingEnte": "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.io",
-  "shareTextRecommendUsingEnteForFamily": "Tải Ente để tôi có thể thêm bạn vào gói gia đình\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.com",
+  "shareTextRecommendUsingEnteForFamily": "Tải Ente để tôi có thể thêm bạn vào gói gia đình\n\nhttps://ente.com",
   "done": "Xong",
   "applyCodeTitle": "Áp dụng mã",
   "enterCodeDescription": "Nhập mã do bạn bè cung cấp để nhận thêm dung lượng miễn phí cho cả hai",
@@ -355,7 +355,7 @@
   "theyAlsoGetXGb": "Họ cũng nhận được {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB cho họ + {storageAmountInGB} GB cho bạn khi nâng cấp.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB mỗi khi ai đó đăng ký gói trả phí và áp dụng mã của bạn",
-  "shareTextReferralCode": "Ente Photos là nơi lưu trữ ảnh riêng tư và an toàn của bạn\n* Tải xuống Ente Photos từ https://ente.io/app\n* Tạo tài khoản\n* Áp mã giới thiệu {referralCode} trong Cài đặt->Giới thiệu bạn bè\n* Nhận {referralStorageInGB}GB thêm khi nâng cấp gói trả phí",
+  "shareTextReferralCode": "Ente Photos là nơi lưu trữ ảnh riêng tư và an toàn của bạn\n* Tải xuống Ente Photos từ https://ente.com/app\n* Tạo tài khoản\n* Áp mã giới thiệu {referralCode} trong Cài đặt->Giới thiệu bạn bè\n* Nhận {referralStorageInGB}GB thêm khi nâng cấp gói trả phí",
   "claimFreeStorage": "Nhận thêm dung lượng",
   "inviteYourFriends": "Mời bạn bè của bạn",
   "earnFreeStorage": "Nhận thêm dung lượng",
@@ -889,7 +889,7 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -937,7 +937,7 @@
   "subscription": "Gói đăng ký",
   "paymentDetails": "Chi tiết thanh toán",
   "manageFamily": "Quản lý gia đình",
-  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.io để quản lý gói {provider} của bạn.",
+  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.com để quản lý gói {provider} của bạn.",
   "renewSubscription": "Gia hạn gói",
   "cancelSubscription": "Hủy gói",
   "areYouSureYouWantToRenew": "Bạn có chắc muốn gia hạn không?",
@@ -984,10 +984,10 @@
   "playstoreSubscription": "Gói PlayStore",
   "appstoreSubscription": "Gói AppStore",
   "subAlreadyLinkedErrMessage": "ID {id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID {id} này với tài khoản này, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.",
-  "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
+  "visitWebToManage": "Vui lòng truy cập web.ente.com để quản lý gói đăng ký",
   "managePaymentMethod": "Quản lý phương thức thanh toán",
   "couldNotUpdateSubscription": "Không thể cập nhật gói",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.com và chúng tôi rất sẵn sàng giúp đỡ!",
   "paymentFailed": "Thanh toán thất bại",
   "paymentFailedTalkToProvider": "Vui lòng trao đổi với bộ phận hỗ trợ {providerName} nếu bạn đã bị tính phí",
   "@paymentFailedTalkToProvider": {
@@ -1420,7 +1420,7 @@
   "loadMessage5": "Mã nguồn và mã hóa của chúng tôi đã được kiểm nghiệm ngoại bộ",
   "loadMessage6": "Bạn có thể chia sẻ liên kết đến album của mình với những người thân yêu",
   "loadMessage7": "Các ứng dụng di động của chúng tôi chạy ngầm để mã hóa và sao lưu bất kỳ ảnh nào bạn mới chụp",
-  "loadMessage8": "web.ente.io có một trình tải lên mượt mà",
+  "loadMessage8": "web.ente.com có một trình tải lên mượt mà",
   "loadMessage9": "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn",
   "photoDescriptions": "Mô tả ảnh",
   "searchResultFileName": "Tên tệp",
@@ -1691,7 +1691,7 @@
   "playOnTv": "Phát album trên TV",
   "pair": "Kết nối",
   "deviceNotFound": "Không tìm thấy thiết bị",
-  "castInstruction": "Truy cập cast.ente.io trên thiết bị bạn muốn kết nối.\n\nNhập mã dưới đây để phát album trên TV của bạn.",
+  "castInstruction": "Truy cập cast.ente.com trên thiết bị bạn muốn kết nối.\n\nNhập mã dưới đây để phát album trên TV của bạn.",
   "deviceCodeHint": "Nhập mã",
   "joinDiscord": "Tham gia Discord",
   "locations": "Vị trí",

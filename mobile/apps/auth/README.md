@@ -39,7 +39,7 @@ works on Windows, Linux and macOS.
 
 ### Web
 
-You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding
+You can view your 2FA codes at [auth.ente.com](https://auth.ente.com). For adding
 or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source
@@ -117,4 +117,4 @@ apksigner verify --print-certs <path_to_apk>
 ## ⭐️ About
 
 To know more about Ente and the ways to get in touch or seek help, see [our main
-README](../../../README.md) or visit [ente.io](https://ente.io).
+README](../../../README.md) or visit [ente.com](https://ente.com).

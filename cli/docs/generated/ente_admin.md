@@ -14,7 +14,7 @@ Commands for admin actions like disable or enabling 2fa, bumping up the storage 
 
 ### SEE ALSO
 
-* [ente](ente.md)	 - CLI tool for exporting your photos from ente.io
+* [ente](ente.md)	 - CLI tool for exporting your photos from ente.com
 * [ente admin delete-user](ente_admin_delete-user.md)	 - Delete  a user
 * [ente admin disable-2fa](ente_admin_disable-2fa.md)	 - Disable 2fa for a user
 * [ente admin disable-passkey](ente_admin_disable-passkey.md)	 - Disable passkey for a user

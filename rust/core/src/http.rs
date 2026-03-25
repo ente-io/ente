@@ -98,8 +98,8 @@ mod tests {
 
     #[test]
     fn test_client_creation() {
-        let client = HttpClient::new("https://api.ente.io");
-        assert_eq!(client.base_url, "https://api.ente.io");
+        let client = HttpClient::new("https://api.ente.com");
+        assert_eq!(client.base_url, "https://api.ente.com");
     }
 
     #[test]

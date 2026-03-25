@@ -26,7 +26,7 @@
   "deleteReason4": "Mijn reden wordt niet vermeld",
   "sendEmail": "E-mail versturen",
   "deleteRequestSLAText": "Je verzoek wordt binnen 72 uur verwerkt.",
-  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres.",
+  "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.com</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
   "createAccount": "Maak account",
@@ -72,7 +72,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -135,7 +135,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -275,18 +275,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Verificatie ID",
   "verifyEmailID": "Verifieer {email}",
   "emailNoEnteAccount": "{email} heeft geen Ente account.\n\nStuur ze een uitnodiging om foto's te delen.",
-  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.io verificatie-ID is: {verificationID}",
+  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.com.",
+  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.com verificatie-ID is: {verificationID}",
   "somethingWentWrong": "Er ging iets mis",
   "sendInvite": "Stuur een uitnodiging",
-  "shareTextRecommendUsingEnte": "Download Ente zodat we gemakkelijk foto's en video's in originele kwaliteit kunnen delen\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente zodat we gemakkelijk foto's en video's in originele kwaliteit kunnen delen\n\nhttps://ente.com",
   "done": "Voltooid",
   "applyCodeTitle": "Code toepassen",
   "enterCodeDescription": "Voer de code van de vriend in om gratis opslag voor jullie beiden te claimen",
@@ -621,7 +621,7 @@
   "subscription": "Abonnement",
   "paymentDetails": "Betaalgegevens",
   "manageFamily": "Familie abonnement beheren",
-  "contactToManageSubscription": "Neem contact met ons op via support@ente.io om uw {provider} abonnement te beheren.",
+  "contactToManageSubscription": "Neem contact met ons op via support@ente.com om uw {provider} abonnement te beheren.",
   "renewSubscription": "Abonnement verlengen",
   "cancelSubscription": "Abonnement opzeggen",
   "areYouSureYouWantToRenew": "Weet u zeker dat u wilt verlengen?",
@@ -668,9 +668,9 @@
   "playstoreSubscription": "PlayStore abonnement",
   "appstoreSubscription": "PlayStore abonnement",
   "subAlreadyLinkedErrMessage": "Jouw {id} is al aan een ander Ente account gekoppeld.\nAls je jouw {id} wilt gebruiken met dit account, neem dan contact op met onze klantenservice",
-  "visitWebToManage": "Bezoek alstublieft web.ente.io om uw abonnement te beheren",
+  "visitWebToManage": "Bezoek alstublieft web.ente.com om uw abonnement te beheren",
   "couldNotUpdateSubscription": "Kon abonnement niet wijzigen",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.io en we helpen u graag!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Neem alstublieft contact op met support@ente.com en we helpen u graag!",
   "paymentFailed": "Betaling mislukt",
   "paymentFailedTalkToProvider": "Praat met {providerName} klantenservice als u in rekening bent gebracht",
   "@paymentFailedTalkToProvider": {
@@ -1028,7 +1028,7 @@
   "loadMessage5": "Onze broncode en cryptografie zijn extern gecontroleerd en geverifieerd",
   "loadMessage6": "Je kunt links naar je albums delen met je dierbaren",
   "loadMessage7": "Onze mobiele apps draaien op de achtergrond om alle nieuwe foto's die je maakt te versleutelen en te back-uppen",
-  "loadMessage8": "web.ente.io heeft een vlotte uploader",
+  "loadMessage8": "web.ente.com heeft een vlotte uploader",
   "loadMessage9": "We gebruiken Xchacha20Poly1305 om uw gegevens veilig te versleutelen",
   "photoDescriptions": "Foto beschrijvingen",
   "fileTypesAndNames": "Bestandstypen en namen",
@@ -1247,7 +1247,7 @@
   "playOnTv": "Album afspelen op TV",
   "pair": "Koppelen",
   "deviceNotFound": "Apparaat niet gevonden",
-  "castInstruction": "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
+  "castInstruction": "Bezoek cast.ente.com op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
   "deviceCodeHint": "Voer de code in",
   "joinDiscord": "Join de Discord",
   "locations": "Locaties",

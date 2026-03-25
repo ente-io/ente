@@ -962,7 +962,7 @@ class CryptoUtil {
   // with memory and ops limit hardcoded to their Interactive variants
   // NOTE: This is only used while setting passwords for shared links, as an
   // extra layer of authentication (atop the access token and collection key).
-  // More details @ https://ente.io/blog/building-shareable-links/
+  // More details @ https://ente.com/blog/building-shareable-links/
   static Future<DerivedKeyResult> deriveInteractiveKey(
     Uint8List password,
     Uint8List salt,

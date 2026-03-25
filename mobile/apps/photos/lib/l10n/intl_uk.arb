@@ -27,7 +27,7 @@
   "deleteReason4": "Причина не перерахована",
   "sendEmail": "Надіслати електронного листа",
   "deleteRequestSLAText": "Ваш запит буде оброблений протягом 72 годин.",
-  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.io</warning> зі скриньки, зазначеної при реєстрації.",
+  "deleteEmailRequest": "Будь ласка, надішліть електронного листа на <warning>account-deletion@ente.com</warning> зі скриньки, зазначеної при реєстрації.",
   "entePhotosPerm": "Ente <i>потребує дозволу</i> до ваших світлин",
   "ok": "Добре",
   "createAccount": "Створити обліковий запис",
@@ -71,7 +71,7 @@
       "email": {
         "description": "The email address of the user",
         "type": "String",
-        "example": "example@ente.io"
+        "example": "example@ente.com"
       }
     }
   },
@@ -134,7 +134,7 @@
       "supportEmail": {
         "description": "The support email address",
         "type": "String",
-        "example": "support@ente.io"
+        "example": "support@ente.com"
       }
     }
   },
@@ -274,18 +274,18 @@
     "placeholders": {
       "email": {
         "type": "String",
-        "example": "someone@ente.io"
+        "example": "someone@ente.com"
       }
     }
   },
   "verificationId": "Ідентифікатор підтвердження",
   "verifyEmailID": "Підтвердити {email}",
   "emailNoEnteAccount": "У {email} немає облікового запису Ente.\n\nНадішліть їм запрошення для обміну фотографіями.",
-  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.io.",
+  "shareMyVerificationID": "Ось мій ідентифікатор підтвердження: {verificationID} для ente.com.",
   "shareTextConfirmOthersVerificationID": "Гей, ви можете підтвердити, що це ваш ідентифікатор підтвердження: {verificationID}",
   "somethingWentWrong": "Щось пішло не так",
   "sendInvite": "Надіслати запрошення",
-  "shareTextRecommendUsingEnte": "Завантажте Ente для того, щоб легко поділитися фотографіями оригінальної якості та відео\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Завантажте Ente для того, щоб легко поділитися фотографіями оригінальної якості та відео\n\nhttps://ente.com",
   "done": "Готово",
   "applyCodeTitle": "Застосувати код",
   "enterCodeDescription": "Введіть код, наданий вашим другом, щоби отримати безплатне сховище для вас обох",
@@ -604,7 +604,7 @@
   "subscription": "Передплата",
   "paymentDetails": "Деталі платежу",
   "manageFamily": "Керування сім'єю",
-  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.io для управління вашою передплатою {provider}.",
+  "contactToManageSubscription": "Зв'яжіться з нами за адресою support@ente.com для управління вашою передплатою {provider}.",
   "renewSubscription": "Поновити передплату",
   "cancelSubscription": "Скасувати передплату",
   "areYouSureYouWantToRenew": "Ви впевнені, що хочете поновити?",
@@ -651,9 +651,9 @@
   "playstoreSubscription": "Передплата Play Store",
   "appstoreSubscription": "Передплата App Store",
   "subAlreadyLinkedErrMessage": "Ваш {id} вже пов'язаний з іншим обліковим записом Ente.\nЯкщо ви хочете використовувати свій {id} з цим обліковим записом, зверніться до нашої служби підтримки",
-  "visitWebToManage": "Відвідайте web.ente.io, щоб керувати передплатою",
+  "visitWebToManage": "Відвідайте web.ente.com, щоб керувати передплатою",
   "couldNotUpdateSubscription": "Не вдалося оновити передплату",
-  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.io і ми будемо раді допомогти!",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Зв'яжіться з support@ente.com і ми будемо раді допомогти!",
   "paymentFailed": "Не вдалося оплатити",
   "paymentFailedTalkToProvider": "Зверніться до {providerName}, якщо було знято платіж",
   "@paymentFailedTalkToProvider": {
@@ -997,7 +997,7 @@
   "loadMessage5": "Наш вихідний код та шифрування пройшли перевірку спільнотою",
   "loadMessage6": "Ви можете поділитися посиланнями на свої альбоми з близькими",
   "loadMessage7": "Наші мобільні застосунки працюють у фоновому режимі для шифрування і створення резервних копій будь-яких нових фотографій, які ви виберете",
-  "loadMessage8": "web.ente.io має зручний завантажувач",
+  "loadMessage8": "web.ente.com має зручний завантажувач",
   "loadMessage9": "Ми використовуємо Xchacha20Poly1305 для безпечного шифрування ваших даних",
   "photoDescriptions": "Опис фотографії",
   "fileTypesAndNames": "Типи та назви файлів",
@@ -1224,7 +1224,7 @@
   "playOnTv": "Відтворити альбом на ТБ",
   "pair": "Створити пару",
   "deviceNotFound": "Пристрій не знайдено",
-  "castInstruction": "Відвідайте cast.ente.io на пристрої, з яким ви хочете створити пару.\n\nВведіть код нижче, щоб відтворити альбом на телевізорі.",
+  "castInstruction": "Відвідайте cast.ente.com на пристрої, з яким ви хочете створити пару.\n\nВведіть код нижче, щоб відтворити альбом на телевізорі.",
   "deviceCodeHint": "Введіть код",
   "joinDiscord": "Приєднатися до Discord",
   "locations": "Розташування",

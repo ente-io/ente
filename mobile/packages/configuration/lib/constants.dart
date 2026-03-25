@@ -1,4 +1,4 @@
-const kDefaultProductionEndpoint = 'https://api.ente.io';
+const kDefaultProductionEndpoint = 'https://api.ente.com';
 
 // 256 bit key maps to 24 words
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic

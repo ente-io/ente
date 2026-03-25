@@ -1,6 +1,6 @@
 ## ente
 
-CLI tool for exporting your photos from ente.io
+CLI tool for exporting your photos from ente.com
 
 ### Synopsis
 

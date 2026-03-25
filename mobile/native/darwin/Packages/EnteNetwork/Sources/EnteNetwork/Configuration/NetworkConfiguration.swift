@@ -37,11 +37,11 @@ public struct NetworkConfiguration {
     
     // Default Ente.io configuration
     public static let `default` = NetworkConfiguration(
-        apiEndpoint: URL(string: "https://api.ente.io")!,
-        accountsEndpoint: URL(string: "https://accounts.ente.io"),
-        castEndpoint: URL(string: "https://api.ente.io"), // Fix: Use same endpoint as web app
-        publicAlbumsEndpoint: URL(string: "https://albums.ente.io"),
-        familyEndpoint: URL(string: "https://family.ente.io")
+        apiEndpoint: URL(string: "https://api.ente.com")!,
+        accountsEndpoint: URL(string: "https://accounts.ente.com"),
+        castEndpoint: URL(string: "https://api.ente.com"), // Fix: Use same endpoint as web app
+        publicAlbumsEndpoint: URL(string: "https://albums.ente.com"),
+        familyEndpoint: URL(string: "https://family.ente.com")
     )
 }
 
@@ -59,9 +59,9 @@ public enum EnteEnvironment {
             return .default
         case .staging:
             return NetworkConfiguration(
-                apiEndpoint: URL(string: "https://api.staging.ente.io")!,
-                accountsEndpoint: URL(string: "https://accounts.staging.ente.io"),
-                castEndpoint: URL(string: "https://cast.staging.ente.io")
+                apiEndpoint: URL(string: "https://api.staging.ente.com")!,
+                accountsEndpoint: URL(string: "https://accounts.staging.ente.com"),
+                castEndpoint: URL(string: "https://cast.staging.ente.com")
             )
         case .development:
             return NetworkConfiguration(

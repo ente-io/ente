@@ -89,7 +89,7 @@ fpm -s dir -t rpm \
   -n enteauth \
   -v "$VERSION" \
   --vendor "Ente.io" \
-  --maintainer "Ente.io Developers <auth@ente.io>" \
+  --maintainer "Ente.io Developers <auth@ente.com>" \
   --license "AGPLv3" \
   --url "https://github.com/ente-io/ente" \
   --description "2FA app with free end-to-end encrypted backup and sync" \

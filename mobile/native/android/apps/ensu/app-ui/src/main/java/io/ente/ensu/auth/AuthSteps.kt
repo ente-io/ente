@@ -164,7 +164,7 @@ internal fun OtpVerificationView(
                         email = email,
                         srp = srpAttributes,
                         sessionId = payload.passkeySessionId.orEmpty(),
-                        accountsUrl = payload.accountsUrl ?: "https://accounts.ente.io",
+                        accountsUrl = payload.accountsUrl ?: "https://accounts.ente.com",
                         twoFactorSessionId = payload.twoFactorSessionId,
                         password = null
                     )
@@ -590,7 +590,7 @@ private fun handleSrpResult(
                 email = email,
                 srp = srpAttributes,
                 sessionId = result.passkeySessionId.orEmpty(),
-                accountsUrl = result.accountsUrl ?: "https://accounts.ente.io",
+                accountsUrl = result.accountsUrl ?: "https://accounts.ente.com",
                 twoFactorSessionId = result.twoFactorSessionId,
                 password = password
             )

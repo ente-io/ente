@@ -87,8 +87,8 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
 
     for account in accounts {
         // Shorten endpoint display for better readability
-        let endpoint_display = if account.endpoint == "https://api.ente.io" {
-            "api.ente.io (prod)".to_string()
+        let endpoint_display = if account.endpoint == "https://api.ente.com" {
+            "api.ente.com (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
             format!(
                 "localhost:{}",
@@ -498,7 +498,7 @@ async fn verify_passkey_2fa(
         .as_ref()
         .filter(|s| !s.is_empty())
         .map(|s| s.as_str())
-        .unwrap_or("https://accounts.ente.io");
+        .unwrap_or("https://accounts.ente.com");
 
     let client_package = match app {
         App::Photos => "io.ente.photos",

@@ -1,7 +1,7 @@
 /**
  * Proxy file uploads.
  *
- * See: https://ente.io/blog/tech/making-uploads-faster/
+ * See: https://ente.com/blog/tech/making-uploads-faster/
  */
 
 export default {
@@ -63,7 +63,7 @@ const isAllowedOrigin = (origin: string | null) => {
         const hostname = url.hostname;
         return (
             origin == "ente://app" /* desktop app */ ||
-            hostname.endsWith("ente.io") ||
+            hostname.endsWith("ente.com") ||
             hostname.endsWith("ente.sh") ||
             hostname == "localhost"
         );

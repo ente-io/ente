@@ -15,7 +15,7 @@ a second factor to secure your Ente account.**
 > credentials.
 >
 > - More details about why and how are in the Passkeys announcement
->   [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
+>   [blog post](https://ente.com/blog/introducing-passkeys-on-ente/).
 > - And to know more technical details about how our passkey verification works,
 >   you can see this
 >   [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
@@ -23,7 +23,7 @@ a second factor to secure your Ente account.**
 ## Passkeys and TOTP
 
 Ente already supports TOTP codes (in fact, we built an
-[entire app](https://ente.io/auth/) to store them...). Passkeys serve as an
+[entire app](https://ente.com/auth/) to store them...). Passkeys serve as an
 alternative 2FA (second factor) mechanism.
 
 If you add a passkey to your Ente account, it will be used instead of any
@@ -35,11 +35,11 @@ Passkeys get enabled if you add one (or more) passkeys to your account.
 Conversely, passkeys get disabled if you remove all your existing passkeys.
 
 To add and remove passkeys, use the _Passkey_ option in the settings menu. This
-will open up _accounts.ente.io_, where you can manage your passkeys.
+will open up _accounts.ente.com_, where you can manage your passkeys.
 
 ## Login with passkeys
 
-If passkeys are enabled, then _accounts.ente.io_ will automatically open when
+If passkeys are enabled, then _accounts.ente.com_ will automatically open when
 you log into your Ente account on a new device. Here you can follow the
 instructions given by the browser to verify your passkey.
 
@@ -61,7 +61,7 @@ and login into your account. Now you can go to the _Passkey_ page to delete the
 lost passkey and/or add a new one.
 
 If you have lost access to both your passkey and recovery key, please reach out
-to [support@ente.io](mailto:support@ente.io) for help.
+to [support@ente.com](mailto:support@ente.com) for help.
 
 ## Related FAQs
 

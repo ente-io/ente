@@ -801,7 +801,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionSkipsResetWhenEmailFails(
 	resetter := &recordingUserAccessResetter{}
 	snapshot := storageWarningSnapshot{
 		RecipientID:      12345,
-		AccountEmail:     "user@ente.io",
+		AccountEmail:     "user@ente.com",
 		TotalUsage:       storageWarningOverageThreshold + 10,
 		AllottedStorage:  0,
 		AvailableStorage: -10,
@@ -846,7 +846,7 @@ func TestProcessStorageWarningSnapshotScheduledDeletionResetsAccessAfterEmail(t 
 	resetter := &recordingUserAccessResetter{callOrder: &callOrder}
 	snapshot := storageWarningSnapshot{
 		RecipientID:      12345,
-		AccountEmail:     "user@ente.io",
+		AccountEmail:     "user@ente.com",
 		TotalUsage:       storageWarningOverageThreshold + 10,
 		AllottedStorage:  0,
 		AvailableStorage: -10,
@@ -930,8 +930,8 @@ func TestStorageWarningShouldResetUserAccess(t *testing.T) {
 func TestIsInStorageWarningRollout(t *testing.T) {
 	const userID int64 = 12345
 
-	if !isInStorageWarningRollout(userID, "alerts@ente.io") {
-		t.Fatal("expected @ente.io account to always be in rollout")
+	if !isInStorageWarningRollout(userID, "alerts@ente.com") {
+		t.Fatal("expected @ente.com account to always be in rollout")
 	}
 
 	want := rollout.IsInPercentageRollout(userID, storageWarningRolloutNonce, storageWarningRolloutPercentage)

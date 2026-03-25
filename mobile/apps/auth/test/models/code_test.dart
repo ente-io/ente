@@ -16,29 +16,29 @@ void main() {
 
   test("parseDocumentedFormat", () {
     final code = Code.fromOTPAuthUrl(
-      "otpauth://totp/testdata@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub",
+      "otpauth://totp/testdata@ente.com?secret=ASKZNWOU6SVYAMVS&issuer=GitHub",
     );
     expect(code.issuer, "GitHub", reason: "issuerMismatch");
-    expect(code.account, "testdata@ente.io", reason: "accountMismatch");
+    expect(code.account, "testdata@ente.com", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
   });
 
   test("validateCount", () {
     final code = Code.fromOTPAuthUrl(
-      "otpauth://hotp/testdata@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
+      "otpauth://hotp/testdata@ente.com?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
     );
     expect(code.issuer, "GitHub", reason: "issuerMismatch");
-    expect(code.account, "testdata@ente.io", reason: "accountMismatch");
+    expect(code.account, "testdata@ente.com", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
     expect(code.counter, 15);
   });
 
   test("validateDisplay", () {
     Code code = Code.fromOTPAuthUrl(
-      "otpauth://hotp/testdata@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
+      "otpauth://hotp/testdata@ente.com?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
     );
     expect(code.issuer, "GitHub", reason: "issuerMismatch");
-    expect(code.account, "testdata@ente.io", reason: "accountMismatch");
+    expect(code.account, "testdata@ente.com", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
     expect(code.counter, 15);
     code = code.copyWith(
@@ -64,7 +64,7 @@ void main() {
 
   test("parseAndUpdateInChinese", () {
     const String rubberDuckQr =
-        'otpauth://totp/%E6%A9%A1%E7%9A%AE%E9%B8%AD?secret=2CWDCK4EOIN5DJDRMYUMYBBO4MKSR5AX&issuer=ente.io';
+        'otpauth://totp/%E6%A9%A1%E7%9A%AE%E9%B8%AD?secret=2CWDCK4EOIN5DJDRMYUMYBBO4MKSR5AX&issuer=ente.com';
     final code = Code.fromOTPAuthUrl(rubberDuckQr);
     expect(code.account, '橡皮鸭');
     final String updatedRawCode =

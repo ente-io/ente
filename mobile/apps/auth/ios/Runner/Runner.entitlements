@@ -6,8 +6,8 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:web.ente.io</string>
-		<string>webcredentials:auth.ente.io</string>
+		<string>webcredentials:web.ente.com</string>
+		<string>webcredentials:auth.ente.com</string>
 	</array>
 </dict>
 </plist>

@@ -6,10 +6,10 @@ const int thumbnailLargeSize = 512;
 const int compressedThumbnailResolution = 1080;
 const int thumbnailDataLimit = 100 * 1024;
 const String sentryDSN =
-    "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4";
+    "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.com/4";
 const String sentryDebugDSN =
-    "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
-const String sentryTunnel = "https://sentry-reporter.ente.io";
+    "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.com/3";
+const String sentryTunnel = "https://sentry-reporter.ente.com";
 const String githubDiscussionsUrl =
     "https://github.com/ente-io/ente/discussions";
 const int microSecondsInDay = 86400000000;
@@ -37,16 +37,16 @@ const mnemonicKeyWordCount = 24;
 // https://stackoverflow.com/a/61162219
 const dragSensitivity = 8;
 
-const supportEmail = 'support@ente.io';
+const supportEmail = 'support@ente.com';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 const multipartPartSize = 20 * 1024 * 1024;
 
-const kDefaultProductionEndpoint = 'https://api.ente.io';
-const kUploadProxyEndpoint = 'https://uploader.ente.io';
-const kAccountsUrl = 'https://accounts.ente.io';
-const kCasUrl = 'https://cas.ente.io';
-const kFamilyUrl = 'https://family.ente.io';
+const kDefaultProductionEndpoint = 'https://api.ente.com';
+const kUploadProxyEndpoint = 'https://uploader.ente.com';
+const kAccountsUrl = 'https://accounts.ente.com';
+const kCasUrl = 'https://cas.ente.com';
+const kFamilyUrl = 'https://family.ente.com';
 
 const int intMaxValue = 9223372036854775807;
 
