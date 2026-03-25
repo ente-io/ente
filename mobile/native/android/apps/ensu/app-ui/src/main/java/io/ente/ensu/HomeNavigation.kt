@@ -35,6 +35,7 @@ import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
 import io.ente.ensu.modelsettings.ModelSettingsScreen
 import io.ente.ensu.settings.LogViewerScreen
+import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.SettingsScreen
 import io.ente.ensu.settings.SystemPromptSettingsScreen
 import kotlinx.coroutines.flow.Flow
@@ -44,6 +45,7 @@ internal fun HomeNavigation(
     appState: AppState,
     store: AppStore,
     logRepository: io.ente.ensu.data.logging.FileLogRepository,
+    authService: io.ente.ensu.data.auth.EnsuAuthService,
     currentEndpointFlow: Flow<String>,
     advancedSettingsDataStore: AdvancedSettingsDataStore,
     appVersion: String,
@@ -94,6 +96,9 @@ internal fun HomeNavigation(
                 }
                 HomeRoute.SystemPromptSettings -> {
                     SimpleTopBar(title = "System Prompt") { navController.popBackStack() }
+                }
+                HomeRoute.EndpointSettings -> {
+                    SimpleTopBar(title = "Endpoint") { navController.popBackStack() }
                 }
                 HomeRoute.Settings -> {
                     SimpleTopBar(title = "Settings") { navController.popBackStack() }
@@ -157,6 +162,7 @@ internal fun HomeNavigation(
                         onOpenLogs = { navController.navigate(HomeRoute.Logs) },
                         onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
                         onOpenSystemPromptSettings = { navController.navigate(HomeRoute.SystemPromptSettings) },
+                        onOpenEndpointSettings = { navController.navigate(HomeRoute.EndpointSettings) },
                         onUnlockAdvanced = {
                             store.unlockAdvancedSettings()
                             advancedSettingsDataStore.persistUnlockAdvancedSettings()
@@ -222,6 +228,20 @@ internal fun HomeNavigation(
                         }
                     )
                 }
+                composable(
+                    route = HomeRoute.EndpointSettings,
+                    enterTransition = { forwardEnter() },
+                    exitTransition = { forwardExit() },
+                    popEnterTransition = { backEnter() },
+                    popExitTransition = { backExit() }
+                ) {
+                    DeveloperSettingsScreen(
+                        authService = authService,
+                        currentEndpointFlow = currentEndpointFlow,
+                        onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
+                        onSaved = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -233,6 +253,7 @@ internal object HomeRoute {
     const val Logs = "logs"
     const val ModelSettings = "model-settings"
     const val SystemPromptSettings = "system-prompt-settings"
+    const val EndpointSettings = "endpoint-settings"
 }
 
 internal fun AnimatedContentTransitionScope<NavBackStackEntry>.forwardEnter() =

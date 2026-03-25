@@ -53,6 +53,7 @@ fun SettingsScreen(
     onOpenLogs: () -> Unit,
     onOpenModelSettings: () -> Unit,
     onOpenSystemPromptSettings: () -> Unit,
+    onOpenEndpointSettings: () -> Unit,
     onUnlockAdvanced: () -> Unit,
     onSignOut: () -> Unit,
     onSignIn: () -> Unit,
@@ -223,6 +224,15 @@ fun SettingsScreen(
                             title = "System prompt",
                             iconRes = HugeIcons.Edit01Icon,
                             onClick = onOpenSystemPromptSettings
+                        )
+                    )
+                }
+                item(key = "advanced-endpoint") {
+                    SettingsRow(
+                        SettingsItem(
+                            title = "Endpoint",
+                            iconRes = HugeIcons.Settings01Icon,
+                            onClick = onOpenEndpointSettings
                         )
                     )
                 }

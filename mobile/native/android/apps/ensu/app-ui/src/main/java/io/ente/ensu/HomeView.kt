@@ -256,6 +256,7 @@ fun HomeView(
             appState = appState,
             store = store,
             logRepository = logRepository,
+            authService = authService,
             currentEndpointFlow = currentEndpointFlow,
             advancedSettingsDataStore = advancedSettingsDataStore,
             appVersion = appVersion,
