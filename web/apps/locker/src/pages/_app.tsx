@@ -78,7 +78,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <BaseContext value={baseContext}>
                 {!isI18nReady ||
                 (requiresLogin &&
-                    (isLoggedIn === undefined || isLoggedIn === false)) ? (
+                    (isLoggedIn === undefined || !isLoggedIn)) ? (
                     <LoadingIndicator />
                 ) : (
                     <>
