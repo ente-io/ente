@@ -3,6 +3,7 @@ package io.ente.ensu.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
@@ -13,9 +14,7 @@ import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 
 class SessionPreferencesDataStore(context: Context) : SessionPreferences {
-    private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create {
-        context.preferencesDataStoreFile("ensu_session_prefs")
-    }
+    private val dataStore: DataStore<Preferences> = getDataStore(context.applicationContext)
 
     override val selectedSessionId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[Keys.SELECTED_SESSION_ID]
@@ -23,6 +22,10 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
 
     override val sessionSummaries: Flow<Map<String, String>> = dataStore.data.map { preferences ->
         decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES])
+    }
+
+    override val modelDownloadRequested: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[Keys.MODEL_DOWNLOAD_REQUESTED] ?: false
     }
 
     override suspend fun setSelectedSessionId(sessionId: String?) {
@@ -44,6 +47,12 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
                 summaries[sessionId] = summary
             }
             preferences[Keys.SESSION_SUMMARIES] = encodeSessionSummaries(summaries)
+        }
+    }
+
+    override suspend fun setModelDownloadRequested(requested: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[Keys.MODEL_DOWNLOAD_REQUESTED] = requested
         }
     }
 
@@ -75,5 +84,21 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
     private object Keys {
         val SELECTED_SESSION_ID = stringPreferencesKey("selected_session_id")
         val SESSION_SUMMARIES = stringPreferencesKey("session_summaries")
+        val MODEL_DOWNLOAD_REQUESTED = booleanPreferencesKey("model_download_requested")
+    }
+
+    companion object {
+        @Volatile
+        private var instance: DataStore<Preferences>? = null
+
+        private fun getDataStore(context: Context): DataStore<Preferences> {
+            return instance ?: synchronized(this) {
+                instance ?: PreferenceDataStoreFactory.create {
+                    context.preferencesDataStoreFile("ensu_session_prefs")
+                }.also { created ->
+                    instance = created
+                }
+            }
+        }
     }
 }

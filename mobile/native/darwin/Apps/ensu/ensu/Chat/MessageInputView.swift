@@ -2,6 +2,9 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+#if os(iOS)
+import UIKit
+#endif
 
 struct MessageInputView: View {
     @Binding var text: String
@@ -189,6 +192,27 @@ struct MessageInputView: View {
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input + 4, style: .continuous))
                 .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+                .overlay(alignment: .topTrailing) {
+                    #if os(iOS)
+                    if isFocused {
+                        Button {
+                            hapticTap()
+                            isFocused = false
+                            hideKeyboard()
+                            onDismissKeyboard()
+                        } label: {
+                            Image(systemName: keyboardDismissIconName)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(EnsuColor.textPrimary)
+                                .frame(width: 32, height: 32)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                        }
+                        .offset(y: -(32 + EnsuSpacing.sm))
+                    }
+                    #endif
+                }
                 .padding(.horizontal, EnsuSpacing.pageHorizontal)
                 .padding(.bottom, bottomPadding)
             }
@@ -211,6 +235,14 @@ struct MessageInputView: View {
         return 16
         #endif
     }
+
+    #if os(iOS)
+    private var keyboardDismissIconName: String {
+        UIImage(systemName: "keyboard.chevron.compact.down") != nil
+            ? "keyboard.chevron.compact.down"
+            : "chevron.down"
+    }
+    #endif
 
     private var attachmentFlowLayout: some View {
         FlowLayout(spacing: EnsuSpacing.sm) {
@@ -305,4 +337,3 @@ struct MessageInputView: View {
     }
 }
 #endif
-
