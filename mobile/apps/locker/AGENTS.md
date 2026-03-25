@@ -1,3 +1,11 @@
+# Ente Locker Mobile App Agent Guidelines
+
+This file provides guidance for AI coding agents working on the Ente Locker mobile application.
+
+## Project Overview
+
+Ente is a monorepo containing multiple interconnected components. Ente Locker is a Flutter application for securely storing important documents. It's part of the Ente mobile monorepo and shares multiple packages with the Ente Photos app. The app provides encrypted file storage with collections, sharing capabilities, and cross-platform support (iOS, Android, Linux, Windows, macOS).
+
 ## Project Philosophy
 
 Ente is focused on privacy, transparency and trust. It's a fully open-source, end-to-end encrypted platform for storing data in the cloud. When contributing, always prioritize:
@@ -9,6 +17,43 @@ Ente is focused on privacy, transparency and trust. It's a fully open-source, en
 ## Project Overview
 
 Ente Locker is a Flutter application for securely storing important documents. It's part of the Ente mobile monorepo and shares multiple packages with the Ente Photos app. The app provides encrypted file storage with collections, sharing capabilities, and cross-platform support (iOS, Android, Linux, Windows, macOS).
+
+## Build, Lint & Test Commands
+
+### Mobile Apps (Flutter/Dart)
+
+```bash
+# Install dependencies
+flutter pub get
+
+# Development run
+flutter run -t lib/main.dart --flavor independent
+
+# Build release APK
+flutter build apk --release --flavor independent
+
+# Code quality
+flutter analyze .    # Static analysis
+dart format .        # Code formatting
+flutter test         # Run tests
+```
+
+### Running Single Tests
+
+```bash
+# Run specific test
+flutter test test/path/to/test.dart
+```
+
+## Code Style Guidelines
+
+### Dart (Mobile Apps)
+
+- **Formatting**: 2-space indentation with trailing commas
+- **Naming**: snake_case for files, PascalCase for classes, camelCase for methods
+- **Imports**: Always use package imports (`package:ente/...`)
+- **Error Handling**: Use proper exception handling, avoid print statements
+- **State Management**: Follow existing service locator pattern
 
 ## Commit & PR Guidelines
 
