@@ -41,6 +41,85 @@ fun LaTeXView(latex: String, modifier: Modifier = Modifier) {
     )
 }
 
+@Composable
+fun InlineLaTeXView(
+    latex: String,
+    modifier: Modifier = Modifier,
+    fontSizeSp: Float = 15f
+) {
+    val isDark = isSystemInDarkTheme()
+    val textColor = if (isDark) EnsuColor.textPrimaryDark else EnsuColor.textPrimaryLight
+    val fontSizePx = fontSizeSp * LocalDensity.current.density
+    val paddingPx = with(LocalDensity.current) { 2.dp.roundToPx() }
+
+    AndroidView(
+        factory = { context ->
+            InlineLatexContainerView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                update(latex, textColor.toArgb(), fontSizePx, paddingPx)
+            }
+        },
+        update = { view ->
+            view.update(latex, textColor.toArgb(), fontSizePx, paddingPx)
+        },
+        modifier = modifier
+    )
+}
+
+private class InlineLatexContainerView(context: Context) : FrameLayout(context) {
+    private val mathView = MTMathView(context)
+    private val fallbackView = TextView(context)
+
+    init {
+        addView(
+            mathView,
+            LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+        addView(
+            fallbackView,
+            LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+        fallbackView.visibility = View.GONE
+    }
+
+    fun update(latex: String, textColor: Int, fontSizePx: Float, paddingPx: Int) {
+        val sanitizedLatex = latex.replace("\\boxed", "")
+
+        fallbackView.text = latex
+        fallbackView.setTextColor(textColor)
+        fallbackView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx)
+        fallbackView.setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
+
+        mathView.textColor = textColor
+        mathView.fontSize = fontSizePx
+        mathView.setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
+        MathViewCompat.setMathTextAlignment(
+            mathView,
+            MTMathView.MTTextAlignment.KMTTextAlignmentLeft
+        )
+        MathViewCompat.setDisplayErrorInline(mathView, false)
+
+        val shouldRender = latexLooksRenderable(sanitizedLatex)
+        if (shouldRender) {
+            mathView.latex = sanitizedLatex
+        }
+
+        val error = if (shouldRender) MathViewCompat.getError(mathView) else null
+        val useFallback = !shouldRender || !error.isNullOrBlank()
+        mathView.visibility = if (useFallback) View.GONE else View.VISIBLE
+        fallbackView.visibility = if (useFallback) View.VISIBLE else View.GONE
+    }
+}
+
 private class LatexContainerView(context: Context) : FrameLayout(context) {
     private val mathView = MTMathView(context)
     private val fallbackView = TextView(context)

@@ -2,6 +2,9 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+#if os(iOS)
+import UIKit
+#endif
 
 struct MessageInputView: View {
     @Binding var text: String
@@ -198,7 +201,7 @@ struct MessageInputView: View {
                             hideKeyboard()
                             onDismissKeyboard()
                         } label: {
-                            Image(systemName: "chevron.down")
+                            Image(systemName: keyboardDismissIconName)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(EnsuColor.textPrimary)
                                 .frame(width: 32, height: 32)
@@ -232,6 +235,14 @@ struct MessageInputView: View {
         return 16
         #endif
     }
+
+    #if os(iOS)
+    private var keyboardDismissIconName: String {
+        UIImage(systemName: "keyboard.chevron.compact.down") != nil
+            ? "keyboard.chevron.compact.down"
+            : "chevron.down"
+    }
+    #endif
 
     private var attachmentFlowLayout: some View {
         FlowLayout(spacing: EnsuSpacing.sm) {

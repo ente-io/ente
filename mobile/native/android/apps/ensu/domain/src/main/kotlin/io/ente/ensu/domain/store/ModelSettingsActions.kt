@@ -336,7 +336,7 @@ internal class ModelSettingsActions(
         }
         val contextLength = settings.contextLength.toIntOrNull()
         val maxTokens = settings.maxTokens.toIntOrNull()?.takeIf { it > 0 }
-        val id = if (useCustom) "custom:${url.hashCode()}" else "default"
+        val id = if (useCustom) "custom:${url.hashCode()}" else "default:${url.hashCode()}"
 
         return LlmModelTarget(
             id = id,
