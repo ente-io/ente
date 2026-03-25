@@ -1,10 +1,27 @@
 use ente_media_inspector::vector_db;
 use flutter_rust_bridge::frb;
-use simsimd::SpatialSimilarity;
 
 type SearchMatch = (Vec<u64>, Vec<f32>);
 type BulkSearchMatch = (Vec<Vec<u64>>, Vec<Vec<f32>>);
 type BulkSearchByKeyMatch = (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>);
+
+// USearch already vendors and links SimSIMD. Call that single exported symbol
+// directly to avoid pulling a second copy of SimSIMD into the final app binary.
+unsafe extern "C" {
+    fn simsimd_dot_f32(a: *const f32, b: *const f32, n: u64, d: *mut f64);
+}
+
+fn simsimd_dot_product(a: &[f32], b: &[f32]) -> f64 {
+    debug_assert_eq!(a.len(), b.len());
+    let mut score = 0.0_f64;
+    // SAFETY:
+    // - `a` and `b` are valid, non-null slices for `a.len()` elements.
+    // - SimSIMD only reads from the input buffers and writes one f64 to `score`.
+    unsafe {
+        simsimd_dot_f32(a.as_ptr(), b.as_ptr(), a.len() as u64, &mut score);
+    }
+    score
+}
 
 #[derive(Clone, Debug)]
 pub struct SemanticSearchExactRequest {
@@ -63,13 +80,7 @@ pub fn semantic_search_exact(
                     ));
                 }
 
-                let Some(score) = <f32 as SpatialSimilarity>::dot(image_embedding, query_embedding)
-                else {
-                    return Err(format!(
-                        "failed to compute dot product for file_id {file_id} with dimension {}",
-                        image_embedding.len()
-                    ));
-                };
+                let score = simsimd_dot_product(image_embedding, query_embedding);
 
                 if score >= minimum_similarity {
                     query_matches.push(SemanticSearchExactMatch {

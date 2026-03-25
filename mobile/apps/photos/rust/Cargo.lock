@@ -778,7 +778,6 @@ version = "0.0.1"
 dependencies = [
  "ente_media_inspector",
  "flutter_rust_bridge",
- "simsimd",
 ]
 
 [[package]]
@@ -2714,15 +2713,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95890f873bec569a0362c235787f3aca6e1e887302ba4840839bcc6459c42da6"
 dependencies = [
  "quote",
-]
-
-[[package]]
-name = "simsimd"
-version = "6.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35185e4ac5ccaa9b8550d0dbdfaca87a6cabd68d5fe2db81ad270692f827bdb1"
-dependencies = [
- "cc",
 ]
 
 [[package]]
