@@ -318,7 +318,9 @@ final class InferenceRsProvider {
         modelHandle = model
 
         let desiredContext = target.contextLength ?? 12000
-        let candidates = Array(Set([desiredContext, 12000, 8192, 4096, 2048, 1024])).filter { $0 > 0 }
+        let candidates = [desiredContext, 12000, 8192, 4096, 2048, 1024]
+            .filter { $0 > 0 }
+            .reduce(into: [Int]()) { if !$0.contains($1) { $0.append($1) } }
         let threadCount = max(1, ProcessInfo.processInfo.activeProcessorCount - 1)
 
         for contextSize in candidates {

@@ -93,10 +93,7 @@ fun SystemPromptSettingsScreen(
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
 
-        TextButton(onClick = {
-            value = defaultPromptBody
-            onReset()
-        }) {
+        TextButton(onClick = { onReset() }) {
             Text(
                 text = "Use Default Prompt",
                 style = EnsuTypography.body,

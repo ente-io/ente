@@ -1263,7 +1263,7 @@ internal class ChatStoreActions(
         private const val DEFAULT_CONTEXT_LENGTH = 12_000
         private const val DEFAULT_GENERATION_MAX_TOKENS = 8_192
         private const val MEDIA_MARKER = "<__media__>"
-        private const val OVERFLOW_SAFETY_TOKENS = 128
+        private const val OVERFLOW_SAFETY_TOKENS = 256
         private const val IMAGE_TOKEN_ESTIMATE = 768
         private const val MAX_CACHED_SESSIONS = 8
     }

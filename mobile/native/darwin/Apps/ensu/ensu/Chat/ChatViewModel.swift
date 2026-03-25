@@ -401,7 +401,7 @@ final class ChatViewModel: ObservableObject {
     }()
     private static let systemPromptDatePlaceholder = EnsuRustDefaults.shared.systemPromptDatePlaceholder
     private static let defaultGenerationMaxTokens = 8_192
-    private static let overflowSafetyTokens = 128
+    private static let overflowSafetyTokens = 256
     private static let imageTokenEstimate = 768
     private nonisolated static let sessionTitleMaxLength = 40
     private static let sessionSummaryMaxWords = 7

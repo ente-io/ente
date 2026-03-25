@@ -793,6 +793,9 @@ const Page: React.FC = () => {
     const [useCustomModel, setUseCustomModel] = useState(false);
     const [resolvedDefaultModel, setResolvedDefaultModel] =
         useState<ModelInfo>(DEFAULT_MODEL);
+    const [resolvedModelPresets, setResolvedModelPresets] = useState<
+        { name: string; url: string; mmproj?: string }[] | null
+    >(null);
     const [modelUrl, setModelUrl] = useState("");
     const [mmprojUrl, setMmprojUrl] = useState("");
     const [contextLength, setContextLength] = useState("");
@@ -1241,13 +1244,19 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (typeof window === "undefined") return;
-        setAdvancedUnlocked(
-            window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1",
-        );
+        const isUnlocked =
+            window.localStorage.getItem(ADVANCED_SETTINGS_UNLOCK_KEY) === "1";
+        setAdvancedUnlocked(isUnlocked);
         setSystemPrompt(
             window.localStorage.getItem(SYSTEM_PROMPT_STORAGE_KEY)?.trim() ||
                 DEFAULT_CHAT_SYSTEM_PROMPT_BODY,
         );
+
+        // Only restore custom model settings when advanced settings are
+        // unlocked. Without this gate a user who had custom settings before
+        // the unlock feature was added would silently keep a hidden custom
+        // model with no visible way to change it.
+        if (!isUnlocked) return;
 
         let raw = window.localStorage.getItem(MODEL_SETTINGS_STORAGE_KEY);
         if (!raw) {
@@ -2076,6 +2085,20 @@ const Page: React.FC = () => {
         }
         await providerRef.current.initialize();
         setResolvedDefaultModel(providerRef.current.getDefaultModel());
+        const defaults = providerRef.current.getEnsuDefaults();
+        if (defaults) {
+            const isTauri = providerRef.current.getBackendKind() === "tauri";
+            const presets = (
+                isTauri
+                    ? defaults.desktopModelPresets
+                    : defaults.mobileModelPresets
+            ).map((p) => ({
+                name: p.title,
+                url: p.url,
+                mmproj: p.mmprojUrl ?? undefined,
+            }));
+            setResolvedModelPresets(presets);
+        }
         return providerRef.current;
     }, []);
 
@@ -3528,7 +3551,9 @@ const Page: React.FC = () => {
         }, 1800);
     }, [advancedUnlocked]);
 
-    const suggestedModels = useMemo(
+    // Hardcoded fallbacks used when Rust defaults are not available (web-only
+    // mode). These must stay in sync with rust/ensu/inference/src/defaults.rs.
+    const fallbackSuggestedModels = useMemo(
         () =>
             isTauriRuntime
                 ? [
@@ -3562,6 +3587,7 @@ const Page: React.FC = () => {
                   ],
         [isTauriRuntime],
     );
+    const suggestedModels = resolvedModelPresets ?? fallbackSuggestedModels;
 
     const handleSaveModel = useCallback(
         (draft: {

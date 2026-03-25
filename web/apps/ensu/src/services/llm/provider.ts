@@ -16,8 +16,11 @@ const OVERFLOW_SAFETY_TOKENS = 256;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
 const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
+// These fallback values must stay in sync with rust/ensu/inference/src/defaults.rs.
+// When running inside Tauri, resolveDefaultModelForDevice() overwrites them with
+// values fetched from the Rust get_ensu_defaults command.
 export const DEFAULT_MODEL: ModelInfo = {
-    id: "lfm-2.5-vl-1.6b",
+    id: "lfm-vl-1.6b",
     name: "LFM 2.5 VL 1.6B (Q4_0)",
     url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
     mmprojUrl:
@@ -28,7 +31,7 @@ export const DEFAULT_MODEL: ModelInfo = {
 };
 
 const DESKTOP_DEFAULT_MODEL: ModelInfo = {
-    id: "qwen-3.5-4b-q4km",
+    id: "qwen-4b-q4km",
     name: "Qwen 3.5 4B (Q4_K_M)",
     url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
     mmprojUrl:
@@ -37,6 +40,24 @@ const DESKTOP_DEFAULT_MODEL: ModelInfo = {
     mmprojSizeBytes: 672_423_616,
     sizeHuman: "3.63 GB",
 };
+
+interface TauriEnsuModelPreset {
+    id: string;
+    title: string;
+    url: string;
+    mmprojUrl?: string | null;
+}
+
+interface TauriEnsuDefaults {
+    mobileSystemPromptBody: string;
+    desktopSystemPromptBody: string;
+    systemPromptDatePlaceholder: string;
+    sessionSummarySystemPrompt: string;
+    mobileDefaultModel: TauriEnsuModelPreset;
+    mobileModelPresets: TauriEnsuModelPreset[];
+    desktopDefaultModel: TauriEnsuModelPreset;
+    desktopModelPresets: TauriEnsuModelPreset[];
+}
 
 export class LlmProvider {
     private backend = createInferenceBackend({
@@ -50,6 +71,7 @@ export class LlmProvider {
     private currentMmprojPath?: string;
     private currentContextKey?: string;
     private defaultModel = DEFAULT_MODEL;
+    private ensuDefaults?: TauriEnsuDefaults;
 
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
@@ -76,6 +98,10 @@ export class LlmProvider {
 
     public getDefaultModel() {
         return this.defaultModel;
+    }
+
+    public getEnsuDefaults(): TauriEnsuDefaults | undefined {
+        return this.ensuDefaults;
     }
 
     public getBackendKind() {
@@ -375,6 +401,33 @@ export class LlmProvider {
 
             if (isMacPlatform && totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES) {
                 this.defaultModel = DESKTOP_DEFAULT_MODEL;
+            }
+
+            // Overlay Rust-authoritative fields (id, name, url, mmprojUrl)
+            // while keeping the web-only display fields (sizeBytes etc.)
+            // as fallbacks.
+            try {
+                const defaults = await invoke<TauriEnsuDefaults>(
+                    "get_ensu_defaults",
+                );
+                const rustPreset =
+                    isMacPlatform &&
+                    totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES
+                        ? defaults.desktopDefaultModel
+                        : defaults.mobileDefaultModel;
+                this.defaultModel = {
+                    ...this.defaultModel,
+                    id: rustPreset.id,
+                    name: rustPreset.title,
+                    url: rustPreset.url,
+                    mmprojUrl: rustPreset.mmprojUrl ?? undefined,
+                };
+                this.ensuDefaults = defaults;
+            } catch (defaultsError) {
+                log.warn(
+                    "Failed to fetch ensu defaults from Rust",
+                    defaultsError,
+                );
             }
 
             log.info("LLM default model resolved", {

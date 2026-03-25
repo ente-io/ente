@@ -194,11 +194,13 @@ internal fun HomeNavigation(
                         defaults = ensuDefaults,
                         state = appState.modelSettings,
                         onSave = { modelSettings ->
+                            store.updateModelSettings(modelSettings)
                             scope.launch {
                                 advancedSettingsDataStore.saveModelSettings(modelSettings)
                             }
                         },
                         onReset = {
+                            store.resetModelSettings()
                             scope.launch {
                                 advancedSettingsDataStore.resetModelSettings()
                             }
