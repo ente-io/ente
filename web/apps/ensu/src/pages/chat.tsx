@@ -19,7 +19,7 @@ import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
-import { getKV, removeKV } from "ente-base/kv";
+import { getKV, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
@@ -74,6 +74,8 @@ import {
 } from "services/featureFlags";
 import {
     DEFAULT_MODEL,
+    FALLBACK_DESKTOP_MODEL_PRESETS,
+    FALLBACK_MOBILE_MODEL_PRESETS,
     LlmProvider,
     type ResolvedModelPreset,
 } from "services/llm/provider";
@@ -3562,35 +3564,8 @@ const Page: React.FC = () => {
     const fallbackSuggestedModels = useMemo(
         () =>
             isTauriRuntime
-                ? [
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 2B (Q8_0)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 4B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ]
-                : [
-                      {
-                          name: "LFM 2.5 VL 1.6B (Q4_0)",
-                          url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
-                          mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
-                      },
-                      {
-                          name: "Qwen 3.5 0.8B (Q4_K_M)",
-                          url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
-                          mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
-                      },
-                  ],
+                ? FALLBACK_DESKTOP_MODEL_PRESETS
+                : FALLBACK_MOBILE_MODEL_PRESETS,
         [isTauriRuntime],
     );
     const suggestedModels = resolvedModelPresets ?? fallbackSuggestedModels;
@@ -3619,6 +3594,7 @@ const Page: React.FC = () => {
                     MODEL_SETTINGS_STORAGE_KEY,
                     JSON.stringify(payload),
                 );
+                void setKV(MODEL_SETTINGS_STORAGE_KEY, payload);
             }
             setUseCustomModel(draft.useCustomModel);
             setModelUrl(draft.modelUrl);

@@ -65,6 +65,32 @@ export interface ResolvedModelPreset {
     mmproj?: string;
 }
 
+export const FALLBACK_MOBILE_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "LFM 2.5 1.2B Instruct (Q4_0)",
+        url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf?download=true",
+    },
+    {
+        name: "Qwen 3.5 0.8B (Q4_K_M)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
+    {
+        name: "Qwen 3.5 2B (Q8_0)",
+        url: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q8_0.gguf?download=true",
+        mmproj: "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+    },
+];
+
+export const FALLBACK_DESKTOP_MODEL_PRESETS: ResolvedModelPreset[] = [
+    {
+        name: "LFM 2.5 VL 1.6B (Q4_0)",
+        url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf?download=true",
+        mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+    },
+    ...FALLBACK_MOBILE_MODEL_PRESETS,
+];
+
 export class LlmProvider {
     private backend = createInferenceBackend({
         backend: "auto",

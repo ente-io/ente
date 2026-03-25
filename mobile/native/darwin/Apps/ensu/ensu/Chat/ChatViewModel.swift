@@ -1787,8 +1787,7 @@ final class ChatViewModel: ObservableObject {
                     return
                 }
 
-                let progress = await self.provider.currentDownloadProgress(target: target)
-                let isDownloaded = self.provider.isModelDownloaded(target: target)
+                let (progress, isDownloaded) = await self.currentDownloadSnapshot(target: target)
 
                 if let progress {
                     emptyPollCount = 0
@@ -1816,6 +1815,14 @@ final class ChatViewModel: ObservableObject {
                 try? await Task.sleep(nanoseconds: 500_000_000)
             }
         }
+    }
+
+    private func currentDownloadSnapshot(
+        target: InferenceModelTarget
+    ) async -> (InferenceDownloadProgress?, Bool) {
+        let progress = await provider.currentDownloadProgress(target: target)
+        let isDownloaded = provider.isModelDownloaded(target: target)
+        return (progress, isDownloaded)
     }
 
     private func buildSyncAuth() -> SyncAuth? {

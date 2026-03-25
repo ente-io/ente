@@ -34,6 +34,8 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.max
 
 class InferenceRsProvider(
@@ -79,9 +81,8 @@ class InferenceRsProvider(
     @Volatile private var currentJobId: Long? = null
     @Volatile private var manualDownloadCancelled = false
     private var backendInitialized = false
-    private val legacyMigrationLock = Any()
-    private val migratingLegacyTargets = mutableSetOf<String>()
     private val migratedLegacyTargets = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val legacyMigrationLocks = ConcurrentHashMap<String, ReentrantLock>()
 
     init {
         uniffiEnsureInitialized()
@@ -567,13 +568,13 @@ class InferenceRsProvider(
     private fun migrateLegacyDownloads(target: LlmModelTarget) {
         val legacyDir = legacyModelDir ?: return
         if (legacyDir.absolutePath == modelDir.absolutePath) return
-        synchronized(legacyMigrationLock) {
-            if (migratedLegacyTargets.contains(target.id) || !migratingLegacyTargets.add(target.id)) {
-                return
-            }
-        }
+        val migrationLock = legacyMigrationLocks.getOrPut(target.id) { ReentrantLock() }
+        migrationLock.lock()
 
         try {
+            if (migratedLegacyTargets.contains(target.id)) {
+                return
+            }
             val oldTargets = ModelDownloadSupport.expectedTargets(legacyDir, target)
             val newTargets = ModelDownloadSupport.expectedTargets(modelDir, target)
             oldTargets.zip(newTargets).forEach { (oldTarget, newTarget) ->
@@ -601,8 +602,9 @@ class InferenceRsProvider(
             }
             migratedLegacyTargets.add(target.id)
         } finally {
-            synchronized(legacyMigrationLock) {
-                migratingLegacyTargets.remove(target.id)
+            migrationLock.unlock()
+            if (!migrationLock.hasQueuedThreads()) {
+                legacyMigrationLocks.remove(target.id, migrationLock)
             }
         }
     }

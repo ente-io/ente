@@ -23,10 +23,11 @@ final class ModelDownloadManager: NSObject {
         let destinationPath: String
         var state: State
         var errorMessage: String?
-        var resumeData: Data?
+        var resumeDataFile: String?
     }
 
     private let recordsKey = "ensu.model.download.records"
+    private let resumeDataDirectoryName = "ensu-model-download-resume"
     private let syncQueue = DispatchQueue(label: "io.ente.ensu.model-download-manager")
     private let delegateQueue: OperationQueue = {
         let queue = OperationQueue()
@@ -70,7 +71,7 @@ final class ModelDownloadManager: NSObject {
                 destinationPath: target.destination.path,
                 state: .queued,
                 errorMessage: nil,
-                resumeData: nil
+                resumeDataFile: nil
             )
 
             guard let url = URL(string: target.url) else {
@@ -81,7 +82,7 @@ final class ModelDownloadManager: NSObject {
 
             let existingRecord = loadRecords()[id]
             let task: URLSessionDownloadTask
-            if let resumeData = existingRecord?.resumeData, !resumeData.isEmpty {
+            if let resumeData = resumeData(for: existingRecord), !resumeData.isEmpty {
                 task = session.downloadTask(withResumeData: resumeData)
             } else {
                 task = session.downloadTask(with: URLRequest(url: url))
@@ -166,7 +167,10 @@ final class ModelDownloadManager: NSObject {
         mutateRecords { records in
             records.keys
                 .filter { !allowedIds.contains($0) }
-                .forEach { records.removeValue(forKey: $0) }
+                .forEach { id in
+                    guard let record = records.removeValue(forKey: id) else { return }
+                    removeResumeData(for: record)
+                }
         }
     }
 
@@ -234,12 +238,16 @@ final class ModelDownloadManager: NSObject {
     private func clearRecords(for targets: [ModelDownloadTarget]) {
         let ids = targets.map { recordId(for: $0.destination) }
         mutateRecords { records in
-            ids.forEach { records.removeValue(forKey: $0) }
+            ids.forEach { id in
+                guard let record = records.removeValue(forKey: id) else { return }
+                removeResumeData(for: record)
+            }
         }
     }
 
     private func clearAllRecords() {
         mutateRecords { records in
+            records.values.forEach { removeResumeData(for: $0) }
             records.removeAll()
         }
     }
@@ -255,14 +263,51 @@ final class ModelDownloadManager: NSObject {
         updateRecord(id: id) { record in
             record.state = .downloading
             record.errorMessage = nil
-            record.resumeData = nil
+            removeResumeData(for: record)
+            record.resumeDataFile = nil
         }
     }
 
     private func clearRecord(id: String) {
         mutateRecords { records in
-            records.removeValue(forKey: id)
+            guard let record = records.removeValue(forKey: id) else { return }
+            removeResumeData(for: record)
         }
+    }
+
+    private func resumeDataDirectory() -> URL {
+        let baseDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let directory = baseDirectory.appendingPathComponent(resumeDataDirectoryName, isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
+    private func resumeDataURL(for id: String) -> URL {
+        resumeDataDirectory().appendingPathComponent(id).appendingPathExtension("resume")
+    }
+
+    private func resumeData(for record: DownloadRecord?) -> Data? {
+        guard let fileName = record?.resumeDataFile else { return nil }
+        let url = resumeDataDirectory().appendingPathComponent(fileName)
+        return try? Data(contentsOf: url)
+    }
+
+    private func persistResumeData(_ data: Data?, for id: String) -> String? {
+        guard let data, !data.isEmpty else { return nil }
+        let url = resumeDataURL(for: id)
+        do {
+            try data.write(to: url, options: .atomic)
+            return url.lastPathComponent
+        } catch {
+            return nil
+        }
+    }
+
+    private func removeResumeData(for record: DownloadRecord) {
+        guard let fileName = record.resumeDataFile else { return }
+        let url = resumeDataDirectory().appendingPathComponent(fileName)
+        try? FileManager.default.removeItem(at: url)
     }
 }
 
@@ -321,7 +366,8 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, URLSessionTaskDelega
             updateRecord(id: id) { record in
                 record.state = .failed
                 record.errorMessage = error.localizedDescription
-                record.resumeData = resumeData
+                removeResumeData(for: record)
+                record.resumeDataFile = persistResumeData(resumeData, for: id)
             }
         }
     }

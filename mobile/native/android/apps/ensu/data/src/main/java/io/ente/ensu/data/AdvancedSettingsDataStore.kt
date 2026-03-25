@@ -9,6 +9,7 @@ import io.ente.ensu.domain.state.DeveloperSettingsState
 import io.ente.ensu.domain.state.ModelSettingsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ data class AdvancedSettingsSnapshot(
 )
 
 class AdvancedSettingsDataStore(private val context: Context) {
-    private val persistenceScope = CoroutineScope(Dispatchers.IO)
+    private val persistenceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val settingsFlow: Flow<AdvancedSettingsSnapshot> = context.advancedSettingsPreferences.data.map { prefs ->
         AdvancedSettingsSnapshot(
