@@ -8,7 +8,7 @@ description: Guide for exporting your photos out from Ente Photos
 Please follow the following simple steps to keep a local copy of the photos and
 videos you have uploaded to Ente.
 
-1. Sign in to [our desktop app](https://ente.io/download/desktop), if you
+1. Sign in to [our desktop app](https://ente.com/download/desktop), if you
    haven't done so already.
 
     ![Ente - Sign in to export data](sign-in.png)

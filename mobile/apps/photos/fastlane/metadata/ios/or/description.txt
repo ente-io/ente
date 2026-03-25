@@ -1,33 +1,33 @@
-Ente is a simple app to automatically backup and organize your photos and videos.
+ଆପଣଙ୍କ ଫଟୋ ଏବଂ ଭିଡିଓ ଗୁଡିକ ଆପେଆପେ ବ୍ୟାକଅପ୍ ଏବଂ ସଂଗଠିତ କରିବା ପାଇଁ ଏଣ୍ଟେ ହେଉଛି ଏକ ସରଳ ଆପ୍ |
 
-If you've been looking for a privacy-friendly alternative to preserve your memories, you've come to the right place. With Ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+ଯଦି ଆପଣ ଆପଣଙ୍କର ସ୍ମୃତିକୁ ସଂରକ୍ଷଣ କରିବା ପାଇଁ ଗୋପନୀୟତା-ଅନୁକୂଳ ବିକଳ୍ପ ଖୋଜୁଛନ୍ତି, ତେବେ ଆପଣ ସଠିକ୍ ସ୍ଥାନକୁ ଆସିଛନ୍ତି । ଏଣ୍ଟେ ସହିତ, ସେଗୁଡିକ ଏଣ୍ଡ-ଟୁ-ଏଣ୍ଡ ଏନକ୍ରିପ୍ଟେଡ୍ (e2ee) ଗଚ୍ଛିତ । ଏହାର ଅର୍ଥ କେବଳ ଆପଣ ସେଗୁଡିକୁ ଦେଖିପାରିବେ।
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+ଆମର ଆଣ୍ଡ୍ରୋଏଡ୍, iOS, ୱେବ୍ ଏବଂ ଡେସ୍କଟପ୍ ରେ ଆପ୍ ଅଛି, ଏବଂ ଆପଣଙ୍କର ଫଟୋଗୁଡିକ ଏକ ଏଣ୍ଡ-ଟୁ-ଏଣ୍ଡ ଏନକ୍ରିପ୍ଟେଡ୍ (e2ee) ଢଙ୍ଗରେ ଆପଣଙ୍କର ସମସ୍ତ ଡିଭାଇସ୍ ମଧ୍ୟରେ ନିରବଚ୍ଛିନ୍ନ ଭାବରେ ସିଙ୍କ୍ ହେବ ।
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+ଏଣ୍ଟେ ଆପଣଙ୍କ ପ୍ରିୟଜନଙ୍କ ସହିତ ଆପଣଙ୍କର ଆଲବମ୍ ଅଂଶୀଦାର କରିବାକୁ ମଧ୍ୟ ସରଳ କରିଥାଏ । ଆପଣ ସେଗୁଡ଼ିକୁ ସିଧାସଳଖ ଅନ୍ୟ ଏଣ୍ଟେ ବ୍ୟବହାରକାରୀଙ୍କ ସହିତ ଅଂଶୀଦାର କରିପାରିବେ, ଏଣ୍ଡ-ଟୁ-ଏଣ୍ଡ ଏନକ୍ରିପ୍ଟେଡ୍ ; କିମ୍ବା ସର୍ବସାଧାରଣରେ ଦେଖିବା ଯୋଗ୍ୟ ଲିଙ୍କ୍ ସହିତ।
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+ଆପଣଙ୍କ ଏନକ୍ରିପ୍ଟ ହୋଇଥିବା ଡାଟା ଏକାଧିକ ସ୍ଥାନରେ ଷ୍ଟୋର୍ ହୋଇଛି, ଯେଉଁଥିରେ ପ୍ୟାରିସରେ ଏକ ଫଲ୍-ଆଉଟ୍ ଆଶ୍ରୟସ୍ଥଳ ଅନ୍ତର୍ଭୁକ୍ତ। ଆମେ ପରବର୍ତ୍ତୀ ପିଢ଼ିକୁ ଗମ୍ଭୀରତାର ସହ ନେଇଥାଉ ଏବଂ ଏହା ନିଶ୍ଚିତ କରିବାକୁ ସହଜ କରିଥାଉ ଯେ ଆପଣଙ୍କର ସ୍ମୃତି ଆପଣଙ୍କୁ ପଛରେ ପକାଇବ |
 
-We are here to make the safest photos app ever, come join our journey!
+ଆମେ ଏପର୍ଯ୍ୟନ୍ତ ସବୁଠାରୁ ସୁରକ୍ଷିତ ଫଟୋ ଆପ୍ ତିଆରି କରିବାକୁ ଏଠାରେ ଅଛୁ, ଆସନ୍ତୁ ଆମର ଯାତ୍ରାରେ ଯୋଗ ଦିଅନ୍ତୁ!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+ବୈଶିଷ୍ଟ୍ୟ
+- ମୂଳ ଗୁଣବତ୍ତା ବ୍ୟାକଅପ୍, କାରଣ ପ୍ରତ୍ୟେକ ପିକ୍ସେଲ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ
+- ପରିବାର ଯୋଜନା, ଯାହା ଦ୍ୱାରା ଆପଣ ନିଜ ପରିବାର ସହିତ ଷ୍ଟୋରେଜ୍ ଅଂଶୀଦାର କରିପାରିବେ
+- ସହଯୋଗୀ ଆଲବମ୍, ଯାହା ଦ୍ୱାରା ଆପଣ ଏକ ଯାତ୍ରା ପରେ ଫଟୋ ଏକାଠି କରିପାରିବେ
+- ଆଲବମ୍ ଲିଙ୍କ୍, ଯାହା ଏକ ପାସୱାର୍ଡ ସହିତ ସୁରକ୍ଷିତ ହୋଇପାରିବ
+- ସୁରକ୍ଷିତ ଭାବରେ ବ୍ୟାକ୍ ଅପ୍ ହୋଇଥିବା ଫାଇଲଗୁଡ଼ିକୁ ହଟାଇ ସ୍ଥାନ ଖାଲି କରିବାର କ୍ଷମତା
+- ଚିତ୍ର ସମ୍ପାଦକ, ଶେଷ ସ୍ପର୍ଶ ଯୋଡ଼ିବା ପାଇଁ
+- ପ୍ରିୟ, ଲୁଚେଇବା ଏବଂ ଆପଣଙ୍କର ସ୍ମୃତିକୁ ପୁନଃ ଉପଭୋଗ କରନ୍ତୁ, କାରଣ ସେଗୁଡ଼ିକ ମୂଲ୍ୟବାନ
+- ସମସ୍ତ ପ୍ରମୁଖ ଷ୍ଟୋରେଜ ପ୍ରଦାନକାରୀଙ୍କ ଠାରୁ ଗୋଟିଏ କ୍ଲିକରେ ଆମଦାନୀ
+- ଗାଢ଼ ଥିମ୍, କାରଣ ଏଥିରେ ଆପଣଙ୍କ ଫଟୋ ଭଲ ଦେଖାଯିବ
+- ୨ଏଫଏ, ୩ଏଫଏ, ବାୟୋମେଟ୍ରିକ ପ୍ରାମାଣିକ
+- ଏବଂ ଆହୁରି ଅନେକ !
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+ମୂଲ୍ୟ
+ଆମେ ସବୁଦିନ ପାଇଁ ମାଗଣା ଯୋଜନା ପ୍ରଦାନ କରୁନାହୁଁ, କାରଣ ଏହା ଆମ ପାଇଁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଯେ ଆମେ ସ୍ଥାୟୀ ରହିବା ଏବଂ ସମୟର ପରୀକ୍ଷାକୁ ସହ୍ୟ କରିବା । ଏହା ପରିବର୍ତ୍ତେ ଆମେ ସୁଲଭ ଯୋଜନା ପ୍ରଦାନ କରୁ ଯାହାକୁ ଆପଣ ନିଜ ପରିବାର ସହିତ ମୁକ୍ତ ଭାବରେ ଅଂଶୀଦାର କରିପାରିବେ । ଆପଣ ente.com ରେ ଅଧିକ ସୂଚନା ପାଇପାରିବେ।.
 
-SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+ସହାୟତା
+ମାନବୀୟ ସମର୍ଥନ ପ୍ରଦାନ କରି ଆମେ ଗର୍ବିତ ।. ଯଦି ଆପଣ ଆମର ଦେୟ ଗ୍ରାହକ, ତେବେ ଆପଣ team@ente.io ନିକଟରେ ପହଞ୍ଚିପାରିବେ ଏବଂ 24 ଘଣ୍ଟା ମଧ୍ୟରେ ଆମ ଦଳରୁ ପ୍ରତିକ୍ରିୟା ଆଶା କରିପାରିବେ ।.
 
-TERMS
-https://ente.io/terms
+ସର୍ତ୍ତାବଳୀ
+https://ente.com/terms

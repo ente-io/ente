@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	t "time"
 
@@ -377,7 +378,48 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
+const (
+	StorageWarningDeletionScheduledCode    = "ACCOUNT_SCHEDULED_FOR_DELETION"
+	StorageWarningDeletionScheduledMessage = "Access to this account has been restricted because its Ente Photos and Ente Locker data is scheduled for deletion. If you think this was a mistake, please reply to this email."
+)
+
+func shouldEnforceStorageWarningDeletionLoginBlock(app ente.App) bool {
+	return app == ente.Photos || app == ente.Locker
+}
+
+func storageWarningDeletionScheduledError() error {
+	return stacktrace.Propagate(&ente.ApiError{
+		Code:           StorageWarningDeletionScheduledCode,
+		Message:        StorageWarningDeletionScheduledMessage,
+		HttpStatusCode: http.StatusForbidden,
+	}, "storage warning deletion scheduled")
+}
+
+func (c *UserController) ensureStorageWarningDeletionLoginAllowed(userID int64, app ente.App) error {
+	if c.NotificationHistoryRepo == nil || !shouldEnforceStorageWarningDeletionLoginBlock(app) {
+		return nil
+	}
+	deletionScheduled, err := c.NotificationHistoryRepo.IsStorageWarningDeletionScheduled(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to read storage warning deletion state")
+	}
+	if deletionScheduled {
+		return storageWarningDeletionScheduledError()
+	}
+	return nil
+}
+
+func (c *UserController) ClearStorageWarningDeletionLoginBlock(userID int64) error {
+	if c.NotificationHistoryRepo == nil {
+		return nil
+	}
+	return c.NotificationHistoryRepo.ClearStorageWarningDeletionScheduled(userID)
+}
+
 func (c *UserController) AddTokenAndNotify(ctx context.Context, userID int64, app ente.App, token string, ip string, userAgent string) error {
+	if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+		return err
+	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
@@ -556,6 +598,9 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
+			if err := c.ensureStorageWarningDeletionLoginAllowed(userID, app); err != nil {
+				return ente.EmailAuthorizationResponse{}, err
+			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,
 				network.GetClientIP(context), context.Request.UserAgent())
 			if err != nil {

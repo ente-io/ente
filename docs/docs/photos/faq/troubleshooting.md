@@ -134,7 +134,7 @@ This usually indicates a network connectivity issue:
 
 ### Why are uploads failing on desktop or web? {#faster-uploads}
 
-We use a Cloudflare proxy to speed up uploads ([blog post](https://ente.io/blog/tech/making-uploads-faster/)). However, in some network configurations (depending on your ISP) this might prevent uploads from going through.
+We use a Cloudflare proxy to speed up uploads ([blog post](https://ente.com/blog/tech/making-uploads-faster/)). However, in some network configurations (depending on your ISP) this might prevent uploads from going through.
 
 **Solution:**
 
@@ -468,7 +468,7 @@ Mobile browsers cannot handle the computationally intensive password derivation 
 
 2. **Use a desktop or laptop computer**:
     - web.ente.io works on desktop browsers (Chrome, Firefox, Safari, Edge)
-    - Or install the [desktop app](https://ente.io/download/desktop)
+    - Or install the [desktop app](https://ente.com/download/desktop)
 
 **Feature differences:**
 
@@ -593,7 +593,7 @@ If the automatic email doesn't work, send logs directly to [support@ente.io](mai
 ### Where can I get help? {#get-help}
 
 1. **Check the FAQ sections** for answers to common questions
-2. **Join our [Discord community](https://ente.io/discord)** for community support
+2. **Join our [Discord community](https://ente.com/discord)** for community support
 3. **Email us at [support@ente.io](mailto:support@ente.io)** with details about your issue
 4. **Report bugs on [GitHub](https://github.com/ente-io/ente/issues)** if you've found a technical issue
 

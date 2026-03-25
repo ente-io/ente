@@ -12,7 +12,7 @@ In production the service runs as a cron job, scheduled using a systemd timer.
 
 > These backups are in addition to the regular snapshots that we take, and are
 > meant as a second layer of replication. For more details, see our
-> [Reliability and Replication Specification](https://ente.io/reliability).
+> [Reliability and Replication Specification](https://ente.com/reliability).
 
 ## Quick help
 

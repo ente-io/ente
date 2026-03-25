@@ -438,7 +438,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/blog/ensu/",
+                                            "https://ente.com/blog/ensu/",
                                         );
                                     }}
                                     sx={settingsItemSx}
@@ -564,7 +564,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/privacy",
+                                            "https://ente.com/privacy",
                                         );
                                     }}
                                     sx={settingsItemSx}
@@ -589,7 +589,7 @@ export const ChatDialogs = memo(
                                     onClick={() => {
                                         closeSettingsModal();
                                         void openExternalUrl(
-                                            "https://ente.io/terms",
+                                            "https://ente.com/terms",
                                         );
                                     }}
                                     sx={settingsItemSx}

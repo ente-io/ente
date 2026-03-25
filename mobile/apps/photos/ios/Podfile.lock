@@ -3,6 +3,8 @@ PODS:
     - Flutter
   - audio_session (0.0.1):
     - Flutter
+  - backup_exclusion (1.0.0):
+    - Flutter
   - battery_info (0.0.1):
     - Flutter
   - camera_avfoundation (0.0.1):
@@ -17,6 +19,8 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - ente_photos_rust (0.0.1):
+    - Flutter
+  - ente_qr (0.0.1):
     - Flutter
   - ente_rust (0.0.1):
     - Flutter
@@ -264,6 +268,7 @@ PODS:
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - backup_exclusion (from `.symlinks/plugins/backup_exclusion/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -271,6 +276,7 @@ DEPENDENCIES:
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ente_photos_rust (from `.symlinks/plugins/ente_photos_rust/ios`)
+  - ente_qr (from `.symlinks/plugins/ente_qr/ios`)
   - ente_rust (from `.symlinks/plugins/ente_rust/ios`)
   - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -355,6 +361,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/app_links/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  backup_exclusion:
+    :path: ".symlinks/plugins/backup_exclusion/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
   camera_avfoundation:
@@ -369,6 +377,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ente_photos_rust:
     :path: ".symlinks/plugins/ente_photos_rust/ios"
+  ente_qr:
+    :path: ".symlinks/plugins/ente_qr/ios"
   ente_rust:
     :path: ".symlinks/plugins/ente_rust/ios"
   ffmpeg_kit_flutter:
@@ -483,6 +493,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  backup_exclusion: 70e8847af915e95b2ff3323c6f49be001075353a
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
   camera_avfoundation: be3be85408cd4126f250386828e9b1dfa40ab436
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
@@ -490,6 +501,7 @@ SPEC CHECKSUMS:
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   ente_photos_rust: 79732f3ba67df7b0fb22089627afb80d692c2b2d
+  ente_qr: 2a30f91f9e938c229ebcbc98a6f8f018d1ac665d
   ente_rust: 9c976e3d083f0ce90f31693deb99629b28d8fe4c
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
   ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
