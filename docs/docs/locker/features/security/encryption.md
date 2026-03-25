@@ -55,7 +55,7 @@ exposing your main keys.
 
 Ente's encryption has been audited by Cure53, a prominent German cybersecurity
 firm. Read more about our
-[security audits](https://ente.io/blog/cryptography-audit/).
+[security audits](https://ente.com/blog/cryptography-audit/).
 
 ## Technical details
 

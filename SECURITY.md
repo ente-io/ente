@@ -24,7 +24,7 @@ We welcome working with you to resolve the issue promptly. Thanks in advance!
 ## In-scope
 
 -   Security issues in any current release of Ente's services. Product downloads
-    are available at [https://ente.io](https://ente.io). Source code is
+    are available at [https://ente.com](https://ente.com). Source code is
     available at [https://github.com/ente-io](https://github.com/ente-io).
 
 ## Exclusions

@@ -34,7 +34,7 @@ export const clipIndexingVersion = 1;
  *    the text (embedding).
  *
  * More details are in our [blog
- * post](https://ente.io/blog/image-search-with-clip-ggml/) that describes the
+ * post](https://ente.com/blog/image-search-with-clip-ggml/) that describes the
  * initial launch of this feature using the GGML runtime.
  *
  * Since the initial launch, we've switched over to another runtime,

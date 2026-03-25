@@ -454,7 +454,7 @@ export type UploadResult =
  * [Note: Faster uploads via workers]
  *
  * These workers were introduced as a way of make file uploads faster:
- * https://ente.io/blog/tech/making-uploads-faster/
+ * https://ente.com/blog/tech/making-uploads-faster/
  *
  * By default, that's the route we take. However, there are multiple reasons why
  * this might be disabled.

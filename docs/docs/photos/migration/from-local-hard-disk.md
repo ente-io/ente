@@ -9,7 +9,7 @@ Uploading photos from your computer or external drives to Ente is straightforwar
 
 ## Quick Start
 
-1. Download and install the [Ente desktop app](https://ente.io/download/desktop) if you haven't already
+1. Download and install the [Ente desktop app](https://ente.com/download/desktop) if you haven't already
 2. Sign in to your account
 3. Drag and drop the folders you want to preserve into the app window
 4. Choose your album organization preference (see below)

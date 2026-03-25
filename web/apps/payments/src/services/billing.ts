@@ -57,7 +57,7 @@ export const parseAndHandleRequest = async () => {
             // Maybe someone attempted to directly open this page in their
             // browser. Not much we can do, just redirect them to the main site.
             console.log(
-                "None of the required query parameters were supplied, redirecting to the ente.io",
+                "None of the required query parameters were supplied, redirecting to the ente.com",
             );
             redirectHome();
             return;
@@ -494,5 +494,5 @@ const redirectToApp = (
 };
 
 const redirectHome = () => {
-    window.location.href = "https://ente.io";
+    window.location.href = "https://ente.com";
 };
